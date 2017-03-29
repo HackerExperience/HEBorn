@@ -7,7 +7,8 @@ module Requests.Models exposing (Request(..), NewRequestData
 
                                 -- Custom requests
                                 , ResponseForUsernameExists(..), ResponseUsernameExistsPayload
-                                , ResponseForSignUp(..), ResponseSignUpPayload)
+                                , ResponseForSignUp(..), ResponseSignUpPayload
+                                , ResponseForLogin(..), ResponseLoginPayload)
 
 
 import Dict
@@ -21,6 +22,7 @@ type Request
     = RequestUsername
     | RequestEmailVerification
     | RequestSignUp
+    | RequestLogin
     | RequestInvalid
     | NewRequest NewRequestData
 
@@ -53,6 +55,7 @@ type RequestPayloadArgs
     = RequestUsernamePayload RequestUsernameArgs
     | RequestEmailVerificationPayload RequestEmailVerificationArgs
     | RequestSignUpPayload RequestSignUpArgs
+    | RequestLoginPayload RequestLoginArgs
 
 {- Expected payload for each Request's args -}
 
@@ -63,13 +66,17 @@ type alias RequestEmailVerificationArgs =
     { email : String}
 
 type alias RequestSignUpArgs =
-    { email : String, password : String, password_confirmation : String }
+    { email : String, password : String, username : String }
+
+type alias RequestLoginArgs =
+    { username: String, password: String }
 
 -- Responses
 
 type Response
     = ResponseUsernameExists ResponseForUsernameExists
     | ResponseSignUp ResponseForSignUp
+    | ResponseLogin ResponseForLogin
     | ResponseEmpty
     | ResponseInvalid
 
@@ -104,6 +111,15 @@ type ResponseForSignUp
 type alias ResponseSignUpPayload =
     { user : String }
 
+
+type ResponseForLogin
+    = ResponseLoginOk ResponseLoginPayload
+    | ResponseLoginFailed
+    | ResponseLoginInvalid
+
+type alias ResponseLoginPayload =
+    { token : String }
+
 {-| encodeRequest will encode the payload to a jsonified string. -}
 encodeRequest : RequestPayload -> String
 encodeRequest payload =
@@ -133,8 +149,13 @@ encodeArgs args =
         RequestSignUpPayload args ->
             Json.Encode.object
                 [ ("email", Json.Encode.string args.email)
+                , ("username", Json.Encode.string args.username)
                 , ("password", Json.Encode.string args.password)]
 
+        RequestLoginPayload args ->
+            Json.Encode.object
+                [ ("username", Json.Encode.string args.username)
+                , ("password", Json.Encode.string args.password)]
 
 {-| Aggregates the required data to create a request into a 3-tuple defined by RequestData -}
 createRequestData : Request -> ResponseDecoder -> String -> RequestPayloadArgs -> NewRequestData

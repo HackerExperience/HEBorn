@@ -1,24 +1,24 @@
-module App.SignUp.Requests exposing (..)
+module App.Login.Requests exposing (..)
 
 import Requests.Models exposing (createRequestData
                                 , RequestPayloadArgs(RequestUsernamePayload
-                                                    , RequestSignUpPayload)
+                                                    , RequestLoginPayload)
                                 , Request(NewRequest
                                          , RequestUsername
-                                         , RequestSignUp)
+                                         , RequestLogin)
                                 , Response(ResponseUsernameExists
-                                          , ResponseSignUp
+                                          , ResponseLogin
                                           , ResponseInvalid)
                                 , ResponseDecoder
 
                                 , ResponseForUsernameExists(..)
                                 , ResponseUsernameExistsPayload
-                                , ResponseForSignUp(..)
-                                , ResponseSignUpPayload)
+                                , ResponseForLogin(..)
+                                , ResponseForLoginPayload)
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
-import App.SignUp.Messages exposing (Msg(Request))
-import App.SignUp.Models exposing (Model)
+import App.Login.Messages exposing (Msg(Request))
+import App.Login.Models exposing (Model)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 
@@ -41,17 +41,16 @@ Request: Sign Up
 Description: Create a new account
 -}
 
-requestSignUp : String -> String -> String -> Cmd Msg
-requestSignUp email username password =
+requestLogin : String -> String -> String -> Cmd Msg
+requestLogin username password =
     queueRequest (Request
                       (NewRequest
                            (createRequestData
                                 RequestSignUp
                                 decodeSignUp
                                 "account.create"
-                                (RequestSignUpPayload
-                                     { email = email
-                                     , password = password
+                                (RequestLoginPayload
+                                     { password = password
                                      , username = username
                                      }))))
 
@@ -60,29 +59,35 @@ decodeSignUp : ResponseDecoder
 decodeSignUp rawMsg code =
     let
         decoder =
-            decode ResponseSignUpPayload
-                |> required "user" string
+            decode ResponseLoginPayload
+                |> required "token" string
     in
         case code of
             200 ->
                 case decodeRequest decoder rawMsg of
                     Ok msg ->
-                        ResponseSignUp (ResponseSignUpOk msg.data)
+                        ResponseLogin (ResponseLoginOk msg.data)
 
                     Err _ ->
-                        ResponseSignUp (ResponseSignUpInvalid)
+                        ResponseLogin (ResponseLoginInvalid)
+
+           403 ->
+               ResponseLogin (ResponseLoginFailed)
 
             _ ->
-                ResponseSignUp (ResponseSignUpInvalid)
+                ResponseLogin (ResponseLoginFailed)
 
 
-requestSignUpHandler : Response -> Model -> (Model, Cmd Msg)
-requestSignUpHandler response model =
+requestLoginHandler : Response -> Model -> (Model, Cmd Msg)
+requestLoginHandler response model =
     case response of
-        ResponseSignUp (ResponseSignUpOk data) ->
+        ResponseLogin (ResponseLoginOk data) ->
             (model, Cmd.none)
 
-        ResponseSignUp (ResponseSignUpInvalid) ->
+        ResponseLogin (ResponseLoginFailed) ->
+            (model, Cmd.none)
+
+        ResponseLogin (ResponseLoginInvalid) ->
             (model, Cmd.none)
 
         _ ->
@@ -94,8 +99,8 @@ responseHandler : Request -> Response -> Model -> (Model, Cmd Msg)
 responseHandler request data model =
     case request of
 
-        RequestSignUp ->
-            requestSignUpHandler data model
+        ResponseLogin ->
+            requestLoginHandler data model
 
         _ ->
             (model, Cmd.none)

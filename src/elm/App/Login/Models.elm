@@ -1,12 +1,23 @@
 module App.Login.Models exposing (..)
 
+type alias FormError =
+    { usernameErrors : String
+    , passwordErrors : String}
 
 type alias Model =
-    { errors : Maybe String
+    { formErrors : FormError
+    , username : String
+    , password : String
     }
 
+initialErrors : FormError
+initialErrors =
+    { usernameErrors = ""
+    , passwordErrors = ""}
 
 initialModel : Model
 initialModel =
-    { errors = Nothing
+    { formErrors = initialErrors
+    , username = ""
+    , password = ""
     }

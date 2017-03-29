@@ -8,4 +8,4 @@ import App.Models exposing (Model)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen "ws://interactive-1.hackerexperience.com:8080" WSReceivedMessage
+  WebSocket.listen "ws://localhost:8080" WSReceivedMessage

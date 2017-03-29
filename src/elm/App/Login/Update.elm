@@ -11,6 +11,18 @@ update msg model =
         SubmitLogin ->
             ( model, Cmd.none )
 
+        SetUsername username ->
+            ({model | username = username}, Cmd.none)
+
+        ValidateUsername ->
+            (model, Cmd.none)
+
+        SetPassword password ->
+            ({model | password = password}, Cmd.none)
+
+        ValidatePassword ->
+            (model, Cmd.none)
+
         Event event ->
             (model, Cmd.none)
 
