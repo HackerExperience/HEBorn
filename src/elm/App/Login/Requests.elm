@@ -14,7 +14,7 @@ import Requests.Models exposing (createRequestData
                                 , ResponseForUsernameExists(..)
                                 , ResponseUsernameExistsPayload
                                 , ResponseForLogin(..)
-                                , ResponseForLoginPayload)
+                                , ResponseLoginPayload)
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 import App.Login.Messages exposing (Msg(Request))
@@ -41,14 +41,14 @@ Request: Sign Up
 Description: Create a new account
 -}
 
-requestLogin : String -> String -> String -> Cmd Msg
+requestLogin : String -> String -> Cmd Msg
 requestLogin username password =
     queueRequest (Request
                       (NewRequest
                            (createRequestData
-                                RequestSignUp
+                                RequestLogin
                                 decodeSignUp
-                                "account.create"
+                                "account.login"
                                 (RequestLoginPayload
                                      { password = password
                                      , username = username
@@ -71,24 +71,24 @@ decodeSignUp rawMsg code =
                     Err _ ->
                         ResponseLogin (ResponseLoginInvalid)
 
-           403 ->
-               ResponseLogin (ResponseLoginFailed)
+            404 ->
+                ResponseLogin (ResponseLoginFailed)
 
             _ ->
-                ResponseLogin (ResponseLoginFailed)
+                ResponseLogin (ResponseLoginInvalid)
 
 
 requestLoginHandler : Response -> Model -> (Model, Cmd Msg)
 requestLoginHandler response model =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            (model, Cmd.none)
+            ({model | loginFailed = False}, Cmd.none)
 
         ResponseLogin (ResponseLoginFailed) ->
-            (model, Cmd.none)
+            ({model | loginFailed = True }, Cmd.none)
 
         ResponseLogin (ResponseLoginInvalid) ->
-            (model, Cmd.none)
+            ({model | loginFailed = True }, Cmd.none)
 
         _ ->
             (model, Cmd.none)
@@ -99,7 +99,7 @@ responseHandler : Request -> Response -> Model -> (Model, Cmd Msg)
 responseHandler request data model =
     case request of
 
-        ResponseLogin ->
+        RequestLogin ->
             requestLoginHandler data model
 
         _ ->

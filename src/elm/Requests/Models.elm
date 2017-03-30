@@ -109,8 +109,9 @@ type ResponseForSignUp
     | ResponseSignUpInvalid
 
 type alias ResponseSignUpPayload =
-    { user : String }
-
+    { username : String
+    , email : String
+    , account_id : String}
 
 type ResponseForLogin
     = ResponseLoginOk ResponseLoginPayload

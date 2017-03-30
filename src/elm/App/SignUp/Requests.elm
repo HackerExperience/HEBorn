@@ -61,7 +61,9 @@ decodeSignUp rawMsg code =
     let
         decoder =
             decode ResponseSignUpPayload
-                |> required "user" string
+                |> required "username" string
+                |> required "email" string
+                |> required "account_id" string
     in
         case code of
             200 ->
@@ -70,9 +72,14 @@ decodeSignUp rawMsg code =
                         ResponseSignUp (ResponseSignUpOk msg.data)
 
                     Err _ ->
+                        Debug.log "errrr"
                         ResponseSignUp (ResponseSignUpInvalid)
 
+            400 ->
+                Debug.log "baaaaaaa"
+                ResponseSignUp (ResponseSignUpInvalid)
             _ ->
+                Debug.log "code is"
                 ResponseSignUp (ResponseSignUpInvalid)
 
 
@@ -80,9 +87,11 @@ requestSignUpHandler : Response -> Model -> (Model, Cmd Msg)
 requestSignUpHandler response model =
     case response of
         ResponseSignUp (ResponseSignUpOk data) ->
+            Debug.log "ok"
             (model, Cmd.none)
 
         ResponseSignUp (ResponseSignUpInvalid) ->
+            Debug.log "invalid"
             (model, Cmd.none)
 
         _ ->

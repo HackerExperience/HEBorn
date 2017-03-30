@@ -31,6 +31,7 @@ view model =
              , onBlur ValidatePassword
              ] []
         , div [ class "validation-error"] [ text (viewErrorsPassword model) ]
+        , div [ class "login-error"] [ text (viewErrorsLogin model) ]
         , button [ class ("signup-button " ++ buttonClass model), onClick SubmitLogin ] [ text "Login" ]
         ]
 
@@ -41,6 +42,13 @@ viewErrorsUsername model =
 viewErrorsPassword : Model -> String
 viewErrorsPassword model =
     model.formErrors.passwordErrors
+
+viewErrorsLogin : Model -> String
+viewErrorsLogin model =
+    if model.loginFailed then
+        "Login failed"
+    else
+        ""
 
 buttonClass : Model -> String
 buttonClass model =

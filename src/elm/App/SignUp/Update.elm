@@ -4,7 +4,7 @@ module App.SignUp.Update exposing (..)
 import App.SignUp.Models exposing (Model, FormError)
 import App.SignUp.Messages exposing (Msg(..))
 import App.SignUp.Requests exposing (responseHandler
-                                    , requestSignUp, requestSignUpHandler
+                                    , requestSignUp
                                     -- , requestUsernameExists
                                     )
 

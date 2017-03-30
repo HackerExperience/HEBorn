@@ -8,6 +8,7 @@ type alias Model =
     { formErrors : FormError
     , username : String
     , password : String
+    , loginFailed : Bool
     }
 
 initialErrors : FormError
@@ -20,4 +21,5 @@ initialModel =
     { formErrors = initialErrors
     , username = ""
     , password = ""
+    , loginFailed = False
     }
