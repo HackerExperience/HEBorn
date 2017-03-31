@@ -6,10 +6,11 @@ import Router.Router exposing (Route(..))
 import App.Messages exposing (Msg(..))
 import App.Models exposing (Model)
 import App.Landing.View
+import App.Dashboard.View
 
 view : Model -> Html Msg
 view model =
-    div [] [ page model ]
+    page model
 
 
 page : Model -> Html Msg
@@ -27,21 +28,7 @@ page model =
                 --     siteView
 
         Just _ ->
-            case model.route of
-                RouteHome ->
-                    homeView
-
-                RouteNotFound ->
-                    notFoundView
-
-                -- _ ->
-                --     homeView
-
-
-homeView : Html msg
-homeView =
-    div [] [ text "logg" ]
-
+            App.Dashboard.View.view model
 
 notFoundView : Html msg
 notFoundView =

@@ -152,7 +152,6 @@ update msg model =
 
             {- Perform no operation -}
             NoOp ->
-                Debug.log "nmoopp"
                 (model, Cmd.none)
 
 
@@ -163,5 +162,3 @@ getCoreMsg msg =
             NoOp
         m :: _ ->
             (MsgCore m)
-
-

@@ -93,7 +93,7 @@ requestLoginHandler : ResponseType
 requestLoginHandler response model core =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            ({model | loginFailed = False}, Cmd.none, [])
+            ({model | loginFailed = False}, Cmd.none, [CoreMsg.SetToken data.token])
 
         ResponseLogin (ResponseLoginFailed) ->
             ({model | loginFailed = True }, Cmd.none, [])
