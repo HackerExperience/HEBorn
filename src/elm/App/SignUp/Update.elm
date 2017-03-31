@@ -7,20 +7,22 @@ import App.SignUp.Requests exposing (responseHandler
                                     , requestSignUp
                                     -- , requestUsernameExists
                                     )
+import App.Core.Messages as CoreMsg
+import App.Core.Models as CoreModel
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> CoreModel.Model -> ( Model, Cmd Msg, List CoreMsg.Msg )
+update msg model core =
     case msg of
         SubmitForm ->
             let
                 formErrors = getErrors model
                 cmd = requestSignUp model.email model.username model.password
             in
-                (model, cmd)
+                (model, cmd, [])
 
         SetUsername username ->
-            ({ model | username = username, usernameTaken = False}, Cmd.none)
+            ({ model | username = username, usernameTaken = False}, Cmd.none, [])
 
         ValidateUsername ->
             let
@@ -28,10 +30,10 @@ update msg model =
                 newUsernameErrors = getErrorsUsername model
                 newFormErrors = { usernameErrors = newUsernameErrors, passwordErrors = passwordErrors, emailErrors = emailErrors}
             in
-                ({ model | formErrors = newFormErrors}, Cmd.none)
+                ({ model | formErrors = newFormErrors}, Cmd.none, [CoreMsg.SetToken "abc"])
 
         SetPassword password ->
-            ({ model | password = password}, Cmd.none)
+            ({ model | password = password}, Cmd.none, [])
 
         ValidatePassword ->
             let
@@ -39,10 +41,10 @@ update msg model =
                 newPasswordErrors = getErrorsPassword model
                 newFormErrors = { usernameErrors = usernameErrors, passwordErrors = newPasswordErrors, emailErrors = emailErrors}
             in
-                ({ model | formErrors = newFormErrors}, Cmd.none)
+                ({ model | formErrors = newFormErrors}, Cmd.none, [])
 
         SetEmail email ->
-            ({ model | email = email}, Cmd.none)
+            ({ model | email = email}, Cmd.none, [])
 
         ValidateEmail ->
             let
@@ -50,19 +52,23 @@ update msg model =
                 newEmailErrors = getErrorsEmail model
                 newFormErrors = { usernameErrors = usernameErrors, passwordErrors = passwordErrors, emailErrors = newEmailErrors}
             in
-                ({ model | formErrors = newFormErrors}, Cmd.none)
+                ({ model | formErrors = newFormErrors}, Cmd.none, [])
 
 
         Event event ->
             case event of
                 _ ->
-                    (model, Cmd.none)
+                    (model, Cmd.none, [])
 
         Request _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
-        Response request data ->
-            responseHandler request data model
+        Response _ _ ->
+            (model, Cmd.none, [])
+
+
+        -- Response request data ->
+        --     responseHandler request data model
 
 
 getErrorsUsername : Model -> String

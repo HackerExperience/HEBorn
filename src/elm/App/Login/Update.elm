@@ -6,38 +6,39 @@ import App.Login.Requests exposing (responseHandler
                                     , requestLogin
                                     -- , requestUsernameExists
                                     )
+import App.Core.Models as CoreModel
+import App.Core.Messages as CoreMsg
 
 
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> CoreModel.Model -> (Model, Cmd Msg, List CoreMsg.Msg)
+update msg model core =
     case msg of
 
         SubmitLogin ->
             let
                 cmd = requestLogin model.username model.password
             in
-                (model, cmd)
+                (model, cmd, [])
 
         SetUsername username ->
-            ({model | username = username}, Cmd.none)
+            ({model | username = username}, Cmd.none, [])
 
         ValidateUsername ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
         SetPassword password ->
-            ({model | password = password}, Cmd.none)
+            ({model | password = password}, Cmd.none, [])
 
         ValidatePassword ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
         Event event ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
         Request _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
         Response request data ->
-            responseHandler request data model
+            responseHandler request data model core
 
 

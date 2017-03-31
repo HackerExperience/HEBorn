@@ -1,6 +1,5 @@
 module App.SignUp.Messages exposing (Msg(..))
 
-import Http
 import Events.Models
 import Requests.Models
 

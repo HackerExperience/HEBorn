@@ -83,23 +83,23 @@ decodeSignUp rawMsg code =
                 ResponseSignUp (ResponseSignUpInvalid)
 
 
-requestSignUpHandler : Response -> Model -> (Model, Cmd Msg)
+requestSignUpHandler : Response -> Model -> (Model, Cmd Msg, Cmd msg)
 requestSignUpHandler response model =
     case response of
         ResponseSignUp (ResponseSignUpOk data) ->
             Debug.log "ok"
-            (model, Cmd.none)
+            (model, Cmd.none, Cmd.none)
 
         ResponseSignUp (ResponseSignUpInvalid) ->
             Debug.log "invalid"
-            (model, Cmd.none)
+            (model, Cmd.none, Cmd.none)
 
         _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, Cmd.none)
 
 -- Top-level response handler
 
-responseHandler : Request -> Response -> Model -> (Model, Cmd Msg)
+responseHandler : Request -> Response -> Model -> (Model, Cmd Msg, Cmd msg)
 responseHandler request data model =
     case request of
 
@@ -107,4 +107,4 @@ responseHandler request data model =
             requestSignUpHandler data model
 
         _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, Cmd.none)

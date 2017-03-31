@@ -17,6 +17,9 @@ import App.Login.Update
 import App.Login.Messages
 import App.SignUp.Update
 import App.SignUp.Messages
+import App.Core.Update
+import App.Core.Messages
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -26,6 +29,19 @@ update msg model =
     in
         case (logMsg msg) of
 
+            -- Core
+
+            MsgCore (App.Core.Messages.Request (NewRequest (requestData))) ->
+                makeRequest model requestData ComponentCore
+
+            MsgCore subMsg ->
+                let
+                    (newCore, cmd) =
+                        App.Core.Update.update subMsg model.core
+                in
+                    ({model | core = newCore}, Cmd.map MsgCore cmd)
+
+
             -- Components
 
             MsgLogin (App.Login.Messages.Request (NewRequest (requestData))) ->
@@ -33,20 +49,22 @@ update msg model =
 
             MsgLogin subMsg ->
                 let
-                    (updatedLogin, cmd) =
-                        App.Login.Update.update subMsg model.appLogin
+                    (updatedLogin, cmd, coreMsg) =
+                        App.Login.Update.update subMsg model.appLogin model.core
                 in
                     ({model | appLogin = updatedLogin}, Cmd.map MsgLogin cmd)
+                        |> Update.andThen update (getCoreMsg coreMsg)
 
             MsgSignUp (App.SignUp.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentSignUp
 
             MsgSignUp subMsg ->
                 let
-                    (updatedSignUp, cmd) =
-                        App.SignUp.Update.update subMsg model.appSignUp
+                    (updatedSignUp, cmd, coreMsg) =
+                        App.SignUp.Update.update subMsg model.appSignUp model.core
                 in
                     ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
+                        |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router
 
@@ -72,7 +90,7 @@ update msg model =
                 Debug.log "eventoo"
                 model ! []
                     |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
-                    |> Update.andThen update (MsgLogin (eventBinds.login event))
+                    -- |> Update.andThen update (MsgLogin (eventBinds.login event))
 
             {-
             DispatchResponse is triggered when the client sends a message to
@@ -97,8 +115,8 @@ update msg model =
                         ComponentSignUp ->
                             update (MsgSignUp (requestBinds.signUp request response)) model
 
-                        ComponentLogin ->
-                            update (MsgLogin (requestBinds.login request response)) model
+                        -- ComponentLogin ->
+                        --     update (MsgLogin (requestBinds.login request response)) model
 
                         _ ->
                             (model, Cmd.none)
@@ -129,4 +147,21 @@ update msg model =
 
                         WSInvalid ->
                             (model, Cmd.none)
+
+            -- Misc
+
+            {- Perform no operation -}
+            NoOp ->
+                Debug.log "nmoopp"
+                (model, Cmd.none)
+
+
+getCoreMsg : List App.Core.Messages.Msg -> Msg
+getCoreMsg msg =
+    case msg of
+        [] ->
+            NoOp
+        m :: _ ->
+            (MsgCore m)
+
 

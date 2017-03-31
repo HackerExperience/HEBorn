@@ -4,6 +4,7 @@ module App.Messages exposing (Msg(..)
 
 import App.Login.Messages
 import App.SignUp.Messages
+import App.Core.Messages
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
 import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
@@ -12,10 +13,12 @@ import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDe
 type Msg
     = MsgLogin App.Login.Messages.Msg
     | MsgSignUp App.SignUp.Messages.Msg
+    | MsgCore App.Core.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData (String, Int)
     | WSReceivedMessage String
+    | NoOp
 
 {-
 EventBinds - Hash that maps each Component's Event type to the relevant Msg.

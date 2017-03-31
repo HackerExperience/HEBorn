@@ -21,7 +21,8 @@ import App.Login.Messages exposing (Msg(Request))
 import App.Login.Models exposing (Model)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
-
+import App.Core.Messages as CoreMsg
+import App.Core.Models as CoreModel
 
 -- requestUsernameExists : String -> Cmd Msg
 -- requestUsernameExists username =
@@ -78,29 +79,29 @@ decodeSignUp rawMsg code =
                 ResponseLogin (ResponseLoginInvalid)
 
 
-requestLoginHandler : Response -> Model -> (Model, Cmd Msg)
-requestLoginHandler response model =
+requestLoginHandler : Response -> Model -> CoreModel.Model -> (Model, Cmd Msg, List CoreMsg.Msg)
+requestLoginHandler response model core =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            ({model | loginFailed = False}, Cmd.none)
+            ({model | loginFailed = False}, Cmd.none, [])
 
         ResponseLogin (ResponseLoginFailed) ->
-            ({model | loginFailed = True }, Cmd.none)
+            ({model | loginFailed = True }, Cmd.none, [])
 
         ResponseLogin (ResponseLoginInvalid) ->
-            ({model | loginFailed = True }, Cmd.none)
+            ({model | loginFailed = True }, Cmd.none, [])
 
         _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
 
 -- Top-level response handler
 
-responseHandler : Request -> Response -> Model -> (Model, Cmd Msg)
-responseHandler request data model =
+responseHandler : Request -> Response -> Model -> CoreModel.Model-> (Model, Cmd Msg, List CoreMsg.Msg)
+responseHandler request data model core =
     case request of
 
         RequestLogin ->
-            requestLoginHandler data model
+            requestLoginHandler data model core
 
         _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])

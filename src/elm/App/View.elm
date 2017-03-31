@@ -7,7 +7,6 @@ import App.Messages exposing (Msg(..))
 import App.Models exposing (Model)
 import App.Landing.View
 
-
 view : Model -> Html Msg
 view model =
     div [] [ page model ]
@@ -15,7 +14,7 @@ view model =
 
 page : Model -> Html Msg
 page model =
-    case model.token of
+    case model.core.token of
         Nothing ->
             case model.route of
                 RouteHome ->
