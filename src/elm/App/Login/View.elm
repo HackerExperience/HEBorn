@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import App.Login.Messages exposing (Msg(..))
 import App.Login.Models exposing (Model)
-import App.Core.Models as CoreModel
+import App.Core.Models.Core as CoreModel
 
 view : Model -> CoreModel.Model -> Html Msg
 view model core =

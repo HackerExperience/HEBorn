@@ -1,0 +1,8 @@
+body {
+    overflow-x: auto;
+    min-width: 1280px;
+}
+
+main {
+    background-color: #CCC;
+}

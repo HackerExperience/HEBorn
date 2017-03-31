@@ -7,7 +7,7 @@ import Random.Pcg exposing (Seed, initialSeed, step)
 import Requests.Models exposing (initialRequest, RequestStore)
 import Router.Router exposing (Route)
 import App.Login.Models
-import App.Core.Models
+import App.Core.Models.Core
 import App.SignUp.Models
 
 
@@ -16,11 +16,10 @@ type alias Model =
     , appSignUp : App.SignUp.Models.Model
     , route : Route
     , email : String
-    , token : Maybe String
     , requests : RequestStore
     , uuid : String
     , seed : Seed
-    , core : App.Core.Models.Model
+    , core : App.Core.Models.Core.Model
     }
 
 type alias Flags =
@@ -37,10 +36,9 @@ initialModel route seedFromJS =
         , appSignUp = App.SignUp.Models.initialModel
         , route = route
         , email = ""
-        , token = Nothing
         , requests = initialRequest
         , uuid = Uuid.toString uuid
         , seed = seed
-        , core = App.Core.Models.initialModel
+        , core = App.Core.Models.Core.initialModel
         }
 

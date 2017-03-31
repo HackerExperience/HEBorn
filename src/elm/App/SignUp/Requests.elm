@@ -21,7 +21,7 @@ import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 
 import App.Core.Messages as CoreMsg
-import App.Core.Models as CoreModel
+import App.Core.Models.Core as CoreModel
 import App.SignUp.Messages exposing (Msg(Request))
 import App.SignUp.Models exposing (Model)
 

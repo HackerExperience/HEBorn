@@ -6,7 +6,7 @@ import App.Login.Requests exposing (responseHandler
                                     , requestLogin
                                     -- , requestUsernameExists
                                     )
-import App.Core.Models as CoreModel
+import App.Core.Models.Core as CoreModel
 import App.Core.Messages as CoreMsg
 
 

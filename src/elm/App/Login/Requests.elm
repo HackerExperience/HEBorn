@@ -22,7 +22,7 @@ import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 
 import App.Core.Messages as CoreMsg
-import App.Core.Models as CoreModel
+import App.Core.Models.Core as CoreModel
 import App.Login.Messages exposing (Msg(Request))
 import App.Login.Models exposing (Model)
 
@@ -93,7 +93,7 @@ requestLoginHandler : ResponseType
 requestLoginHandler response model core =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            ({model | loginFailed = False}, Cmd.none, [CoreMsg.SetToken data.token])
+            ({model | loginFailed = False}, Cmd.none, [CoreMsg.SetToken (Just data.token)])
 
         ResponseLogin (ResponseLoginFailed) ->
             ({model | loginFailed = True }, Cmd.none, [])

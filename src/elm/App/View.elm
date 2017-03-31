@@ -5,6 +5,7 @@ import Html exposing (Html, div, text)
 import Router.Router exposing (Route(..))
 import App.Messages exposing (Msg(..))
 import App.Models exposing (Model)
+import App.Core.Models.Core exposing (isAuthenticated)
 import App.Landing.View
 import App.Dashboard.View
 
@@ -15,20 +16,23 @@ view model =
 
 page : Model -> Html Msg
 page model =
-    case model.core.token of
-        Nothing ->
-            case model.route of
-                RouteHome ->
-                    App.Landing.View.view model
+    if isAuthenticated model.core.account then
+        Html.map MsgCore (App.Dashboard.View.view model)
 
-                RouteNotFound ->
-                    notFoundView
+    else
+        case model.route of
+            RouteNotFound ->
+                notFoundView
 
-                -- _ - >
-                --     siteView
+            _ ->
+                landingView model
 
-        Just _ ->
-            App.Dashboard.View.view model
+
+
+landingView : Model -> Html Msg
+landingView model =
+    App.Landing.View.view model
+
 
 notFoundView : Html msg
 notFoundView =

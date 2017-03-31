@@ -8,7 +8,7 @@ import App.SignUp.Requests exposing (responseHandler
                                     -- , requestUsernameExists
                                     )
 import App.Core.Messages as CoreMsg
-import App.Core.Models as CoreModel
+import App.Core.Models.Core as CoreModel
 
 
 update : Msg -> Model -> CoreModel.Model -> ( Model, Cmd Msg, List CoreMsg.Msg )
@@ -30,7 +30,7 @@ update msg model core =
                 newUsernameErrors = getErrorsUsername model
                 newFormErrors = { usernameErrors = newUsernameErrors, passwordErrors = passwordErrors, emailErrors = emailErrors}
             in
-                ({ model | formErrors = newFormErrors}, Cmd.none, [CoreMsg.SetToken "abc"])
+                ({ model | formErrors = newFormErrors}, Cmd.none, [])
 
         SetPassword password ->
             ({ model | password = password}, Cmd.none, [])
