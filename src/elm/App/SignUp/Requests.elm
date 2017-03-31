@@ -17,10 +17,20 @@ import Requests.Models exposing (createRequestData
                                 , ResponseSignUpPayload)
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
-import App.SignUp.Messages exposing (Msg(Request))
-import App.SignUp.Models exposing (Model)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
+
+import App.Core.Messages as CoreMsg
+import App.Core.Models as CoreModel
+import App.SignUp.Messages exposing (Msg(Request))
+import App.SignUp.Models exposing (Model)
+
+
+type alias ResponseType
+    = Response
+    -> Model
+    -> CoreModel.Model
+    -> (Model, Cmd Msg, List CoreMsg.Msg)
 
 
 -- requestUsernameExists : String -> Cmd Msg
@@ -82,29 +92,28 @@ decodeSignUp rawMsg code =
                 Debug.log "code is"
                 ResponseSignUp (ResponseSignUpInvalid)
 
-
-requestSignUpHandler : Response -> Model -> (Model, Cmd Msg, Cmd msg)
-requestSignUpHandler response model =
+requestSignUpHandler : ResponseType
+requestSignUpHandler response model core =
     case response of
         ResponseSignUp (ResponseSignUpOk data) ->
             Debug.log "ok"
-            (model, Cmd.none, Cmd.none)
+            (model, Cmd.none, [])
 
         ResponseSignUp (ResponseSignUpInvalid) ->
             Debug.log "invalid"
-            (model, Cmd.none, Cmd.none)
+            (model, Cmd.none, [])
 
         _ ->
-            (model, Cmd.none, Cmd.none)
+            (model, Cmd.none, [])
 
 -- Top-level response handler
 
-responseHandler : Request -> Response -> Model -> (Model, Cmd Msg, Cmd msg)
-responseHandler request data model =
+responseHandler : Request -> ResponseType
+responseHandler request data model core =
     case request of
 
         RequestSignUp ->
-            requestSignUpHandler data model
+            requestSignUpHandler data model core
 
         _ ->
-            (model, Cmd.none, Cmd.none)
+            (model, Cmd.none, [])

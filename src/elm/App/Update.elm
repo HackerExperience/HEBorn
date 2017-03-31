@@ -10,16 +10,16 @@ import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
 import WS.WS exposing (getWSMsgMeta, getWSMsgType)
 import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
+
 import App.Messages exposing (Msg(..), eventBinds, requestBinds)
 import App.Models exposing (Model)
 import App.Components exposing (Component(..))
+import App.Core.Update
+import App.Core.Messages
 import App.Login.Update
 import App.Login.Messages
 import App.SignUp.Update
 import App.SignUp.Messages
-import App.Core.Update
-import App.Core.Messages
-
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -90,7 +90,7 @@ update msg model =
                 Debug.log "eventoo"
                 model ! []
                     |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
-                    -- |> Update.andThen update (MsgLogin (eventBinds.login event))
+                    |> Update.andThen update (MsgLogin (eventBinds.login event))
 
             {-
             DispatchResponse is triggered when the client sends a message to
@@ -115,8 +115,8 @@ update msg model =
                         ComponentSignUp ->
                             update (MsgSignUp (requestBinds.signUp request response)) model
 
-                        -- ComponentLogin ->
-                        --     update (MsgLogin (requestBinds.login request response)) model
+                        ComponentLogin ->
+                            update (MsgLogin (requestBinds.login request response)) model
 
                         _ ->
                             (model, Cmd.none)

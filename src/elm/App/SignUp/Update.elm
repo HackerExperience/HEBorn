@@ -63,12 +63,8 @@ update msg model core =
         Request _ ->
             (model, Cmd.none, [])
 
-        Response _ _ ->
-            (model, Cmd.none, [])
-
-
-        -- Response request data ->
-        --     responseHandler request data model
+        Response request data ->
+            responseHandler request data model core
 
 
 getErrorsUsername : Model -> String
