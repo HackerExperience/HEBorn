@@ -8,10 +8,22 @@
     "type": "git",
     "url": "https://github.com/moarwick/elm-webpack-starter"
   },
+  "watch": {
+    "elm-css": {
+      "patterns": [
+        "src/elm/App/*/Style.elm",
+        "src/elm/App/Stylesheets.elm"
+      ],
+      "extensions": "elm"
+    }
+  },
   "scripts": {
-    "start": "webpack-dev-server --hot --inline --port 8000",
+    "start": "webpack-dev-server --hot --inline --port 8000 & npm run watch",
     "build": "rimraf dist && webpack && mv dist/*.eot dist/static/css/ && mv dist/*.woff* dist/static/css/ && mv dist/*.svg dist/static/css/ && mv dist/*.ttf dist/static/css/",
-    "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install"
+    "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install",
+    "watch": "npm-watch",
+    "elm-css": "sleep 2 && elm-css src/elm/App/Stylesheets.elm -o src/static/",
+    "comment": "sleep 2 on elm-css is required so there is no conflict/slow-down on compilation time"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",
@@ -27,6 +39,10 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1",
-    "webpack-merge": "^2.4.0"
+    "webpack-merge": "^2.4.0",
+    "elm-css": "^0.6.0"
+  },
+  "dependencies": {
+    "npm-watch": "^0.1.8"
   }
 }

@@ -16,7 +16,6 @@ type alias Model =
     , appSignUp : App.SignUp.Models.Model
     , route : Route
     , email : String
-    , token : Maybe String
     , requests : RequestStore
     , uuid : String
     , seed : Seed
@@ -37,7 +36,6 @@ initialModel route seedFromJS =
         , appSignUp = App.SignUp.Models.initialModel
         , route = route
         , email = ""
-        , token = Nothing
         , requests = initialRequest
         , uuid = Uuid.toString uuid
         , seed = seed

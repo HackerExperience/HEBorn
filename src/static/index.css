@@ -1,0 +1,28 @@
+body {
+    overflow-x: auto;
+    min-width: 1280px;
+}
+
+#Page {
+    background-color: rgb(200, 128, 64);
+    color: #CCFFFF;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    margin: 0;
+}
+
+.dreamwriterNavBar {
+    margin: 0;
+    padding: 0;
+}
+
+.dreamwriterNavBar > li {
+    display: inline-block !important;
+    color: #ccffaa;
+}
+
+main {
+    background-color: #000;
+}

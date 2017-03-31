@@ -10,6 +10,12 @@ import App.Messages exposing (Msg(MsgSignUp, MsgLogin))
 import App.Core.Models as CoreModel
 
 
+import Html.CssHelpers
+import App.Dashboard.Style as Style
+
+{id, class, classList} =
+    Html.CssHelpers.withNamespace "dreamwriter"
+
 view : Model -> Html Msg
 view model =
     case model.route of
@@ -33,6 +39,7 @@ viewHeader core =
     header []
         []
 
+        -- lol;a
 viewSidebar : CoreModel.Model -> Html Msg
 viewSidebar core =
     nav []
@@ -41,8 +48,8 @@ viewSidebar core =
 
 viewMain : CoreModel.Model -> Html Msg
 viewMain core =
-    main_ []
-       []
+    main_ [ ]
+       [ text "abcdef" ]
 
 viewFooter : CoreModel.Model -> Html Msg
 viewFooter core =

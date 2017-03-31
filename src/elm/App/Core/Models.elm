@@ -6,5 +6,5 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { token = Nothing
+    { token = Just "abc"
     }
