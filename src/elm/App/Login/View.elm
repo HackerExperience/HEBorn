@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 
-import Core.Models exposing (CoreModel)
+import Core.Models.Core exposing (CoreModel)
 import App.Login.Messages exposing (Msg(..))
 import App.Login.Models exposing (Model)
 

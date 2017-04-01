@@ -2,10 +2,10 @@ module Core.Update exposing (..)
 
 
 import Utils
-import Core.Models exposing (CoreModel
-                            , setToken, getToken)
+import Core.Models.Core exposing (CoreModel)
+import Core.Models.Account exposing (setToken, getToken)
 import Core.Messages exposing (CoreMsg(..))
-import Core.Requests exposing ( responseHandler
+import Core.Requests exposing (responseHandler
                               , requestLogout)
 
 

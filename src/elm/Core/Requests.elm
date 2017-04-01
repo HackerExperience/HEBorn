@@ -15,7 +15,7 @@ import Requests.Update exposing (queueRequest)
 -- import Requests.Decoder exposing (decodeRequest)
 
 import Core.Messages exposing (CoreMsg(Request))
-import Core.Models exposing (CoreModel)
+import Core.Models.Core exposing (CoreModel)
 
 
 type alias ResponseType

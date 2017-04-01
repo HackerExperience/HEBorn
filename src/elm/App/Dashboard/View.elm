@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Router.Router exposing (Route(..))
 
 import Core.Messages exposing (CoreMsg(..))
-import Core.Models exposing (CoreModel)
+import Core.Models.Core exposing (CoreModel)
 import App.Models exposing (Model)
 
 

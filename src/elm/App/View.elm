@@ -1,13 +1,15 @@
 module App.View exposing (view)
 
+
 import Html exposing (Html, div, text)
 
 import Router.Router exposing (Route(..))
+import Core.Models.Account exposing (isAuthenticated)
 import App.Messages exposing (Msg(..))
 import App.Models exposing (Model)
-import Core.Models exposing (isAuthenticated)
 import App.Landing.View
 import App.Dashboard.View
+
 
 view : Model -> Html Msg
 view model =
