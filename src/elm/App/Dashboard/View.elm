@@ -6,10 +6,9 @@ import Html.Events exposing (onClick)
 
 import Router.Router exposing (Route(..))
 
+import Core.Messages exposing (CoreMsg(..))
+import Core.Models.Core exposing (CoreModel)
 import App.Models exposing (Model)
--- import App.Messages exposing (Msg(..))
-import App.Core.Messages exposing (Msg(..))
-import App.Core.Models.Core as CoreModel
 
 
 import Html.CssHelpers
@@ -18,7 +17,7 @@ import App.Dashboard.Style as Style
 {id, class, classList} =
     Html.CssHelpers.withNamespace "dreamwriter"
 
-view : Model -> Html Msg
+view : Model -> Html CoreMsg
 view model =
     case model.route of
         RouteNotFound ->
@@ -28,7 +27,7 @@ view model =
             viewDashboard model.core
 
 
-viewDashboard : CoreModel.Model -> Html Msg
+viewDashboard : CoreModel -> Html CoreMsg
 viewDashboard core =
     div [ id "view-dashboard" ]
         [ viewHeader core
@@ -37,7 +36,7 @@ viewDashboard core =
         , viewFooter core
         ]
 
-viewHeader : CoreModel.Model -> Html Msg
+viewHeader : CoreModel -> Html CoreMsg
 viewHeader core =
     header []
         [ div [ id "header-left" ]
@@ -50,32 +49,32 @@ viewHeader core =
         ]
 
         -- lol;a
-viewSidebar : CoreModel.Model -> Html Msg
+viewSidebar : CoreModel -> Html CoreMsg
 viewSidebar core =
     nav []
         [ text "nav" ]
 
 
-viewMain : CoreModel.Model -> Html Msg
+viewMain : CoreModel -> Html CoreMsg
 viewMain core =
     main_ [ ]
        [ text "main" ]
 
-viewFooter : CoreModel.Model -> Html Msg
+viewFooter : CoreModel -> Html CoreMsg
 viewFooter core =
     footer []
         []
 
 
-viewNotFound : Html Msg
+viewNotFound : Html CoreMsg
 viewNotFound =
     div []
         [ text "Not found"
         ]
--- viewLogin : Model -> Html Msg
+-- viewLogin : Model -> Html CoreMsg
 -- viewLogin model =
---     Html.map MsgLogin (App.Login.View.view model.appLogin model.core)
+--     Html.map CoreMsgLogin (App.Login.View.view model.appLogin model.core)
 
--- viewSignUp : Model -> Html Msg
+-- viewSignUp : Model -> Html CoreMsg
 -- viewSignUp model =
---     Html.map MsgSignUp (App.SignUp.View.view model.appSignUp model.core)
+--     Html.map CoreMsgSignUp (App.SignUp.View.view model.appSignUp model.core)

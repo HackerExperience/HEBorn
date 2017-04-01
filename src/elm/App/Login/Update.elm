@@ -6,11 +6,11 @@ import App.Login.Requests exposing (responseHandler
                                     , requestLogin
                                     -- , requestUsernameExists
                                     )
-import App.Core.Models.Core as CoreModel
-import App.Core.Messages as CoreMsg
+import Core.Models.Core exposing (CoreModel)
+import Core.Messages exposing (CoreMsg)
 
 
-update : Msg -> Model -> CoreModel.Model -> (Model, Cmd Msg, List CoreMsg.Msg)
+update : Msg -> Model -> CoreModel -> (Model, Cmd Msg, List CoreMsg)
 update msg model core =
     case msg of
 

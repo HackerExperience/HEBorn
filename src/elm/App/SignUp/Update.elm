@@ -7,11 +7,11 @@ import App.SignUp.Requests exposing (responseHandler
                                     , requestSignUp
                                     -- , requestUsernameExists
                                     )
-import App.Core.Messages as CoreMsg
-import App.Core.Models.Core as CoreModel
+import Core.Messages exposing (CoreMsg)
+import Core.Models.Core exposing (CoreModel)
 
 
-update : Msg -> Model -> CoreModel.Model -> ( Model, Cmd Msg, List CoreMsg.Msg )
+update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg)
 update msg model core =
     case msg of
         SubmitForm ->
