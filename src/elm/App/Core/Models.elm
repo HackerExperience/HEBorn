@@ -107,6 +107,7 @@ type alias SoftwareModel =
     { filesystem : Filesystem }
 
 
+getFilePath : File -> String
 getFilePath file =
     let
         path = case file of
@@ -117,6 +118,7 @@ getFilePath file =
     in
         path
 
+getFileName : File -> String
 getFileName file =
     let
         name = case file of
@@ -146,6 +148,7 @@ getFilesOnPath model path =
         Nothing ->
             []
 
+
 pathExists : SoftwareModel -> FilePath -> Bool
 pathExists model path =
     case Dict.get path model.filesystem of
@@ -153,6 +156,7 @@ pathExists model path =
             True
         Nothing ->
             False
+
 
 removeFileFromPath : SoftwareModel -> File -> Filesystem
 removeFileFromPath model file =
@@ -164,10 +168,13 @@ removeFileFromPath model file =
     in
         Dict.insert path newFiles model.filesystem
 
+
 listFilesystem : SoftwareModel -> String
 listFilesystem model =
     toString model.filesystem
 
+
+initialSoftwareModel : SoftwareModel
 initialSoftwareModel =
     {filesystem = Dict.empty}
 
