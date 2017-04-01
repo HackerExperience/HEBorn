@@ -1,4 +1,4 @@
-module App.Core.Requests exposing (..)
+module Core.Requests exposing (..)
 
 -- import Json.Decode exposing (Decoder, string, decodeString, dict)
 -- import Json.Decode.Pipeline exposing (decode, required, optional)
@@ -14,8 +14,8 @@ import Requests.Models exposing (createRequestData
 import Requests.Update exposing (queueRequest)
 -- import Requests.Decoder exposing (decodeRequest)
 
-import App.Core.Messages exposing (CoreMsg(Request))
-import App.Core.Models exposing (CoreModel)
+import Core.Messages exposing (CoreMsg(Request))
+import Core.Models exposing (CoreModel)
 
 
 type alias ResponseType

@@ -1,12 +1,12 @@
-module App.Core.Update exposing (..)
+module Core.Update exposing (..)
 
 
 import Utils
-import App.Core.Models exposing (CoreModel
-                                , setToken, getToken)
-import App.Core.Messages exposing (CoreMsg(..))
-import App.Core.Requests exposing ( responseHandler
-                                  , requestLogout)
+import Core.Models exposing (CoreModel
+                            , setToken, getToken)
+import Core.Messages exposing (CoreMsg(..))
+import Core.Requests exposing ( responseHandler
+                              , requestLogout)
 
 
 update : CoreMsg -> CoreModel -> (CoreModel, Cmd CoreMsg)

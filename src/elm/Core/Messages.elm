@@ -1,4 +1,4 @@
-module App.Core.Messages exposing (CoreMsg(..))
+module Core.Messages exposing (CoreMsg(..))
 
 import Events.Models
 import Requests.Models

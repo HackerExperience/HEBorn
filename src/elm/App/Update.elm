@@ -14,8 +14,8 @@ import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 import App.Messages exposing (Msg(..), eventBinds, requestBinds)
 import App.Models exposing (Model)
 import App.Components exposing (Component(..))
-import App.Core.Update
-import App.Core.Messages
+import Core.Update
+import Core.Messages
 import App.Login.Update
 import App.Login.Messages
 import App.SignUp.Update
@@ -31,13 +31,13 @@ update msg model =
 
             -- Core
 
-            MsgCore (App.Core.Messages.Request (NewRequest (requestData))) ->
+            MsgCore (Core.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentCore
 
             MsgCore subMsg ->
                 let
                     (newCore, cmd) =
-                        App.Core.Update.update subMsg model.core
+                        Core.Update.update subMsg model.core
                 in
                     ({model | core = newCore}, Cmd.map MsgCore cmd)
 
@@ -155,7 +155,7 @@ update msg model =
                 (model, Cmd.none)
 
 
-getCoreMsg : List App.Core.Messages.CoreMsg -> Msg
+getCoreMsg : List Core.Messages.CoreMsg -> Msg
 getCoreMsg msg =
     case msg of
         [] ->

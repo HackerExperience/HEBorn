@@ -6,9 +6,9 @@ import Html.Events exposing (onClick)
 
 import Router.Router exposing (Route(..))
 
+import Core.Messages exposing (CoreMsg(..))
+import Core.Models exposing (CoreModel)
 import App.Models exposing (Model)
-import App.Core.Messages exposing (CoreMsg(..))
-import App.Core.Models exposing (CoreModel)
 
 
 import Html.CssHelpers

@@ -21,8 +21,8 @@ import Requests.Models exposing (createRequestData
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 
-import App.Core.Messages exposing (CoreMsg(SetToken))
-import App.Core.Models exposing (CoreModel)
+import Core.Messages exposing (CoreMsg(SetToken))
+import Core.Models exposing (CoreModel)
 import App.Login.Messages exposing (Msg(Request))
 import App.Login.Models exposing (Model)
 

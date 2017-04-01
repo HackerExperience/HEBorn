@@ -7,8 +7,8 @@ import App.SignUp.Requests exposing (responseHandler
                                     , requestSignUp
                                     -- , requestUsernameExists
                                     )
-import App.Core.Messages exposing (CoreMsg)
-import App.Core.Models exposing (CoreModel)
+import Core.Messages exposing (CoreMsg)
+import Core.Models exposing (CoreModel)
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg)

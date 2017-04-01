@@ -6,8 +6,8 @@ import App.Login.Requests exposing (responseHandler
                                     , requestLogin
                                     -- , requestUsernameExists
                                     )
-import App.Core.Models exposing (CoreModel)
-import App.Core.Messages exposing (CoreMsg)
+import Core.Models exposing (CoreModel)
+import Core.Messages exposing (CoreMsg)
 
 
 update : Msg -> Model -> CoreModel -> (Model, Cmd Msg, List CoreMsg)

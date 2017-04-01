@@ -2,16 +2,16 @@ module App.Messages exposing (Msg(..)
                              , EventBinds, eventBinds
                              , RequestBinds, requestBinds)
 
+import Core.Messages
 import App.Login.Messages
 import App.SignUp.Messages
-import App.Core.Messages
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
 import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
 
 
 type Msg
-    = MsgCore App.Core.Messages.CoreMsg
+    = MsgCore Core.Messages.CoreMsg
     | MsgLogin App.Login.Messages.Msg
     | MsgSignUp App.SignUp.Messages.Msg
     | OnLocationChange Location

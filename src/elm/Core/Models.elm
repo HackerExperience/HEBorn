@@ -1,4 +1,4 @@
-module App.Core.Models exposing (..)
+module Core.Models exposing (..)
 
 import Dict
 

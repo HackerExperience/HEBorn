@@ -1,11 +1,14 @@
 module App.Login.View exposing (..)
 
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
+
+import Core.Models exposing (CoreModel)
 import App.Login.Messages exposing (Msg(..))
 import App.Login.Models exposing (Model)
-import App.Core.Models exposing (CoreModel)
+
 
 view : Model -> CoreModel -> Html Msg
 view model core =
