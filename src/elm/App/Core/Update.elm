@@ -20,7 +20,8 @@ update msg model =
 
         Logout ->
             let
-                cmd = requestLogout (Utils.maybeToString (getToken model.account))
+                cmd = requestLogout (Utils.maybeToString
+                                         (getToken model.account))
                 account_ = setToken model.account Nothing
             in
                 ({model | account = account_}, cmd)
