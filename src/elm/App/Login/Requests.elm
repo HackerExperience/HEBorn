@@ -58,7 +58,7 @@ requestLogin username password =
                       (NewRequest
                            (createRequestData
                                 RequestLogin
-                                decodeSignUp
+                                decodeLogin
                                 "account.login"
                                 (RequestLoginPayload
                                      { password = password
@@ -66,8 +66,8 @@ requestLogin username password =
                                      }))))
 
 
-decodeSignUp : ResponseDecoder
-decodeSignUp rawMsg code =
+decodeLogin : ResponseDecoder
+decodeLogin rawMsg code =
     let
         decoder =
             decode ResponseLoginPayload

@@ -44,8 +44,20 @@ isAuthenticated model =
     case getToken model of
         Nothing ->
             False
+
         Just _ ->
             True
+
+
+getTokenAsString : AccountModel -> String
+getTokenAsString model =
+    case getToken model of
+        Just token ->
+            token
+
+        Nothing ->
+            ""
+
 
 initialAuth : AuthData
 initialAuth =

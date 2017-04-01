@@ -8,7 +8,8 @@ module Requests.Models exposing (Request(..), NewRequestData
                                 -- Custom requests
                                 , ResponseForUsernameExists(..), ResponseUsernameExistsPayload
                                 , ResponseForSignUp(..), ResponseSignUpPayload
-                                , ResponseForLogin(..), ResponseLoginPayload)
+                                , ResponseForLogin(..), ResponseLoginPayload
+                                , ResponseForLogout(..))
 
 
 import Dict
@@ -23,6 +24,7 @@ type Request
     | RequestEmailVerification
     | RequestSignUp
     | RequestLogin
+    | RequestLogout
     | RequestInvalid
     | NewRequest NewRequestData
 
@@ -56,6 +58,7 @@ type RequestPayloadArgs
     | RequestEmailVerificationPayload RequestEmailVerificationArgs
     | RequestSignUpPayload RequestSignUpArgs
     | RequestLoginPayload RequestLoginArgs
+    | RequestLogoutPayload RequestLogoutArgs
 
 {- Expected payload for each Request's args -}
 
@@ -69,7 +72,10 @@ type alias RequestSignUpArgs =
     { email : String, password : String, username : String }
 
 type alias RequestLoginArgs =
-    { username: String, password: String }
+    { username : String, password : String }
+
+type alias RequestLogoutArgs =
+    { token : String }
 
 -- Responses
 
@@ -77,6 +83,7 @@ type Response
     = ResponseUsernameExists ResponseForUsernameExists
     | ResponseSignUp ResponseForSignUp
     | ResponseLogin ResponseForLogin
+    | ResponseLogout ResponseForLogout
     | ResponseEmpty
     | ResponseInvalid
 
@@ -121,6 +128,10 @@ type ResponseForLogin
 type alias ResponseLoginPayload =
     { token : String }
 
+type ResponseForLogout
+    = ResponseLogoutOk
+    | ResponseLogoutInvalid
+
 {-| encodeRequest will encode the payload to a jsonified string. -}
 encodeRequest : RequestPayload -> String
 encodeRequest payload =
@@ -157,6 +168,10 @@ encodeArgs args =
             Json.Encode.object
                 [ ("username", Json.Encode.string args.username)
                 , ("password", Json.Encode.string args.password)]
+
+        RequestLogoutPayload args ->
+            Json.Encode.object
+                [ ("token", Json.Encode.string args.token)]
 
 {-| Aggregates the required data to create a request into a 3-tuple defined by RequestData -}
 createRequestData : Request -> ResponseDecoder -> String -> RequestPayloadArgs -> NewRequestData

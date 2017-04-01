@@ -1,8 +1,12 @@
 module App.Core.Update exposing (..)
 
 
-import App.Core.Models exposing (CoreModel, setToken)
+import Utils
+import App.Core.Models exposing (CoreModel
+                                , setToken, getToken)
 import App.Core.Messages exposing (CoreMsg(..))
+import App.Core.Requests exposing ( responseHandler
+                                  , requestLogout)
 
 
 update : CoreMsg -> CoreModel -> (CoreModel, Cmd CoreMsg)
@@ -16,9 +20,10 @@ update msg model =
 
         Logout ->
             let
+                cmd = requestLogout (Utils.maybeToString (getToken model.account))
                 account_ = setToken model.account Nothing
             in
-                ({model | account = account_}, Cmd.none)
+                ({model | account = account_}, cmd)
 
         Event _ ->
             (model, Cmd.none)
@@ -26,5 +31,5 @@ update msg model =
         Request _ ->
             (model, Cmd.none)
 
-        Response _ _ ->
-            (model, Cmd.none)
+        Response request data ->
+            responseHandler request data model

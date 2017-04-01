@@ -1,4 +1,6 @@
-module Utils exposing (msgToCmd)
+module Utils exposing ( msgToCmd
+                      , boolToString
+                      , maybeToString)
 
 
 import Task
@@ -21,3 +23,10 @@ boolToString bool =
         False ->
             "false"
 
+maybeToString : Maybe String -> String
+maybeToString maybe =
+    case maybe of
+        Just something ->
+            something
+        Nothing ->
+            ""
