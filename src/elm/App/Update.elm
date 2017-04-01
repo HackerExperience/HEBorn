@@ -155,7 +155,7 @@ update msg model =
                 (model, Cmd.none)
 
 
-getCoreMsg : List App.Core.Messages.Msg -> Msg
+getCoreMsg : List App.Core.Messages.CoreMsg -> Msg
 getCoreMsg msg =
     case msg of
         [] ->

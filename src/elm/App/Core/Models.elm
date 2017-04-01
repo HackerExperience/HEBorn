@@ -1,4 +1,4 @@
-module App.Core.Models.Core exposing (..)
+module App.Core.Models exposing (..)
 
 import Dict
 
@@ -213,14 +213,14 @@ storeConnection model connection =
 {- CORE -}
 
 
-type alias Model =
+type alias CoreModel =
     { account : AccountModel
     , server : ServerModel
     , network : NetworkModel
     }
 
 
-initialModel : Model
+initialModel : CoreModel
 initialModel =
     { account = initialAccountModel
     , server = initialServerModel

@@ -11,9 +11,9 @@ import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDe
 
 
 type Msg
-    = MsgLogin App.Login.Messages.Msg
+    = MsgCore App.Core.Messages.CoreMsg
+    | MsgLogin App.Login.Messages.Msg
     | MsgSignUp App.SignUp.Messages.Msg
-    | MsgCore App.Core.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData (String, Int)

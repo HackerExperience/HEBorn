@@ -21,8 +21,8 @@ import Requests.Models exposing (createRequestData
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 
-import App.Core.Messages as CoreMsg
-import App.Core.Models.Core as CoreModel
+import App.Core.Messages exposing (CoreMsg(SetToken))
+import App.Core.Models exposing (CoreModel)
 import App.Login.Messages exposing (Msg(Request))
 import App.Login.Models exposing (Model)
 
@@ -30,8 +30,8 @@ import App.Login.Models exposing (Model)
 type alias ResponseType
     = Response
     -> Model
-    -> CoreModel.Model
-    -> (Model, Cmd Msg, List CoreMsg.Msg)
+    -> CoreModel
+    -> (Model, Cmd Msg, List CoreMsg)
 
 
 -- requestUsernameExists : String -> Cmd Msg
@@ -93,7 +93,7 @@ requestLoginHandler : ResponseType
 requestLoginHandler response model core =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            ({model | loginFailed = False}, Cmd.none, [CoreMsg.SetToken (Just data.token)])
+            ({model | loginFailed = False}, Cmd.none, [SetToken (Just data.token)])
 
         ResponseLogin (ResponseLoginFailed) ->
             ({model | loginFailed = True }, Cmd.none, [])

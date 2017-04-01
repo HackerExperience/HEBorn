@@ -20,8 +20,8 @@ import Requests.Decoder exposing (decodeRequest)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 
-import App.Core.Messages as CoreMsg
-import App.Core.Models.Core as CoreModel
+import App.Core.Messages exposing (CoreMsg)
+import App.Core.Models exposing  (CoreModel)
 import App.SignUp.Messages exposing (Msg(Request))
 import App.SignUp.Models exposing (Model)
 
@@ -29,8 +29,8 @@ import App.SignUp.Models exposing (Model)
 type alias ResponseType
     = Response
     -> Model
-    -> CoreModel.Model
-    -> (Model, Cmd Msg, List CoreMsg.Msg)
+    -> CoreModel
+    -> (Model, Cmd Msg, List CoreMsg)
 
 
 -- requestUsernameExists : String -> Cmd Msg

@@ -1,11 +1,11 @@
 module App.Core.Update exposing (..)
 
 
-import App.Core.Models.Core exposing (Model, setToken)
-import App.Core.Messages exposing (Msg(..))
+import App.Core.Models exposing (CoreModel, setToken)
+import App.Core.Messages exposing (CoreMsg(..))
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : CoreMsg -> CoreModel -> (CoreModel, Cmd CoreMsg)
 update msg model =
     case msg of
         SetToken token ->

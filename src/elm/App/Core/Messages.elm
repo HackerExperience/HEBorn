@@ -1,9 +1,9 @@
-module App.Core.Messages exposing (Msg(..))
+module App.Core.Messages exposing (CoreMsg(..))
 
 import Events.Models
 import Requests.Models
 
-type Msg
+type CoreMsg
     = SetToken (Maybe String)
     | Logout
     | Event Events.Models.Event

@@ -5,9 +5,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import App.SignUp.Messages exposing (Msg(..))
 import App.SignUp.Models exposing (Model)
-import App.Core.Models.Core  as CoreModel
+import App.Core.Models exposing (CoreModel)
 
-view : Model -> CoreModel.Model -> Html Msg
+view : Model -> CoreModel -> Html Msg
 view model core =
     Html.form
         [ id "signup-form"
