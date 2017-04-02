@@ -105,7 +105,12 @@ listFilesystem model =
     toString model.filesystem
 
 
+initialFilesystem : Filesystem
+initialFilesystem =
+    Dict.empty
+
+
 initialSoftwareModel : SoftwareModel
 initialSoftwareModel =
-    {filesystem = Dict.empty}
+    {filesystem = initialFilesystem}
 
