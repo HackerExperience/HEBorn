@@ -2,12 +2,50 @@ module Gen.Utils exposing (..)
 
 
 import Random
+import Random.Int
 import Random.String
 import Random.Char
 
 
 type alias StringSeed =
     Random.Seed -> (String, Random.Seed)
+
+
+
+listOfInt size seedInt =
+    let
+        seed0 = Random.initialSeed seedInt
+        (pace, seed1) = intSeed seed0
+        list = List.repeat size seedInt
+        list_ =
+            List.indexedMap (\i value -> i + value + pace)
+                (List.repeat size seedInt)
+    in
+        list_
+
+
+intSeed seed =
+    Random.step
+        (Random.Int.anyInt) seed
+
+
+int seedInt =
+    let
+        (int, _) = intSeed (Random.initialSeed seedInt)
+    in
+        int
+
+
+intRangeSeed min max seed =
+    Random.step
+        (Random.int min max) seed
+
+
+intRange min max seedInt =
+    let
+        (int, _) = intRangeSeed min max (Random.initialSeed seedInt)
+    in
+        int
 
 
 smallStringSeed : StringSeed
@@ -21,14 +59,16 @@ stringSeed min max seed =
         (Random.String.rangeLengthString min max Random.Char.english) seed
 
 
+fuzz1 : Int -> (Random.Seed -> (String, a)) -> String
 fuzz1 seedInt function =
     let
-        seed = Random.initialSeed seedInt
-        (value, _) = function seed
+        seed0 = Random.initialSeed seedInt
+        (value, _) = function seed0
     in
         value
 
 
+fuzz2 : Int -> (Random.Seed -> (a, b)) -> (b -> (c, d)) -> (a, c)
 fuzz2 seedInt f1 f2 =
     let
         seed0 = Random.initialSeed seedInt
@@ -38,6 +78,11 @@ fuzz2 seedInt f1 f2 =
         (v1, v2)
 
 
+fuzz3 : Int
+        -> (Random.Seed -> (a, b))
+        -> (b -> (c, d))
+        -> (d -> (e, f))
+        -> (a, c, e)
 fuzz3 seedInt f1 f2 f3 =
     let
         seed0 = Random.initialSeed seedInt
@@ -46,5 +91,4 @@ fuzz3 seedInt f1 f2 f3 =
         (v3, _) = f3 seed2
     in
         (v1, v2, v3)
-
 
