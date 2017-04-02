@@ -61,14 +61,16 @@ getFileName file =
         name
 
 
-addFileToPath : SoftwareModel -> File -> Filesystem
-addFileToPath model file =
+addFile : SoftwareModel -> File -> SoftwareModel
+addFile model file =
     let
         path = getFilePath file
         filesOnPath = getFilesOnPath model path
         newFiles = filesOnPath ++ [file]
     in
-        Dict.insert path newFiles model.filesystem
+        {model | filesystem = (Dict.insert path newFiles model.filesystem)}
+
+
 
 
 getFilesOnPath : SoftwareModel -> FilePath -> List File
@@ -89,15 +91,15 @@ pathExists model path =
             False
 
 
-removeFileFromPath : SoftwareModel -> File -> Filesystem
-removeFileFromPath model file =
+removeFile : SoftwareModel -> File -> SoftwareModel
+removeFile model file =
     let
         path = getFilePath file
         name = getFileName file
         filesOnPath = getFilesOnPath model path
         newFiles = List.filter (\x -> (getFileName x) /= name) filesOnPath
     in
-        Dict.insert path newFiles model.filesystem
+        {model | filesystem = (Dict.insert path newFiles model.filesystem)}
 
 
 listFilesystem : SoftwareModel -> String
@@ -105,7 +107,12 @@ listFilesystem model =
     toString model.filesystem
 
 
+initialFilesystem : Filesystem
+initialFilesystem =
+    Dict.empty
+
+
 initialSoftwareModel : SoftwareModel
 initialSoftwareModel =
-    {filesystem = Dict.empty}
+    {filesystem = initialFilesystem}
 
