@@ -15,7 +15,7 @@ module Requests.Models exposing (Request(..), NewRequestData
 import Dict
 import Json.Encode
 
-import App.Components exposing (Component(ComponentInvalid))
+import Core.Components exposing (Component(ComponentInvalid))
 
 -- Requests
 
