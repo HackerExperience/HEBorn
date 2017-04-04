@@ -4,11 +4,11 @@ import TimeTravel.Navigation
 import Navigation exposing (Location)
 
 import Router.Router exposing (parseLocation)
-import App.Subscriptions exposing (subscriptions)
-import App.Messages exposing (Msg(OnLocationChange))
-import App.Models exposing (Model, Flags, initialModel)
-import App.Update exposing (update)
-import App.View exposing (view)
+import Core.Subscriptions exposing (subscriptions)
+import Core.Messages exposing (Msg(OnLocationChange))
+import Core.Models exposing (Model, Flags, initialModel)
+import Core.Update exposing (update)
+import Core.View exposing (view)
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )

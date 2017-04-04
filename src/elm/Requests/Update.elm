@@ -15,8 +15,8 @@ import Requests.Models exposing (Request(RequestInvalid, NewRequest)
                                 , encodeRequest)
 import WS.WS
 import Utils
-import App.Models exposing (Model)
-import App.Components exposing (Component(ComponentInvalid))
+import Core.Models exposing (Model)
+import Core.Components exposing (Component(ComponentInvalid))
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
