@@ -1,4 +1,4 @@
-module Core.Models.SoftwareTest exposing (..)
+module Game.Software.ModelTest exposing (..)
 
 
 import Dict
@@ -7,7 +7,7 @@ import Expect
 import Fuzz exposing (..)
 
 import Gen.Software as Gen
-import Core.Models.Software exposing (..)
+import Game.Software.Models exposing (..)
 
 
 all : Test

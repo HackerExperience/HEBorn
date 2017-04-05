@@ -5,10 +5,10 @@ import Expect
 import Fuzz exposing (list, int, tuple, string)
 import String
 
-import Core.Models.SoftwareTest
+import Game.Software.ModelTest
 
 
 all : Test
 all =
     describe "heborn"
-        [ Core.Models.SoftwareTest.all ]
+        [ Game.Software.ModelTest.all ]
