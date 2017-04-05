@@ -4,7 +4,7 @@ module Core.View exposing (view)
 import Html exposing (Html, div, text)
 
 import Router.Router exposing (Route(..))
-import Game.Models.Account exposing (isAuthenticated)
+import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (Msg(..))
 import Core.Models exposing (Model)
 import Apps.Landing.View

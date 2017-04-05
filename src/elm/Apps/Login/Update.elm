@@ -1,13 +1,14 @@
 module Apps.Login.Update exposing (..)
 
+
+import Game.Models exposing (GameModel)
+import Game.Messages exposing (GameMsg)
 import Apps.Login.Models exposing (Model)
 import Apps.Login.Messages exposing (Msg(..))
 import Apps.Login.Requests exposing (responseHandler
                                     , requestLogin
                                     -- , requestUsernameExists
                                     )
-import Game.Models.Game exposing (GameModel)
-import Game.Messages exposing (GameMsg)
 
 
 update : Msg -> Model -> GameModel -> (Model, Cmd Msg, List GameMsg)

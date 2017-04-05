@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 
-import Game.Models.Game exposing (GameModel)
+import Game.Models exposing (GameModel)
 import Apps.Login.Messages exposing (Msg(..))
 import Apps.Login.Models exposing (Model)
 

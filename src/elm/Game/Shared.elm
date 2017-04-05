@@ -1,4 +1,4 @@
-module Game.Models.Shared exposing (..)
+module Game.Shared exposing (..)
 
 
 type alias IP =

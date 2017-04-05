@@ -21,8 +21,9 @@ import Requests.Models exposing (createRequestData
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 
-import Game.Messages exposing (GameMsg(SetToken))
-import Game.Models.Game exposing (GameModel)
+import Game.Messages exposing (GameMsg, call)
+import Game.Account.Messages exposing (AccountMsg(Login))
+import Game.Models  exposing (GameModel)
 import Apps.Login.Messages exposing (Msg(Request))
 import Apps.Login.Models exposing (Model)
 
@@ -93,7 +94,10 @@ requestLoginHandler : ResponseType
 requestLoginHandler response model core =
     case response of
         ResponseLogin (ResponseLoginOk data) ->
-            ({model | loginFailed = False}, Cmd.none, [SetToken (Just data.token)])
+            let
+                loginCmd = call.account (Login (Just data.token))
+            in
+                ({model | loginFailed = False}, Cmd.none, [loginCmd])
 
         ResponseLogin (ResponseLoginFailed) ->
             ({model | loginFailed = True }, Cmd.none, [])

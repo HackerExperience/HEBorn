@@ -1,12 +1,12 @@
-module Game.Models.Game exposing (..)
+module Game.Models exposing (..)
 
 import Dict
 
-import Game.Models.Shared exposing (..)
-import Game.Models.Account exposing (..)
-import Game.Models.Software exposing (..)
-import Game.Models.Server exposing (..)
-import Game.Models.Network exposing (..)
+import Game.Shared exposing (..)
+import Game.Account.Models exposing (..)
+import Game.Software.Models exposing (..)
+import Game.Server.Models exposing (..)
+import Game.Network.Models exposing (..)
 
 
 type alias GameModel =

@@ -1,8 +1,8 @@
-module Game.Models.Server exposing (..)
+module Game.Server.Models exposing (..)
 
 
 import Dict
-import Game.Models.Shared exposing (..)
+import Game.Shared exposing (..)
 
 
 type alias ServerID =

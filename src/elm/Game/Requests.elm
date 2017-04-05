@@ -15,7 +15,7 @@ import Requests.Update exposing (queueRequest)
 -- import Requests.Decoder exposing (decodeRequest)
 
 import Game.Messages exposing (GameMsg(Request))
-import Game.Models.Game exposing (GameModel)
+import Game.Models exposing (GameModel)
 
 
 type alias ResponseType

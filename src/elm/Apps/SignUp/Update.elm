@@ -1,15 +1,14 @@
 module Apps.SignUp.Update exposing (..)
 
 
+import Game.Messages exposing (GameMsg)
+import Game.Models exposing (GameModel)
 import Apps.SignUp.Models exposing (Model, FormError)
 import Apps.SignUp.Messages exposing (Msg(..))
 import Apps.SignUp.Requests exposing (responseHandler
                                     , requestSignUp
                                     -- , requestUsernameExists
                                     )
-import Game.Messages exposing (GameMsg)
-import Game.Models.Game exposing (GameModel)
-
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List GameMsg)
 update msg model core =

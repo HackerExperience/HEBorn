@@ -1,7 +1,7 @@
-module Game.Models.Account exposing (..)
+module Game.Account.Models exposing (..)
 
 
-import Game.Models.Shared exposing (..)
+import Game.Shared exposing (..)
 
 
 type alias AccountID =

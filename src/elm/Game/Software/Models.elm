@@ -1,8 +1,8 @@
-module Game.Models.Software exposing (..)
+module Game.Software.Models exposing (..)
+
 
 import Dict
-
-import Game.Models.Shared exposing (..)
+import Game.Shared exposing (..)
 
 
 type alias FilePath =

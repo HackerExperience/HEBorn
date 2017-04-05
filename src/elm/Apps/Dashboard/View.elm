@@ -1,17 +1,18 @@
 module Apps.Dashboard.View exposing (view)
 
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Html.CssHelpers
 
 import Router.Router exposing (Route(..))
 
-import Game.Messages exposing (GameMsg(..))
-import Game.Models.Game exposing (GameModel)
 import Core.Models exposing (Model)
+import Game.Messages exposing (GameMsg(..), call)
+import Game.Models exposing (GameModel)
+import Game.Account.Messages exposing (AccountMsg(Logout))
 
-
-import Html.CssHelpers
 import Apps.Dashboard.Style as Style
 
 
@@ -46,7 +47,7 @@ viewHeader core =
         , div [ id "header-mid" ]
             []
         , div [ id "header-right" ]
-            [ button [ onClick (Logout) ]
+            [ button [ onClick (call.account Logout) ]
                 [ text "logout" ] ]
         ]
 
