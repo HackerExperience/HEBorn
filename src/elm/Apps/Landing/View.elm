@@ -27,9 +27,9 @@ viewIntro =
 
 viewLogin : Model -> Html Msg
 viewLogin model =
-    Html.map MsgLogin (Apps.Login.View.view model.appLogin model.core)
+    Html.map MsgLogin (Apps.Login.View.view model.appLogin model.game)
 
 
 viewSignUp : Model -> Html Msg
 viewSignUp model =
-    Html.map MsgSignUp (Apps.SignUp.View.view model.appSignUp model.core)
+    Html.map MsgSignUp (Apps.SignUp.View.view model.appSignUp model.game)

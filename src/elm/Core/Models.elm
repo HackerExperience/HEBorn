@@ -18,7 +18,7 @@ type alias Model =
     , requests : RequestStore
     , uuid : String
     , seed : Seed
-    , core : Game.Models.GameModel
+    , game : Game.Models.GameModel
     }
 
 type alias Flags =
@@ -37,6 +37,6 @@ initialModel route seedFromJS =
         , requests = initialRequest
         , uuid = Uuid.toString uuid
         , seed = seed
-        , core = Game.Models.initialModel
+        , game = Game.Models.initialModel
         }
 

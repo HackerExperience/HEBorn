@@ -18,8 +18,8 @@ view model =
 
 page : Model -> Html Msg
 page model =
-    if isAuthenticated model.core.account then
-        Html.map MsgCore (Apps.Dashboard.View.view model)
+    if isAuthenticated model.game.account then
+        Html.map MsgGame (Apps.Dashboard.View.view model)
 
     else
         case model.route of

@@ -3,6 +3,6 @@ module Core.Components exposing (Component(..))
 
 type Component
     = ComponentSignUp
-    | ComponentCore
+    | ComponentGame
     | ComponentLogin
     | ComponentInvalid

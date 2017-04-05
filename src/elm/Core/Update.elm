@@ -32,15 +32,15 @@ update msg model =
 
             -- Game
 
-            MsgCore (Game.Messages.Request (NewRequest (requestData))) ->
-                makeRequest model requestData ComponentCore
+            MsgGame (Game.Messages.Request (NewRequest (requestData))) ->
+                makeRequest model requestData ComponentGame
 
-            MsgCore subMsg ->
+            MsgGame subMsg ->
                 let
-                    (newCore, cmd) =
-                        Game.Update.update subMsg model.core
+                    (game_, cmd) =
+                        Game.Update.update subMsg model.game
                 in
-                    ({model | core = newCore}, Cmd.map MsgCore cmd)
+                    ({model | game = game_}, Cmd.map MsgGame cmd)
 
 
             -- Components
@@ -50,22 +50,22 @@ update msg model =
 
             MsgLogin subMsg ->
                 let
-                    (updatedLogin, cmd, coreMsg) =
-                        Apps.Login.Update.update subMsg model.appLogin model.core
+                    (updatedLogin, cmd, gameMsg) =
+                        Apps.Login.Update.update subMsg model.appLogin model.game
                 in
                     ({model | appLogin = updatedLogin}, Cmd.map MsgLogin cmd)
-                        |> Update.andThen update (getGameMsg coreMsg)
+                        |> Update.andThen update (getGameMsg gameMsg)
 
             MsgSignUp (Apps.SignUp.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentSignUp
 
             MsgSignUp subMsg ->
                 let
-                    (updatedSignUp, cmd, coreMsg) =
-                        Apps.SignUp.Update.update subMsg model.appSignUp model.core
+                    (updatedSignUp, cmd, gameMsg) =
+                        Apps.SignUp.Update.update subMsg model.appSignUp model.game
                 in
                     ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
-                        |> Update.andThen update (getGameMsg coreMsg)
+                        |> Update.andThen update (getGameMsg gameMsg)
 
             -- Router
 
@@ -162,4 +162,4 @@ getGameMsg msg =
         [] ->
             NoOp
         m :: _ ->
-            (MsgCore m)
+            (MsgGame m)

@@ -27,20 +27,20 @@ view model =
             viewNotFound
 
         _ ->
-            viewDashboard model.core
+            viewDashboard model.game
 
 
 viewDashboard : GameModel -> Html GameMsg
-viewDashboard core =
+viewDashboard game =
     div [ id "view-dashboard" ]
-        [ viewHeader core
-        , viewSidebar core
-        , viewMain core
-        , viewFooter core
+        [ viewHeader game
+        , viewSidebar game
+        , viewMain game
+        , viewFooter game
         ]
 
 viewHeader : GameModel -> Html GameMsg
-viewHeader core =
+viewHeader game =
     header []
         [ div [ id "header-left" ]
             []
@@ -52,18 +52,18 @@ viewHeader core =
         ]
 
 viewSidebar : GameModel -> Html GameMsg
-viewSidebar core =
+viewSidebar game =
     nav []
         [ text "nav" ]
 
 
 viewMain : GameModel -> Html GameMsg
-viewMain core =
+viewMain game =
     main_ [ ]
        [ text "main" ]
 
 viewFooter : GameModel -> Html GameMsg
-viewFooter core =
+viewFooter game =
     footer []
         []
 
@@ -75,8 +75,8 @@ viewNotFound =
         ]
 -- viewLogin : Model -> Html GameMsg
 -- viewLogin model =
---     Html.map GameMsgLogin (Apps.Login.View.view model.appLogin model.core)
+--     Html.map GameMsgLogin (Apps.Login.View.view model.appLogin model.game)
 
 -- viewSignUp : Model -> Html GameMsg
 -- viewSignUp model =
---     Html.map GameMsgSignUp (Apps.SignUp.View.view model.appSignUp model.core)
+--     Html.map GameMsgSignUp (Apps.SignUp.View.view model.appSignUp model.game)
