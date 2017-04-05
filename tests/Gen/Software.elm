@@ -6,7 +6,7 @@ import Dict
 import Arithmetic exposing (isEven)
 
 import Gen.Utils exposing (..)
-import Core.Models.Software exposing (..)
+import Game.Software.Models exposing (..)
 
 
 name : Int -> String
