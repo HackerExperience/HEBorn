@@ -1,12 +1,22 @@
-module Game.Models exposing (..)
+module Game.Models exposing ( GameModel, initialModel
+                            , ResponseType)
+
 
 import Dict
 
+import Requests.Models exposing (Response)
+import Game.Messages exposing (GameMsg)
 import Game.Shared exposing (..)
 import Game.Account.Models exposing (..)
 import Game.Software.Models exposing (..)
 import Game.Server.Models exposing (..)
 import Game.Network.Models exposing (..)
+
+
+type alias ResponseType
+    = Response
+    -> GameModel
+    -> (GameModel, Cmd GameMsg, List GameMsg)
 
 
 type alias GameModel =

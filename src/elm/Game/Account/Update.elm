@@ -6,8 +6,7 @@ import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Account.Messages exposing (AccountMsg(..))
 import Game.Account.Models exposing (setToken, getToken, AccountModel)
-import Game.Requests exposing (responseHandler
-                              , requestLogout)
+import Game.Account.Requests exposing (requestLogout)
 
 
 

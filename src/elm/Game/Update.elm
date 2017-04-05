@@ -5,8 +5,7 @@ import Update.Extra as Update
 
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
-import Game.Requests exposing (responseHandler
-                              , requestLogout)
+import Game.Requests exposing (responseHandler)
 
 import Game.Account.Update
 import Game.Server.Update
@@ -33,6 +32,7 @@ update msg model =
             in
                 ({model | server = server_}, cmd)
                     |> Update.andThen update (getGameMsg gameMsg)
+
         MsgSoftware subMsg ->
             let
                 (software_, cmd, gameMsg) =
@@ -56,7 +56,12 @@ update msg model =
             (model, Cmd.none)
 
         Response request data ->
-            responseHandler request data model
+            let
+                (model_, cmd, gameMsg) =
+                    responseHandler request data model
+            in
+                (model_, cmd)
+                    |> Update.andThen update (getGameMsg gameMsg)
 
         NoOp ->
             (model, Cmd.none)
