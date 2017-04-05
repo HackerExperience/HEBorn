@@ -1,9 +1,9 @@
-module Game.Models.Network exposing (..)
+module Game.Network.Models exposing (..)
 
 
 import Dict
-import Game.Models.Shared exposing (..)
-import Game.Models.Server exposing (AnyServer(..), ServerID)
+import Game.Shared exposing (..)
+import Game.Server.Models exposing (AnyServer(..), ServerID)
 
 
 type alias ConnectionID

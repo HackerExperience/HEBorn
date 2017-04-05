@@ -21,7 +21,7 @@ import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 
 import Game.Messages exposing (GameMsg)
-import Game.Models.Game exposing  (GameModel)
+import Game.Models exposing  (GameModel)
 import Apps.SignUp.Messages exposing (Msg(Request))
 import Apps.SignUp.Models exposing (Model)
 

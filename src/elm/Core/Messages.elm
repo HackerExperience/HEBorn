@@ -11,7 +11,7 @@ import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDe
 
 
 type Msg
-    = MsgCore Game.Messages.GameMsg
+    = MsgGame Game.Messages.GameMsg
     | MsgLogin Apps.Login.Messages.Msg
     | MsgSignUp Apps.SignUp.Messages.Msg
     | OnLocationChange Location

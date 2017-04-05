@@ -1,17 +1,18 @@
 module Apps.Dashboard.View exposing (view)
 
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Html.CssHelpers
 
 import Router.Router exposing (Route(..))
 
-import Game.Messages exposing (GameMsg(..))
-import Game.Models.Game exposing (GameModel)
 import Core.Models exposing (Model)
+import Game.Messages exposing (GameMsg(..), call)
+import Game.Models exposing (GameModel)
+import Game.Account.Messages exposing (AccountMsg(Logout))
 
-
-import Html.CssHelpers
 import Apps.Dashboard.Style as Style
 
 
@@ -26,43 +27,43 @@ view model =
             viewNotFound
 
         _ ->
-            viewDashboard model.core
+            viewDashboard model.game
 
 
 viewDashboard : GameModel -> Html GameMsg
-viewDashboard core =
+viewDashboard game =
     div [ id "view-dashboard" ]
-        [ viewHeader core
-        , viewSidebar core
-        , viewMain core
-        , viewFooter core
+        [ viewHeader game
+        , viewSidebar game
+        , viewMain game
+        , viewFooter game
         ]
 
 viewHeader : GameModel -> Html GameMsg
-viewHeader core =
+viewHeader game =
     header []
         [ div [ id "header-left" ]
             []
         , div [ id "header-mid" ]
             []
         , div [ id "header-right" ]
-            [ button [ onClick (Logout) ]
+            [ button [ onClick (call.account Logout) ]
                 [ text "logout" ] ]
         ]
 
 viewSidebar : GameModel -> Html GameMsg
-viewSidebar core =
+viewSidebar game =
     nav []
         [ text "nav" ]
 
 
 viewMain : GameModel -> Html GameMsg
-viewMain core =
+viewMain game =
     main_ [ ]
        [ text "main" ]
 
 viewFooter : GameModel -> Html GameMsg
-viewFooter core =
+viewFooter game =
     footer []
         []
 
@@ -74,8 +75,8 @@ viewNotFound =
         ]
 -- viewLogin : Model -> Html GameMsg
 -- viewLogin model =
---     Html.map GameMsgLogin (Apps.Login.View.view model.appLogin model.core)
+--     Html.map GameMsgLogin (Apps.Login.View.view model.appLogin model.game)
 
 -- viewSignUp : Model -> Html GameMsg
 -- viewSignUp model =
---     Html.map GameMsgSignUp (Apps.SignUp.View.view model.appSignUp model.core)
+--     Html.map GameMsgSignUp (Apps.SignUp.View.view model.appSignUp model.game)

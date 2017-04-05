@@ -1,54 +1,14 @@
-module Game.Requests exposing (..)
+module Game.Requests exposing (responseHandler)
 
--- import Json.Decode exposing (Decoder, string, decodeString, dict)
--- import Json.Decode.Pipeline exposing (decode, required, optional)
 
-import Requests.Models exposing (createRequestData
-                                , RequestPayloadArgs(RequestLogoutPayload)
-                                , Request(NewRequest
+import Requests.Models exposing ( Request(NewRequest
                                          , RequestLogout)
-                                , Response(ResponseLogout)
-                                , ResponseDecoder
+                                , Response)
 
-                                , ResponseForLogout(..))
-import Requests.Update exposing (queueRequest)
--- import Requests.Decoder exposing (decodeRequest)
+import Game.Messages exposing (GameMsg)
+import Game.Models exposing (ResponseType)
+import Game.Account.Requests exposing (requestLogoutHandler)
 
-import Game.Messages exposing (GameMsg(Request))
-import Game.Models.Game exposing (GameModel)
-
-
-type alias ResponseType
-    = Response
-    -> GameModel
-    -> (GameModel, Cmd GameMsg)
-
-
-requestLogout : String -> Cmd GameMsg
-requestLogout token =
-    queueRequest (Request
-                      (NewRequest
-                           (createRequestData
-                                RequestLogout
-                                decodeLogout
-                                "account.logout"
-                                (RequestLogoutPayload
-                                     { token = token
-                                     }))))
-
-
-decodeLogout : ResponseDecoder
-decodeLogout rawMsg code =
-    case code of
-        _ ->
-            ResponseLogout (ResponseLogoutOk)
-
-
-requestLogoutHandler : ResponseType
-requestLogoutHandler response model =
-    case response of
-        _ ->
-            (model, Cmd.none)
 
 -- Top-level response handler
 
@@ -60,4 +20,4 @@ responseHandler request data model =
             requestLogoutHandler data model
 
         _ ->
-            (model, Cmd.none)
+            (model, Cmd.none, [])
