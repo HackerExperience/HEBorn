@@ -11,6 +11,7 @@ import Game.Account.Models exposing (..)
 import Game.Software.Models exposing (..)
 import Game.Server.Models exposing (..)
 import Game.Network.Models exposing (..)
+import Game.Meta.Models exposing (..)
 
 
 type alias ResponseType
@@ -24,6 +25,7 @@ type alias GameModel =
     , server : ServerModel
     , network : NetworkModel
     , software : SoftwareModel
+    , meta : MetaModel
     }
 
 
@@ -33,4 +35,5 @@ initialModel =
     , server = initialServerModel
     , network = initialNetworkModel
     , software = initialSoftwareModel
+    , meta = initialMetaModel
     }

@@ -34,7 +34,8 @@ invalidWSMsg =
     }
 
 
-{-| decodeWSMsg will decode a raw string into the expected WSMsg format. -}
+{-| decodeWsgMeta decodes only the meta part of the msg, it ignores the
+"data" field. Useful when we do not know yet what "data" is. -}
 decodeWSMsgMeta : String ->  Result String (WSMsg Response)
 decodeWSMsgMeta =
     decodeString
@@ -45,6 +46,7 @@ decodeWSMsgMeta =
             |> required "code" int)
 
 
+{-| decodeWSMsg will decode a raw string into the expected WSMsg format. -}
 decodeWSMsg : Decoder a -> Decoder (WSMsg a)
 decodeWSMsg dataDecoder =
     decode WSMsg
