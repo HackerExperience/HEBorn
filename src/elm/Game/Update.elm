@@ -6,12 +6,16 @@ import Update.Extra as Update
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Requests exposing (responseHandler)
+import Game.Events exposing (eventHandler)
 
 import Game.Account.Update
 import Game.Server.Update
 import Game.Network.Update
 import Game.Software.Update
+import Game.Meta.Update
 
+
+import Game.Meta.Events exposing (metaEventHandler)
 
 update : GameMsg -> GameModel -> (GameModel, Cmd GameMsg)
 update msg model =
@@ -49,8 +53,22 @@ update msg model =
                 ({model | network = network_}, cmd)
                     |> Update.andThen update (getGameMsg gameMsg)
 
-        Event _ ->
-            (model, Cmd.none)
+        MsgMeta subMsg ->
+            let
+                (meta_, cmd, gameMsg) =
+                    Game.Meta.Update.update subMsg model.meta model
+            in
+                ({model | meta = meta_}, cmd)
+                    |> Update.andThen update (getGameMsg gameMsg)
+
+
+        Event event ->
+            let
+                (model_, cmd) =
+                    eventHandler model event
+            in
+                (model_, cmd)
+
 
         Request _ ->
             (model, Cmd.none)

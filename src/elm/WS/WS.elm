@@ -26,12 +26,17 @@ getWSMsgMeta : String -> WSMsg WSMsgData
 getWSMsgMeta msg =
     case decodeWSMsgMeta msg of
         Ok msg ->
-            Debug.log "msg is"
-            msg
+            let
+                debug1 = Debug.log "msg: " (toString msg)
+            in
+                msg
 
-        Err _ ->
-            Debug.log (String.concat ["invalid payload: ", msg])
-            invalidWSMsg
+        Err reason ->
+            let
+                debug1 = Debug.log "invalid payload: " (toString msg)
+                debug2 = Debug.log "reason: " (toString reason)
+            in
+                invalidWSMsg
 
 
 {-| send the message (string, already json-encoded) to the Helix server. -}

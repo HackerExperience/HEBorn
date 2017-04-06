@@ -1,6 +1,7 @@
 module Core.Messages exposing (Msg(..)
                               , EventBinds, eventBinds
-                              , RequestBinds, requestBinds)
+                              , RequestBinds, requestBinds, getRequestMsg)
+
 
 import Game.Messages
 import Apps.Login.Messages
@@ -8,6 +9,7 @@ import Apps.SignUp.Messages
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
 import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
+import Core.Components exposing (..)
 
 
 type Msg
@@ -28,27 +30,49 @@ To avoid hardcoding the component Event, we create this EventBinds type, which
 maps the component to its own event type. -}
 
 type alias EventBinds =
-    { login : Event -> Apps.Login.Messages.Msg
+    { game : Event -> Game.Messages.GameMsg
+    , login : Event -> Apps.Login.Messages.Msg
     , signUp : Event -> Apps.SignUp.Messages.Msg
     }
 
+
 eventBinds : EventBinds
 eventBinds =
-    { login = Apps.Login.Messages.Event
+    { game = Game.Messages.Event
+    , login = Apps.Login.Messages.Event
     , signUp = Apps.SignUp.Messages.Event
     }
+
 
 {-
 RequestBinds - See description for EventBinds, same rationale. -}
 
 type alias RequestBinds =
-    { login : Request -> Response -> Apps.Login.Messages.Msg
+    { game : Request -> Response -> Game.Messages.GameMsg
+    , login : Request -> Response -> Apps.Login.Messages.Msg
     , signUp : Request -> Response -> Apps.SignUp.Messages.Msg
     }
 
 
 requestBinds : RequestBinds
 requestBinds =
-    { login = Apps.Login.Messages.Response
+    { game = Game.Messages.Response
+    , login = Apps.Login.Messages.Response
     , signUp = Apps.SignUp.Messages.Response
     }
+
+
+getRequestMsg : Component -> Request -> Response -> Msg
+getRequestMsg component request response =
+    case component of
+        ComponentGame ->
+            MsgGame (requestBinds.game request response)
+
+        ComponentSignUp ->
+          MsgSignUp (requestBinds.signUp request response)
+
+        ComponentLogin ->
+            MsgLogin (requestBinds.login request response)
+
+        ComponentInvalid ->
+            NoOp

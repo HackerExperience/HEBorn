@@ -11,7 +11,7 @@ import Router.Router exposing (parseLocation)
 import WS.WS exposing (getWSMsgMeta, getWSMsgType)
 import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 
-import Core.Messages exposing (Msg(..), eventBinds, requestBinds)
+import Core.Messages exposing (Msg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (Model)
 import Core.Components exposing (Component(..))
 import Game.Update
@@ -43,7 +43,7 @@ update msg model =
                     ({model | game = game_}, Cmd.map MsgGame cmd)
 
 
-            -- Components
+            -- Apps
 
             MsgLogin (Apps.Login.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentLogin
@@ -90,6 +90,7 @@ update msg model =
             DispatchEvent event ->
                 Debug.log "eventoo"
                 model ! []
+                    |> Update.andThen update (MsgGame (eventBinds.game event))
                     |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
                     |> Update.andThen update (MsgLogin (eventBinds.login event))
 
@@ -110,17 +111,9 @@ update msg model =
 
                 let
                     response = decoder raw code
+                    requestMsg = getRequestMsg component request response
                 in
-                    case component of
-
-                        ComponentSignUp ->
-                            update (MsgSignUp (requestBinds.signUp request response)) model
-
-                        ComponentLogin ->
-                            update (MsgLogin (requestBinds.login request response)) model
-
-                        _ ->
-                            (model, Cmd.none)
+                    update requestMsg model
 
             -- Websocket
 
