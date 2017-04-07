@@ -1,7 +1,7 @@
 port module Stylesheets exposing (..)
 
 import Css.File exposing (CssFileStructure, CssCompilerProgram)
-import Apps.Dashboard.Style
+import Core.Style
 
 
 port files : CssFileStructure -> Cmd msg
@@ -10,7 +10,7 @@ port files : CssFileStructure -> Cmd msg
 fileStructure : CssFileStructure
 fileStructure =
     Css.File.toFileStructure
-        [ ( "index.css", Css.File.compile [ Apps.Dashboard.Style.css ] ) ]
+        [ ( "index.css", Css.File.compile [ Core.Style.css ] ) ]
 
 
 main : CssCompilerProgram

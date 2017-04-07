@@ -3,6 +3,7 @@ module Apps.Login.Messages exposing (..)
 import Events.Models
 import Requests.Models
 
+
 type Msg
     = SubmitLogin
     | SetUsername String

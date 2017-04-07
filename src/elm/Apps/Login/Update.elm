@@ -41,5 +41,3 @@ update msg model core =
 
         Response request data ->
             responseHandler request data model core
-
-

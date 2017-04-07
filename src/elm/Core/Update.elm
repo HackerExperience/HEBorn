@@ -14,6 +14,8 @@ import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 import Core.Messages exposing (Msg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (Model)
 import Core.Components exposing (Component(..))
+import OS.WindowManager.Update
+import OS.WindowManager.Messages
 import Game.Update
 import Game.Messages
 import Apps.Login.Update
@@ -35,12 +37,27 @@ update msg model =
             MsgGame (Game.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentGame
 
+            MsgGame (Game.Messages.ToWM subMsg) ->
+                update (MsgWM subMsg) model
+
             MsgGame subMsg ->
                 let
                     (game_, cmd) =
                         Game.Update.update subMsg model.game
                 in
                     ({model | game = game_}, Cmd.map MsgGame cmd)
+
+            -- Window Manager
+
+            MsgWM (OS.WindowManager.Messages.Request (NewRequest (requestData))) ->
+                makeRequest model requestData ComponentWM
+
+            MsgWM subMsg ->
+                let
+                    (wm_, cmd) =
+                        OS.WindowManager.Update.update subMsg model.wm model.seed
+                in
+                    ({model | wm = wm_}, Cmd.map MsgWM cmd)
 
 
             -- Apps
@@ -56,16 +73,18 @@ update msg model =
                     ({model | appLogin = updatedLogin}, Cmd.map MsgLogin cmd)
                         |> Update.andThen update (getGameMsg gameMsg)
 
-            MsgSignUp (Apps.SignUp.Messages.Request (NewRequest (requestData))) ->
-                makeRequest model requestData ComponentSignUp
+            -- MsgSignUp (Apps.SignUp.Messages.Request (NewRequest (requestData))) ->
+            --     makeRequest model requestData ComponentSignUp
 
-            MsgSignUp subMsg ->
-                let
-                    (updatedSignUp, cmd, gameMsg) =
-                        Apps.SignUp.Update.update subMsg model.appSignUp model.game
-                in
-                    ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
-                        |> Update.andThen update (getGameMsg gameMsg)
+            -- MsgSignUp subMsg ->
+            --     let
+            --         (updatedSignUp, cmd, gameMsg) =
+            --             Apps.SignUp.Update.update subMsg model.appSignUp model.game
+            --     in
+            --         ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
+            --             |> Update.andThen update (getGameMsg gameMsg)
+            MsgSignUp _ ->
+                (model, Cmd.none)
 
             -- Router
 

@@ -2,7 +2,8 @@ module Core.Components exposing (Component(..))
 
 
 type Component
-    = ComponentSignUp
-    | ComponentGame
+    = ComponentGame
+    | ComponentWM
+    | ComponentSignUp
     | ComponentLogin
     | ComponentInvalid

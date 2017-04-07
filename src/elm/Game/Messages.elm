@@ -1,8 +1,9 @@
 module Game.Messages exposing (GameMsg(..), call)
 
+
 import Events.Models
 import Requests.Models
-
+import OS.WindowManager.Messages
 import Game.Account.Messages
 import Game.Server.Messages
 import Game.Network.Messages
@@ -19,6 +20,7 @@ type GameMsg
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
+    | ToWM OS.WindowManager.Messages.Msg
     | NoOp
 
 
