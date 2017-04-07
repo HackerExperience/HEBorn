@@ -15,7 +15,7 @@ import Apps.Login.View
 
 renderWindows : Model -> Html Msg
 renderWindows model =
-    div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.wm))
+    div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
 
 renderLoop : Model -> WindowID -> Window -> List (Html Msg) -> List (Html Msg)

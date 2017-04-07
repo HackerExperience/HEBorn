@@ -2,13 +2,17 @@ module OS.WindowManager.Update exposing (..)
 
 
 import Random.Pcg exposing (Seed)
+
+import OS.Messages exposing (OSMsg)
+import Game.Messages exposing (GameMsg)
+
 import OS.WindowManager.Models exposing ( Model
                                         , openWindow, closeWindow)
 import OS.WindowManager.Messages exposing (Msg(..))
 
 
-update : Msg -> Model -> Seed -> ( Model, Cmd Msg)
-update msg model seed =
+update : Msg -> Model -> (Model, Cmd OSMsg, List GameMsg, List OSMsg)
+update msg model =
     case msg of
 
         OpenWindow window ->
@@ -16,19 +20,10 @@ update msg model seed =
                 (windows_, seed_) = openWindow model window
                 model_ = {model | windows = windows_, seed = seed_}
             in
-                (model_, Cmd.none)
+                (model_, Cmd.none, [], [])
 
         CloseWindow id ->
             let
                 windows_ = closeWindow model id
             in
-                ({model | windows = windows_}, Cmd.none)
-
-        Event _ ->
-            (model, Cmd.none)
-
-        Request _ ->
-            (model, Cmd.none)
-
-        Response _ _ ->
-            (model, Cmd.none)
+                ({model | windows = windows_}, Cmd.none, [], [])

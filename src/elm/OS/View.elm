@@ -14,6 +14,7 @@ import Game.Messages exposing (GameMsg(..), call)
 import Game.Models exposing (GameModel)
 import Game.Account.Messages exposing (AccountMsg(Logout))
 import OS.WindowManager.View
+import OS.Dock.View
 
 
 {id, class, classList} =
@@ -68,7 +69,7 @@ viewMain model =
 viewFooter : Model -> Html Msg
 viewFooter model =
     footer []
-        []
+        [ OS.Dock.View.view model ]
 
 
 viewNotFound : Html Msg

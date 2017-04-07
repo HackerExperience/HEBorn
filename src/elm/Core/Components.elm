@@ -3,7 +3,7 @@ module Core.Components exposing (Component(..))
 
 type Component
     = ComponentGame
-    | ComponentWM
+    | ComponentOS
     | ComponentSignUp
     | ComponentLogin
     | ComponentInvalid
