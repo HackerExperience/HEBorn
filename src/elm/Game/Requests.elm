@@ -4,9 +4,8 @@ module Game.Requests exposing (responseHandler)
 import Requests.Models exposing ( Request(NewRequest
                                          , RequestLogout)
                                 , Response)
-
-import Game.Messages exposing (GameMsg)
 import Game.Models exposing (ResponseType)
+
 import Game.Account.Requests exposing (requestLogoutHandler)
 
 

@@ -11,6 +11,7 @@ type alias Model =
     }
 
 
+initialModel : Model
 initialModel =
     { wm = OS.WindowManager.Models.initialModel
     , dock = OS.Dock.Models.initialModel

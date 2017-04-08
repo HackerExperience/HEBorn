@@ -6,7 +6,7 @@ module OS.Dock.Models exposing ( Model, initialModel
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
-
+-- oi
 type alias Application =
     { name : String
     , window : GameWindow
@@ -28,6 +28,7 @@ type alias Model =
     }
 
 
+generateIcon : String -> Icon
 generateIcon name =
     let
         path = "icons/" ++ name ++ ".png"
@@ -35,6 +36,7 @@ generateIcon name =
         {path = path}
 
 
+generateApplication : GameWindow -> Application
 generateApplication window =
     let
         name =
@@ -48,6 +50,7 @@ generateApplication window =
         {name = name, window = window, icon = icon}
 
 
+initialApplications : List Application
 initialApplications =
     let
         applications = [generateApplication SignUpWindow]
@@ -56,13 +59,16 @@ initialApplications =
         applications
 
 
+initialDock : Dock
 initialDock =
     initialApplications
 
 
+initialModel : Model
 initialModel =
     { dock = initialDock }
 
 
+getApplications : Model -> Dock
 getApplications model =
     model.dock

@@ -1,7 +1,6 @@
 module OS.WindowManager.Style exposing (..)
 
 import Css exposing (..)
-import Css.Elements exposing (body, li, main_, header, footer, nav)
 import Css.Namespace exposing (namespace)
 
 

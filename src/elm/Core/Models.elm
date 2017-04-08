@@ -1,8 +1,6 @@
 module Core.Models exposing (Model, Flags
                             , initialModel)
 
-import Uuid
-import Random.Pcg exposing (Seed, initialSeed, step)
 
 import Requests.Models
 import Router.Router exposing (Route)
@@ -23,9 +21,11 @@ type alias Model =
     , os : OS.Models.Model
     }
 
+
 type alias Flags =
     { seed : Int
     }
+
 
 initialModel : Router.Router.Route -> Int -> Model
 initialModel route seedInt =

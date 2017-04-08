@@ -92,3 +92,20 @@ fuzz3 seedInt f1 f2 f3 =
     in
         (v1, v2, v3)
 
+
+fuzz4 : Int
+        -> (Random.Seed -> (a, b))
+        -> (b -> (c, d))
+        -> (d -> (e, f))
+        -> (f -> (g, h))
+        -> (a, c, e, g)
+fuzz4 seedInt f1 f2 f3 f4 =
+    let
+        seed0 = Random.initialSeed seedInt
+        (v1, seed1) = f1 seed0
+        (v2, seed2) = f2 seed1
+        (v3, seed3) = f3 seed2
+        (v4, _) = f4 seed3
+    in
+        (v1, v2, v3, v4)
+

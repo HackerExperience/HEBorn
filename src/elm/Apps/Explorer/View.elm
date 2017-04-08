@@ -3,7 +3,7 @@ module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput, onBlur)
+import Html.Events exposing (..)
 import Html.CssHelpers
 
 import Game.Models exposing (GameModel)

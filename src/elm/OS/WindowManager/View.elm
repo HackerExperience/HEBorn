@@ -26,6 +26,7 @@ import Apps.Login.View
     Html.CssHelpers.withNamespace "wm"
 
 
+styles : List Css.Mixin -> Attribute CoreMsg
 styles =
     Css.asPairs >> style
 

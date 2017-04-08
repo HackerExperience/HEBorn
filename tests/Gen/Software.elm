@@ -9,6 +9,16 @@ import Gen.Utils exposing (..)
 import Game.Software.Models exposing (..)
 
 
+fileID : Int -> FileID
+fileID seedInt =
+    fuzz1 seedInt fileSeed
+
+
+fileSeed : StringSeed
+fileSeed seed =
+    smallStringSeed seed
+
+
 name : Int -> String
 name seedInt =
     fuzz1 seedInt nameSeed
@@ -42,39 +52,45 @@ extensionSeed seed =
 folder : Int -> File
 folder seedInt =
     let
-        (name, path) = fuzz2 seedInt nameSeed pathSeed
+        (id, name, path) =
+            fuzz3 seedInt fileSeed nameSeed pathSeed
     in
         folderArgs
-            name path
+            id name path
 
 
-folderArgs : String -> String -> File
-folderArgs name path =
-    RegularFolder {name = name, path = path}
+folderArgs : FileID -> String -> String -> File
+folderArgs id name path =
+    RegularFolder {id = id, name = name, path = path}
 
 
 regularFile : Int -> File
 regularFile seedInt =
     let
-        (name, path, extension) = fuzz3 seedInt nameSeed pathSeed extensionSeed
+        (id, name, path, extension) =
+            fuzz4 seedInt fileSeed nameSeed pathSeed extensionSeed
         (version, size) = (fileVersion, fileSize)
     in
         regularFileArgs
-            name path extension version size
+            id name path extension version size
 
 
-regularFileArgs : String
+regularFileArgs : FileID
+         -> String
          -> FilePath
          -> String
          -> FileVersion
          -> FileSize
          -> File
-regularFileArgs name path extension version size =
-    RegularFile { name = name
-                , path = path
-                , extension = extension
-                , version = version
-                , size = size}
+regularFileArgs id name path extension version size =
+    RegularFile
+    { id = id
+    , name = name
+    , path = path
+    , extension = extension
+    , version = version
+    , size = size
+    }
 
 
 fileVersion : FileVersion

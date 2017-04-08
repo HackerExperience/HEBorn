@@ -117,6 +117,7 @@ getOpenWindows model =
         open
 
 
+windowsFoldr : (comparable -> v -> a -> a) -> a -> Dict.Dict comparable v -> a
 windowsFoldr fun acc windows =
     Dict.foldr (fun) acc windows
 
