@@ -81,6 +81,9 @@ update msg model =
                 (model_, cmd)
                     |> Update.andThen update (getGameMsg gameMsg)
 
+        ToOS _ ->
+            (model, Cmd.none)
+
         NoOp ->
             (model, Cmd.none)
 

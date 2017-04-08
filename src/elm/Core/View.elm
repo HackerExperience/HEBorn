@@ -7,8 +7,8 @@ import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (Msg(..))
 import Core.Models exposing (Model)
+import OS.View
 import Apps.Landing.View
-import Apps.Dashboard.View
 
 
 view : Model -> Html Msg
@@ -19,7 +19,7 @@ view model =
 page : Model -> Html Msg
 page model =
     if isAuthenticated model.game.account then
-        Html.map MsgGame (Apps.Dashboard.View.view model)
+        OS.View.view model
 
     else
         case model.route of

@@ -1,7 +1,9 @@
 module Game.Messages exposing (GameMsg(..), call)
 
+
 import Events.Models
 import Requests.Models
+import OS.Messages
 
 import Game.Account.Messages
 import Game.Server.Messages
@@ -19,6 +21,7 @@ type GameMsg
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
+    | ToOS OS.Messages.OSMsg
     | NoOp
 
 

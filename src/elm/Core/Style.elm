@@ -1,4 +1,4 @@
-module Apps.Dashboard.Style exposing (..)
+module Core.Style exposing (..)
 
 import Css exposing (..)
 import Css.Elements exposing (body, li, main_, header, footer, nav)

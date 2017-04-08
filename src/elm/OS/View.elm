@@ -1,4 +1,4 @@
-module Apps.Dashboard.View exposing (view)
+module OS.View exposing (view)
 
 
 import Html exposing (..)
@@ -9,39 +9,41 @@ import Html.CssHelpers
 import Router.Router exposing (Route(..))
 
 import Core.Models exposing (Model)
+import Core.Messages exposing (Msg(..))
 import Game.Messages exposing (GameMsg(..), call)
 import Game.Models exposing (GameModel)
 import Game.Account.Messages exposing (AccountMsg(Logout))
-
-import Apps.Dashboard.Style as Style
+import OS.WindowManager.View
+import OS.Dock.View
 
 
 {id, class, classList} =
     Html.CssHelpers.withNamespace "dreamwriter"
 
 
-view : Model -> Html GameMsg
+view : Model -> Html Msg
 view model =
     case model.route of
         RouteNotFound ->
             viewNotFound
 
         _ ->
-            viewDashboard model.game
+            viewDashboard model
 
 
-viewDashboard : GameModel -> Html GameMsg
-viewDashboard game =
+viewDashboard : Model -> Html Msg
+viewDashboard model =
     div [ id "view-dashboard" ]
-        [ viewHeader game
-        , viewSidebar game
-        , viewMain game
-        , viewFooter game
+        [ viewHeader model
+        , viewSidebar model
+        , viewMain model
+        , viewFooter model
         ]
 
-viewHeader : GameModel -> Html GameMsg
-viewHeader game =
-    header []
+viewHeader : Model -> Html Msg
+viewHeader model =
+    Html.map MsgGame
+    (header []
         [ div [ id "header-left" ]
             []
         , div [ id "header-mid" ]
@@ -50,25 +52,27 @@ viewHeader game =
             [ button [ onClick (call.account Logout) ]
                 [ text "logout" ] ]
         ]
+    )
 
-viewSidebar : GameModel -> Html GameMsg
-viewSidebar game =
+viewSidebar : Model -> Html Msg
+viewSidebar model =
     nav []
         [ text "nav" ]
 
 
-viewMain : GameModel -> Html GameMsg
-viewMain game =
-    main_ [ ]
-       [ text "main" ]
+viewMain : Model -> Html Msg
+viewMain model =
+    main_ []
+        [ OS.WindowManager.View.renderWindows model
+        ]
 
-viewFooter : GameModel -> Html GameMsg
-viewFooter game =
+viewFooter : Model -> Html Msg
+viewFooter model =
     footer []
-        []
+        [ OS.Dock.View.view model ]
 
 
-viewNotFound : Html GameMsg
+viewNotFound : Html Msg
 viewNotFound =
     div []
         [ text "Not found"
