@@ -41,6 +41,8 @@ generateApplication window =
             case window of
                 SignUpWindow ->
                     "signup"
+                ExplorerWindow ->
+                    "explorer"
         icon = generateIcon name
     in
         {name = name, window = window, icon = icon}
@@ -49,7 +51,7 @@ generateApplication window =
 initialApplications =
     let
         applications = [generateApplication SignUpWindow]
-                       ++ [generateApplication SignUpWindow]
+                       ++ [generateApplication ExplorerWindow]
     in
         applications
 

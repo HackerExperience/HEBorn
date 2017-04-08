@@ -1,4 +1,11 @@
-module Game.Software.Models exposing (..)
+module Game.Software.Models exposing ( SoftwareModel, initialSoftwareModel
+                                     , Filesystem, initialFilesystem
+                                     , File(..)
+                                     , FilePath, FileSize(..), FileVersion(..)
+                                     , addFile, removeFile
+                                     , getFilePath, getFileName, getFilesOnPath
+                                     , pathExists, rootPath
+                                     , listFilesystem)
 
 
 import Dict
@@ -49,6 +56,7 @@ getFilePath file =
     in
         path
 
+
 getFileName : File -> String
 getFileName file =
     let
@@ -69,8 +77,6 @@ addFile model file =
         newFiles = filesOnPath ++ [file]
     in
         {model | filesystem = (Dict.insert path newFiles model.filesystem)}
-
-
 
 
 getFilesOnPath : SoftwareModel -> FilePath -> List File
@@ -116,3 +122,7 @@ initialSoftwareModel : SoftwareModel
 initialSoftwareModel =
     {filesystem = initialFilesystem}
 
+
+rootPath : FilePath
+rootPath =
+    "/"

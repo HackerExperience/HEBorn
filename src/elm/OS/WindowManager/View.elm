@@ -1,21 +1,33 @@
 module OS.WindowManager.View exposing (renderWindows)
 
 
-import Html exposing (Html, div, text, button)
+import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
+import Html.CssHelpers
+import Css exposing (transform, translate2, asPairs, px, height, width)
 import Draggable
 
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (Model)
 
+import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models exposing ( Window, WindowID
                                         , getOpenWindows, windowsFoldr)
 import OS.WindowManager.Messages exposing (Msg(..))
-import OS.Messages exposing (OSMsg(..))
+import OS.WindowManager.Style as Css
 
+import Apps.Explorer.View
 import Apps.Login.View
+
+
+{id, class, classList} =
+    Html.CssHelpers.withNamespace "wm"
+
+
+styles =
+    Css.asPairs >> style
 
 
 renderWindows : Model -> Html CoreMsg
@@ -34,45 +46,55 @@ renderWindow model window =
         SignUpWindow ->
             windowWrapper
                 window (Html.map MsgLogin (Apps.Login.View.view model.appLogin model.game))
+        ExplorerWindow ->
+            windowWrapper
+                window (Html.map MsgExplorer (Apps.Explorer.View.view model.appExplorer model.game))
+
 
 
 windowWrapper : Window -> Html CoreMsg -> Html CoreMsg
 windowWrapper window view =
-    div [ class "window"
-        , windowStyle window]
+    div [ class [ Css.Window ]
+        , windowStyle window
+        ]
         [ Html.map MsgOS( Html.map MsgWM (header window))
-        , div [ class "window-body"] [view]
+        , div
+            [ class [ Css.WindowBody ] ]
+            [ view ]
         ]
 
 
 header : Window -> Html Msg
 header window =
     div
-        [ class "window-header"
+        [ class [ Css.WindowHeader ]
         , Draggable.mouseTrigger window.id DragMsg
         ]
-        [ text "header"
-        , button [ onClick (CloseWindow window.id) ] [text "X"]
+        [ headerTitle "title"
+        , div [ class [ Css.HeaderVoid] ] []
+        , headerButtons window.id
         ]
 
 
--- TODO: Use elm-css instead of this
+headerTitle : String -> Html Msg
+headerTitle title =
+    div [ class [ Css.HeaderTitle ] ]
+        [ text title ]
+
+
+headerButtons : WindowID -> Html Msg
+headerButtons id =
+    div [ class [ Css.HeaderButtons ] ]
+        [ span
+              [ class [Css.HeaderButton]
+              , onClick (CloseWindow id) ]
+              [ text "X" ]
+        ]
+
+
+windowStyle : Window -> Html.Attribute CoreMsg
 windowStyle window =
-    let
-        translate =
-            "translate(" ++ (toString window.position.x) ++ "px, " ++ (toString window.position.y) ++ "px)"
-
-        style_ =
-            [ "transform" => translate
-            , "padding" => "16px"
-            , "background-color" => "blue"
-            , "width" => "264px"
-            , "cursor" => "move"
-            ]
-    in
-        style style_
-
-
-(=>) : a -> b -> ( a, b )
-(=>) =
-    (,)
+    styles
+        [ transform (translate2 (px window.position.x) (px window.position.y))
+        , width (px window.size.width)
+        , height (px window.size.height)]

@@ -15,8 +15,6 @@ import Game.Software.Update
 import Game.Meta.Update
 
 
-import Game.Meta.Events exposing (metaEventHandler)
-
 update : GameMsg -> GameModel -> (GameModel, Cmd GameMsg)
 update msg model =
     case msg of

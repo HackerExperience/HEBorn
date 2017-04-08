@@ -1,5 +1,6 @@
 module OS.WindowManager.Models exposing ( Model, initialModel
                                         , Window, WindowID, Position
+                                        , defaultSize
                                         , openWindow, closeWindow
                                         , getOpenWindows
                                         , updateWindowPosition
@@ -32,6 +33,11 @@ type alias Position =
     , y : Float}
 
 
+type alias Size =
+    { width : Float
+    , height : Float}
+
+
 type WindowState
     = Open
     | Minimized
@@ -42,6 +48,8 @@ type alias Window =
     , window : GameWindow
     , state : WindowState
     , position : Position
+    , title : String
+    , size : Size
     }
 
 
@@ -57,6 +65,11 @@ initialPosition =
 initialWindows : Dict.Dict WindowID Window
 initialWindows =
     Dict.empty
+
+
+defaultSize : Size
+defaultSize =
+    Size 600 400
 
 
 initialModel : Model
@@ -75,7 +88,9 @@ newWindow model window =
             { id = (Uuid.toString id)
             , window = window
             , state = Open
-            , position = initialPosition}
+            , position = initialPosition
+            , title = "Sem titulo"
+            , size = defaultSize}
     in
         (window_, seed)
 

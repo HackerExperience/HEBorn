@@ -30,7 +30,6 @@ page model =
                 landingView model
 
 
-
 landingView : Model -> Html CoreMsg
 landingView model =
     Apps.Landing.View.view model

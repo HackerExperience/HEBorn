@@ -19,6 +19,8 @@ import OS.Update
 
 import Game.Update
 import Game.Messages
+import Apps.Explorer.Update
+import Apps.Explorer.Messages
 import Apps.Login.Update
 import Apps.Login.Messages
 import Apps.SignUp.Update
@@ -61,6 +63,17 @@ update msg model =
                     ({model | os = os_}, Cmd.map MsgOS cmd)
 
             -- Apps
+
+            MsgExplorer (Apps.Explorer.Messages.Request (NewRequest (requestData))) ->
+                makeRequest model requestData ComponentExplorer
+
+            MsgExplorer subMsg ->
+                let
+                    (explorer_, cmd, gameMsg) =
+                        Apps.Explorer.Update.update subMsg model.appExplorer model.game
+                in
+                    ({model | appExplorer = explorer_}, Cmd.map MsgExplorer cmd)
+                        |> Update.andThen update (getGameMsg gameMsg)
 
             MsgLogin (Apps.Login.Messages.Request (NewRequest (requestData))) ->
                 makeRequest model requestData ComponentLogin
