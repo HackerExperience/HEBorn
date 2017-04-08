@@ -22,8 +22,8 @@ init flags location =
 
 -- main : Program Flags Model Msg
 main =
-    -- Navigation.programWithFlags OnLocationChange
-    TimeTravel.Navigation.programWithFlags OnLocationChange
+    Navigation.programWithFlags OnLocationChange
+    -- TimeTravel.Navigation.programWithFlags OnLocationChange
         { init = init
         , view = view
         , update = update
