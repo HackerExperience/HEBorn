@@ -1,5 +1,6 @@
 module WS.WS exposing (getWSMsgMeta, send, getWSMsgType)
 
+
 import WebSocket
 import WS.Models exposing (WSMsg, WSMsgData, WSMsgType(..), invalidWSMsg, decodeWSMsgMeta)
 

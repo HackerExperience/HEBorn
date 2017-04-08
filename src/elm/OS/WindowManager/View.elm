@@ -6,7 +6,7 @@ import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Draggable
 
-import Core.Messages as CoreMsg
+import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (Model)
 
 import OS.WindowManager.Windows exposing (GameWindow(..))
@@ -18,29 +18,29 @@ import OS.Messages exposing (OSMsg(..))
 import Apps.Login.View
 
 
-renderWindows : Model -> Html CoreMsg.Msg
+renderWindows : Model -> Html CoreMsg
 renderWindows model =
     div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
 
-renderLoop : Model -> WindowID -> Window -> List (Html CoreMsg.Msg) -> List (Html CoreMsg.Msg)
+renderLoop : Model -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
 renderLoop model id window acc =
     [(renderWindow model window)] ++ acc
 
 
-renderWindow : Model -> Window -> Html CoreMsg.Msg
+renderWindow : Model -> Window -> Html CoreMsg
 renderWindow model window =
     case window.window of
         SignUpWindow ->
             windowWrapper
-                window (Html.map CoreMsg.MsgLogin (Apps.Login.View.view model.appLogin model.game))
+                window (Html.map MsgLogin (Apps.Login.View.view model.appLogin model.game))
 
 
-windowWrapper : Window -> Html CoreMsg.Msg -> Html CoreMsg.Msg
+windowWrapper : Window -> Html CoreMsg -> Html CoreMsg
 windowWrapper window view =
     div [ class "window"
         , windowStyle window]
-        [ Html.map CoreMsg.MsgOS ( Html.map MsgWM (header window))
+        [ Html.map MsgOS( Html.map MsgWM (header window))
         , div [ class "window-body"] [view]
         ]
 

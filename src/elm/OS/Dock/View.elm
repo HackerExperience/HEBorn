@@ -4,21 +4,21 @@ module OS.Dock.View exposing (view)
 import Html exposing (Html, div, text, button)
 import Html.Events exposing (onClick)
 
-import Core.Messages exposing (Msg(..))
+import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (Model)
 import OS.Messages exposing (OSMsg(..))
 
-import OS.WindowManager.Messages as WMMsg
+import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Models exposing ( Application
                                , getApplications)
 
 
-view : Model -> (Html Msg)
+view : Model -> (Html CoreMsg)
 view model =
     renderApplications model
 
 
-renderApplications : Model -> (Html Msg)
+renderApplications : Model -> (Html CoreMsg)
 renderApplications model =
     let
         applications = getApplications model.os.dock
@@ -27,8 +27,8 @@ renderApplications model =
         div [] html
 
 
-renderApplication : Model -> Application -> (Html Msg)
+renderApplication : Model -> Application -> (Html CoreMsg)
 renderApplication model application =
     div []
-        [ button [ onClick (MsgOS (MsgWM (WMMsg.OpenWindow application.window))) ]
+        [ button [ onClick (MsgOS (MsgWM (OpenWindow application.window))) ]
             [ text application.name ] ]

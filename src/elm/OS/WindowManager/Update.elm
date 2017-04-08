@@ -4,7 +4,6 @@ module OS.WindowManager.Update exposing (..)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Random.Pcg exposing (Seed)
-import Math.Vector2 as Vector2
 
 import OS.Messages exposing (OSMsg(MsgWM))
 import Game.Messages exposing (GameMsg)

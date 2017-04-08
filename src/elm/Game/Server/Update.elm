@@ -1,7 +1,6 @@
 module Game.Server.Update exposing (..)
 
 
-import Utils
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Server.Messages exposing (ServerMsg(..))

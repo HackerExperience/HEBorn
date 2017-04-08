@@ -2,16 +2,14 @@ module OS.View exposing (view)
 
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 
 import Router.Router exposing (Route(..))
 
 import Core.Models exposing (Model)
-import Core.Messages exposing (Msg(..))
+import Core.Messages exposing (CoreMsg(..))
 import Game.Messages exposing (GameMsg(..), call)
-import Game.Models exposing (GameModel)
 import Game.Account.Messages exposing (AccountMsg(Logout))
 import OS.WindowManager.View
 import OS.Dock.View
@@ -21,7 +19,7 @@ import OS.Dock.View
     Html.CssHelpers.withNamespace "dreamwriter"
 
 
-view : Model -> Html Msg
+view : Model -> Html CoreMsg
 view model =
     case model.route of
         RouteNotFound ->
@@ -31,7 +29,7 @@ view model =
             viewDashboard model
 
 
-viewDashboard : Model -> Html Msg
+viewDashboard : Model -> Html CoreMsg
 viewDashboard model =
     div [ id "view-dashboard" ]
         [ viewHeader model
@@ -40,7 +38,7 @@ viewDashboard model =
         , viewFooter model
         ]
 
-viewHeader : Model -> Html Msg
+viewHeader : Model -> Html CoreMsg
 viewHeader model =
     Html.map MsgGame
     (header []
@@ -54,33 +52,26 @@ viewHeader model =
         ]
     )
 
-viewSidebar : Model -> Html Msg
+viewSidebar : Model -> Html CoreMsg
 viewSidebar model =
     nav []
         [ text "nav" ]
 
 
-viewMain : Model -> Html Msg
+viewMain : Model -> Html CoreMsg
 viewMain model =
     main_ []
         [ OS.WindowManager.View.renderWindows model
         ]
 
-viewFooter : Model -> Html Msg
+viewFooter : Model -> Html CoreMsg
 viewFooter model =
     footer []
         [ OS.Dock.View.view model ]
 
 
-viewNotFound : Html Msg
+viewNotFound : Html CoreMsg
 viewNotFound =
     div []
         [ text "Not found"
         ]
--- viewLogin : Model -> Html GameMsg
--- viewLogin model =
---     Html.map GameMsgLogin (Apps.Login.View.view model.appLogin model.game)
-
--- viewSignUp : Model -> Html GameMsg
--- viewSignUp model =
---     Html.map GameMsgSignUp (Apps.SignUp.View.view model.appSignUp model.game)

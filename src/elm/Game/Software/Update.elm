@@ -1,7 +1,6 @@
 module Game.Software.Update exposing (..)
 
 
-import Utils
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Software.Messages exposing (SoftwareMsg(..))

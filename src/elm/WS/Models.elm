@@ -2,10 +2,12 @@ module WS.Models exposing (WSMsg, WSMsgData, WSMsgType(..)
                           , invalidWSMsg
                           , decodeWSMsg, decodeWSMsgMeta)
 
+
 import Json.Decode exposing (Decoder, string, decodeString, int)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 
 import Requests.Models exposing (Response(ResponseEmpty))
+
 
 {-| WSMsgType identifies the possible received messages as:
  1) a direct response from a request;
@@ -24,6 +26,7 @@ type alias WSMsg var =
     }
 
 type alias WSMsgData = Response
+
 
 invalidWSMsg : WSMsg Response
 invalidWSMsg =
