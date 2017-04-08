@@ -7,23 +7,25 @@ import Uuid
 import Random.Pcg exposing (step)
 import Dict
 
-import Requests.Models exposing (Request(RequestInvalid, NewRequest)
+import Requests.Models exposing ( Model, RequestID
+                                , Request(RequestInvalid, NewRequest)
                                 , RequestStoreData, RequestPayload
                                 , Response(..)
                                 , NewRequestData
                                 , ResponseDecoder, noopDecoder
+                                , storeRequest
                                 , encodeRequest)
 import WS.WS
 import Utils
-import Core.Models exposing (Model)
 import Core.Components exposing (Component(ComponentInvalid))
+import Core.Models as Core
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
 (the 3-tuple (Component, Request, Decoder)) if the `request_id` key is found
 on the dict. If the request key is not found, returns an RequestStoreData with
 invalid data. -}
-getRequestData : Model -> String -> RequestStoreData
+getRequestData : Model -> RequestID -> RequestStoreData
 getRequestData model request_id =
     case Dict.get request_id model.requests of
 
@@ -34,24 +36,14 @@ getRequestData model request_id =
             (ComponentInvalid, RequestInvalid, noopDecoder)
 
 
-{- Create a new entry on the RequestStore dict (UUID -> (Component, Request, Decoder))
--}
-saveRequestId : Model -> String -> Component -> Request -> ResponseDecoder -> Model
-saveRequestId model request_id component request response =
-    let
-        newRequests = Dict.insert request_id (component, request, response) model.requests
-    in
-        {model | requests = newRequests}
-
-
 {-| removeRequestId will remove the entry identified by key `request_id` on the
 RequestStore-}
-removeRequestId : Model -> String -> Model
+removeRequestId : Model -> RequestID -> Model
 removeRequestId model request_id =
     let
-        newRequests = Dict.remove request_id model.requests
+        requests_ = Dict.remove request_id model.requests
     in
-        {model | requests = newRequests}
+        {model | requests = requests_}
 
 
 {-| makeRequest is the function to actually send a message (internally Elm
@@ -69,15 +61,21 @@ Before sending the message, a `RequestStore` is created, which contains data we
 need to correctly route the response to the component (the 3-tuple
 `(Component, Request, Decoder)`. The RequestStore is identified by the request UUID,
 which the server will sent with the response (on the key "request_id").-}
-makeRequest : Model -> NewRequestData -> Component -> (Model, Cmd msg)
-makeRequest model requestData component =
+makeRequest : Core.Model -> NewRequestData -> Component -> (Core.Model, Cmd msg)
+makeRequest core requestData component =
     let
+        model = core.requests
         (request, payload, response) = requestData
-        newPayload = encodeRequest {payload | request_id = model.uuid}
-        newModel = saveRequestId model model.uuid component request response
-        (newUuid, newSeed) = step Uuid.uuidGenerator model.seed
+        payload_ = encodeRequest {payload | request_id = model.uuid}
+        requests_ = storeRequest model model.uuid component request response
+        (uuid_, seed_) = step Uuid.uuidGenerator model.seed
+        model_ =
+            { requests = requests_
+            , seed = seed_
+            , uuid = Uuid.toString uuid_
+            }
     in
-        ({newModel | uuid = Uuid.toString newUuid, seed = newSeed}, WS.WS.send newPayload)
+        ({core | requests = model_}, WS.WS.send payload_)
 
 
 {-| queueRequest is the function a module should call to let Elm know we want

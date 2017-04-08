@@ -1,4 +1,4 @@
-module Core.Messages exposing (Msg(..)
+module Core.Messages exposing (CoreMsg(..)
                               , EventBinds, eventBinds
                               , RequestBinds, requestBinds, getRequestMsg)
 
@@ -13,7 +13,7 @@ import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDe
 import Core.Components exposing (..)
 
 
-type Msg
+type CoreMsg
     = MsgGame Game.Messages.GameMsg
     | MsgOS OS.Messages.OSMsg
     | MsgLogin Apps.Login.Messages.Msg
@@ -68,7 +68,7 @@ requestBinds =
     }
 
 
-getRequestMsg : Component -> Request -> Response -> Msg
+getRequestMsg : Component -> Request -> Response -> CoreMsg
 getRequestMsg component request response =
     case component of
         ComponentGame ->

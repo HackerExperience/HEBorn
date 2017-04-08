@@ -1,7 +1,6 @@
 module Game.Network.Update exposing (..)
 
 
-import Utils
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Network.Messages exposing (NetworkMsg(..))

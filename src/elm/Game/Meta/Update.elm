@@ -1,7 +1,6 @@
 module Game.Meta.Update exposing (..)
 
 
-import Utils
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Meta.Messages exposing (MetaMsg(..))

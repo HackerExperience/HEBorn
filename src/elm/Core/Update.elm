@@ -1,7 +1,7 @@
 module Core.Update exposing (update)
 
+
 import Update.Extra as Update
-import Debug
 
 import Requests.Models exposing (Request(RequestInvalid, NewRequest))
 import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
@@ -11,7 +11,7 @@ import Router.Router exposing (parseLocation)
 import WS.WS exposing (getWSMsgMeta, getWSMsgType)
 import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 
-import Core.Messages exposing (Msg(..), eventBinds, getRequestMsg)
+import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (Model)
 import Core.Components exposing (Component(..))
 import OS.Messages
@@ -25,7 +25,7 @@ import Apps.SignUp.Update
 import Apps.SignUp.Messages
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : CoreMsg -> Model -> (Model, Cmd CoreMsg)
 update msg model =
     let
         logMsg =
@@ -60,21 +60,6 @@ update msg model =
                 in
                     ({model | os = os_}, Cmd.map MsgOS cmd)
 
-            -- -- Window Manager
-
-            -- MsgWM (OS.WindowManager.Messages.Request (NewRequest (requestData))) ->
-            --     makeRequest model requestData ComponentWM
-
-            -- MsgWM subMsg ->
-            --     let
-            --         (wm_, cmd) =
-            --             OS.WindowManager.Update.update subMsg model.os.wm model.seed
-            --         os = model.os
-            --         os_ = { os | wm = wm_}
-            --     in
-            --         ({model | os = os_}, Cmd.map MsgWM cmd)
-
-
             -- Apps
 
             MsgLogin (Apps.Login.Messages.Request (NewRequest (requestData))) ->
@@ -88,18 +73,16 @@ update msg model =
                     ({model | appLogin = updatedLogin}, Cmd.map MsgLogin cmd)
                         |> Update.andThen update (getGameMsg gameMsg)
 
-            -- MsgSignUp (Apps.SignUp.Messages.Request (NewRequest (requestData))) ->
-            --     makeRequest model requestData ComponentSignUp
+            MsgSignUp (Apps.SignUp.Messages.Request (NewRequest (requestData))) ->
+                makeRequest model requestData ComponentSignUp
 
-            -- MsgSignUp subMsg ->
-            --     let
-            --         (updatedSignUp, cmd, gameMsg) =
-            --             Apps.SignUp.Update.update subMsg model.appSignUp model.game
-            --     in
-            --         ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
-            --             |> Update.andThen update (getGameMsg gameMsg)
-            MsgSignUp _ ->
-                (model, Cmd.none)
+            MsgSignUp subMsg ->
+                let
+                    (updatedSignUp, cmd, gameMsg) =
+                        Apps.SignUp.Update.update subMsg model.appSignUp model.game
+                in
+                    ({model | appSignUp = updatedSignUp}, Cmd.map MsgSignUp cmd)
+                        |> Update.andThen update (getGameMsg gameMsg)
 
             -- Router
 
@@ -165,10 +148,11 @@ update msg model =
 
                         WSResponse ->
                             let
-                                requestData = getRequestData model wsMsg.request_id
-                                newModel = removeRequestId model wsMsg.request_id
+                                requestData = getRequestData model.requests wsMsg.request_id
+                                requests_ = removeRequestId model.requests wsMsg.request_id
+                                model_ = {model | requests = requests_}
                             in
-                                update (DispatchResponse requestData (message, wsMsg.code)) newModel
+                                update (DispatchResponse requestData (message, wsMsg.code)) model_
 
                         WSEvent ->
                             update (DispatchEvent (getEvent wsMsg.event)) model
@@ -183,7 +167,7 @@ update msg model =
                 (model, Cmd.none)
 
 
-getGameMsg : List Game.Messages.GameMsg -> Msg
+getGameMsg : List Game.Messages.GameMsg -> CoreMsg
 getGameMsg msg =
     case msg of
         [] ->

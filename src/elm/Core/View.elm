@@ -5,18 +5,18 @@ import Html exposing (Html, div, text)
 
 import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
-import Core.Messages exposing (Msg(..))
+import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (Model)
 import OS.View
 import Apps.Landing.View
 
 
-view : Model -> Html Msg
+view : Model -> Html CoreMsg
 view model =
     page model
 
 
-page : Model -> Html Msg
+page : Model -> Html CoreMsg
 page model =
     if isAuthenticated model.game.account then
         OS.View.view model
@@ -31,7 +31,7 @@ page model =
 
 
 
-landingView : Model -> Html Msg
+landingView : Model -> Html CoreMsg
 landingView model =
     Apps.Landing.View.view model
 
