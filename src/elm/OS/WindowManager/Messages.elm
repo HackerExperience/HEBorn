@@ -1,6 +1,5 @@
 module OS.WindowManager.Messages exposing (..)
 
-
 import Draggable
 import OS.WindowManager.Windows exposing (GameWindow)
 import OS.WindowManager.Models exposing (WindowID, Position)

@@ -1,9 +1,7 @@
 module Apps.Landing.View exposing (view)
 
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
-
 import Core.Models exposing (Model)
 import Core.Messages exposing (CoreMsg(MsgSignUp, MsgLogin))
 import Apps.Login.View
@@ -18,11 +16,12 @@ view model =
         , viewSignUp model
         ]
 
+
 viewIntro : Html CoreMsg
 viewIntro =
-    div [ id "view-intro"] [
-         text "welcome to raquer ispirienci!"
-    ]
+    div [ id "view-intro" ]
+        [ text "welcome to raquer ispirienci!"
+        ]
 
 
 viewLogin : Model -> Html CoreMsg

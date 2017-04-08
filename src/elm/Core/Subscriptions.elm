@@ -1,11 +1,8 @@
 module Core.Subscriptions exposing (subscriptions)
 
-
 import WebSocket
-
 import Core.Messages exposing (CoreMsg(WSReceivedMessage, MsgOS))
 import Core.Models exposing (Model)
-
 import OS.WindowManager.Subscriptions
 
 

@@ -1,12 +1,17 @@
-module OS.Dock.Models exposing ( Model, initialModel
-                               , Application
-                               , getApplications)
-
+module OS.Dock.Models
+    exposing
+        ( Model
+        , initialModel
+        , Application
+        , getApplications
+        )
 
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
 -- oi
+
+
 type alias Application =
     { name : String
     , window : GameWindow
@@ -15,7 +20,7 @@ type alias Application =
 
 
 type alias Icon =
-    { path: String
+    { path : String
     }
 
 
@@ -31,9 +36,10 @@ type alias Model =
 generateIcon : String -> Icon
 generateIcon name =
     let
-        path = "icons/" ++ name ++ ".png"
+        path =
+            "icons/" ++ name ++ ".png"
     in
-        {path = path}
+        { path = path }
 
 
 generateApplication : GameWindow -> Application
@@ -43,18 +49,22 @@ generateApplication window =
             case window of
                 SignUpWindow ->
                     "signup"
+
                 ExplorerWindow ->
                     "explorer"
-        icon = generateIcon name
+
+        icon =
+            generateIcon name
     in
-        {name = name, window = window, icon = icon}
+        { name = name, window = window, icon = icon }
 
 
 initialApplications : List Application
 initialApplications =
     let
-        applications = [generateApplication SignUpWindow]
-                       ++ [generateApplication ExplorerWindow]
+        applications =
+            [ generateApplication SignUpWindow ]
+                ++ [ generateApplication ExplorerWindow ]
     in
         applications
 

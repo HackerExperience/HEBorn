@@ -17,24 +17,24 @@ type Css
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
-    [ class Window
-        [ backgroundColor (hex "AAA")
+        [ class Window
+            [ backgroundColor (hex "AAA")
+            ]
+        , class WindowHeader
+            [ displayFlex
+            , flexFlow2 row wrap
+            , backgroundColor (hex "888")
+            ]
+        , class HeaderTitle
+            [ flex (int 6)
+            ]
+        , class HeaderVoid
+            [ flex (int 3)
+            ]
+        , class HeaderButtons
+            [ flex (int 1)
+            ]
+        , class HeaderButton
+            [ cursor pointer
+            ]
         ]
-    , class WindowHeader
-        [ displayFlex
-        , flexFlow2 row wrap
-        , backgroundColor (hex "888")
-        ]
-    , class HeaderTitle
-        [ flex (int 6)
-        ]
-    , class HeaderVoid
-        [ flex (int 3)
-        ]
-    , class HeaderButtons
-        [ flex (int 1)
-        ]
-    , class HeaderButton
-        [ cursor pointer
-        ]
-    ]

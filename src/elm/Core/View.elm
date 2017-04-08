@@ -1,8 +1,6 @@
 module Core.View exposing (view)
 
-
 import Html exposing (Html, div, text)
-
 import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (CoreMsg(..))
@@ -20,7 +18,6 @@ page : Model -> Html CoreMsg
 page model =
     if isAuthenticated model.game.account then
         OS.View.view model
-
     else
         case model.route of
             RouteNotFound ->

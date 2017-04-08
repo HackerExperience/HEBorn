@@ -2,7 +2,7 @@ module Game.Meta.Models exposing (..)
 
 
 type alias MetaModel =
-    { online : Int}
+    { online : Int }
 
 
 initialMetaModel : MetaModel

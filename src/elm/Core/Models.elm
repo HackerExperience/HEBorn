@@ -1,6 +1,9 @@
-module Core.Models exposing (Model, Flags
-                            , initialModel)
-
+module Core.Models
+    exposing
+        ( Model
+        , Flags
+        , initialModel
+        )
 
 import Requests.Models
 import Router.Router exposing (Route)
@@ -37,4 +40,3 @@ initialModel route seedInt =
     , game = Game.Models.initialModel
     , os = OS.Models.initialModel
     }
-

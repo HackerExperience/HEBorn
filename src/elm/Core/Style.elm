@@ -8,8 +8,8 @@ import Css.Namespace exposing (namespace)
 css : Stylesheet
 css =
     (stylesheet << namespace "core")
-    [ body
-        [ displayFlex
-        , minWidth (px 1280)
+        [ body
+            [ displayFlex
+            , minWidth (px 1280)
+            ]
         ]
-    ]

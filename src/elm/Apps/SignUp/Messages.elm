@@ -3,6 +3,7 @@ module Apps.SignUp.Messages exposing (Msg(..))
 import Events.Models
 import Requests.Models
 
+
 type Msg
     = SubmitForm
     | SetUsername String

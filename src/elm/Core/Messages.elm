@@ -1,7 +1,12 @@
-module Core.Messages exposing (CoreMsg(..)
-                              , EventBinds, eventBinds
-                              , RequestBinds, requestBinds, getRequestMsg)
-
+module Core.Messages
+    exposing
+        ( CoreMsg(..)
+        , EventBinds
+        , eventBinds
+        , RequestBinds
+        , requestBinds
+        , getRequestMsg
+        )
 
 import Game.Messages
 import OS.Messages
@@ -22,16 +27,20 @@ type CoreMsg
     | MsgSignUp Apps.SignUp.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
-    | DispatchResponse RequestStoreData (String, Int)
+    | DispatchResponse RequestStoreData ( String, Int )
     | WSReceivedMessage String
     | NoOp
 
+
+
 {-
-EventBinds - Hash that maps each Component's Event type to the relevant Msg.
-In other words: When we want to send an event to a component, we need to use
-that component's Event type. Each component expects its own component type.
-To avoid hardcoding the component Event, we create this EventBinds type, which
-maps the component to its own event type. -}
+   EventBinds - Hash that maps each Component's Event type to the relevant Msg.
+   In other words: When we want to send an event to a component, we need to use
+   that component's Event type. Each component expects its own component type.
+   To avoid hardcoding the component Event, we create this EventBinds type, which
+   maps the component to its own event type.
+-}
+
 
 type alias EventBinds =
     { game : Event -> Game.Messages.GameMsg
@@ -52,8 +61,11 @@ eventBinds =
     }
 
 
+
 {-
-RequestBinds - See description for EventBinds, same rationale. -}
+   RequestBinds - See description for EventBinds, same rationale.
+-}
+
 
 type alias RequestBinds =
     { game : Request -> Response -> Game.Messages.GameMsg
@@ -80,14 +92,14 @@ getRequestMsg component request response =
         ComponentGame ->
             MsgGame (requestBinds.game request response)
 
-        ComponentOS->
+        ComponentOS ->
             MsgOS (requestBinds.os request response)
 
         ComponentExplorer ->
             MsgExplorer (requestBinds.explorer request response)
 
         ComponentSignUp ->
-          MsgSignUp (requestBinds.signUp request response)
+            MsgSignUp (requestBinds.signUp request response)
 
         ComponentLogin ->
             MsgLogin (requestBinds.login request response)

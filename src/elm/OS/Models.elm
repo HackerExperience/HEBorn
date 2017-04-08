@@ -1,6 +1,5 @@
 module OS.Models exposing (Model, initialModel)
 
-
 import OS.WindowManager.Models exposing (Model, initialModel)
 import OS.Dock.Models exposing (Model, initialModel)
 
