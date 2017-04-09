@@ -1,6 +1,5 @@
 module Events.Update exposing (getEvent)
 
-
 import Events.Models exposing (Event(..))
 
 
@@ -12,4 +11,4 @@ getEvent rawEvent =
 
         _ ->
             Debug.log rawEvent
-            EventUnknown
+                EventUnknown

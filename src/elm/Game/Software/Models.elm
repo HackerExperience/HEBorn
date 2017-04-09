@@ -1,45 +1,71 @@
-module Game.Software.Models exposing ( SoftwareModel, initialSoftwareModel
-                                     , Filesystem, initialFilesystem
-                                     , File(..)
-                                     , FilePath, FileSize(..), FileVersion(..)
-                                     , addFile, removeFile
-                                     , getFilePath, getFileName, getFilesOnPath
-                                     , pathExists, rootPath
-                                     , listFilesystem)
-
+module Game.Software.Models
+    exposing
+        ( SoftwareModel
+        , initialSoftwareModel
+        , Filesystem
+        , initialFilesystem
+        , File(..)
+        , FileID
+        , FilePath
+        , FileSize(..)
+        , FileVersion(..)
+        , addFile
+        , removeFile
+        , getFilePath
+        , getFileName
+        , getFilesOnPath
+        , pathExists
+        , rootPath
+        , listFilesystem
+        )
 
 import Dict
-import Game.Shared exposing (..)
+import Game.Shared exposing (ID)
+
+
+type alias FileID =
+    ID
 
 
 type alias FilePath =
     String
 
+
 type FileVersion
     = FileVersionNumber Int
     | NoVersion
+
 
 type FileSize
     = FileSizeNumber Int
     | NoSize
 
+
 type alias RegularFileData =
-    { name : String
+    { id : FileID
+    , name : String
     , extension : String
     , version : FileVersion
     , size : FileSize
-    , path : FilePath}
+    , path : FilePath
+    }
+
 
 type alias FolderData =
-    { name : String
-    , path : FilePath}
+    { id : FileID
+    , name : String
+    , path : FilePath
+    }
+
 
 type File
     = RegularFile RegularFileData
     | RegularFolder FolderData
 
+
 type alias Filesystem =
     Dict.Dict FilePath (List File)
+
 
 type alias SoftwareModel =
     { filesystem : Filesystem }
@@ -48,11 +74,13 @@ type alias SoftwareModel =
 getFilePath : File -> String
 getFilePath file =
     let
-        path = case file of
-            RegularFile file_ ->
-                file_.path
-            RegularFolder folder ->
-                folder.path
+        path =
+            case file of
+                RegularFile file_ ->
+                    file_.path
+
+                RegularFolder folder ->
+                    folder.path
     in
         path
 
@@ -60,11 +88,13 @@ getFilePath file =
 getFileName : File -> String
 getFileName file =
     let
-        name = case file of
-            RegularFile file_ ->
-                file_.name
-            RegularFolder folder ->
-                folder.name
+        name =
+            case file of
+                RegularFile file_ ->
+                    file_.name
+
+                RegularFolder folder ->
+                    folder.name
     in
         name
 
@@ -72,11 +102,16 @@ getFileName file =
 addFile : SoftwareModel -> File -> SoftwareModel
 addFile model file =
     let
-        path = getFilePath file
-        filesOnPath = getFilesOnPath model path
-        newFiles = filesOnPath ++ [file]
+        path =
+            getFilePath file
+
+        filesOnPath =
+            getFilesOnPath model path
+
+        newFiles =
+            filesOnPath ++ [ file ]
     in
-        {model | filesystem = (Dict.insert path newFiles model.filesystem)}
+        { model | filesystem = (Dict.insert path newFiles model.filesystem) }
 
 
 getFilesOnPath : SoftwareModel -> FilePath -> List File
@@ -84,6 +119,7 @@ getFilesOnPath model path =
     case Dict.get path model.filesystem of
         Just files ->
             files
+
         Nothing ->
             []
 
@@ -93,6 +129,7 @@ pathExists model path =
     case Dict.get path model.filesystem of
         Just _ ->
             True
+
         Nothing ->
             False
 
@@ -100,12 +137,19 @@ pathExists model path =
 removeFile : SoftwareModel -> File -> SoftwareModel
 removeFile model file =
     let
-        path = getFilePath file
-        name = getFileName file
-        filesOnPath = getFilesOnPath model path
-        newFiles = List.filter (\x -> (getFileName x) /= name) filesOnPath
+        path =
+            getFilePath file
+
+        name =
+            getFileName file
+
+        filesOnPath =
+            getFilesOnPath model path
+
+        newFiles =
+            List.filter (\x -> (getFileName x) /= name) filesOnPath
     in
-        {model | filesystem = (Dict.insert path newFiles model.filesystem)}
+        { model | filesystem = (Dict.insert path newFiles model.filesystem) }
 
 
 listFilesystem : SoftwareModel -> String
@@ -120,7 +164,7 @@ initialFilesystem =
 
 initialSoftwareModel : SoftwareModel
 initialSoftwareModel =
-    {filesystem = initialFilesystem}
+    { filesystem = initialFilesystem }
 
 
 rootPath : FilePath

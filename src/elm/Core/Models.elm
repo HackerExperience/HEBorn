@@ -1,8 +1,9 @@
-module Core.Models exposing (Model, Flags
-                            , initialModel)
-
-import Uuid
-import Random.Pcg exposing (Seed, initialSeed, step)
+module Core.Models
+    exposing
+        ( Model
+        , Flags
+        , initialModel
+        )
 
 import Requests.Models
 import Router.Router exposing (Route)
@@ -23,9 +24,11 @@ type alias Model =
     , os : OS.Models.Model
     }
 
+
 type alias Flags =
     { seed : Int
     }
+
 
 initialModel : Router.Router.Route -> Int -> Model
 initialModel route seedInt =
@@ -37,4 +40,3 @@ initialModel route seedInt =
     , game = Game.Models.initialModel
     , os = OS.Models.initialModel
     }
-

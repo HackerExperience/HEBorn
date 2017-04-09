@@ -1,6 +1,5 @@
 module Apps.Explorer.Messages exposing (..)
 
-
 import Events.Models
 import Requests.Models
 

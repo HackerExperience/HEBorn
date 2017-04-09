@@ -1,36 +1,44 @@
 module Apps.SignUp.Requests exposing (..)
 
-import Requests.Models exposing (createRequestData
-                                , RequestPayloadArgs(RequestUsernamePayload
-                                                    , RequestSignUpPayload)
-                                , Request(NewRequest
-                                         , RequestUsername
-                                         , RequestSignUp)
-                                , Response(ResponseUsernameExists
-                                          , ResponseSignUp
-                                          , ResponseInvalid)
-                                , ResponseDecoder
-
-                                , ResponseForUsernameExists(..)
-                                , ResponseUsernameExistsPayload
-                                , ResponseForSignUp(..)
-                                , ResponseSignUpPayload)
+import Requests.Models
+    exposing
+        ( createRequestData
+        , RequestPayloadArgs
+            ( RequestUsernamePayload
+            , RequestSignUpPayload
+            )
+        , Request
+            ( NewRequest
+            , RequestUsername
+            , RequestSignUp
+            )
+        , Response
+            ( ResponseUsernameExists
+            , ResponseSignUp
+            , ResponseInvalid
+            )
+        , ResponseDecoder
+        , ResponseForUsernameExists(..)
+        , ResponseUsernameExistsPayload
+        , ResponseForSignUp(..)
+        , ResponseSignUpPayload
+        )
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
-
 import Game.Messages exposing (GameMsg)
-import Game.Models exposing  (GameModel)
+import Game.Models exposing (GameModel)
 import Apps.SignUp.Messages exposing (Msg(Request))
 import Apps.SignUp.Models exposing (Model)
 
 
-type alias ResponseType
-    = Response
+type alias ResponseType =
+    Response
     -> Model
     -> GameModel
-    -> (Model, Cmd Msg, List GameMsg)
+    -> ( Model, Cmd Msg, List GameMsg )
+
 
 
 -- requestUsernameExists : String -> Cmd Msg
@@ -44,26 +52,30 @@ type alias ResponseType
 --                                 (RequestUsernamePayload
 --                                      { user = username
 --                                      }))))
-
-
 {-
-Request: Sign Up
-Description: Create a new account
+   Request: Sign Up
+   Description: Create a new account
 -}
+
 
 requestSignUp : String -> String -> String -> Cmd Msg
 requestSignUp email username password =
-    queueRequest (Request
-                      (NewRequest
-                           (createRequestData
-                                RequestSignUp
-                                decodeSignUp
-                                "account.create"
-                                (RequestSignUpPayload
-                                     { email = email
-                                     , password = password
-                                     , username = username
-                                     }))))
+    queueRequest
+        (Request
+            (NewRequest
+                (createRequestData
+                    RequestSignUp
+                    decodeSignUp
+                    "account.create"
+                    (RequestSignUpPayload
+                        { email = email
+                        , password = password
+                        , username = username
+                        }
+                    )
+                )
+            )
+        )
 
 
 decodeSignUp : ResponseDecoder
@@ -83,37 +95,44 @@ decodeSignUp rawMsg code =
 
                     Err _ ->
                         Debug.log "errrr"
-                        ResponseSignUp (ResponseSignUpInvalid)
+                            ResponseSignUp
+                            (ResponseSignUpInvalid)
 
             400 ->
                 Debug.log "baaaaaaa"
-                ResponseSignUp (ResponseSignUpInvalid)
+                    ResponseSignUp
+                    (ResponseSignUpInvalid)
+
             _ ->
                 Debug.log "code is"
-                ResponseSignUp (ResponseSignUpInvalid)
+                    ResponseSignUp
+                    (ResponseSignUpInvalid)
+
 
 requestSignUpHandler : ResponseType
 requestSignUpHandler response model core =
     case response of
         ResponseSignUp (ResponseSignUpOk data) ->
             Debug.log "ok"
-            (model, Cmd.none, [])
+                ( model, Cmd.none, [] )
 
-        ResponseSignUp (ResponseSignUpInvalid) ->
+        ResponseSignUp ResponseSignUpInvalid ->
             Debug.log "invalid"
-            (model, Cmd.none, [])
+                ( model, Cmd.none, [] )
 
         _ ->
-            (model, Cmd.none, [])
+            ( model, Cmd.none, [] )
+
+
 
 -- Top-level response handler
+
 
 responseHandler : Request -> ResponseType
 responseHandler request data model core =
     case request of
-
         RequestSignUp ->
             requestSignUpHandler data model core
 
         _ ->
-            (model, Cmd.none, [])
+            ( model, Cmd.none, [] )

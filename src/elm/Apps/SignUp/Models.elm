@@ -1,10 +1,12 @@
 module Apps.SignUp.Models exposing (..)
 
+
 type alias FormError =
     { usernameErrors : String
     , passwordErrors : String
     , emailErrors : String
     }
+
 
 type alias Model =
     { formErrors : FormError
@@ -14,12 +16,14 @@ type alias Model =
     , usernameTaken : Bool
     }
 
+
 initialErrors : FormError
 initialErrors =
     { usernameErrors = ""
     , passwordErrors = ""
     , emailErrors = ""
     }
+
 
 initialModel : Model
 initialModel =

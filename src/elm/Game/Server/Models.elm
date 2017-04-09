@@ -1,6 +1,5 @@
 module Game.Server.Models exposing (..)
 
-
 import Dict
 import Game.Shared exposing (..)
 
@@ -8,14 +7,17 @@ import Game.Shared exposing (..)
 type alias ServerID =
     ID
 
+
 type alias ServerData =
     { id : ServerID
     , ip : IP
     }
 
+
 type AnyServer
     = Server ServerData
     | NoServer
+
 
 type alias Servers =
     Dict.Dict ServerID ServerData
@@ -48,12 +50,11 @@ getServerByID model id =
     case Dict.get id model.servers of
         Just server ->
             Server server
+
         Nothing ->
             NoServer
 
 
 initialServerModel : ServerModel
 initialServerModel =
-    {servers = Dict.empty}
-
-
+    { servers = Dict.empty }

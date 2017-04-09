@@ -1,12 +1,9 @@
 module OS.View exposing (view)
 
-
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
-
 import Router.Router exposing (Route(..))
-
 import Core.Models exposing (Model)
 import Core.Messages exposing (CoreMsg(..))
 import Game.Messages exposing (GameMsg(..), call)
@@ -15,7 +12,7 @@ import OS.WindowManager.View
 import OS.Dock.View
 
 
-{id, class, classList} =
+{ id, class, classList } =
     Html.CssHelpers.withNamespace "dreamwriter"
 
 
@@ -38,19 +35,22 @@ viewDashboard model =
         , viewFooter model
         ]
 
+
 viewHeader : Model -> Html CoreMsg
 viewHeader model =
     Html.map MsgGame
-    (header []
-        [ div [ id "header-left" ]
-            []
-        , div [ id "header-mid" ]
-            []
-        , div [ id "header-right" ]
-            [ button [ onClick (call.account Logout) ]
-                [ text "logout" ] ]
-        ]
-    )
+        (header []
+            [ div [ id "header-left" ]
+                []
+            , div [ id "header-mid" ]
+                []
+            , div [ id "header-right" ]
+                [ button [ onClick (call.account Logout) ]
+                    [ text "logout" ]
+                ]
+            ]
+        )
+
 
 viewSidebar : Model -> Html CoreMsg
 viewSidebar model =
@@ -63,6 +63,7 @@ viewMain model =
     main_ []
         [ OS.WindowManager.View.renderWindows model
         ]
+
 
 viewFooter : Model -> Html CoreMsg
 viewFooter model =

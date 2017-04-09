@@ -1,6 +1,5 @@
 module OS.Messages exposing (OSMsg(..), call)
 
-
 import Events.Models
 import Requests.Models
 import OS.WindowManager.Messages
@@ -18,4 +17,5 @@ type OSMsg
 
 call =
     { wm = MsgWM
-    , dock = MsgDock}
+    , dock = MsgDock
+    }

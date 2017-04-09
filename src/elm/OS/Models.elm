@@ -1,6 +1,5 @@
 module OS.Models exposing (Model, initialModel)
 
-
 import OS.WindowManager.Models exposing (Model, initialModel)
 import OS.Dock.Models exposing (Model, initialModel)
 
@@ -11,6 +10,7 @@ type alias Model =
     }
 
 
+initialModel : Model
 initialModel =
     { wm = OS.WindowManager.Models.initialModel
     , dock = OS.Dock.Models.initialModel

@@ -1,14 +1,15 @@
 module Game.Account.Models exposing (..)
 
-
 import Game.Shared exposing (..)
 
 
 type alias AccountID =
     ID
 
+
 type alias AuthData =
-    {token : Maybe String}
+    { token : Maybe String }
+
 
 type alias AccountModel =
     { id : Maybe AccountID
@@ -17,16 +18,20 @@ type alias AccountModel =
     , auth : AuthData
     }
 
+
 getToken : AccountModel -> Maybe String
 getToken model =
     model.auth.token
 
+
 setToken : AccountModel -> Maybe String -> AccountModel
 setToken model token =
     let
-        auth_ = {token = token}
+        auth_ =
+            { token = token }
     in
-        {model | auth = auth_}
+        { model | auth = auth_ }
+
 
 isAuthenticated : AccountModel -> Bool
 isAuthenticated model =
@@ -50,7 +55,7 @@ getTokenAsString model =
 
 initialAuth : AuthData
 initialAuth =
-    {token = Nothing}
+    { token = Nothing }
 
 
 initialAccountModel : AccountModel
@@ -60,4 +65,3 @@ initialAccountModel =
     , email = Nothing
     , auth = initialAuth
     }
-

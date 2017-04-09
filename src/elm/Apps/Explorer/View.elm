@@ -1,19 +1,16 @@
 module Apps.Explorer.View exposing (..)
 
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput, onBlur)
+import Html.Events exposing (..)
 import Html.CssHelpers
-
 import Game.Models exposing (GameModel)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model)
-
 import Apps.Explorer.Style exposing (Classes(..))
 
 
-{id, class, classList} =
+{ id, class, classList } =
     Html.CssHelpers.withNamespace "explorer"
 
 
@@ -32,4 +29,4 @@ viewExplorerColumn model game =
 
 viewExplorerMain : Model -> GameModel -> Html Msg
 viewExplorerMain model game =
-    div [ class [ Content ]] [ text "main" ]
+    div [ class [ Content ] ] [ text "main" ]

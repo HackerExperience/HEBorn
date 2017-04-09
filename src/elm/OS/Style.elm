@@ -7,9 +7,8 @@ import Css.Namespace exposing (namespace)
 
 css =
     (stylesheet << namespace "os")
-    [ header
-          [
-          ]
-    , main_
-          [ backgroundColor (hex "CCC") ]
-    ]
+        [ header
+            []
+        , main_
+            [ backgroundColor (hex "CCC") ]
+        ]
