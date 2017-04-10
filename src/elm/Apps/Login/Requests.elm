@@ -27,7 +27,8 @@ import Requests.Models
         )
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
-import Game.Messages exposing (GameMsg, call)
+import Core.Messages exposing (CoreMsg)
+import Core.Dispatcher exposing (callAccount)
 import Game.Account.Messages exposing (AccountMsg(Login))
 import Game.Models exposing (GameModel)
 import Apps.Login.Messages exposing (Msg(Request))
@@ -38,7 +39,7 @@ type alias ResponseType =
     Response
     -> Model
     -> GameModel
-    -> ( Model, Cmd Msg, List GameMsg )
+    -> ( Model, Cmd Msg, List CoreMsg )
 
 
 
@@ -107,7 +108,8 @@ requestLoginHandler response model core =
         ResponseLogin (ResponseLoginOk data) ->
             let
                 loginCmd =
-                    call.account (Login (Just data.token))
+                    callAccount
+                        (Login (Just data.token))
             in
                 ( { model | loginFailed = False }, Cmd.none, [ loginCmd ] )
 

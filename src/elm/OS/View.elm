@@ -4,9 +4,9 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Router.Router exposing (Route(..))
-import Core.Models exposing (Model)
+import Core.Models exposing (CoreModel)
 import Core.Messages exposing (CoreMsg(..))
-import Game.Messages exposing (GameMsg(..), call)
+import Core.Dispatcher exposing (callAccount)
 import Game.Account.Messages exposing (AccountMsg(Logout))
 import OS.WindowManager.View
 import OS.Dock.View
@@ -16,7 +16,7 @@ import OS.Dock.View
     Html.CssHelpers.withNamespace "dreamwriter"
 
 
-view : Model -> Html CoreMsg
+view : CoreModel -> Html CoreMsg
 view model =
     case model.route of
         RouteNotFound ->
@@ -26,7 +26,7 @@ view model =
             viewDashboard model
 
 
-viewDashboard : Model -> Html CoreMsg
+viewDashboard : CoreModel -> Html CoreMsg
 viewDashboard model =
     div [ id "view-dashboard" ]
         [ viewHeader model
@@ -36,36 +36,34 @@ viewDashboard model =
         ]
 
 
-viewHeader : Model -> Html CoreMsg
+viewHeader : CoreModel -> Html CoreMsg
 viewHeader model =
-    Html.map MsgGame
-        (header []
-            [ div [ id "header-left" ]
-                []
-            , div [ id "header-mid" ]
-                []
-            , div [ id "header-right" ]
-                [ button [ onClick (call.account Logout) ]
-                    [ text "logout" ]
-                ]
+    header []
+        [ div [ id "header-left" ]
+            []
+        , div [ id "header-mid" ]
+            []
+        , div [ id "header-right" ]
+            [ button [ onClick (callAccount Logout) ]
+                [ text "logout" ]
             ]
-        )
+        ]
 
 
-viewSidebar : Model -> Html CoreMsg
+viewSidebar : CoreModel -> Html CoreMsg
 viewSidebar model =
     nav []
         [ text "nav" ]
 
 
-viewMain : Model -> Html CoreMsg
+viewMain : CoreModel -> Html CoreMsg
 viewMain model =
     main_ []
         [ OS.WindowManager.View.renderWindows model
         ]
 
 
-viewFooter : Model -> Html CoreMsg
+viewFooter : CoreModel -> Html CoreMsg
 viewFooter model =
     footer []
         [ OS.Dock.View.view model ]

@@ -4,17 +4,17 @@ import Html exposing (Html, div, text)
 import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (CoreMsg(..))
-import Core.Models exposing (Model)
+import Core.Models exposing (CoreModel)
 import OS.View
 import Apps.Landing.View
 
 
-view : Model -> Html CoreMsg
+view : CoreModel -> Html CoreMsg
 view model =
     page model
 
 
-page : Model -> Html CoreMsg
+page : CoreModel -> Html CoreMsg
 page model =
     if isAuthenticated model.game.account then
         OS.View.view model
@@ -27,9 +27,9 @@ page model =
                 landingView model
 
 
-landingView : Model -> Html CoreMsg
+landingView : CoreModel -> Html CoreMsg
 landingView model =
-    Apps.Landing.View.view model
+    Html.map MsgApp (Apps.Landing.View.view model)
 
 
 notFoundView : Html msg

@@ -1,7 +1,9 @@
 module Apps.SignUp.Messages exposing (Msg(..))
 
+import ContextMenu exposing (ContextMenu)
 import Events.Models
 import Requests.Models
+import Apps.SignUp.Context.Models exposing (Context)
 
 
 type Msg
@@ -15,3 +17,5 @@ type Msg
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
+    | ContextMenuMsgS (ContextMenu.Msg Context)
+    | ItemS Int

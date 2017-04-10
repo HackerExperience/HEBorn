@@ -27,7 +27,7 @@ import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
-import Game.Messages exposing (GameMsg)
+import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.SignUp.Messages exposing (Msg(Request))
 import Apps.SignUp.Models exposing (Model)
@@ -37,7 +37,7 @@ type alias ResponseType =
     Response
     -> Model
     -> GameModel
-    -> ( Model, Cmd Msg, List GameMsg )
+    -> ( Model, Cmd Msg, List CoreMsg )
 
 
 

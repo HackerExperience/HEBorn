@@ -2,13 +2,13 @@ module Apps.Landing.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Core.Models exposing (Model)
-import Core.Messages exposing (CoreMsg(MsgSignUp, MsgLogin))
+import Core.Models exposing (CoreModel)
+import Apps.Messages exposing (AppMsg(MsgSignUp, MsgLogin))
 import Apps.Login.View
 import Apps.SignUp.View
 
 
-view : Model -> Html CoreMsg
+view : CoreModel -> Html AppMsg
 view model =
     div [ id "view-landing" ]
         [ viewIntro
@@ -17,18 +17,18 @@ view model =
         ]
 
 
-viewIntro : Html CoreMsg
+viewIntro : Html AppMsg
 viewIntro =
     div [ id "view-intro" ]
         [ text "welcome to raquer ispirienci!"
         ]
 
 
-viewLogin : Model -> Html CoreMsg
+viewLogin : CoreModel -> Html AppMsg
 viewLogin model =
-    Html.map MsgLogin (Apps.Login.View.view model.appLogin model.game)
+    Html.map MsgLogin (Apps.Login.View.view model.apps.login model.game)
 
 
-viewSignUp : Model -> Html CoreMsg
+viewSignUp : CoreModel -> Html AppMsg
 viewSignUp model =
-    Html.map MsgSignUp (Apps.SignUp.View.view model.appSignUp model.game)
+    Html.map MsgSignUp (Apps.SignUp.View.view model.apps.signUp model.game)

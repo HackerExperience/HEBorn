@@ -18,6 +18,7 @@ import Uuid
 import Random.Pcg exposing (Seed, step, initialSeed)
 import Draggable
 import OS.WindowManager.Windows exposing (GameWindow(..))
+import OS.WindowManager.ContextHandler.Models as ContextHandler
 
 
 type alias Model =
@@ -25,6 +26,7 @@ type alias Model =
     , seed : Seed
     , drag : Draggable.State WindowID
     , dragging : Maybe WindowID
+    , contextHandler : ContextHandler.Model
     }
 
 
@@ -84,6 +86,7 @@ initialModel =
     , seed = initialSeed 42
     , drag = Draggable.init
     , dragging = Nothing
+    , contextHandler = ContextHandler.initialModel
     }
 
 

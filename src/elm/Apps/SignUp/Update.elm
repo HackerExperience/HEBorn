@@ -1,6 +1,7 @@
 module Apps.SignUp.Update exposing (..)
 
-import Game.Messages exposing (GameMsg)
+import ContextMenu exposing (ContextMenu)
+import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.SignUp.Models exposing (Model, FormError)
 import Apps.SignUp.Messages exposing (Msg(..))
@@ -12,7 +13,7 @@ import Apps.SignUp.Requests
         )
 
 
-update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List GameMsg )
+update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
 update msg model core =
     case msg of
         SubmitForm ->
@@ -83,6 +84,22 @@ update msg model core =
 
         Response request data ->
             responseHandler request data model core
+
+        ContextMenuMsgS msg ->
+            let
+                ( contextMenu, cmd ) =
+                    ContextMenu.update msg model.context.menu
+
+                context =
+                    model.context
+
+                context_ =
+                    { context | menu = contextMenu }
+            in
+                ( { model | context = context_ }, Cmd.map ContextMenuMsgS cmd, [] )
+
+        ItemS int ->
+            ( model, Cmd.none, [] )
 
 
 getErrorsUsername : Model -> String
