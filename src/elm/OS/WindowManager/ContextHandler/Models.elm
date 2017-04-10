@@ -1,17 +1,21 @@
 module OS.WindowManager.ContextHandler.Models exposing (..)
 
-import Apps.Explorer.Context.Models as Explorer
-import Apps.SignUp.Context.Models as SignUp
+import ContextMenu exposing (ContextMenu)
+import OS.WindowManager.ContextHandler.Config exposing (clientConfig)
 
 
-type alias Model =
-    { explorer : Explorer.ContextModel
-    , signup : SignUp.ContextModel
+type alias Model context =
+    { menu : ContextMenu context
+    , config : ContextMenu.Config
     }
 
 
-initialModel : Model
+initialModel : Model context
 initialModel =
-    { explorer = Explorer.initialContext
-    , signup = SignUp.initialContext
-    }
+    let
+        ( menu_, _ ) =
+            ContextMenu.init
+    in
+        { menu = menu_
+        , config = clientConfig
+        }

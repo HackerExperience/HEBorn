@@ -11,6 +11,7 @@ module OS.WindowManager.Models
         , getOpenWindows
         , updateWindowPosition
         , windowsFoldr
+        , hasWindowOpen
         )
 
 import Dict
@@ -18,7 +19,6 @@ import Uuid
 import Random.Pcg exposing (Seed, step, initialSeed)
 import Draggable
 import OS.WindowManager.Windows exposing (GameWindow(..))
-import OS.WindowManager.ContextHandler.Models as ContextHandler
 
 
 type alias Model =
@@ -26,7 +26,6 @@ type alias Model =
     , seed : Seed
     , drag : Draggable.State WindowID
     , dragging : Maybe WindowID
-    , contextHandler : ContextHandler.Model
     }
 
 
@@ -86,7 +85,6 @@ initialModel =
     , seed = initialSeed 42
     , drag = Draggable.init
     , dragging = Nothing
-    , contextHandler = ContextHandler.initialModel
     }
 
 
@@ -144,55 +142,59 @@ getWindow model id =
     Dict.get id model.windows
 
 
-
--- Help, make me pretty
-
-
 updateWindowPosition : Model -> ( Float, Float ) -> Windows
 updateWindowPosition model delta =
+    case model.dragging of
+        Nothing ->
+            model.windows
+
+        Just id ->
+            let
+                windows_ =
+                    case (getWindow model id) of
+                        Nothing ->
+                            model.windows
+
+                        Just window ->
+                            let
+                                ( dx, dy ) =
+                                    delta
+
+                                x_ =
+                                    window.position.x + dx
+
+                                y_ =
+                                    window.position.y + dy
+
+                                position_ =
+                                    Position x_ y_
+
+                                window_ =
+                                    { window | position = position_ }
+
+                                update_ w =
+                                    case w of
+                                        Just window ->
+                                            Just window_
+
+                                        Nothing ->
+                                            Nothing
+
+                                windows_ =
+                                    Dict.update id update_ model.windows
+                            in
+                                windows_
+            in
+                windows_
+
+
+hasWindowOpen : Model -> GameWindow -> Bool
+hasWindowOpen model window =
     let
-        windows_ =
-            case model.dragging of
-                Nothing ->
-                    model.windows
+        filter id w =
+            w.state == Open && w.window == window
 
-                Just id ->
-                    let
-                        windows_ =
-                            case (getWindow model id) of
-                                Nothing ->
-                                    model.windows
-
-                                Just window ->
-                                    let
-                                        ( dx, dy ) =
-                                            delta
-
-                                        x_ =
-                                            window.position.x + dx
-
-                                        y_ =
-                                            window.position.y + dy
-
-                                        position_ =
-                                            Position x_ y_
-
-                                        window_ =
-                                            { window | position = position_ }
-
-                                        update_ w =
-                                            case w of
-                                                Just window ->
-                                                    Just window_
-
-                                                Nothing ->
-                                                    Nothing
-
-                                        windows_ =
-                                            Dict.update id update_ model.windows
-                                    in
-                                        windows_
-                    in
-                        windows_
+        open =
+            Dict.filter filter model.windows
     in
-        windows_
+        not (Dict.isEmpty open)

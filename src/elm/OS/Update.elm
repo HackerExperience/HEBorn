@@ -40,10 +40,6 @@ update msg model =
         NoOp ->
             ( model, Cmd.none, [] )
 
-        -- handled by Core
-        ToApp _ ->
-            ( model, Cmd.none, [] )
-
 
 getOSMsg : List OSMsg -> OSMsg
 getOSMsg msg =

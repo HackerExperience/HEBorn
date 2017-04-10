@@ -13,7 +13,6 @@ import OS.WindowManager.Models
         , updateWindowPosition
         )
 import OS.WindowManager.Messages exposing (Msg(..))
-import OS.WindowManager.ContextHandler.Update as ContextHandler
 
 
 update : Msg -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
@@ -59,13 +58,6 @@ update msg model =
 
         StopDragging ->
             ( { model | dragging = Nothing }, Cmd.none, [] )
-
-        ContextHandlerMsg subMsg ->
-            let
-                ( contextHandler_, cmd, coreMsg ) =
-                    ContextHandler.update subMsg model.contextHandler
-            in
-                ( model, cmd, [] )
 
 
 dragConfig : Draggable.Config WindowID Msg
