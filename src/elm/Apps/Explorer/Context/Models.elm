@@ -1,8 +1,6 @@
 module Apps.Explorer.Context.Models exposing (..)
 
-import ContextMenu exposing (ContextMenu)
-import ContextMenu exposing (Overflow(..), Cursor(..), Direction(..), defaultConfig)
-import Color exposing (Color)
+import OS.WindowManager.ContextHandler.Models as ContextHandler
 
 
 type Context
@@ -10,41 +8,10 @@ type Context
     | ContextContent
 
 
-type alias ContextModel =
-    { menu : ContextMenu Context
-    , config : ContextMenu.Config
-    }
+type alias Model =
+    ContextHandler.Model Context
 
 
-winChrome : ContextMenu.Config
-winChrome =
-    { defaultConfig
-        | direction = RightBottom
-        , overflowX = Mirror
-        , overflowY = Mirror
-        , containerColor = white
-        , hoverColor = lightGray
-        , invertText = False
-        , cursor = Arrow
-        , rounded = False
-    }
-
-
-white : Color
-white =
-    Color.rgb 255 255 255
-
-
-lightGray : Color
-lightGray =
-    Color.rgb 238 238 238
-
-
+initialContext : Model
 initialContext =
-    let
-        ( contextMenu, _ ) =
-            ContextMenu.init
-    in
-        { menu = contextMenu
-        , config = winChrome
-        }
+    ContextHandler.initialModel

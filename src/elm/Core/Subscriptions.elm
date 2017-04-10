@@ -11,6 +11,6 @@ subscriptions : CoreModel -> Sub CoreMsg
 subscriptions model =
     Sub.batch
         [ WebSocket.listen "ws://localhost:8080" WSReceivedMessage
-        , Sub.map MsgOS (OS.WindowManager.Subscriptions.subscriptions model.os.wm)
-        , Sub.map MsgApp (Apps.Subscriptions.subscriptions model.apps)
+        , Sub.map MsgOS (OS.WindowManager.Subscriptions.subscriptions model.os.wm model)
+        , Sub.map MsgApp (Apps.Subscriptions.subscriptions model.apps model)
         ]

@@ -1,14 +1,12 @@
-module Apps.Explorer.Messages exposing (..)
+module Apps.Explorer.Messages exposing (Msg(..))
 
-import ContextMenu exposing (ContextMenu)
 import Events.Models
 import Requests.Models
-import Apps.Explorer.Context.Models exposing (Context)
+import Apps.Explorer.Context.Messages as Context
 
 
 type Msg
     = Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
-    | ContextMenuMsg (ContextMenu.Msg Context)
-    | Item Int
+    | ContextMsg Context.Msg

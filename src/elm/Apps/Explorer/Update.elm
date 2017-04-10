@@ -1,10 +1,12 @@
 module Apps.Explorer.Update exposing (update)
 
-import ContextMenu exposing (ContextMenu)
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages exposing (Msg(..))
+import Apps.Explorer.Context.Messages as MsgContext
+import Apps.Explorer.Context.Update
+import Apps.Explorer.Context.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -19,18 +21,15 @@ update msg model game =
         Response request data ->
             ( model, Cmd.none, [] )
 
-        ContextMenuMsg msg ->
+        ContextMsg (MsgContext.MenuClick action) ->
+            actionHandler action model game
+
+        ContextMsg subMsg ->
             let
-                ( contextMenu, cmd ) =
-                    ContextMenu.update msg model.context.menu
+                ( context_, cmd, coreMsg ) =
+                    Apps.Explorer.Context.Update.update subMsg model.context game
 
-                context =
-                    model.context
-
-                context_ =
-                    { context | menu = contextMenu }
+                cmd_ =
+                    Cmd.map ContextMsg cmd
             in
-                ( { model | context = context_ }, Cmd.map ContextMenuMsg cmd, [] )
-
-        Item int ->
-            ( model, Cmd.none, [] )
+                ( { model | context = context_ }, cmd_, coreMsg )
