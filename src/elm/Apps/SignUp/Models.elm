@@ -1,5 +1,7 @@
 module Apps.SignUp.Models exposing (..)
 
+import Apps.SignUp.Context.Models exposing (ContextModel, initialContext)
+
 
 type alias FormError =
     { usernameErrors : String
@@ -14,6 +16,7 @@ type alias Model =
     , password : String
     , email : String
     , usernameTaken : Bool
+    , context : ContextModel
     }
 
 
@@ -32,4 +35,5 @@ initialModel =
     , password = ""
     , email = ""
     , usernameTaken = False
+    , context = initialContext
     }

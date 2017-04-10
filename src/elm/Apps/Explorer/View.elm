@@ -7,6 +7,8 @@ import Html.CssHelpers
 import Game.Models exposing (GameModel)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model)
+import Apps.Explorer.Context.Models exposing (Context(..))
+import Apps.Explorer.Context.View exposing (contextView, contextNav, contextContent)
 import Apps.Explorer.Style exposing (Classes(..))
 
 
@@ -19,14 +21,24 @@ view model game =
     div [ class [ Window ] ]
         [ viewExplorerColumn model game
         , viewExplorerMain model game
+        , contextView model
         ]
 
 
 viewExplorerColumn : Model -> GameModel -> Html Msg
 viewExplorerColumn model game =
-    div [ class [ Nav ] ] [ text "col" ]
+    div
+        [ contextNav
+        , class [ Nav ]
+        ]
+        [ text "col" ]
 
 
 viewExplorerMain : Model -> GameModel -> Html Msg
 viewExplorerMain model game =
-    div [ class [ Content ] ] [ text "main" ]
+    div
+        [ contextContent
+        , class
+            [ Content ]
+        ]
+        [ text "main" ]

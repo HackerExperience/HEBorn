@@ -3,7 +3,7 @@ module OS.Dock.View exposing (view)
 import Html exposing (Html, div, text, button)
 import Html.Events exposing (onClick)
 import Core.Messages exposing (CoreMsg(..))
-import Core.Models exposing (Model)
+import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Models
@@ -13,12 +13,12 @@ import OS.Dock.Models
         )
 
 
-view : Model -> Html CoreMsg
+view : CoreModel -> Html CoreMsg
 view model =
     renderApplications model
 
 
-renderApplications : Model -> Html CoreMsg
+renderApplications : CoreModel -> Html CoreMsg
 renderApplications model =
     let
         applications =
@@ -30,7 +30,7 @@ renderApplications model =
         div [] html
 
 
-renderApplication : Model -> Application -> Html CoreMsg
+renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
     div []
         [ button [ onClick (MsgOS (MsgWM (OpenWindow application.window))) ]

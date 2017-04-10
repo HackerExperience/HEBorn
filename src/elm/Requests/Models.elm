@@ -297,7 +297,13 @@ initialModel seedInt =
         }
 
 
-storeRequest : Model -> RequestID -> Component -> Request -> ResponseDecoder -> RequestStore
+storeRequest :
+    Model
+    -> RequestID
+    -> Component
+    -> Request
+    -> ResponseDecoder
+    -> RequestStore
 storeRequest model request_id component request response =
     Dict.insert request_id ( component, request, response ) model.requests
 

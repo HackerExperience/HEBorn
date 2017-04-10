@@ -9,21 +9,17 @@ import Router.Router exposing (parseLocation)
 import WS.WS exposing (getWSMsgMeta, getWSMsgType)
 import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
-import Core.Models exposing (Model)
+import Core.Models exposing (CoreModel)
 import Core.Components exposing (Component(..))
 import OS.Messages
 import OS.Update
 import Game.Update
 import Game.Messages
-import Apps.Explorer.Update
-import Apps.Explorer.Messages
-import Apps.Login.Update
-import Apps.Login.Messages
-import Apps.SignUp.Update
-import Apps.SignUp.Messages
+import Apps.Messages
+import Apps.Update
 
 
-update : CoreMsg -> Model -> ( Model, Cmd CoreMsg )
+update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
 update msg model =
     let
         logMsg =
@@ -33,9 +29,6 @@ update msg model =
             -- Game
             MsgGame (Game.Messages.Request (NewRequest requestData)) ->
                 makeRequest model requestData ComponentGame
-
-            MsgGame (Game.Messages.ToOS subMsg) ->
-                update (MsgOS subMsg) model
 
             MsgGame subMsg ->
                 let
@@ -50,44 +43,23 @@ update msg model =
 
             MsgOS subMsg ->
                 let
-                    ( os_, cmd ) =
+                    ( os_, cmd, coreMsg ) =
                         OS.Update.update subMsg model.os
                 in
                     ( { model | os = os_ }, Cmd.map MsgOS cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Apps
-            MsgExplorer (Apps.Explorer.Messages.Request (NewRequest requestData)) ->
-                makeRequest model requestData ComponentExplorer
+            MsgApp (Apps.Messages.Request (NewRequest requestData) component) ->
+                makeRequest model requestData component
 
-            MsgExplorer subMsg ->
+            MsgApp subMsg ->
                 let
-                    ( explorer_, cmd, gameMsg ) =
-                        Apps.Explorer.Update.update subMsg model.appExplorer model.game
+                    ( apps_, cmd, coreMsg ) =
+                        Apps.Update.update subMsg model.apps model
                 in
-                    ( { model | appExplorer = explorer_ }, Cmd.map MsgExplorer cmd )
-                        |> Update.andThen update (getGameMsg gameMsg)
-
-            MsgLogin (Apps.Login.Messages.Request (NewRequest requestData)) ->
-                makeRequest model requestData ComponentLogin
-
-            MsgLogin subMsg ->
-                let
-                    ( updatedLogin, cmd, gameMsg ) =
-                        Apps.Login.Update.update subMsg model.appLogin model.game
-                in
-                    ( { model | appLogin = updatedLogin }, Cmd.map MsgLogin cmd )
-                        |> Update.andThen update (getGameMsg gameMsg)
-
-            MsgSignUp (Apps.SignUp.Messages.Request (NewRequest requestData)) ->
-                makeRequest model requestData ComponentSignUp
-
-            MsgSignUp subMsg ->
-                let
-                    ( updatedSignUp, cmd, gameMsg ) =
-                        Apps.SignUp.Update.update subMsg model.appSignUp model.game
-                in
-                    ( { model | appSignUp = updatedSignUp }, Cmd.map MsgSignUp cmd )
-                        |> Update.andThen update (getGameMsg gameMsg)
+                    ( { model | apps = apps_ }, Cmd.map MsgApp cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router
             OnLocationChange location ->
@@ -112,10 +84,10 @@ update msg model =
                 Debug.log "eventoo"
                     model
                     ! []
-                    |> Update.andThen update (MsgGame (eventBinds.game event))
-                    |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
-                    |> Update.andThen update (MsgLogin (eventBinds.login event))
 
+            -- |> Update.andThen update (MsgGame (eventBinds.game event))
+            -- |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
+            -- |> Update.andThen update (MsgLogin (eventBinds.login event))
             {-
                DispatchResponse is triggered when the client sends a message to
                the server and the message is answered. It is the classic
@@ -185,3 +157,13 @@ getGameMsg msg =
 
         m :: _ ->
             (MsgGame m)
+
+
+getCoreMsg : List CoreMsg -> CoreMsg
+getCoreMsg msg =
+    case msg of
+        [] ->
+            NoOp
+
+        m :: _ ->
+            m

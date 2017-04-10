@@ -26,7 +26,7 @@ import Requests.Models
 import WS.WS
 import Utils
 import Core.Components exposing (Component(ComponentInvalid))
-import Core.Models as Core
+import Core.Models exposing (CoreModel)
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
@@ -73,7 +73,7 @@ need to correctly route the response to the component (the 3-tuple
 which the server will sent with the response (on the key "request_id").
 
 -}
-makeRequest : Core.Model -> NewRequestData -> Component -> ( Core.Model, Cmd msg )
+makeRequest : CoreModel -> NewRequestData -> Component -> ( CoreModel, Cmd msg )
 makeRequest core requestData component =
     let
         model =

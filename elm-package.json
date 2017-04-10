@@ -19,6 +19,7 @@
         "elm-lang/navigation": "2.0.1 <= v < 3.0.0",
         "elm-lang/websocket": "1.0.2 <= v < 2.0.0",
         "evancz/url-parser": "2.0.1 <= v < 3.0.0",
+        "jinjor/elm-contextmenu": "1.0.3 <= v < 2.0.0",
         "jinjor/elm-time-travel": "2.0.0 <= v < 3.0.0",
         "mgold/elm-random-pcg": "4.0.2 <= v < 5.0.0",
         "rtfeldman/elm-css": "8.2.0 <= v < 9.0.0",

@@ -8,23 +8,19 @@ module Core.Messages
         , getRequestMsg
         )
 
-import Game.Messages
-import OS.Messages
-import Apps.Explorer.Messages
-import Apps.Login.Messages
-import Apps.SignUp.Messages
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
 import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
 import Core.Components exposing (..)
+import Game.Messages exposing (GameMsg(..))
+import OS.Messages exposing (OSMsg(..))
+import Apps.Messages exposing (AppMsg(..), appBinds)
 
 
 type CoreMsg
     = MsgGame Game.Messages.GameMsg
     | MsgOS OS.Messages.OSMsg
-    | MsgExplorer Apps.Explorer.Messages.Msg
-    | MsgLogin Apps.Login.Messages.Msg
-    | MsgSignUp Apps.SignUp.Messages.Msg
+    | MsgApp Apps.Messages.AppMsg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData ( String, Int )
@@ -45,9 +41,7 @@ type CoreMsg
 type alias EventBinds =
     { game : Event -> Game.Messages.GameMsg
     , os : Event -> OS.Messages.OSMsg
-    , explorer : Event -> Apps.Explorer.Messages.Msg
-    , login : Event -> Apps.Login.Messages.Msg
-    , signUp : Event -> Apps.SignUp.Messages.Msg
+    , apps : Event -> Apps.Messages.AppMsg
     }
 
 
@@ -55,9 +49,7 @@ eventBinds : EventBinds
 eventBinds =
     { game = Game.Messages.Event
     , os = OS.Messages.Event
-    , explorer = Apps.Explorer.Messages.Event
-    , login = Apps.Login.Messages.Event
-    , signUp = Apps.SignUp.Messages.Event
+    , apps = Apps.Messages.Event
     }
 
 
@@ -70,9 +62,7 @@ eventBinds =
 type alias RequestBinds =
     { game : Request -> Response -> Game.Messages.GameMsg
     , os : Request -> Response -> OS.Messages.OSMsg
-    , explorer : Request -> Response -> Apps.Explorer.Messages.Msg
-    , login : Request -> Response -> Apps.Login.Messages.Msg
-    , signUp : Request -> Response -> Apps.SignUp.Messages.Msg
+    , apps : Request -> Response -> Apps.Messages.AppMsg
     }
 
 
@@ -80,9 +70,7 @@ requestBinds : RequestBinds
 requestBinds =
     { game = Game.Messages.Response
     , os = OS.Messages.Response
-    , explorer = Apps.Explorer.Messages.Response
-    , login = Apps.Login.Messages.Response
-    , signUp = Apps.SignUp.Messages.Response
+    , apps = Apps.Messages.Response
     }
 
 
@@ -95,14 +83,17 @@ getRequestMsg component request response =
         ComponentOS ->
             MsgOS (requestBinds.os request response)
 
-        ComponentExplorer ->
-            MsgExplorer (requestBinds.explorer request response)
-
-        ComponentSignUp ->
-            MsgSignUp (requestBinds.signUp request response)
+        ComponentApp ->
+            MsgApp (requestBinds.apps request response)
 
         ComponentLogin ->
-            MsgLogin (requestBinds.login request response)
+            MsgApp
+                (MsgLogin
+                    (appBinds.login request response)
+                )
 
         ComponentInvalid ->
+            NoOp
+
+        _ ->
             NoOp

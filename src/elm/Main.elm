@@ -5,12 +5,12 @@ import Navigation exposing (Location)
 import Router.Router exposing (parseLocation)
 import Core.Subscriptions exposing (subscriptions)
 import Core.Messages exposing (CoreMsg(OnLocationChange))
-import Core.Models exposing (Model, Flags, initialModel)
+import Core.Models exposing (CoreModel, Flags, initialModel)
 import Core.Update exposing (update)
 import Core.View exposing (view)
 
 
-init : Flags -> Location -> ( Model, Cmd CoreMsg )
+init : Flags -> Location -> ( CoreModel, Cmd CoreMsg )
 init flags location =
     let
         currentRoute =

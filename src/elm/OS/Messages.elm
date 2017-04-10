@@ -1,9 +1,11 @@
-module OS.Messages exposing (OSMsg(..), call)
+module OS.Messages exposing (OSMsg(..))
 
 import Events.Models
 import Requests.Models
 import OS.WindowManager.Messages
+import OS.WindowManager.ContextHandler.Messages exposing (ContextMsg)
 import OS.Dock.Messages
+import Apps.Messages exposing (AppMsg)
 
 
 type OSMsg
@@ -12,10 +14,5 @@ type OSMsg
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
+    | ToApp AppMsg
     | NoOp
-
-
-call =
-    { wm = MsgWM
-    , dock = MsgDock
-    }

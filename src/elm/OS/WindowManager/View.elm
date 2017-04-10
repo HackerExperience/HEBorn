@@ -7,7 +7,7 @@ import Html.CssHelpers
 import Css exposing (transform, translate2, asPairs, px, height, width)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
-import Core.Models exposing (Model)
+import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models
@@ -19,8 +19,9 @@ import OS.WindowManager.Models
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.WindowManager.Style as Css
+import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.View
-import Apps.Login.View
+import Apps.SignUp.View
 
 
 { id, class, classList } =
@@ -32,28 +33,28 @@ styles =
     Css.asPairs >> style
 
 
-renderWindows : Model -> Html CoreMsg
+renderWindows : CoreModel -> Html CoreMsg
 renderWindows model =
     div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
 
-renderLoop : Model -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
+renderLoop : CoreModel -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
 renderLoop model id window acc =
     [ (renderWindow model window) ] ++ acc
 
 
-renderWindow : Model -> Window -> Html CoreMsg
+renderWindow : CoreModel -> Window -> Html CoreMsg
 renderWindow model window =
     case window.window of
         SignUpWindow ->
             windowWrapper
                 window
-                (Html.map MsgLogin (Apps.Login.View.view model.appLogin model.game))
+                (Html.map MsgApp (Html.map MsgSignUp (Apps.SignUp.View.view model.apps.signUp model.game)))
 
         ExplorerWindow ->
             windowWrapper
                 window
-                (Html.map MsgExplorer (Apps.Explorer.View.view model.appExplorer model.game))
+                (Html.map MsgApp (Html.map MsgExplorer (Apps.Explorer.View.view model.apps.explorer model.game)))
 
 
 windowWrapper : Window -> Html CoreMsg -> Html CoreMsg

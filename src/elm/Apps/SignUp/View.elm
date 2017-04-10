@@ -6,46 +6,52 @@ import Html.Events exposing (onClick, onInput, onBlur)
 import Game.Models exposing (GameModel)
 import Apps.SignUp.Messages exposing (Msg(..))
 import Apps.SignUp.Models exposing (Model)
+import Apps.SignUp.Context.Models exposing (Context(..))
+import Apps.SignUp.Context.View exposing (contextView, contextOnly)
 
 
 view : Model -> GameModel -> Html Msg
 view model core =
-    Html.form
-        [ id "signup-form"
-        , action "javascript:void(0);"
-        ]
-        [ h1 [] [ text "Sign up" ]
-        , label [ for "email-field" ] [ text "email: " ]
-        , input
-            [ id "email-field"
-            , type_ "text"
-            , value model.email
-            , onInput (\str -> SetEmail str)
-            , onBlur ValidateEmail
+    div [ contextOnly ]
+        [ Html.form
+            [ id "signup-form"
+            , action "javascript:void(0);"
             ]
-            []
-        , div [ class "validation-error" ] [ text (viewErrorsEmail model) ]
-        , label [ for "username-field" ] [ text "username: " ]
-        , input
-            [ id "username-field"
-            , type_ "text"
-            , value model.username
-            , onInput (\str -> SetUsername str)
-            , onBlur ValidateUsername
+            [ h1 [] [ text "Sign up" ]
+            , label [ for "email-field" ] [ text "email: " ]
+            , input
+                [ id "email-field"
+                , type_ "text"
+                , value model.email
+                , onInput (\str -> SetEmail str)
+                , onBlur ValidateEmail
+                ]
+                []
+            , div [ class "validation-error" ] [ text (viewErrorsEmail model) ]
+            , label [ for "username-field" ] [ text "username: " ]
+            , input
+                [ id "username-field"
+                , type_ "text"
+                , value model.username
+                , onInput (\str -> SetUsername str)
+                , onBlur ValidateUsername
+                ]
+                []
+            , div [ class "validation-error" ] [ text (viewErrorsUsername model) ]
+            , label [ for "password-field" ] [ text "password: " ]
+            , input
+                [ id "password-field"
+                , type_ "password"
+                , value model.password
+                , onInput (\str -> SetPassword str)
+                , onBlur ValidatePassword
+                ]
+                []
+            , div [ class "validation-error" ] [ text (viewErrorsPassword model) ]
+            , button [ class ("signup-button " ++ signUpButtonClass model), onClick SubmitForm ] [ text "Sign up" ]
             ]
-            []
-        , div [ class "validation-error" ] [ text (viewErrorsUsername model) ]
-        , label [ for "password-field" ] [ text "password: " ]
-        , input
-            [ id "password-field"
-            , type_ "password"
-            , value model.password
-            , onInput (\str -> SetPassword str)
-            , onBlur ValidatePassword
-            ]
-            []
-        , div [ class "validation-error" ] [ text (viewErrorsPassword model) ]
-        , button [ class ("signup-button " ++ signUpButtonClass model), onClick SubmitForm ] [ text "Sign up" ]
+        , text "oi"
+        , contextView model
         ]
 
 
