@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
+import Html.Attributes exposing (attribute)
 import Css exposing (transform, translate2, asPairs, px, height, width)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
@@ -70,15 +71,17 @@ header window =
         [ class [ Css.WindowHeader ]
         , Draggable.mouseTrigger window.id DragMsg
         ]
-        [ headerTitle "title"
+        [ headerTitle "title" "icon"
         , headerButtons window.id
         ]
 
 
-headerTitle : String -> Html Msg
-headerTitle title =
-    div [ class [ Css.HeaderTitle ] ]
-        [ text title ]
+headerTitle : String -> String -> Html Msg
+headerTitle title icon =
+    div [ class [ Css.HeaderTitle ]
+        , attribute "data-icon" icon
+        ]
+            [ text title ]
 
 
 headerButtons : WindowID -> Html Msg
