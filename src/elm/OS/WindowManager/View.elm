@@ -77,7 +77,6 @@ header window =
         , Draggable.mouseTrigger window.id DragMsg
         ]
         [ headerTitle "title"
-        , div [ class [ Css.HeaderVoid ] ] []
         , headerButtons window.id
         ]
 

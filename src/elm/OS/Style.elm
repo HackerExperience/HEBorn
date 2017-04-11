@@ -3,7 +3,7 @@ module OS.Style exposing (..)
 import Css exposing (..)
 import Css.Elements exposing (body,  main_, header, footer)
 import Css.Namespace exposing (namespace)
-import Utils exposing (flexContainerHorz)
+import Utils exposing (flexContainerVert, flexContainerHorz, globalShadow, transition, easingToString, Easing(..))
 
 type Id
     = Dashboard
@@ -13,14 +13,14 @@ css =
         [ id Dashboard   
             [ width (pct 100)
             , minHeight (pct 100)
-            , displayFlex
-            , flexDirection column
+            , flexContainerVert
             ]
         , header
-            [ backgroundColor (hex "0A0")
+            [ backgroundColor (hex "EEE")
             , flexContainerHorz
             , justifyContent flexEnd
             , padding (px 8)
+            , globalShadow
             ]
         , main_
             [ flex (int 1) ]
@@ -31,7 +31,7 @@ css =
             , minHeight (px 60)
             , marginBottom (px -60)
             , paddingTop (px 8)
-            , property "transition" "0.15s margin ease-out" 
+            , transition 0.15 "margin" EaseOut
             , hover
                 [ marginBottom (px 0) ]
             ]

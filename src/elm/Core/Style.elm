@@ -15,6 +15,8 @@ css =
             , maxHeight (vh 100)
             , overflow hidden
             , margin (px 0)
+            , backgroundColor (rgb 57 109 166)
+            , fontFamily sansSerif
             ]
         , id "app"    
             [ width (pct 100)
