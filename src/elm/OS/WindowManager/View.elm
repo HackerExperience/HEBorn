@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Html.Attributes exposing (attribute)
-import Css exposing (transform, translate2, asPairs, px, height, width)
+import Css exposing (transform, translate2, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
@@ -34,9 +34,9 @@ styles =
     Css.asPairs >> style
 
 
-renderWindows : CoreModel -> Html CoreMsg
+-- rendrWindows : CoreModel -> Html CoreMsg
 renderWindows model =
-    div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
+    (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
 
 renderLoop : CoreModel -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
@@ -70,6 +70,24 @@ windowWrapper window view =
             [ view ]
         ]
 
+windowTitle : Window -> String
+windowTitle window =
+    case window.window of
+        SignUpWindow ->
+            "Sign Up"
+        
+        ExplorerWindow ->
+            "File Explorer"
+
+windowIcon : Window -> String
+windowIcon window =
+    case window.window of
+        SignUpWindow ->
+            "signup"
+
+        ExplorerWindow ->
+            "explorer"
+
 
 header : Window -> Html Msg
 header window =
@@ -77,7 +95,7 @@ header window =
         [ class [ Css.WindowHeader ]
         , Draggable.mouseTrigger window.id DragMsg
         ]
-        [ headerTitle "title" "icon"
+        [ headerTitle (windowTitle window) (windowIcon window)
         , headerButtons window.id
         ]
 
@@ -94,7 +112,7 @@ headerButtons : WindowID -> Html Msg
 headerButtons id =
     div [ class [ Css.HeaderButtons ] ]
         [ span
-            [ class [ Css.HeaderButton ]
+            [ class [ Css.HeaderButton, Css.HeaderBtnClose ]
             , onClick (CloseWindow id)
             ]
             [ text "X" ]
@@ -107,4 +125,5 @@ windowStyle window =
         [ transform (translate2 (px window.position.x) (px window.position.y))
         , width (px window.size.width)
         , height (px window.size.height)
+        , zIndex (int window.position.z)
         ]

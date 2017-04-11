@@ -58,6 +58,21 @@ footer:hover {
     box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.2);
 }
 
+.wmWindow.wmMaximizeme {
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0px;
+}
+
+.wmWindow.wmMaximizeme > .wmWindowBody {
+    border-radius: 0px;
+}
+
+.wmWindow.wmMaximizeme > .wmWindowHeader {
+    border-radius: 0px;
+}
+
 .wmWindowBody {
     border-radius: 0px 0px 8px 8px;
     background-color: #EEE;
@@ -90,8 +105,12 @@ footer:hover {
     float: left;
 }
 
-.wmHeaderTitle[data-icon^=icon]::before {
-    content: "\f179";
+.wmHeaderTitle[data-icon^=signup]::before {
+    content: "\f2ba";
+}
+
+.wmHeaderTitle[data-icon^=explorer]::before {
+    content: "\f1c6";
 }
 
 .wmHeaderButtons {
@@ -100,12 +119,15 @@ footer:hover {
 
 .wmHeaderButton {
     cursor: pointer;
-    color: #5c5c5c;
     min-width: 16px;
     margin: 0px 4px;
     display: inline-block;
-    background-color: #FFF;
     text-align: center;
+}
+
+.wmHeaderBtnClose {
+    background-color: #FFF;
+    color: #5c5c5c;
     border-radius: 100%;
 }
 

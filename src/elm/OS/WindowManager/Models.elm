@@ -36,6 +36,7 @@ type alias WindowID =
 type alias Position =
     { x : Float
     , y : Float
+    , z : Int
     }
 
 
@@ -64,9 +65,9 @@ type alias Windows =
     Dict.Dict WindowID Window
 
 
-initialPosition : Position
-initialPosition =
-    Position 32 32
+initialPosition : Int -> Position
+initialPosition off =
+    Position (toFloat (32*off)) (toFloat (32*off)) off
 
 
 initialWindows : Dict.Dict WindowID Window
@@ -98,7 +99,7 @@ newWindow model window =
             { id = (Uuid.toString id)
             , window = window
             , state = Open
-            , position = initialPosition
+            , position = initialPosition (Dict.size model.windows)
             , title = "Sem titulo"
             , size = defaultSize
             }
@@ -167,7 +168,7 @@ updateWindowPosition model delta =
                                     window.position.y + dy
 
                                 position_ =
-                                    Position x_ y_
+                                    Position x_ y_ window.position.z
 
                                 window_ =
                                     { window | position = position_ }
