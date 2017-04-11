@@ -4,7 +4,6 @@ import Update.Extra as Update
 import Core.Messages exposing (CoreMsg)
 import OS.Messages exposing (OSMsg(..))
 import OS.Models exposing (Model)
-import Game.Messages exposing (GameMsg)
 import OS.WindowManager.Update
 import OS.Dock.Update
 
@@ -19,7 +18,6 @@ update msg model =
             in
                 ( { model | wm = wm_ }, cmd, coreMsg )
 
-        -- |> Update.andThen update (getOSMsg osMsg) model toCore
         MsgDock subMsg ->
             let
                 ( dock_, cmd, coreMsg ) =
@@ -27,7 +25,6 @@ update msg model =
             in
                 ( { model | dock = dock_ }, cmd, coreMsg )
 
-        -- |> Update.andThen update (getOSMsg osMsg) toCore
         Event _ ->
             ( model, Cmd.none, [] )
 

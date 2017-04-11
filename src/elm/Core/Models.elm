@@ -10,6 +10,7 @@ import Router.Router exposing (Route)
 import Game.Models
 import OS.Models
 import Apps.Models
+import Landing.Models
 
 
 type alias CoreModel =
@@ -18,6 +19,7 @@ type alias CoreModel =
     , game : Game.Models.GameModel
     , os : OS.Models.Model
     , apps : Apps.Models.AppModel
+    , landing : Landing.Models.LandModel
     }
 
 
@@ -33,4 +35,5 @@ initialModel route seedInt =
     , game = Game.Models.initialModel
     , os = OS.Models.initialModel
     , apps = Apps.Models.initialModel
+    , landing = Landing.Models.initialModel
     }

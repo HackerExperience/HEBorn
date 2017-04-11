@@ -1,44 +1,42 @@
-module Apps.Login.Requests exposing (..)
+module Landing.SignUp.Requests exposing (..)
 
-import Json.Decode exposing (Decoder, string, decodeString, dict)
-import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Models
     exposing
         ( createRequestData
         , RequestPayloadArgs
             ( RequestUsernamePayload
-            , RequestLoginPayload
+            , RequestSignUpPayload
             )
         , Request
             ( NewRequest
             , RequestUsername
-            , RequestLogin
+            , RequestSignUp
             )
         , Response
             ( ResponseUsernameExists
-            , ResponseLogin
+            , ResponseSignUp
             , ResponseInvalid
             )
         , ResponseDecoder
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
-        , ResponseForLogin(..)
-        , ResponseLoginPayload
+        , ResponseForSignUp(..)
+        , ResponseSignUpPayload
         )
 import Requests.Update exposing (queueRequest)
 import Requests.Decoder exposing (decodeRequest)
+import Json.Decode exposing (Decoder, string, decodeString, dict)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callAccount)
-import Game.Account.Messages exposing (AccountMsg(Login))
-import Game.Models exposing (GameModel)
-import Apps.Login.Messages exposing (Msg(Request))
-import Apps.Login.Models exposing (Model)
+import Core.Models exposing (CoreModel)
+import Landing.SignUp.Messages exposing (Msg(Request))
+import Landing.SignUp.Models exposing (Model)
 
 
 type alias ResponseType =
     Response
     -> Model
-    -> GameModel
+    -> CoreModel
     -> ( Model, Cmd Msg, List CoreMsg )
 
 
@@ -60,17 +58,18 @@ type alias ResponseType =
 -}
 
 
-requestLogin : String -> String -> Cmd Msg
-requestLogin username password =
+requestSignUp : String -> String -> String -> Cmd Msg
+requestSignUp email username password =
     queueRequest
         (Request
             (NewRequest
                 (createRequestData
-                    RequestLogin
-                    decodeLogin
-                    "account.login"
-                    (RequestLoginPayload
-                        { password = password
+                    RequestSignUp
+                    decodeSignUp
+                    "account.create"
+                    (RequestSignUpPayload
+                        { email = email
+                        , password = password
                         , username = username
                         }
                     )
@@ -79,45 +78,47 @@ requestLogin username password =
         )
 
 
-decodeLogin : ResponseDecoder
-decodeLogin rawMsg code =
+decodeSignUp : ResponseDecoder
+decodeSignUp rawMsg code =
     let
         decoder =
-            decode ResponseLoginPayload
-                |> required "token" string
+            decode ResponseSignUpPayload
+                |> required "username" string
+                |> required "email" string
+                |> required "account_id" string
     in
         case code of
             200 ->
                 case decodeRequest decoder rawMsg of
                     Ok msg ->
-                        ResponseLogin (ResponseLoginOk msg.data)
+                        ResponseSignUp (ResponseSignUpOk msg.data)
 
                     Err _ ->
-                        ResponseLogin (ResponseLoginInvalid)
+                        Debug.log "errrr"
+                            ResponseSignUp
+                            (ResponseSignUpInvalid)
 
-            404 ->
-                ResponseLogin (ResponseLoginFailed)
+            400 ->
+                Debug.log "baaaaaaa"
+                    ResponseSignUp
+                    (ResponseSignUpInvalid)
 
             _ ->
-                ResponseLogin (ResponseLoginInvalid)
+                Debug.log "code is"
+                    ResponseSignUp
+                    (ResponseSignUpInvalid)
 
 
-requestLoginHandler : ResponseType
-requestLoginHandler response model core =
+requestSignUpHandler : ResponseType
+requestSignUpHandler response model core =
     case response of
-        ResponseLogin (ResponseLoginOk data) ->
-            let
-                loginCmd =
-                    callAccount
-                        (Login (Just data.token))
-            in
-                ( { model | loginFailed = False }, Cmd.none, [ loginCmd ] )
+        ResponseSignUp (ResponseSignUpOk data) ->
+            Debug.log "ok"
+                ( model, Cmd.none, [] )
 
-        ResponseLogin ResponseLoginFailed ->
-            ( { model | loginFailed = True }, Cmd.none, [] )
-
-        ResponseLogin ResponseLoginInvalid ->
-            ( { model | loginFailed = True }, Cmd.none, [] )
+        ResponseSignUp ResponseSignUpInvalid ->
+            Debug.log "invalid"
+                ( model, Cmd.none, [] )
 
         _ ->
             ( model, Cmd.none, [] )
@@ -130,8 +131,8 @@ requestLoginHandler response model core =
 responseHandler : Request -> ResponseType
 responseHandler request data model core =
     case request of
-        RequestLogin ->
-            requestLoginHandler data model core
+        RequestSignUp ->
+            requestSignUpHandler data model core
 
         _ ->
             ( model, Cmd.none, [] )

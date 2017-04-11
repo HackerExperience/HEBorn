@@ -47,9 +47,6 @@ generateApplication window =
     let
         name =
             case window of
-                SignUpWindow ->
-                    "signup"
-
                 ExplorerWindow ->
                     "explorer"
 
@@ -63,8 +60,7 @@ initialApplications : List Application
 initialApplications =
     let
         applications =
-            [ generateApplication SignUpWindow ]
-                ++ [ generateApplication ExplorerWindow ]
+            [ generateApplication ExplorerWindow ]
     in
         applications
 

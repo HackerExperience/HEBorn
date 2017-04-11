@@ -1,21 +1,15 @@
-module Apps.SignUp.Messages exposing (Msg(..))
+module Landing.Login.Messages exposing (..)
 
-import ContextMenu exposing (ContextMenu)
 import Events.Models
 import Requests.Models
-import Apps.SignUp.Context.Models exposing (Context)
 
 
 type Msg
-    = SubmitForm
+    = SubmitLogin
     | SetUsername String
     | ValidateUsername
     | SetPassword String
     | ValidatePassword
-    | SetEmail String
-    | ValidateEmail
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
-    | ContextMenuMsgS (ContextMenu.Msg Context)
-    | ItemS Int

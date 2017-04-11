@@ -17,6 +17,8 @@ import Game.Update
 import Game.Messages
 import Apps.Messages
 import Apps.Update
+import Landing.Messages
+import Landing.Update
 
 
 update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
@@ -59,6 +61,17 @@ update msg model =
                         Apps.Update.update subMsg model.apps model
                 in
                     ( { model | apps = apps_ }, Cmd.map MsgApp cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
+
+            -- Landing
+            -- MsgLanding (Apps.Messages.Request (NewRequest requestData) component) ->
+            --     makeRequest model requestData component
+            MsgLand subMsg ->
+                let
+                    ( landing_, cmd, coreMsg ) =
+                        Landing.Update.update subMsg model.landing model
+                in
+                    ( { model | landing = landing_ }, Cmd.map MsgLand cmd )
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router

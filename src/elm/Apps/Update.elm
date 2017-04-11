@@ -8,10 +8,6 @@ import Apps.Models exposing (AppModel)
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.Messages
 import Apps.Explorer.Update
-import Apps.SignUp.Messages
-import Apps.SignUp.Update
-import Apps.Login.Messages
-import Apps.Login.Update
 
 
 delegateRequest : NewRequestData -> Component -> List CoreMsg
@@ -31,26 +27,6 @@ update msg model core =
                     Apps.Explorer.Update.update subMsg model.explorer core.game
             in
                 ( { model | explorer = explorer_ }, Cmd.map MsgExplorer cmd, coreMsg )
-
-        MsgLogin (Apps.Login.Messages.Request (NewRequest requestData)) ->
-            ( model, Cmd.none, delegateRequest requestData ComponentLogin )
-
-        MsgLogin subMsg ->
-            let
-                ( login_, cmd, coreMsg ) =
-                    Apps.Login.Update.update subMsg model.login core.game
-            in
-                ( { model | login = login_ }, Cmd.map MsgLogin cmd, coreMsg )
-
-        MsgSignUp (Apps.SignUp.Messages.Request (NewRequest requestData)) ->
-            ( model, Cmd.none, delegateRequest requestData ComponentSignUp )
-
-        MsgSignUp subMsg ->
-            let
-                ( signUp_, cmd, coreMsg ) =
-                    Apps.SignUp.Update.update subMsg model.signUp core.game
-            in
-                ( { model | signUp = signUp_ }, Cmd.map MsgSignUp cmd, coreMsg )
 
         Event _ ->
             ( model, Cmd.none, [] )

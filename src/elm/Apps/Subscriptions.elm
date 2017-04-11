@@ -6,7 +6,6 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 import Apps.Models exposing (AppModel)
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.Subscriptions as Explorer
-import Apps.SignUp.Context.Subscriptions as SignUp
 
 
 subscriptions : AppModel -> CoreModel -> Sub AppMsg
@@ -17,16 +16,9 @@ subscriptions model core =
                 ExplorerWindow
                 MsgExplorer
                 (Explorer.subscriptions model.explorer)
-
-        signup =
-            subOnOpenWindow core
-                SignUpWindow
-                MsgSignUp
-                (SignUp.subscriptions model.signUp)
     in
         Sub.batch
             [ explorer
-            , signup
             ]
 
 

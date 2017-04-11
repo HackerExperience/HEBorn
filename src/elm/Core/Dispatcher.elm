@@ -8,8 +8,6 @@ module Core.Dispatcher
         , callWM
         , callDock
         , callExplorer
-        , callSignUp
-        , callLogin
         )
 
 import Core.Messages exposing (CoreMsg(MsgGame, MsgOS, MsgApp))
@@ -24,8 +22,6 @@ import Game.Server.Messages as Server
 import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
-import Apps.SignUp.Messages as SignUp
-import Apps.Login.Messages as Login
 
 
 -- Would love to do something like below, but I can't =(
@@ -92,13 +88,3 @@ callDock msg =
 callExplorer : Explorer.Msg -> CoreMsg
 callExplorer msg =
     callApps (MsgExplorer msg)
-
-
-callLogin : Login.Msg -> CoreMsg
-callLogin msg =
-    callApps (MsgLogin msg)
-
-
-callSignUp : SignUp.Msg -> CoreMsg
-callSignUp msg =
-    callApps (MsgSignUp msg)

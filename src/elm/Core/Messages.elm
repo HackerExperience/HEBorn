@@ -15,12 +15,14 @@ import Core.Components exposing (..)
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
 import Apps.Messages exposing (AppMsg(..), appBinds)
+import Landing.Messages exposing (LandMsg(..))
 
 
 type CoreMsg
     = MsgGame Game.Messages.GameMsg
     | MsgOS OS.Messages.OSMsg
     | MsgApp Apps.Messages.AppMsg
+    | MsgLand Landing.Messages.LandMsg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData ( String, Int )
@@ -85,12 +87,6 @@ getRequestMsg component request response =
 
         ComponentApp ->
             MsgApp (requestBinds.apps request response)
-
-        ComponentLogin ->
-            MsgApp
-                (MsgLogin
-                    (appBinds.login request response)
-                )
 
         ComponentInvalid ->
             NoOp
