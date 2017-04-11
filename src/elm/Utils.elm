@@ -1,11 +1,11 @@
 module Utils
     exposing
-        ( msgToCmd
-        , boolToString
-        , maybeToString
+        (
+            ..
         )
 
 import Task
+import Css exposing (..)
 
 
 -- I know this is not how it's supposed to be done but until I get a better
@@ -35,3 +35,9 @@ maybeToString maybe =
 
         Nothing ->
             ""
+
+flexContainerHorz =
+    mixin
+        [ displayFlex
+        , flexDirection (row)
+        ]

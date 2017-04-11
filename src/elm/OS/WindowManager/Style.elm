@@ -19,6 +19,7 @@ css =
     (stylesheet << namespace "wm")
         [ class Window
             [ backgroundColor (hex "AAA")
+            , position (absolute)
             ]
         , class WindowHeader
             [ displayFlex
@@ -26,13 +27,15 @@ css =
             , backgroundColor (hex "888")
             ]
         , class HeaderTitle
-            [ flex (int 6)
+            [ flex (int 0)
+            , paddingLeft (px 8)
             ]
         , class HeaderVoid
-            [ flex (int 3)
+            [ flex (int 1)
             ]
         , class HeaderButtons
-            [ flex (int 1)
+            [ flex (int 0)
+            , paddingRight (px 8)
             ]
         , class HeaderButton
             [ cursor pointer

@@ -1,14 +1,55 @@
 body {
     display: flex;
-    min-width: 1280px;
+    min-width: 100vw;
+    min-height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    margin: 0px;
+}
+
+#app {
+    width: 100%;
+    min-height: 100%;
+}
+
+#Dashboard {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: #0A0;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 8px;
 }
 
 main {
-    background-color: #CCC;
+    flex: 1;
+}
+
+footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    position: relative;
+    min-height: 60px;
+    margin-bottom: -60px;
+    padding-top: 8px;
+    transition: 0.15s margin ease-out;
+}
+
+footer:hover {
+    margin-bottom: 0px;
 }
 
 .wmWindow {
     background-color: #AAA;
+    position: absolute;
 }
 
 .wmWindowHeader {
@@ -18,19 +59,54 @@ main {
 }
 
 .wmHeaderTitle {
-    flex: 6;
+    flex: 0;
+    padding-left: 8px;
 }
 
 .wmHeaderVoid {
-    flex: 3;
+    flex: 1;
 }
 
 .wmHeaderButtons {
-    flex: 1;
+    flex: 0;
+    padding-right: 8px;
 }
 
 .wmHeaderButton {
     cursor: pointer;
+}
+
+#DockMain {
+    width: auto;
+    min-height: 48px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#DockMain::after {
+    height: 16px;
+    width: 100%;
+    background-color: #FFF;
+    display: block;
+    z-index: 1;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    content: '';
+    border: 2px dashed rgb(11, 14, 17);
+}
+
+#DockContainer {
+    position: relative;
+    z-index: 0;
+}
+
+.dockItem {
+    padding: 16px;
+    border-radius: 100%;
+    background-color: #F00;
+    z-index: 2;
 }
 
 .explorerWindow {
