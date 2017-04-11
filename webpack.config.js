@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 var autoprefixer      = require( 'autoprefixer' );
 var ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-var entryPath         = path.join( __dirname, 'src/static/index.js' );
+var entryPath         = path.join( __dirname, 'src/static/game.js' );
 var outputPath        = path.join( __dirname, 'dist' );
 
 console.log( 'WEBPACK GO!');
@@ -39,9 +39,9 @@ var commonConfig = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/static/index.html',
+      template: 'src/static/game.html',
       inject:   'body',
-      filename: 'index.html'
+      filename: 'game.html'
     })
   ],
 

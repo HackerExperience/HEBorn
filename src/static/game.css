@@ -1,0 +1,49 @@
+body {
+    display: flex;
+    min-width: 1280px;
+}
+
+main {
+    background-color: #CCC;
+}
+
+.wmWindow {
+    background-color: #AAA;
+}
+
+.wmWindowHeader {
+    display: flex;
+    flex-flow: row wrap;
+    background-color: #888;
+}
+
+.wmHeaderTitle {
+    flex: 6;
+}
+
+.wmHeaderVoid {
+    flex: 3;
+}
+
+.wmHeaderButtons {
+    flex: 1;
+}
+
+.wmHeaderButton {
+    cursor: pointer;
+}
+
+.explorerWindow {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.explorerNav {
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+.explorerContent {
+    flex: 3;
+}
