@@ -2,6 +2,7 @@ module OS.Dock.View exposing (view)
 
 import Html exposing (Html, div, text, button)
 import Html.Events exposing (onClick)
+import Html.Attributes exposing (attribute)
 import Html.CssHelpers
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
@@ -44,5 +45,6 @@ renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
     div [ class [ Css.Item ]
         , onClick (MsgOS (MsgWM (OpenWindow application.window)))
+        , attribute "data-app" application.name
         ]
-        [ text application.name ]
+        []
