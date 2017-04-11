@@ -4,6 +4,7 @@ import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Core.Style
 import OS.Style
 import OS.WindowManager.Style
+import OS.Dock.Style
 import Apps.Explorer.Style
 
 
@@ -18,6 +19,7 @@ fileStructure =
                 [ Core.Style.css
                 , OS.Style.css
                 , OS.WindowManager.Style.css
+                , OS.Dock.Style.css
                 , Apps.Explorer.Style.css
                 ]
           )
