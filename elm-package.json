@@ -4,7 +4,8 @@
     "repository": "https://github.com/hackerexperience/heborn.git",
     "license": "AGPLv3",
     "source-directories": [
-        "src/elm"
+	"src/elm",
+	"src/vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],
     "dependencies": {
@@ -26,5 +27,6 @@
         "rtfeldman/elm-css-helpers": "2.0.1 <= v < 3.0.0",
         "zaboco/elm-draggable": "3.0.0 <= v < 4.0.0"
     },
-    "elm-version": "0.18.0 <= v < 0.19.0"
+    "elm-version": "0.18.0 <= v < 0.19.0",
+    "native-modules": true
 }
