@@ -12,7 +12,9 @@ type Css
     | HeaderVoid
     | HeaderButtons
     | HeaderButton
+    | HeaderBtnClose
     | WindowBody
+    | Maximizeme
 
 
 css : Stylesheet
@@ -24,6 +26,19 @@ css =
             , borderRadius4 (px 8) (px 8) (px 8) (px 8)
             , flexDirection column
             , globalShadow
+            , withClass Maximizeme
+                [ property "transform" "none !important"
+                , property "width" "100% !important"
+                , property "height" "100% !important"
+                -- OR instead use inline-style
+                , borderRadius (px 0)
+                , children
+                    [ class WindowBody
+                        [ borderRadius (px 0) ]
+                    , class WindowHeader
+                        [ borderRadius (px 0) ]
+                    ]
+                ]
             ]
         , class WindowBody
             [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
@@ -53,20 +68,26 @@ css =
                 , float left
                 ]
             ]
-        , selector ".wmHeaderTitle[data-icon^=icon]"
+        , selector ".wmHeaderTitle[data-icon^=signup]"
             [before
-                [ pseudoContent "\"\\f179\"" ]
+                [ pseudoContent "\"\\f2ba\"" ]
+            ]
+        , selector ".wmHeaderTitle[data-icon^=explorer]"
+            [before
+                [ pseudoContent "\"\\f1c6\"" ]
             ]
         , class HeaderButtons
             [ flex (int 0) ]
         , class HeaderButton
             [ cursor pointer
-            , color (hex "5c5c5c")
             , minWidth (px 16)
             , margin2 (px 0) (px 4)
             , display inlineBlock
-            , backgroundColor (hex "FFF")
             , textAlign center
+            ]
+        , class HeaderBtnClose
+            [ backgroundColor (hex "FFF")
+            , color (hex "5c5c5c")
             , borderRadius (pct 100)
             ]
         ]
