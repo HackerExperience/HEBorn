@@ -60,7 +60,7 @@ footer:hover {
 
 .wmWindowBody {
     border-radius: 0px 0px 8px 8px;
-    background-color: #AAA;
+    background-color: #EEE;
     flex: 1;
     padding: 8px;
 }
@@ -68,17 +68,30 @@ footer:hover {
 .wmWindowHeader {
     display: flex;
     flex-flow: row wrap;
-    background: linear-gradient(to bottom, #606c88 0%,#3f4c6b 100%);
+    background: linear-gradient(to bottom, #6c6c6c 0%,#4c4c4c 100%);
     color: #FFF;
     flex: 0;
     border-radius: 8px 8px 0px 0px;
     padding: 8px;
-    line-height: 1;
+    line-height: 16px;
+    border-bottom: 1px solid rgb(0, 140, 255);
+    font-size: 12px;
 }
 
 .wmHeaderTitle {
     flex: 1;
     text-align: center;
+}
+
+.wmHeaderTitle::before {
+    font-family: FontAwesome;
+    min-width: 14px;
+    text-align: center;
+    float: left;
+}
+
+.wmHeaderTitle[data-icon^=icon]::before {
+    content: "\f179";
 }
 
 .wmHeaderButtons {
@@ -87,6 +100,13 @@ footer:hover {
 
 .wmHeaderButton {
     cursor: pointer;
+    color: #5c5c5c;
+    min-width: 16px;
+    margin: 0px 4px;
+    display: inline-block;
+    background-color: #FFF;
+    text-align: center;
+    border-radius: 100%;
 }
 
 #DockMain {
