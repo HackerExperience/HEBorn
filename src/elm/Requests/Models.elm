@@ -4,17 +4,23 @@ module Requests.Models
         , initialModel
         , RequestID
         , Request(..)
-        , NewRequestData
         , RequestStore
         , RequestStoreData
         , RequestPayload
         , RequestPayloadArgs(..)
+        , RequestDriver(..)
+        , RequestTopic(..)
+        , NewRequestData
         , Response(..)
+        , ResponseCode(..)
         , ResponseDecoder
+        , getResponseCode
+        , invalidRequestId
         , noopDecoder
         , createRequestData
-        , encodeRequest
+        , encodeData
         , storeRequest
+        , getTopicDriver
           -- Custom requests
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
@@ -77,7 +83,7 @@ type alias RequestStore =
 
 
 type alias NewRequestData =
-    ( Request, RequestPayload, ResponseDecoder )
+    ( Request, RequestTopic, RequestPayload, ResponseDecoder )
 
 
 
@@ -88,7 +94,7 @@ type alias NewRequestData =
 
 
 type alias RequestPayload =
-    { topic : String
+    { topic : RequestTopic
     , args : RequestPayloadArgs
     , request_id : RequestID
     }
@@ -155,7 +161,7 @@ type Response
 
 
 type alias ResponseDecoder =
-    RequestID -> Int -> Response
+    RequestID -> ResponseCode -> Response
 
 
 
@@ -169,7 +175,9 @@ type alias ResponseDecoder =
 
 
 type ResponseCode
-    = Number
+    = ResponseCodeOk
+    | ResponseCodeNotFound
+    | ResponseCodeUnknownError
 
 
 
@@ -212,25 +220,12 @@ type ResponseForLogout
     | ResponseLogoutInvalid
 
 
-{-| encodeRequest will encode the payload to a jsonified string.
--}
-encodeRequest : RequestPayload -> String
-encodeRequest payload =
-    Json.Encode.encode 0
-        (Json.Encode.object
-            [ ( "topic", Json.Encode.string payload.topic )
-            , ( "args", encodeArgs payload.args )
-            , ( "request_id", Json.Encode.string payload.request_id )
-            ]
-        )
-
-
-{-| encodeArgs is the specific encoding part of the parent encodeRequest. Since
+{-| encodeData is the specific encoding part of the parent encodeRequest. Since
 the content of `args` varies for each request, we must tell Elm how to encode
 each RequestPayloadArgs.
 -}
-encodeArgs : RequestPayloadArgs -> Json.Encode.Value
-encodeArgs args =
+encodeData : RequestPayloadArgs -> Json.Encode.Value
+encodeData args =
     case args of
         RequestUsernamePayload args ->
             Json.Encode.object
@@ -258,11 +253,37 @@ encodeArgs args =
                 [ ( "token", Json.Encode.string args.token ) ]
 
 
+type RequestDriver
+    = DriverWebsocket
+    | DriverHTTP
+
+
+type RequestTopic
+    = TopicAccountLogin
+    | TopicAccountCreate
+
+
+getTopicDriver : RequestTopic -> RequestDriver
+getTopicDriver topic =
+    case topic of
+        TopicAccountCreate ->
+            DriverHTTP
+
+        TopicAccountLogin ->
+            DriverHTTP
+
+
 {-| Aggregates the required data to create a request into a 3-tuple defined by RequestData
 -}
-createRequestData : Request -> ResponseDecoder -> String -> RequestPayloadArgs -> NewRequestData
+createRequestData :
+    Request
+    -> ResponseDecoder
+    -> RequestTopic
+    -> RequestPayloadArgs
+    -> NewRequestData
 createRequestData request decoder topic args =
     ( request
+    , topic
     , { topic = topic
       , args = args
       , request_id = ""
@@ -311,3 +332,21 @@ storeRequest model request_id component request response =
 removeRequest : Model -> RequestID -> RequestStore
 removeRequest model request_id =
     Dict.remove request_id model.requests
+
+
+invalidRequestId : RequestID
+invalidRequestId =
+    ""
+
+
+getResponseCode : Int -> ResponseCode
+getResponseCode httpCode =
+    case httpCode of
+        200 ->
+            ResponseCodeOk
+
+        404 ->
+            ResponseCodeNotFound
+
+        _ ->
+            ResponseCodeUnknownError

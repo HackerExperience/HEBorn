@@ -12,12 +12,14 @@ import Requests.Models
             , RequestUsername
             , RequestSignUp
             )
+        , RequestTopic(..)
         , Response
             ( ResponseUsernameExists
             , ResponseSignUp
             , ResponseInvalid
             )
         , ResponseDecoder
+        , ResponseCode(..)
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
         , ResponseForSignUp(..)
@@ -66,7 +68,7 @@ requestSignUp email username password =
                 (createRequestData
                     RequestSignUp
                     decodeSignUp
-                    "account.create"
+                    TopicAccountCreate
                     (RequestSignUpPayload
                         { email = email
                         , password = password
@@ -88,20 +90,15 @@ decodeSignUp rawMsg code =
                 |> required "account_id" string
     in
         case code of
-            200 ->
+            ResponseCodeOk ->
                 case decodeRequest decoder rawMsg of
                     Ok msg ->
-                        ResponseSignUp (ResponseSignUpOk msg.data)
+                        ResponseSignUp (ResponseSignUpOk msg)
 
                     Err _ ->
                         Debug.log "errrr"
                             ResponseSignUp
                             (ResponseSignUpInvalid)
-
-            400 ->
-                Debug.log "baaaaaaa"
-                    ResponseSignUp
-                    (ResponseSignUpInvalid)
 
             _ ->
                 Debug.log "code is"

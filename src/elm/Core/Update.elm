@@ -1,13 +1,18 @@
 module Core.Update exposing (update)
 
 import Update.Extra as Update
-import Requests.Models exposing (Request(RequestInvalid, NewRequest))
+import Requests.Models exposing (Request(RequestInvalid, NewRequest), getResponseCode)
 import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
 import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
-import WS.WS exposing (getWSMsgMeta, getWSMsgType)
-import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
+import WS.Models
+    exposing
+        ( WSMsgType(WSResponse, WSEvent, WSInvalid)
+        , getWSMsgMeta
+        , getWSMsgType
+        )
+import HttpDriver.Models exposing (..)
 import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (CoreModel)
 import Core.Components exposing (Component(..))
@@ -64,8 +69,9 @@ update msg model =
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Landing
-            -- MsgLanding (Apps.Messages.Request (NewRequest requestData) component) ->
-            --     makeRequest model requestData component
+            MsgLand (Landing.Messages.Request (NewRequest requestData) component) ->
+                makeRequest model requestData component
+
             MsgLand subMsg ->
                 let
                     ( landing_, cmd, coreMsg ) =
@@ -147,14 +153,35 @@ update msg model =
 
                                 model_ =
                                     { model | requests = requests_ }
+
+                                {- HACK: Translating http status to ResponseCode
+                                   should be done at the driver level, but I can't
+                                   figure out now how to properly decode it.
+                                -}
+                                code =
+                                    getResponseCode wsMsg.code
                             in
-                                update (DispatchResponse requestData ( message, wsMsg.code )) model_
+                                update (DispatchResponse requestData ( message, code )) model_
 
                         WSEvent ->
                             update (DispatchEvent (getEvent wsMsg.event)) model
 
                         WSInvalid ->
                             ( model, Cmd.none )
+
+            HttpReceivedMessage ( code, requestId, body ) ->
+                let
+                    requestData =
+                        getRequestData model.requests requestId
+
+                    requests_ =
+                        removeRequestId model.requests requestId
+
+                    model_ =
+                        { model | requests = requests_ }
+                in
+                    update (DispatchResponse requestData ( body, code ))
+                        model_
 
             -- Misc
             {- Perform no operation -}

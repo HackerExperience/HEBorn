@@ -15,4 +15,4 @@ type AppMsg
 
 
 appBinds =
-    {}
+    { explorer = Apps.Explorer.Messages.Response }

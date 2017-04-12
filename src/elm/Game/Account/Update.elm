@@ -5,7 +5,9 @@ import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Account.Messages exposing (AccountMsg(..))
 import Game.Account.Models exposing (setToken, getToken, AccountModel)
-import Game.Account.Requests exposing (requestLogout)
+
+
+-- import Game.Account.Requests exposing (requestLogout)
 
 
 update : AccountMsg -> AccountModel -> GameModel -> ( AccountModel, Cmd GameMsg, List GameMsg )
@@ -19,11 +21,11 @@ update msg model game =
                 ( model_, Cmd.none, [] )
 
         Logout ->
-            let
-                cmd =
-                    requestLogout (Utils.maybeToString (getToken model))
-
-                model_ =
-                    setToken model Nothing
-            in
-                ( model_, cmd, [] )
+            -- let
+            --     cmd =
+            --         requestLogout (Utils.maybeToString (getToken model))
+            --     model_ =
+            --         setToken model Nothing
+            -- in
+            -- ( model_, cmd, [] )
+            ( model, Cmd.none, [] )

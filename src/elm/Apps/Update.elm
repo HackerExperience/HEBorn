@@ -10,11 +10,6 @@ import Apps.Explorer.Messages
 import Apps.Explorer.Update
 
 
-delegateRequest : NewRequestData -> Component -> List CoreMsg
-delegateRequest requestData component =
-    [ MsgApp (Request (NewRequest requestData) component) ]
-
-
 update : AppMsg -> AppModel -> CoreModel -> ( AppModel, Cmd AppMsg, List CoreMsg )
 update msg model core =
     case msg of
@@ -39,3 +34,8 @@ update msg model core =
 
         NoOp ->
             ( model, Cmd.none, [] )
+
+
+delegateRequest : NewRequestData -> Component -> List CoreMsg
+delegateRequest requestData component =
+    [ MsgApp (Request (NewRequest requestData) component) ]

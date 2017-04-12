@@ -10,12 +10,20 @@ module Core.Messages
 
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
-import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
+import Requests.Models
+    exposing
+        ( Request
+        , RequestStoreData
+        , RequestID
+        , Response
+        , ResponseDecoder
+        , ResponseCode
+        )
 import Core.Components exposing (..)
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
 import Apps.Messages exposing (AppMsg(..), appBinds)
-import Landing.Messages exposing (LandMsg(..))
+import Landing.Messages exposing (LandMsg(..), landBinds)
 
 
 type CoreMsg
@@ -25,8 +33,9 @@ type CoreMsg
     | MsgLand Landing.Messages.LandMsg
     | OnLocationChange Location
     | DispatchEvent Event
-    | DispatchResponse RequestStoreData ( String, Int )
+    | DispatchResponse RequestStoreData ( String, ResponseCode )
     | WSReceivedMessage String
+    | HttpReceivedMessage ( ResponseCode, RequestID, String )
     | NoOp
 
 
@@ -65,6 +74,7 @@ type alias RequestBinds =
     { game : Request -> Response -> Game.Messages.GameMsg
     , os : Request -> Response -> OS.Messages.OSMsg
     , apps : Request -> Response -> Apps.Messages.AppMsg
+    , land : Request -> Response -> Landing.Messages.LandMsg
     }
 
 
@@ -73,6 +83,7 @@ requestBinds =
     { game = Game.Messages.Response
     , os = OS.Messages.Response
     , apps = Apps.Messages.Response
+    , land = Landing.Messages.Response
     }
 
 
@@ -88,8 +99,17 @@ getRequestMsg component request response =
         ComponentApp ->
             MsgApp (requestBinds.apps request response)
 
-        ComponentInvalid ->
-            NoOp
+        ComponentExplorer ->
+            MsgApp
+                (MsgExplorer (appBinds.explorer request response))
 
-        _ ->
+        ComponentLogin ->
+            MsgLand
+                (MsgLogin (landBinds.login request response))
+
+        ComponentSignUp ->
+            MsgLand
+                (MsgSignUp (landBinds.signUp request response))
+
+        ComponentInvalid ->
             NoOp

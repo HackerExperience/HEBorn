@@ -14,12 +14,14 @@ import Requests.Models
             , RequestUsername
             , RequestLogin
             )
+        , RequestTopic(..)
         , Response
             ( ResponseUsernameExists
             , ResponseLogin
             , ResponseInvalid
             )
         , ResponseDecoder
+        , ResponseCode(..)
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
         , ResponseForLogin(..)
@@ -68,7 +70,7 @@ requestLogin username password =
                 (createRequestData
                     RequestLogin
                     decodeLogin
-                    "account.login"
+                    TopicAccountLogin
                     (RequestLoginPayload
                         { password = password
                         , username = username
@@ -82,20 +84,26 @@ requestLogin username password =
 decodeLogin : ResponseDecoder
 decodeLogin rawMsg code =
     let
+        d1 =
+            Debug.log "msg" rawMsg
+
         decoder =
             decode ResponseLoginPayload
                 |> required "token" string
+
+        d2 =
+            Debug.log "tddtdt" (toString decoder)
     in
         case code of
-            200 ->
+            ResponseCodeOk ->
                 case decodeRequest decoder rawMsg of
                     Ok msg ->
-                        ResponseLogin (ResponseLoginOk msg.data)
+                        ResponseLogin (ResponseLoginOk msg)
 
                     Err _ ->
                         ResponseLogin (ResponseLoginInvalid)
 
-            404 ->
+            ResponseCodeNotFound ->
                 ResponseLogin (ResponseLoginFailed)
 
             _ ->

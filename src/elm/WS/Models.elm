@@ -4,13 +4,23 @@ module WS.Models
         , WSMsgData
         , WSMsgType(..)
         , invalidWSMsg
+        , getWSMsgMeta
+        , getWSMsgType
         , decodeWSMsg
         , decodeWSMsgMeta
+        , encodeWSRequest
         )
 
+import Json.Encode
 import Json.Decode exposing (Decoder, string, decodeString, int)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
-import Requests.Models exposing (Response(ResponseEmpty))
+import Requests.Models
+    exposing
+        ( Response(ResponseEmpty)
+        , RequestPayload
+        , RequestTopic(..)
+        , encodeData
+        )
 
 
 {-| WSMsgType identifies the possible received messages as:
@@ -70,3 +80,72 @@ decodeWSMsg dataDecoder =
         |> optional "request_id" string "event"
         |> required "data" (dataDecoder)
         |> required "code" int
+
+
+encodeWSRequest : RequestPayload -> String
+encodeWSRequest payload =
+    let
+        topic =
+            getTopicChannel payload.topic
+    in
+        Json.Encode.encode 0
+            (Json.Encode.object
+                [ ( "topic", Json.Encode.string topic )
+                , ( "args", encodeData payload.args )
+                , ( "request_id", Json.Encode.string payload.request_id )
+                ]
+            )
+
+
+{-| getWSMsgType is used to quickly tell us the type of the received message,
+as defined by WSMsgType (response, event or invalid).
+-}
+getWSMsgType : WSMsg WSMsgData -> WSMsgType
+getWSMsgType msg =
+    case msg.request_id of
+        "event" ->
+            WSEvent
+
+        "invalid" ->
+            WSInvalid
+
+        _ ->
+            WSResponse
+
+
+
+{- getWSMsg gets the raw WS message we just received and converts it to a
+   format complying with WSMsg type. If it fails, we return a WSMsg JSON with
+   invalid data.
+-}
+
+
+getWSMsgMeta : String -> WSMsg WSMsgData
+getWSMsgMeta msg =
+    case decodeWSMsgMeta msg of
+        Ok msg ->
+            let
+                debug1 =
+                    Debug.log "msg: " (toString msg)
+            in
+                msg
+
+        Err reason ->
+            let
+                debug1 =
+                    Debug.log "invalid payload: " (toString msg)
+
+                debug2 =
+                    Debug.log "reason: " (toString reason)
+            in
+                invalidWSMsg
+
+
+getTopicChannel : RequestTopic -> String
+getTopicChannel topic =
+    case topic of
+        TopicAccountLogin ->
+            "account:login"
+
+        TopicAccountCreate ->
+            "account:create"
