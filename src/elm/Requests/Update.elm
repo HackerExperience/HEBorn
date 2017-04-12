@@ -24,8 +24,8 @@ import Requests.Models
         , storeRequest
         , getTopicDriver
         )
-import WS.Models exposing (encodeWSRequest)
-import WS.WS
+import WebsocketDriver.Models exposing (encodeWSRequest)
+import WebsocketDriver.Websocket
 import HttpDriver.Models exposing (encodeHTTPRequest, getTopicUrl)
 import HttpDriver.Http
 import Utils
@@ -117,7 +117,7 @@ makeRequest core requestData component =
         cmd =
             case (getTopicDriver topic) of
                 DriverWebsocket ->
-                    WS.WS.send payload_
+                    WebsocketDriver.Websocket.send payload_
 
                 DriverHTTP ->
                     HttpDriver.Http.send (getTopicUrl topic) request_id payload_

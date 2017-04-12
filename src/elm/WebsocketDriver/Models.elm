@@ -1,4 +1,4 @@
-module WS.Models
+module WebsocketDriver.Models
     exposing
         ( WSMsg
         , WSMsgData

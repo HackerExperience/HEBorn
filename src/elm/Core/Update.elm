@@ -6,13 +6,12 @@ import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
 import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
-import WS.Models
+import WebsocketDriver.Models
     exposing
         ( WSMsgType(WSResponse, WSEvent, WSInvalid)
         , getWSMsgMeta
         , getWSMsgType
         )
-import HttpDriver.Models exposing (..)
 import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (CoreModel)
 import Core.Components exposing (Component(..))

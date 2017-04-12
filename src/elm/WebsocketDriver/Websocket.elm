@@ -1,4 +1,4 @@
-module WS.WS exposing (send)
+module WebsocketDriver.Websocket exposing (send)
 
 import WebSocket
 
