@@ -51,11 +51,21 @@ renderWindow model window =
                 window
                 (Html.map MsgApp (Html.map MsgExplorer (Apps.Explorer.View.view model.apps.explorer model.game)))
 
+widndowClasses window =
+    if (window.maximized)
+    then
+        class
+            [ Css.Window
+            , Css.Maximizeme
+            ]
+    else
+        class [ Css.Window ]
+
 
 windowWrapper : Window -> Html CoreMsg -> Html CoreMsg
 windowWrapper window view =
     div
-        [ class [ Css.Window ]
+        [ widndowClasses window
         , windowStyle window
         ]
         [ Html.map MsgOS (Html.map MsgWM (header window))
@@ -106,10 +116,15 @@ headerButtons : WindowID -> Html Msg
 headerButtons id =
     div [ class [ Css.HeaderButtons ] ]
         [ span
+            [ class [ Css.HeaderButton, Css.HeaderBtnMaximize ]
+            , onClick (ToggleMaximize id)
+            ]
+            []
+        , span
             [ class [ Css.HeaderButton, Css.HeaderBtnClose ]
             , onClick (CloseWindow id)
             ]
-            [ text "X" ]
+            []
         ]
 
 

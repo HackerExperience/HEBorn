@@ -2,19 +2,20 @@ module OS.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Utils exposing (globalShadow, pseudoContent)
+import Utils exposing (globalShadow, pseudoContent, flexContainerHorz, attrSelector)
 
 
 type Css
     = Window
     | WindowHeader
+    | WindowBody
+    | Maximizeme
     | HeaderTitle
     | HeaderVoid
     | HeaderButtons
     | HeaderButton
     | HeaderBtnClose
-    | WindowBody
-    | Maximizeme
+    | HeaderBtnMaximize
 
 
 css : Stylesheet
@@ -68,26 +69,38 @@ css =
                 , float left
                 ]
             ]
-        , selector ".wmHeaderTitle[data-icon^=signup]"
+        , attrSelector "wmHeaderTitle" "data-icon" "=" "signup"
             [before
                 [ pseudoContent "\"\\f2ba\"" ]
             ]
-        , selector ".wmHeaderTitle[data-icon^=explorer]"
+        , attrSelector "wmHeaderTitle" "data-icon" "=" "explorer"
             [before
                 [ pseudoContent "\"\\f1c6\"" ]
             ]
         , class HeaderButtons
-            [ flex (int 0) ]
+            [ flex (int 0)
+            , flexContainerHorz ]
         , class HeaderButton
             [ cursor pointer
+            , flex (int 0)
             , minWidth (px 16)
             , margin2 (px 0) (px 4)
             , display inlineBlock
             , textAlign center
+            , fontSize (px 16)
+            , marginBottom (px -2)
+            , color (hex "FFF")
+            , before
+                [ fontFamilies ["FontAwesome"]
+                , textAlign center
+                ]
             ]
         , class HeaderBtnClose
-            [ backgroundColor (hex "FFF")
-            , color (hex "5c5c5c")
-            , borderRadius (pct 100)
+            [ before
+                [ pseudoContent "\"\\f057\"" ]
+            ]
+        , class HeaderBtnMaximize
+            [ before
+                [ pseudoContent "\"\\f065\"" ]
             ]
         ]
