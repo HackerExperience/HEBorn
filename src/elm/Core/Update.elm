@@ -6,7 +6,7 @@ import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
 import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
-import WebsocketDriver.Models
+import Driver.Websocket.Models
     exposing
         ( WSMsgType(WSResponse, WSEvent, WSInvalid)
         , getWSMsgMeta

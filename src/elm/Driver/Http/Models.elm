@@ -1,4 +1,4 @@
-module HttpDriver.Models exposing (..)
+module Driver.Http.Models exposing (..)
 
 import Dict
 import Json.Encode

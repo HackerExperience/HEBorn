@@ -1,4 +1,4 @@
-module HttpDriver.Http exposing (..)
+module Driver.Http.Http exposing (..)
 
 import Http
 import Json.Decode as Decode exposing (list, string)
@@ -10,7 +10,7 @@ import Requests.Models
         , invalidRequestId
         )
 import Core.Messages exposing (CoreMsg(..))
-import HttpDriver.Models exposing (getTopicUrl, getRequestIdHeader)
+import Driver.Http.Models exposing (getTopicUrl, getRequestIdHeader)
 
 
 decodeMsg : Result Http.Error ( Maybe RequestID, String ) -> CoreMsg

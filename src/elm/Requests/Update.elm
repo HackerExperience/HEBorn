@@ -24,10 +24,10 @@ import Requests.Models
         , storeRequest
         , getTopicDriver
         )
-import WebsocketDriver.Models exposing (encodeWSRequest)
-import WebsocketDriver.Websocket
-import HttpDriver.Models exposing (encodeHTTPRequest, getTopicUrl)
-import HttpDriver.Http
+import Driver.Websocket.Models exposing (encodeWSRequest)
+import Driver.Websocket.Websocket
+import Driver.Http.Models exposing (encodeHTTPRequest, getTopicUrl)
+import Driver.Http.Http
 import Utils
 import Core.Components exposing (Component(ComponentInvalid))
 import Core.Models exposing (CoreModel)
@@ -117,10 +117,10 @@ makeRequest core requestData component =
         cmd =
             case (getTopicDriver topic) of
                 DriverWebsocket ->
-                    WebsocketDriver.Websocket.send payload_
+                    Driver.Websocket.Websocket.send payload_
 
                 DriverHTTP ->
-                    HttpDriver.Http.send (getTopicUrl topic) request_id payload_
+                    Driver.Http.Http.send (getTopicUrl topic) request_id payload_
     in
         ( { core | requests = model_ }, cmd )
 
