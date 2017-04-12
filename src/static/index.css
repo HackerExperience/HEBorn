@@ -105,30 +105,43 @@ footer:hover {
     float: left;
 }
 
-.wmHeaderTitle[data-icon^=signup]::before {
+.wmHeaderTitle[data-icon=signup]::before {
     content: "\f2ba";
 }
 
-.wmHeaderTitle[data-icon^=explorer]::before {
+.wmHeaderTitle[data-icon=explorer]::before {
     content: "\f1c6";
 }
 
 .wmHeaderButtons {
     flex: 0;
+    display: flex;
+    flex-direction: row;
 }
 
 .wmHeaderButton {
     cursor: pointer;
+    flex: 0;
     min-width: 16px;
     margin: 0px 4px;
     display: inline-block;
     text-align: center;
+    font-size: 16px;
+    margin-bottom: -2px;
+    color: #FFF;
 }
 
-.wmHeaderBtnClose {
-    background-color: #FFF;
-    color: #5c5c5c;
-    border-radius: 100%;
+.wmHeaderButton::before {
+    font-family: FontAwesome;
+    text-align: center;
+}
+
+.wmHeaderBtnClose::before {
+    content: "\f057";
+}
+
+.wmHeaderBtnMaximize::before {
+    content: "\f065";
 }
 
 #DockMain {

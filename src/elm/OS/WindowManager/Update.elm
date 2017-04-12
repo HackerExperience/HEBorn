@@ -11,6 +11,7 @@ import OS.WindowManager.Models
         , openWindow
         , closeWindow
         , updateWindowPosition
+        , toggleMaximizeWindow
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 
@@ -58,6 +59,13 @@ update msg model =
 
         StopDragging ->
             ( { model | dragging = Nothing }, Cmd.none, [] )
+
+        ToggleMaximize id ->
+            let
+                windows_ =
+                    toggleMaximizeWindow model id
+            in
+                ( { model | windows = windows_ }, Cmd.none, [] )
 
 
 dragConfig : Draggable.Config WindowID Msg

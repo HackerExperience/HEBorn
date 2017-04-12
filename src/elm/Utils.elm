@@ -70,6 +70,18 @@ transition : Float -> String -> Easing -> Mixin
 transition time propertyName easing =
     property "transition" ((toString time)++"s "++(propertyName)++" "++(easingToString easing))
 
+{-withAttrSelector attrName op value =
+    Css.Preprocess.ExtendSelector 
+        ( Css.Structure.AttributeSelector
+            ( Css.Helpers.toCssIdentifier attrName )
+            op
+            ( Css.Helpers.toCssIdentifier value )
+        )-}
+
+attrSelector parent attrName op value =
+    selector ( "." ++ parent ++ "[" ++ attrName ++ op ++ value ++ "]")
+
+
 -- Common CSS
 
 flexContainerVert : Mixin

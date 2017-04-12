@@ -12,6 +12,7 @@ module OS.WindowManager.Models
         , updateWindowPosition
         , windowsFoldr
         , hasWindowOpen
+        , toggleMaximizeWindow
         )
 
 import Dict
@@ -58,6 +59,7 @@ type alias Window =
     , position : Position
     , title : String
     , size : Size
+    , maximized : Bool
     }
 
 
@@ -102,6 +104,7 @@ newWindow model window =
             , position = initialPosition (Dict.size model.windows)
             , title = "Sem titulo"
             , size = defaultSize
+            , maximized = False
             }
     in
         ( window_, seed )
@@ -199,3 +202,31 @@ hasWindowOpen model window =
             Dict.filter filter model.windows
     in
         not (Dict.isEmpty open)
+
+toggleMaximizeWindow : Model -> WindowID -> Windows
+toggleMaximizeWindow model id =
+    let
+        windows_ =
+            case (getWindow model id) of
+                Nothing ->
+                    model.windows
+
+                Just window ->
+                    let
+                        window_ =
+                            { window | maximized = not window.maximized }
+
+                        update_ w =
+                            case w of
+                                Just window ->
+                                    Just window_
+
+                                Nothing ->
+                                    Nothing
+
+                        windows_ =
+                            Dict.update id update_ model.windows
+                    in
+                        windows_
+    in
+        windows_
