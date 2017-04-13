@@ -29,7 +29,6 @@ import Requests.Models
         , ResponseLoginPayload
         )
 import Requests.Update exposing (queueRequest)
-import Requests.Decoder exposing (decodeRequest)
 import Core.Messages exposing (CoreMsg)
 import Core.Models exposing (CoreModel)
 import Core.Dispatcher exposing (callAccount)
@@ -46,17 +45,6 @@ type alias ResponseType =
 
 
 
--- requestUsernameExists : String -> Cmd Msg
--- requestUsernameExists username =
---     queueRequest (Request
---                       (NewRequest
---                            (createRequestData
---                                 RequestUsername
---                                 decodeUsernameExists
---                                 "account.query"
---                                 (RequestUsernamePayload
---                                      { user = username
---                                      }))))
 {-
    Request: Sign Up
    Description: Create a new account

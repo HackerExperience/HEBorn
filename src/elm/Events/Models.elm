@@ -4,9 +4,10 @@ module Events.Models
         , decodeEvent
         )
 
-import Json.Decode exposing (Decoder, string, decodeString, dict, int, decodeValue)
+import Json.Decode exposing (Decoder, string, int, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode
+import Driver.Websocket.Models exposing (WSMsg, invalidWSMsg, getWSMsgMeta)
 import Requests.Models
     exposing
         ( Response(..)
@@ -20,18 +21,13 @@ type Event
     | EventUnknown
 
 
-type alias TmpData =
-    { event : String
-    , data : Json.Decode.Value
-    }
-
-
 decoderMyCool : Decoder ResponseEventCoolPayload
 decoderMyCool =
     decode ResponseEventCoolPayload
         |> required "foo" string
 
 
+resultMyCool : Result error ResponseEventCoolPayload -> Event
 resultMyCool result =
     case result of
         Ok m ->
@@ -41,7 +37,8 @@ resultMyCool result =
             EventMyCool ResponseEventCoolInvalid
 
 
-getEvent event =
+getEventType : String -> Event
+getEventType event =
     case event of
         "cool" ->
             EventMyCool ResponseEventCoolInvalid
@@ -50,29 +47,9 @@ getEvent event =
             EventUnknown
 
 
-invalidTmpData =
-    { event = "invalid"
-    , data = Json.Encode.null
-    }
-
-
-decodeEventMeta rawMsg =
-    let
-        decoder =
-            decode TmpData
-                |> required "event" string
-                |> required "data" Json.Decode.value
-    in
-        case (decodeValue decoder rawMsg) of
-            Ok m ->
-                m
-
-            Err _ ->
-                invalidTmpData
-
-
-doit event data =
-    case (getEvent event) of
+getEvent : String -> Json.Decode.Value -> Event
+getEvent event data =
+    case (getEventType event) of
         EventMyCool _ ->
             resultMyCool (decodeValue decoderMyCool data)
 
@@ -80,12 +57,13 @@ doit event data =
             EventUnknown
 
 
+decodeEvent : Json.Decode.Value -> Event
 decodeEvent msg =
     let
         meta =
-            decodeEventMeta msg
+            getWSMsgMeta msg
 
         event =
-            doit meta.event meta.data
+            getEvent meta.event meta.data
     in
         event

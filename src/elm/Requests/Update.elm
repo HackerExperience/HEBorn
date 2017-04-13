@@ -9,6 +9,22 @@ module Requests.Update
 import Uuid
 import Random.Pcg exposing (step)
 import Dict
+import Utils
+import Driver.Websocket.Models
+    exposing
+        ( encodeWSRequest
+        , getTopicChannel
+        , getTopicMsg
+        , getChannelAddress
+        )
+import Driver.Websocket.Websocket
+import Driver.Http.Models
+    exposing
+        ( encodeHTTPRequest
+        , getTopicPath
+        , httpPayloadToString
+        )
+import Driver.Http.Http
 import Requests.Models
     exposing
         ( Model
@@ -24,25 +40,9 @@ import Requests.Models
         , storeRequest
         , getTopicDriver
         )
-import Driver.Websocket.Models
-    exposing
-        ( encodeWSRequest
-        , getTopicChannel
-        , getTopicMsg
-        , getChannelAddress
-        )
-import Driver.Websocket.Websocket
-import Driver.Http.Models
-    exposing
-        ( encodeHTTPRequest
-        , getTopicUrl
-        , httpPayloadToString
-        )
-import Driver.Http.Http
-import Utils
 import Core.Components exposing (Component(ComponentInvalid))
 import Core.Models exposing (CoreModel)
-import Core.Messages exposing (CoreMsg(MsgChannel))
+import Core.Messages exposing (CoreMsg)
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
@@ -137,24 +137,22 @@ makeRequest core requestData component =
                         channelAddress =
                             getChannelAddress channel context
                     in
-                        Cmd.map MsgChannel
-                            (Driver.Websocket.Websocket.send
-                                channelAddress
-                                message
-                                request_id
-                                payload_
-                            )
+                        Driver.Websocket.Websocket.send
+                            channelAddress
+                            message
+                            request_id
+                            payload_
 
                 DriverHTTP ->
                     let
-                        url =
-                            getTopicUrl topic
+                        path =
+                            getTopicPath topic
 
                         body =
                             httpPayloadToString payload_
                     in
                         Driver.Http.Http.send
-                            url
+                            path
                             request_id
                             body
     in

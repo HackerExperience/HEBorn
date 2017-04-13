@@ -5,20 +5,13 @@ module Core.Models
         , initialModel
         )
 
+import Driver.Websocket.Models
 import Requests.Models
 import Router.Router exposing (Route)
 import Game.Models
 import OS.Models
 import Apps.Models
 import Landing.Models
-import Phoenix
-import Phoenix.Socket as Socket
-import Core.Messages exposing (CoreMsg)
-import Driver.Websocket.Models
-
-
-socket =
-    Socket.init "ws://localhost:4000/websocket"
 
 
 type alias CoreModel =

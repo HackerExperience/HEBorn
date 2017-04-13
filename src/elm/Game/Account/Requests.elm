@@ -19,7 +19,6 @@ import Requests.Models
 import Requests.Update exposing (queueRequest)
 import Game.Messages exposing (GameMsg(Request))
 import Game.Models exposing (GameModel, ResponseType)
-import Game.Account.Models exposing (AccountID)
 
 
 requestLogout : TopicContext -> String -> Cmd GameMsg

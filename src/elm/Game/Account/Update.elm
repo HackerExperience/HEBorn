@@ -1,8 +1,8 @@
 module Game.Account.Update exposing (..)
 
 import Utils
-import Core.Messages exposing (CoreMsg(MsgChannel))
-import Driver.Websocket.Messages exposing (Msg(UpdateSocketParams, JoinChannel, NewMsg))
+import Driver.Websocket.Messages exposing (Msg(UpdateSocketParams, JoinChannel))
+import Core.Messages exposing (CoreMsg(MsgWebsocket))
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg)
 import Game.Account.Messages exposing (AccountMsg(..))
@@ -22,12 +22,12 @@ update msg model game =
                     setToken model (Just token)
 
                 coreCmd =
-                    [ MsgChannel
+                    [ MsgWebsocket
                         (UpdateSocketParams ( token, account_id ))
-                    , MsgChannel
-                        (JoinChannel ( "account:" ++ account_id, "notification", "a" ))
-                    , MsgChannel
-                        (JoinChannel ( "requests", "requests", "a" ))
+                    , MsgWebsocket
+                        (JoinChannel ( "account:" ++ account_id, "notification" ))
+                    , MsgWebsocket
+                        (JoinChannel ( "requests", "requests" ))
                     ]
             in
                 ( { model_ | id = Just account_id }, Cmd.none, coreCmd )
@@ -39,7 +39,7 @@ update msg model game =
                         (Utils.maybeToString model.id)
                         (Utils.maybeToString (getToken model))
 
-                -- model_ =
-                -- setToken model Nothing
+                model_ =
+                    setToken model Nothing
             in
                 ( model, cmd, [] )

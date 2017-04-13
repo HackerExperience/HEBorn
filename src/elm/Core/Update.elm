@@ -6,12 +6,6 @@ import Requests.Models exposing (Request(RequestInvalid, NewRequest), getRespons
 import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
 import Router.Router exposing (parseLocation)
-import Driver.Websocket.Models
-    exposing
-        ( WSMsgType(WSResponse, WSEvent, WSInvalid)
-        , getWSMsgMeta
-        , getWSMsgType
-        )
 import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (CoreModel)
 import Core.Components exposing (Component(..))
@@ -83,12 +77,12 @@ update msg model =
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Channel
-            MsgChannel subMsg ->
+            MsgWebsocket subMsg ->
                 let
-                    ( channel_, cmd, coreMsg ) =
+                    ( websocket_, cmd, coreMsg ) =
                         Driver.Websocket.Update.update subMsg model.websocket model
                 in
-                    ( { model | websocket = channel_ }, Cmd.map MsgChannel cmd )
+                    ( { model | websocket = websocket_ }, Cmd.map MsgWebsocket cmd )
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router
@@ -118,6 +112,21 @@ update msg model =
             -- |> Update.andThen update (MsgGame (eventBinds.game event))
             -- |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
             -- |> Update.andThen update (MsgLogin (eventBinds.login event))
+            -- Responses
+            NewResponse ( requestId, code, body ) ->
+                let
+                    requestData =
+                        getRequestData model.requests requestId
+
+                    requests_ =
+                        removeRequestId model.requests requestId
+
+                    model_ =
+                        { model | requests = requests_ }
+                in
+                    update (DispatchResponse requestData ( code, body ))
+                        model_
+
             {-
                DispatchResponse is triggered when the client sends a message to
                the server and the message is answered. It is the classic
@@ -145,49 +154,6 @@ update msg model =
                         Debug.log "llll" (toString requestMsg)
                 in
                     update requestMsg model
-
-            -- Websocket
-            {-
-               Parse the received WebSocket message into the expected format and
-               forward it to the relevant dispatcher.
-            -}
-            -- WSReceivedMessage message ->
-            --     let
-            --         wsMsg =
-            --             getWSMsgMeta message
-            --         wsMsgType =
-            --             getWSMsgType wsMsg
-            --     in
-            --         case wsMsgType of
-            --             WSResponse ->
-            --                 let
-            --                     requestData =
-            --                         getRequestData model.requests wsMsg.request_id
-            --                     requests_ =
-            --                         removeRequestId model.requests wsMsg.request_id
-            --                     model_ =
-            --                         { model | requests = requests_ }
-            --                     {- HACK: Translating http status to ResponseCode
-            --                        should be done at the driver level, but I can't
-            --                        figure out now how to properly decode it.
-            --                     -}
-            --                     code =
-            --                         getResponseCode wsMsg.code
-            --                 in
-            --                     update (DispatchResponse requestData ( message, code )) model_
-            HttpReceivedMessage ( requestId, code, body ) ->
-                let
-                    requestData =
-                        getRequestData model.requests requestId
-
-                    requests_ =
-                        removeRequestId model.requests requestId
-
-                    model_ =
-                        { model | requests = requests_ }
-                in
-                    update (DispatchResponse requestData ( code, body ))
-                        model_
 
             -- Misc
             {- Perform no operation -}

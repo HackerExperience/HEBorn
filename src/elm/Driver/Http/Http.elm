@@ -3,6 +3,7 @@ module Driver.Http.Http exposing (..)
 import Http
 import Json.Encode
 import Json.Decode exposing (decodeString)
+import Driver.Http.Models exposing (getRequestIdHeader)
 import Requests.Models
     exposing
         ( ResponseCode(..)
@@ -10,12 +11,11 @@ import Requests.Models
         , getResponseCode
         , invalidRequestId
         )
-import Core.Messages exposing (CoreMsg(..))
-import Driver.Http.Models exposing (getTopicUrl, getRequestIdHeader)
+import Core.Messages exposing (CoreMsg(NewResponse))
 
 
-decodeResult : String -> Json.Encode.Value
-decodeResult result =
+stringToValue : String -> Json.Encode.Value
+stringToValue result =
     case (decodeString Json.Decode.value result) of
         Ok m ->
             m
@@ -28,7 +28,7 @@ decodeMsg : RequestID -> Result Http.Error String -> CoreMsg
 decodeMsg requestId return =
     case return of
         Ok result ->
-            HttpReceivedMessage ( requestId, ResponseCodeOk, decodeResult result )
+            NewResponse ( requestId, ResponseCodeOk, stringToValue result )
 
         Err (Http.BadStatus response) ->
             let
@@ -46,14 +46,14 @@ decodeMsg requestId return =
                         Nothing ->
                             invalidRequestId
             in
-                HttpReceivedMessage ( requestId, code, decodeResult body )
+                NewResponse ( requestId, code, stringToValue body )
 
         Err reason ->
             let
                 d =
                     Debug.log "FIXME: " (toString reason)
             in
-                HttpReceivedMessage
+                NewResponse
                     ( invalidRequestId
                     , ResponseCodeUnknownError
                     , Json.Encode.null

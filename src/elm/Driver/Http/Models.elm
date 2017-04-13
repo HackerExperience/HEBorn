@@ -58,8 +58,8 @@ getRequestIdHeader headers =
     Dict.get "X-Request-Id" headers
 
 
-getTopicUrl : RequestTopic -> String
-getTopicUrl topic =
+getTopicPath : RequestTopic -> String
+getTopicPath topic =
     case topic of
         TopicAccountLogin ->
             "account/login"

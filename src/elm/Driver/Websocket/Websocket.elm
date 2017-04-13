@@ -1,14 +1,14 @@
 module Driver.Websocket.Websocket exposing (send)
 
-import WebSocket
+import Json.Encode
 import Phoenix
 import Phoenix.Push as Push
 import Driver.Websocket.Messages exposing (Msg(NewReply))
 import Requests.Models exposing (RequestID)
-import Json.Encode
+import Core.Messages exposing (CoreMsg(MsgWebsocket))
 
 
-send : String -> String -> RequestID -> Json.Encode.Value -> Cmd Msg
+send : String -> String -> RequestID -> Json.Encode.Value -> Cmd CoreMsg
 send channel topic request_id payload =
     let
         message =
@@ -17,4 +17,6 @@ send channel topic request_id payload =
                 |> Push.onOk (\m -> NewReply m request_id)
                 |> Push.onError (\m -> NewReply m request_id)
     in
-        Phoenix.push "ws://localhost:4000/websocket" message
+        Cmd.map
+            MsgWebsocket
+            (Phoenix.push "ws://localhost:4000/websocket" message)

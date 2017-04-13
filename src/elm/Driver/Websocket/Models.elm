@@ -5,7 +5,6 @@ module Driver.Websocket.Models
         , WSMsg
         , WSMsgData
         , WSMsgType(..)
-        , decMe
         , invalidWSMsg
         , getWSMsgMeta
         , getWSMsgType
@@ -26,6 +25,8 @@ import Requests.Models
         ( Response(ResponseEmpty)
         , RequestPayload
         , RequestTopic(..)
+        , TopicContext
+        , ResponseCode
         , encodeData
         , getResponseCode
         )
@@ -71,10 +72,12 @@ type Channel
     | ChannelRequests
 
 
+initialSocket : Socket.Socket Msg
 initialSocket =
     Socket.init "ws://localhost:4000/websocket"
 
 
+initialChannels : List (Channel.Channel Msg)
 initialChannels =
     [ Channel.init "requests" ]
 
@@ -94,15 +97,6 @@ invalidWSMsg =
     , data = Json.Encode.null
     , code = 400
     }
-
-
-decMe =
-    (decode WSMsg
-        |> optional "event" string "request"
-        |> optional "request_id" string "event"
-        |> hardcoded ResponseEmpty
-        |> optional "code" int 0
-    )
 
 
 {-| decodeWsgMeta decodes only the meta part of the msg, it ignores the
@@ -193,6 +187,7 @@ getTopicMsg topic =
             "account.get"
 
 
+getTopicChannel : RequestTopic -> Channel
 getTopicChannel topic =
     case topic of
         TopicAccountLogin ->
@@ -205,6 +200,7 @@ getTopicChannel topic =
             ChannelRequests
 
 
+getChannelAddress : Channel -> TopicContext -> String
 getChannelAddress channel context =
     case channel of
         ChannelAccount ->
@@ -214,6 +210,7 @@ getChannelAddress channel context =
             "requests"
 
 
+getResponse : Json.Decode.Value -> ( WSMsg WSMsgData, ResponseCode )
 getResponse msg =
     let
         meta =

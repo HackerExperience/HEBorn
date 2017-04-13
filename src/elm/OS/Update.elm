@@ -1,6 +1,5 @@
 module OS.Update exposing (update)
 
-import Update.Extra as Update
 import Core.Messages exposing (CoreMsg)
 import OS.Messages exposing (OSMsg(..))
 import OS.Models exposing (Model)

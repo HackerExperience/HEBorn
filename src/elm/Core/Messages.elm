@@ -33,12 +33,12 @@ type CoreMsg
     | MsgOS OS.Messages.OSMsg
     | MsgApp Apps.Messages.AppMsg
     | MsgLand Landing.Messages.LandMsg
-    | MsgChannel Driver.Websocket.Messages.Msg
+    | MsgWebsocket Driver.Websocket.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData ( ResponseCode, Json.Decode.Value )
       -- | WSReceivedMessage String
-    | HttpReceivedMessage ( RequestID, ResponseCode, Json.Decode.Value )
+    | NewResponse ( RequestID, ResponseCode, Json.Decode.Value )
     | NoOp
 
 

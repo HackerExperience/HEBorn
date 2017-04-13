@@ -1,14 +1,20 @@
 module Driver.Websocket.Update exposing (update)
 
 import Utils
-import Driver.Websocket.Models exposing (Model, getWSMsgType, getWSMsgMeta, decodeWSMsgMeta, decMe, invalidWSMsg, decodeWSMsg, WSMsgType(..), getResponse)
-import Driver.Websocket.Messages exposing (Msg(..))
-import Core.Messages exposing (CoreMsg(NoOp, DispatchEvent, HttpReceivedMessage))
-import Core.Models exposing (CoreModel)
 import Phoenix.Socket as Socket
 import Phoenix.Channel as Channel
-import Json.Decode exposing (decodeValue)
-import Events.Models exposing (..)
+import Driver.Websocket.Models
+    exposing
+        ( Model
+        , getWSMsgType
+        , getWSMsgMeta
+        , WSMsgType(..)
+        , getResponse
+        )
+import Driver.Websocket.Messages exposing (Msg(..))
+import Events.Models exposing (decodeEvent)
+import Core.Messages exposing (CoreMsg(NoOp, DispatchEvent, NewResponse))
+import Core.Models exposing (CoreModel)
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -26,32 +32,29 @@ update msg model core =
                 ( { model | socket = socket_ }, Cmd.none, [] )
 
         JoinChannel args ->
-            if model.defer then
-                let
-                    cmd =
-                        (Utils.delay 0.5 <| JoinChannel args)
-                in
-                    ( { model | defer = False }, cmd, [] )
-            else
-                let
-                    ( topic, event, msg ) =
-                        args
-
-                    channel =
-                        Channel.init topic
-                            |> Channel.on event (\m -> NewMsg m)
-                            |> Channel.withDebug
-
-                    channels_ =
-                        model.channels ++ [ channel ]
-                in
-                    ( { model | channels = channels_ }, Cmd.none, [] )
-
-        NewMsg msg ->
             let
-                t =
-                    Debug.log "original" (toString msg)
+                ( model_, cmd ) =
+                    if model.defer then
+                        ( model, Utils.delay 0.5 <| JoinChannel args )
+                    else
+                        let
+                            ( topic, event ) =
+                                args
 
+                            channel =
+                                Channel.init topic
+                                    |> Channel.on event (\m -> NewNotification m)
+                                    |> Channel.withDebug
+
+                            channels_ =
+                                model.channels ++ [ channel ]
+                        in
+                            ( { model | channels = channels_ }, Cmd.none )
+            in
+                ( model_, cmd, [] )
+
+        NewNotification msg ->
+            let
                 meta =
                     getWSMsgMeta msg
 
@@ -66,17 +69,13 @@ update msg model core =
 
                         WSResponse ->
                             let
-                                event =
-                                    decodeEvent msg
+                                d =
+                                    Debug.log
+                                        "received a reply on an event topic"
+                                        (toString msg)
                             in
-                                DispatchEvent event
+                                NoOp
 
-                        -- WSResponse ->
-                        --     let
-                        --         request =
-                        --             getRequest msg
-                        --     in
-                        --         DispatchResponse (requestId, body, code)
                         WSInvalid ->
                             NoOp
             in
@@ -88,6 +87,6 @@ update msg model core =
                     getResponse msg
 
                 coreMsg =
-                    HttpReceivedMessage ( requestId, code, meta.data )
+                    NewResponse ( requestId, code, meta.data )
             in
                 ( model, Cmd.none, [ coreMsg ] )
