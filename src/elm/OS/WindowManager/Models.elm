@@ -12,6 +12,7 @@ module OS.WindowManager.Models
         , updateWindowPosition
         , windowsFoldr
         , hasWindowOpen
+        , toggleMaximizeWindow
         )
 
 import Dict
@@ -36,6 +37,7 @@ type alias WindowID =
 type alias Position =
     { x : Float
     , y : Float
+    , z : Int
     }
 
 
@@ -57,6 +59,7 @@ type alias Window =
     , position : Position
     , title : String
     , size : Size
+    , maximized : Bool
     }
 
 
@@ -64,9 +67,9 @@ type alias Windows =
     Dict.Dict WindowID Window
 
 
-initialPosition : Position
-initialPosition =
-    Position 32 32
+initialPosition : Int -> Position
+initialPosition off =
+    Position (toFloat (32 * off)) (toFloat (32 * off)) off
 
 
 initialWindows : Dict.Dict WindowID Window
@@ -98,9 +101,10 @@ newWindow model window =
             { id = (Uuid.toString id)
             , window = window
             , state = Open
-            , position = initialPosition
+            , position = initialPosition (Dict.size model.windows)
             , title = "Sem titulo"
             , size = defaultSize
+            , maximized = False
             }
     in
         ( window_, seed )
@@ -167,7 +171,7 @@ updateWindowPosition model delta =
                                     window.position.y + dy
 
                                 position_ =
-                                    Position x_ y_
+                                    Position x_ y_ window.position.z
 
                                 window_ =
                                     { window | position = position_ }
@@ -198,3 +202,28 @@ hasWindowOpen model window =
             Dict.filter filter model.windows
     in
         not (Dict.isEmpty open)
+
+
+toggleMaximizeWindow : Model -> WindowID -> Windows
+toggleMaximizeWindow model id =
+    case (getWindow model id) of
+        Nothing ->
+            model.windows
+
+        Just window ->
+            let
+                window_ =
+                    { window | maximized = not window.maximized }
+
+                update_ w =
+                    case w of
+                        Just window ->
+                            Just window_
+
+                        Nothing ->
+                            Nothing
+
+                windows_ =
+                    Dict.update id update_ model.windows
+            in
+                windows_
