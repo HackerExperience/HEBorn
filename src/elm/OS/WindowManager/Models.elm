@@ -115,16 +115,46 @@ newWindow model window =
         ( window_, seed )
 
 
+getMinimizedWindow : Model -> GameWindow -> Windows
+getMinimizedWindow model winType =
+    Dict.filter
+        (\id oWindow ->
+            ((oWindow.state == Minimized)
+                && (oWindow.window == winType)
+            )
+        )
+        model.windows
+
+
+countMinimizedWindow : Model -> GameWindow -> Int
+countMinimizedWindow model winType =
+    Dict.size
+        (getMinimizedWindow model winType)
+
+
+unMinimizeIfGameWindow : Window -> GameWindow -> Window
+unMinimizeIfGameWindow window winType =
+    if (window.window == winType) then
+        { window | state = Open }
+    else
+        window
+
+
 openWindow : Model -> GameWindow -> ( Windows, Seed )
 openWindow model window =
-    let
-        ( window_, seed_ ) =
-            newWindow model window
+    if ((countMinimizedWindow model window) > 0) then
+        ( Dict.map (\id oWindow -> (unMinimizeIfGameWindow oWindow window)) model.windows
+        , model.seed
+        )
+    else
+        let
+            ( window_, seed_ ) =
+                newWindow model window
 
-        windows_ =
-            Dict.insert window_.id window_ model.windows
-    in
-        ( windows_, seed_ )
+            windows_ =
+                Dict.insert window_.id window_ model.windows
+        in
+            ( windows_, seed_ )
 
 
 closeWindow : Model -> WindowID -> Windows
