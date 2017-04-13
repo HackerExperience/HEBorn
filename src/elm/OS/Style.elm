@@ -3,7 +3,8 @@ module OS.Style exposing (..)
 import Css exposing (..)
 import Css.Elements exposing (body,  main_, header, footer)
 import Css.Namespace exposing (namespace)
-import Utils exposing (flexContainerVert, flexContainerHorz, globalShadow, transition, easingToString, Easing(..))
+import Css.Utils exposing (transition, easingToString, Easing(..))
+import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 
 type Id
     = Dashboard
