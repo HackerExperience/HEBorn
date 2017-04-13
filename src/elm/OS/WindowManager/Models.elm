@@ -69,7 +69,11 @@ type alias Windows =
 
 initialPosition : Int -> Position
 initialPosition off =
-    Position (toFloat (32 * off)) (toFloat (32 * off)) off
+    Position (toFloat (32 * off)) (44 + (toFloat (32 * off))) off
+
+
+
+-- initialPosition: 44 is header height hardwritten
 
 
 initialWindows : Dict.Dict WindowID Window

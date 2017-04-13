@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Html.Attributes exposing (attribute)
-import Css exposing (transform, translate2, asPairs, px, height, width, int, zIndex)
+import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
@@ -137,7 +137,8 @@ headerButtons id =
 windowStyle : Window -> Html.Attribute CoreMsg
 windowStyle window =
     styles
-        [ transform (translate2 (px window.position.x) (px window.position.y))
+        [ left (px window.position.x)
+        , top (px window.position.y)
         , width (px window.size.width)
         , height (px window.size.height)
         , zIndex (int window.position.z)
