@@ -2,8 +2,10 @@ module OS.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Utils exposing (globalShadow, pseudoContent, flexContainerHorz, attrSelector)
-
+import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Common exposing (globalShadow, flexContainerHorz)
+import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
+import Css.FontAwesome.Icons as FA exposing (..)
 
 type Css
     = Window
@@ -31,7 +33,6 @@ css =
                 [ property "transform" "none !important"
                 , property "width" "100% !important"
                 , property "height" "100% !important"
-                -- OR instead use inline-style
                 , borderRadius (px 0)
                 , children
                     [ class WindowBody
@@ -63,7 +64,7 @@ css =
             [ flex (int 1)
             , textAlign center
             , before
-                [ fontFamilies ["FontAwesome"]
+                [ fontAwesome
                 , minWidth (px 14)
                 , textAlign center
                 , float left
@@ -71,11 +72,11 @@ css =
             ]
         , attrSelector "wmHeaderTitle" "data-icon" "=" "signup"
             [before
-                [ pseudoContent "\"\\f2ba\"" ]
+                [ faIcon FA.addressBookO ]
             ]
         , attrSelector "wmHeaderTitle" "data-icon" "=" "explorer"
             [before
-                [ pseudoContent "\"\\f1c6\"" ]
+                [ faIcon FA.fileArchiveO ]
             ]
         , class HeaderButtons
             [ flex (int 0)
@@ -91,16 +92,16 @@ css =
             , marginBottom (px -2)
             , color (hex "FFF")
             , before
-                [ fontFamilies ["FontAwesome"]
+                [ fontAwesome
                 , textAlign center
                 ]
             ]
         , class HeaderBtnClose
             [ before
-                [ pseudoContent "\"\\f057\"" ]
+                [ faIcon FA.timesCircle ]
             ]
         , class HeaderBtnMaximize
             [ before
-                [ pseudoContent "\"\\f065\"" ]
+                [ faIcon FA.expand ]
             ]
         ]

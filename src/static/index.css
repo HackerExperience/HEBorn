@@ -190,11 +190,11 @@ footer:hover {
     display: inline-block;
 }
 
-.dockItem[data-app^=signup]::after {
+.dockItem[data-app=signup]::after {
     content: "\f2ba";
 }
 
-.dockItem[data-app^=explorer]::after {
+.dockItem[data-app=explorer]::after {
     content: "\f1c6";
 }
 

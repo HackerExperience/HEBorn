@@ -2,7 +2,10 @@ module OS.Dock.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Utils exposing (flexContainerHorz, globalShadow, pseudoContent, emptyContent)
+import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
+import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
+import Css.FontAwesome.Icons as FA exposing (..)
 
 type Id
     = DockMain
@@ -45,7 +48,7 @@ css =
             , color (hex "FFF")
             , globalShadow
             , after
-                [ fontFamilies ["FontAwesome"]
+                [ fontAwesome
                 , fontSize (px 24)
                 , minWidth (px 30)
                 , minHeight (px 30)
@@ -53,12 +56,12 @@ css =
                 , display inlineBlock
                 ]
             ]
-        , selector ".dockItem[data-app^=signup]"
+        , attrSelector "dockItem" "data-app" "=" "signup"
             [ after
-                [ pseudoContent "\"\\f2ba\"" ]
+                [ faIcon FA.addressBookO ]
             ]
-        , selector ".dockItem[data-app^=explorer]"
+        , attrSelector "dockItem" "data-app" "=" "explorer"
             [ after
-                [ pseudoContent "\"\\f1c6\"" ]
+                [ faIcon FA.fileArchiveO ]
             ]
         ]
