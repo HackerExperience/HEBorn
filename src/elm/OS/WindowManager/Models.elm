@@ -69,7 +69,7 @@ type alias Windows =
 
 initialPosition : Int -> Position
 initialPosition off =
-    Position (toFloat (32*off)) (toFloat (32*off)) off
+    Position (toFloat (32 * off)) (toFloat (32 * off)) off
 
 
 initialWindows : Dict.Dict WindowID Window
@@ -202,6 +202,7 @@ hasWindowOpen model window =
             Dict.filter filter model.windows
     in
         not (Dict.isEmpty open)
+
 
 toggleMaximizeWindow : Model -> WindowID -> Windows
 toggleMaximizeWindow model id =

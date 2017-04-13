@@ -4,6 +4,7 @@ import Css exposing (..)
 import Css.Elements exposing (body, li, main_, header, footer, nav)
 import Css.Namespace exposing (namespace)
 
+
 css : Stylesheet
 css =
     (stylesheet << namespace "core")
@@ -18,7 +19,7 @@ css =
             , backgroundColor (rgb 57 109 166)
             , fontFamily sansSerif
             ]
-        , id "app"    
+        , id "app"
             [ width (pct 100)
             , minHeight (pct 100)
             ]

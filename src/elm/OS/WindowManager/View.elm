@@ -34,7 +34,10 @@ styles =
     Css.asPairs >> style
 
 
+
 -- rendrWindows : CoreModel -> Html CoreMsg
+
+
 renderWindows model =
     (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
@@ -57,9 +60,9 @@ renderWindow model window =
                 window
                 (Html.map MsgApp (Html.map MsgExplorer (Apps.Explorer.View.view model.apps.explorer model.game)))
 
+
 widndowClasses window =
-    if (window.maximized)
-    then
+    if (window.maximized) then
         class
             [ Css.Window
             , Css.Maximizeme
@@ -80,14 +83,16 @@ windowWrapper window view =
             [ view ]
         ]
 
+
 windowTitle : Window -> String
 windowTitle window =
     case window.window of
         SignUpWindow ->
             "Sign Up"
-        
+
         ExplorerWindow ->
             "File Explorer"
+
 
 windowIcon : Window -> String
 windowIcon window =
@@ -112,10 +117,11 @@ header window =
 
 headerTitle : String -> String -> Html Msg
 headerTitle title icon =
-    div [ class [ Css.HeaderTitle ]
+    div
+        [ class [ Css.HeaderTitle ]
         , attribute "data-icon" icon
         ]
-            [ text title ]
+        [ text title ]
 
 
 headerButtons : WindowID -> Html Msg

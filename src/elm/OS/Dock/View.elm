@@ -43,7 +43,8 @@ renderApplications model =
 
 renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
-    div [ class [ Css.Item ]
+    div
+        [ class [ Css.Item ]
         , onClick (MsgOS (MsgWM (OpenWindow application.window)))
         , attribute "data-app" application.name
         ]
