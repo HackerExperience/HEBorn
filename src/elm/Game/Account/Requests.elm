@@ -1,5 +1,7 @@
 module Game.Account.Requests exposing (..)
 
+import Json.Decode exposing (Decoder, string, decodeString, dict)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Models
     exposing
         ( createRequestData
@@ -8,6 +10,8 @@ import Requests.Models
             ( NewRequest
             , RequestLogout
             )
+        , RequestTopic(TopicAccountLogout)
+        , TopicContext
         , Response(ResponseLogout)
         , ResponseDecoder
         , ResponseForLogout(..)
@@ -17,15 +21,16 @@ import Game.Messages exposing (GameMsg(Request))
 import Game.Models exposing (GameModel, ResponseType)
 
 
-requestLogout : String -> Cmd GameMsg
-requestLogout token =
+requestLogout : TopicContext -> String -> Cmd GameMsg
+requestLogout accountId token =
     queueRequest
         (Request
             (NewRequest
                 (createRequestData
                     RequestLogout
                     decodeLogout
-                    "account.logout"
+                    TopicAccountLogout
+                    accountId
                     (RequestLogoutPayload
                         { token = token
                         }

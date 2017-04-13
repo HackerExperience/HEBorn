@@ -9,6 +9,22 @@ module Requests.Update
 import Uuid
 import Random.Pcg exposing (step)
 import Dict
+import Utils
+import Driver.Websocket.Models
+    exposing
+        ( encodeWSRequest
+        , getTopicChannel
+        , getTopicMsg
+        , getChannelAddress
+        )
+import Driver.Websocket.Websocket
+import Driver.Http.Models
+    exposing
+        ( encodeHTTPRequest
+        , getTopicPath
+        , httpPayloadToString
+        )
+import Driver.Http.Http
 import Requests.Models
     exposing
         ( Model
@@ -19,14 +35,14 @@ import Requests.Models
         , Response(..)
         , NewRequestData
         , ResponseDecoder
+        , RequestDriver(..)
         , noopDecoder
         , storeRequest
-        , encodeRequest
+        , getTopicDriver
         )
-import WS.WS
-import Utils
 import Core.Components exposing (Component(ComponentInvalid))
 import Core.Models exposing (CoreModel)
+import Core.Messages exposing (CoreMsg)
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
@@ -73,20 +89,31 @@ need to correctly route the response to the component (the 3-tuple
 which the server will sent with the response (on the key "request_id").
 
 -}
-makeRequest : CoreModel -> NewRequestData -> Component -> ( CoreModel, Cmd msg )
+makeRequest : CoreModel -> NewRequestData -> Component -> ( CoreModel, Cmd CoreMsg )
 makeRequest core requestData component =
     let
         model =
             core.requests
 
-        ( request, payload, response ) =
+        request_id =
+            model.uuid
+
+        ( request, topic, context, payload, decoder ) =
             requestData
 
+        payloadEncoder =
+            case (getTopicDriver topic) of
+                DriverWebsocket ->
+                    encodeWSRequest
+
+                DriverHTTP ->
+                    encodeHTTPRequest
+
         payload_ =
-            encodeRequest { payload | request_id = model.uuid }
+            payloadEncoder payload
 
         requests_ =
-            storeRequest model model.uuid component request response
+            storeRequest model request_id component request decoder
 
         ( uuid_, seed_ ) =
             step Uuid.uuidGenerator model.seed
@@ -96,8 +123,40 @@ makeRequest core requestData component =
             , seed = seed_
             , uuid = Uuid.toString uuid_
             }
+
+        cmd =
+            case (getTopicDriver topic) of
+                DriverWebsocket ->
+                    let
+                        message =
+                            getTopicMsg topic
+
+                        channel =
+                            (getTopicChannel topic)
+
+                        channelAddress =
+                            getChannelAddress channel context
+                    in
+                        Driver.Websocket.Websocket.send
+                            channelAddress
+                            message
+                            request_id
+                            payload_
+
+                DriverHTTP ->
+                    let
+                        path =
+                            getTopicPath topic
+
+                        body =
+                            httpPayloadToString payload_
+                    in
+                        Driver.Http.Http.send
+                            path
+                            request_id
+                            body
     in
-        ( { core | requests = model_ }, WS.WS.send payload_ )
+        ( { core | requests = model_ }, cmd )
 
 
 {-| queueRequest is the function a module should call to let Elm know we want

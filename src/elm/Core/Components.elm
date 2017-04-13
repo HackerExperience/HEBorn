@@ -6,6 +6,6 @@ type Component
     | ComponentOS
     | ComponentApp
     | ComponentExplorer
-    | ComponentSignUp
     | ComponentLogin
+    | ComponentSignUp
     | ComponentInvalid

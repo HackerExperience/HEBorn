@@ -1,18 +1,16 @@
-module Apps.SignUp.View exposing (..)
+module Landing.SignUp.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Game.Models exposing (GameModel)
-import Apps.SignUp.Messages exposing (Msg(..))
-import Apps.SignUp.Models exposing (Model)
-import Apps.SignUp.Context.Models exposing (Context(..))
-import Apps.SignUp.Context.View exposing (contextView, contextOnly)
+import Landing.SignUp.Messages exposing (Msg(..))
+import Landing.SignUp.Models exposing (Model)
 
 
 view : Model -> GameModel -> Html Msg
 view model core =
-    div [ contextOnly ]
+    div []
         [ Html.form
             [ id "signup-form"
             , action "javascript:void(0);"
@@ -50,8 +48,6 @@ view model core =
             , div [ class "validation-error" ] [ text (viewErrorsPassword model) ]
             , button [ class ("signup-button " ++ signUpButtonClass model), onClick SubmitForm ] [ text "Sign up" ]
             ]
-        , text "oi"
-        , contextView model
         ]
 
 

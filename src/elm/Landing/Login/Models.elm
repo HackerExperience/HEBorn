@@ -1,4 +1,4 @@
-module Apps.Login.Models exposing (..)
+module Landing.Login.Models exposing (..)
 
 
 type alias FormError =

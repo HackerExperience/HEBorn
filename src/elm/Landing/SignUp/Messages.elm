@@ -1,15 +1,17 @@
-module Apps.Login.Messages exposing (..)
+module Landing.SignUp.Messages exposing (Msg(..))
 
 import Events.Models
 import Requests.Models
 
 
 type Msg
-    = SubmitLogin
+    = SubmitForm
     | SetUsername String
     | ValidateUsername
     | SetPassword String
     | ValidatePassword
+    | SetEmail String
+    | ValidateEmail
     | Event Events.Models.Event
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response

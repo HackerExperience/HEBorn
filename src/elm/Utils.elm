@@ -3,9 +3,12 @@ module Utils
         ( msgToCmd
         , boolToString
         , maybeToString
+        , delay
         )
 
+import Time
 import Task
+import Process
 
 
 -- I know this is not how it's supposed to be done but until I get a better
@@ -35,3 +38,10 @@ maybeToString maybe =
 
         Nothing ->
             ""
+
+
+delay : Float -> msg -> Cmd msg
+delay seconds msg =
+    Process.sleep (Time.second * seconds)
+        |> Task.andThen (always <| Task.succeed msg)
+        |> Task.perform identity

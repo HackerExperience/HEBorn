@@ -1,6 +1,6 @@
-module Apps.Login.Requests exposing (..)
+module Landing.Login.Requests exposing (..)
 
-import Json.Decode exposing (Decoder, string, decodeString, dict)
+import Json.Decode exposing (Decoder, string, decodeString, dict, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Models
     exposing
@@ -14,46 +14,37 @@ import Requests.Models
             , RequestUsername
             , RequestLogin
             )
+        , RequestTopic(TopicAccountLogin)
+        , emptyTopicContext
         , Response
             ( ResponseUsernameExists
             , ResponseLogin
             , ResponseInvalid
             )
         , ResponseDecoder
+        , ResponseCode(..)
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
         , ResponseForLogin(..)
         , ResponseLoginPayload
         )
 import Requests.Update exposing (queueRequest)
-import Requests.Decoder exposing (decodeRequest)
 import Core.Messages exposing (CoreMsg)
+import Core.Models exposing (CoreModel)
 import Core.Dispatcher exposing (callAccount)
 import Game.Account.Messages exposing (AccountMsg(Login))
-import Game.Models exposing (GameModel)
-import Apps.Login.Messages exposing (Msg(Request))
-import Apps.Login.Models exposing (Model)
+import Landing.Login.Messages exposing (Msg(Request))
+import Landing.Login.Models exposing (Model)
 
 
 type alias ResponseType =
     Response
     -> Model
-    -> GameModel
+    -> CoreModel
     -> ( Model, Cmd Msg, List CoreMsg )
 
 
 
--- requestUsernameExists : String -> Cmd Msg
--- requestUsernameExists username =
---     queueRequest (Request
---                       (NewRequest
---                            (createRequestData
---                                 RequestUsername
---                                 decodeUsernameExists
---                                 "account.query"
---                                 (RequestUsernamePayload
---                                      { user = username
---                                      }))))
 {-
    Request: Sign Up
    Description: Create a new account
@@ -68,7 +59,8 @@ requestLogin username password =
                 (createRequestData
                     RequestLogin
                     decodeLogin
-                    "account.login"
+                    TopicAccountLogin
+                    emptyTopicContext
                     (RequestLoginPayload
                         { password = password
                         , username = username
@@ -82,20 +74,28 @@ requestLogin username password =
 decodeLogin : ResponseDecoder
 decodeLogin rawMsg code =
     let
+        k =
+            Debug.log "<<<" (rawMsg)
+
         decoder =
             decode ResponseLoginPayload
                 |> required "token" string
+                |> required "account_id" string
     in
         case code of
-            200 ->
-                case decodeRequest decoder rawMsg of
+            ResponseCodeOk ->
+                case decodeValue decoder rawMsg of
                     Ok msg ->
-                        ResponseLogin (ResponseLoginOk msg.data)
+                        ResponseLogin (ResponseLoginOk msg)
 
-                    Err _ ->
-                        ResponseLogin (ResponseLoginInvalid)
+                    Err r ->
+                        let
+                            k =
+                                Debug.log ">>>>>>>" (toString r)
+                        in
+                            ResponseLogin (ResponseLoginInvalid)
 
-            404 ->
+            ResponseCodeNotFound ->
                 ResponseLogin (ResponseLoginFailed)
 
             _ ->
@@ -109,7 +109,7 @@ requestLoginHandler response model core =
             let
                 loginCmd =
                     callAccount
-                        (Login (Just data.token))
+                        (Login data)
             in
                 ( { model | loginFailed = False }, Cmd.none, [ loginCmd ] )
 

@@ -1,9 +1,9 @@
 module Requests.Decoder exposing (decodeRequest)
 
-import Json.Decode exposing (Decoder, decodeString)
-import WS.Models exposing (WSMsg, decodeWSMsg)
+import Json.Decode exposing (Decoder, decodeValue)
+import Driver.Websocket.Models exposing (WSMsg, decodeWSMsg)
 
 
-decodeRequest : Decoder a -> String -> Result String (WSMsg a)
+decodeRequest : Decoder a -> Json.Decode.Value -> Result String a
 decodeRequest dataDecoder msg =
-    decodeString (decodeWSMsg dataDecoder) msg
+    decodeValue dataDecoder msg

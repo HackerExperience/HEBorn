@@ -8,23 +8,37 @@ module Core.Messages
         , getRequestMsg
         )
 
+import Json.Decode
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
-import Requests.Models exposing (Request, RequestStoreData, Response, ResponseDecoder)
+import Requests.Models
+    exposing
+        ( Request
+        , RequestStoreData
+        , RequestID
+        , Response
+        , ResponseDecoder
+        , ResponseCode
+        )
 import Core.Components exposing (..)
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
 import Apps.Messages exposing (AppMsg(..), appBinds)
+import Landing.Messages exposing (LandMsg(..), landBinds)
+import Driver.Websocket.Messages
 
 
 type CoreMsg
     = MsgGame Game.Messages.GameMsg
     | MsgOS OS.Messages.OSMsg
     | MsgApp Apps.Messages.AppMsg
+    | MsgLand Landing.Messages.LandMsg
+    | MsgWebsocket Driver.Websocket.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
-    | DispatchResponse RequestStoreData ( String, Int )
-    | WSReceivedMessage String
+    | DispatchResponse RequestStoreData ( ResponseCode, Json.Decode.Value )
+      -- | WSReceivedMessage String
+    | NewResponse ( RequestID, ResponseCode, Json.Decode.Value )
     | NoOp
 
 
@@ -63,6 +77,7 @@ type alias RequestBinds =
     { game : Request -> Response -> Game.Messages.GameMsg
     , os : Request -> Response -> OS.Messages.OSMsg
     , apps : Request -> Response -> Apps.Messages.AppMsg
+    , land : Request -> Response -> Landing.Messages.LandMsg
     }
 
 
@@ -71,6 +86,7 @@ requestBinds =
     { game = Game.Messages.Response
     , os = OS.Messages.Response
     , apps = Apps.Messages.Response
+    , land = Landing.Messages.Response
     }
 
 
@@ -86,14 +102,17 @@ getRequestMsg component request response =
         ComponentApp ->
             MsgApp (requestBinds.apps request response)
 
-        ComponentLogin ->
+        ComponentExplorer ->
             MsgApp
-                (MsgLogin
-                    (appBinds.login request response)
-                )
+                (MsgExplorer (appBinds.explorer request response))
+
+        ComponentLogin ->
+            MsgLand
+                (MsgLogin (landBinds.login request response))
+
+        ComponentSignUp ->
+            MsgLand
+                (MsgSignUp (landBinds.signUp request response))
 
         ComponentInvalid ->
-            NoOp
-
-        _ ->
             NoOp

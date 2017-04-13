@@ -4,17 +4,25 @@ module Requests.Models
         , initialModel
         , RequestID
         , Request(..)
-        , NewRequestData
         , RequestStore
         , RequestStoreData
         , RequestPayload
         , RequestPayloadArgs(..)
+        , RequestDriver(..)
+        , RequestTopic(..)
+        , TopicContext
+        , NewRequestData
         , Response(..)
+        , ResponseCode(..)
         , ResponseDecoder
+        , getResponseCode
+        , invalidRequestId
         , noopDecoder
         , createRequestData
-        , encodeRequest
+        , encodeData
         , storeRequest
+        , getTopicDriver
+        , emptyTopicContext
           -- Custom requests
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
@@ -23,6 +31,8 @@ module Requests.Models
         , ResponseForLogin(..)
         , ResponseLoginPayload
         , ResponseForLogout(..)
+        , ResponseForEventCool(..)
+        , ResponseEventCoolPayload
         )
 
 import Dict
@@ -77,7 +87,7 @@ type alias RequestStore =
 
 
 type alias NewRequestData =
-    ( Request, RequestPayload, ResponseDecoder )
+    ( Request, RequestTopic, TopicContext, RequestPayload, ResponseDecoder )
 
 
 
@@ -88,7 +98,7 @@ type alias NewRequestData =
 
 
 type alias RequestPayload =
-    { topic : String
+    { topic : RequestTopic
     , args : RequestPayloadArgs
     , request_id : RequestID
     }
@@ -142,6 +152,7 @@ type Response
     | ResponseSignUp ResponseForSignUp
     | ResponseLogin ResponseForLogin
     | ResponseLogout ResponseForLogout
+    | ResponseEventCool ResponseForEventCool
     | ResponseEmpty
     | ResponseInvalid
 
@@ -155,7 +166,7 @@ type Response
 
 
 type alias ResponseDecoder =
-    RequestID -> Int -> Response
+    Json.Encode.Value -> ResponseCode -> Response
 
 
 
@@ -169,7 +180,9 @@ type alias ResponseDecoder =
 
 
 type ResponseCode
-    = Number
+    = ResponseCodeOk
+    | ResponseCodeNotFound
+    | ResponseCodeUnknownError
 
 
 
@@ -204,7 +217,9 @@ type ResponseForLogin
 
 
 type alias ResponseLoginPayload =
-    { token : String }
+    { token : String
+    , account_id : String
+    }
 
 
 type ResponseForLogout
@@ -212,25 +227,25 @@ type ResponseForLogout
     | ResponseLogoutInvalid
 
 
-{-| encodeRequest will encode the payload to a jsonified string.
--}
-encodeRequest : RequestPayload -> String
-encodeRequest payload =
-    Json.Encode.encode 0
-        (Json.Encode.object
-            [ ( "topic", Json.Encode.string payload.topic )
-            , ( "args", encodeArgs payload.args )
-            , ( "request_id", Json.Encode.string payload.request_id )
-            ]
-        )
+
+{- Responses for Events -}
 
 
-{-| encodeArgs is the specific encoding part of the parent encodeRequest. Since
+type ResponseForEventCool
+    = ResponseEventCoolOk ResponseEventCoolPayload
+    | ResponseEventCoolInvalid
+
+
+type alias ResponseEventCoolPayload =
+    { foo : String }
+
+
+{-| encodeData is the specific encoding part of the parent encodeRequest. Since
 the content of `args` varies for each request, we must tell Elm how to encode
 each RequestPayloadArgs.
 -}
-encodeArgs : RequestPayloadArgs -> Json.Encode.Value
-encodeArgs args =
+encodeData : RequestPayloadArgs -> Json.Encode.Value
+encodeData args =
     case args of
         RequestUsernamePayload args ->
             Json.Encode.object
@@ -258,11 +273,52 @@ encodeArgs args =
                 [ ( "token", Json.Encode.string args.token ) ]
 
 
+type RequestDriver
+    = DriverWebsocket
+    | DriverHTTP
+
+
+type alias TopicContext =
+    String
+
+
+emptyTopicContext : TopicContext
+emptyTopicContext =
+    ""
+
+
+type RequestTopic
+    = TopicAccountLogin
+    | TopicAccountCreate
+    | TopicAccountLogout
+
+
+getTopicDriver : RequestTopic -> RequestDriver
+getTopicDriver topic =
+    case topic of
+        TopicAccountCreate ->
+            DriverHTTP
+
+        TopicAccountLogin ->
+            DriverHTTP
+
+        _ ->
+            DriverWebsocket
+
+
 {-| Aggregates the required data to create a request into a 3-tuple defined by RequestData
 -}
-createRequestData : Request -> ResponseDecoder -> String -> RequestPayloadArgs -> NewRequestData
-createRequestData request decoder topic args =
+createRequestData :
+    Request
+    -> ResponseDecoder
+    -> RequestTopic
+    -> TopicContext
+    -> RequestPayloadArgs
+    -> NewRequestData
+createRequestData request decoder topic context args =
     ( request
+    , topic
+    , context
     , { topic = topic
       , args = args
       , request_id = ""
@@ -311,3 +367,21 @@ storeRequest model request_id component request response =
 removeRequest : Model -> RequestID -> RequestStore
 removeRequest model request_id =
     Dict.remove request_id model.requests
+
+
+invalidRequestId : RequestID
+invalidRequestId =
+    ""
+
+
+getResponseCode : Int -> ResponseCode
+getResponseCode httpCode =
+    case httpCode of
+        200 ->
+            ResponseCodeOk
+
+        404 ->
+            ResponseCodeNotFound
+
+        _ ->
+            ResponseCodeUnknownError

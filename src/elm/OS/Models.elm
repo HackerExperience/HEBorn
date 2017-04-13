@@ -1,7 +1,7 @@
 module OS.Models exposing (Model, initialModel)
 
-import OS.WindowManager.Models exposing (Model, initialModel)
-import OS.Dock.Models exposing (Model, initialModel)
+import OS.WindowManager.Models
+import OS.Dock.Models
 
 
 type alias Model =

@@ -21,7 +21,6 @@ import OS.WindowManager.Messages exposing (Msg(..))
 import OS.WindowManager.Style as Css
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.View
-import Apps.SignUp.View
 
 
 { id, class, classList } =
@@ -46,11 +45,6 @@ renderLoop model id window acc =
 renderWindow : CoreModel -> Window -> Html CoreMsg
 renderWindow model window =
     case window.window of
-        SignUpWindow ->
-            windowWrapper
-                window
-                (Html.map MsgApp (Html.map MsgSignUp (Apps.SignUp.View.view model.apps.signUp model.game)))
-
         ExplorerWindow ->
             windowWrapper
                 window

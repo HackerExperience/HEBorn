@@ -1,6 +1,6 @@
 module Game.Update exposing (..)
 
-import Update.Extra as Update
+import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Requests exposing (responseHandler)
@@ -12,76 +12,60 @@ import Game.Software.Update
 import Game.Meta.Update
 
 
-update : GameMsg -> GameModel -> ( GameModel, Cmd GameMsg )
+update : GameMsg -> GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg )
 update msg model =
     case msg of
         MsgAccount subMsg ->
             let
-                ( account_, cmd, gameMsg ) =
+                ( account_, cmd, coreMsg ) =
                     Game.Account.Update.update subMsg model.account model
             in
-                ( { model | account = account_ }, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( { model | account = account_ }, cmd, coreMsg )
 
         MsgServer subMsg ->
             let
-                ( server_, cmd, gameMsg ) =
+                ( server_, cmd, coreMsg ) =
                     Game.Server.Update.update subMsg model.server model
             in
-                ( { model | server = server_ }, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( { model | server = server_ }, cmd, coreMsg )
 
         MsgSoftware subMsg ->
             let
-                ( software_, cmd, gameMsg ) =
+                ( software_, cmd, coreMsg ) =
                     Game.Software.Update.update subMsg model.software model
             in
-                ( { model | software = software_ }, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( { model | software = software_ }, cmd, coreMsg )
 
         MsgNetwork subMsg ->
             let
-                ( network_, cmd, gameMsg ) =
+                ( network_, cmd, coreMsg ) =
                     Game.Network.Update.update subMsg model.network model
             in
-                ( { model | network = network_ }, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( { model | network = network_ }, cmd, coreMsg )
 
         MsgMeta subMsg ->
             let
-                ( meta_, cmd, gameMsg ) =
+                ( meta_, cmd, coreMsg ) =
                     Game.Meta.Update.update subMsg model.meta model
             in
-                ( { model | meta = meta_ }, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( { model | meta = meta_ }, cmd, coreMsg )
 
         Event event ->
             let
-                ( model_, cmd ) =
+                ( model_, cmd, coreMsg ) =
                     eventHandler model event
             in
-                ( model_, cmd )
+                ( model_, cmd, coreMsg )
 
         Request _ ->
-            ( model, Cmd.none )
+            ( model, Cmd.none, [] )
 
         Response request data ->
             let
-                ( model_, cmd, gameMsg ) =
+                ( model_, cmd, coreMsg ) =
                     responseHandler request data model
             in
-                ( model_, cmd )
-                    |> Update.andThen update (getGameMsg gameMsg)
+                ( model_, cmd, coreMsg )
 
         NoOp ->
-            ( model, Cmd.none )
-
-
-getGameMsg : List GameMsg -> GameMsg
-getGameMsg msg =
-    case msg of
-        [] ->
-            NoOp
-
-        m :: _ ->
-            m
+            ( model, Cmd.none, [] )

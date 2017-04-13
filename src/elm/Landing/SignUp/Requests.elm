@@ -1,4 +1,4 @@
-module Apps.SignUp.Requests exposing (..)
+module Landing.SignUp.Requests exposing (..)
 
 import Requests.Models
     exposing
@@ -12,12 +12,15 @@ import Requests.Models
             , RequestUsername
             , RequestSignUp
             )
+        , RequestTopic(TopicAccountCreate)
+        , emptyTopicContext
         , Response
             ( ResponseUsernameExists
             , ResponseSignUp
             , ResponseInvalid
             )
         , ResponseDecoder
+        , ResponseCode(..)
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
         , ResponseForSignUp(..)
@@ -28,15 +31,15 @@ import Requests.Decoder exposing (decodeRequest)
 import Json.Decode exposing (Decoder, string, decodeString, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Apps.SignUp.Messages exposing (Msg(Request))
-import Apps.SignUp.Models exposing (Model)
+import Core.Models exposing (CoreModel)
+import Landing.SignUp.Messages exposing (Msg(Request))
+import Landing.SignUp.Models exposing (Model)
 
 
 type alias ResponseType =
     Response
     -> Model
-    -> GameModel
+    -> CoreModel
     -> ( Model, Cmd Msg, List CoreMsg )
 
 
@@ -66,7 +69,8 @@ requestSignUp email username password =
                 (createRequestData
                     RequestSignUp
                     decodeSignUp
-                    "account.create"
+                    TopicAccountCreate
+                    emptyTopicContext
                     (RequestSignUpPayload
                         { email = email
                         , password = password
@@ -88,20 +92,15 @@ decodeSignUp rawMsg code =
                 |> required "account_id" string
     in
         case code of
-            200 ->
+            ResponseCodeOk ->
                 case decodeRequest decoder rawMsg of
                     Ok msg ->
-                        ResponseSignUp (ResponseSignUpOk msg.data)
+                        ResponseSignUp (ResponseSignUpOk msg)
 
                     Err _ ->
                         Debug.log "errrr"
                             ResponseSignUp
                             (ResponseSignUpInvalid)
-
-            400 ->
-                Debug.log "baaaaaaa"
-                    ResponseSignUp
-                    (ResponseSignUpInvalid)
 
             _ ->
                 Debug.log "code is"

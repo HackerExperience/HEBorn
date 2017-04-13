@@ -1,10 +1,10 @@
-module Apps.Login.Update exposing (..)
+module Landing.Login.Update exposing (..)
 
 import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Apps.Login.Models exposing (Model)
-import Apps.Login.Messages exposing (Msg(..))
-import Apps.Login.Requests
+import Core.Models exposing (CoreModel)
+import Landing.Login.Models exposing (Model)
+import Landing.Login.Messages exposing (Msg(..))
+import Landing.Login.Requests
     exposing
         ( responseHandler
         , requestLogin
@@ -12,7 +12,7 @@ import Apps.Login.Requests
         )
 
 
-update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
+update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
 update msg model core =
     case msg of
         SubmitLogin ->

@@ -1,13 +1,11 @@
 module Core.Update exposing (update)
 
 import Update.Extra as Update
-import Requests.Models exposing (Request(RequestInvalid, NewRequest))
+import Utils
+import Requests.Models exposing (Request(RequestInvalid, NewRequest), getResponseCode)
 import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
-import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
-import WS.WS exposing (getWSMsgMeta, getWSMsgType)
-import WS.Models exposing (WSMsgType(WSResponse, WSEvent, WSInvalid))
 import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
 import Core.Models exposing (CoreModel)
 import Core.Components exposing (Component(..))
@@ -17,6 +15,9 @@ import Game.Update
 import Game.Messages
 import Apps.Messages
 import Apps.Update
+import Landing.Messages
+import Landing.Update
+import Driver.Websocket.Update
 
 
 update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
@@ -32,10 +33,12 @@ update msg model =
 
             MsgGame subMsg ->
                 let
-                    ( game_, cmd ) =
+                    ( game_, cmd, coreMsg ) =
                         Game.Update.update subMsg model.game
                 in
                     ( { model | game = game_ }, Cmd.map MsgGame cmd )
+                        -- |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- OS
             MsgOS (OS.Messages.Request (NewRequest requestData)) ->
@@ -59,6 +62,27 @@ update msg model =
                         Apps.Update.update subMsg model.apps model
                 in
                     ( { model | apps = apps_ }, Cmd.map MsgApp cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
+
+            -- Landing
+            MsgLand (Landing.Messages.Request (NewRequest requestData) component) ->
+                makeRequest model requestData component
+
+            MsgLand subMsg ->
+                let
+                    ( landing_, cmd, coreMsg ) =
+                        Landing.Update.update subMsg model.landing model
+                in
+                    ( { model | landing = landing_ }, Cmd.map MsgLand cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
+
+            -- Channel
+            MsgWebsocket subMsg ->
+                let
+                    ( websocket_, cmd, coreMsg ) =
+                        Driver.Websocket.Update.update subMsg model.websocket model
+                in
+                    ( { model | websocket = websocket_ }, Cmd.map MsgWebsocket cmd )
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router
@@ -88,6 +112,21 @@ update msg model =
             -- |> Update.andThen update (MsgGame (eventBinds.game event))
             -- |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
             -- |> Update.andThen update (MsgLogin (eventBinds.login event))
+            -- Responses
+            NewResponse ( requestId, code, body ) ->
+                let
+                    requestData =
+                        getRequestData model.requests requestId
+
+                    requests_ =
+                        removeRequestId model.requests requestId
+
+                    model_ =
+                        { model | requests = requests_ }
+                in
+                    update (DispatchResponse requestData ( code, body ))
+                        model_
+
             {-
                DispatchResponse is triggered when the client sends a message to
                the server and the message is answered. It is the classic
@@ -100,53 +139,35 @@ update msg model =
                 Debug.log "received reply never was requested"
                     ( model, Cmd.none )
 
-            DispatchResponse ( component, request, decoder ) ( raw, code ) ->
+            DispatchResponse ( component, request, decoder ) ( code, body ) ->
                 let
                     response =
-                        decoder raw code
+                        decoder body code
+
+                    f =
+                        Debug.log "response: " (toString response)
 
                     requestMsg =
                         getRequestMsg component request response
+
+                    g =
+                        Debug.log "llll" (toString requestMsg)
                 in
                     update requestMsg model
-
-            -- Websocket
-            {-
-               Parse the received WebSocket message into the expected format and
-               forward it to the relevant dispatcher.
-            -}
-            WSReceivedMessage message ->
-                let
-                    wsMsg =
-                        getWSMsgMeta message
-
-                    wsMsgType =
-                        getWSMsgType wsMsg
-                in
-                    case wsMsgType of
-                        WSResponse ->
-                            let
-                                requestData =
-                                    getRequestData model.requests wsMsg.request_id
-
-                                requests_ =
-                                    removeRequestId model.requests wsMsg.request_id
-
-                                model_ =
-                                    { model | requests = requests_ }
-                            in
-                                update (DispatchResponse requestData ( message, wsMsg.code )) model_
-
-                        WSEvent ->
-                            update (DispatchEvent (getEvent wsMsg.event)) model
-
-                        WSInvalid ->
-                            ( model, Cmd.none )
 
             -- Misc
             {- Perform no operation -}
             NoOp ->
                 ( model, Cmd.none )
+
+
+{-| Transform multiple Msgs into a single, batched Cmd. We reverse the msg list
+so they can get executed in the order they were specified.
+-}
+batchMsgs : List CoreMsg -> Cmd CoreMsg
+batchMsgs msg =
+    Cmd.batch
+        (List.reverse (List.map Utils.msgToCmd msg))
 
 
 getGameMsg : List Game.Messages.GameMsg -> CoreMsg
