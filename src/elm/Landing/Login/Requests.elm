@@ -84,15 +84,10 @@ requestLogin username password =
 decodeLogin : ResponseDecoder
 decodeLogin rawMsg code =
     let
-        d1 =
-            Debug.log "msg" rawMsg
-
         decoder =
             decode ResponseLoginPayload
                 |> required "token" string
-
-        d2 =
-            Debug.log "tddtdt" (toString decoder)
+                |> required "account_id" string
     in
         case code of
             ResponseCodeOk ->
@@ -117,7 +112,7 @@ requestLoginHandler response model core =
             let
                 loginCmd =
                     callAccount
-                        (Login (Just data.token))
+                        (Login data)
             in
                 ( { model | loginFailed = False }, Cmd.none, [ loginCmd ] )
 

@@ -29,6 +29,8 @@ module Requests.Models
         , ResponseForLogin(..)
         , ResponseLoginPayload
         , ResponseForLogout(..)
+        , ResponseForEventCool(..)
+        , ResponseEventCoolPayload
         )
 
 import Dict
@@ -148,6 +150,7 @@ type Response
     | ResponseSignUp ResponseForSignUp
     | ResponseLogin ResponseForLogin
     | ResponseLogout ResponseForLogout
+    | ResponseEventCool ResponseForEventCool
     | ResponseEmpty
     | ResponseInvalid
 
@@ -212,12 +215,27 @@ type ResponseForLogin
 
 
 type alias ResponseLoginPayload =
-    { token : String }
+    { token : String
+    , account_id : String
+    }
 
 
 type ResponseForLogout
     = ResponseLogoutOk
     | ResponseLogoutInvalid
+
+
+
+{- Responses for Events -}
+
+
+type ResponseForEventCool
+    = ResponseEventCoolOk ResponseEventCoolPayload
+    | ResponseEventCoolInvalid
+
+
+type alias ResponseEventCoolPayload =
+    { foo : String }
 
 
 {-| encodeData is the specific encoding part of the parent encodeRequest. Since
@@ -261,6 +279,7 @@ type RequestDriver
 type RequestTopic
     = TopicAccountLogin
     | TopicAccountCreate
+    | TopicAccountLogout
 
 
 getTopicDriver : RequestTopic -> RequestDriver
@@ -271,6 +290,9 @@ getTopicDriver topic =
 
         TopicAccountLogin ->
             DriverHTTP
+
+        _ ->
+            DriverWebsocket
 
 
 {-| Aggregates the required data to create a request into a 3-tuple defined by RequestData
@@ -350,3 +372,7 @@ getResponseCode httpCode =
 
         _ ->
             ResponseCodeUnknownError
+
+
+getResponse msg =
+    5

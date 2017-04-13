@@ -11,6 +11,14 @@ import Game.Models
 import OS.Models
 import Apps.Models
 import Landing.Models
+import Phoenix
+import Phoenix.Socket as Socket
+import Core.Messages exposing (CoreMsg)
+import Driver.Websocket.Models
+
+
+socket =
+    Socket.init "ws://localhost:4000/websocket"
 
 
 type alias CoreModel =
@@ -20,6 +28,7 @@ type alias CoreModel =
     , os : OS.Models.Model
     , apps : Apps.Models.AppModel
     , landing : Landing.Models.LandModel
+    , websocket : Driver.Websocket.Models.Model
     }
 
 
@@ -36,4 +45,5 @@ initialModel route seedInt =
     , os = OS.Models.initialModel
     , apps = Apps.Models.initialModel
     , landing = Landing.Models.initialModel
+    , websocket = Driver.Websocket.Models.initialModel
     }

@@ -7,4 +7,8 @@ import WebSocket
 -}
 send : String -> Cmd msg
 send payload =
-    WebSocket.send "ws://localhost:8080" payload
+    Cmd.none
+
+
+
+-- WebSocket.send "ws://localhost:4000" payload

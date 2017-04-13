@@ -114,6 +114,9 @@ makeRequest core requestData component =
             , uuid = Uuid.toString uuid_
             }
 
+        f =
+            Debug.log "letsgo" (toString request_id)
+
         cmd =
             case (getTopicDriver topic) of
                 DriverWebsocket ->

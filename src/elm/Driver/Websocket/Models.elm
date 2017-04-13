@@ -1,8 +1,11 @@
 module Driver.Websocket.Models
     exposing
-        ( WSMsg
+        ( Model
+        , initialModel
+        , WSMsg
         , WSMsgData
         , WSMsgType(..)
+        , decMe
         , invalidWSMsg
         , getWSMsgMeta
         , getWSMsgType
@@ -12,7 +15,7 @@ module Driver.Websocket.Models
         )
 
 import Json.Encode
-import Json.Decode exposing (Decoder, string, decodeString, int)
+import Json.Decode exposing (Decoder, string, decodeString, int, decodeValue, Value)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Requests.Models
     exposing
@@ -21,6 +24,36 @@ import Requests.Models
         , RequestTopic(..)
         , encodeData
         )
+import Driver.Websocket.Messages exposing (Msg(..))
+import Phoenix.Socket as Socket
+import Phoenix.Channel as Channel
+
+
+type alias Model =
+    { socket : Socket.Socket Msg
+    , channels : List (Channel.Channel Msg)
+    , defer : Bool
+    }
+
+
+initialSocket =
+    Socket.init "ws://localhost:4000/websocket"
+
+
+initialChannels =
+    [ Channel.init "requests" ]
+
+
+
+-- |> Channel.on "new_msg" WSReceivedMessage
+
+
+initialModel : Model
+initialModel =
+    { socket = initialSocket
+    , channels = initialChannels
+    , defer = True
+    }
 
 
 {-| WSMsgType identifies the possible received messages as:
@@ -57,17 +90,26 @@ invalidWSMsg =
     }
 
 
+decMe =
+    (decode WSMsg
+        |> optional "event" string "request"
+        |> optional "request_id" string "event"
+        |> hardcoded ResponseEmpty
+        |> optional "code" int 0
+    )
+
+
 {-| decodeWsgMeta decodes only the meta part of the msg, it ignores the
 "data" field. Useful when we do not know yet what "data" is.
 -}
-decodeWSMsgMeta : String -> Result String (WSMsg Response)
+decodeWSMsgMeta : Json.Decode.Value -> Result String (WSMsg Response)
 decodeWSMsgMeta =
-    decodeString
+    decodeValue
         (decode WSMsg
             |> optional "event" string "request"
             |> optional "request_id" string "event"
             |> hardcoded ResponseEmpty
-            |> required "code" int
+            |> optional "code" int 0
         )
 
 
@@ -120,7 +162,7 @@ getWSMsgType msg =
 -}
 
 
-getWSMsgMeta : String -> WSMsg WSMsgData
+getWSMsgMeta : Json.Decode.Value -> WSMsg WSMsgData
 getWSMsgMeta msg =
     case decodeWSMsgMeta msg of
         Ok msg ->
@@ -145,7 +187,10 @@ getTopicChannel : RequestTopic -> String
 getTopicChannel topic =
     case topic of
         TopicAccountLogin ->
-            "account:login"
+            "account.login"
 
         TopicAccountCreate ->
-            "account:create"
+            "account.create"
+
+        TopicAccountLogout ->
+            "account.logout"

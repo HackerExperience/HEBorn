@@ -24,6 +24,7 @@ import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
 import Apps.Messages exposing (AppMsg(..), appBinds)
 import Landing.Messages exposing (LandMsg(..), landBinds)
+import Driver.Websocket.Messages
 
 
 type CoreMsg
@@ -31,10 +32,11 @@ type CoreMsg
     | MsgOS OS.Messages.OSMsg
     | MsgApp Apps.Messages.AppMsg
     | MsgLand Landing.Messages.LandMsg
+    | MsgChannel Driver.Websocket.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
     | DispatchResponse RequestStoreData ( String, ResponseCode )
-    | WSReceivedMessage String
+      -- | WSReceivedMessage String
     | HttpReceivedMessage ( ResponseCode, RequestID, String )
     | NoOp
 

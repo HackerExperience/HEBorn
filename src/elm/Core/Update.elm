@@ -1,10 +1,10 @@
 module Core.Update exposing (update)
 
 import Update.Extra as Update
+import Utils
 import Requests.Models exposing (Request(RequestInvalid, NewRequest), getResponseCode)
 import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
 import Events.Models exposing (Event(EventUnknown))
-import Events.Update exposing (getEvent)
 import Router.Router exposing (parseLocation)
 import Driver.Websocket.Models
     exposing
@@ -23,6 +23,7 @@ import Apps.Messages
 import Apps.Update
 import Landing.Messages
 import Landing.Update
+import Driver.Websocket.Update
 
 
 update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
@@ -38,10 +39,12 @@ update msg model =
 
             MsgGame subMsg ->
                 let
-                    ( game_, cmd ) =
+                    ( game_, cmd, coreMsg ) =
                         Game.Update.update subMsg model.game
                 in
                     ( { model | game = game_ }, Cmd.map MsgGame cmd )
+                        -- |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- OS
             MsgOS (OS.Messages.Request (NewRequest requestData)) ->
@@ -77,6 +80,15 @@ update msg model =
                         Landing.Update.update subMsg model.landing model
                 in
                     ( { model | landing = landing_ }, Cmd.map MsgLand cmd )
+                        |> Update.andThen update (getCoreMsg coreMsg)
+
+            -- Channel
+            MsgChannel subMsg ->
+                let
+                    ( channel_, cmd, coreMsg ) =
+                        Driver.Websocket.Update.update subMsg model.websocket model
+                in
+                    ( { model | websocket = channel_ }, Cmd.map MsgChannel cmd )
                         |> Update.andThen update (getCoreMsg coreMsg)
 
             -- Router
@@ -133,41 +145,30 @@ update msg model =
                Parse the received WebSocket message into the expected format and
                forward it to the relevant dispatcher.
             -}
-            WSReceivedMessage message ->
-                let
-                    wsMsg =
-                        getWSMsgMeta message
-
-                    wsMsgType =
-                        getWSMsgType wsMsg
-                in
-                    case wsMsgType of
-                        WSResponse ->
-                            let
-                                requestData =
-                                    getRequestData model.requests wsMsg.request_id
-
-                                requests_ =
-                                    removeRequestId model.requests wsMsg.request_id
-
-                                model_ =
-                                    { model | requests = requests_ }
-
-                                {- HACK: Translating http status to ResponseCode
-                                   should be done at the driver level, but I can't
-                                   figure out now how to properly decode it.
-                                -}
-                                code =
-                                    getResponseCode wsMsg.code
-                            in
-                                update (DispatchResponse requestData ( message, code )) model_
-
-                        WSEvent ->
-                            update (DispatchEvent (getEvent wsMsg.event)) model
-
-                        WSInvalid ->
-                            ( model, Cmd.none )
-
+            -- WSReceivedMessage message ->
+            --     let
+            --         wsMsg =
+            --             getWSMsgMeta message
+            --         wsMsgType =
+            --             getWSMsgType wsMsg
+            --     in
+            --         case wsMsgType of
+            --             WSResponse ->
+            --                 let
+            --                     requestData =
+            --                         getRequestData model.requests wsMsg.request_id
+            --                     requests_ =
+            --                         removeRequestId model.requests wsMsg.request_id
+            --                     model_ =
+            --                         { model | requests = requests_ }
+            --                     {- HACK: Translating http status to ResponseCode
+            --                        should be done at the driver level, but I can't
+            --                        figure out now how to properly decode it.
+            --                     -}
+            --                     code =
+            --                         getResponseCode wsMsg.code
+            --                 in
+            --                     update (DispatchResponse requestData ( message, code )) model_
             HttpReceivedMessage ( code, requestId, body ) ->
                 let
                     requestData =
@@ -186,6 +187,15 @@ update msg model =
             {- Perform no operation -}
             NoOp ->
                 ( model, Cmd.none )
+
+
+{-| Transform multiple Msgs into a single, batched Cmd. We reverse the msg list
+so they can get executed in the order they were specified.
+-}
+batchMsgs : List CoreMsg -> Cmd CoreMsg
+batchMsgs msg =
+    Cmd.batch
+        (List.reverse (List.map Utils.msgToCmd msg))
 
 
 getGameMsg : List Game.Messages.GameMsg -> CoreMsg

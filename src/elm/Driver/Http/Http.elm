@@ -13,19 +13,11 @@ import Core.Messages exposing (CoreMsg(..))
 import Driver.Http.Models exposing (getTopicUrl, getRequestIdHeader)
 
 
-decodeMsg : Result Http.Error ( Maybe RequestID, String ) -> CoreMsg
+decodeMsg : Result Http.Error ( RequestID, String ) -> CoreMsg
 decodeMsg result =
     case result of
-        Ok ( Just requestId, result ) ->
+        Ok ( requestId, result ) ->
             HttpReceivedMessage ( ResponseCodeOk, requestId, result )
-
-        Ok ( Nothing, result ) ->
-            -- TODO: log internal client error
-            HttpReceivedMessage
-                ( ResponseCodeUnknownError
-                , invalidRequestId
-                , ""
-                )
 
         Err (Http.BadStatus response) ->
             let
@@ -63,20 +55,18 @@ send url id payload =
         decodeMsg
         (Http.request
             { method = "POST"
-            , headers = [ Http.header "X-Request-ID" id ]
+            , headers =
+                [ Http.header "X-Request-Id" id
+                ]
             , url = "http://localhost:4000/v1/" ++ url
             , body = Http.stringBody "application/json" payload
-            , expect = Http.expectStringResponse responseExpector
+            , expect = Http.expectStringResponse (responseWrapper id)
             , timeout = Nothing
             , withCredentials = False
             }
         )
 
 
-responseExpector : Http.Response r -> Result error ( Maybe String, r )
-responseExpector response =
-    let
-        request_id =
-            getRequestIdHeader response.headers
-    in
-        Ok ( request_id, response.body )
+responseWrapper : RequestID -> Http.Response r -> Result error ( RequestID, r )
+responseWrapper id response =
+    Ok ( id, response.body )

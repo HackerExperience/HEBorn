@@ -1,6 +1,7 @@
 module Game.Events exposing (eventHandler)
 
 import Events.Models exposing (Event)
+import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg)
 import Game.Meta.Events exposing (metaEventHandler)
@@ -10,7 +11,7 @@ import Game.Server.Events exposing (serverEventHandler)
 import Game.Network.Events exposing (networkEventHandler)
 
 
-eventHandler : GameModel -> Event -> ( GameModel, Cmd GameMsg )
+eventHandler : GameModel -> Event -> ( GameModel, Cmd GameMsg, List CoreMsg )
 eventHandler model event =
     let
         ( meta_, cmdMeta ) =
@@ -46,4 +47,4 @@ eventHandler model event =
             , server = server_
             }
     in
-        ( model_, Cmd.batch cmdList_ )
+        ( model_, Cmd.batch cmdList_, [] )

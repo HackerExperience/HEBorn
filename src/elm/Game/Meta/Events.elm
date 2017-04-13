@@ -8,7 +8,7 @@ import Events.Models exposing (Event(..))
 metaEventHandler : MetaModel -> Event -> ( MetaModel, Cmd GameMsg )
 metaEventHandler model event =
     case event of
-        EventMyCool ->
+        EventMyCool _ ->
             let
                 online_ =
                     model.online + 1

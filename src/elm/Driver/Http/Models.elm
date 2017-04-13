@@ -51,7 +51,7 @@ encodeHTTPRequest payload =
 
 getRequestIdHeader : Dict.Dict String RequestID -> Maybe RequestID
 getRequestIdHeader headers =
-    Dict.get "X-Request-ID" headers
+    Dict.get "X-Request-Id" headers
 
 
 getTopicUrl : RequestTopic -> String
@@ -62,3 +62,6 @@ getTopicUrl topic =
 
         TopicAccountCreate ->
             "account/register"
+
+        _ ->
+            ""
