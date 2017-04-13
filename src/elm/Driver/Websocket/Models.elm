@@ -12,6 +12,10 @@ module Driver.Websocket.Models
         , decodeWSMsg
         , decodeWSMsgMeta
         , encodeWSRequest
+        , getTopicMsg
+        , getTopicChannel
+        , getChannelAddress
+        , getResponse
         )
 
 import Json.Encode
@@ -23,6 +27,7 @@ import Requests.Models
         , RequestPayload
         , RequestTopic(..)
         , encodeData
+        , getResponseCode
         )
 import Driver.Websocket.Messages exposing (Msg(..))
 import Phoenix.Socket as Socket
@@ -33,26 +38,6 @@ type alias Model =
     { socket : Socket.Socket Msg
     , channels : List (Channel.Channel Msg)
     , defer : Bool
-    }
-
-
-initialSocket =
-    Socket.init "ws://localhost:4000/websocket"
-
-
-initialChannels =
-    [ Channel.init "requests" ]
-
-
-
--- |> Channel.on "new_msg" WSReceivedMessage
-
-
-initialModel : Model
-initialModel =
-    { socket = initialSocket
-    , channels = initialChannels
-    , defer = True
     }
 
 
@@ -78,14 +63,35 @@ type alias WSMsg var =
 
 
 type alias WSMsgData =
-    Response
+    Json.Encode.Value
 
 
-invalidWSMsg : WSMsg Response
+type Channel
+    = ChannelAccount
+    | ChannelRequests
+
+
+initialSocket =
+    Socket.init "ws://localhost:4000/websocket"
+
+
+initialChannels =
+    [ Channel.init "requests" ]
+
+
+initialModel : Model
+initialModel =
+    { socket = initialSocket
+    , channels = initialChannels
+    , defer = True
+    }
+
+
+invalidWSMsg : WSMsg Json.Encode.Value
 invalidWSMsg =
     { event = "invalid"
     , request_id = "invalid"
-    , data = ResponseEmpty
+    , data = Json.Encode.null
     , code = 400
     }
 
@@ -102,13 +108,13 @@ decMe =
 {-| decodeWsgMeta decodes only the meta part of the msg, it ignores the
 "data" field. Useful when we do not know yet what "data" is.
 -}
-decodeWSMsgMeta : Json.Decode.Value -> Result String (WSMsg Response)
+decodeWSMsgMeta : Json.Decode.Value -> Result String (WSMsg WSMsgData)
 decodeWSMsgMeta =
     decodeValue
         (decode WSMsg
             |> optional "event" string "request"
             |> optional "request_id" string "event"
-            |> hardcoded ResponseEmpty
+            |> required "data" Json.Decode.value
             |> optional "code" int 0
         )
 
@@ -124,19 +130,10 @@ decodeWSMsg dataDecoder =
         |> required "code" int
 
 
-encodeWSRequest : RequestPayload -> String
+encodeWSRequest : RequestPayload -> Json.Encode.Value
 encodeWSRequest payload =
-    let
-        topic =
-            getTopicChannel payload.topic
-    in
-        Json.Encode.encode 0
-            (Json.Encode.object
-                [ ( "topic", Json.Encode.string topic )
-                , ( "args", encodeData payload.args )
-                , ( "request_id", Json.Encode.string payload.request_id )
-                ]
-            )
+    encodeData
+        payload.args
 
 
 {-| getWSMsgType is used to quickly tell us the type of the received message,
@@ -183,8 +180,8 @@ getWSMsgMeta msg =
                 invalidWSMsg
 
 
-getTopicChannel : RequestTopic -> String
-getTopicChannel topic =
+getTopicMsg : RequestTopic -> String
+getTopicMsg topic =
     case topic of
         TopicAccountLogin ->
             "account.login"
@@ -193,4 +190,36 @@ getTopicChannel topic =
             "account.create"
 
         TopicAccountLogout ->
-            "account.logout"
+            "account.get"
+
+
+getTopicChannel topic =
+    case topic of
+        TopicAccountLogin ->
+            ChannelAccount
+
+        TopicAccountCreate ->
+            ChannelAccount
+
+        TopicAccountLogout ->
+            ChannelRequests
+
+
+getChannelAddress channel context =
+    case channel of
+        ChannelAccount ->
+            "account:" ++ context
+
+        ChannelRequests ->
+            "requests"
+
+
+getResponse msg =
+    let
+        meta =
+            getWSMsgMeta msg
+
+        code =
+            getResponseCode meta.code
+    in
+        ( meta, code )

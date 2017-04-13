@@ -8,6 +8,7 @@ module Core.Messages
         , getRequestMsg
         )
 
+import Json.Decode
 import Navigation exposing (Location)
 import Events.Models exposing (Event)
 import Requests.Models
@@ -35,9 +36,9 @@ type CoreMsg
     | MsgChannel Driver.Websocket.Messages.Msg
     | OnLocationChange Location
     | DispatchEvent Event
-    | DispatchResponse RequestStoreData ( String, ResponseCode )
+    | DispatchResponse RequestStoreData ( ResponseCode, Json.Decode.Value )
       -- | WSReceivedMessage String
-    | HttpReceivedMessage ( ResponseCode, RequestID, String )
+    | HttpReceivedMessage ( RequestID, ResponseCode, Json.Decode.Value )
     | NoOp
 
 

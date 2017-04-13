@@ -41,12 +41,16 @@ decodeHttpMsg dataDecoder =
         |> required "data" (dataDecoder)
 
 
-encodeHTTPRequest : RequestPayload -> String
+encodeHTTPRequest : RequestPayload -> Json.Encode.Value
 encodeHTTPRequest payload =
-    Json.Encode.encode 0
-        (encodeData
-            payload.args
-        )
+    (encodeData
+        payload.args
+    )
+
+
+httpPayloadToString : Json.Encode.Value -> String
+httpPayloadToString data =
+    Json.Encode.encode 0 data
 
 
 getRequestIdHeader : Dict.Dict String RequestID -> Maybe RequestID

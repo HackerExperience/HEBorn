@@ -1,15 +1,14 @@
 module Driver.Websocket.Update exposing (update)
 
 import Utils
-import Driver.Websocket.Models exposing (Model, getWSMsgType, getWSMsgMeta, decodeWSMsgMeta, decMe, invalidWSMsg, decodeWSMsg, WSMsgType(..))
+import Driver.Websocket.Models exposing (Model, getWSMsgType, getWSMsgMeta, decodeWSMsgMeta, decMe, invalidWSMsg, decodeWSMsg, WSMsgType(..), getResponse)
 import Driver.Websocket.Messages exposing (Msg(..))
-import Core.Messages exposing (CoreMsg(NoOp, DispatchEvent, DispatchResponse))
+import Core.Messages exposing (CoreMsg(NoOp, DispatchEvent, HttpReceivedMessage))
 import Core.Models exposing (CoreModel)
 import Phoenix.Socket as Socket
 import Phoenix.Channel as Channel
 import Json.Decode exposing (decodeValue)
 import Events.Models exposing (..)
-import Requests.Decoder exposing (decodeRequest)
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -80,5 +79,15 @@ update msg model core =
                         --         DispatchResponse (requestId, body, code)
                         WSInvalid ->
                             NoOp
+            in
+                ( model, Cmd.none, [ coreMsg ] )
+
+        NewReply msg requestId ->
+            let
+                ( meta, code ) =
+                    getResponse msg
+
+                coreMsg =
+                    HttpReceivedMessage ( requestId, code, meta.data )
             in
                 ( model, Cmd.none, [ coreMsg ] )

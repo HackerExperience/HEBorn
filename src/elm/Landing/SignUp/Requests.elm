@@ -12,7 +12,8 @@ import Requests.Models
             , RequestUsername
             , RequestSignUp
             )
-        , RequestTopic(..)
+        , RequestTopic(TopicAccountCreate)
+        , emptyTopicContext
         , Response
             ( ResponseUsernameExists
             , ResponseSignUp
@@ -69,6 +70,7 @@ requestSignUp email username password =
                     RequestSignUp
                     decodeSignUp
                     TopicAccountCreate
+                    emptyTopicContext
                     (RequestSignUpPayload
                         { email = email
                         , password = password

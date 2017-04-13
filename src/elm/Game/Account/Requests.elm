@@ -11,6 +11,7 @@ import Requests.Models
             , RequestLogout
             )
         , RequestTopic(TopicAccountLogout)
+        , TopicContext
         , Response(ResponseLogout)
         , ResponseDecoder
         , ResponseForLogout(..)
@@ -18,10 +19,11 @@ import Requests.Models
 import Requests.Update exposing (queueRequest)
 import Game.Messages exposing (GameMsg(Request))
 import Game.Models exposing (GameModel, ResponseType)
+import Game.Account.Models exposing (AccountID)
 
 
-requestLogout : String -> Cmd GameMsg
-requestLogout token =
+requestLogout : TopicContext -> String -> Cmd GameMsg
+requestLogout accountId token =
     queueRequest
         (Request
             (NewRequest
@@ -29,6 +31,7 @@ requestLogout token =
                     RequestLogout
                     decodeLogout
                     TopicAccountLogout
+                    accountId
                     (RequestLogoutPayload
                         { token = token
                         }

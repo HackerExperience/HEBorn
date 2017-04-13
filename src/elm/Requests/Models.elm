@@ -10,6 +10,7 @@ module Requests.Models
         , RequestPayloadArgs(..)
         , RequestDriver(..)
         , RequestTopic(..)
+        , TopicContext
         , NewRequestData
         , Response(..)
         , ResponseCode(..)
@@ -21,6 +22,7 @@ module Requests.Models
         , encodeData
         , storeRequest
         , getTopicDriver
+        , emptyTopicContext
           -- Custom requests
         , ResponseForUsernameExists(..)
         , ResponseUsernameExistsPayload
@@ -85,7 +87,7 @@ type alias RequestStore =
 
 
 type alias NewRequestData =
-    ( Request, RequestTopic, RequestPayload, ResponseDecoder )
+    ( Request, RequestTopic, TopicContext, RequestPayload, ResponseDecoder )
 
 
 
@@ -164,7 +166,7 @@ type Response
 
 
 type alias ResponseDecoder =
-    RequestID -> ResponseCode -> Response
+    Json.Encode.Value -> ResponseCode -> Response
 
 
 
@@ -276,6 +278,15 @@ type RequestDriver
     | DriverHTTP
 
 
+type alias TopicContext =
+    String
+
+
+emptyTopicContext : TopicContext
+emptyTopicContext =
+    ""
+
+
 type RequestTopic
     = TopicAccountLogin
     | TopicAccountCreate
@@ -301,11 +312,13 @@ createRequestData :
     Request
     -> ResponseDecoder
     -> RequestTopic
+    -> TopicContext
     -> RequestPayloadArgs
     -> NewRequestData
-createRequestData request decoder topic args =
+createRequestData request decoder topic context args =
     ( request
     , topic
+    , context
     , { topic = topic
       , args = args
       , request_id = ""
@@ -372,7 +385,3 @@ getResponseCode httpCode =
 
         _ ->
             ResponseCodeUnknownError
-
-
-getResponse msg =
-    5

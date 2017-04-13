@@ -1,7 +1,8 @@
 module Driver.Http.Http exposing (..)
 
 import Http
-import Json.Decode as Decode exposing (list, string)
+import Json.Encode
+import Json.Decode exposing (decodeString)
 import Requests.Models
     exposing
         ( ResponseCode(..)
@@ -13,11 +14,21 @@ import Core.Messages exposing (CoreMsg(..))
 import Driver.Http.Models exposing (getTopicUrl, getRequestIdHeader)
 
 
-decodeMsg : Result Http.Error ( RequestID, String ) -> CoreMsg
-decodeMsg result =
-    case result of
-        Ok ( requestId, result ) ->
-            HttpReceivedMessage ( ResponseCodeOk, requestId, result )
+decodeResult : String -> Json.Encode.Value
+decodeResult result =
+    case (decodeString Json.Decode.value result) of
+        Ok m ->
+            m
+
+        Err _ ->
+            Json.Encode.null
+
+
+decodeMsg : RequestID -> Result Http.Error String -> CoreMsg
+decodeMsg requestId return =
+    case return of
+        Ok result ->
+            HttpReceivedMessage ( requestId, ResponseCodeOk, decodeResult result )
 
         Err (Http.BadStatus response) ->
             let
@@ -35,7 +46,7 @@ decodeMsg result =
                         Nothing ->
                             invalidRequestId
             in
-                HttpReceivedMessage ( code, requestId, body )
+                HttpReceivedMessage ( requestId, code, decodeResult body )
 
         Err reason ->
             let
@@ -43,16 +54,16 @@ decodeMsg result =
                     Debug.log "FIXME: " (toString reason)
             in
                 HttpReceivedMessage
-                    ( ResponseCodeUnknownError
-                    , invalidRequestId
-                    , ""
+                    ( invalidRequestId
+                    , ResponseCodeUnknownError
+                    , Json.Encode.null
                     )
 
 
 send : String -> RequestID -> String -> Cmd CoreMsg
 send url id payload =
     Http.send
-        decodeMsg
+        (decodeMsg id)
         (Http.request
             { method = "POST"
             , headers =
@@ -60,13 +71,8 @@ send url id payload =
                 ]
             , url = "http://localhost:4000/v1/" ++ url
             , body = Http.stringBody "application/json" payload
-            , expect = Http.expectStringResponse (responseWrapper id)
+            , expect = Http.expectString
             , timeout = Nothing
             , withCredentials = False
             }
         )
-
-
-responseWrapper : RequestID -> Http.Response r -> Result error ( RequestID, r )
-responseWrapper id response =
-    Ok ( id, response.body )

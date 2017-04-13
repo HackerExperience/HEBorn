@@ -130,13 +130,19 @@ update msg model =
                 Debug.log "received reply never was requested"
                     ( model, Cmd.none )
 
-            DispatchResponse ( component, request, decoder ) ( raw, code ) ->
+            DispatchResponse ( component, request, decoder ) ( code, body ) ->
                 let
                     response =
-                        decoder raw code
+                        decoder body code
+
+                    f =
+                        Debug.log "response: " (toString response)
 
                     requestMsg =
                         getRequestMsg component request response
+
+                    g =
+                        Debug.log "llll" (toString requestMsg)
                 in
                     update requestMsg model
 
@@ -169,7 +175,7 @@ update msg model =
             --                         getResponseCode wsMsg.code
             --                 in
             --                     update (DispatchResponse requestData ( message, code )) model_
-            HttpReceivedMessage ( code, requestId, body ) ->
+            HttpReceivedMessage ( requestId, code, body ) ->
                 let
                     requestData =
                         getRequestData model.requests requestId
@@ -180,7 +186,7 @@ update msg model =
                     model_ =
                         { model | requests = requests_ }
                 in
-                    update (DispatchResponse requestData ( body, code ))
+                    update (DispatchResponse requestData ( code, body ))
                         model_
 
             -- Misc

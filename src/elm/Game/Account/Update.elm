@@ -26,6 +26,8 @@ update msg model game =
                         (UpdateSocketParams ( token, account_id ))
                     , MsgChannel
                         (JoinChannel ( "account:" ++ account_id, "notification", "a" ))
+                    , MsgChannel
+                        (JoinChannel ( "requests", "requests", "a" ))
                     ]
             in
                 ( { model_ | id = Just account_id }, Cmd.none, coreCmd )
@@ -33,9 +35,11 @@ update msg model game =
         Logout ->
             let
                 cmd =
-                    requestLogout (Utils.maybeToString (getToken model))
+                    requestLogout
+                        (Utils.maybeToString model.id)
+                        (Utils.maybeToString (getToken model))
 
-                model_ =
-                    setToken model Nothing
+                -- model_ =
+                -- setToken model Nothing
             in
-                ( model_, cmd, [] )
+                ( model, cmd, [] )

@@ -24,14 +24,25 @@ import Requests.Models
         , storeRequest
         , getTopicDriver
         )
-import Driver.Websocket.Models exposing (encodeWSRequest)
+import Driver.Websocket.Models
+    exposing
+        ( encodeWSRequest
+        , getTopicChannel
+        , getTopicMsg
+        , getChannelAddress
+        )
 import Driver.Websocket.Websocket
-import Driver.Http.Models exposing (encodeHTTPRequest, getTopicUrl)
+import Driver.Http.Models
+    exposing
+        ( encodeHTTPRequest
+        , getTopicUrl
+        , httpPayloadToString
+        )
 import Driver.Http.Http
 import Utils
 import Core.Components exposing (Component(ComponentInvalid))
 import Core.Models exposing (CoreModel)
-import Core.Messages exposing (CoreMsg)
+import Core.Messages exposing (CoreMsg(MsgChannel))
 
 
 {-| getRequestData will fetch the RequestStore and return the RequestStoreData
@@ -87,7 +98,7 @@ makeRequest core requestData component =
         request_id =
             model.uuid
 
-        ( request, topic, payload, decoder ) =
+        ( request, topic, context, payload, decoder ) =
             requestData
 
         payloadEncoder =
@@ -99,8 +110,7 @@ makeRequest core requestData component =
                     encodeHTTPRequest
 
         payload_ =
-            payloadEncoder
-                { payload | request_id = request_id }
+            payloadEncoder payload
 
         requests_ =
             storeRequest model request_id component request decoder
@@ -114,16 +124,39 @@ makeRequest core requestData component =
             , uuid = Uuid.toString uuid_
             }
 
-        f =
-            Debug.log "letsgo" (toString request_id)
-
         cmd =
             case (getTopicDriver topic) of
                 DriverWebsocket ->
-                    Driver.Websocket.Websocket.send payload_
+                    let
+                        message =
+                            getTopicMsg topic
+
+                        channel =
+                            (getTopicChannel topic)
+
+                        channelAddress =
+                            getChannelAddress channel context
+                    in
+                        Cmd.map MsgChannel
+                            (Driver.Websocket.Websocket.send
+                                channelAddress
+                                message
+                                request_id
+                                payload_
+                            )
 
                 DriverHTTP ->
-                    Driver.Http.Http.send (getTopicUrl topic) request_id payload_
+                    let
+                        url =
+                            getTopicUrl topic
+
+                        body =
+                            httpPayloadToString payload_
+                    in
+                        Driver.Http.Http.send
+                            url
+                            request_id
+                            body
     in
         ( { core | requests = model_ }, cmd )
 
