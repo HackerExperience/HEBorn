@@ -12,6 +12,7 @@ import OS.WindowManager.Models
         , closeWindow
         , updateWindowPosition
         , toggleMaximizeWindow
+        , minimizeWindow
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 
@@ -64,6 +65,13 @@ update msg model =
             let
                 windows_ =
                     toggleMaximizeWindow model id
+            in
+                ( { model | windows = windows_ }, Cmd.none, [] )
+
+        MinimizeWindow id ->
+            let
+                windows_ =
+                    minimizeWindow model id
             in
                 ( { model | windows = windows_ }, Cmd.none, [] )
 

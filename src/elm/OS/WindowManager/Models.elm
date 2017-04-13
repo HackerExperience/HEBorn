@@ -13,6 +13,7 @@ module OS.WindowManager.Models
         , windowsFoldr
         , hasWindowOpen
         , toggleMaximizeWindow
+        , minimizeWindow
         )
 
 import Dict
@@ -218,6 +219,31 @@ toggleMaximizeWindow model id =
             let
                 window_ =
                     { window | maximized = not window.maximized }
+
+                update_ w =
+                    case w of
+                        Just window ->
+                            Just window_
+
+                        Nothing ->
+                            Nothing
+
+                windows_ =
+                    Dict.update id update_ model.windows
+            in
+                windows_
+
+
+minimizeWindow : Model -> WindowID -> Windows
+minimizeWindow model id =
+    case (getWindow model id) of
+        Nothing ->
+            model.windows
+
+        Just window ->
+            let
+                window_ =
+                    { window | state = Minimized }
 
                 update_ w =
                     case w of

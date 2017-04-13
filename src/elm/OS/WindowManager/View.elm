@@ -122,6 +122,11 @@ headerButtons : WindowID -> Html Msg
 headerButtons id =
     div [ class [ Css.HeaderButtons ] ]
         [ span
+            [ class [ Css.HeaderButton, Css.HeaderBtnMinimize ]
+            , onClick (MinimizeWindow id)
+            ]
+            []
+        , span
             [ class [ Css.HeaderButton, Css.HeaderBtnMaximize ]
             , onClick (ToggleMaximize id)
             ]

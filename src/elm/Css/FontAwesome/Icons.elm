@@ -24,3 +24,8 @@ fileArchiveO =
 addressBookO : UnicodeTag
 addressBookO =
     "f2ba"
+
+
+windowMinimize : UnicodeTag
+windowMinimize =
+    "f2d1"

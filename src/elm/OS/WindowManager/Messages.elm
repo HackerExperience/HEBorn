@@ -14,3 +14,4 @@ type Msg
     | StopDragging
     | DragMsg (Draggable.Msg WindowID)
     | ToggleMaximize WindowID
+    | MinimizeWindow WindowID

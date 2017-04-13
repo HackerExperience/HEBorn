@@ -19,6 +19,7 @@ type Css
     | HeaderButton
     | HeaderBtnClose
     | HeaderBtnMaximize
+    | HeaderBtnMinimize
 
 
 css : Stylesheet
@@ -111,5 +112,9 @@ css =
         , class HeaderBtnMaximize
             [ before
                 [ faIcon FA.expand ]
+            ]
+        , class HeaderBtnMinimize
+            [ before
+                [ faIcon FA.windowMinimize ]
             ]
         ]
