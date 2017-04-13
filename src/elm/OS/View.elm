@@ -45,6 +45,7 @@ viewHeader model =
             ]
         ]
 
+
 viewMain : CoreModel -> Html CoreMsg
 viewMain model =
     main_ [] (OS.WindowManager.View.renderWindows model)

@@ -7,12 +7,15 @@ import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
 import Css.FontAwesome.Icons as FA exposing (..)
 
+
 type Id
     = DockMain
     | DockContainer
 
+
 type Class
     = Item
+
 
 css =
     (stylesheet << namespace "dock")
@@ -56,11 +59,17 @@ css =
                 , display inlineBlock
                 ]
             ]
-        , attrSelector "dockItem" "data-app" "=" "signup"
+        , attrSelector "dockItem"
+            "data-app"
+            "="
+            "signup"
             [ after
                 [ faIcon FA.addressBookO ]
             ]
-        , attrSelector "dockItem" "data-app" "=" "explorer"
+        , attrSelector "dockItem"
+            "data-app"
+            "="
+            "explorer"
             [ after
                 [ faIcon FA.fileArchiveO ]
             ]

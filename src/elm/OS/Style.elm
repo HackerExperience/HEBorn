@@ -1,17 +1,19 @@
 module OS.Style exposing (..)
 
 import Css exposing (..)
-import Css.Elements exposing (body,  main_, header, footer)
+import Css.Elements exposing (body, main_, header, footer)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (transition, easingToString, Easing(..))
 import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 
+
 type Id
     = Dashboard
 
+
 css =
     (stylesheet << namespace "os")
-        [ id Dashboard   
+        [ id Dashboard
             [ width (pct 100)
             , minHeight (pct 100)
             , flexContainerVert

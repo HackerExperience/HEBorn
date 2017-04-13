@@ -7,6 +7,7 @@ import Css.Common exposing (globalShadow, flexContainerHorz)
 import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
 import Css.FontAwesome.Icons as FA exposing (..)
 
+
 type Css
     = Window
     | WindowHeader
@@ -24,7 +25,7 @@ css : Stylesheet
 css =
     (stylesheet << namespace "wm")
         [ class Window
-            [  position (absolute)
+            [ position (absolute)
             , displayFlex
             , borderRadius4 (px 8) (px 8) (px 8) (px 8)
             , flexDirection column
@@ -70,17 +71,24 @@ css =
                 , float left
                 ]
             ]
-        , attrSelector "wmHeaderTitle" "data-icon" "=" "signup"
-            [before
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "signup"
+            [ before
                 [ faIcon FA.addressBookO ]
             ]
-        , attrSelector "wmHeaderTitle" "data-icon" "=" "explorer"
-            [before
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "explorer"
+            [ before
                 [ faIcon FA.fileArchiveO ]
             ]
         , class HeaderButtons
             [ flex (int 0)
-            , flexContainerHorz ]
+            , flexContainerHorz
+            ]
         , class HeaderButton
             [ cursor pointer
             , flex (int 0)
