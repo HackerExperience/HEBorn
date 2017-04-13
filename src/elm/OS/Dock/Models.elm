@@ -4,9 +4,12 @@ module OS.Dock.Models
         , initialModel
         , Application
         , getApplications
+        , updateInstances
         )
 
+import Dict
 import OS.WindowManager.Windows exposing (GameWindow(..))
+import OS.WindowManager.Models exposing (Windows, filterAppWindows)
 
 
 -- oi
@@ -16,6 +19,7 @@ type alias Application =
     { name : String
     , window : GameWindow
     , icon : String
+    , instancesNum : Int
     }
 
 
@@ -39,7 +43,7 @@ generateApplication window =
         icon =
             name
     in
-        { name = name, window = window, icon = icon }
+        { name = name, window = window, icon = icon, instancesNum = 0 }
 
 
 initialApplications : List Application
@@ -49,6 +53,16 @@ initialApplications =
             [ generateApplication ExplorerWindow ]
     in
         applications
+
+
+recountInstances : Windows -> Application -> Application
+recountInstances windows app =
+    { app | instancesNum = (Dict.size (filterAppWindows windows app.window)) }
+
+
+updateInstances : Model -> Windows -> Model
+updateInstances model windows =
+    { model | dock = (List.map (\app -> (recountInstances windows app)) model.dock) }
 
 
 initialDock : Dock

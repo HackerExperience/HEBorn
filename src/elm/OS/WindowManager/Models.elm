@@ -5,10 +5,12 @@ module OS.WindowManager.Models
         , Window
         , WindowID
         , Position
+        , Windows
         , defaultSize
         , openWindow
         , closeWindow
         , getOpenWindows
+        , filterAppWindows
         , updateWindowPosition
         , windowsFoldr
         , hasWindowOpen
@@ -115,26 +117,26 @@ newWindow model window =
         ( window_, seed )
 
 
-getMinimizedWindow : Model -> GameWindow -> Windows
-getMinimizedWindow model winType =
+filterAppMinimizedWindows : Windows -> GameWindow -> Windows
+filterAppMinimizedWindows windows app =
     Dict.filter
         (\id oWindow ->
             ((oWindow.state == Minimized)
-                && (oWindow.window == winType)
+                && (oWindow.window == app)
             )
         )
-        model.windows
+        windows
 
 
-countMinimizedWindow : Model -> GameWindow -> Int
-countMinimizedWindow model winType =
+countAppMinimizedWindow : Model -> GameWindow -> Int
+countAppMinimizedWindow model app =
     Dict.size
-        (getMinimizedWindow model winType)
+        (filterAppMinimizedWindows model.windows app)
 
 
 unMinimizeIfGameWindow : Window -> GameWindow -> Window
-unMinimizeIfGameWindow window winType =
-    if (window.window == winType) then
+unMinimizeIfGameWindow window app =
+    if (window.window == app) then
         { window | state = Open }
     else
         window
@@ -142,7 +144,7 @@ unMinimizeIfGameWindow window winType =
 
 openWindow : Model -> GameWindow -> ( Windows, Seed )
 openWindow model window =
-    if ((countMinimizedWindow model window) > 0) then
+    if ((countAppMinimizedWindow model window) > 0) then
         ( Dict.map (\id oWindow -> (unMinimizeIfGameWindow oWindow window)) model.windows
         , model.seed
         )
@@ -164,11 +166,12 @@ closeWindow model id =
 
 getOpenWindows : Model -> Windows
 getOpenWindows model =
-    let
-        open =
-            Dict.filter (\id window -> window.state == Open) model.windows
-    in
-        open
+    Dict.filter (\id window -> window.state == Open) model.windows
+
+
+filterAppWindows : Windows -> GameWindow -> Windows
+filterAppWindows windows app =
+    Dict.filter (\id window -> window.window == app) windows
 
 
 windowsFoldr : (comparable -> v -> a -> a) -> a -> Dict.Dict comparable v -> a

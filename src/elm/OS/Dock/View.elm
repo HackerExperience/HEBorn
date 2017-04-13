@@ -41,11 +41,20 @@ renderApplications model =
             ]
 
 
+hasInstanceString : Int -> String
+hasInstanceString num =
+    if (num > 0) then
+        "Y"
+    else
+        "N"
+
+
 renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
     div
         [ class [ Css.Item ]
         , onClick (MsgOS (MsgWM (OpenWindow application.window)))
         , attribute "data-icon" application.icon
+        , attribute "data-hasinst" (hasInstanceString application.instancesNum)
         ]
         []

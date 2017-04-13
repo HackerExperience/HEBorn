@@ -3,6 +3,7 @@ module OS.WindowManager.Update exposing (..)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Core.Messages exposing (CoreMsg)
+import Core.Dispatcher exposing (callDock)
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
@@ -15,6 +16,7 @@ import OS.WindowManager.Models
         , minimizeWindow
         )
 import OS.WindowManager.Messages exposing (Msg(..))
+import OS.Dock.Messages as DockMsg
 
 
 update : Msg -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
@@ -28,14 +30,14 @@ update msg model =
                 model_ =
                     { model | windows = windows_, seed = seed_ }
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_) ] )
 
         CloseWindow id ->
             let
                 windows_ =
                     closeWindow model id
             in
-                ( { model | windows = windows_ }, Cmd.none, [] )
+                ( { model | windows = windows_ }, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_) ] )
 
         -- Drag
         OnDragBy delta ->
