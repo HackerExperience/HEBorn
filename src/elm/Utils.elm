@@ -1,6 +1,12 @@
-module Utils exposing (..)
+module Utils
+    exposing
+        ( msgToCmd
+        , boolToString
+        , maybeToString
+        )
 
 import Task
+
 
 -- I know this is not how it's supposed to be done but until I get a better
 -- grasp of Elm, it's good enough.
