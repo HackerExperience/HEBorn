@@ -60,14 +60,14 @@ css =
                 ]
             ]
         , attrSelector "dockItem"
-            "data-app"
+            "data-icon"
             "="
             "signup"
             [ after
                 [ faIcon FA.addressBookO ]
             ]
         , attrSelector "dockItem"
-            "data-app"
+            "data-icon"
             "="
             "explorer"
             [ after

@@ -15,12 +15,7 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 type alias Application =
     { name : String
     , window : GameWindow
-    , icon : Icon
-    }
-
-
-type alias Icon =
-    { path : String
+    , icon : String
     }
 
 
@@ -33,15 +28,6 @@ type alias Model =
     }
 
 
-generateIcon : String -> Icon
-generateIcon name =
-    let
-        path =
-            "icons/" ++ name ++ ".png"
-    in
-        { path = path }
-
-
 generateApplication : GameWindow -> Application
 generateApplication window =
     let
@@ -51,7 +37,7 @@ generateApplication window =
                     "explorer"
 
         icon =
-            generateIcon name
+            name
     in
         { name = name, window = window, icon = icon }
 

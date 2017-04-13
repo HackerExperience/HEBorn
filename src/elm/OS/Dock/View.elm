@@ -46,6 +46,6 @@ renderApplication model application =
     div
         [ class [ Css.Item ]
         , onClick (MsgOS (MsgWM (OpenWindow application.window)))
-        , attribute "data-app" application.name
+        , attribute "data-icon" application.icon
         ]
         []
