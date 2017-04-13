@@ -205,28 +205,24 @@ hasWindowOpen model window =
 
 toggleMaximizeWindow : Model -> WindowID -> Windows
 toggleMaximizeWindow model id =
-    let
-        windows_ =
-            case (getWindow model id) of
-                Nothing ->
-                    model.windows
+    case (getWindow model id) of
+        Nothing ->
+            model.windows
 
-                Just window ->
-                    let
-                        window_ =
-                            { window | maximized = not window.maximized }
+        Just window ->
+            let
+                window_ =
+                    { window | maximized = not window.maximized }
 
-                        update_ w =
-                            case w of
-                                Just window ->
-                                    Just window_
+                update_ w =
+                    case w of
+                        Just window ->
+                            Just window_
 
-                                Nothing ->
-                                    Nothing
+                        Nothing ->
+                            Nothing
 
-                        windows_ =
-                            Dict.update id update_ model.windows
-                    in
-                        windows_
-    in
-        windows_
+                windows_ =
+                    Dict.update id update_ model.windows
+            in
+                windows_
