@@ -28,12 +28,11 @@ update msg model =
                     openWindow model window
 
                 model_ =
-                    { model | windows = windows_, seed = seed_ }
+                    { model | windows = windows_, seed = seed_, focus = focusID }
             in
                 ( model_
                 , Cmd.none
                 , [ callDock (DockMsg.WindowsChanges windows_)
-                  , callWM (UpdateFocus focusID)
                   ]
                 )
 
@@ -42,7 +41,10 @@ update msg model =
                 windows_ =
                     closeWindow model id
             in
-                ( { model | windows = windows_ }, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_), callWM (UpdateFocus Nothing) ] )
+                ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
+                , Cmd.none
+                , [ callDock (DockMsg.WindowsChanges windows_) ]
+                )
 
         -- Drag
         OnDragBy delta ->
@@ -63,9 +65,9 @@ update msg model =
                 ( model_, cmd_, [] )
 
         StartDragging id ->
-            ( { model | dragging = Just id }
+            ( { model | dragging = Just id, focus = Just id }
             , Cmd.none
-            , [ callWM (UpdateFocus (Just id)) ]
+            , []
             )
 
         StopDragging ->
@@ -76,14 +78,20 @@ update msg model =
                 windows_ =
                     toggleMaximizeWindow model id
             in
-                ( { model | windows = windows_ }, Cmd.none, [] )
+                ( { model | windows = windows_, dragging = Nothing }
+                , Cmd.none
+                , []
+                )
 
         MinimizeWindow id ->
             let
                 windows_ =
                     minimizeWindow model id
             in
-                ( { model | windows = windows_ }, Cmd.none, [] )
+                ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
+                , Cmd.none
+                , []
+                )
 
         UpdateFocus target ->
             ( { model | focus = target }, Cmd.none, [] )

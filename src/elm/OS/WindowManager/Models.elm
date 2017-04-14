@@ -148,20 +148,61 @@ unMinimizeIfGameWindow window app =
 
 openWindow : Model -> GameWindow -> ( Windows, Seed, Maybe WindowID )
 openWindow model window =
-    if ((countAppMinimizedWindow model window) > 0) then
-        ( Dict.map (\id oWindow -> (unMinimizeIfGameWindow oWindow window)) model.windows
-        , model.seed
-        , Nothing
-        )
-    else
-        let
-            ( window_, seed_ ) =
-                newWindow model window
+    let
+        minimizeds =
+            (filterAppMinimizedWindows model.windows window)
 
-            windows_ =
-                Dict.insert window_.id window_ model.windows
-        in
-            ( windows_, seed_, Just window_.id )
+        count_min =
+            (Dict.size minimizeds)
+
+        ( windows_, seed_, focus_ ) =
+            if (count_min > 1) then
+                ( Dict.map
+                    (\id oWindow -> (unMinimizeIfGameWindow oWindow window))
+                    model.windows
+                , model.seed
+                , Nothing
+                )
+            else if (count_min == 1) then
+                let
+                    pWindow =
+                        List.head (Dict.values minimizeds)
+
+                    safe_result =
+                        case pWindow of
+                            Just oWindow ->
+                                let
+                                    m_window_ w =
+                                        case w of
+                                            Just w ->
+                                                Just { oWindow | state = Open }
+
+                                            Nothing ->
+                                                Nothing
+
+                                    id =
+                                        oWindow.id
+                                in
+                                    ( (Dict.update id m_window_ model.windows)
+                                    , model.seed
+                                    , Just id
+                                    )
+
+                            Nothing ->
+                                ( model.windows, model.seed, Nothing )
+                in
+                    safe_result
+            else
+                let
+                    ( window_, seed__ ) =
+                        newWindow model window
+                in
+                    ( Dict.insert window_.id window_ model.windows
+                    , seed__
+                    , Just window_.id
+                    )
+    in
+        ( windows_, seed_, focus_ )
 
 
 closeWindow : Model -> WindowID -> Windows
