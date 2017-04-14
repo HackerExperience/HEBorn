@@ -3,7 +3,7 @@ module OS.WindowManager.Update exposing (..)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callDock, callWM)
+import Core.Dispatcher exposing (callDock)
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
@@ -14,6 +14,7 @@ import OS.WindowManager.Models
         , updateWindowPosition
         , toggleMaximizeWindow
         , minimizeWindow
+        , bringFocus
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
@@ -24,16 +25,15 @@ update msg model =
     case msg of
         OpenWindow window ->
             let
-                ( windows_, seed_, focusID ) =
+                ( windows_, seed_, rNewWindowID ) =
                     openWindow model window
 
                 model_ =
-                    { model | windows = windows_, seed = seed_, focus = focusID }
+                    (bringFocus { model | windows = windows_, seed = seed_ } rNewWindowID)
             in
                 ( model_
                 , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_)
-                  ]
+                , [ callDock (DockMsg.WindowsChanges windows_) ]
                 )
 
         CloseWindow id ->
@@ -65,7 +65,10 @@ update msg model =
                 ( model_, cmd_, [] )
 
         StartDragging id ->
-            ( { model | dragging = Just id, focus = Just id }
+            ( (bringFocus
+                { model | dragging = Just id }
+                (Just id)
+              )
             , Cmd.none
             , []
             )
@@ -94,7 +97,7 @@ update msg model =
                 )
 
         UpdateFocus target ->
-            ( { model | focus = target }, Cmd.none, [] )
+            ( (bringFocus model target), Cmd.none, [] )
 
 
 dragConfig : Draggable.Config WindowID Msg

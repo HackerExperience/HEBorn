@@ -16,6 +16,7 @@ module OS.WindowManager.Models
         , hasWindowOpen
         , toggleMaximizeWindow
         , minimizeWindow
+        , bringFocus
         )
 
 import Dict
@@ -132,12 +133,6 @@ filterAppMinimizedWindows windows app =
         windows
 
 
-countAppMinimizedWindow : Model -> GameWindow -> Int
-countAppMinimizedWindow model app =
-    Dict.size
-        (filterAppMinimizedWindows model.windows app)
-
-
 unMinimizeIfGameWindow : Window -> GameWindow -> Window
 unMinimizeIfGameWindow window app =
     if (window.window == app) then
@@ -152,27 +147,27 @@ openWindow model window =
         minimizeds =
             (filterAppMinimizedWindows model.windows window)
 
-        count_min =
+        countMin =
             (Dict.size minimizeds)
 
-        ( windows_, seed_, focus_ ) =
-            if (count_min > 1) then
+        unminimizeOrCreate =
+            if (countMin > 1) then
                 ( Dict.map
                     (\id oWindow -> (unMinimizeIfGameWindow oWindow window))
                     model.windows
                 , model.seed
                 , Nothing
                 )
-            else if (count_min == 1) then
+            else if (countMin == 1) then
                 let
                     pWindow =
                         List.head (Dict.values minimizeds)
 
-                    safe_result =
+                    safeResult =
                         case pWindow of
                             Just oWindow ->
                                 let
-                                    m_window_ w =
+                                    mWindow w =
                                         case w of
                                             Just w ->
                                                 Just { oWindow | state = Open }
@@ -183,7 +178,7 @@ openWindow model window =
                                     id =
                                         oWindow.id
                                 in
-                                    ( (Dict.update id m_window_ model.windows)
+                                    ( (Dict.update id mWindow model.windows)
                                     , model.seed
                                     , Just id
                                     )
@@ -191,18 +186,18 @@ openWindow model window =
                             Nothing ->
                                 ( model.windows, model.seed, Nothing )
                 in
-                    safe_result
+                    safeResult
             else
                 let
-                    ( window_, seed__ ) =
+                    ( rNewWindow, newSeed ) =
                         newWindow model window
                 in
-                    ( Dict.insert window_.id window_ model.windows
-                    , seed__
-                    , Just window_.id
+                    ( Dict.insert rNewWindow.id rNewWindow model.windows
+                    , newSeed
+                    , Just rNewWindow.id
                     )
     in
-        ( windows_, seed_, focus_ )
+        unminimizeOrCreate
 
 
 closeWindow : Model -> WindowID -> Windows
@@ -336,3 +331,43 @@ minimizeWindow model id =
                     Dict.update id update_ model.windows
             in
                 windows_
+
+
+bringFocus : Model -> Maybe WindowID -> Model
+bringFocus model target =
+    case (target) of
+        Nothing ->
+            { model | focus = Nothing }
+
+        Just id ->
+            case (getWindow model id) of
+                Nothing ->
+                    model
+
+                Just window ->
+                    let
+                        incHighestZ =
+                            model.highestZ + 1
+
+                        position_ =
+                            Position window.position.x window.position.y incHighestZ
+
+                        window_ =
+                            { window | position = position_ }
+
+                        update_ w =
+                            case w of
+                                Just window ->
+                                    Just window_
+
+                                Nothing ->
+                                    Nothing
+
+                        windows_ =
+                            Dict.update id update_ model.windows
+                    in
+                        { model
+                            | highestZ = incHighestZ
+                            , windows = windows_
+                            , focus = Just id
+                        }
