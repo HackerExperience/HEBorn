@@ -50,7 +50,7 @@ css =
             , zIndex (int 2)
             , color (hex "FFF")
             , globalShadow
-            , after
+            , before
                 [ fontAwesome
                 , fontSize (px 24)
                 , minWidth (px 30)
@@ -58,19 +58,37 @@ css =
                 , textAlign center
                 , display inlineBlock
                 ]
+            , after
+                [ emptyContent
+                , borderRadius (pct 100)
+                , height (px 1)
+                , width (px 1)
+                , display block
+                , margin2 (px 0) auto
+                ]
             ]
         , attrSelector "dockItem"
             "data-icon"
             "="
             "signup"
-            [ after
+            [ before
                 [ faIcon FA.addressBookO ]
             ]
         , attrSelector "dockItem"
             "data-icon"
             "="
             "explorer"
-            [ after
+            [ before
                 [ faIcon FA.fileArchiveO ]
+            ]
+        , attrSelector "dockItem"
+            "data-hasinst"
+            "="
+            "Y"
+            [ after
+                [ padding (px 2)
+                , backgroundColor (hex "FFF")
+                , globalShadow
+                ]
             ]
         ]
