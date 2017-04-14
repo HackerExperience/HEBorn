@@ -30,6 +30,8 @@ type alias Model =
     , seed : Seed
     , drag : Draggable.State WindowID
     , dragging : Maybe WindowID
+    , focus : Maybe WindowID
+    , highestZ : Int
     }
 
 
@@ -95,6 +97,8 @@ initialModel =
     , seed = initialSeed 42
     , drag = Draggable.init
     , dragging = Nothing
+    , focus = Nothing
+    , highestZ = 1
     }
 
 
@@ -142,11 +146,12 @@ unMinimizeIfGameWindow window app =
         window
 
 
-openWindow : Model -> GameWindow -> ( Windows, Seed )
+openWindow : Model -> GameWindow -> ( Windows, Seed, Maybe WindowID )
 openWindow model window =
     if ((countAppMinimizedWindow model window) > 0) then
         ( Dict.map (\id oWindow -> (unMinimizeIfGameWindow oWindow window)) model.windows
         , model.seed
+        , Nothing
         )
     else
         let
@@ -156,7 +161,7 @@ openWindow model window =
             windows_ =
                 Dict.insert window_.id window_ model.windows
         in
-            ( windows_, seed_ )
+            ( windows_, seed_, Just window_.id )
 
 
 closeWindow : Model -> WindowID -> Windows

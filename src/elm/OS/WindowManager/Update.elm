@@ -3,7 +3,7 @@ module OS.WindowManager.Update exposing (..)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callDock)
+import Core.Dispatcher exposing (callDock, callWM)
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
@@ -24,20 +24,25 @@ update msg model =
     case msg of
         OpenWindow window ->
             let
-                ( windows_, seed_ ) =
+                ( windows_, seed_, focusID ) =
                     openWindow model window
 
                 model_ =
                     { model | windows = windows_, seed = seed_ }
             in
-                ( model_, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_) ] )
+                ( model_
+                , Cmd.none
+                , [ callDock (DockMsg.WindowsChanges windows_)
+                  , callWM (UpdateFocus focusID)
+                  ]
+                )
 
         CloseWindow id ->
             let
                 windows_ =
                     closeWindow model id
             in
-                ( { model | windows = windows_ }, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_) ] )
+                ( { model | windows = windows_ }, Cmd.none, [ callDock (DockMsg.WindowsChanges windows_), callWM (UpdateFocus Nothing) ] )
 
         -- Drag
         OnDragBy delta ->
@@ -58,7 +63,10 @@ update msg model =
                 ( model_, cmd_, [] )
 
         StartDragging id ->
-            ( { model | dragging = Just id }, Cmd.none, [] )
+            ( { model | dragging = Just id }
+            , Cmd.none
+            , [ callWM (UpdateFocus (Just id)) ]
+            )
 
         StopDragging ->
             ( { model | dragging = Nothing }, Cmd.none, [] )
@@ -76,6 +84,9 @@ update msg model =
                     minimizeWindow model id
             in
                 ( { model | windows = windows_ }, Cmd.none, [] )
+
+        UpdateFocus target ->
+            ( { model | focus = target }, Cmd.none, [] )
 
 
 dragConfig : Draggable.Config WindowID Msg
