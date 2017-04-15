@@ -20,12 +20,19 @@ init flags location =
 
 
 
--- main : Program Flags Model Msg
+-- main : Program Flags CoreModel CoreMsg
 
 
 main =
-    -- Navigation.programWithFlags OnLocationChange
-    TimeTravel.Navigation.programWithFlags OnLocationChange
+    {- Toggle comment below to switch on/off TimeTravel debugger. It's a great
+       option to debug changes on models (and quickly go back in time to apply
+       new changes), but it makes the UI quite sluggish, specially when dragging
+       windows, since it has to track all messages. In short, we recommend using
+       TimeTravel only when debugging specific models.
+
+    -}
+    Navigation.programWithFlags OnLocationChange
+        -- TimeTravel.Navigation.programWithFlags OnLocationChange
         { init = init
         , view = view
         , update = update
