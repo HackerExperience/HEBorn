@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 var autoprefixer      = require( 'autoprefixer' );
 var ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-var entryPath         = path.join( __dirname, 'src/static/index.js' );
+var entryPath         = path.join( __dirname, 'src/static/js/index.js' );
 var outputPath        = path.join( __dirname, 'dist' );
 
 console.log( 'WEBPACK GO!');
