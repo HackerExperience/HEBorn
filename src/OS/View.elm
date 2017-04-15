@@ -6,10 +6,9 @@ import Html.CssHelpers
 import Router.Router exposing (Route(..))
 import Core.Models exposing (CoreModel)
 import Core.Messages exposing (CoreMsg(..))
-import Core.Dispatcher exposing (callAccount)
-import Game.Account.Messages exposing (AccountMsg(Logout))
 import OS.Style exposing (Id(..))
 import OS.WindowManager.View
+import OS.Header.View
 import OS.Dock.View
 
 
@@ -39,11 +38,7 @@ viewDashboard model =
 viewHeader : CoreModel -> Html CoreMsg
 viewHeader model =
     header []
-        [ div []
-            [ button [ onClick (callAccount Logout) ]
-                [ text "logout" ]
-            ]
-        ]
+        [ (OS.Header.View.view model) ]
 
 
 viewMain : CoreModel -> Html CoreMsg
