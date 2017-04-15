@@ -11,6 +11,3 @@ update msg model =
     case msg of
         WindowsChanges windows ->
             ( (updateInstances model windows), Cmd.none, [] )
-
-        _ ->
-            ( model, Cmd.none, [] )
