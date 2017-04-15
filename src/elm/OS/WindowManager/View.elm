@@ -81,9 +81,6 @@ windowWrapper window view =
 windowTitle : Window -> String
 windowTitle window =
     case window.window of
-        SignUpWindow ->
-            "Sign Up"
-
         ExplorerWindow ->
             "File Explorer"
 
@@ -91,9 +88,6 @@ windowTitle window =
 windowIcon : Window -> String
 windowIcon window =
     case window.window of
-        SignUpWindow ->
-            "signup"
-
         ExplorerWindow ->
             "explorer"
 
