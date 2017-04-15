@@ -4,11 +4,10 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (pseudoContent, attrSelector)
 import Css.Common exposing (globalShadow, flexContainerHorz)
-import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
-import Css.FontAwesome.Icons as FA exposing (..)
+import Css.Icons as Icon
 
 
-type Css
+type Class
     = Window
     | WindowHeader
     | WindowBody
@@ -66,7 +65,7 @@ css =
             [ flex (int 1)
             , textAlign center
             , before
-                [ fontAwesome
+                [ Icon.fontFamily
                 , minWidth (px 14)
                 , textAlign center
                 , float left
@@ -75,16 +74,9 @@ css =
         , attrSelector "wmHeaderTitle"
             "data-icon"
             "="
-            "signup"
-            [ before
-                [ faIcon FA.addressBookO ]
-            ]
-        , attrSelector "wmHeaderTitle"
-            "data-icon"
-            "="
             "explorer"
             [ before
-                [ faIcon FA.fileArchiveO ]
+                Icon.explorer
             ]
         , class HeaderButtons
             [ flex (int 0)
@@ -101,20 +93,20 @@ css =
             , marginBottom (px -2)
             , color (hex "FFF")
             , before
-                [ fontAwesome
+                [ Icon.fontFamily
                 , textAlign center
                 ]
             ]
         , class HeaderBtnClose
             [ before
-                [ faIcon FA.timesCircle ]
+                Icon.windowClose
             ]
         , class HeaderBtnMaximize
             [ before
-                [ faIcon FA.expand ]
+                Icon.windowMaximize
             ]
         , class HeaderBtnMinimize
             [ before
-                [ faIcon FA.windowMinimize ]
+                Icon.windowMinimize
             ]
         ]

@@ -4,8 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (pseudoContent, attrSelector)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
-import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
-import Css.FontAwesome.Icons as FA exposing (..)
+import Css.Icons as Icon
 
 
 type Id
@@ -51,7 +50,7 @@ css =
             , color (hex "FFF")
             , globalShadow
             , before
-                [ fontAwesome
+                [ Icon.fontFamily
                 , fontSize (px 24)
                 , minWidth (px 30)
                 , minHeight (px 30)
@@ -70,16 +69,9 @@ css =
         , attrSelector "dockItem"
             "data-icon"
             "="
-            "signup"
-            [ before
-                [ faIcon FA.addressBookO ]
-            ]
-        , attrSelector "dockItem"
-            "data-icon"
-            "="
             "explorer"
             [ before
-                [ faIcon FA.fileArchiveO ]
+                Icon.explorer
             ]
         , attrSelector "dockItem"
             "data-hasinst"

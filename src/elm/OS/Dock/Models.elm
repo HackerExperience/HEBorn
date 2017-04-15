@@ -12,9 +12,6 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models exposing (Windows, filterAppWindows)
 
 
--- oi
-
-
 type alias Application =
     { name : String
     , window : GameWindow
