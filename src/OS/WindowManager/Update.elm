@@ -65,10 +65,7 @@ update msg model =
                 ( model_, cmd_, [] )
 
         StartDragging id ->
-            ( (bringFocus
-                { model | dragging = Just id }
-                (Just id)
-              )
+            ( { model | dragging = Just id }
             , Cmd.none
             , []
             )

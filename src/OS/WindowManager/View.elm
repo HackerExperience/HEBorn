@@ -2,13 +2,14 @@ module OS.WindowManager.View exposing (renderWindows)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onMouseDown)
 import Html.CssHelpers
 import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
+import Core.Dispatcher exposing (callWM)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models
@@ -70,6 +71,7 @@ windowWrapper window view =
     div
         [ widndowClasses window
         , windowStyle window
+        , onMouseDown (callWM (UpdateFocus (Just window.id)))
         ]
         [ Html.map MsgOS (Html.map MsgWM (header window))
         , div
@@ -95,11 +97,14 @@ windowIcon window =
 header : Window -> Html Msg
 header window =
     div
-        [ class [ Css.WindowHeader ]
-        , Draggable.mouseTrigger window.id DragMsg
-        ]
-        [ headerTitle (windowTitle window) (windowIcon window)
-        , headerButtons window.id
+        [ Draggable.mouseTrigger window.id DragMsg ]
+        [ div
+            [ class [ Css.WindowHeader ]
+            , onMouseDown (UpdateFocus (Just window.id))
+            ]
+            [ headerTitle (windowTitle window) (windowIcon window)
+            , headerButtons window.id
+            ]
         ]
 
 
