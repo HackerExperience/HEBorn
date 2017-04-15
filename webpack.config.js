@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 var autoprefixer      = require( 'autoprefixer' );
 var ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-var entryPath         = path.join( __dirname, 'src/static/js/index.js' );
+var entryPath         = path.join( __dirname, 'static/js/index.js' );
 var outputPath        = path.join( __dirname, 'dist' );
 
 console.log( 'WEBPACK GO!');
@@ -39,7 +39,7 @@ var commonConfig = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/static/index.html',
+      template: 'static/index.html',
       inject:   'body',
       filename: 'index.html'
     })
@@ -63,7 +63,7 @@ if ( TARGET_ENV === 'development' ) {
     devServer: {
       // serve index.html in place of 404 responses
       historyApiFallback: true,
-      contentBase: './src',
+      contentBase: '.',
     },
 
     module: {
@@ -115,11 +115,11 @@ if ( TARGET_ENV === 'production' ) {
     plugins: [
       new CopyWebpackPlugin([
         {
-          from: 'src/static/img/',
+          from: 'static/img/',
           to:   'static/img/'
         },
         {
-          from: 'src/favicon.ico'
+          from: 'favicon.ico'
         },
       ]),
 
