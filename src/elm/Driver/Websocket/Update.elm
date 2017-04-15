@@ -35,7 +35,9 @@ update msg model core =
             let
                 ( model_, cmd ) =
                     if model.defer then
-                        ( model, Utils.delay 0.5 <| JoinChannel args )
+                        ( { model | defer = False }
+                        , Utils.delay 0.5 <| JoinChannel args
+                        )
                     else
                         let
                             ( topic, event ) =

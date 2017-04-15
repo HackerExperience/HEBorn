@@ -4,7 +4,8 @@ import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
-import Css exposing (transform, translate2, asPairs, px, height, width)
+import Html.Attributes exposing (attribute)
+import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
@@ -32,9 +33,12 @@ styles =
     Css.asPairs >> style
 
 
-renderWindows : CoreModel -> Html CoreMsg
+
+-- rendrWindows : CoreModel -> Html CoreMsg
+
+
 renderWindows model =
-    div [] (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
+    (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
 
 renderLoop : CoreModel -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
@@ -51,10 +55,20 @@ renderWindow model window =
                 (Html.map MsgApp (Html.map MsgExplorer (Apps.Explorer.View.view model.apps.explorer model.game)))
 
 
+widndowClasses window =
+    if (window.maximized) then
+        class
+            [ Css.Window
+            , Css.Maximizeme
+            ]
+    else
+        class [ Css.Window ]
+
+
 windowWrapper : Window -> Html CoreMsg -> Html CoreMsg
 windowWrapper window view =
     div
-        [ class [ Css.Window ]
+        [ widndowClasses window
         , windowStyle window
         ]
         [ Html.map MsgOS (Html.map MsgWM (header window))
@@ -64,21 +78,37 @@ windowWrapper window view =
         ]
 
 
+windowTitle : Window -> String
+windowTitle window =
+    case window.window of
+        ExplorerWindow ->
+            "File Explorer"
+
+
+windowIcon : Window -> String
+windowIcon window =
+    case window.window of
+        ExplorerWindow ->
+            "explorer"
+
+
 header : Window -> Html Msg
 header window =
     div
         [ class [ Css.WindowHeader ]
         , Draggable.mouseTrigger window.id DragMsg
         ]
-        [ headerTitle "title"
-        , div [ class [ Css.HeaderVoid ] ] []
+        [ headerTitle (windowTitle window) (windowIcon window)
         , headerButtons window.id
         ]
 
 
-headerTitle : String -> Html Msg
-headerTitle title =
-    div [ class [ Css.HeaderTitle ] ]
+headerTitle : String -> String -> Html Msg
+headerTitle title icon =
+    div
+        [ class [ Css.HeaderTitle ]
+        , attribute "data-icon" icon
+        ]
         [ text title ]
 
 
@@ -86,17 +116,29 @@ headerButtons : WindowID -> Html Msg
 headerButtons id =
     div [ class [ Css.HeaderButtons ] ]
         [ span
-            [ class [ Css.HeaderButton ]
+            [ class [ Css.HeaderButton, Css.HeaderBtnMinimize ]
+            , onClick (MinimizeWindow id)
+            ]
+            []
+        , span
+            [ class [ Css.HeaderButton, Css.HeaderBtnMaximize ]
+            , onClick (ToggleMaximize id)
+            ]
+            []
+        , span
+            [ class [ Css.HeaderButton, Css.HeaderBtnClose ]
             , onClick (CloseWindow id)
             ]
-            [ text "X" ]
+            []
         ]
 
 
 windowStyle : Window -> Html.Attribute CoreMsg
 windowStyle window =
     styles
-        [ transform (translate2 (px window.position.x) (px window.position.y))
+        [ left (px window.position.x)
+        , top (px window.position.y)
         , width (px window.size.width)
         , height (px window.size.height)
+        , zIndex (int window.position.z)
         ]
