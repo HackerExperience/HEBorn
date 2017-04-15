@@ -11,11 +11,11 @@
   "watch": {
     "elm-css": {
       "patterns": [
-        "src/elm/OS/Style.elm",
-        "src/elm/OS/*/Style.elm",
-        "src/elm/Apps/*/Style.elm",
-        "src/elm/Core/Style.elm",
-        "src/elm/Core/Stylesheets.elm"
+        "src/OS/Style.elm",
+        "src/OS/*/Style.elm",
+        "src/Apps/*/Style.elm",
+        "src/Core/Style.elm",
+        "src/Core/Stylesheets.elm"
       ],
       "extensions": "elm"
     }
@@ -25,7 +25,7 @@
     "build": "rimraf dist && webpack && mv dist/*.eot dist/static/css/ && mv dist/*.woff* dist/static/css/ && mv dist/*.svg dist/static/css/ && mv dist/*.ttf dist/static/css/",
     "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install",
     "watch": "npm-watch",
-    "elm-css": "sleep 4 && elm-css src/elm/Core/Stylesheets.elm -o src/static/css/",
+    "elm-css": "sleep 4 && elm-css src/Core/Stylesheets.elm -o static/css/",
     "comment": "sleep 4 on elm-css is required so there is no conflict/slow-down on compilation time"
   },
   "devDependencies": {
