@@ -10,6 +10,7 @@ import OS.Style exposing (Id(..))
 import OS.WindowManager.View
 import OS.Header.View
 import OS.Dock.View
+import OS.Context.View exposing (contextView, contextEmpty)
 
 
 { id, class, classList } =
@@ -28,10 +29,14 @@ view model =
 
 viewDashboard : CoreModel -> Html CoreMsg
 viewDashboard model =
-    div [ id Dashboard ]
+    div
+        [ id Dashboard
+        , contextEmpty
+        ]
         [ viewHeader model
         , viewMain model
         , viewFooter model
+        , contextView model.os
         ]
 
 

@@ -47,7 +47,7 @@ update msg model =
             MsgOS subMsg ->
                 let
                     ( os_, cmd, coreMsg ) =
-                        OS.Update.update subMsg model.os
+                        OS.Update.update subMsg model.os model
                 in
                     ( { model | os = os_ }, Cmd.map MsgOS cmd )
                         |> Update.andThen update (getCoreMsg coreMsg)

@@ -3,7 +3,7 @@ module Core.Subscriptions exposing (subscriptions)
 import Driver.Websocket.Subscriptions
 import Core.Messages exposing (CoreMsg(MsgOS, MsgApp, MsgWebsocket))
 import Core.Models exposing (CoreModel)
-import OS.WindowManager.Subscriptions
+import OS.Subscriptions
 import Apps.Subscriptions
 
 
@@ -13,7 +13,7 @@ subscriptions model =
         [ Sub.map MsgWebsocket
             (Driver.Websocket.Subscriptions.subscriptions model.websocket model)
         , Sub.map MsgOS
-            (OS.WindowManager.Subscriptions.subscriptions model.os.wm model)
+            (OS.Subscriptions.subscriptions model.os model)
         , Sub.map MsgApp
             (Apps.Subscriptions.subscriptions model.apps model)
         ]

@@ -11,6 +11,8 @@ import Game.Account.Messages exposing (AccountMsg(Logout))
 view : CoreModel -> Html CoreMsg
 view model =
     div []
-        [ button [ onClick (callAccount Logout) ]
+        [ button
+            [ onClick (callAccount Logout)
+            ]
             [ text "logout" ]
         ]
