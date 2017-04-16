@@ -1,10 +1,7 @@
 module Gen.Software exposing (..)
 
-
 import Dict
-
 import Arithmetic exposing (isEven)
-
 import Gen.Utils exposing (..)
 import Game.Software.Models exposing (..)
 
@@ -52,45 +49,55 @@ extensionSeed seed =
 folder : Int -> File
 folder seedInt =
     let
-        (id, name, path) =
+        ( id, name, path ) =
             fuzz3 seedInt fileSeed nameSeed pathSeed
     in
         folderArgs
-            id name path
+            id
+            name
+            path
 
 
 folderArgs : FileID -> String -> String -> File
 folderArgs id name path =
-    RegularFolder {id = id, name = name, path = path}
+    RegularFolder { id = id, name = name, path = path }
 
 
 regularFile : Int -> File
 regularFile seedInt =
     let
-        (id, name, path, extension) =
+        ( id, name, path, extension ) =
             fuzz4 seedInt fileSeed nameSeed pathSeed extensionSeed
-        (version, size) = (fileVersion, fileSize)
+
+        ( version, size ) =
+            ( fileVersion, fileSize )
     in
         regularFileArgs
-            id name path extension version size
+            id
+            name
+            path
+            extension
+            version
+            size
 
 
-regularFileArgs : FileID
-         -> String
-         -> FilePath
-         -> String
-         -> FileVersion
-         -> FileSize
-         -> File
+regularFileArgs :
+    FileID
+    -> String
+    -> FilePath
+    -> String
+    -> FileVersion
+    -> FileSize
+    -> File
 regularFileArgs id name path extension version size =
     RegularFile
-    { id = id
-    , name = name
-    , path = path
-    , extension = extension
-    , version = version
-    , size = size
-    }
+        { id = id
+        , name = name
+        , path = path
+        , extension = extension
+        , version = version
+        , size = size
+        }
 
 
 fileVersion : FileVersion
@@ -103,14 +110,14 @@ fileSize =
     FileSizeNumber 100
 
 
-fsEmpty: Filesystem
+fsEmpty : Filesystem
 fsEmpty =
     initialFilesystem
 
 
 model : Int -> SoftwareModel
-model seedInt  =
-    {filesystem = (fsRandom seedInt)}
+model seedInt =
+    { filesystem = (fsRandom seedInt) }
 
 
 file : Int -> File
@@ -121,25 +128,34 @@ file seedInt =
         folder seedInt
 
 
-overwriteFile : (File, Int) -> (File, Int)
-overwriteFile oldFile =
-    let
-        (_, seed) = oldFile
-        file_ = file seed
-    in
-        (file_, seed)
-
-
 fileList : Int -> List File
 fileList seedInt =
     let
-        size = Gen.Utils.intRange 10 50 seedInt
-        seedList = listOfInt size seedInt
-        fileList = List.repeat size (file seedInt)
+        size =
+            Gen.Utils.intRange 10 50 seedInt
 
-        list = List.map2 (,) fileList seedList
+        seedList =
+            listOfInt size seedInt
 
-        (list_, _) = List.unzip (List.map overwriteFile list)
+        fileList =
+            List.repeat size (file seedInt)
+
+        list =
+            List.map2 (,) fileList seedList
+
+        funOverwrite : ( File, Int ) -> ( File, Int )
+        funOverwrite oldFile =
+            let
+                ( _, seed ) =
+                    oldFile
+
+                file_ =
+                    file seed
+            in
+                ( file_, seed )
+
+        ( list_, _ ) =
+            List.unzip (List.map funOverwrite list)
     in
         list_
 
@@ -147,9 +163,13 @@ fileList seedInt =
 fsRandom : Int -> Filesystem
 fsRandom seedInt =
     let
-        list = fileList seedInt
-        model = List.foldr
-                    (\file model_ -> addFile model_ file)
-                    initialSoftwareModel list
+        list =
+            fileList seedInt
+
+        model =
+            List.foldr
+                (\file model_ -> addFile model_ file)
+                initialSoftwareModel
+                list
     in
         model.filesystem
