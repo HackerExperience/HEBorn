@@ -60,11 +60,11 @@ folder seedInt =
 
 folderArgs : FileID -> String -> String -> File
 folderArgs id name path =
-    RegularFolder { id = id, name = name, path = path }
+    Folder { id = id, name = name, path = path }
 
 
-regularFile : Int -> File
-regularFile seedInt =
+stdFile : Int -> File
+stdFile seedInt =
     let
         ( id, name, path, extension ) =
             fuzz4 seedInt fileSeed nameSeed pathSeed extensionSeed
@@ -72,7 +72,7 @@ regularFile seedInt =
         ( version, size ) =
             ( fileVersion, fileSize )
     in
-        regularFileArgs
+        stdFileArgs
             id
             name
             path
@@ -81,7 +81,7 @@ regularFile seedInt =
             size
 
 
-regularFileArgs :
+stdFileArgs :
     FileID
     -> String
     -> FilePath
@@ -89,8 +89,8 @@ regularFileArgs :
     -> FileVersion
     -> FileSize
     -> File
-regularFileArgs id name path extension version size =
-    RegularFile
+stdFileArgs id name path extension version size =
+    StdFile
         { id = id
         , name = name
         , path = path
@@ -123,7 +123,7 @@ model seedInt =
 file : Int -> File
 file seedInt =
     if isEven seedInt then
-        regularFile seedInt
+        stdFile seedInt
     else
         folder seedInt
 
@@ -168,7 +168,7 @@ fsRandom seedInt =
 
         model =
             List.foldr
-                (\file model_ -> addFile model_ file)
+                (\file model_ -> addFileRecursively model_ file)
                 initialSoftwareModel
                 list
     in
