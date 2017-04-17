@@ -2,6 +2,7 @@ module Css.Common exposing (..)
 
 import Css exposing (..)
 import Css.Utils exposing (pseudoContent)
+import Css.Icons as Icon
 
 
 flexContainerVert : Mixin

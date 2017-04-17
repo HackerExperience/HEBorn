@@ -47,10 +47,28 @@ viewExplorerMain model id game =
             [ class [ ContentHeader ] ]
             [ div
                 [ class [ LocBar ] ]
-                [ text "location" ]
+                [ span
+                    [ class [ BreadcrumbItem ] ]
+                    [ text "home" ]
+                , span
+                    [ class [ BreadcrumbItem ] ]
+                    [ text "root" ]
+                , span
+                    [ class [ BreadcrumbItem ] ]
+                    [ text "Documents" ]
+                ]
             , div
                 [ class [ ActBtns ] ]
-                [ text "action buttons" ]
+                [ span
+                    [ class [ DirBtn, NewBtn ] ]
+                    []
+                , span
+                    [ class [ DocBtn, NewBtn ] ]
+                    []
+                , span
+                    [ class [ GoUpBtn ] ]
+                    []
+                ]
             ]
         , div
             [ class [ ContentList ] ]

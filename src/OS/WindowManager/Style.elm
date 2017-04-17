@@ -80,7 +80,7 @@ css =
             "="
             "explorer"
             [ before
-                Icon.explorer
+                [ Icon.explorer ]
             ]
         , class HeaderButtons
             [ flex (int 0)
@@ -103,14 +103,14 @@ css =
             ]
         , class HeaderBtnClose
             [ before
-                Icon.windowClose
+                [ Icon.windowClose ]
             ]
         , class HeaderBtnMaximize
             [ before
-                Icon.windowMaximize
+                [ Icon.windowMaximize ]
             ]
         , class HeaderBtnMinimize
             [ before
-                Icon.windowMinimize
+                [ Icon.windowMinimize ]
             ]
         ]

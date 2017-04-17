@@ -71,7 +71,7 @@ css =
             "="
             "explorer"
             [ before
-                Icon.explorer
+                [ Icon.explorer ]
             ]
         , attrSelector "dockItem"
             "data-hasinst"
