@@ -5,5 +5,4 @@ import OS.WindowManager.Models exposing (Windows)
 
 
 type Msg
-    = ToWM OS.WindowManager.Messages.Msg
-    | WindowsChanges Windows
+    = WindowsChanges Windows

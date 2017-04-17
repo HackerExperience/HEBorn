@@ -1,6 +1,5 @@
 module Apps.Explorer.Models exposing (..)
 
-import ContextMenu exposing (ContextMenu)
 import Game.Software.Models exposing (FilePath, rootPath)
 import Apps.Explorer.Context.Models as Context
 

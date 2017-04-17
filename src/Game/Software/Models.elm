@@ -73,30 +73,22 @@ type alias SoftwareModel =
 
 getFilePath : File -> String
 getFilePath file =
-    let
-        path =
-            case file of
-                RegularFile file_ ->
-                    file_.path
+    case file of
+        RegularFile file_ ->
+            file_.path
 
-                RegularFolder folder ->
-                    folder.path
-    in
-        path
+        RegularFolder folder ->
+            folder.path
 
 
 getFileName : File -> String
 getFileName file =
-    let
-        name =
-            case file of
-                RegularFile file_ ->
-                    file_.name
+    case file of
+        RegularFile file_ ->
+            file_.name
 
-                RegularFolder folder ->
-                    folder.name
-    in
-        name
+        RegularFolder folder ->
+            folder.name
 
 
 addFile : SoftwareModel -> File -> SoftwareModel

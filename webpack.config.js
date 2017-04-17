@@ -63,7 +63,7 @@ if ( TARGET_ENV === 'development' ) {
     devServer: {
       // serve index.html in place of 404 responses
       historyApiFallback: true,
-      contentBase: './src',
+      contentBase: '.',
     },
 
     module: {
