@@ -37,7 +37,6 @@ update msg model =
                         Game.Update.update subMsg model.game
                 in
                     ( { model | game = game_ }, Cmd.map MsgGame cmd )
-                        -- |> Update.andThen update (getCoreMsg coreMsg)
                         |> Update.addCmd (batchMsgs coreMsg)
 
             -- OS
@@ -50,7 +49,7 @@ update msg model =
                         OS.Update.update subMsg model.os model
                 in
                     ( { model | os = os_ }, Cmd.map MsgOS cmd )
-                        |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- Apps
             MsgApp (Apps.Messages.Request (NewRequest requestData) component) ->
@@ -62,7 +61,7 @@ update msg model =
                         Apps.Update.update subMsg model.apps model
                 in
                     ( { model | apps = apps_ }, Cmd.map MsgApp cmd )
-                        |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- Landing
             MsgLand (Landing.Messages.Request (NewRequest requestData) component) ->
@@ -74,7 +73,7 @@ update msg model =
                         Landing.Update.update subMsg model.landing model
                 in
                     ( { model | landing = landing_ }, Cmd.map MsgLand cmd )
-                        |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- Channel
             MsgWebsocket subMsg ->
@@ -83,7 +82,7 @@ update msg model =
                         Driver.Websocket.Update.update subMsg model.websocket model
                 in
                     ( { model | websocket = websocket_ }, Cmd.map MsgWebsocket cmd )
-                        |> Update.andThen update (getCoreMsg coreMsg)
+                        |> Update.addCmd (batchMsgs coreMsg)
 
             -- Router
             OnLocationChange location ->
@@ -144,14 +143,8 @@ update msg model =
                     response =
                         decoder body code
 
-                    f =
-                        Debug.log "response: " (toString response)
-
                     requestMsg =
                         getRequestMsg component request response
-
-                    g =
-                        Debug.log "llll" (toString requestMsg)
                 in
                     update requestMsg model
 
@@ -168,23 +161,3 @@ batchMsgs : List CoreMsg -> Cmd CoreMsg
 batchMsgs msg =
     Cmd.batch
         (List.reverse (List.map Utils.msgToCmd msg))
-
-
-getGameMsg : List Game.Messages.GameMsg -> CoreMsg
-getGameMsg msg =
-    case msg of
-        [] ->
-            NoOp
-
-        m :: _ ->
-            (MsgGame m)
-
-
-getCoreMsg : List CoreMsg -> CoreMsg
-getCoreMsg msg =
-    case msg of
-        [] ->
-            NoOp
-
-        m :: _ ->
-            m
