@@ -3,7 +3,7 @@ module OS.WindowManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (pseudoContent, attrSelector)
-import Css.Common exposing (globalShadow, flexContainerHorz)
+import Css.Common exposing (globalShadow, flexContainerHorz, internalPadding)
 import Css.Icons as Icon
 
 
@@ -30,10 +30,14 @@ css =
             , borderRadius4 (px 8) (px 8) (px 8) (px 8)
             , flexDirection column
             , globalShadow
+            , flex (int 0)
             , withClass Maximizeme
-                [ property "transform" "none !important"
+                [ property "top" "auto !important"
+                , property "left" "auto !important"
                 , property "width" "100% !important"
-                , property "height" "100% !important"
+                , property "height" "auto !important"
+                , position relative
+                , flex (int 1)
                 , borderRadius (px 0)
                 , children
                     [ class WindowBody
@@ -47,7 +51,7 @@ css =
             [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
             , backgroundColor (hex "EEE")
             , flex (int 1)
-            , padding (px 8)
+            , internalPadding
             ]
         , class WindowHeader
             [ displayFlex
@@ -56,7 +60,7 @@ css =
             , color (hex "FFF")
             , flex (int 0)
             , borderRadius4 (px 8) (px 8) (px 0) (px 0)
-            , padding (px 8)
+            , internalPadding
             , lineHeight (px 16)
             , borderBottom3 (px 1) solid (rgb 0 140 255)
             , fontSize (px 12)

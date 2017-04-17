@@ -8,7 +8,7 @@ import Game.Models exposing (GameModel)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (..)
+import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Context.Models exposing (Context(..))
 import Apps.Explorer.Context.View exposing (contextView, contextNav, contextContent)
 import Apps.Explorer.Style exposing (Classes(..))
@@ -33,7 +33,7 @@ viewExplorerColumn model game =
         [ contextNav
         , class [ Nav ]
         ]
-        [ text "col" ]
+        [ text "sidebar" ]
 
 
 viewExplorerMain : Model -> InstanceID -> GameModel -> Html Msg
@@ -43,16 +43,16 @@ viewExplorerMain model id game =
         , class
             [ Content ]
         ]
-        [ renderMain model id ]
-
-
-renderMain model id =
-    let
-        explorer =
-            getState model id
-
-        path =
-            getCurrentPath explorer
-    in
-        div []
-            [ text path ]
+        [ div
+            [ class [ ContentHeader ] ]
+            [ div
+                [ class [ LocBar ] ]
+                [ text "location" ]
+            , div
+                [ class [ ActBtns ] ]
+                [ text "action buttons" ]
+            ]
+        , div
+            [ class [ ContentList ] ]
+            [ text "grid-itens" ]
+        ]

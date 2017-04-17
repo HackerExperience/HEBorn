@@ -28,3 +28,12 @@ globalShadow =
 emptyContent : Mixin
 emptyContent =
     pseudoContent "''"
+
+
+internalPaddingSz =
+    (px 8)
+
+
+internalPadding : Mixin
+internalPadding =
+    padding internalPaddingSz

@@ -26,11 +26,16 @@ css =
             , globalShadow
             ]
         , main_
-            [ flex (int 1) ]
+            [ flex (int 1)
+            , flexContainerVert
+            ]
         , footer
             [ flexContainerHorz
             , justifyContent center
-            , position relative
+            , position absolute
+            , width (vw 100)
+            , bottom zero
+            , zIndex (int 1699999)
             , minHeight (px 60)
             , marginBottom (px -60)
             , paddingTop (px 8)
