@@ -13,10 +13,15 @@ module Game.Software.Models
         , removeFile
         , getFilePath
         , getFileName
+        , getFileId
         , getFilesOnPath
         , pathExists
         , rootPath
         , listFilesystem
+        , moveFile
+        , setFilePath
+        , addFileRecursively
+        , pathSeparator
         )
 
 import Dict
@@ -41,7 +46,7 @@ type FileSize
     | NoSize
 
 
-type alias RegularFileData =
+type alias StdFileData =
     { id : FileID
     , name : String
     , extension : String
@@ -59,8 +64,8 @@ type alias FolderData =
 
 
 type File
-    = RegularFile RegularFileData
-    | RegularFolder FolderData
+    = StdFile StdFileData
+    | Folder FolderData
 
 
 type alias Filesystem =
@@ -71,23 +76,43 @@ type alias SoftwareModel =
     { filesystem : Filesystem }
 
 
-getFilePath : File -> String
+getFileId : File -> FileID
+getFileId file =
+    case file of
+        StdFile file_ ->
+            file_.id
+
+        Folder folder ->
+            folder.id
+
+
+getFilePath : File -> FilePath
 getFilePath file =
     case file of
-        RegularFile file_ ->
+        StdFile file_ ->
             file_.path
 
-        RegularFolder folder ->
+        Folder folder ->
             folder.path
+
+
+setFilePath : File -> FilePath -> File
+setFilePath file path =
+    case file of
+        StdFile file ->
+            StdFile { file | path = path }
+
+        Folder folder ->
+            Folder { folder | path = path }
 
 
 getFileName : File -> String
 getFileName file =
     case file of
-        RegularFile file_ ->
+        StdFile file_ ->
             file_.name
 
-        RegularFolder folder ->
+        Folder folder ->
             folder.name
 
 
@@ -102,8 +127,54 @@ addFile model file =
 
         newFiles =
             filesOnPath ++ [ file ]
+
+        filesystem_ =
+            case file of
+                StdFile _ ->
+                    if (pathExists model path) then
+                        Dict.insert path newFiles model.filesystem
+                    else
+                        model.filesystem
+
+                {- Adding a folder is a special case. We need to ensure our model
+                   recognizes this new folder as a valid path, so it can store
+                   its own StdFiles
+                -}
+                Folder _ ->
+                    let
+                        filesystem1 =
+                            Dict.insert path newFiles model.filesystem
+
+                        newPath =
+                            path ++ pathSeparator ++ (getFileName file)
+
+                        filesystem2 =
+                            Dict.insert newPath [] filesystem1
+                    in
+                        filesystem2
     in
-        { model | filesystem = (Dict.insert path newFiles model.filesystem) }
+        { model | filesystem = filesystem_ }
+
+
+addFileRecursively : SoftwareModel -> File -> SoftwareModel
+addFileRecursively model file =
+    case file of
+        Folder _ ->
+            addFile model file
+
+        StdFile file_ ->
+            let
+                path =
+                    (getFilePath file)
+
+                -- TODO: this is not recursive, will break once we add nested folders
+                folder =
+                    Folder { id = "id", name = "name", path = path }
+
+                model_ =
+                    addFile model folder
+            in
+                addFile model_ (StdFile file_)
 
 
 getFilesOnPath : SoftwareModel -> FilePath -> List File
@@ -126,22 +197,56 @@ pathExists model path =
             False
 
 
+moveFile : SoftwareModel -> File -> FilePath -> SoftwareModel
+moveFile model file path =
+    if not (pathExists model path) then
+        -- Moving to a non-existing path
+        model
+    else
+        let
+            file_ =
+                setFilePath file path
+
+            model1 =
+                addFile model file_
+
+            model_ =
+                removeFile model1 file
+        in
+            model_
+
+
 removeFile : SoftwareModel -> File -> SoftwareModel
 removeFile model file =
     let
         path =
             getFilePath file
 
-        name =
-            getFileName file
+        id =
+            getFileId file
 
         filesOnPath =
             getFilesOnPath model path
 
         newFiles =
-            List.filter (\x -> (getFileName x) /= name) filesOnPath
+            List.filter (\x -> (getFileId x) /= id) filesOnPath
+
+        filesystem_ =
+            case file of
+                StdFile _ ->
+                    Dict.insert path newFiles model.filesystem
+
+                {- Deleting a folder is a special case. If there are any files
+                   inside the folder, it can't be deleted at all. On the other hand,
+                   if there are no files, the whole path should be deleted
+                -}
+                Folder _ ->
+                    if List.isEmpty newFiles then
+                        Dict.remove path model.filesystem
+                    else
+                        model.filesystem
     in
-        { model | filesystem = (Dict.insert path newFiles model.filesystem) }
+        { model | filesystem = filesystem_ }
 
 
 listFilesystem : SoftwareModel -> String
@@ -161,4 +266,9 @@ initialSoftwareModel =
 
 rootPath : FilePath
 rootPath =
+    "/"
+
+
+pathSeparator : String
+pathSeparator =
     "/"
