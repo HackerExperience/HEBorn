@@ -52,6 +52,9 @@ css =
             , backgroundColor (hex "EEE")
             , flex (int 1)
             , internalPadding
+            , maxHeight (pct 100)
+
+            -- TODO: Consider header height
             ]
         , class WindowHeader
             [ displayFlex

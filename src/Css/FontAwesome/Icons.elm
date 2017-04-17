@@ -31,9 +31,19 @@ plusCircle =
     "f055"
 
 
+folder : UnicodeTag
+folder =
+    "f07b"
+
+
 folderOpenO : UnicodeTag
 folderOpenO =
     "f115"
+
+
+shield : UnicodeTag
+shield =
+    "f132"
 
 
 levelUp : UnicodeTag
@@ -44,6 +54,11 @@ levelUp =
 fileArchiveO : UnicodeTag
 fileArchiveO =
     "f1c6"
+
+
+bug : UnicodeTag
+bug =
+    "f188"
 
 
 plusSquareO : UnicodeTag

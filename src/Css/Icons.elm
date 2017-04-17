@@ -39,6 +39,11 @@ directory =
     faIcon FA.folderOpenO
 
 
+directoryUntouched : Icon
+directoryUntouched =
+    faIcon FA.folder
+
+
 fileGeneric : Icon
 fileGeneric =
     faIcon FA.fileO
@@ -52,3 +57,13 @@ dirUp =
 add : Icon
 add =
     faIcon FA.plusCircle
+
+
+virus : Icon
+virus =
+    faIcon FA.bug
+
+
+firewall : Icon
+firewall =
+    faIcon FA.shield

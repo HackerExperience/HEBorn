@@ -58,3 +58,23 @@ transition time propertyName easing =
 
 attrSelector parent attrName op value =
     selector ("." ++ parent ++ "[" ++ attrName ++ op ++ value ++ "]")
+
+
+selectableText : Mixin
+selectableText =
+    mixin
+        [ property "-moz-user-select" "text"
+        , property "-webkit-user-select" "text"
+        , property "-ms-user-select" "text"
+        , property "user-select" "text"
+        ]
+
+
+unselectable : Mixin
+unselectable =
+    mixin
+        [ property "-moz-user-select" "none"
+        , property "-webkit-user-select" "none"
+        , property "-ms-user-select" "none"
+        , property "user-select" "none"
+        ]
