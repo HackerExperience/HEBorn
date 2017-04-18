@@ -36,6 +36,16 @@ folder =
     "f07b"
 
 
+folderOpen : UnicodeTag
+folderOpen =
+    "f07c"
+
+
+plusSquare : UnicodeTag
+plusSquare =
+    "f0fe"
+
+
 folderOpenO : UnicodeTag
 folderOpenO =
     "f115"
@@ -44,6 +54,11 @@ folderOpenO =
 shield : UnicodeTag
 shield =
     "f132"
+
+
+minusSquare : UnicodeTag
+minusSquare =
+    "f146"
 
 
 levelUp : UnicodeTag

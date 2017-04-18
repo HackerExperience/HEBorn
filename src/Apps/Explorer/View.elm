@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
+import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
@@ -20,6 +21,13 @@ import Apps.Explorer.Style exposing (Classes(..))
 
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model id game =
+styles : List Css.Mixin -> Attribute Msg
+styles =
+    Css.asPairs >> style
+
+
+view : Model -> GameModel -> Html Msg
+view model game =
     div [ class [ Window ] ]
         [ viewExplorerColumn model game
         , viewExplorerMain model id game
@@ -33,7 +41,91 @@ viewExplorerColumn model game =
         [ contextNav
         , class [ Nav ]
         ]
-        [ text "sidebar" ]
+        [ div [ class [ NavTree ] ]
+            [ div [ class [ NavEntry, EntryDir, EntryExpanded ] ]
+                [ div
+                    [ class [ EntryView ] ]
+                    [ span [ class [ CasedDirIcon, NavIcon ] ] []
+                    , span [] [ text "Pictures" ]
+                    ]
+                , div
+                    [ class [ EntryChilds ] ]
+                    [ div
+                        [ class [ NavEntry, EntryArchive ] ]
+                        [ span [ class [ GenericArchiveIcon, NavIcon ] ] []
+                        , span [] [ text "Purple Lotus 1.jpg" ]
+                        ]
+                    , div
+                        [ class [ NavEntry, EntryArchive ] ]
+                        [ span [ class [ GenericArchiveIcon, NavIcon ] ] []
+                        , span [] [ text "Blue Orchid.png" ]
+                        ]
+                    , div
+                        [ class [ NavEntry, EntryDir ] ]
+                        [ div
+                            [ class [ EntryView ] ]
+                            [ span [ class [ CasedDirIcon, NavIcon ] ] []
+                            , span [] [ text "Other Flowers" ]
+                            ]
+                        , div
+                            [ class [ EntryChilds ] ]
+                            []
+                        ]
+                    ]
+                ]
+            , div [ class [ NavEntry, EntryDir, EntryExpanded ] ]
+                [ div
+                    [ class [ EntryView ] ]
+                    [ span [ class [ CasedOpIcon, NavIcon ] ] []
+                    , span [] [ text "Tree" ]
+                    ]
+                , div
+                    [ class [ EntryChilds ] ]
+                    [ div
+                        [ class [ NavEntry, EntryDir ] ]
+                        [ div
+                            [ class [ EntryView ] ]
+                            [ span [ class [ CasedOpIcon, NavIcon ] ] []
+                            , span [] [ text "Branch" ]
+                            ]
+                        , div
+                            [ class [ EntryChilds ] ]
+                            []
+                        ]
+                    , div
+                        [ class [ NavEntry, EntryDir ] ]
+                        [ div
+                            [ class [ EntryView ] ]
+                            [ span [ class [ CasedOpIcon, NavIcon ] ] []
+                            , span [] [ text "AnotherBranch" ]
+                            ]
+                        , div
+                            [ class [ EntryChilds ] ]
+                            []
+                        ]
+                    , div
+                        [ class [ NavEntry, EntryArchive ] ]
+                        [ text "A Leaf" ]
+                    ]
+                ]
+            ]
+        , div [ class [ NavData ] ]
+            [ text "Data usage"
+            , br [] []
+            , text "82%"
+            , br [] []
+            , div
+                [ class [ ProgBar ] ]
+                [ div
+                    [ class [ [ ProgFill ] ]
+                    , styles [ Css.width (pct 50) ]
+                    ]
+                    []
+                ]
+            , br [] []
+            , text "289 MB / 1000 MB"
+            ]
+        ]
 
 
 viewExplorerMain : Model -> InstanceID -> GameModel -> Html Msg
@@ -95,7 +187,7 @@ viewExplorerMain model game =
         , div
             [ class [ ContentList ] ]
             [ div [ class [ CntListEntry, EntryDir ] ]
-                [ span [] []
+                [ span [ class [ DirIcon ] ] []
                 , span [] [ text "Downloads" ]
                 ]
             , div [ class [ CntListEntry, EntryArchive ] ]

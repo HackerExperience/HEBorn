@@ -23,8 +23,21 @@ type Classes
     | CntListEntry
     | EntryDir
     | EntryArchive
+    | EntryExpanded
     | VirusIcon
     | FirewallIcon
+    | DirIcon
+    | GenericArchiveIcon
+    | CasedDirIcon
+    | CasedOpIcon
+    | NavEntry
+    | NavTree
+    | NavData
+    | NavIcon
+    | EntryView
+    | EntryChilds
+    | ProgBar
+    | ProgFill
 
 
 css : Stylesheet
@@ -33,12 +46,6 @@ css =
         [ class Window
             [ flexContainerHorz
             , height (pct 100)
-            ]
-        , class Nav
-            [ margin zero
-            , padding zero
-            , flex (int 0)
-            , minWidth (px 180)
             ]
         , class Content
             [ flex (int 1)
@@ -122,12 +129,10 @@ css =
                     ]
                 ]
             ]
-        , class EntryDir
-            [ children
-                [ everything
-                    [ firstChild
-                        [ before [ Icon.directoryUntouched ] ]
-                    ]
+        , class DirIcon
+            [ before
+                [ Icon.directoryUntouched
+                , color (hex "000")
                 ]
             ]
         , class VirusIcon
@@ -160,5 +165,61 @@ css =
                         ]
                     ]
                 ]
+            ]
+        , class Nav
+            [ margin zero
+            , padding zero
+            , flex (int 0)
+            , minWidth (px 180)
+            , flexContainerVert
+            , fontSize (px 12)
+            ]
+        , class NavTree
+            [ flex (int 1) ]
+        , class NavData
+            [ flex (int 0)
+            , textAlign center
+            ]
+        , class NavEntry
+            [ margin3 (px 8) (px 0) (px 0) ]
+        , class NavIcon
+            [ marginRight (px 8)
+            , Icon.fontFamily
+            ]
+        , class EntryChilds
+            [ paddingLeft (px 12)
+            , display none
+            ]
+        , class CasedDirIcon
+            [ before [ Icon.directoryUntouched ] ]
+        , class CasedOpIcon
+            [ before [ Icon.branchUntouched ] ]
+        , class GenericArchiveIcon
+            [ before [ Icon.fileGeneric ] ]
+        , class EntryExpanded
+            [ children
+                [ class EntryChilds
+                    [ display inlineBlock ]
+                , class EntryView
+                    [ children
+                        [ class CasedDirIcon
+                            [ before [ Icon.directoryExpanded ] ]
+                        , class CasedOpIcon
+                            [ before [ Icon.branchExpanded ] ]
+                        ]
+                    ]
+                ]
+            ]
+        , class ProgBar
+            [ borderRadius (px 8)
+            , border3 (px 1) solid (hex "000")
+            , display inlineBlock
+            , width (pct 80)
+            , height (px 8)
+            ]
+        , class ProgFill
+            [ width (pct 100)
+            , height (pct 100)
+            , backgroundColor (hex "555")
             ]
         ]

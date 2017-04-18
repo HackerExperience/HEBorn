@@ -39,9 +39,24 @@ directory =
     faIcon FA.folderOpenO
 
 
+directoryExpanded : Icon
+directoryExpanded =
+    faIcon FA.folderOpen
+
+
 directoryUntouched : Icon
 directoryUntouched =
     faIcon FA.folder
+
+
+branchExpanded : Icon
+branchExpanded =
+    faIcon FA.plusSquare
+
+
+branchUntouched : Icon
+branchUntouched =
+    faIcon FA.minusSquare
 
 
 fileGeneric : Icon
