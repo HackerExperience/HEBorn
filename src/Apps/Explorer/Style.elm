@@ -175,7 +175,9 @@ css =
             , fontSize (px 12)
             ]
         , class NavTree
-            [ flex (int 1) ]
+            [ flex (int 1)
+            , overflowY auto
+            ]
         , class NavData
             [ flex (int 0)
             , textAlign center
