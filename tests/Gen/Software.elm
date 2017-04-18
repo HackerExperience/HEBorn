@@ -4,6 +4,7 @@ import Dict
 import Arithmetic exposing (isEven)
 import Gen.Utils exposing (..)
 import Game.Software.Models exposing (..)
+import Helper.Software as Helper
 
 
 fileID : Int -> FileID
@@ -168,7 +169,7 @@ fsRandom seedInt =
 
         model =
             List.foldr
-                (\file model_ -> addFileRecursively model_ file)
+                (\file model_ -> Helper.addFileRecursively model_ file)
                 initialSoftwareModel
                 list
     in
