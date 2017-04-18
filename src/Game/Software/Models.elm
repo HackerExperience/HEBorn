@@ -9,6 +9,10 @@ module Game.Software.Models
         , FilePath
         , FileSize(..)
         , FileVersion(..)
+        , FileModules
+        , FileModule
+        , ModuleName
+        , ModuleVersion
         , addFile
         , removeFile
         , getFilePath
@@ -52,7 +56,26 @@ type alias StdFileData =
     , version : FileVersion
     , size : FileSize
     , path : FilePath
+    , modules : FileModules
     }
+
+
+type alias FileModules =
+    List FileModule
+
+
+type alias FileModule =
+    { name : ModuleName
+    , version : ModuleVersion
+    }
+
+
+type alias ModuleName =
+    String
+
+
+type alias ModuleVersion =
+    Int
 
 
 type alias FolderData =
@@ -73,6 +96,16 @@ type alias Filesystem =
 
 type alias SoftwareModel =
     { filesystem : Filesystem }
+
+
+getFileModules : File -> FileModules
+getFileModules file =
+    case file of
+        StdFile file_ ->
+            file_.modules
+
+        Folder folder ->
+            []
 
 
 getFileId : File -> FileID

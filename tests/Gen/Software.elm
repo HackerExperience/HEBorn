@@ -80,6 +80,7 @@ stdFile seedInt =
             extension
             version
             size
+            []
 
 
 stdFileArgs :
@@ -89,8 +90,9 @@ stdFileArgs :
     -> String
     -> FileVersion
     -> FileSize
+    -> FileModules
     -> File
-stdFileArgs id name path extension version size =
+stdFileArgs id name path extension version size modules =
     StdFile
         { id = id
         , name = name
@@ -98,6 +100,7 @@ stdFileArgs id name path extension version size =
         , extension = extension
         , version = version
         , size = size
+        , modules = modules
         }
 
 
