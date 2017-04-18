@@ -37,10 +37,12 @@ css =
             , bottom zero
             , zIndex (int 1699999)
             , minHeight (px 60)
-            , marginBottom (px -60)
             , paddingTop (px 8)
             , transition 0.15 "margin" EaseOut
-            , hover
-                [ marginBottom (px 0) ]
+            , withClass "autoHide"
+                [ marginBottom (px -60)
+                , hover
+                    [ marginBottom (px 0) ]
+                ]
             ]
         ]

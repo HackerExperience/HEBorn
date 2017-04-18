@@ -38,6 +38,39 @@ viewExplorerColumn model game =
 
 viewExplorerMain : Model -> InstanceID -> GameModel -> Html Msg
 viewExplorerMain model id game =
+stripPath : FilePath -> FilePath
+stripPath path =
+    let
+        stripRight =
+            (if (String.right 1 path == "/") then
+                (String.dropRight 1 path)
+             else
+                path
+            )
+    in
+        (if (String.left 1 stripRight == "/") then
+            (String.dropLeft 1 stripRight)
+         else
+            stripRight
+        )
+
+
+viewLocBar : FilePath -> Html Msg
+viewLocBar path =
+    div
+        [ class [ LocBar ] ]
+        (List.map
+            (\o ->
+                span
+                    [ class [ BreadcrumbItem ] ]
+                    [ text o ]
+            )
+            (String.split "/" (stripPath path))
+        )
+
+
+viewExplorerMain : Model -> GameModel -> Html Msg
+viewExplorerMain model game =
     div
         [ contextContent
         , class
@@ -45,18 +78,7 @@ viewExplorerMain model id game =
         ]
         [ div
             [ class [ ContentHeader ] ]
-            [ div
-                [ class [ LocBar ] ]
-                [ span
-                    [ class [ BreadcrumbItem ] ]
-                    [ text "home" ]
-                , span
-                    [ class [ BreadcrumbItem ] ]
-                    [ text "root" ]
-                , span
-                    [ class [ BreadcrumbItem ] ]
-                    [ text "Documents" ]
-                ]
+            [ viewLocBar model.path
             , div
                 [ class [ ActBtns ] ]
                 [ span
