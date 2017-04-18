@@ -25,7 +25,7 @@ contextView model id =
     contextViewCreator
         ExplorerMsg.ContextMsg
         model
-        model.context
+        model.menu
         MenuMsg
         (menu id)
 

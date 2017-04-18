@@ -15,3 +15,4 @@ type Msg
     | ToggleMaximize WindowID
     | MinimizeWindow WindowID
     | UpdateFocus (Maybe WindowID)
+    | SwitchContext WindowID

@@ -7,6 +7,8 @@ module OS.WindowManager.Models
         , Position
         , Windows
         , defaultSize
+        , updateWindows
+        , getWindow
         , openWindow
         , closeWindow
         , getOpenWindows
@@ -17,13 +19,17 @@ module OS.WindowManager.Models
         , toggleMaximizeWindow
         , minimizeWindow
         , bringFocus
+        , switchContext
+        , getContextText
         )
 
 import Dict
 import Uuid
 import Random.Pcg exposing (Seed, step, initialSeed)
 import Draggable
+import Utils
 import OS.WindowManager.Windows exposing (GameWindow(..))
+import Apps.Context as Context exposing (ActiveContext(..))
 
 
 type alias Model =
@@ -66,6 +72,7 @@ type alias Window =
     , title : String
     , size : Size
     , maximized : Bool
+    , context : ActiveContext
     }
 
 
@@ -117,6 +124,7 @@ newWindow model window =
             , title = "Sem titulo"
             , size = defaultSize
             , maximized = False
+            , context = ContextGateway
             }
     in
         ( window_, seed )
@@ -225,6 +233,11 @@ getWindow model id =
     Dict.get id model.windows
 
 
+updateWindows : Model -> WindowID -> Window -> Windows
+updateWindows model id window =
+    Utils.safeUpdateDict model.windows id window
+
+
 updateWindowPosition : Model -> ( Float, Float ) -> Windows
 updateWindowPosition model delta =
     case model.dragging of
@@ -255,16 +268,8 @@ updateWindowPosition model delta =
                                 window_ =
                                     { window | position = position_ }
 
-                                update_ w =
-                                    case w of
-                                        Just window ->
-                                            Just window_
-
-                                        Nothing ->
-                                            Nothing
-
                                 windows_ =
-                                    Dict.update id update_ model.windows
+                                    updateWindows model id window_
                             in
                                 windows_
             in
@@ -294,16 +299,8 @@ toggleMaximizeWindow model id =
                 window_ =
                     { window | maximized = not window.maximized }
 
-                update_ w =
-                    case w of
-                        Just window ->
-                            Just window_
-
-                        Nothing ->
-                            Nothing
-
                 windows_ =
-                    Dict.update id update_ model.windows
+                    updateWindows model id window_
             in
                 windows_
 
@@ -319,16 +316,8 @@ minimizeWindow model id =
                 window_ =
                     { window | state = Minimized }
 
-                update_ w =
-                    case w of
-                        Just window ->
-                            Just window_
-
-                        Nothing ->
-                            Nothing
-
                 windows_ =
-                    Dict.update id update_ model.windows
+                    updateWindows model id window_
             in
                 windows_
 
@@ -355,19 +344,51 @@ bringFocus model target =
                         window_ =
                             { window | position = position_ }
 
-                        update_ w =
-                            case w of
-                                Just window ->
-                                    Just window_
-
-                                Nothing ->
-                                    Nothing
-
                         windows_ =
-                            Dict.update id update_ model.windows
+                            updateWindows model id window_
                     in
                         { model
                             | highestZ = incHighestZ
                             , windows = windows_
                             , focus = Just id
                         }
+
+
+getContext : Window -> ActiveContext
+getContext window =
+    window.context
+
+
+getContextText : ActiveContext -> String
+getContextText context =
+    case context of
+        ContextGateway ->
+            "Gateway"
+
+        ContextEndpoint ->
+            "Remote"
+
+
+switchContext : Model -> WindowID -> Model
+switchContext model id =
+    case (getWindow model id) of
+        Nothing ->
+            model
+
+        Just window ->
+            let
+                context_ =
+                    case (getContext window) of
+                        ContextGateway ->
+                            ContextEndpoint
+
+                        ContextEndpoint ->
+                            ContextGateway
+
+                window_ =
+                    { window | context = context_ }
+
+                windows_ =
+                    updateWindows model id window_
+            in
+                { model | windows = windows_ }

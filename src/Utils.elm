@@ -4,8 +4,10 @@ module Utils
         , boolToString
         , maybeToString
         , delay
+        , safeUpdateDict
         )
 
+import Dict
 import Time
 import Task
 import Process
@@ -45,3 +47,21 @@ delay seconds msg =
     Process.sleep (Time.second * seconds)
         |> Task.andThen (always <| Task.succeed msg)
         |> Task.perform identity
+
+
+safeUpdateDict :
+    Dict.Dict comparable a
+    -> comparable
+    -> a
+    -> Dict.Dict comparable a
+safeUpdateDict dict key value =
+    let
+        fnUpdate item =
+            case item of
+                Just _ ->
+                    Just value
+
+                Nothing ->
+                    Nothing
+    in
+        Dict.update key fnUpdate dict

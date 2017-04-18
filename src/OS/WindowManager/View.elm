@@ -18,6 +18,7 @@ import OS.WindowManager.Models
         , WindowID
         , getOpenWindows
         , windowsFoldr
+        , getContextText
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.WindowManager.Style as Css
@@ -108,7 +109,16 @@ header window =
             , onMouseDown (UpdateFocus (Just window.id))
             ]
             [ headerTitle (windowTitle window) (windowIcon window)
+            , headerContext window.id window.context
             , headerButtons window.id
+            ]
+        ]
+
+
+headerContext id context =
+    div []
+        [ span [ onClick (SwitchContext id) ]
+            [ text (getContextText context)
             ]
         ]
 
