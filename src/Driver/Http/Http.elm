@@ -1,55 +1,9 @@
 module Driver.Http.Http exposing (..)
 
 import Http
-import Json.Encode
-import Json.Decode exposing (decodeString)
-import Driver.Http.Models exposing (getRequestIdHeader)
-import Requests.Models
-    exposing
-        ( ResponseCode(..)
-        , RequestID
-        , getResponseCode
-        , invalidRequestId
-        )
-import Core.Messages exposing (CoreMsg(NewResponse))
-
-
-stringToValue : String -> Json.Encode.Value
-stringToValue result =
-    case (decodeString Json.Decode.value result) of
-        Ok m ->
-            m
-
-        Err _ ->
-            Json.Encode.null
-
-
-decodeMsg : RequestID -> Result Http.Error String -> CoreMsg
-decodeMsg requestId return =
-    case return of
-        Ok result ->
-            NewResponse ( requestId, ResponseCodeOk, stringToValue result )
-
-        Err (Http.BadStatus response) ->
-            let
-                code =
-                    getResponseCode response.status.code
-
-                body =
-                    response.body
-            in
-                NewResponse ( requestId, code, stringToValue body )
-
-        Err reason ->
-            let
-                d =
-                    Debug.log "FIXME: " (toString reason)
-            in
-                NewResponse
-                    ( invalidRequestId
-                    , ResponseCodeUnknownError
-                    , Json.Encode.null
-                    )
+import Driver.Http.Models exposing (decodeMsg)
+import Requests.Models exposing (RequestID)
+import Core.Messages exposing (CoreMsg)
 
 
 send : String -> RequestID -> String -> Cmd CoreMsg
