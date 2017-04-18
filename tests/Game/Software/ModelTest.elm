@@ -358,7 +358,7 @@ moveFolderTests =
                     getFilePath destFolder
 
                 newPath =
-                    destination ++ "/" ++ (getFileName originFolder)
+                    destination ++ pathSeparator ++ (getFileName originFolder)
 
                 -- todo: ensureDifferentSeed3
                 testFile =

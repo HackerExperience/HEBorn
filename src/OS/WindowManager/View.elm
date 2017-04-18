@@ -9,7 +9,7 @@ import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
-import Core.Dispatcher exposing (callWM)
+import Core.Dispatcher exposing (callWM, callExplorer)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models
@@ -34,10 +34,7 @@ styles =
     Css.asPairs >> style
 
 
-
--- rendrWindows : CoreModel -> Html CoreMsg
-
-
+renderWindows : CoreModel -> List (Html CoreMsg)
 renderWindows model =
     (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
 
@@ -53,7 +50,15 @@ renderWindow model window =
         ExplorerWindow ->
             windowWrapper
                 window
-                (Html.map MsgApp (Html.map MsgExplorer (Apps.Explorer.View.view model.apps.explorer model.game)))
+                (Html.map MsgApp
+                    (Html.map MsgExplorer
+                        (Apps.Explorer.View.view
+                            model.apps.explorer
+                            window.id
+                            model.game
+                        )
+                    )
+                )
 
 
 widndowClasses window =

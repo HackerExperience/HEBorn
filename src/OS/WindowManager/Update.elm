@@ -1,14 +1,16 @@
 module OS.WindowManager.Update exposing (..)
 
+import Utils
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
-import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callDock)
+import Core.Messages exposing (CoreMsg(NoOp))
+import Core.Dispatcher exposing (callDock, callExplorer)
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
         ( Model
         , WindowID
+        , getWindow
         , openWindow
         , closeWindow
         , updateWindowPosition
@@ -18,6 +20,10 @@ import OS.WindowManager.Models
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
+import Apps.Instances.Dispatcher exposing (instanceDispatcher)
+import Apps.Instances.Binds as InstanceBind
+import Apps.Explorer.Messages as ExplorerMsg
+import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
 update : Msg -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
@@ -30,20 +36,66 @@ update msg model =
 
                 model_ =
                     (bringFocus { model | windows = windows_, seed = seed_ } rNewWindowID)
+
+                -- REVIEW: Why `openWindow` returns *maybe* windowID?
+                windowID =
+                    Utils.maybeToString rNewWindowID
+
+                coreMsg =
+                    [ instanceDispatcher
+                        window
+                        ((InstanceBind.open window) windowID)
+                    , callDock (DockMsg.WindowsChanges windows_)
+                    ]
             in
                 ( model_
                 , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_) ]
+                , coreMsg
                 )
 
         CloseWindow id ->
             let
+                window =
+                    (getWindow model id)
+
                 windows_ =
                     closeWindow model id
+
+                model_ =
+                    { model
+                        | windows = windows_
+                        , focus = Nothing
+                        , dragging = Nothing
+                    }
+
+                instanceMsg =
+                    case window of
+                        Just w ->
+                            instanceDispatcher
+                                w.window
+                                ((InstanceBind.close w.window) id)
+
+                        Nothing ->
+                            NoOp
+
+                coreMsg =
+                    [ instanceMsg
+                    , callDock (DockMsg.WindowsChanges windows_)
+                    ]
+            in
+                ( model_
+                , Cmd.none
+                , coreMsg
+                )
+
+        MinimizeWindow id ->
+            let
+                windows_ =
+                    minimizeWindow model id
             in
                 ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
                 , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_) ]
+                , []
                 )
 
         -- Drag

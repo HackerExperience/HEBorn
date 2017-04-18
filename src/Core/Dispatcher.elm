@@ -22,6 +22,7 @@ import Game.Server.Messages as Server
 import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
+import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
 -- Would love to do something like below, but I can't =(

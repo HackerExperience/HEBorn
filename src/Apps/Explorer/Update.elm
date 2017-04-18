@@ -2,7 +2,8 @@ module Apps.Explorer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
-import Apps.Explorer.Models exposing (Model)
+import Apps.Instances.Models as Instance
+import Apps.Explorer.Models exposing (Model, initialExplorer)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Context.Messages as MsgContext
 import Apps.Explorer.Context.Update
@@ -21,8 +22,22 @@ update msg model game =
         Response request data ->
             ( model, Cmd.none, [] )
 
-        ContextMsg (MsgContext.MenuClick action) ->
-            actionHandler action model game
+        OpenInstance id ->
+            let
+                instances_ =
+                    Instance.open model.instances id initialExplorer
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        CloseInstance id ->
+            let
+                instances_ =
+                    Instance.close model.instances id
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        ContextMsg (MsgContext.MenuClick action id) ->
+            actionHandler action id model game
 
         ContextMsg subMsg ->
             let
