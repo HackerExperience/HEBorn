@@ -13,20 +13,21 @@ import OS.WindowManager.ContextHandler.View
         ( contextForCreator
         , contextViewCreator
         )
+import Apps.Instances.Models exposing (InstanceID)
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages as ExplorerMsg
 import Apps.Explorer.Context.Messages exposing (Msg(..), MenuAction(..))
 import Apps.Explorer.Context.Models exposing (Context(..))
 
 
-contextView : Model -> Html ExplorerMsg.Msg
-contextView model =
+contextView : Model -> InstanceID -> Html ExplorerMsg.Msg
+contextView model id =
     contextViewCreator
         ExplorerMsg.ContextMsg
         model
         model.context
         MenuMsg
-        menu
+        (menu id)
 
 
 contextFor : Context -> Html.Attribute ExplorerMsg.Msg
@@ -34,18 +35,18 @@ contextFor context =
     contextForCreator ExplorerMsg.ContextMsg MenuMsg context
 
 
-menu : Model -> Context -> List (List ( ContextMenu.Item, Msg ))
-menu model context =
+menu : InstanceID -> Model -> Context -> List (List ( ContextMenu.Item, Msg ))
+menu id model context =
     case context of
         ContextNav ->
-            [ [ ( ContextMenu.item "A", MenuClick DoA )
-              , ( ContextMenu.item "B", MenuClick DoB )
+            [ [ ( ContextMenu.item "A", MenuClick DoA id )
+              , ( ContextMenu.item "B", MenuClick DoB id )
               ]
             ]
 
         ContextContent ->
-            [ [ ( ContextMenu.item "c", MenuClick DoB )
-              , ( ContextMenu.item "d", MenuClick DoA )
+            [ [ ( ContextMenu.item "c", MenuClick DoB id )
+              , ( ContextMenu.item "d", MenuClick DoA id )
               ]
             ]
 

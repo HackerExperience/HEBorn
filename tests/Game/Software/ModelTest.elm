@@ -6,6 +6,7 @@ import Test exposing (Test, describe)
 import Fuzz exposing (int, tuple)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Software as Gen
+import Helper.Software as Helper exposing (addFileRecursively)
 import Game.Software.Models exposing (..)
 import Gen.Remote
 
@@ -357,7 +358,7 @@ moveFolderTests =
                     getFilePath destFolder
 
                 newPath =
-                    destination ++ "/" ++ (getFileName originFolder)
+                    destination ++ pathSeparator ++ (getFileName originFolder)
 
                 -- todo: ensureDifferentSeed3
                 testFile =

@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Game.Models exposing (GameModel)
+import Apps.Instances.Models exposing (InstanceID)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Context.Models exposing (Context(..))
@@ -16,12 +17,12 @@ import Apps.Explorer.Style exposing (Classes(..))
     Html.CssHelpers.withNamespace "explorer"
 
 
-view : Model -> GameModel -> Html Msg
-view model game =
+view : Model -> InstanceID -> GameModel -> Html Msg
+view model id game =
     div [ class [ Window ] ]
         [ viewExplorerColumn model game
         , viewExplorerMain model game
-        , contextView model
+        , contextView model id
         ]
 
 
@@ -41,4 +42,4 @@ viewExplorerMain model game =
         , class
             [ Content ]
         ]
-        [ text "main" ]
+        [ text (toString model) ]

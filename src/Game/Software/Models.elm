@@ -9,6 +9,10 @@ module Game.Software.Models
         , FilePath
         , FileSize(..)
         , FileVersion(..)
+        , FileModules
+        , FileModule
+        , ModuleName
+        , ModuleVersion
         , addFile
         , removeFile
         , getFilePath
@@ -20,7 +24,6 @@ module Game.Software.Models
         , listFilesystem
         , moveFile
         , setFilePath
-        , addFileRecursively
         , pathSeparator
         )
 
@@ -53,7 +56,26 @@ type alias StdFileData =
     , version : FileVersion
     , size : FileSize
     , path : FilePath
+    , modules : FileModules
     }
+
+
+type alias FileModules =
+    List FileModule
+
+
+type alias FileModule =
+    { name : ModuleName
+    , version : ModuleVersion
+    }
+
+
+type alias ModuleName =
+    String
+
+
+type alias ModuleVersion =
+    Int
 
 
 type alias FolderData =
@@ -74,6 +96,16 @@ type alias Filesystem =
 
 type alias SoftwareModel =
     { filesystem : Filesystem }
+
+
+getFileModules : File -> FileModules
+getFileModules file =
+    case file of
+        StdFile file_ ->
+            file_.modules
+
+        Folder folder ->
+            []
 
 
 getFileId : File -> FileID
@@ -154,27 +186,6 @@ addFile model file =
                         filesystem2
     in
         { model | filesystem = filesystem_ }
-
-
-addFileRecursively : SoftwareModel -> File -> SoftwareModel
-addFileRecursively model file =
-    case file of
-        Folder _ ->
-            addFile model file
-
-        StdFile file_ ->
-            let
-                path =
-                    (getFilePath file)
-
-                -- TODO: this is not recursive, will break once we add nested folders
-                folder =
-                    Folder { id = "id", name = "name", path = path }
-
-                model_ =
-                    addFile model folder
-            in
-                addFile model_ (StdFile file_)
 
 
 getFilesOnPath : SoftwareModel -> FilePath -> List File

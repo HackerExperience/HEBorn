@@ -1,6 +1,6 @@
 module Driver.Http.Models exposing (..)
 
-import Dict
+import Http
 import Json.Encode
 import Json.Decode exposing (Decoder, string, decodeString, int)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
@@ -11,7 +11,11 @@ import Requests.Models
         , RequestTopic(..)
         , RequestID
         , encodeData
+        , getResponseCode
+        , invalidRequestId
+        , ResponseCode(..)
         )
+import Core.Messages exposing (CoreMsg(NewResponse))
 
 
 type alias HttpMsg var =
@@ -53,11 +57,6 @@ httpPayloadToString data =
     Json.Encode.encode 0 data
 
 
-getRequestIdHeader : Dict.Dict String RequestID -> Maybe RequestID
-getRequestIdHeader headers =
-    Dict.get "X-Request-Id" headers
-
-
 getTopicPath : RequestTopic -> String
 getTopicPath topic =
     case topic of
@@ -69,3 +68,41 @@ getTopicPath topic =
 
         _ ->
             ""
+
+
+stringToValue : String -> Json.Encode.Value
+stringToValue result =
+    case (decodeString Json.Decode.value result) of
+        Ok m ->
+            m
+
+        Err _ ->
+            Json.Encode.null
+
+
+decodeMsg : RequestID -> Result Http.Error String -> CoreMsg
+decodeMsg requestId return =
+    case return of
+        Ok result ->
+            NewResponse ( requestId, ResponseCodeOk, stringToValue result )
+
+        Err (Http.BadStatus response) ->
+            let
+                code =
+                    getResponseCode response.status.code
+
+                body =
+                    response.body
+            in
+                NewResponse ( requestId, code, stringToValue body )
+
+        Err reason ->
+            let
+                d =
+                    Debug.log "FIXME: " (toString reason)
+            in
+                NewResponse
+                    ( invalidRequestId
+                    , ResponseCodeUnknownError
+                    , Json.Encode.null
+                    )

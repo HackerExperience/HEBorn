@@ -4,6 +4,7 @@ import Dict
 import Arithmetic exposing (isEven)
 import Gen.Utils exposing (..)
 import Game.Software.Models exposing (..)
+import Helper.Software as Helper
 
 
 fileID : Int -> FileID
@@ -79,6 +80,7 @@ stdFile seedInt =
             extension
             version
             size
+            []
 
 
 stdFileArgs :
@@ -88,8 +90,9 @@ stdFileArgs :
     -> String
     -> FileVersion
     -> FileSize
+    -> FileModules
     -> File
-stdFileArgs id name path extension version size =
+stdFileArgs id name path extension version size modules =
     StdFile
         { id = id
         , name = name
@@ -97,6 +100,7 @@ stdFileArgs id name path extension version size =
         , extension = extension
         , version = version
         , size = size
+        , modules = modules
         }
 
 
@@ -168,7 +172,7 @@ fsRandom seedInt =
 
         model =
             List.foldr
-                (\file model_ -> addFileRecursively model_ file)
+                (\file model_ -> Helper.addFileRecursively model_ file)
                 initialSoftwareModel
                 list
     in
