@@ -37,14 +37,6 @@ decodeMsg requestId return =
 
                 body =
                     response.body
-
-                requestId =
-                    case (getRequestIdHeader response.headers) of
-                        Just id ->
-                            id
-
-                        Nothing ->
-                            invalidRequestId
             in
                 NewResponse ( requestId, code, stringToValue body )
 
@@ -66,9 +58,7 @@ send url id payload =
         (decodeMsg id)
         (Http.request
             { method = "POST"
-            , headers =
-                [ Http.header "X-Request-Id" id
-                ]
+            , headers = []
             , url = "http://localhost:4000/v1/" ++ url
             , body = Http.stringBody "application/json" payload
             , expect = Http.expectString
