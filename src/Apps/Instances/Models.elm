@@ -1,6 +1,8 @@
 module Apps.Instances.Models exposing (..)
 
 import Dict
+import Utils
+import OS.WindowManager.ContextHandler.Models as Menu
 import OS.WindowManager.Models exposing (WindowID)
 
 
@@ -47,16 +49,7 @@ close instances id =
 
 update : Instances app -> InstanceID -> app -> Instances app
 update instances id instance =
-    let
-        fnUpdate inst =
-            case inst of
-                Just _ ->
-                    Just instance
-
-                Nothing ->
-                    Nothing
-    in
-        Dict.update id fnUpdate instances
+    Utils.safeUpdateDict instances id instance
 
 
 initialState : Instances app

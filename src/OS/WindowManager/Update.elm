@@ -17,6 +17,7 @@ import OS.WindowManager.Models
         , toggleMaximizeWindow
         , minimizeWindow
         , bringFocus
+        , switchContext
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
@@ -98,6 +99,43 @@ update msg model =
                 , []
                 )
 
+        ToggleMaximize id ->
+            let
+                windows_ =
+                    toggleMaximizeWindow model id
+            in
+                ( { model | windows = windows_, dragging = Nothing }
+                , Cmd.none
+                , []
+                )
+
+        UpdateFocus target ->
+            ( (bringFocus model target), Cmd.none, [] )
+
+        SwitchContext id ->
+            let
+                window =
+                    getWindow model id
+
+                model_ =
+                    switchContext model id
+
+                instanceMsg =
+                    case window of
+                        Just w ->
+                            instanceDispatcher
+                                w.window
+                                ((InstanceBind.context w.window) id)
+
+                        Nothing ->
+                            NoOp
+
+                coreMsg =
+                    [ instanceMsg
+                    ]
+            in
+                ( model_, Cmd.none, coreMsg )
+
         -- Drag
         OnDragBy delta ->
             let
@@ -124,29 +162,6 @@ update msg model =
 
         StopDragging ->
             ( { model | dragging = Nothing }, Cmd.none, [] )
-
-        ToggleMaximize id ->
-            let
-                windows_ =
-                    toggleMaximizeWindow model id
-            in
-                ( { model | windows = windows_, dragging = Nothing }
-                , Cmd.none
-                , []
-                )
-
-        MinimizeWindow id ->
-            let
-                windows_ =
-                    minimizeWindow model id
-            in
-                ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
-                , Cmd.none
-                , []
-                )
-
-        UpdateFocus target ->
-            ( (bringFocus model target), Cmd.none, [] )
 
 
 dragConfig : Draggable.Config WindowID Msg

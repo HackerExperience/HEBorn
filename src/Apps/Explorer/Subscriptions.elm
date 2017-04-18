@@ -7,4 +7,4 @@ import Apps.Explorer.Context.Subscriptions as Context
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map ContextMsg (Context.subscriptions model.context)
+    Sub.map ContextMsg (Context.subscriptions model.menu)

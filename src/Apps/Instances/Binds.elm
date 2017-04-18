@@ -1,4 +1,4 @@
-module Apps.Instances.Binds exposing (open, close)
+module Apps.Instances.Binds exposing (open, close, context)
 
 import OS.WindowManager.Windows exposing (GameWindow(..))
 import Apps.Explorer.Messages as Explorer
@@ -14,3 +14,9 @@ close window msg =
     case window of
         ExplorerWindow ->
             Explorer.CloseInstance msg
+
+
+context window msg =
+    case window of
+        ExplorerWindow ->
+            Explorer.SwitchContext msg
