@@ -3,6 +3,7 @@ module Core.Style exposing (..)
 import Css exposing (..)
 import Css.Elements exposing (body, li, main_, header, footer, nav)
 import Css.Namespace exposing (namespace)
+import Css.Utils exposing (unselectable)
 
 
 css : Stylesheet
@@ -18,6 +19,8 @@ css =
             , margin (px 0)
             , backgroundColor (rgb 57 109 166)
             , fontFamily sansSerif
+            , unselectable
+            , cursor default
             ]
         , id "app"
             [ width (pct 100)

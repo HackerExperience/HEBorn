@@ -60,31 +60,21 @@ attrSelector parent attrName op value =
     selector ("." ++ parent ++ "[" ++ attrName ++ op ++ value ++ "]")
 
 
-
--- Common CSS
-
-
-flexContainerVert : Mixin
-flexContainerVert =
+selectableText : Mixin
+selectableText =
     mixin
-        [ displayFlex
-        , flexDirection column
+        [ property "-moz-user-select" "text"
+        , property "-webkit-user-select" "text"
+        , property "-ms-user-select" "text"
+        , property "user-select" "text"
         ]
 
 
-flexContainerHorz : Mixin
-flexContainerHorz =
+unselectable : Mixin
+unselectable =
     mixin
-        [ displayFlex
-        , flexDirection row
+        [ property "-moz-user-select" "none"
+        , property "-webkit-user-select" "none"
+        , property "-ms-user-select" "none"
+        , property "user-select" "none"
         ]
-
-
-globalShadow : Mixin
-globalShadow =
-    boxShadow5 (px 0) (px 0) (px 8) (px 1) (rgba 0 0 0 0.2)
-
-
-emptyContent : Mixin
-emptyContent =
-    pseudoContent "''"

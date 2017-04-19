@@ -16,9 +16,74 @@ expand =
     "f065"
 
 
+fileO : UnicodeTag
+fileO =
+    "f016"
+
+
+arrowCircleOUp : UnicodeTag
+arrowCircleOUp =
+    "f01b"
+
+
+plusCircle : UnicodeTag
+plusCircle =
+    "f055"
+
+
+folder : UnicodeTag
+folder =
+    "f07b"
+
+
+folderOpen : UnicodeTag
+folderOpen =
+    "f07c"
+
+
+plusSquare : UnicodeTag
+plusSquare =
+    "f0fe"
+
+
+folderOpenO : UnicodeTag
+folderOpenO =
+    "f115"
+
+
+shield : UnicodeTag
+shield =
+    "f132"
+
+
+minusSquare : UnicodeTag
+minusSquare =
+    "f146"
+
+
+levelUp : UnicodeTag
+levelUp =
+    "f148"
+
+
+bug : UnicodeTag
+bug =
+    "f188"
+
+
+plusSquareO : UnicodeTag
+plusSquareO =
+    "f196"
+
+
 fileArchiveO : UnicodeTag
 fileArchiveO =
     "f1c6"
+
+
+bomb : UnicodeTag
+bomb =
+    "f1e2"
 
 
 addressBookO : UnicodeTag
@@ -29,3 +94,8 @@ addressBookO =
 windowMinimize : UnicodeTag
 windowMinimize =
     "f2d1"
+
+
+wpExplorer : UnicodeTag
+wpExplorer =
+    "f2de"
