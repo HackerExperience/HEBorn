@@ -1,6 +1,5 @@
-module Game.Software.ModelTest exposing (..)
+module Game.Software.ModelTest exposing (all)
 
-import Dict
 import Expect
 import Test exposing (Test, describe)
 import Fuzz exposing (int, tuple)
@@ -107,12 +106,51 @@ addFileGenericTests =
                     Gen.folder seed1
 
                 model =
-                    Gen.model seed1
+                    Gen.model seed2
 
                 model_ =
                     addFileRecursively model folder
             in
                 Expect.equal (pathExists model_ (getFilePath folder)) True
+    , fuzz (tuple ( int, int )) "multiple files can exist on the same folder" <|
+        \seed ->
+            let
+                ( seed1, seed2 ) =
+                    ensureDifferentSeed seed
+
+                folder =
+                    setFilePath (Gen.folder seed1) (Gen.path (seed1 + 1))
+
+                model =
+                    Gen.model seed1
+
+                path =
+                    getFilePath folder
+
+                file1 =
+                    setFilePath (Gen.stdFile seed2) path
+
+                file2 =
+                    setFilePath (Gen.stdFile (seed2 + 1)) path
+
+                model1 =
+                    addFile model folder
+
+                model2 =
+                    addFile model1 file1
+
+                model_ =
+                    addFile model2 file2
+
+                filesOnPath =
+                    getFilesOnPath model_ path
+
+                f =
+                    Debug.log "on path" (toString (getFilesOnPath model_ path))
+            in
+                Expect.equal
+                    ([ folder ] ++ [ file1 ] ++ [ file2 ])
+                    filesOnPath
     ]
 
 

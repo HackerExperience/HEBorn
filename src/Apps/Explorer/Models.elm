@@ -1,7 +1,13 @@
 module Apps.Explorer.Models exposing (..)
 
 import Dict
-import Game.Software.Models exposing (FilePath, rootPath)
+import Game.Models exposing (GameModel)
+import Game.Software.Models
+    exposing
+        ( FilePath
+        , rootPath
+        , pathExists
+        )
 import Apps.Instances.Models as Instance
     exposing
         ( Instances
@@ -71,5 +77,19 @@ getState model id =
         (getExplorerInstance model.instances id)
 
 
-getCurrentPath explorer =
+getPath : Explorer -> FilePath
+getPath explorer =
     explorer.path
+
+
+setPath : Explorer -> FilePath -> Explorer
+setPath explorer path =
+    { explorer | path = path }
+
+
+changePath : Explorer -> GameModel -> FilePath -> Explorer
+changePath explorer game path =
+    if not (pathExists game.software path) then
+        explorer
+    else
+        setPath explorer path
