@@ -34,7 +34,40 @@ path seedInt =
 
 pathSeed : StringSeed
 pathSeed seed =
-    smallStringSeed seed
+    let
+        ( level, seed1 ) =
+            intRangeSeed 1 10 seed
+
+        ( path, s ) =
+            smallStringSeed seed1
+
+        ( seedList, seed2 ) =
+            listOfSeed level seed1
+
+        directoryList =
+            List.repeat level ""
+
+        list =
+            List.map2 (,) directoryList seedList
+
+        funOverwrite : ( FilePath, Seed ) -> ( FilePath, Seed )
+        funOverwrite item =
+            let
+                ( _, seed_ ) =
+                    item
+
+                ( directory_, _ ) =
+                    smallStringSeed seed_
+            in
+                ( directory_, seed_ )
+
+        ( list_, _ ) =
+            List.unzip (List.map funOverwrite list)
+
+        joined =
+            "/" ++ (String.join "/" list_)
+    in
+        ( joined, s )
 
 
 extension : Int -> String

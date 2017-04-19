@@ -6,26 +6,53 @@ import Random.String
 import Random.Char
 
 
+type alias Seed =
+    Random.Seed
+
+
 type alias StringSeed =
-    Random.Seed -> ( String, Random.Seed )
+    Seed -> ( String, Seed )
 
 
+listOfInt : Int -> Int -> List Int
 listOfInt size seedInt =
     let
-        seed0 =
+        seed =
             Random.initialSeed seedInt
 
         ( pace, seed1 ) =
-            intSeed seed0
+            intSeed seed
 
         list =
-            List.repeat size seedInt
-
-        list_ =
-            List.indexedMap (\i value -> i + value + pace)
+            List.indexedMap
+                (\i value -> (i + value + pace))
                 (List.repeat size seedInt)
     in
-        list_
+        list
+
+
+listOfSeed : Int -> Seed -> ( List Seed, Seed )
+listOfSeed size seed =
+    let
+        ( base, seed1 ) =
+            intSeed seed
+
+        ( pace, seed2 ) =
+            intSeed seed1
+
+        -- todo: make me recursive
+        list =
+            List.map
+                (\item ->
+                    let
+                        ( _, seed_ ) =
+                            Random.step (Random.int 1 10) seed2
+                    in
+                        seed_
+                )
+                (List.repeat size base)
+    in
+        ( list, seed2 )
 
 
 intSeed seed =
@@ -68,7 +95,7 @@ stringSeed min max seed =
         seed
 
 
-fuzz1 : Int -> (Random.Seed -> ( String, a )) -> String
+fuzz1 : Int -> (Seed -> ( String, a )) -> String
 fuzz1 seedInt function =
     let
         seed0 =
@@ -80,7 +107,7 @@ fuzz1 seedInt function =
         value
 
 
-fuzz2 : Int -> (Random.Seed -> ( a, b )) -> (b -> ( c, d )) -> ( a, c )
+fuzz2 : Int -> (Seed -> ( a, b )) -> (b -> ( c, d )) -> ( a, c )
 fuzz2 seedInt f1 f2 =
     let
         seed0 =
@@ -97,7 +124,7 @@ fuzz2 seedInt f1 f2 =
 
 fuzz3 :
     Int
-    -> (Random.Seed -> ( a, b ))
+    -> (Seed -> ( a, b ))
     -> (b -> ( c, d ))
     -> (d -> ( e, f ))
     -> ( a, c, e )
@@ -120,7 +147,7 @@ fuzz3 seedInt f1 f2 f3 =
 
 fuzz4 :
     Int
-    -> (Random.Seed -> ( a, b ))
+    -> (Seed -> ( a, b ))
     -> (b -> ( c, d ))
     -> (d -> ( e, f ))
     -> (f -> ( g, h ))
