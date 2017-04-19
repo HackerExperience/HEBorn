@@ -66,11 +66,6 @@ levelUp =
     "f148"
 
 
-fileArchiveO : UnicodeTag
-fileArchiveO =
-    "f1c6"
-
-
 bug : UnicodeTag
 bug =
     "f188"
@@ -81,6 +76,16 @@ plusSquareO =
     "f196"
 
 
+fileArchiveO : UnicodeTag
+fileArchiveO =
+    "f1c6"
+
+
+bomb : UnicodeTag
+bomb =
+    "f1e2"
+
+
 addressBookO : UnicodeTag
 addressBookO =
     "f2ba"
@@ -89,3 +94,8 @@ addressBookO =
 windowMinimize : UnicodeTag
 windowMinimize =
     "f2d1"
+
+
+wpExplorer : UnicodeTag
+wpExplorer =
+    "f2de"

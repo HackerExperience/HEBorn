@@ -82,3 +82,13 @@ virus =
 firewall : Icon
 firewall =
     faIcon FA.shield
+
+
+modeActive : Icon
+modeActive =
+    faIcon FA.bomb
+
+
+modePassive : Icon
+modePassive =
+    faIcon FA.wpExplorer

@@ -20,12 +20,16 @@ type Classes
     | NewBtn
     | GoUpBtn
     | BreadcrumbItem
+    | CntListContainer
     | CntListEntry
+    | CntListChilds
     | EntryDir
     | EntryArchive
     | EntryExpanded
     | VirusIcon
     | FirewallIcon
+    | ActiveIcon
+    | PassiveIcon
     | DirIcon
     | GenericArchiveIcon
     | CasedDirIcon
@@ -129,6 +133,35 @@ css =
                     ]
                 ]
             ]
+        , class CntListChilds
+            [ paddingLeft (px 32)
+            , cursor pointer
+            , children
+                [ everything
+                    [ flexContainerHorz
+                    , children
+                        [ everything
+                            [ firstChild
+                                [ minWidth (px 32)
+                                , display inlineBlock
+                                , flex (int 0)
+                                , textAlign center
+                                , Icon.fontFamily
+                                ]
+                            , lastChild
+                                [ width (px 92) ]
+                            , nthChild "0n+3"
+                                [ width (px 46)
+                                , textAlign center
+                                , selectableText
+                                ]
+                            , nthChild "0n+2"
+                                [ flex (int 5) ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         , class DirIcon
             [ before
                 [ Icon.directoryUntouched
@@ -147,22 +180,33 @@ css =
                 , color (hex "D00")
                 ]
             ]
+        , class ActiveIcon
+            [ before
+                [ Icon.modeActive
+                , color (hex "D00")
+                ]
+            ]
+        , class PassiveIcon
+            [ before
+                [ Icon.modePassive
+                , color (hex "000")
+                ]
+            ]
         , class EntryArchive
             [ children
                 [ everything
                     [ lastChild
-                        [ flex (int 2)
-                        , textAlign center
+                        [ textAlign center
                         , selectableText
+                        , width (px 92)
                         ]
                     , nthChild "0n+3"
-                        [ flex (int 1)
+                        [ width (px 46)
                         , textAlign center
                         , selectableText
                         ]
                     , nthChild "0n+2"
-                        [ flex (int 5)
-                        ]
+                        [ flex (int 5) ]
                     ]
                 ]
             ]
