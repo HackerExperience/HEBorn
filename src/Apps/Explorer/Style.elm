@@ -42,7 +42,7 @@ type Classes
 
 css : Stylesheet
 css =
-    (stylesheet << namespace "fm")
+    (stylesheet << namespace "explorer")
         [ class Window
             [ flexContainerHorz
             , height (pct 100)
