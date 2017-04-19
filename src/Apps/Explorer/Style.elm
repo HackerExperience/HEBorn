@@ -71,8 +71,13 @@ css =
             [ flex (int 1)
             , internalPadding
             , paddingRight zero
-            , backgroundColor (hex "DDD")
             , overflowY auto
+            , children
+                [ everything
+                    [ nthChild "2n+0"
+                        [ backgroundColor (hex "DDD") ]
+                    ]
+                ]
             ]
         , class BreadcrumbItem
             [ before
@@ -159,6 +164,8 @@ css =
                                 [ flex (int 5) ]
                             ]
                         ]
+                    , nthChild "2n+0"
+                        [ backgroundColor (hex "DDF") ]
                     ]
                 ]
             ]
