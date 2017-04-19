@@ -39,7 +39,7 @@ var commonConfig = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'static/index.html',
+      template: 'build/index.html',
       inject:   'body',
       filename: 'index.html'
     })
@@ -63,7 +63,7 @@ if ( TARGET_ENV === 'development' ) {
     devServer: {
       // serve index.html in place of 404 responses
       historyApiFallback: true,
-      contentBase: '.',
+      contentBase: './build',
     },
 
     module: {
