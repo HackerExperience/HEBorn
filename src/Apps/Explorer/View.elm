@@ -6,10 +6,11 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
+import Game.Software.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model)
+import Apps.Explorer.Models exposing (Model, Explorer, getState)
 import Apps.Explorer.Context.Models exposing (Context(..))
 import Apps.Explorer.Context.View exposing (contextView, contextNav, contextContent)
 import Apps.Explorer.Style exposing (Classes(..))
@@ -19,24 +20,26 @@ import Apps.Explorer.Style exposing (Classes(..))
     Html.CssHelpers.withNamespace "explorer"
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
 styles : List Css.Mixin -> Attribute Msg
 styles =
     Css.asPairs >> style
 
 
-view : Model -> GameModel -> Html Msg
-view model game =
-    div [ class [ Window ] ]
-        [ viewExplorerColumn model game
-        , viewExplorerMain model id game
-        , contextView model id
-        ]
+view : Model -> InstanceID -> GameModel -> Html Msg
+view model id game =
+    let
+        explorer =
+            getState model id
+    in
+        div [ class [ Window ] ]
+            [ viewExplorerColumn explorer game
+            , viewExplorerMain explorer game
+            , contextView model id
+            ]
 
 
-viewExplorerColumn : Model -> GameModel -> Html Msg
-viewExplorerColumn model game =
+viewExplorerColumn : Explorer -> GameModel -> Html Msg
+viewExplorerColumn explorer game =
     div
         [ contextNav
         , class [ Nav ]
@@ -128,8 +131,6 @@ viewExplorerColumn model game =
         ]
 
 
-viewExplorerMain : Model -> InstanceID -> GameModel -> Html Msg
-viewExplorerMain model id game =
 stripPath : FilePath -> FilePath
 stripPath path =
     let
@@ -161,8 +162,8 @@ viewLocBar path =
         )
 
 
-viewExplorerMain : Model -> GameModel -> Html Msg
-viewExplorerMain model game =
+viewExplorerMain : Explorer -> GameModel -> Html Msg
+viewExplorerMain explorer game =
     div
         [ contextContent
         , class
@@ -170,7 +171,7 @@ viewExplorerMain model game =
         ]
         [ div
             [ class [ ContentHeader ] ]
-            [ viewLocBar model.path
+            [ viewLocBar explorer.path
             , div
                 [ class [ ActBtns ] ]
                 [ span
