@@ -26,6 +26,11 @@ arrowCircleOUp =
     "f01b"
 
 
+book : UnicodeTag
+book =
+    "f02d"
+
+
 plusCircle : UnicodeTag
 plusCircle =
     "f055"

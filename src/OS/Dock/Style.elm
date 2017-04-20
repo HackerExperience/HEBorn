@@ -77,6 +77,13 @@ css =
                 [ Icon.explorer ]
             ]
         , attrSelector "dockItem"
+            "data-icon"
+            "="
+            "logvw"
+            [ before
+                [ Icon.logvw ]
+            ]
+        , attrSelector "dockItem"
             "data-hasinst"
             "="
             "Y"
