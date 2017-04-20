@@ -1,14 +1,14 @@
-module Game.Server.Update exposing (..)
+module Game.Servers.Update exposing (..)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
-import Game.Server.Messages exposing (ServerMsg(..))
-import Game.Server.Models exposing (..)
-import Game.Server.Filesystem.Update as Filesystem
+import Game.Servers.Messages exposing (ServerMsg(..))
+import Game.Servers.Models exposing (..)
+import Game.Servers.Filesystem.Update as Filesystem
 
 
-update : ServerMsg -> ServerModel -> GameModel -> ( ServerModel, Cmd GameMsg, List CoreMsg )
+update : ServerMsg -> Servers -> GameModel -> ( Servers, Cmd GameMsg, List CoreMsg )
 update msg model game =
     case msg of
         MsgFilesystem serverID subMsg ->

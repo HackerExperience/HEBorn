@@ -3,14 +3,14 @@ module Game.Messages exposing (GameMsg(..))
 import Events.Models
 import Requests.Models
 import Game.Account.Messages
-import Game.Server.Messages
+import Game.Servers.Messages
 import Game.Network.Messages
 import Game.Meta.Messages
 
 
 type GameMsg
     = MsgAccount Game.Account.Messages.AccountMsg
-    | MsgServer Game.Server.Messages.ServerMsg
+    | MsgServers Game.Servers.Messages.ServerMsg
     | MsgNetwork Game.Network.Messages.NetworkMsg
     | MsgMeta Game.Meta.Messages.MetaMsg
     | Event Events.Models.Event

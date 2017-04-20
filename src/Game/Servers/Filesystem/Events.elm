@@ -1,7 +1,7 @@
-module Game.Server.Filesystem.Events exposing (filesystemEventHandler)
+module Game.Servers.Filesystem.Events exposing (filesystemEventHandler)
 
 import Events.Models exposing (Event(..))
-import Game.Server.Filesystem.Models exposing (Filesystem)
+import Game.Servers.Filesystem.Models exposing (Filesystem)
 import Game.Messages exposing (GameMsg)
 
 

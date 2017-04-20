@@ -2,13 +2,13 @@ module Apps.Explorer.Models exposing (..)
 
 import Dict
 import Game.Models exposing (GameModel)
-import Game.Server.Models
+import Game.Servers.Models
     exposing
         ( ServerID
         , getFilesystem
         , getServerByID
         )
-import Game.Server.Filesystem.Models
+import Game.Servers.Filesystem.Models
     exposing
         ( FilePath
         , rootPath
@@ -99,7 +99,7 @@ changePath : Explorer -> GameModel -> FilePath -> Explorer
 changePath explorer game path =
     let
         server =
-            getServerByID game.server explorer.serverID
+            getServerByID game.servers explorer.serverID
     in
         if not (pathExists (getFilesystem server) path) then
             explorer

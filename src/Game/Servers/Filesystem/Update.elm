@@ -1,10 +1,10 @@
-module Game.Server.Filesystem.Update exposing (..)
+module Game.Servers.Filesystem.Update exposing (..)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
-import Game.Server.Filesystem.Messages exposing (FilesystemMsg(..))
-import Game.Server.Filesystem.Models exposing (Filesystem)
+import Game.Servers.Filesystem.Messages exposing (FilesystemMsg(..))
+import Game.Servers.Filesystem.Models exposing (Filesystem)
 
 
 update :

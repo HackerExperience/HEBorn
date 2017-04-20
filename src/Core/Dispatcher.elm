@@ -17,12 +17,12 @@ import Apps.Messages exposing (AppMsg(..))
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
-import Game.Server.Messages as Server
-import Game.Server.Filesystem.Messages as Filesystem
+import Game.Servers.Messages as Server
+import Game.Servers.Filesystem.Messages as Filesystem
 import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
-import Game.Server.Models exposing (ServerID)
+import Game.Servers.Models exposing (ServerID)
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
@@ -31,7 +31,7 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 -- callGame =
 --     { account = MsgGame (MsgAccount)
 --     , network = MsgGame (MsgNetwork)
---     , server = MsgGame (MsgServer)
+--     , server = MsgGame (MsgServers)
 --     , meta = MsgGame (MsgMeta)
 --     }
 
@@ -63,7 +63,7 @@ callNetwork msg =
 
 callServer : Server.ServerMsg -> CoreMsg
 callServer msg =
-    callGame (MsgServer msg)
+    callGame (MsgServers msg)
 
 
 callFilesystem : ServerID -> Filesystem.FilesystemMsg -> CoreMsg

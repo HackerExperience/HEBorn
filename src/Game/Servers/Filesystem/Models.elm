@@ -1,4 +1,4 @@
-module Game.Server.Filesystem.Models
+module Game.Servers.Filesystem.Models
     exposing
         ( Filesystem
         , initialFilesystem

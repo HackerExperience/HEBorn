@@ -9,7 +9,7 @@ import Requests.Models exposing (Response)
 import Core.Messages exposing (CoreMsg)
 import Game.Messages exposing (GameMsg)
 import Game.Account.Models exposing (..)
-import Game.Server.Models exposing (..)
+import Game.Servers.Models exposing (..)
 import Game.Network.Models exposing (..)
 import Game.Meta.Models exposing (..)
 
@@ -22,7 +22,7 @@ type alias ResponseType =
 
 type alias GameModel =
     { account : AccountModel
-    , server : ServerModel
+    , servers : Servers
     , network : NetworkModel
     , meta : MetaModel
     }
@@ -31,7 +31,7 @@ type alias GameModel =
 initialModel : GameModel
 initialModel =
     { account = initialAccountModel
-    , server = initialServerModel
+    , servers = initialServers
     , network = initialNetworkModel
     , meta = initialMetaModel
     }
