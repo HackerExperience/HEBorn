@@ -46,8 +46,11 @@ pathMoveAroundTests =
                 explorer0 =
                     initialExplorer
 
-                ( game, server, ( _, folder ) ) =
+                play =
                     Playstate.one seed1 seed2
+
+                ( game, server, folder ) =
+                    ( play.game, play.server, play.valid.folder )
 
                 explorer =
                     { explorer0 | serverID = (getServerID server) }
@@ -65,8 +68,11 @@ pathMoveAroundTests =
                 explorer =
                     initialExplorer
 
-                ( game, _, _ ) =
+                play =
                     Playstate.one seed1 seed2
+
+                game =
+                    play.game
 
                 explorer_ =
                     changePath explorer game (Gen.Filesystem.path seed2)
