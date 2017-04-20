@@ -92,3 +92,8 @@ modeActive =
 modePassive : Icon
 modePassive =
     faIcon FA.wpExplorer
+
+
+logvw : Icon
+logvw =
+    faIcon FA.book

@@ -6,16 +6,11 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (asPairs)
 import Game.Models exposing (GameModel)
-import Game.Software.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (Model, LogViewer, getState)
 import Apps.LogViewer.Context.Models exposing (Context(..))
-
-
---import Apps.LogViewer.Context.View exposing (contextView, contextNav, contextContent)
-
 import Apps.LogViewer.Style exposing (Classes(..))
 
 

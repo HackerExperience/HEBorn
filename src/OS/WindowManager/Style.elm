@@ -86,6 +86,13 @@ css =
             [ before
                 [ Icon.explorer ]
             ]
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "logviewer"
+            [ before
+                [ Icon.logvw ]
+            ]
         , class HeaderButtons
             [ flex (int 0)
             , flexContainerHorz
