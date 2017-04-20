@@ -8,6 +8,8 @@ module Core.Dispatcher
         , callWM
         , callDock
         , callExplorer
+        , callLogViewer
+        , callInstance
         )
 
 import Core.Messages exposing (CoreMsg(MsgGame, MsgOS, MsgApp))
