@@ -1,5 +1,8 @@
 module Game.Server.Messages exposing (ServerMsg(..))
 
+import Game.Server.Models exposing (ServerID)
+import Game.Server.Filesystem.Messages exposing (FilesystemMsg)
+
 
 type ServerMsg
-    = ToDo
+    = MsgFilesystem ServerID FilesystemMsg

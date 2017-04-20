@@ -1,9 +1,9 @@
 module Core.Dispatcher
     exposing
         ( callAccount
-        , callSoftware
         , callNetwork
         , callServer
+        , callFilesystem
         , callMeta
         , callWM
         , callDock
@@ -16,12 +16,13 @@ import OS.Messages exposing (OSMsg(..))
 import Apps.Messages exposing (AppMsg(..))
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
-import Game.Software.Messages as Software
 import Game.Network.Messages as Network
 import Game.Server.Messages as Server
+import Game.Server.Filesystem.Messages as Filesystem
 import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
+import Game.Server.Models exposing (ServerID)
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
@@ -29,7 +30,6 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 --
 -- callGame =
 --     { account = MsgGame (MsgAccount)
---     , software = MsgGame (MsgSoftware)
 --     , network = MsgGame (MsgNetwork)
 --     , server = MsgGame (MsgServer)
 --     , meta = MsgGame (MsgMeta)
@@ -56,11 +56,6 @@ callAccount msg =
     callGame (MsgAccount msg)
 
 
-callSoftware : Software.SoftwareMsg -> CoreMsg
-callSoftware msg =
-    callGame (MsgSoftware msg)
-
-
 callNetwork : Network.NetworkMsg -> CoreMsg
 callNetwork msg =
     callGame (MsgNetwork msg)
@@ -69,6 +64,11 @@ callNetwork msg =
 callServer : Server.ServerMsg -> CoreMsg
 callServer msg =
     callGame (MsgServer msg)
+
+
+callFilesystem : ServerID -> Filesystem.FilesystemMsg -> CoreMsg
+callFilesystem serverID msg =
+    callServer (Server.MsgFilesystem serverID msg)
 
 
 callMeta : Meta.MetaMsg -> CoreMsg

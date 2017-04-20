@@ -4,9 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
-import Game.Software.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
@@ -18,11 +16,6 @@ import Apps.Explorer.Style exposing (Classes(..))
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "explorer"
-
-
-styles : List Css.Mixin -> Attribute Msg
-styles =
-    Css.asPairs >> style
 
 
 view : Model -> InstanceID -> GameModel -> Html Msg
@@ -148,22 +141,8 @@ stripPath path =
         )
 
 
-viewLocBar : FilePath -> Html Msg
-viewLocBar path =
-    div
-        [ class [ LocBar ] ]
-        (List.map
-            (\o ->
-                span
-                    [ class [ BreadcrumbItem ] ]
-                    [ text o ]
-            )
-            (String.split "/" (stripPath path))
-        )
-
-
-viewExplorerMain : Explorer -> GameModel -> Html Msg
-viewExplorerMain explorer game =
+viewExplorerMain : Model -> InstanceID -> GameModel -> Html Msg
+viewExplorerMain model id game =
     div
         [ contextContent
         , class

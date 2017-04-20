@@ -9,7 +9,6 @@ import Requests.Models exposing (Response)
 import Core.Messages exposing (CoreMsg)
 import Game.Messages exposing (GameMsg)
 import Game.Account.Models exposing (..)
-import Game.Software.Models exposing (..)
 import Game.Server.Models exposing (..)
 import Game.Network.Models exposing (..)
 import Game.Meta.Models exposing (..)
@@ -25,7 +24,6 @@ type alias GameModel =
     { account : AccountModel
     , server : ServerModel
     , network : NetworkModel
-    , software : SoftwareModel
     , meta : MetaModel
     }
 
@@ -35,6 +33,5 @@ initialModel =
     { account = initialAccountModel
     , server = initialServerModel
     , network = initialNetworkModel
-    , software = initialSoftwareModel
     , meta = initialMetaModel
     }
