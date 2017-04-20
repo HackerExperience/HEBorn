@@ -44,8 +44,11 @@ prepare:
 build: prepare
 	cat static/index.html > build/index.html
 
-build-quick: prepare
-	sed '/cssrefresh/d' static/index.html > build/index.html
+build-css: prepare
+	sed 's/ \
+		<\/body/ \
+		\<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh.js\"\>\<\/script\> \
+		&/' static/index.html > build/index.html
 
 ################################################################################
 # Dev
@@ -62,8 +65,8 @@ build-quick: prepare
 dev: compile-clean build
 	npm start
 
-# Do not use annoying css reloader
-dev-quick: compile-clean build-quick
+# Add annoying css hot reloader. Useful when editing styles.
+dev-css: compile-clean build-css
 	npm start
 
 ################################################################################
@@ -71,7 +74,7 @@ dev-quick: compile-clean build-quick
 ################################################################################
 
 server:
-	$(server) & ls
+	$(server)
 
 ################################################################################
 # Test
