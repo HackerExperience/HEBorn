@@ -4,7 +4,7 @@ import Dict
 import Utils
 import Game.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
-import Game.Log.Models as Log exposing (Logs)
+import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
 
 
 type alias ServerID =
@@ -15,7 +15,7 @@ type alias ServerData =
     { id : ServerID
     , ip : IP
     , filesystem : Filesystem
-    , log : Logs
+    , logs : Logs
     }
 
 
@@ -38,7 +38,7 @@ invalidServer =
     { id = invalidServerID
     , ip = "todo"
     , filesystem = initialFilesystem
-    , log = Dict.empty
+    , logs = initialLogs
     }
 
 
@@ -97,11 +97,31 @@ getFilesystem server =
             initialFilesystem
 
 
+getLogs : Server -> Logs
+getLogs server =
+    case server of
+        StdServer s ->
+            s.logs
+
+        NoServer ->
+            initialLogs
+
+
 updateFilesystem : Server -> Filesystem -> Server
 updateFilesystem server filesystem =
     case server of
         StdServer s ->
             StdServer { s | filesystem = filesystem }
+
+        NoServer ->
+            NoServer
+
+
+updateLogs : Server -> Logs -> Server
+updateLogs server logs =
+    case server of
+        StdServer s ->
+            StdServer { s | logs = logs}
 
         NoServer ->
             NoServer
