@@ -4,13 +4,13 @@ import Test exposing (..)
 import Expect
 import Fuzz exposing (list, int, tuple, string)
 import String
-import Game.Software.ModelTest
-import Apps.Explorer.ModelTest
+import Game.Servers.Filesystem.ModelTest as FilesystemModel
+import Apps.Explorer.ModelTest as ExplorerModel
 
 
 all : Test
 all =
     describe "heborn"
-        [ Game.Software.ModelTest.all
-        , Apps.Explorer.ModelTest.all
+        [ FilesystemModel.all
+        , ExplorerModel.all
         ]

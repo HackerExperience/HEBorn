@@ -1,10 +1,10 @@
-module Gen.Software exposing (..)
+module Gen.Filesystem exposing (..)
 
 import Dict
 import Arithmetic exposing (isEven)
 import Gen.Utils exposing (..)
-import Game.Software.Models exposing (..)
-import Helper.Software as Helper
+import Game.Servers.Filesystem.Models exposing (..)
+import Helper.Filesystem as Helper
 
 
 fileID : Int -> FileID
@@ -152,9 +152,9 @@ fsEmpty =
     initialFilesystem
 
 
-model : Int -> SoftwareModel
+model : Int -> Filesystem
 model seedInt =
-    { filesystem = (fsRandom seedInt) }
+    fsRandom seedInt
 
 
 file : Int -> File
@@ -169,8 +169,9 @@ fileList : Int -> List File
 fileList seedInt =
     let
         size =
-            Gen.Utils.intRange 10 50 seedInt
+            1
 
+        -- Gen.Utils.intRange 10 50 seedInt
         seedList =
             listOfInt size seedInt
 
@@ -206,7 +207,7 @@ fsRandom seedInt =
         model =
             List.foldr
                 (\file model_ -> Helper.addFileRecursively model_ file)
-                initialSoftwareModel
+                initialFilesystem
                 list
     in
-        model.filesystem
+        model

@@ -1,18 +1,17 @@
-module Game.Software.ModelTest exposing (all)
+module Game.Servers.Filesystem.ModelTest exposing (all)
 
 import Expect
 import Test exposing (Test, describe)
 import Fuzz exposing (int, tuple)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
-import Gen.Software as Gen
-import Helper.Software as Helper exposing (addFileRecursively)
-import Game.Software.Models exposing (..)
-import Gen.Remote
+import Gen.Filesystem as Gen
+import Helper.Filesystem as Helper exposing (addFileRecursively)
+import Game.Servers.Filesystem.Models exposing (..)
 
 
 all : Test
 all =
-    describe "software"
+    describe "filesystem"
         [ fileOperationsTests
         ]
 

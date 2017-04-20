@@ -1,6 +1,6 @@
-module Helper.Software exposing (..)
+module Helper.Filesystem exposing (..)
 
-import Game.Software.Models exposing (..)
+import Game.Servers.Filesystem.Models exposing (..)
 
 
 {-| addFileRecursively is a helper because on tests we often want to add a file
@@ -10,11 +10,11 @@ allow us to have this assumption when adding files. It's usually safe to use
 addFileRecursively instead of addFile for tests, unless you want to test exactly
 the assumption that the path the file is being added to must exist.
 -}
-addFileRecursively : SoftwareModel -> File -> SoftwareModel
-addFileRecursively model file =
+addFileRecursively : Filesystem -> File -> Filesystem
+addFileRecursively filesystem file =
     case file of
         Folder _ ->
-            addFile model file
+            addFile filesystem file
 
         StdFile file_ ->
             let
@@ -25,7 +25,7 @@ addFileRecursively model file =
                 folder =
                     Folder { id = "id", name = "name", path = path }
 
-                model_ =
-                    addFile model folder
+                filesystem_ =
+                    addFile filesystem folder
             in
-                addFile model_ (StdFile file_)
+                addFile filesystem_ (StdFile file_)
