@@ -23,7 +23,7 @@ compile:
 	elm-make $(main)
 
 compile-clean:
-	$(MAKE) compile > /dev/null && rm index.html
+	$(MAKE) compile && rm -f index.html
 
 ################################################################################
 # Build
@@ -34,9 +34,9 @@ prepare:
 	mkdir -p build/css && \
 	mkdir -p build/js && \
 	mkdir -p build/vendor && \
-	cp -r static/css/ build/css/ && \
-	cp -r static/js/ build/js/ && \
-	cp -r static/vendor/ build/vendor/
+	cp -r static/css/* build/css && \
+	cp -r static/js/* build/js && \
+	cp -r static/vendor/* build/vendor
 
 build: prepare
 	cat static/index.html > build/index.html
@@ -95,6 +95,6 @@ test-long:
 
 clean:
 	rm -rf build/* && \
-	rm *.html && \
+	rm -f *.html && \
 	git clean -id && \
 	git checkout tests/Config.elm
