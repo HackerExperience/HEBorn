@@ -106,6 +106,10 @@ getRequestMsg component request response =
             MsgApp
                 (MsgExplorer (appBinds.explorer request response))
 
+        ComponentLogViewer ->
+            MsgApp
+                (MsgLogViewer (appBinds.logViewer request response))
+
         ComponentLogin ->
             MsgLand
                 (MsgLogin (landBinds.login request response))

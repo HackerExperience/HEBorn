@@ -24,6 +24,7 @@ import OS.WindowManager.Messages exposing (Msg(..))
 import OS.WindowManager.Style as Css
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.View
+import Apps.LogViewer.View
 
 
 { id, class, classList } =
@@ -61,6 +62,19 @@ renderWindow model window =
                     )
                 )
 
+        LogViewerWindow ->
+            windowWrapper
+                window
+                (Html.map MsgApp
+                    (Html.map MsgLogViewer
+                        (Apps.LogViewer.View.view
+                            model.apps.logViewer
+                            window.id
+                            model.game
+                        )
+                    )
+                )
+
 
 widndowClasses window =
     if (window.maximized) then
@@ -92,12 +106,18 @@ windowTitle window =
         ExplorerWindow ->
             "File Explorer"
 
+        LogViewerWindow ->
+            "Log Viewer"
+
 
 windowIcon : Window -> String
 windowIcon window =
     case window.window of
         ExplorerWindow ->
             "explorer"
+
+        LogViewerWindow ->
+            "logviewer"
 
 
 header : Window -> Html Msg
@@ -117,7 +137,10 @@ header window =
 
 headerContext id context =
     div []
-        [ span [ onClick (SwitchContext id) ]
+        [ span
+            [ class [ Css.HeaderContextSw ]
+            , onClick (SwitchContext id)
+            ]
             [ text (getContextText context)
             ]
         ]

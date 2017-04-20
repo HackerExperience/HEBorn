@@ -19,6 +19,7 @@ type Class
     | HeaderBtnClose
     | HeaderBtnMaximize
     | HeaderBtnMinimize
+    | HeaderContextSw
 
 
 css : Stylesheet
@@ -116,4 +117,6 @@ css =
             [ before
                 [ Icon.windowMinimize ]
             ]
+        , class HeaderContextSw
+            [ margin2 (px 0) (px 8) ]
         ]
