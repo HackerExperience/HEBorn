@@ -25,6 +25,9 @@ compile:
 compile-clean:
 	$(MAKE) compile && rm -f index.html
 
+compile-loop:
+	-while true; do $(MAKE) compile; sleep 2; done
+
 ################################################################################
 # Build
 ################################################################################
