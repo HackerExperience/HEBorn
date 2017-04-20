@@ -11,12 +11,31 @@ import Css.Icons as Icon
 
 
 type Classes
-    = Aaaaaa
+    = HeaderBar
+    | Entry
+    | ETop
+    | ETAct
+    | EData
+    | EAct
+    | EToggler
+    | BtnUser
+    | BtnEdit
+    | BtnView
+    | BtnOrder
+    | BtnLock
+    | BtnDelete
+    | BtnUnlock
+    | BtnApply
+    | BtnCancel
+    | CasedBtnExpand
+    | IcoCrosshair
+    | IcoUser
+    | IcoHome
 
 
 css : Stylesheet
 css =
     (stylesheet << namespace "logvw")
-        [ class Aaaaaa
+        [ class HeaderBar
             []
         ]
