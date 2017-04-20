@@ -37,6 +37,9 @@ generateApplication window =
                 ExplorerWindow ->
                     "explorer"
 
+                LogViewerWindow ->
+                    "logvw"
+
         icon =
             name
     in
@@ -47,7 +50,9 @@ initialApplications : List Application
 initialApplications =
     let
         applications =
-            [ generateApplication ExplorerWindow ]
+            [ generateApplication ExplorerWindow
+            , generateApplication LogViewerWindow
+            ]
     in
         applications
 

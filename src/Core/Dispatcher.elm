@@ -8,6 +8,8 @@ module Core.Dispatcher
         , callWM
         , callDock
         , callExplorer
+        , callLogViewer
+        , callInstance
         )
 
 import Core.Messages exposing (CoreMsg(MsgGame, MsgOS, MsgApp))
@@ -23,6 +25,7 @@ import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
 import Game.Servers.Models exposing (ServerID)
+import Apps.LogViewer.Messages as LogViewer
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
@@ -89,3 +92,12 @@ callDock msg =
 callExplorer : Explorer.Msg -> CoreMsg
 callExplorer msg =
     callApps (MsgExplorer msg)
+
+
+callLogViewer : LogViewer.Msg -> CoreMsg
+callLogViewer msg =
+    callApps (MsgLogViewer msg)
+
+
+callInstance msg =
+    callApps msg

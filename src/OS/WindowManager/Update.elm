@@ -4,7 +4,7 @@ import Utils
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Core.Messages exposing (CoreMsg(NoOp))
-import Core.Dispatcher exposing (callDock, callExplorer)
+import Core.Dispatcher exposing (callDock, callInstance)
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
@@ -21,7 +21,6 @@ import OS.WindowManager.Models
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
-import Apps.Instances.Dispatcher exposing (instanceDispatcher)
 import Apps.Instances.Binds as InstanceBind
 import Apps.Explorer.Messages as ExplorerMsg
 import OS.WindowManager.Windows exposing (GameWindow(..))
@@ -43,9 +42,8 @@ update msg model =
                     Utils.maybeToString rNewWindowID
 
                 coreMsg =
-                    [ instanceDispatcher
-                        window
-                        ((InstanceBind.open window) windowID)
+                    [ callInstance
+                        (InstanceBind.open window windowID)
                     , callDock (DockMsg.WindowsChanges windows_)
                     ]
             in
@@ -72,9 +70,8 @@ update msg model =
                 instanceMsg =
                     case window of
                         Just w ->
-                            instanceDispatcher
-                                w.window
-                                ((InstanceBind.close w.window) id)
+                            callInstance
+                                (InstanceBind.close w.window id)
 
                         Nothing ->
                             NoOp
@@ -123,8 +120,7 @@ update msg model =
                 instanceMsg =
                     case window of
                         Just w ->
-                            instanceDispatcher
-                                w.window
+                            callInstance
                                 ((InstanceBind.context w.window) id)
 
                         Nothing ->
