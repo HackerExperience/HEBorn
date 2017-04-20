@@ -6,8 +6,11 @@ import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg)
 import Game.Meta.Events exposing (metaEventHandler)
 import Game.Account.Events exposing (accountEventHandler)
-import Game.Software.Events exposing (softwareEventHandler)
-import Game.Server.Events exposing (serverEventHandler)
+
+
+-- import Game.Software.Events exposing (softwareEventHandler)
+
+import Game.Servers.Events exposing (serversEventHandler)
 import Game.Network.Events exposing (networkEventHandler)
 
 
@@ -20,11 +23,8 @@ eventHandler model event =
         ( account_, cmdAccount ) =
             accountEventHandler model.account event
 
-        ( software_, cmdSoftware ) =
-            softwareEventHandler model.software event
-
-        ( server_, cmdServer ) =
-            serverEventHandler model.server event
+        ( servers_, cmdServers ) =
+            serversEventHandler model.servers event
 
         ( network_, cmdNetwork ) =
             networkEventHandler model.network event
@@ -32,8 +32,7 @@ eventHandler model event =
         cmdList =
             [ cmdMeta ]
                 ++ [ cmdAccount ]
-                ++ [ cmdSoftware ]
-                ++ [ cmdServer ]
+                ++ [ cmdServers ]
                 ++ [ cmdNetwork ]
 
         cmdList_ =
@@ -42,9 +41,8 @@ eventHandler model event =
         model_ =
             { meta = meta_
             , account = account_
-            , software = software_
             , network = network_
-            , server = server_
+            , servers = servers_
             }
     in
         ( model_, Cmd.batch cmdList_, [] )

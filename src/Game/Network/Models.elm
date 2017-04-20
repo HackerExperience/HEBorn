@@ -2,7 +2,7 @@ module Game.Network.Models exposing (..)
 
 import Dict
 import Game.Shared exposing (..)
-import Game.Server.Models exposing (AnyServer(..), ServerID)
+import Game.Servers.Models exposing (Server(..), ServerID)
 
 
 type alias ConnectionID =
@@ -10,8 +10,8 @@ type alias ConnectionID =
 
 
 type alias Gateway =
-    { current : AnyServer
-    , previous : AnyServer
+    { current : Server
+    , previous : Server
     }
 
 
@@ -32,8 +32,8 @@ type alias ConnectionData =
     }
 
 
-type AnyConnection
-    = Connection ConnectionData
+type Connection
+    = StdConnection ConnectionData
     | NoConnection
 
 
@@ -47,22 +47,22 @@ type alias NetworkModel =
     }
 
 
-createGateway : AnyServer -> AnyServer -> Gateway
+createGateway : Server -> Server -> Gateway
 createGateway current previous =
     { current = current, previous = previous }
 
 
-getCurrentGateway : NetworkModel -> AnyServer
+getCurrentGateway : NetworkModel -> Server
 getCurrentGateway model =
     model.gateway.current
 
 
-getPreviousGateway : NetworkModel -> AnyServer
+getPreviousGateway : NetworkModel -> Server
 getPreviousGateway model =
     model.gateway.previous
 
 
-setCurrentGateway : NetworkModel -> AnyServer -> Gateway
+setCurrentGateway : NetworkModel -> Server -> Gateway
 setCurrentGateway model gateway =
     createGateway gateway model.gateway.current
 

@@ -2,7 +2,13 @@ module Apps.Explorer.Models exposing (..)
 
 import Dict
 import Game.Models exposing (GameModel)
-import Game.Software.Models
+import Game.Servers.Models
+    exposing
+        ( ServerID
+        , getFilesystem
+        , getServerByID
+        )
+import Game.Servers.Filesystem.Models
     exposing
         ( FilePath
         , rootPath
@@ -19,7 +25,8 @@ import Apps.Explorer.Context.Models as Menu
 
 
 type alias Explorer =
-    { path : FilePath
+    { serverID : ServerID
+    , path : FilePath
     }
 
 
@@ -35,7 +42,8 @@ type alias Model =
 
 initialExplorer : Explorer
 initialExplorer =
-    { path = rootPath
+    { serverID = "invalid"
+    , path = rootPath
     }
 
 
@@ -89,7 +97,11 @@ setPath explorer path =
 
 changePath : Explorer -> GameModel -> FilePath -> Explorer
 changePath explorer game path =
-    if not (pathExists game.software path) then
-        explorer
-    else
-        setPath explorer path
+    let
+        server =
+            getServerByID game.servers explorer.serverID
+    in
+        if not (pathExists (getFilesystem server) path) then
+            explorer
+        else
+            setPath explorer path

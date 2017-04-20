@@ -1,8 +1,6 @@
-module Game.Software.Models
+module Game.Servers.Filesystem.Models
     exposing
-        ( SoftwareModel
-        , initialSoftwareModel
-        , Filesystem
+        ( Filesystem
         , initialFilesystem
         , File(..)
         , FileID
@@ -35,6 +33,8 @@ type alias FileID =
     ID
 
 
+{-| todo: how about FilePath as a List String?
+-}
 type alias FilePath =
     String
 
@@ -94,10 +94,6 @@ type alias Filesystem =
     Dict.Dict FilePath (List File)
 
 
-type alias SoftwareModel =
-    { filesystem : Filesystem }
-
-
 getFileModules : File -> FileModules
 getFileModules file =
     case file of
@@ -148,14 +144,14 @@ getFileName file =
             folder.name
 
 
-addFile : SoftwareModel -> File -> SoftwareModel
-addFile model file =
+addFile : Filesystem -> File -> Filesystem
+addFile filesystem file =
     let
         path =
             getFilePath file
 
         filesOnPath =
-            getFilesOnPath model path
+            getFilesOnPath filesystem path
 
         newFiles =
             filesOnPath ++ [ file ]
@@ -163,10 +159,10 @@ addFile model file =
         filesystem_ =
             case file of
                 StdFile _ ->
-                    if (pathExists model path) then
-                        Dict.insert path newFiles model.filesystem
+                    if (pathExists filesystem path) then
+                        Dict.insert path newFiles filesystem
                     else
-                        model.filesystem
+                        filesystem
 
                 {- Adding a folder is a special case. We need to ensure our model
                    recognizes this new folder as a valid path, so it can store
@@ -175,22 +171,19 @@ addFile model file =
                 Folder _ ->
                     let
                         filesystem1 =
-                            Dict.insert path newFiles model.filesystem
+                            Dict.insert path newFiles filesystem
 
                         newPath =
                             path ++ pathSeparator ++ (getFileName file)
-
-                        filesystem2 =
-                            Dict.insert newPath [] filesystem1
                     in
-                        filesystem2
+                        Dict.insert newPath [] filesystem1
     in
-        { model | filesystem = filesystem_ }
+        filesystem_
 
 
-getFilesOnPath : SoftwareModel -> FilePath -> List File
-getFilesOnPath model path =
-    case Dict.get path model.filesystem of
+getFilesOnPath : Filesystem -> FilePath -> List File
+getFilesOnPath filesystem path =
+    case Dict.get path filesystem of
         Just files ->
             files
 
@@ -198,9 +191,9 @@ getFilesOnPath model path =
             []
 
 
-pathExists : SoftwareModel -> FilePath -> Bool
-pathExists model path =
-    case Dict.get path model.filesystem of
+pathExists : Filesystem -> FilePath -> Bool
+pathExists filesystem path =
+    case Dict.get path filesystem of
         Just _ ->
             True
 
@@ -208,27 +201,27 @@ pathExists model path =
             False
 
 
-moveFile : SoftwareModel -> File -> FilePath -> SoftwareModel
-moveFile model file path =
-    if not (pathExists model path) then
+moveFile : Filesystem -> File -> FilePath -> Filesystem
+moveFile filesystem file path =
+    if not (pathExists filesystem path) then
         -- Moving to a non-existing path
-        model
+        filesystem
     else
         let
             file_ =
                 setFilePath file path
 
-            model1 =
-                addFile model file_
+            filesystem1 =
+                addFile filesystem file_
 
-            model_ =
-                removeFile model1 file
+            filesystem_ =
+                removeFile filesystem1 file
         in
-            model_
+            filesystem_
 
 
-removeFile : SoftwareModel -> File -> SoftwareModel
-removeFile model file =
+removeFile : Filesystem -> File -> Filesystem
+removeFile filesystem file =
     let
         path =
             getFilePath file
@@ -237,7 +230,7 @@ removeFile model file =
             getFileId file
 
         filesOnPath =
-            getFilesOnPath model path
+            getFilesOnPath filesystem path
 
         newFiles =
             List.filter (\x -> (getFileId x) /= id) filesOnPath
@@ -245,7 +238,7 @@ removeFile model file =
         filesystem_ =
             case file of
                 StdFile _ ->
-                    Dict.insert path newFiles model.filesystem
+                    Dict.insert path newFiles filesystem
 
                 {- Deleting a folder is a special case. If there are any files
                    inside the folder, it can't be deleted at all. On the other hand,
@@ -253,26 +246,21 @@ removeFile model file =
                 -}
                 Folder _ ->
                     if List.isEmpty newFiles then
-                        Dict.remove path model.filesystem
+                        Dict.remove path filesystem
                     else
-                        model.filesystem
+                        filesystem
     in
-        { model | filesystem = filesystem_ }
+        filesystem_
 
 
-listFilesystem : SoftwareModel -> String
-listFilesystem model =
-    toString model.filesystem
+listFilesystem : Filesystem -> String
+listFilesystem filesystem =
+    toString filesystem
 
 
 initialFilesystem : Filesystem
 initialFilesystem =
     Dict.empty
-
-
-initialSoftwareModel : SoftwareModel
-initialSoftwareModel =
-    { filesystem = initialFilesystem }
 
 
 rootPath : FilePath

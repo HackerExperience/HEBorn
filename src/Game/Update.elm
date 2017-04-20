@@ -6,9 +6,8 @@ import Game.Messages exposing (GameMsg(..))
 import Game.Requests exposing (responseHandler)
 import Game.Events exposing (eventHandler)
 import Game.Account.Update
-import Game.Server.Update
+import Game.Servers.Update
 import Game.Network.Update
-import Game.Software.Update
 import Game.Meta.Update
 
 
@@ -22,19 +21,12 @@ update msg model =
             in
                 ( { model | account = account_ }, cmd, coreMsg )
 
-        MsgServer subMsg ->
+        MsgServers subMsg ->
             let
-                ( server_, cmd, coreMsg ) =
-                    Game.Server.Update.update subMsg model.server model
+                ( servers_, cmd, coreMsg ) =
+                    Game.Servers.Update.update subMsg model.servers model
             in
-                ( { model | server = server_ }, cmd, coreMsg )
-
-        MsgSoftware subMsg ->
-            let
-                ( software_, cmd, coreMsg ) =
-                    Game.Software.Update.update subMsg model.software model
-            in
-                ( { model | software = software_ }, cmd, coreMsg )
+                ( { model | servers = servers_ }, cmd, coreMsg )
 
         MsgNetwork subMsg ->
             let
