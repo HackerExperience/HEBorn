@@ -7,8 +7,12 @@ type alias AccountID =
     ID
 
 
+type alias Token =
+    String
+
+
 type alias AuthData =
-    { token : Maybe String }
+    { token : Maybe Token }
 
 
 type alias AccountModel =
@@ -19,12 +23,12 @@ type alias AccountModel =
     }
 
 
-getToken : AccountModel -> Maybe String
+getToken : AccountModel -> Maybe Token
 getToken model =
     model.auth.token
 
 
-setToken : AccountModel -> Maybe String -> AccountModel
+setToken : AccountModel -> Maybe Token -> AccountModel
 setToken model token =
     let
         auth_ =
@@ -41,16 +45,6 @@ isAuthenticated model =
 
         Just _ ->
             True
-
-
-getTokenAsString : AccountModel -> String
-getTokenAsString model =
-    case getToken model of
-        Just token ->
-            token
-
-        Nothing ->
-            ""
 
 
 initialAuth : AuthData

@@ -53,7 +53,7 @@ pathMoveAroundTests =
                     ( play.game, play.server, play.valid.folder )
 
                 explorer =
-                    { explorer0 | serverID = (getServerID server) }
+                    { explorer0 | serverID = (getServerIDSafe server) }
 
                 explorer_ =
                     changePath explorer game (getFilePath folder)
