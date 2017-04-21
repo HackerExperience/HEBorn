@@ -4,7 +4,7 @@ import Dict
 import Game.Shared exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem)
-import Game.Log.Models exposing (..)
+import Game.Servers.Logs.Models exposing (..)
 import Gen.Filesystem
 import Gen.Utils exposing (..)
 
@@ -54,11 +54,11 @@ serverData seedInt =
 
 
 serverArgs : ServerID -> IP -> Filesystem -> Logs -> ServerData
-serverArgs id ip filesystem log =
+serverArgs id ip filesystem logs =
     { id = id
     , ip = ip
     , filesystem = filesystem
-    , log = log
+    , logs = logs
     }
 
 

@@ -13,33 +13,37 @@ update : ServerMsg -> Servers -> GameModel -> ( Servers, Cmd GameMsg, List CoreM
 update msg model game =
     case msg of
         MsgFilesystem serverID subMsg ->
-            let
-                server =
-                    getServerByID model serverID
+            case (getServerByID model serverID) of
+                StdServer server ->
+                    let
+                        ( filesystem_, cmd, coreMsg ) =
+                            Filesystem.update subMsg server.filesystem game
 
-                ( filesystem_, cmd, coreMsg ) =
-                    Filesystem.update subMsg (getFilesystem server) game
+                        server_ =
+                            StdServer { server | filesystem = filesystem_ }
 
-                server_ =
-                    updateFilesystem server filesystem_
+                        model_ =
+                            updateServer model server_
+                    in
+                        ( model_, cmd, coreMsg )
 
-                model_ =
-                    updateServer model server_
-            in
-                ( model_, cmd, coreMsg )
+                NoServer ->
+                    ( model, Cmd.none, [] )
 
         MsgLog serverID subMsg ->
-            let
-                server =
-                    getServerByID model serverID
+            case (getServerByID model serverID) of
+                StdServer server ->
+                    let
+                        ( logs_, cmd, coreMsg ) =
+                            Logs.update subMsg server.logs game
 
-                ( logs_, cmd, coreMsg ) =
-                    Logs.update subMsg (getLogs server) game
+                        server_ =
+                            StdServer { server | logs = logs_ }
 
-                server_ =
-                    updateLogs server logs_
+                        model_ =
+                            updateServer model server_
+                    in
+                        ( model_, cmd, coreMsg )
 
-                model_ =
-                    updateServer model server_
-            in
-                ( model_, cmd, coreMsg )
+                NoServer ->
+                    ( model, Cmd.none, [] )

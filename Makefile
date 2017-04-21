@@ -26,7 +26,7 @@ compile-clean:
 	$(MAKE) compile && rm -f index.html
 
 compile-loop:
-	-while true; do $(MAKE) compile; sleep 2; done
+	-while :; do $(MAKE) compile; sleep 2; done
 
 ################################################################################
 # Build
@@ -94,6 +94,9 @@ test-long:
 	mv tests/Config.elm.tmp tests/Config.elm
 	$(MAKE) test
 	git checkout tests/Config.elm
+
+test-loop:
+	- while :; do $(MAKE) test; sleep 2; done
 
 ################################################################################
 # Clean

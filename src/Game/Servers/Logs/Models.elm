@@ -18,6 +18,7 @@ type alias LogData =
     , content : LogContent
     }
 
+
 type Log
     = LogEntry LogData
     | NoLog
@@ -31,15 +32,6 @@ initialLogs : Logs
 initialLogs =
     Dict.empty
 
-invalidLogContent : LogContent
-invalidLogContent =
-    ""
-
-
-invalidLogID : LogID
-invalidLogID =
-    ""
-
 
 getLogByID : Logs -> LogID -> Log
 getLogByID logs id =
@@ -50,38 +42,57 @@ getLogByID logs id =
         Nothing ->
             NoLog
 
+
 logExists : Logs -> LogID -> Bool
 logExists logs id =
     Dict.member id logs
 
 
-getLogContent : Log -> LogContent
+getLogContent : Log -> Maybe LogContent
 getLogContent log =
     case log of
         LogEntry l ->
-            l.content
-        NoLog ->
-            invalidLogContent
+            Just l.content
 
-getLogID : Log -> LogID
+        NoLog ->
+            Nothing
+
+
+getLogID : Log -> Maybe LogID
 getLogID log =
     case log of
         LogEntry l ->
-            l.id
+            Just l.id
 
         NoLog ->
-            invalidLogID
+            Nothing
+
+
+addLog : Logs -> Log -> Logs
+addLog logs log =
+    case (getLogID log) of
+        Just id ->
+            Dict.insert id log logs
+
+        Nothing ->
+            logs
+
 
 removeLog : Logs -> Log -> Logs
 removeLog logs log =
-    Dict.remove (getLogID log) logs
+    case (getLogID log) of
+        Just id ->
+            Dict.remove id logs
+
+        Nothing ->
+            logs
 
 
 updateLog : Logs -> Log -> Logs
 updateLog logs log =
     case log of
         LogEntry entry ->
-           Utils.safeUpdateDict logs entry.id log
+            Utils.safeUpdateDict logs entry.id log
+
         NoLog ->
             logs
-
