@@ -100,8 +100,19 @@ changePath explorer game path =
     let
         server =
             getServerByID game.servers explorer.serverID
+
+        filesystem =
+            getFilesystem server
+
+        explorer_ =
+            case filesystem of
+                Just fs ->
+                    if pathExists fs path then
+                        setPath explorer path
+                    else
+                        explorer
+
+                Nothing ->
+                    explorer
     in
-        if not (pathExists (getFilesystem server) path) then
-            explorer
-        else
-            setPath explorer path
+        explorer_

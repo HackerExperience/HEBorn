@@ -1,15 +1,7 @@
 module Helper.Playstate exposing (..)
 
 import Game.Models exposing (GameModel)
-import Game.Servers.Models
-    exposing
-        ( Server
-        , addServer
-        , getServer
-        , getFilesystem
-        , updateServer
-        , updateFilesystem
-        )
+import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models exposing (File, addFile, getFileName)
 import Gen.Game
 import Gen.Servers
@@ -53,7 +45,7 @@ one seed1 seed2 =
             Gen.Filesystem.folder (seed2 + 1)
 
         filesystem1 =
-            addFileRecursively (getFilesystem server) file
+            addFileRecursively (getFilesystemSafe server) file
 
         filesystem_ =
             addFileRecursively filesystem1 folder
@@ -62,7 +54,7 @@ one seed1 seed2 =
             updateFilesystem server filesystem_
 
         servers =
-            addServer game0.servers (getServer server_)
+            addServer game0.servers (getServerSafe server_)
 
         game =
             { game0

@@ -143,9 +143,6 @@ addFileGenericTests =
 
                 filesOnPath =
                     getFilesOnPath model_ path
-
-                f =
-                    Debug.log "on path" (toString (getFilesOnPath model_ path))
             in
                 Expect.equal
                     ([ folder ] ++ [ file1 ] ++ [ file2 ])
@@ -446,7 +443,7 @@ moveFolderTests =
                     getFilePath destFolder
 
                 newPath =
-                    destination ++ "/" ++ (getFileName originFolder)
+                    destination ++ pathSeparator ++ (getFileName originFolder)
 
                 model1 =
                     addFileRecursively (Gen.model seed1) originFolder

@@ -42,24 +42,34 @@ invalidServer =
     }
 
 
-getServerID : Server -> ServerID
+getServerID : Server -> Maybe ServerID
 getServerID server =
     case server of
         StdServer s ->
-            s.id
+            Just s.id
 
         NoServer ->
-            invalidServerID
+            Nothing
 
 
-getServer : Server -> ServerData
+getServerIDSafe : Server -> ServerID
+getServerIDSafe server =
+    Maybe.withDefault invalidServerID (getServerID server)
+
+
+getServer : Server -> Maybe ServerData
 getServer server =
     case server of
         StdServer s ->
-            s
+            Just s
 
         NoServer ->
-            invalidServer
+            Nothing
+
+
+getServerSafe : Server -> ServerData
+getServerSafe server =
+    Maybe.withDefault invalidServer (getServer server)
 
 
 addServer : Servers -> ServerData -> Servers
@@ -87,24 +97,29 @@ initialServers =
     Dict.empty
 
 
-getFilesystem : Server -> Filesystem
+getFilesystem : Server -> Maybe Filesystem
 getFilesystem server =
     case server of
         StdServer s ->
-            s.filesystem
+            Just s.filesystem
 
         NoServer ->
-            initialFilesystem
+            Nothing
 
 
-getLogs : Server -> Logs
+getFilesystemSafe : Server -> Filesystem
+getFilesystemSafe server =
+    Maybe.withDefault initialFilesystem (getFilesystem server)
+
+
+getLogs : Server -> Maybe Logs
 getLogs server =
     case server of
         StdServer s ->
-            s.logs
+            Just s.logs
 
         NoServer ->
-            initialLogs
+            Nothing
 
 
 updateFilesystem : Server -> Filesystem -> Server
@@ -121,7 +136,7 @@ updateLogs : Server -> Logs -> Server
 updateLogs server logs =
     case server of
         StdServer s ->
-            StdServer { s | logs = logs}
+            StdServer { s | logs = logs }
 
         NoServer ->
             NoServer
@@ -131,7 +146,20 @@ updateServer : Servers -> Server -> Servers
 updateServer servers server =
     case server of
         StdServer s ->
-            Utils.safeUpdateDict servers (getServerID server) (getServer server)
+            Utils.safeUpdateDict
+                servers
+                (getServerIDSafe server)
+                (getServerSafe server)
 
         NoServer ->
             servers
+
+
+safeMaybe : Maybe a -> a -> a
+safeMaybe maybe onNothing =
+    case maybe of
+        Just something ->
+            something
+
+        Nothing ->
+            onNothing
