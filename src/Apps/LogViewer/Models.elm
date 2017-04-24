@@ -2,6 +2,12 @@ module Apps.LogViewer.Models exposing (..)
 
 import Dict
 import Game.Models exposing (GameModel)
+import Game.Servers.Filesystem.Models
+    exposing
+        ( FilePath
+        , rootPath
+        , pathExists
+        )
 import Apps.Instances.Models as Instance
     exposing
         ( Instances

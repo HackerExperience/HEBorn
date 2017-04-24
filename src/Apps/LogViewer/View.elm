@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (asPairs)
 import Game.Models exposing (GameModel)
+import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
