@@ -21,7 +21,7 @@ type Classes
     | BtnUser
     | BtnEdit
     | BtnView
-    | BtnOrder
+    | BtnFilter
     | BtnLock
     | BtnDelete
     | BtnUnlock
@@ -50,54 +50,54 @@ css =
             []
         , class BtnUser
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.user ]
             ]
         , class BtnEdit
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.edit ]
             ]
         , class BtnView
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.view ]
             ]
-        , class BtnOrder
+        , class BtnFilter
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.filter ]
             ]
         , class BtnLock
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.lock ]
             ]
         , class BtnDelete
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.trash ]
             ]
         , class BtnUnlock
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.unlock ]
             ]
         , class BtnApply
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.apply ]
             ]
         , class BtnCancel
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.cancel ]
             ]
         , class CasedBtnExpand
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.divExpand ]
             ]
         , class IcoCrosshair
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.locationTarget ]
             ]
         , class IcoUser
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.person ]
             ]
         , class IcoHome
             [ ico
-            , before [ Icon.fileGeneric ]
+            , before [ Icon.home ]
             ]
         ]

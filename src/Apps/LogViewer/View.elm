@@ -38,7 +38,7 @@ view model id game =
                     , span [ class [ BtnView ] ] []
                     ]
                 , div [ class [ ETAct ] ]
-                    [ span [ class [ BtnOrder ] ] []
+                    [ span [ class [ BtnFilter ] ] []
                     , input [ placeholder "Search..." ] []
                     ]
                 ]
