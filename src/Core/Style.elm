@@ -6,9 +6,18 @@ import Css.Namespace exposing (namespace)
 import Css.Utils exposing (unselectable)
 
 
+type Classes
+    = Elastic
+
+
+prefix : String
+prefix =
+    "c"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "core")
+    (stylesheet << namespace prefix)
         [ body
             [ displayFlex
             , minWidth (vw 100)
@@ -26,4 +35,6 @@ css =
             [ width (pct 100)
             , minHeight (pct 100)
             ]
+        , class Elastic
+            [ flex (int 1) ]
         ]

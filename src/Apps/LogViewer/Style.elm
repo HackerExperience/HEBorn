@@ -2,11 +2,8 @@ module Apps.LogViewer.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-
-
---import Css.Utils exposing (transition, easingToString, Easing(..), pseudoContent, selectableText)
-
-import Css.Common exposing (internalPadding, internalPaddingSz)
+import Css.Elements exposing (input, span)
+import Css.Common exposing (internalPadding, internalPaddingSz, flexContainerHorz)
 import Css.Icons as Icon
 
 
@@ -15,8 +12,12 @@ type Classes
     | Entry
     | ETop
     | ETAct
+    | ETActMini
+    | ETFilter
+    | ETFBar
     | EData
     | EAct
+    | EBottom
     | EToggler
     | BtnUser
     | BtnEdit
@@ -31,6 +32,11 @@ type Classes
     | IcoCrosshair
     | IcoUser
     | IcoHome
+    | IcoDangerous
+    | IdMe
+    | IdOther
+    | IdLocal
+    | IdRoot
 
 
 ico : Mixin
@@ -47,7 +53,43 @@ css : Stylesheet
 css =
     (stylesheet << namespace "logvw")
         [ class HeaderBar
-            []
+            [ flexContainerHorz
+            , borderBottom3 (px 1) solid (hex "000")
+            ]
+        , class ETAct
+            [ flex (int 1)
+            , fontSize (px 32)
+            ]
+        , class ETFilter
+            [ flex (int 0)
+            , flexContainerHorz
+            , lineHeight (px 32)
+            ]
+        , class ETFBar
+            [ children
+                [ input
+                    [ flex (int 1)
+                    , marginLeft (px 18)
+                    , padding (px 3)
+                    , borderRadius (px 12)
+                    , border3 (px 1) solid (hex "000")
+                    ]
+                ]
+            ]
+        , class ETop
+            [ flexContainerHorz ]
+        , class EBottom
+            [ flexContainerHorz ]
+        , class Entry
+            [ fontSize (px 12)
+            , borderBottom3 (px 1) solid (hex "000")
+            , padding (px 16)
+            ]
+        , class EAct
+            [ width (pct 100)
+            , fontSize (px 24)
+            , textAlign center
+            ]
         , class BtnUser
             [ ico
             , before [ Icon.user ]
@@ -91,6 +133,7 @@ css =
         , class IcoCrosshair
             [ ico
             , before [ Icon.locationTarget ]
+            , color (hex "00E")
             ]
         , class IcoUser
             [ ico
@@ -99,5 +142,13 @@ css =
         , class IcoHome
             [ ico
             , before [ Icon.home ]
+            ]
+        , class IcoDangerous
+            [ ico
+            , before [ Icon.dangerous ]
+            ]
+        , class IdMe
+            [ color (hex "00E")
+            , textDecoration underline
             ]
         ]

@@ -54,6 +54,7 @@ css =
             , flex (int 1)
             , internalPadding
             , maxHeight (pct 100)
+            , overflowY auto
 
             -- TODO: Consider header height
             ]
