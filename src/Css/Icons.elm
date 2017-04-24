@@ -126,7 +126,7 @@ locationTarget =
 
 person : Icon
 person =
-    faIcon FA.thumbTack
+    faIcon FA.user
 
 
 lock : Icon
@@ -167,3 +167,8 @@ divExpand =
 divContract : Icon
 divContract =
     faIcon FA.chevronUp
+
+
+dangerous : Icon
+dangerous =
+    faIcon FA.exclamationTriangle

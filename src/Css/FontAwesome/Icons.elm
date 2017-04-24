@@ -71,6 +71,11 @@ eye =
     "f06e"
 
 
+exclamationTriangle : UnicodeTag
+exclamationTriangle =
+    "f071"
+
+
 chevronUp : UnicodeTag
 chevronUp =
     "f077"
@@ -103,12 +108,12 @@ thumbTack =
 
 filter : UnicodeTag
 filter =
-    "f0fe"
+    "f0b0"
 
 
 plusSquare : UnicodeTag
 plusSquare =
-    "f0b0"
+    "f0fe"
 
 
 folderOpenO : UnicodeTag
