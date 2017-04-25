@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --hot --inline --port 8000 & npm run watch",
-    "build": "rimraf dist && webpack && mv dist/*.eot dist/static/css/ && mv dist/*.woff* dist/static/css/ && mv dist/*.svg dist/static/css/ && mv dist/*.ttf dist/static/css/",
+    "build": "webpack",
     "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install",
     "watch": "npm-watch",
     "elm-css": "sleep 4 && elm-css src/Core/Stylesheets.elm -o build/css/",

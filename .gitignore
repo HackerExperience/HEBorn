@@ -3,4 +3,5 @@ elm-stuff/
 /*.html
 npm-debug.log
 build/
+release.tar.gz
 

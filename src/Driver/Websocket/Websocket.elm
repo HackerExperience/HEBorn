@@ -19,4 +19,4 @@ send channel topic request_id payload =
     in
         Cmd.map
             MsgWebsocket
-            (Phoenix.push "ws://localhost:4000/websocket" message)
+            (Phoenix.push "wss://api.hackerexperience.com/websocket" message)

@@ -1,5 +1,5 @@
 # Works with GNU Make and BSD Make
-.PHONY: default prepare build build-quick
+.PHONY: default setup prepare build build-css release
 default: dev
 
 nodebin := node_modules/.bin
@@ -8,10 +8,12 @@ port := 8000
 server := $(nodebin)/webpack-dev-server --hot --inline --port $(port)
 
 ################################################################################
-# Install
+# Setup
 ################################################################################
 
-install:
+setup:
+	git submodule init
+	git submodule update
 	npm install
 	elm-package install -y
 
@@ -46,9 +48,13 @@ build: prepare
 
 build-css: prepare
 	sed 's/ \
-		<\/body/ \
-		\<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh.js\"\>\<\/script\> \
-		&/' static/index.html > build/index.html
+	  <\/body/ \
+	  \<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh.js\"\>\<\/script\> \
+	  &/' static/index.html > build/index.html
+
+release: build
+	npm run build
+	tar -zcf release.tar.gz build/ && mv release.tar.gz build/
 
 ################################################################################
 # Dev
@@ -76,12 +82,20 @@ dev-css: compile-clean build-css
 server:
 	$(server)
 
+# We repeat the lint command as a hack to ignore badly formatted code on vendor/
+# This way, we can display which HEBorn files are not complying with the style
+# guide AND THEN return the relevant status code.
+# If we remove vendor/, below can be simplified to `elm-format --validate src/`
+lint:
+	elm-format --validate src/ | grep -v vendor
+	elm-format --validate src/ | grep -v vendor | wc -l | grep 1
+
 ################################################################################
 # Test
 ################################################################################
 
 test:
-	elm-test
+	$(nodebin)/elm-test
 
 test-quick:
 	sed 's/10/1/g' tests/Config.elm > tests/Config.elm.tmp && \
@@ -105,5 +119,6 @@ test-loop:
 clean:
 	rm -rf build/* && \
 	rm -f *.html && \
+	rm -f release.tar.gz && \
 	git clean -id && \
 	git checkout tests/Config.elm
