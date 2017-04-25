@@ -6,7 +6,7 @@ var autoprefixer      = require( 'autoprefixer' );
 var ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 var entryPath         = path.join( __dirname, 'static/js/index.js' );
-var outputPath        = path.join( __dirname, 'dist' );
+var outputPath        = path.join( __dirname, 'build' );
 
 console.log( 'WEBPACK GO!');
 
@@ -19,7 +19,7 @@ var commonConfig = {
 
   output: {
     path:       outputPath,
-    filename: `/static/js/${outputFilename}`,
+    filename: `js/${outputFilename}`,
     // publicPath: '/'
   },
 
@@ -116,17 +116,17 @@ if ( TARGET_ENV === 'production' ) {
       new CopyWebpackPlugin([
         {
           from: 'static/img/',
-          to:   'static/img/'
+          to:   'build/img/'
         },
         {
-          from: 'favicon.ico'
+          from: 'static/favicon.ico'
         },
       ]),
 
       new webpack.optimize.OccurenceOrderPlugin(),
 
       // extract CSS into a separate file
-      new ExtractTextPlugin( 'static/css/[name]-[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin( 'build/css/[name]-[hash].css', { allChunks: true } ),
 
       // minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({

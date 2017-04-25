@@ -13,7 +13,7 @@ send url id payload =
         (Http.request
             { method = "POST"
             , headers = []
-            , url = "http://localhost:4000/v1/" ++ url
+            , url = "https://api.hackerexperience.com/v1/" ++ url
             , body = Http.stringBody "application/json" payload
             , expect = Http.expectString
             , timeout = Nothing
