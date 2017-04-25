@@ -9,7 +9,7 @@ node('elm') {
 
     checkout scm
 
-    sh 'make setup'
+    sh 'gmake setup'
 
     stash name: 'source', useDefaultExcludes: false
   }
@@ -20,9 +20,10 @@ parallel(
     node('elm') {
       stage('Lint') {
         step([$class: 'WsCleanup'])
+
         unstash 'source'
 
-        sh 'make lint'
+        sh 'gmake lint'
       }
     }
   },
@@ -30,9 +31,13 @@ parallel(
     node('elm') {
       stage('Test') {
         step([$class: 'WsCleanup'])
-        unstash 'source'
 
-        sh 'make test-long'
+        unstash 'source'
+        // `stash` won't keep file permissions (why??)
+        // so we have to fix them here
+        sh 'chmod +x node_modules/.bin/*'
+
+        sh 'gmake test-long'
       }
     }
   },
@@ -40,9 +45,13 @@ parallel(
     node('elm') {
       stage('Lint') {
         step([$class: 'WsCleanup'])
-        unstash 'source'
 
-        sh 'make release'
+        unstash 'source'
+        // `stash` won't keep file permissions (why??)
+        // so we have to fix them here
+        sh 'chmod +x node_modules/.bin/*'
+
+        sh 'gmake release'
 
         stash 'release'
       }

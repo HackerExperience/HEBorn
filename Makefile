@@ -1,7 +1,8 @@
-# Works with GNU Make and BSD Make
+# Does not work with BSD Make :(
 .PHONY: default setup prepare build build-css release
 default: dev
 
+UNAME := $(shell uname)
 nodebin := node_modules/.bin
 main := src/Main.elm
 port := 8000
@@ -12,10 +13,22 @@ server := $(nodebin)/webpack-dev-server --hot --inline --port $(port)
 ################################################################################
 
 setup:
+  ifeq ($(UNAME),FreeBSD)
+	rm -rf node_modules/elm-webpack-loader
+  endif
 	git submodule init
 	git submodule update
 	npm install
 	elm-package install -y
+  # FreeBSD compat hack
+  # Clone elm-webpack-loader, remove `elm` from deps and then `npm install` it.
+  ifeq ($(UNAME),FreeBSD)
+	mkdir node_modules/elm-webpack-loader
+	cp -r /usr/local/elm/elm-webpack-loader/* node_modules/elm-webpack-loader
+  endif
+  # ??? not sure why some bins aren't installed as executable
+  # this seems to be only on the FreeBSD build server
+	chmod +x node_modules/.bin/*
 
 ################################################################################
 # Compile
@@ -38,9 +51,11 @@ prepare:
 	rm -rf build/ && \
 	mkdir -p build/css && \
 	mkdir -p build/js && \
+	mkdir -p build/img && \
 	mkdir -p build/vendor && \
 	cp -r static/css/* build/css && \
 	cp -r static/js/* build/js && \
+	cp -r static/img/* build/img && \
 	cp -r static/vendor/* build/vendor
 
 build: prepare
