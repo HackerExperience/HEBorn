@@ -83,6 +83,26 @@ intRange min max seedInt =
         int
 
 
+floatRange min max seedInt =
+    fuzz1 seedInt (floatRangeSeed min max)
+
+
+floatRangeSeed min max seed =
+    Random.step
+        (Random.float min max)
+        seed
+
+
+percentage : Int -> Float
+percentage seedInt =
+    fuzz1 seedInt percentageSeed
+
+
+percentageSeed : Seed -> ( Float, Seed )
+percentageSeed seed =
+    floatRangeSeed 0 1 seed
+
+
 smallStringSeed : StringSeed
 smallStringSeed seed =
     stringSeed 1 64 seed
