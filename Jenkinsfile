@@ -9,7 +9,7 @@ node('elm') {
 
     checkout scm
 
-    sh 'make setup'
+    sh 'gmake setup'
 
     stash name: 'source', useDefaultExcludes: false
   }
@@ -22,7 +22,7 @@ parallel(
         step([$class: 'WsCleanup'])
         unstash 'source'
 
-        sh 'make lint'
+        sh 'gmake lint'
       }
     }
   },
@@ -32,7 +32,7 @@ parallel(
         step([$class: 'WsCleanup'])
         unstash 'source'
 
-        sh 'make test-long'
+        sh 'gmake test-long'
       }
     }
   },
@@ -42,7 +42,7 @@ parallel(
         step([$class: 'WsCleanup'])
         unstash 'source'
 
-        sh 'make release'
+        sh 'gmake release'
 
         stash 'release'
       }

@@ -1,7 +1,8 @@
-# Works with GNU Make and BSD Make
+# Does not work with BSD Make :(
 .PHONY: default setup prepare build build-css release
 default: dev
 
+UNAME := $(shell uname)
 nodebin := node_modules/.bin
 main := src/Main.elm
 port := 8000
@@ -16,7 +17,13 @@ setup:
 	git submodule update
 	npm install
 	elm-package install -y
-
+  # FreeBSD compat hack
+  # Clone elm-webpack-loader, remove `elm` from deps and then `npm install` it.
+  ifeq ($(UNAME),FreeBSD)
+	(unlink node_modules/elm-webpack-loader &>/dev/null) || true
+	sleep 0.1
+	ln -sh /usr/local/elm/elm-webpack-loader node_modules/elm-webpack-loader
+  endif
 ################################################################################
 # Compile
 ################################################################################
