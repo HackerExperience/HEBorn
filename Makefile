@@ -60,12 +60,14 @@ prepare:
 
 build: prepare
 	cat static/index.html > build/index.html
+	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
 
 build-css: prepare
 	sed 's/ \
 	  <\/body/ \
 	  \<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh.js\"\>\<\/script\> \
 	  &/' static/index.html > build/index.html
+	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
 
 release: build
 	npm run build
