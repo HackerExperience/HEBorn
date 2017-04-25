@@ -35,10 +35,7 @@ setup:
 ################################################################################
 
 compile:
-	elm-make $(main)
-
-compile-clean:
-	$(MAKE) compile && rm -f index.html
+	elm-make $(main) && rm -f index.html
 
 compile-loop:
 	-while :; do $(MAKE) compile; sleep 2; done
@@ -85,11 +82,11 @@ release: build
 # of changes are made, but it makes everything much faster when the
 # whole app, with dependencies, need to be built. This usually happens
 # when adding dependencies, changing branches etc.
-dev: compile-clean build
+dev: compile build
 	npm start
 
 # Add annoying css hot reloader. Useful when editing styles.
-dev-css: compile-clean build-css
+dev-css: compile build-css
 	npm start
 
 ################################################################################
