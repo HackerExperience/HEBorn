@@ -8,7 +8,7 @@ import Game.Servers.Logs.Models exposing (Logs)
 
 
 update :
-   LogMsg
+    LogMsg
     -> Logs
     -> GameModel
     -> ( Logs, Cmd GameMsg, List CoreMsg )

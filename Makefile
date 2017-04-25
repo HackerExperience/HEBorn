@@ -13,6 +13,9 @@ server := $(nodebin)/webpack-dev-server --hot --inline --port $(port)
 ################################################################################
 
 setup:
+  ifeq ($(UNAME),FreeBSD)
+	rm -rf node_modules/elm-webpack-loader
+  endif
 	git submodule init
 	git submodule update
 	npm install
@@ -20,10 +23,13 @@ setup:
   # FreeBSD compat hack
   # Clone elm-webpack-loader, remove `elm` from deps and then `npm install` it.
   ifeq ($(UNAME),FreeBSD)
-	(unlink node_modules/elm-webpack-loader &>/dev/null) || true
-	sleep 0.1
-	ln -sh /usr/local/elm/elm-webpack-loader node_modules/elm-webpack-loader
+	mkdir node_modules/elm-webpack-loader
+	cp -r /usr/local/elm/elm-webpack-loader/* node_modules/elm-webpack-loader
   endif
+  # ??? not sure why some bins aren't installed as executable
+  # this seems to be only on the FreeBSD build server
+	chmod +x node_modules/.bin/*
+
 ################################################################################
 # Compile
 ################################################################################
@@ -45,9 +51,11 @@ prepare:
 	rm -rf build/ && \
 	mkdir -p build/css && \
 	mkdir -p build/js && \
+	mkdir -p build/img && \
 	mkdir -p build/vendor && \
 	cp -r static/css/* build/css && \
 	cp -r static/js/* build/js && \
+	cp -r static/img/* build/img && \
 	cp -r static/vendor/* build/vendor
 
 build: prepare

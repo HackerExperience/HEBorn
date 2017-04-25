@@ -20,6 +20,7 @@ parallel(
     node('elm') {
       stage('Lint') {
         step([$class: 'WsCleanup'])
+
         unstash 'source'
 
         sh 'gmake lint'
@@ -30,7 +31,11 @@ parallel(
     node('elm') {
       stage('Test') {
         step([$class: 'WsCleanup'])
+
         unstash 'source'
+        // `stash` won't keep file permissions (why??)
+        // so we have to fix them here
+        sh 'chmod +x node_modules/.bin/*'
 
         sh 'gmake test-long'
       }
@@ -40,7 +45,11 @@ parallel(
     node('elm') {
       stage('Lint') {
         step([$class: 'WsCleanup'])
+
         unstash 'source'
+        // `stash` won't keep file permissions (why??)
+        // so we have to fix them here
+        sh 'chmod +x node_modules/.bin/*'
 
         sh 'gmake release'
 
