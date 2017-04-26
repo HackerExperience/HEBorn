@@ -63,11 +63,7 @@ intSeed seed =
 
 
 int seedInt =
-    let
-        ( int, _ ) =
-            intSeed (Random.initialSeed seedInt)
-    in
-        int
+    fuzz1 seedInt intSeed
 
 
 intRangeSeed min max seed =
@@ -77,11 +73,7 @@ intRangeSeed min max seed =
 
 
 intRange min max seedInt =
-    let
-        ( int, _ ) =
-            intRangeSeed min max (Random.initialSeed seedInt)
-    in
-        int
+    fuzz1 seedInt (intRangeSeed min max)
 
 
 float seedInt =
