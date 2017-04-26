@@ -215,6 +215,6 @@ processesSeed seed =
             processListSeed seed
 
         processes =
-            List.foldl (\p xs -> addProcess xs p) processesEmpty processList
+            List.foldl addProcess processesEmpty processList
     in
         ( processes, seed_ )

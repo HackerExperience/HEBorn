@@ -1,6 +1,7 @@
 module Game.Servers.Processes.ModelTest exposing (all)
 
 import Expect
+import Utils exposing (swap, andJust)
 import Test exposing (Test, describe)
 import Fuzz exposing (int, tuple)
 import Maybe exposing (andThen)
@@ -53,14 +54,10 @@ addProcessGenericTests =
                 process =
                     Gen.process seed
 
-                processes =
-                    Gen.processesEmpty
-
-                processes_ =
-                    addProcess processes process
-
                 result =
-                    getProcessByID processes_ process.id
+                    Gen.processesEmpty
+                        |> addProcess process
+                        |> getProcessByID process.id
             in
                 Expect.equal (Just process) result
     ]
@@ -84,32 +81,16 @@ pauseProcessGenericTests =
     [ fuzz int "can pause a process" <|
         \seed ->
             let
-                -- REVIEW: this code could be refactored to a better form by
-                -- moving the collection to the last param, this is also a
-                -- pattern on functional programming:
-                --
-                --   seed
-                --     |> Gen.processes
-                --     |> addProcess process
-                --     |> pauseProcess process
                 process =
                     Gen.process seed
 
-                processes =
-                    pauseProcess
-                        (addProcess (Gen.processes seed) process)
-                        process
-
-                maybeProcess =
-                    getProcessByID processes process.id
-
                 maybeState =
-                    case maybeProcess of
-                        Just process_ ->
-                            Just process_.state
-
-                        Nothing ->
-                            Nothing
+                    seed
+                        |> Gen.processes
+                        |> addProcess process
+                        |> pauseProcess process
+                        |> getProcessByID process.id
+                        |> andThen (\process_ -> Just process_.state)
             in
                 Expect.equal (Just StatePaused) maybeState
     ]
@@ -133,44 +114,41 @@ resumeProcessGenericTests =
     [ fuzz int "can resume a paused process" <|
         \seed ->
             let
-                proc =
+                process =
                     Gen.process seed
 
-                procs =
-                    pauseProcess
-                        (addProcess (Gen.processes seed) proc)
-                        proc
+                processes =
+                    seed
+                        |> Gen.processes
+                        |> addProcess process
+                        |> pauseProcess process
 
-                -- FIXME: this won't be that awkward after we move our
-                -- collections to the last param
                 maybeState =
-                    proc.id
-                        |> getProcessByID procs
-                        |> andThen (\proc -> Just (resumeProcess procs proc 1))
-                        |> andThen (\procs -> getProcessByID procs proc.id)
-                        |> andThen (\proc -> Just proc.state)
+                    processes
+                        |> getProcessByID process.id
+                        |> andJust ((swap resumeProcess) processes 1)
+                        |> andThen (getProcessByID process.id)
+                        |> andJust (\process_ -> process_.state)
             in
                 Expect.equal (Just (StateRunning 1)) maybeState
     , fuzz int "can't resume a running process" <|
         \seed ->
             let
-                proc =
+                process =
                     Gen.process seed
 
-                procs =
-                    resumeProcess
-                        (addProcess (Gen.processes seed) proc)
-                        proc
-                        1
+                processes =
+                    seed
+                        |> Gen.processes
+                        |> addProcess process
+                        |> resumeProcess process 1
 
-                -- FIXME: this won't be that awkward after we move our
-                -- collections to the last param
                 maybeState =
-                    proc.id
-                        |> getProcessByID procs
-                        |> andThen (\proc -> Just (resumeProcess procs proc 2))
-                        |> andThen (\procs -> getProcessByID procs proc.id)
-                        |> andThen (\proc -> Just proc.state)
+                    processes
+                        |> getProcessByID process.id
+                        |> andJust ((swap resumeProcess) processes 2)
+                        |> andThen (getProcessByID process.id)
+                        |> andJust (\process_ -> process_.state)
             in
                 Expect.notEqual (Just (StateRunning 2)) maybeState
     ]
@@ -198,20 +176,15 @@ completeProcessGenericTests =
                     Gen.process seed
 
                 processes =
-                    completeProcess
-                        (addProcess (Gen.processes seed) process)
-                        process
-
-                maybeProcess =
-                    getProcessByID processes process.id
+                    seed
+                        |> Gen.processes
+                        |> addProcess process
+                        |> completeProcess process
 
                 maybeState =
-                    case maybeProcess of
-                        Just process_ ->
-                            Just process_.state
-
-                        Nothing ->
-                            Nothing
+                    processes
+                        |> getProcessByID process.id
+                        |> andJust (\process_ -> process_.state)
             in
                 Expect.equal (Just StateComplete) maybeState
     ]
@@ -239,26 +212,19 @@ deleteProcessGenericTests =
                     Gen.process seed
 
                 processes =
-                    addProcess Gen.processesEmpty process
-
-                processes_ =
-                    removeProcess processes process
-
-                result =
-                    getProcessByID processes_ process.id
+                    Gen.processesEmpty
+                        |> addProcess process
+                        |> removeProcess process
             in
-                Expect.equal Nothing result
-    , fuzz int "can delete a non-existing process" <|
+                Expect.equal Nothing (getProcessByID process.id processes)
+    , fuzz int "can't delete a non-existing process" <|
         \seed ->
             let
-                process =
-                    Gen.process seed
-
                 processes =
                     Gen.processes seed
 
                 processes_ =
-                    removeProcess processes process
+                    removeProcess (Gen.process seed) processes
             in
                 Expect.equal processes processes_
     ]

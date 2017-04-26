@@ -83,28 +83,28 @@ getProcessID process =
     process.id
 
 
-getProcessByID : Processes -> ProcessID -> Maybe Process
-getProcessByID processes id =
+getProcessByID : ProcessID -> Processes -> Maybe Process
+getProcessByID id processes =
     Dict.get id processes
 
 
-processExists : Processes -> ProcessID -> Bool
-processExists processes id =
+processExists : ProcessID -> Processes -> Bool
+processExists id processes =
     Dict.member id processes
 
 
-addProcess : Processes -> Process -> Processes
-addProcess processes process =
+addProcess : Process -> Processes -> Processes
+addProcess process processes =
     Dict.insert process.id process processes
 
 
-removeProcess : Processes -> Process -> Processes
-removeProcess processes process =
+removeProcess : Process -> Processes -> Processes
+removeProcess process processes =
     Dict.remove process.id processes
 
 
-pauseProcess : Processes -> Process -> Processes
-pauseProcess processes process =
+pauseProcess : Process -> Processes -> Processes
+pauseProcess process processes =
     case process.state of
         StatePaused ->
             processes
@@ -117,8 +117,8 @@ pauseProcess processes process =
                 Utils.safeUpdateDict processes process_.id process_
 
 
-resumeProcess : Processes -> Process -> CompletionDate -> Processes
-resumeProcess processes process completionDate =
+resumeProcess : Process -> CompletionDate -> Processes -> Processes
+resumeProcess process completionDate processes =
     case process.state of
         StateRunning _ ->
             processes
@@ -131,8 +131,8 @@ resumeProcess processes process completionDate =
                 Utils.safeUpdateDict processes process_.id process_
 
 
-completeProcess : Processes -> Process -> Processes
-completeProcess processes process =
+completeProcess : Process -> Processes -> Processes
+completeProcess process processes =
     case process.state of
         StateComplete ->
             processes
