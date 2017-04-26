@@ -95,7 +95,7 @@ stringSeed min max seed =
         seed
 
 
-fuzz1 : Int -> (Seed -> ( String, a )) -> String
+fuzz1 : Int -> (Seed -> ( a, Seed )) -> a
 fuzz1 seedInt function =
     let
         seed0 =
