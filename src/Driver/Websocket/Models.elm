@@ -72,9 +72,9 @@ type Channel
     | ChannelRequests
 
 
-initialSocket : Socket.Socket Msg
-initialSocket =
-    Socket.init "ws://localhost:4000/websocket"
+initialSocket : String -> Socket.Socket Msg
+initialSocket apiWsUrl =
+    Socket.init apiWsUrl
 
 
 initialChannels : List (Channel.Channel Msg)
@@ -82,9 +82,9 @@ initialChannels =
     [ Channel.init "requests" ]
 
 
-initialModel : Model
-initialModel =
-    { socket = initialSocket
+initialModel : String -> Model
+initialModel apiWsUrl =
+    { socket = initialSocket apiWsUrl
     , channels = initialChannels
     , defer = True
     }
