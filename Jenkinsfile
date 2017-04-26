@@ -43,7 +43,7 @@ parallel(
   },
   'Compile': {
     node('elm') {
-      stage('Lint') {
+      stage('Compile') {
         step([$class: 'WsCleanup'])
 
         unstash 'source'
@@ -51,7 +51,15 @@ parallel(
         // so we have to fix them here
         sh 'chmod +x node_modules/.bin/*'
 
+        // Reuse existing compiled files
+        sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
+
+        sh 'gmake compile'
         sh 'gmake release'
+
+        // Backup compiled files for later reuse
+        // TODO: It's being saved but it's not actually working, not sure why
+        sh 'rm -rf ~/.elm/elm-stuff/* && cp -r elm-stuff/* ~/.elm/elm-stuff'
 
         stash 'release'
       }
