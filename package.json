@@ -46,6 +46,7 @@
     "elm-css": "^0.6.0"
   },
   "dependencies": {
+    "dotenv": "^4.0.0",
     "elm-test": "^0.18.2",
     "npm-watch": "^0.1.8",
     "webpack-dev-server": "^1.16.3"

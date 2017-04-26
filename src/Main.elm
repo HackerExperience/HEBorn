@@ -16,7 +16,12 @@ init flags location =
         currentRoute =
             parseLocation location
     in
-        ( initialModel currentRoute flags.seed, Cmd.none )
+        ( initialModel
+            currentRoute
+            flags.seed
+            flags.apiUrl
+        , Cmd.none
+        )
 
 
 
