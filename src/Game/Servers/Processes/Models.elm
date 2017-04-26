@@ -3,12 +3,18 @@ module Game.Servers.Processes.Models exposing (..)
 import Dict
 import Utils
 import Game.Servers.Filesystem.Models exposing (FileID)
-import Game.Network.Models exposing (ConnectionID)
-import Game.Servers.Models exposing (ServerID)
 import Game.Shared exposing (ID)
 
 
 type alias ProcessID =
+    ID
+
+
+type alias ServerID =
+    ID
+
+
+type alias ConnectionID =
     ID
 
 

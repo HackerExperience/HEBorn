@@ -4,8 +4,10 @@ import Dict
 import Game.Shared exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem)
-import Game.Servers.Logs.Models exposing (..)
+import Game.Servers.Logs.Models exposing (Logs)
+import Game.Servers.Processes.Models exposing (Processes)
 import Gen.Filesystem
+import Gen.Processes
 import Gen.Utils exposing (..)
 
 
@@ -51,14 +53,16 @@ serverData seedInt =
             ip
             (Gen.Filesystem.fsRandom seedInt)
             Dict.empty
+            (Gen.Processes.processes seedInt)
 
 
-serverArgs : ServerID -> IP -> Filesystem -> Logs -> ServerData
-serverArgs id ip filesystem logs =
+serverArgs : ServerID -> IP -> Filesystem -> Logs -> Processes -> ServerData
+serverArgs id ip filesystem logs processes =
     { id = id
     , ip = ip
     , filesystem = filesystem
     , logs = logs
+    , processes = processes
     }
 
 

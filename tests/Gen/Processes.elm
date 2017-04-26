@@ -1,10 +1,7 @@
 module Gen.Processes exposing (..)
 
-import Game.Network.Models exposing (ConnectionID)
-import Game.Servers.Models exposing (ServerID)
 import Game.Servers.Processes.Models exposing (..)
 import Gen.Filesystem exposing (fileID)
-import Gen.Servers
 import Gen.Utils exposing (..)
 
 
@@ -106,14 +103,14 @@ progressSeed seed =
     percentageSeed seed
 
 
-gatewayID : Int -> ServerID
+gatewayID : Int -> GatewayID
 gatewayID seedInt =
     fuzz1 seedInt gatewayIDSeed
 
 
-gatewayIDSeed : Seed -> ( ServerID, Seed )
+gatewayIDSeed : Seed -> ( GatewayID, Seed )
 gatewayIDSeed seed =
-    Gen.Servers.idSeed seed
+    smallStringSeed seed
 
 
 networkID : Int -> NetworkID

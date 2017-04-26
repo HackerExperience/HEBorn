@@ -5,6 +5,7 @@ import Utils
 import Game.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
 import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
+import Game.Servers.Processes.Models as Processes exposing (Processes, initialProcesses)
 
 
 type alias ServerID =
@@ -16,6 +17,7 @@ type alias ServerData =
     , ip : IP
     , filesystem : Filesystem
     , logs : Logs
+    , processes : Processes
     }
 
 
@@ -39,6 +41,7 @@ invalidServer =
     , ip = "todo"
     , filesystem = initialFilesystem
     , logs = initialLogs
+    , processes = initialProcesses
     }
 
 
@@ -122,6 +125,16 @@ getLogs server =
             Nothing
 
 
+getProcesses : Server -> Maybe Processes
+getProcesses server =
+    case server of
+        StdServer s ->
+            Just s.processes
+
+        NoServer ->
+            Nothing
+
+
 updateFilesystem : Server -> Filesystem -> Server
 updateFilesystem server filesystem =
     case server of
@@ -142,6 +155,16 @@ updateLogs server logs =
             NoServer
 
 
+updateProcesses : Server -> Processes -> Server
+updateProcesses server processes =
+    case server of
+        StdServer s ->
+            StdServer { s | processes = processes }
+
+        NoServer ->
+            NoServer
+
+
 updateServer : Servers -> Server -> Servers
 updateServer servers server =
     case server of
@@ -153,13 +176,3 @@ updateServer servers server =
 
         NoServer ->
             servers
-
-
-safeMaybe : Maybe a -> a -> a
-safeMaybe maybe onNothing =
-    case maybe of
-        Just something ->
-            something
-
-        Nothing ->
-            onNothing
