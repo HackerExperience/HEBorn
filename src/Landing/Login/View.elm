@@ -14,7 +14,7 @@ view model core =
         [ id "login-form"
         , action "javascript:void(0);"
         ]
-        [ h1 [] [ text "Sign up" ]
+        [ h1 [] [ text "Login" ]
         , label [ for "username-field" ] [ text "username: " ]
         , input
             [ id "username-field"
