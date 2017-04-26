@@ -13,14 +13,17 @@ view model =
     div [ id "view-landing" ]
         [ viewIntro
         , viewLogin model
-        , viewSignUp model
+
+        -- , viewSignUp model
         ]
 
 
 viewIntro : Html LandMsg
 viewIntro =
     div [ id "view-intro" ]
-        [ text "welcome to raquer ispirienci!"
+        [ text "Shh! Don't tell anyone, but this is the new HE1 website."
+        , br [] []
+        , text "We are under active development, and soon we'll release the new HE1 to public."
         ]
 
 
