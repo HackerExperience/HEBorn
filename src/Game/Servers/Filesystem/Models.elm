@@ -150,35 +150,22 @@ addFile filesystem file =
         path =
             getFilePath file
 
-        filesOnPath =
-            getFilesOnPath filesystem path
-
-        newFiles =
-            filesOnPath ++ [ file ]
-
-        filesystem_ =
-            case file of
-                StdFile _ ->
-                    if (pathExists filesystem path) then
-                        Dict.insert path newFiles filesystem
-                    else
-                        filesystem
-
-                {- Adding a folder is a special case. We need to ensure our model
-                   recognizes this new folder as a valid path, so it can store
-                   its own StdFiles
-                -}
-                Folder _ ->
-                    let
-                        filesystem1 =
-                            Dict.insert path newFiles filesystem
-
-                        newPath =
-                            path ++ pathSeparator ++ (getFileName file)
-                    in
-                        Dict.insert newPath [] filesystem1
+        files =
+            (getFilesOnPath filesystem path) ++ [ file ]
     in
-        filesystem_
+        case file of
+            StdFile _ ->
+                if pathExists filesystem path then
+                    Dict.insert path files filesystem
+                else
+                    filesystem
+
+            -- when adding a new folder we also need to insert a new
+            -- path to hold it's files
+            Folder _ ->
+                filesystem
+                    |> Dict.insert path files
+                    |> Dict.insert (fullFilePath file) []
 
 
 getFilesOnPath : Filesystem -> FilePath -> List File
@@ -203,21 +190,14 @@ pathExists filesystem path =
 
 moveFile : Filesystem -> File -> FilePath -> Filesystem
 moveFile filesystem file path =
-    if not (pathExists filesystem path) then
+    if (pathExists filesystem path) then
+        -- TODO: remove flips after moving filesystem to the last param
+        filesystem
+            |> (flip addFile) (setFilePath file path)
+            |> (flip removeFile) file
+    else
         -- Moving to a non-existing path
         filesystem
-    else
-        let
-            file_ =
-                setFilePath file path
-
-            filesystem1 =
-                addFile filesystem file_
-
-            filesystem_ =
-                removeFile filesystem1 file
-        in
-            filesystem_
 
 
 removeFile : Filesystem -> File -> Filesystem
@@ -229,28 +209,21 @@ removeFile filesystem file =
         id =
             getFileId file
 
-        filesOnPath =
-            getFilesOnPath filesystem path
-
         newFiles =
-            List.filter (\x -> (getFileId x) /= id) filesOnPath
-
-        filesystem_ =
-            case file of
-                StdFile _ ->
-                    Dict.insert path newFiles filesystem
-
-                {- Deleting a folder is a special case. If there are any files
-                   inside the folder, it can't be deleted at all. On the other hand,
-                   if there are no files, the whole path should be deleted
-                -}
-                Folder _ ->
-                    if List.isEmpty newFiles then
-                        Dict.remove path filesystem
-                    else
-                        filesystem
+            path
+                |> getFilesOnPath filesystem
+                |> List.filter (\x -> (getFileId x) /= id)
     in
-        filesystem_
+        case file of
+            StdFile _ ->
+                Dict.insert path newFiles filesystem
+
+            Folder _ ->
+                -- just like rmdir, it can't remove non-empty folders
+                if List.isEmpty newFiles then
+                    Dict.remove path filesystem
+                else
+                    filesystem
 
 
 listFilesystem : Filesystem -> String
@@ -271,3 +244,21 @@ rootPath =
 pathSeparator : String
 pathSeparator =
     "/"
+
+
+fullFilePath : File -> String
+fullFilePath file =
+    let
+        name =
+            getFileName file
+
+        path =
+            getFilePath file
+    in
+        case file of
+            StdFile _ ->
+                -- TODO: add extension with a new function like getFileExtension
+                path ++ pathSeparator ++ name
+
+            Folder _ ->
+                path ++ pathSeparator ++ name
