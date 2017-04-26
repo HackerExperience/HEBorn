@@ -1,6 +1,39 @@
-module Helper.Filesystem exposing (..)
+module Helper.Filesystem exposing (addFileRecursively)
 
 import Game.Servers.Filesystem.Models exposing (..)
+
+
+addFolderReducer : String -> ( Filesystem, String ) -> ( Filesystem, String )
+addFolderReducer folderName ( filesystem, path ) =
+    let
+        folder =
+            Folder { id = "id", name = folderName, path = path }
+
+        filesystem_ =
+            addFile filesystem folder
+
+        path_ =
+            if path /= "/" then
+                path ++ "/" ++ folderName
+            else
+                path ++ folderName
+    in
+        ( filesystem_, path_ )
+
+
+addPathParents : String -> Filesystem -> Filesystem
+addPathParents path filesystem =
+    if pathExists filesystem path then
+        filesystem
+    else
+        let
+            ( filesystem_, _ ) =
+                path
+                    |> String.split "/"
+                    |> List.filter ((/=) "")
+                    |> List.foldl addFolderReducer ( filesystem, "" )
+        in
+            filesystem_
 
 
 {-| addFileRecursively is a helper because on tests we often want to add a file
@@ -12,20 +45,20 @@ the assumption that the path the file is being added to must exist.
 -}
 addFileRecursively : Filesystem -> File -> Filesystem
 addFileRecursively filesystem file =
-    case file of
-        Folder _ ->
-            addFile filesystem file
+    let
+        path =
+            getFilePath file
 
-        StdFile file_ ->
-            let
-                path =
-                    (getFilePath file)
+        -- TODO: change this to use pipes once we move filesystem to last
+        -- param:
+        --
+        -- filesystem
+        --     |> addPathParents file.path
+        --     |> addFile file
+        filesystemWithParents =
+            addPathParents path filesystem
 
-                -- TODO: this is not recursive, will break once we add nested folders
-                folder =
-                    Folder { id = "id", name = "name", path = path }
-
-                filesystem_ =
-                    addFile filesystem folder
-            in
-                addFile filesystem_ (StdFile file_)
+        filesystemWithFile =
+            addFile filesystemWithParents file
+    in
+        filesystemWithFile
