@@ -92,3 +92,83 @@ modeActive =
 modePassive : Icon
 modePassive =
     faIcon FA.wpExplorer
+
+
+logvw : Icon
+logvw =
+    faIcon FA.book
+
+
+view : Icon
+view =
+    faIcon FA.eye
+
+
+user : Icon
+user =
+    faIcon FA.addressBookO
+
+
+edit : Icon
+edit =
+    faIcon FA.pencil
+
+
+filter : Icon
+filter =
+    faIcon FA.filter
+
+
+locationTarget : Icon
+locationTarget =
+    faIcon FA.thumbTack
+
+
+person : Icon
+person =
+    faIcon FA.user
+
+
+lock : Icon
+lock =
+    faIcon FA.lock
+
+
+trash : Icon
+trash =
+    faIcon FA.trash
+
+
+unlock : Icon
+unlock =
+    faIcon FA.key
+
+
+apply : Icon
+apply =
+    faIcon FA.check
+
+
+cancel : Icon
+cancel =
+    faIcon FA.times
+
+
+home : Icon
+home =
+    faIcon FA.home
+
+
+divExpand : Icon
+divExpand =
+    faIcon FA.chevronDown
+
+
+divContract : Icon
+divContract =
+    faIcon FA.chevronUp
+
+
+dangerous : Icon
+dangerous =
+    faIcon FA.exclamationTriangle

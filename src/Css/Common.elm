@@ -1,8 +1,18 @@
 module Css.Common exposing (..)
 
+import Html.CssHelpers
 import Css exposing (..)
 import Css.Utils exposing (pseudoContent)
 import Css.Icons as Icon
+import Core.Style as Core exposing (Classes(..), prefix)
+
+
+coreClass =
+    (Html.CssHelpers.withNamespace Core.prefix).class
+
+
+elasticClass =
+    coreClass [ Core.Elastic ]
 
 
 flexContainerVert : Mixin

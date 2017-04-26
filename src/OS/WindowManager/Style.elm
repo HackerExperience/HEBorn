@@ -54,6 +54,7 @@ css =
             , flex (int 1)
             , internalPadding
             , maxHeight (pct 100)
+            , overflowY auto
 
             -- TODO: Consider header height
             ]
@@ -85,6 +86,13 @@ css =
             "explorer"
             [ before
                 [ Icon.explorer ]
+            ]
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "logviewer"
+            [ before
+                [ Icon.logvw ]
             ]
         , class HeaderButtons
             [ flex (int 0)

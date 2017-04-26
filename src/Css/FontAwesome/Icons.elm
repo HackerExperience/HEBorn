@@ -6,14 +6,24 @@ import Css.FontAwesome.Helper exposing (UnicodeTag)
 -- TODO: Auto generate from https://github.com/FortAwesome/Font-Awesome/blob/master/src/icons.yml
 
 
-timesCircle : UnicodeTag
-timesCircle =
-    "f057"
+user : UnicodeTag
+user =
+    "f007"
 
 
-expand : UnicodeTag
-expand =
-    "f065"
+check : UnicodeTag
+check =
+    "f00c"
+
+
+times : UnicodeTag
+times =
+    "f00d"
+
+
+home : UnicodeTag
+home =
+    "f015"
 
 
 fileO : UnicodeTag
@@ -26,9 +36,54 @@ arrowCircleOUp =
     "f01b"
 
 
+lock : UnicodeTag
+lock =
+    "f023"
+
+
+book : UnicodeTag
+book =
+    "f02d"
+
+
+pencil : UnicodeTag
+pencil =
+    "f040"
+
+
 plusCircle : UnicodeTag
 plusCircle =
     "f055"
+
+
+timesCircle : UnicodeTag
+timesCircle =
+    "f057"
+
+
+expand : UnicodeTag
+expand =
+    "f065"
+
+
+eye : UnicodeTag
+eye =
+    "f06e"
+
+
+exclamationTriangle : UnicodeTag
+exclamationTriangle =
+    "f071"
+
+
+chevronUp : UnicodeTag
+chevronUp =
+    "f077"
+
+
+chevronDown : UnicodeTag
+chevronDown =
+    "f078"
 
 
 folder : UnicodeTag
@@ -39,6 +94,21 @@ folder =
 folderOpen : UnicodeTag
 folderOpen =
     "f07c"
+
+
+key : UnicodeTag
+key =
+    "f084"
+
+
+thumbTack : UnicodeTag
+thumbTack =
+    "f08d"
+
+
+filter : UnicodeTag
+filter =
+    "f0b0"
 
 
 plusSquare : UnicodeTag
@@ -54,6 +124,11 @@ folderOpenO =
 shield : UnicodeTag
 shield =
     "f132"
+
+
+unlockAlt : UnicodeTag
+unlockAlt =
+    "f13e"
 
 
 minusSquare : UnicodeTag
@@ -86,8 +161,18 @@ bomb =
     "f1e2"
 
 
+trash : UnicodeTag
+trash =
+    "f1f8"
+
+
 addressBookO : UnicodeTag
 addressBookO =
+    "f2be"
+
+
+userCircleO : UnicodeTag
+userCircleO =
     "f2ba"
 
 
