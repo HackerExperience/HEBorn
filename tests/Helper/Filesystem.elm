@@ -45,20 +45,7 @@ the assumption that the path the file is being added to must exist.
 -}
 addFileRecursively : Filesystem -> File -> Filesystem
 addFileRecursively filesystem file =
-    let
-        path =
-            getFilePath file
-
-        -- TODO: change this to use pipes once we move filesystem to last
-        -- param:
-        --
-        -- filesystem
-        --     |> addPathParents file.path
-        --     |> addFile file
-        filesystemWithParents =
-            addPathParents path filesystem
-
-        filesystemWithFile =
-            addFile filesystemWithParents file
-    in
-        filesystemWithFile
+    -- TODO: remove flips once we move filesystem to last param
+    filesystem
+        |> addPathParents (getFilePath file)
+        |> (flip addFile) file
