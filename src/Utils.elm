@@ -5,6 +5,8 @@ module Utils
         , maybeToString
         , delay
         , safeUpdateDict
+        , swap
+        , andJust
         )
 
 import Dict
@@ -65,3 +67,30 @@ safeUpdateDict dict key value =
                     Nothing
     in
         Dict.update key fnUpdate dict
+
+
+{-| Swaps the first argument of a 3-arity function with the last. Can be
+helpful with test chains like:
+
+    processes
+        |> getProcessByID process.id
+        |> andJust ((swap resumeProcess) processes 1)
+
+To work with 2-arity functions, use the flip function from core.
+
+-}
+swap : (a -> b -> c -> d) -> c -> b -> a -> d
+swap function =
+    (\a b c -> function c b a)
+
+
+{-| Like Maybe.andThen, but always returns `Just something`.
+-}
+andJust : (a -> b) -> Maybe a -> Maybe b
+andJust callback maybe =
+    case maybe of
+        Just value ->
+            Just (callback value)
+
+        Nothing ->
+            Nothing
