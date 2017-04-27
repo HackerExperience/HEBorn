@@ -3,6 +3,7 @@ module Game.Servers.Filesystem.ModelTest exposing (all)
 import Expect
 import Test exposing (Test, describe)
 import Fuzz exposing (int, tuple)
+import Utils exposing (andJust)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Filesystem as Gen
 import Helper.Filesystem as Helper exposing (addFileRecursively)
@@ -51,14 +52,11 @@ addFileGenericTests =
                 ( seed1, seed2 ) =
                     ensureDifferentSeed seed
 
-                stdFile =
-                    Gen.stdFile seed1
-
                 model =
                     Gen.fsRandom seed1
 
                 model_ =
-                    addFile stdFile model
+                    addFile (Gen.stdFile seed2) model
             in
                 Expect.equal model model_
     , fuzz (tuple ( int, int ))
@@ -72,21 +70,21 @@ addFileGenericTests =
                 stdFile =
                     Gen.stdFile seed1
 
-                model =
-                    Gen.fsRandom seed1
+                stdFileID =
+                    getFileId stdFile
 
-                model_ =
-                    addFileRecursively stdFile model
+                model =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
 
                 filesOnPath =
-                    getFilesOnPath (getFilePath stdFile) model_
+                    getFilesOnPath (getFilePath stdFile) model
 
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId stdFile))
-                            filesOnPath
-                        )
+                    filesOnPath
+                        |> List.filter (\x -> (getFileId x) == stdFileID)
+                        |> List.head
             in
                 Expect.equal maybeFile (Just stdFile)
 
@@ -105,12 +103,11 @@ addFileGenericTests =
                     Gen.folder seed1
 
                 model =
-                    Gen.fsRandom seed2
-
-                model_ =
-                    addFileRecursively folder model
+                    seed2
+                        |> Gen.fsRandom
+                        |> addFileRecursively folder
             in
-                Expect.equal (pathExists (getFilePath folder) model_) True
+                Expect.equal (pathExists (getFilePath folder) model) True
     , fuzz (tuple ( int, int )) "multiple files can exist on the same folder" <|
         \seed ->
             let
@@ -118,31 +115,29 @@ addFileGenericTests =
                     ensureDifferentSeed seed
 
                 folder =
-                    setFilePath (Gen.path (seed1 + 1)) (Gen.folder seed1)
-
-                model =
-                    Gen.fsRandom seed1
+                    Gen.folder (seed1 + 1)
 
                 path =
                     getFilePath folder
 
                 file1 =
-                    setFilePath path (Gen.stdFile seed2)
+                    seed2
+                        |> Gen.stdFile
+                        |> setFilePath path
 
                 file2 =
-                    setFilePath path (Gen.stdFile (seed2 + 1))
-
-                model1 =
-                    addFile folder model
-
-                model2 =
-                    addFile file1 model1
-
-                model_ =
-                    addFile file2 model2
+                    seed2
+                        |> (+) 1
+                        |> Gen.stdFile
+                        |> setFilePath path
 
                 filesOnPath =
-                    getFilesOnPath path model_
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFile folder
+                        |> addFile file1
+                        |> addFile file2
+                        |> getFilesOnPath path
             in
                 Expect.equal
                     ([ folder ] ++ [ file1 ] ++ [ file2 ])
@@ -181,13 +176,15 @@ moveFileGenericTests =
                 destination =
                     Gen.path seed2
 
-                model1 =
-                    addFileRecursively stdFile (Gen.fsRandom seed1)
+                model =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
 
                 model_ =
-                    moveFile destination stdFile model1
+                    moveFile destination stdFile model
             in
-                Expect.equal model_ model1
+                Expect.equal model model_
     ]
 
 
@@ -202,40 +199,27 @@ moveStdFileTests =
                 stdFile =
                     Gen.stdFile seed1
 
+                stdFileID =
+                    getFileId stdFile
+
                 folder =
                     Gen.folder seed2
 
                 destination =
                     getFilePath folder
 
-                model1 =
-                    addFileRecursively stdFile (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively folder model1
-
-                model_ =
-                    moveFile destination stdFile model2
-
-                filesOnPath =
-                    getFilesOnPath destination model_
-
-                maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId stdFile))
-                            filesOnPath
-                        )
-
-                destinationFileId =
-                    case maybeFile of
-                        Just file ->
-                            getFileId file
-
-                        Nothing ->
-                            "invalidid"
+                maybeDestinationFileID =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> addFileRecursively folder
+                        |> moveFile destination stdFile
+                        |> getFilesOnPath destination
+                        |> List.filter (\x -> (getFileId x) == stdFileID)
+                        |> List.head
+                        |> andJust getFileId
             in
-                Expect.equal destinationFileId (getFileId stdFile)
+                Expect.equal (Just stdFileID) maybeDestinationFileID
     , fuzz (tuple ( int, int )) "file is absent on old location" <|
         \seed ->
             let
@@ -245,30 +229,21 @@ moveStdFileTests =
                 stdFile =
                     Gen.stdFile seed1
 
+                stdFileID =
+                    getFileId stdFile
+
                 folder =
                     Gen.folder seed2
 
-                origin =
-                    getFilePath stdFile
-
-                model1 =
-                    addFileRecursively stdFile (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively folder model1
-
-                model_ =
-                    moveFile (getFilePath folder) stdFile model2
-
-                filesOnPath =
-                    getFilesOnPath origin model_
-
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId stdFile))
-                            filesOnPath
-                        )
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> addFileRecursively folder
+                        |> moveFile (getFilePath folder) stdFile
+                        |> getFilesOnPath (getFilePath stdFile)
+                        |> List.filter (\x -> (getFileId x) == stdFileID)
+                        |> List.head
             in
                 Expect.equal maybeFile Nothing
     , fuzz (tuple ( int, int )) "old path is still present" <|
@@ -283,19 +258,15 @@ moveStdFileTests =
                 folder =
                     Gen.folder seed2
 
-                origin =
-                    getFilePath stdFile
-
-                model1 =
-                    addFileRecursively stdFile (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively folder model1
-
-                model_ =
-                    moveFile (getFilePath folder) stdFile model2
+                doesPathExist =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> addFileRecursively folder
+                        |> moveFile (getFilePath folder) stdFile
+                        |> pathExists (getFilePath stdFile)
             in
-                Expect.equal (pathExists origin model_) True
+                Expect.equal True doesPathExist
     ]
 
 
@@ -310,40 +281,27 @@ moveFolderTests =
                 originFolder =
                     Gen.stdFile seed1
 
+                originFolderID =
+                    getFileId originFolder
+
                 destFolder =
                     Gen.folder seed2
 
                 destination =
                     getFilePath destFolder
 
-                model1 =
-                    addFileRecursively originFolder (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively destFolder model1
-
-                model_ =
-                    moveFile destination originFolder model2
-
-                filesOnPath =
-                    getFilesOnPath destination model_
-
-                maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId originFolder))
-                            filesOnPath
-                        )
-
-                destinationFileId =
-                    case maybeFile of
-                        Just file ->
-                            getFileId file
-
-                        Nothing ->
-                            "invalidid"
+                maybeDestinationFileId =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively originFolder
+                        |> addFileRecursively destFolder
+                        |> moveFile destination originFolder
+                        |> getFilesOnPath destination
+                        |> List.filter (\x -> (getFileId x) == originFolderID)
+                        |> List.head
+                        |> andJust getFileId
             in
-                Expect.equal destinationFileId (getFileId originFolder)
+                Expect.equal (Just originFolderID) maybeDestinationFileId
 
     {- We moved /bar to /foo, so now we have /foo/bar. We need to ensure our
        model recognizes path /foo/bar as valid
@@ -363,24 +321,26 @@ moveFolderTests =
                 destination =
                     getFilePath destFolder
 
-                model1 =
-                    addFileRecursively originFolder (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively destFolder model1
-
-                model_ =
-                    moveFile destination originFolder model2
-
                 newPath =
                     destination ++ pathSeparator ++ (getFileName originFolder)
+
+                model =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively originFolder
+                        |> addFileRecursively destFolder
+                        |> moveFile destination originFolder
             in
-                Expect.equal (pathExists newPath model_) True
+                Expect.equal (pathExists newPath model) True
     , fuzz (tuple ( int, int )) "we can move a new file into the moved folder" <|
         \seed ->
             let
                 ( seed1, seed2 ) =
                     ensureDifferentSeed seed
+
+                -- todo: ensureDifferentSeed3
+                seed3 =
+                    seed2 + 1
 
                 originFolder =
                     Gen.folder seed1
@@ -394,34 +354,25 @@ moveFolderTests =
                 newPath =
                     destination ++ pathSeparator ++ (getFileName originFolder)
 
-                -- todo: ensureDifferentSeed3
                 testFile =
-                    setFilePath newPath (Gen.stdFile (seed2 + 1))
+                    seed3
+                        |> Gen.stdFile
+                        |> setFilePath newPath
 
-                model1 =
-                    addFileRecursively originFolder (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively destFolder model1
-
-                model3 =
-                    moveFile destination originFolder model2
-
-                model4 =
-                    addFileRecursively testFile model3
-
-                model_ =
-                    addFileRecursively testFile model4
-
-                filesOnPath =
-                    getFilesOnPath newPath model_
+                testFileID =
+                    getFileId testFile
 
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId testFile))
-                            filesOnPath
-                        )
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively originFolder
+                        |> addFileRecursively destFolder
+                        |> moveFile destination originFolder
+                        |> addFileRecursively testFile
+                        |> addFileRecursively testFile
+                        |> getFilesOnPath newPath
+                        |> List.filter (\x -> (getFileId x) == testFileID)
+                        |> List.head
             in
                 Expect.equal maybeFile (Just testFile)
     , fuzz (tuple ( int, int )) "old folder path no longer exists" <|
@@ -436,25 +387,24 @@ moveFolderTests =
                 destFolder =
                     Gen.folder seed2
 
-                origin =
-                    getFilePath originFolder
-
                 destination =
                     getFilePath destFolder
 
                 newPath =
-                    destination ++ pathSeparator ++ (getFileName originFolder)
+                    destFolder
+                        |> getFilePath
+                        |> (++) pathSeparator
+                        |> (++) (getFileName originFolder)
 
-                model1 =
-                    addFileRecursively originFolder (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively destFolder model1
-
-                model_ =
-                    moveFile destination originFolder model2
+                doesPathExists =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively originFolder
+                        |> addFileRecursively destFolder
+                        |> moveFile destination originFolder
+                        |> pathExists (getFilePath originFolder)
             in
-                Expect.equal (pathExists origin model_) False
+                Expect.equal doesPathExists False
     ]
 
 
@@ -481,21 +431,17 @@ deleteStdFileTests =
                 stdFile =
                     Gen.stdFile seed
 
-                model =
-                    addFileRecursively stdFile (Gen.fsRandom seed)
-
-                model_ =
-                    removeFile stdFile model
-
-                filesOnPath =
-                    getFilesOnPath (getFilePath stdFile) model_
+                stdFileID =
+                    getFileId stdFile
 
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId stdFile))
-                            filesOnPath
-                        )
+                    seed
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> removeFile stdFile
+                        |> getFilesOnPath (getFilePath stdFile)
+                        |> List.filter (\x -> (getFileId x) == stdFileID)
+                        |> List.head
             in
                 Expect.equal maybeFile Nothing
     , fuzz int "removed stdfile path still exists" <|
@@ -504,16 +450,14 @@ deleteStdFileTests =
                 stdFile =
                     Gen.stdFile seed
 
-                model =
-                    addFileRecursively stdFile (Gen.fsRandom seed)
-
-                path =
-                    getFilePath stdFile
-
-                model_ =
-                    removeFile stdFile model
+                doesPathExist =
+                    seed
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> removeFile stdFile
+                        |> pathExists (getFilePath stdFile)
             in
-                Expect.equal (pathExists path model_) True
+                Expect.equal doesPathExist True
     , fuzz
         (tuple ( int, int ))
         "'sister' files still exists on that path"
@@ -530,26 +474,22 @@ deleteStdFileTests =
                     getFilePath stdFile
 
                 sister =
-                    setFilePath path (Gen.file seed2)
+                    seed2
+                        |> Gen.file
+                        |> setFilePath path
 
-                model1 =
-                    addFileRecursively stdFile (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively sister model1
-
-                model_ =
-                    removeFile stdFile model2
-
-                filesOnPath =
-                    getFilesOnPath path model_
+                sisterID =
+                    getFileId sister
 
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId sister))
-                            filesOnPath
-                        )
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively stdFile
+                        |> addFileRecursively sister
+                        |> removeFile stdFile
+                        |> getFilesOnPath path
+                        |> List.filter (\x -> (getFileId x) == sisterID)
+                        |> List.head
             in
                 Expect.equal maybeFile (Just sister)
     ]
@@ -570,42 +510,37 @@ deleteFolderTests =
                     Gen.folder seed1
 
                 file =
-                    Gen.file seed2
+                    seed2
+                        |> Gen.file
+                        |> setFilePath (getFilePath folder)
 
-                file_ =
-                    setFilePath (getFilePath folder) file
-
-                model1 =
-                    addFileRecursively folder (Gen.fsRandom seed1)
-
-                model2 =
-                    addFileRecursively file_ model1
+                model =
+                    seed1
+                        |> Gen.fsRandom
+                        |> addFileRecursively folder
+                        |> addFileRecursively file
 
                 model_ =
-                    removeFile folder model2
+                    removeFile folder model
             in
-                Expect.equal model2 model_
+                Expect.equal model model_
     , fuzz int "folder no longer exists on path" <|
         \seed ->
             let
                 folder =
                     Gen.folder seed
 
-                model =
-                    addFileRecursively folder (Gen.fsRandom seed)
-
-                model_ =
-                    removeFile folder model
-
-                filesOnPath =
-                    getFilesOnPath (getFilePath folder) model_
+                folderID =
+                    getFileId folder
 
                 maybeFile =
-                    List.head
-                        (List.filter
-                            (\x -> (getFileId x) == (getFileId folder))
-                            filesOnPath
-                        )
+                    seed
+                        |> Gen.fsRandom
+                        |> addFileRecursively folder
+                        |> removeFile folder
+                        |> getFilesOnPath (getFilePath folder)
+                        |> List.filter (\x -> (getFileId x) == folderID)
+                        |> List.head
             in
                 Expect.equal maybeFile Nothing
     , fuzz int "folder path no longer exists" <|
@@ -614,14 +549,14 @@ deleteFolderTests =
                 folder =
                     Gen.folder seed
 
-                model =
-                    addFileRecursively folder (Gen.fsRandom seed)
-
                 path =
                     getFilePath folder
 
-                model_ =
-                    removeFile folder model
+                model =
+                    seed
+                        |> Gen.fsRandom
+                        |> addFileRecursively folder
+                        |> removeFile folder
             in
-                Expect.equal (pathExists path model_) False
+                Expect.equal (pathExists path model) False
     ]
