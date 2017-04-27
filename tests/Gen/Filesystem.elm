@@ -206,7 +206,7 @@ fsRandom seedInt =
 
         model =
             List.foldr
-                (\file model_ -> Helper.addFileRecursively model_ file)
+                Helper.addFileRecursively
                 initialFilesystem
                 list
     in

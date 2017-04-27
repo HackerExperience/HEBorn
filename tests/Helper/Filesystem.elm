@@ -10,7 +10,7 @@ addFolderReducer folderName ( filesystem, path ) =
             Folder { id = "id", name = folderName, path = path }
 
         filesystem_ =
-            addFile filesystem folder
+            addFile folder filesystem
 
         path_ =
             if path /= "/" then
@@ -23,7 +23,7 @@ addFolderReducer folderName ( filesystem, path ) =
 
 addPathParents : String -> Filesystem -> Filesystem
 addPathParents path filesystem =
-    if pathExists filesystem path then
+    if pathExists path filesystem then
         filesystem
     else
         let
@@ -43,9 +43,8 @@ allow us to have this assumption when adding files. It's usually safe to use
 addFileRecursively instead of addFile for tests, unless you want to test exactly
 the assumption that the path the file is being added to must exist.
 -}
-addFileRecursively : Filesystem -> File -> Filesystem
-addFileRecursively filesystem file =
-    -- TODO: remove flips once we move filesystem to last param
+addFileRecursively : File -> Filesystem -> Filesystem
+addFileRecursively file filesystem =
     filesystem
         |> addPathParents (getFilePath file)
-        |> (flip addFile) file
+        |> addFile file

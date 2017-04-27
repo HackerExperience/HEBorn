@@ -45,10 +45,10 @@ one seed1 seed2 =
             Gen.Filesystem.folder (seed2 + 1)
 
         filesystem1 =
-            addFileRecursively (getFilesystemSafe server) file
+            addFileRecursively file (getFilesystemSafe server)
 
         filesystem_ =
-            addFileRecursively filesystem1 folder
+            addFileRecursively folder filesystem1
 
         server_ =
             updateFilesystem server filesystem_
