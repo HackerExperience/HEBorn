@@ -42,7 +42,10 @@ var commonConfig = {
       template: 'build/index.html',
       inject:   'body',
       filename: 'index.html'
-    })
+    }),
+    new webpack.EnvironmentPlugin(
+      ["HEBORN_API_HTTP_URL", "HEBORN_API_WEBSOCKET_URL"]
+    )
   ],
 
   postcss: [ autoprefixer( { browsers: ['last 2 versions'] } ) ],

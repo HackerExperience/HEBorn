@@ -6,14 +6,14 @@ import Requests.Models exposing (RequestID)
 import Core.Messages exposing (CoreMsg)
 
 
-send : String -> RequestID -> String -> Cmd CoreMsg
-send url id payload =
+send : String -> String -> RequestID -> String -> Cmd CoreMsg
+send apiHttpUrl path id payload =
     Http.send
         (decodeMsg id)
         (Http.request
             { method = "POST"
             , headers = []
-            , url = "https://api.hackerexperience.com/v1/" ++ url
+            , url = apiHttpUrl ++ "/" ++ path
             , body = Http.stringBody "application/json" payload
             , expect = Http.expectString
             , timeout = Nothing

@@ -152,6 +152,7 @@ makeRequest core requestData component =
                             httpPayloadToString payload_
                     in
                         Driver.Http.Http.send
+                            core.config.apiHttpUrl
                             path
                             request_id
                             body
