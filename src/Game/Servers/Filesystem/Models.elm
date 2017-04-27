@@ -124,8 +124,8 @@ getFilePath file =
             folder.path
 
 
-setFilePath : File -> FilePath -> File
-setFilePath file path =
+setFilePath : FilePath -> File -> File
+setFilePath path file =
     case file of
         StdFile file ->
             StdFile { file | path = path }
@@ -144,18 +144,18 @@ getFileName file =
             folder.name
 
 
-addFile : Filesystem -> File -> Filesystem
-addFile filesystem file =
+addFile : File -> Filesystem -> Filesystem
+addFile file filesystem =
     let
         path =
             getFilePath file
 
         files =
-            (getFilesOnPath filesystem path) ++ [ file ]
+            (getFilesOnPath path filesystem) ++ [ file ]
     in
         case file of
             StdFile _ ->
-                if pathExists filesystem path then
+                if pathExists path filesystem then
                     Dict.insert path files filesystem
                 else
                     filesystem
@@ -168,8 +168,8 @@ addFile filesystem file =
                     |> Dict.insert (fullFilePath file) []
 
 
-getFilesOnPath : Filesystem -> FilePath -> List File
-getFilesOnPath filesystem path =
+getFilesOnPath : FilePath -> Filesystem -> List File
+getFilesOnPath path filesystem =
     case Dict.get path filesystem of
         Just files ->
             files
@@ -178,8 +178,8 @@ getFilesOnPath filesystem path =
             []
 
 
-pathExists : Filesystem -> FilePath -> Bool
-pathExists filesystem path =
+pathExists : FilePath -> Filesystem -> Bool
+pathExists path filesystem =
     case Dict.get path filesystem of
         Just _ ->
             True
@@ -188,20 +188,20 @@ pathExists filesystem path =
             False
 
 
-moveFile : Filesystem -> File -> FilePath -> Filesystem
-moveFile filesystem file path =
-    if (pathExists filesystem path) then
+moveFile : FilePath -> File -> Filesystem -> Filesystem
+moveFile path file filesystem =
+    if (pathExists path filesystem) then
         -- TODO: remove flips after moving filesystem to the last param
         filesystem
-            |> (flip addFile) (setFilePath file path)
-            |> (flip removeFile) file
+            |> addFile (setFilePath path file)
+            |> removeFile file
     else
         -- Moving to a non-existing path
         filesystem
 
 
-removeFile : Filesystem -> File -> Filesystem
-removeFile filesystem file =
+removeFile : File -> Filesystem -> Filesystem
+removeFile file filesystem =
     let
         path =
             getFilePath file
@@ -210,8 +210,8 @@ removeFile filesystem file =
             getFileId file
 
         newFiles =
-            path
-                |> getFilesOnPath filesystem
+            filesystem
+                |> getFilesOnPath path
                 |> List.filter (\x -> (getFileId x) /= id)
     in
         case file of

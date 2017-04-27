@@ -107,7 +107,7 @@ changePath explorer game path =
         explorer_ =
             case filesystem of
                 Just fs ->
-                    if pathExists fs path then
+                    if pathExists path fs then
                         setPath explorer path
                     else
                         explorer
