@@ -1,7 +1,5 @@
 module Gen.Filesystem exposing (..)
 
-import Dict
-import Arithmetic exposing (isEven)
 import Gen.Utils exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Helper.Filesystem as Helper
@@ -9,11 +7,11 @@ import Helper.Filesystem as Helper
 
 fileID : Int -> FileID
 fileID seedInt =
-    fuzz1 seedInt fileSeed
+    fuzz1 seedInt fileIDSeed
 
 
-fileSeed : StringSeed
-fileSeed seed =
+fileIDSeed : StringSeed
+fileIDSeed seed =
     smallStringSeed seed
 
 
@@ -82,14 +80,25 @@ extensionSeed seed =
 
 folder : Int -> File
 folder seedInt =
+    fuzz1 seedInt folderSeed
+
+
+folderSeed : Seed -> ( File, Seed )
+folderSeed seed =
     let
-        ( id, name, path ) =
-            fuzz3 seedInt fileSeed nameSeed pathSeed
+        ( id, seed1 ) =
+            fileIDSeed seed
+
+        ( name, seed2 ) =
+            nameSeed seed1
+
+        ( path, seed3 ) =
+            pathSeed seed2
+
+        folder =
+            folderArgs id name path
     in
-        folderArgs
-            id
-            name
-            path
+        ( folder, seed3 )
 
 
 folderArgs : FileID -> String -> String -> File
@@ -99,21 +108,38 @@ folderArgs id name path =
 
 stdFile : Int -> File
 stdFile seedInt =
+    fuzz1 seedInt stdFileSeed
+
+
+stdFileSeed : Seed -> ( File, Seed )
+stdFileSeed seed =
     let
-        ( id, name, path, extension ) =
-            fuzz4 seedInt fileSeed nameSeed pathSeed extensionSeed
+        ( id, seed1 ) =
+            fileIDSeed seed
+
+        ( name, seed2 ) =
+            nameSeed seed1
+
+        ( path, seed3 ) =
+            pathSeed seed2
+
+        ( extension, seed4 ) =
+            extensionSeed seed3
 
         ( version, size ) =
             ( fileVersion, fileSize )
+
+        stdFile =
+            stdFileArgs
+                id
+                name
+                path
+                extension
+                version
+                size
+                []
     in
-        stdFileArgs
-            id
-            name
-            path
-            extension
-            version
-            size
-            []
+        ( stdFile, seed4 )
 
 
 stdFileArgs :
@@ -152,62 +178,70 @@ fsEmpty =
     initialFilesystem
 
 
-model : Int -> Filesystem
-model seedInt =
-    fsRandom seedInt
-
-
 file : Int -> File
 file seedInt =
-    if isEven seedInt then
-        stdFile seedInt
-    else
-        folder seedInt
+    fuzz1 seedInt fileSeed
+
+
+fileSeed : Seed -> ( File, Seed )
+fileSeed seed =
+    let
+        ( buildStdFile, seed_ ) =
+            boolSeed (seed)
+    in
+        if buildStdFile then
+            stdFileSeed seed_
+        else
+            folderSeed seed_
 
 
 fileList : Int -> List File
 fileList seedInt =
+    fuzz1 seedInt fileListSeed
+
+
+fileListSeed : Seed -> ( List File, Seed )
+fileListSeed seed =
     let
-        size =
-            1
-
-        -- Gen.Utils.intRange 10 50 seedInt
-        seedList =
-            listOfInt size seedInt
-
-        fileList =
-            List.repeat size (file seedInt)
+        ( size, seed_ ) =
+            intRangeSeed 1 100 seed
 
         list =
-            List.map2 (,) fileList seedList
+            List.range 1 size
 
-        funOverwrite : ( File, Int ) -> ( File, Int )
-        funOverwrite oldFile =
-            let
-                ( _, seed ) =
-                    oldFile
-
-                file_ =
-                    file seed
-            in
-                ( file_, seed )
-
-        ( list_, _ ) =
-            List.unzip (List.map funOverwrite list)
+        reducer =
+            \_ ( filesystem, seed ) ->
+                let
+                    ( file, seed_ ) =
+                        fileSeed seed
+                in
+                    ( file :: filesystem, seed_ )
     in
-        list_
+        List.foldl reducer ( [], seed_ ) list
+
+
+model : Int -> Filesystem
+model seedInt =
+    fuzz1 seedInt modelSeed
+
+
+modelSeed : Seed -> ( Filesystem, Seed )
+modelSeed seed =
+    fsRandomSeed seed
 
 
 fsRandom : Int -> Filesystem
 fsRandom seedInt =
-    let
-        list =
-            fileList seedInt
+    fuzz1 seedInt fsRandomSeed
 
-        model =
-            List.foldr
-                Helper.addFileRecursively
-                initialFilesystem
-                list
+
+fsRandomSeed : Seed -> ( Filesystem, Seed )
+fsRandomSeed seed =
+    let
+        ( fileList, seed_ ) =
+            fileListSeed seed
+
+        filesystem =
+            List.foldl Helper.addFileRecursively fsEmpty fileList
     in
-        model
+        ( filesystem, seed_ )
