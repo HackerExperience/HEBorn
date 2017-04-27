@@ -55,7 +55,7 @@ addFileGenericTests =
                     Gen.stdFile seed1
 
                 model =
-                    Gen.model seed1
+                    Gen.fsRandom seed1
 
                 model_ =
                     addFile stdFile model
@@ -73,7 +73,7 @@ addFileGenericTests =
                     Gen.stdFile seed1
 
                 model =
-                    Gen.model seed1
+                    Gen.fsRandom seed1
 
                 model_ =
                     addFileRecursively stdFile model
@@ -105,7 +105,7 @@ addFileGenericTests =
                     Gen.folder seed1
 
                 model =
-                    Gen.model seed2
+                    Gen.fsRandom seed2
 
                 model_ =
                     addFileRecursively folder model
@@ -121,7 +121,7 @@ addFileGenericTests =
                     setFilePath (Gen.path (seed1 + 1)) (Gen.folder seed1)
 
                 model =
-                    Gen.model seed1
+                    Gen.fsRandom seed1
 
                 path =
                     getFilePath folder
@@ -182,7 +182,7 @@ moveFileGenericTests =
                     Gen.path seed2
 
                 model1 =
-                    addFileRecursively stdFile (Gen.model seed1)
+                    addFileRecursively stdFile (Gen.fsRandom seed1)
 
                 model_ =
                     moveFile destination stdFile model1
@@ -209,7 +209,7 @@ moveStdFileTests =
                     getFilePath folder
 
                 model1 =
-                    addFileRecursively stdFile (Gen.model seed1)
+                    addFileRecursively stdFile (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively folder model1
@@ -252,7 +252,7 @@ moveStdFileTests =
                     getFilePath stdFile
 
                 model1 =
-                    addFileRecursively stdFile (Gen.model seed1)
+                    addFileRecursively stdFile (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively folder model1
@@ -287,7 +287,7 @@ moveStdFileTests =
                     getFilePath stdFile
 
                 model1 =
-                    addFileRecursively stdFile (Gen.model seed1)
+                    addFileRecursively stdFile (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively folder model1
@@ -317,7 +317,7 @@ moveFolderTests =
                     getFilePath destFolder
 
                 model1 =
-                    addFileRecursively originFolder (Gen.model seed1)
+                    addFileRecursively originFolder (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively destFolder model1
@@ -364,7 +364,7 @@ moveFolderTests =
                     getFilePath destFolder
 
                 model1 =
-                    addFileRecursively originFolder (Gen.model seed1)
+                    addFileRecursively originFolder (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively destFolder model1
@@ -399,7 +399,7 @@ moveFolderTests =
                     setFilePath newPath (Gen.stdFile (seed2 + 1))
 
                 model1 =
-                    addFileRecursively originFolder (Gen.model seed1)
+                    addFileRecursively originFolder (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively destFolder model1
@@ -446,7 +446,7 @@ moveFolderTests =
                     destination ++ pathSeparator ++ (getFileName originFolder)
 
                 model1 =
-                    addFileRecursively originFolder (Gen.model seed1)
+                    addFileRecursively originFolder (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively destFolder model1
@@ -482,7 +482,7 @@ deleteStdFileTests =
                     Gen.stdFile seed
 
                 model =
-                    addFileRecursively stdFile (Gen.model seed)
+                    addFileRecursively stdFile (Gen.fsRandom seed)
 
                 model_ =
                     removeFile stdFile model
@@ -505,7 +505,7 @@ deleteStdFileTests =
                     Gen.stdFile seed
 
                 model =
-                    addFileRecursively stdFile (Gen.model seed)
+                    addFileRecursively stdFile (Gen.fsRandom seed)
 
                 path =
                     getFilePath stdFile
@@ -533,7 +533,7 @@ deleteStdFileTests =
                     setFilePath path (Gen.file seed2)
 
                 model1 =
-                    addFileRecursively stdFile (Gen.model seed1)
+                    addFileRecursively stdFile (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively sister model1
@@ -576,7 +576,7 @@ deleteFolderTests =
                     setFilePath (getFilePath folder) file
 
                 model1 =
-                    addFileRecursively folder (Gen.model seed1)
+                    addFileRecursively folder (Gen.fsRandom seed1)
 
                 model2 =
                     addFileRecursively file_ model1
@@ -592,7 +592,7 @@ deleteFolderTests =
                     Gen.folder seed
 
                 model =
-                    addFileRecursively folder (Gen.model seed)
+                    addFileRecursively folder (Gen.fsRandom seed)
 
                 model_ =
                     removeFile folder model
@@ -615,7 +615,7 @@ deleteFolderTests =
                     Gen.folder seed
 
                 model =
-                    addFileRecursively folder (Gen.model seed)
+                    addFileRecursively folder (Gen.fsRandom seed)
 
                 path =
                     getFilePath folder
