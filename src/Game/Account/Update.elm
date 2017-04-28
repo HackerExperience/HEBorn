@@ -42,4 +42,4 @@ update msg model game =
                 model_ =
                     setToken model Nothing
             in
-                ( model, cmd, [] )
+                ( model_, cmd, [] )
