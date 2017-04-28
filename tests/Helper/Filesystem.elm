@@ -1,8 +1,15 @@
-module Helper.Filesystem exposing (addFileRecursively)
+module Helper.Filesystem
+    exposing
+        ( addFileRecursively
+        , addPathParents
+        )
 
 import Game.Servers.Filesystem.Models exposing (..)
 
 
+{-| Private function used by a reducer in addPathParents to add folder to given
+filesystem.
+-}
 addFolderReducer : String -> ( Filesystem, String ) -> ( Filesystem, String )
 addFolderReducer folderName ( filesystem, path ) =
     let
@@ -21,6 +28,8 @@ addFolderReducer folderName ( filesystem, path ) =
         ( filesystem_, path_ )
 
 
+{-| Like "mkdir -p", add folders recursively for given path.
+-}
 addPathParents : String -> Filesystem -> Filesystem
 addPathParents path filesystem =
     if pathExists path filesystem then
