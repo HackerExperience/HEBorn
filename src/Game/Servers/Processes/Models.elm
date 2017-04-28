@@ -2,6 +2,7 @@ module Game.Servers.Processes.Models exposing (..)
 
 import Dict
 import Utils
+import Time exposing (Time)
 import Game.Servers.Filesystem.Models exposing (FileID)
 import Game.Shared exposing (ID)
 
@@ -27,7 +28,7 @@ type ProcessType
 
 
 type alias CompletionDate =
-    Float
+    Time
 
 
 type ProcessState

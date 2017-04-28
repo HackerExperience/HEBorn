@@ -1,7 +1,7 @@
 module Gen.Processes exposing (..)
 
-import Game.Servers.Processes.Models exposing (..)
 import Gen.Filesystem exposing (fileID)
+import Game.Servers.Processes.Models exposing (..)
 import Gen.Utils exposing (..)
 
 
@@ -88,7 +88,7 @@ stateRunning : Seed -> ProcessState
 stateRunning seed =
     let
         ( completionDate, _ ) =
-            floatRangeSeed 1 60 seed
+            floatSeed seed
     in
         StateRunning completionDate
 
