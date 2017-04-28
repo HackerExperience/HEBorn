@@ -96,13 +96,8 @@ dev-css: compile build-css
 server:
 	$(server)
 
-# We repeat the lint command as a hack to ignore badly formatted code on vendor/
-# This way, we can display which HEBorn files are not complying with the style
-# guide AND THEN return the relevant status code.
-# If we remove vendor/, below can be simplified to `elm-format --validate src/`
 lint:
-	elm-format --validate src/ | grep -v vendor
-	elm-format --validate src/ | grep -v vendor | wc -l | grep 1
+	elm-format --validate src/
 
 ################################################################################
 # Test
