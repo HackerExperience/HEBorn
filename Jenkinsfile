@@ -60,8 +60,8 @@ parallel(
           "HEBORN_VERSION=${env.BUILD_VERSION}"
           ]) {
           sh 'gmake compile'
+          sh 'gmake release'
         }
-        sh 'gmake release'
 
         // Backup compiled files for later reuse
         // TODO: It's being saved but it's not actually working, not sure why

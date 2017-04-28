@@ -45,19 +45,11 @@ compile-loop:
 ################################################################################
 
 prepare:
-	rm -rf build/ && \
-	mkdir -p build/css && \
-	mkdir -p build/js && \
-	mkdir -p build/img && \
-	mkdir -p build/vendor && \
-	cp -r static/css/* build/css && \
-	cp -r static/js/* build/js && \
-	cp -r static/img/* build/img && \
-	cp -r static/vendor/* build/vendor
+	rm -rf build/ && mkdir -p build/
 
 build: prepare
 	cat static/index.html > build/index.html
-	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
+	$(nodebin)/elm-css src/Core/Stylesheets.elm -o static/css
 
 build-css: prepare
 	awk '/\<\/body/ \
@@ -66,7 +58,7 @@ build-css: prepare
 	    \<\/script\> \
 	  "}1' \
 	  static/index.html > build/index.html
-	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
+	$(nodebin)/elm-css src/Core/Stylesheets.elm -o static/css
 
 release: build
 	npm run build

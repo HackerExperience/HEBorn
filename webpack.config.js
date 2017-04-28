@@ -12,27 +12,53 @@ console.log( 'WEBPACK GO!');
 
 // determine build env
 var TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
-var outputFilename = TARGET_ENV === 'production' ? '[name]-[hash].js' : '[name].js'
+var outputFilename = TARGET_ENV === 'production' ? '[name]-[hash].js' : '[name]-dev.js';
 
 // common webpack config
 var commonConfig = {
 
+  entry: {
+    'app': entryPath
+  },
+
   output: {
     path:       outputPath,
-    filename: `js/${outputFilename}`,
+    filename: `js/${outputFilename}`
     // publicPath: '/'
   },
 
   resolve: {
     extensions: ['', '.js', '.elm']
   },
-
   module: {
     noParse: /\.elm$/,
     loaders: [
       {
-        test: /\.(eot|ttf|woff|woff2|svg)$/,
-        loader: 'file-loader'
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/font-woff&publicPath=../&name=fonts/[name].[ext]"
+      },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/font-woff&publicPath=../&name=fonts/[name].[ext]"
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/octet-stream&publicPath=../&name=fonts/[name].[ext]"
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file?publicPath=../&name=fonts/[name].[ext]"
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=image/svg+xml&publicPath=../&name=files/[name].[ext]"
+      },
+      {
+        test: /\.(css|scss)$/,
+        loader: ExtractTextPlugin.extract( 'style-loader', [
+          'css-loader',
+          'postcss-loader',
+        ])
       }
     ]
   },
@@ -48,9 +74,9 @@ var commonConfig = {
     )
   ],
 
-  postcss: [ autoprefixer( { browsers: ['last 2 versions'] } ) ],
+  postcss: [ autoprefixer( { browsers: ['last 2 versions'] } ) ]
 
-}
+};
 
 // additional webpack settings for local env (when invoked by 'npm start')
 if ( TARGET_ENV === 'development' ) {
@@ -58,15 +84,9 @@ if ( TARGET_ENV === 'development' ) {
 
   module.exports = merge( commonConfig, {
 
-    entry: [
-      'webpack-dev-server/client?http://localhost:8000',
-      entryPath
-    ],
-
     devServer: {
-      // serve index.html in place of 404 responses
       historyApiFallback: true,
-      contentBase: './build',
+      contentBase: './build'
     },
 
     module: {
@@ -75,17 +95,13 @@ if ( TARGET_ENV === 'development' ) {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
           loader:  'elm-hot!elm-webpack?verbose=true&warn=true&debug=true'
-        },
-        {
-          test: /\.(css|scss)$/,
-          loaders: [
-            'style-loader',
-            'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
-            'postcss-loader',
-          ]
         }
       ]
-    }
+    },
+
+    plugins: [
+      new ExtractTextPlugin( 'css/[name]-dev.css', { allChunks: true } )
+    ]
 
   });
 }
@@ -96,21 +112,12 @@ if ( TARGET_ENV === 'production' ) {
 
   module.exports = merge( commonConfig, {
 
-    entry: entryPath,
-
     module: {
       loaders: [
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
           loader:  'elm-webpack'
-        },
-        {
-          test: /\.(css|scss)$/,
-          loader: ExtractTextPlugin.extract( 'style-loader', [
-            'css-loader',
-            'postcss-loader',
-          ])
         }
       ]
     },
@@ -122,20 +129,18 @@ if ( TARGET_ENV === 'production' ) {
           to:   'img/'
         },
         {
-          from: 'static/favicon.ico'
+          from: 'static/favicon.ico',
+          to: 'favicon.ico'
         },
       ]),
 
       new webpack.optimize.OccurenceOrderPlugin(),
 
-      // extract CSS into a separate file
-      new ExtractTextPlugin( 'build/css/[name]-[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin( 'css/[name]-[hash].css', { allChunks: true } ),
 
-      // minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
           minimize:   true,
           compressor: { warnings: false }
-          // mangle:  true
       })
     ]
 
