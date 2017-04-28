@@ -40,6 +40,9 @@ generateApplication window =
                 LogViewerWindow ->
                     "logvw"
 
+                BrowserWindow ->
+                    "browser"
+
         icon =
             name
     in
@@ -52,6 +55,7 @@ initialApplications =
         applications =
             [ generateApplication ExplorerWindow
             , generateApplication LogViewerWindow
+            , generateApplication BrowserWindow
             ]
     in
         applications
