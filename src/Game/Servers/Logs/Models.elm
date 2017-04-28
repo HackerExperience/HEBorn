@@ -2,6 +2,7 @@ module Game.Servers.Logs.Models exposing (..)
 
 import Dict
 import Utils
+import Time exposing (Time)
 import Game.Shared exposing (ID)
 
 
@@ -13,9 +14,14 @@ type alias LogContent =
     String
 
 
+type alias LogTimestamp =
+    Time
+
+
 type alias LogData =
     { id : LogID
     , content : LogContent
+    , timestamp : LogTimestamp
     }
 
 
@@ -46,6 +52,16 @@ getLogByID logs id =
 logExists : Logs -> LogID -> Bool
 logExists logs id =
     Dict.member id logs
+
+
+getLogTimestamp : Log -> Maybe LogTimestamp
+getLogTimestamp log =
+    case log of
+        LogEntry l ->
+            Just l.timestamp
+
+        NoLog ->
+            Nothing
 
 
 getLogContent : Log -> Maybe LogContent

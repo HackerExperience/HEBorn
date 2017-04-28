@@ -25,6 +25,16 @@ contentSeed seed =
     smallStringSeed seed
 
 
+timestamp : Int -> LogTimestamp
+timestamp seedInt =
+    fuzz1 seedInt timestampSeed
+
+
+timestampSeed : Seed -> ( LogTimestamp, Seed )
+timestampSeed seed =
+    floatSeed seed
+
+
 stdLog : Int -> Log
 stdLog seedInt =
     fuzz1 seedInt stdLogSeed
@@ -38,15 +48,19 @@ stdLogSeed seed =
 
         ( content, seed2 ) =
             contentSeed seed1
+
+        ( timestamp, seed3 ) =
+            timestampSeed seed2
     in
-        ( stdLogArgs id content, seed2 )
+        ( stdLogArgs id content timestamp, seed3 )
 
 
-stdLogArgs : LogID -> LogContent -> Log
-stdLogArgs id content =
+stdLogArgs : LogID -> LogContent -> LogTimestamp -> Log
+stdLogArgs id content time =
     LogEntry
         { id = id
         , content = content
+        , timestamp = time
         }
 
 
