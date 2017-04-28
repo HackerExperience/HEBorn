@@ -54,7 +54,13 @@ parallel(
         // Reuse existing compiled files
         sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
 
-        sh 'gmake compile'
+        withEnv([
+          'HEBORN_API_HTTP_URL=https://api.hackerexperience.com/v1',
+          'HEBORN_API_WEBSOCKET_URL=wss://api.hackerexperience.com/websocket',
+          "HEBORN_VERSION=${env.BUILD_VERSION}"
+          ]) {
+          sh 'gmake compile'
+        }
         sh 'gmake release'
 
         // Backup compiled files for later reuse

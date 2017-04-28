@@ -9,6 +9,7 @@ import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 
 type Id
     = Dashboard
+    | DesktopVersion
 
 
 css =
@@ -45,4 +46,6 @@ css =
                     [ marginBottom (px 0) ]
                 ]
             ]
+        , id DesktopVersion
+            []
         ]

@@ -29,6 +29,7 @@ type alias CoreModel =
 type alias Config =
     { apiHttpUrl : String
     , apiWsUrl : String
+    , version : String
     }
 
 
@@ -36,6 +37,7 @@ type alias Flags =
     { seed : Int
     , apiHttpUrl : String
     , apiWsUrl : String
+    , version : String
     }
 
 
@@ -44,8 +46,9 @@ initialModel :
     -> Int
     -> String
     -> String
+    -> String
     -> CoreModel
-initialModel route seedInt apiHttpUrl apiWsUrl =
+initialModel route seedInt apiHttpUrl apiWsUrl version =
     { route = route
     , requests = Requests.Models.initialModel seedInt
     , game = Game.Models.initialModel
@@ -53,12 +56,13 @@ initialModel route seedInt apiHttpUrl apiWsUrl =
     , apps = Apps.Models.initialModel
     , landing = Landing.Models.initialModel
     , websocket = Driver.Websocket.Models.initialModel apiWsUrl
-    , config = generateConfig apiHttpUrl apiWsUrl
+    , config = generateConfig apiHttpUrl apiWsUrl version
     }
 
 
-generateConfig : String -> String -> Config
-generateConfig apiHttpUrl apiWsUrl =
+generateConfig : String -> String -> String -> Config
+generateConfig apiHttpUrl apiWsUrl version =
     Config
         apiHttpUrl
         apiWsUrl
+        version

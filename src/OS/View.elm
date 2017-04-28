@@ -6,7 +6,7 @@ import Html.CssHelpers
 import Router.Router exposing (Route(..))
 import Core.Models exposing (CoreModel)
 import Core.Messages exposing (CoreMsg(..))
-import OS.Style exposing (Id(..))
+import OS.Style as Css
 import OS.WindowManager.View
 import OS.Header.View
 import OS.Dock.View
@@ -30,7 +30,7 @@ view model =
 viewDashboard : CoreModel -> Html CoreMsg
 viewDashboard model =
     div
-        [ id Dashboard
+        [ id Css.Dashboard
         , contextEmpty
         ]
         [ viewHeader model
@@ -54,7 +54,15 @@ viewMain model =
 viewFooter : CoreModel -> Html CoreMsg
 viewFooter model =
     footer []
-        [ OS.Dock.View.view model ]
+        [ OS.Dock.View.view model
+        , displayVersion model.config.version
+        ]
+
+
+displayVersion : String -> Html CoreMsg
+displayVersion version =
+    div [ id Css.DesktopVersion ]
+        [ text version ]
 
 
 viewNotFound : Html CoreMsg

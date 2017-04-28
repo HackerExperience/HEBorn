@@ -44,7 +44,7 @@ var commonConfig = {
       filename: 'index.html'
     }),
     new webpack.EnvironmentPlugin(
-      ["HEBORN_API_HTTP_URL", "HEBORN_API_WEBSOCKET_URL"]
+      ["HEBORN_API_HTTP_URL", "HEBORN_API_WEBSOCKET_URL", "HEBORN_VERSION"]
     )
   ],
 

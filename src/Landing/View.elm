@@ -13,8 +13,7 @@ view model =
     div [ id "view-landing" ]
         [ viewIntro
         , viewLogin model
-
-        -- , viewSignUp model
+        , viewSignUp model
         ]
 
 
@@ -34,4 +33,7 @@ viewLogin model =
 
 viewSignUp : CoreModel -> Html LandMsg
 viewSignUp model =
-    Html.map MsgSignUp (Landing.SignUp.View.view model.landing.signUp model.game)
+    if model.config.version == "dev" then
+        Html.map MsgSignUp (Landing.SignUp.View.view model.landing.signUp model.game)
+    else
+        div [] []
