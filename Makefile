@@ -60,10 +60,12 @@ build: prepare
 	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
 
 build-css: prepare
-	sed 's/ \
-	  <\/body/ \
-	  \<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh.js\"\>\<\/script\> \
-	  &/' static/index.html > build/index.html
+	awk '/\<\/body/ \
+	  {print \
+	    "\<script type\=\"text\/javascript\" src\=\"vendor\/cssrefresh\.js\"\> \
+	    \<\/script\> \
+	  "}1' \
+	  static/index.html > build/index.html
 	$(nodebin)/elm-css src/Core/Stylesheets.elm -o build/css
 
 release: build

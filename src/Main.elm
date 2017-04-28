@@ -21,6 +21,7 @@ init flags location =
             flags.seed
             flags.apiHttpUrl
             flags.apiWsUrl
+            flags.version
         , Cmd.none
         )
 
