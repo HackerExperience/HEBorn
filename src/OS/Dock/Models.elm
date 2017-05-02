@@ -9,7 +9,7 @@ module OS.Dock.Models
 
 import Dict
 import OS.WindowManager.Windows exposing (GameWindow(..))
-import OS.WindowManager.Models exposing (Windows, filterAppWindows)
+import OS.WindowManager.Models exposing (Windows, WindowID, filterAppWindows, WindowState(..))
 
 
 type alias Application =
@@ -17,6 +17,8 @@ type alias Application =
     , window : GameWindow
     , icon : String
     , instancesNum : Int
+    , openWindows : List WindowID
+    , minimizedWindows : List WindowID
     }
 
 
@@ -43,7 +45,7 @@ generateApplication window =
         icon =
             name
     in
-        { name = name, window = window, icon = icon, instancesNum = 0 }
+        { name = name, window = window, icon = icon, instancesNum = 0, openWindows = [], minimizedWindows = [] }
 
 
 initialApplications : List Application
@@ -57,14 +59,32 @@ initialApplications =
         applications
 
 
-recountInstances : Windows -> Application -> Application
-recountInstances windows app =
-    { app | instancesNum = (Dict.size (filterAppWindows windows app.window)) }
+refreshInstances : Windows -> Application -> Application
+refreshInstances windows app =
+    let
+        appWindows =
+            filterAppWindows windows app.window
+
+        minimizeds =
+            Dict.filter
+                (\id oWindow -> (oWindow.state == Minimized))
+                appWindows
+
+        openeds =
+            Dict.filter
+                (\id oWindow -> (oWindow.state == Open))
+                appWindows
+    in
+        { app
+            | instancesNum = (Dict.size appWindows)
+            , openWindows = (Dict.keys openeds)
+            , minimizedWindows = (Dict.keys minimizeds)
+        }
 
 
 updateInstances : Model -> Windows -> Model
 updateInstances model windows =
-    { model | dock = (List.map (\app -> (recountInstances windows app)) model.dock) }
+    { model | dock = (List.map (\app -> (refreshInstances windows app)) model.dock) }
 
 
 initialDock : Dock

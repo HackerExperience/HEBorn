@@ -2,6 +2,7 @@ module OS.Dock.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
+import Css.Elements exposing (ul)
 import Css.Utils exposing (pseudoContent, attrSelector)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Icons as Icon
@@ -10,6 +11,9 @@ import Css.Icons as Icon
 type Id
     = DockMain
     | DockContainer
+    | DockAppContext
+    | Visible
+    | ClickableWindow
 
 
 type Class
@@ -67,6 +71,8 @@ css =
                 , position absolute
                 , marginLeft (px 12)
                 ]
+            , hover
+                [ children [ class DockAppContext [ display block ] ] ]
             ]
         , attrSelector "dockItem"
             "data-icon"
@@ -91,5 +97,25 @@ css =
                 , backgroundColor (hex "FFF")
                 , globalShadow
                 ]
+            ]
+        , class DockAppContext
+            [ display none
+            , position absolute
+            , bottom (px 0)
+            , backgroundColor (rgba 0 0 0 0.5)
+            , marginBottom (px 50)
+            , maxWidth (px 240)
+            , maxHeight (vh 80)
+            , marginLeft (px -(120 - (46 / 2)))
+            , borderRadius (px 8)
+            , cursor pointer
+            , withClass Visible
+                [ display block ]
+            , children
+                [ ul [ padding (px 8), listStyle none ] ]
+            ]
+        , class ClickableWindow
+            [ cursor pointer
+            , hover [ backgroundColor (rgba 0 0 0 0.5) ]
             ]
         ]
