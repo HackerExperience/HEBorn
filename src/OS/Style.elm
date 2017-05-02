@@ -47,5 +47,9 @@ css =
                 ]
             ]
         , id DesktopVersion
-            []
+            [ position absolute
+            , left (px 0)
+            , bottom (px 0)
+            , color (hex "DDD")
+            ]
         ]
