@@ -65,8 +65,7 @@ css =
                 , display block
                 , margin2 (px 0) auto
                 , position absolute
-                , left (pct 50)
-                , marginLeft (px -2)
+                , marginLeft (px 12)
                 ]
             ]
         , attrSelector "dockItem"
