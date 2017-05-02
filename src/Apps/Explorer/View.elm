@@ -29,10 +29,6 @@ styles =
 -- VIEW WRAPPER
 
 
-type alias Entries =
-    List Entry
-
-
 type alias FileSize =
     Float
 
@@ -68,21 +64,31 @@ type ArchiveType
 
 
 type alias ArchiveProp =
-    { type_ : ArchiveType
-    , size : FileSize
+    { size : FileSize
+    , type_ : ArchiveType
     }
 
 
 type EntryType
     = Fantasy
-    | Group Bool EntryGroup (List Entries)
+    | Group EntryGroup (List Entry)
     | Archive ArchiveProp
 
 
 type alias Entry =
-    { type_ : EntryType
-    , name : String
+    { name : String
+    , type_ : EntryType
     }
+
+
+groupIcon : EntryGroup -> Classes
+groupIcon type_ =
+    case type_ of
+        Dir ->
+            CasedDirIcon
+
+        Branch ->
+            CasedOpIcon
 
 
 entryIcon : EntryType -> Classes
@@ -91,14 +97,8 @@ entryIcon type_ =
         Fantasy ->
             GenericArchiveIcon
 
-        Group expanded groupType ch ->
-            (case groupType of
-                Dir ->
-                    CasedDirIcon
-
-                Branch ->
-                    CasedOpIcon
-            )
+        Group groupType ch ->
+            groupIcon groupType
 
         Archive prop ->
             (case prop.type_ of
@@ -163,11 +163,11 @@ renderActionList acts =
     List.map (\o -> renderAction o) acts
 
 
-renderSidebarEntry : Entry -> Html msg
-renderSidebarEntry entry =
+renderTreeEntry : Entry -> Html Msg
+renderTreeEntry entry =
     case entry.type_ of
-        Group expanded gr childs ->
-            renderSidebarGroup expanded childs entry.name gr
+        Group gr childs ->
+            renderSidebarGroup childs entry.name gr
 
         Fantasy ->
             div
@@ -182,15 +182,40 @@ renderSidebarEntry entry =
                 ]
 
 
-renderSidebarGroup expanded childs name grType =
-    div [] []
+renderTreeEntryList : List Entry -> List (Html Msg)
+renderTreeEntryList list =
+    List.map (\o -> renderTreeEntry o) list
 
 
-renderExplorerEntry : Entry -> Html msg
-renderExplorerEntry entry =
+renderSidebarGroup childs name grType =
+    div
+        [ class
+            ([ NavEntry, EntryDir ]
+                ++ if ((List.length childs) > 0) then
+                    [ EntryExpanded ]
+                   else
+                    []
+            )
+        ]
+        [ div
+            [ class [ EntryView ] ]
+            [ span [ class [ (groupIcon grType), NavIcon ] ] []
+            , span [] [ text name ]
+            ]
+        , div
+            [ class [ EntryChilds ] ]
+            (renderTreeEntryList childs)
+        ]
+
+
+renderDetailedEntry : Entry -> Html Msg
+renderDetailedEntry entry =
     case entry.type_ of
-        Group expanded gr childs ->
-            renderExplorerGroup expanded childs entry.name gr
+        Group gr childs ->
+            div [ class [ CntListEntry, EntryDir ] ]
+                [ span [ class [ DirIcon ] ] []
+                , span [] [ text entry.name ]
+                ]
 
         Fantasy ->
             div [ class [ CntListEntry, EntryArchive ] ]
@@ -218,7 +243,18 @@ renderExplorerEntry entry =
 
                         Just actions ->
                             div [ class [ CntListContainer ] ]
-                                [ (renderExplorerEntry { entry | type_ = { entry.type_ | type_ = Archive (Executable exeMime ver Nothing) }} )
+                                [ (renderDetailedEntry
+                                    ({ entry
+                                        | type_ =
+                                            (Archive
+                                                { prop
+                                                    | type_ =
+                                                        (Executable exeMime ver Nothing)
+                                                }
+                                            )
+                                     }
+                                    )
+                                  )
                                 , div [ class [ CntListChilds ] ]
                                     (renderActionList
                                         actions
@@ -228,8 +264,9 @@ renderExplorerEntry entry =
             )
 
 
-renderExplorerGroup expanded childs name grType =
-    div [] []
+renderDetailedEntryList : List Entry -> List (Html Msg)
+renderDetailedEntryList list =
+    List.map (\o -> renderDetailedEntry o) list
 
 
 
@@ -256,73 +293,56 @@ viewExplorerColumn explorer game =
         , class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            [ div [ class [ NavEntry, EntryDir, EntryExpanded ] ]
-                [ div
-                    [ class [ EntryView ] ]
-                    [ span [ class [ CasedDirIcon, NavIcon ] ] []
-                    , span [] [ text "Pictures" ]
-                    ]
-                , div
-                    [ class [ EntryChilds ] ]
-                    [ div
-                        [ class [ NavEntry, EntryArchive ] ]
-                        [ span [ class [ GenericArchiveIcon, NavIcon ] ] []
-                        , span [] [ text "Purple Lotus 1.jpg" ]
-                        ]
-                    , div
-                        [ class [ NavEntry, EntryArchive ] ]
-                        [ span [ class [ GenericArchiveIcon, NavIcon ] ] []
-                        , span [] [ text "Blue Orchid.png" ]
-                        ]
-                    , div
-                        [ class [ NavEntry, EntryDir ] ]
-                        [ div
-                            [ class [ EntryView ] ]
-                            [ span [ class [ CasedDirIcon, NavIcon ] ] []
-                            , span [] [ text "Other Flowers" ]
+            (renderTreeEntryList
+                [ { name = "Pictures"
+                  , type_ =
+                        Group
+                            Dir
+                            [ { name = "Purple Lotus 1.jpg"
+                              , type_ =
+                                    Archive
+                                        { size = 0
+                                        , type_ = Generic
+                                        }
+                              }
+                            , { name = "Blue Orchid.png"
+                              , type_ =
+                                    Archive
+                                        { size = 0
+                                        , type_ = Generic
+                                        }
+                              }
+                            , { name = "Other Flowers"
+                              , type_ =
+                                    Group
+                                        Dir
+                                        []
+                              }
                             ]
-                        , div
-                            [ class [ EntryChilds ] ]
-                            []
-                        ]
-                    ]
+                  }
+                , { name = "Tree"
+                  , type_ =
+                        Group
+                            Branch
+                            [ { name = "Branch"
+                              , type_ =
+                                    Group
+                                        Branch
+                                        []
+                              }
+                            , { name = "AnotherBranch"
+                              , type_ =
+                                    Group
+                                        Dir
+                                        []
+                              }
+                            , { name = "A Leaf"
+                              , type_ = Fantasy
+                              }
+                            ]
+                  }
                 ]
-            , div [ class [ NavEntry, EntryDir, EntryExpanded ] ]
-                [ div
-                    [ class [ EntryView ] ]
-                    [ span [ class [ CasedOpIcon, NavIcon ] ] []
-                    , span [] [ text "Tree" ]
-                    ]
-                , div
-                    [ class [ EntryChilds ] ]
-                    [ div
-                        [ class [ NavEntry, EntryDir ] ]
-                        [ div
-                            [ class [ EntryView ] ]
-                            [ span [ class [ CasedOpIcon, NavIcon ] ] []
-                            , span [] [ text "Branch" ]
-                            ]
-                        , div
-                            [ class [ EntryChilds ] ]
-                            []
-                        ]
-                    , div
-                        [ class [ NavEntry, EntryDir ] ]
-                        [ div
-                            [ class [ EntryView ] ]
-                            [ span [ class [ CasedOpIcon, NavIcon ] ] []
-                            , span [] [ text "AnotherBranch" ]
-                            ]
-                        , div
-                            [ class [ EntryChilds ] ]
-                            []
-                        ]
-                    , div
-                        [ class [ NavEntry, EntryArchive ] ]
-                        [ text "A Leaf" ]
-                    ]
-                ]
-            ]
+            )
         , div [ class [ NavData ] ]
             [ text "Data usage"
             , br [] []
@@ -398,37 +418,31 @@ viewExplorerMain explorer game =
             ]
         , div
             [ class [ ContentList ] ]
-            [ div [ class [ CntListEntry, EntryDir ] ]
-                [ span [ class [ DirIcon ] ] []
-                , span [] [ text "Downloads" ]
+            (renderDetailedEntryList
+                [ { name = "Downloads"
+                  , type_ =
+                        Group
+                            Dir
+                            []
+                  }
+                , { name = "MyVirus.spam"
+                  , type_ =
+                        Archive { size = 230, type_ = Executable Virus 2.3 Nothing }
+                  }
+                , { name = "TheWall.fwl"
+                  , type_ =
+                        Archive
+                            { size = 230
+                            , type_ =
+                                Executable Firewall
+                                    4.0
+                                    (Just
+                                        [ { target = Active, ver = 4.5 }
+                                        , { target = Passive, ver = 3.5 }
+                                        ]
+                                    )
+                            }
+                  }
                 ]
-            , div [ class [ CntListEntry, EntryArchive ] ]
-                [ span [ class [ VirusIcon ] ] []
-                , span [] [ text "MyVirus.spam" ]
-                , span [] [ text "2.3" ]
-                , span [] [ text "230 MB" ]
-                ]
-            , div [ class [ CntListContainer ] ]
-                [ div [ class [ CntListEntry, EntryArchive ] ]
-                    [ span [ class [ FirewallIcon ] ] []
-                    , span [] [ text "TheWall.fwl" ]
-                    , span [] [ text "4.0" ]
-                    , span [] [ text "230 MB" ]
-                    ]
-                , div [ class [ CntListChilds ] ]
-                    [ div []
-                        [ span [ class [ ActiveIcon ] ] []
-                        , span [] [ text "Active" ]
-                        , span [] [ text "4.5" ]
-                        , span [] []
-                        ]
-                    , div []
-                        [ span [ class [ PassiveIcon ] ] []
-                        , span [] [ text "Passive" ]
-                        , span [] [ text "3.5" ]
-                        , span [] []
-                        ]
-                    ]
-                ]
-            ]
+            )
         ]
