@@ -1,6 +1,6 @@
 module OS.Dock.View exposing (view)
 
-import Html exposing (Html, div, text, button)
+import Html exposing (Html, div, text, button, ul, li, hr)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
@@ -57,4 +57,29 @@ renderApplication model application =
         , attribute "data-icon" application.icon
         , attribute "data-hasinst" (hasInstanceString application.instancesNum)
         ]
-        []
+        (if application.instancesNum > 0 then
+            [ div [ class [ Css.DockAppContext ] ]
+                [ ul []
+                    ([ li [] [ text "JAN. ABERTAS" ] ]
+                        ++ (List.map
+                                (\o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text "O" ])
+                                application.openWindows
+                           )
+                        ++ [ hr [] []
+                           , li [] [ text "JAN. MINIMIZADAS" ]
+                           ]
+                        ++ (List.map
+                                (\o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text "M" ])
+                                application.minimizedWindows
+                           )
+                        ++ [ hr [] []
+                           , li [ class [ Css.ClickableWindow ] ] [ text "Nova janela" ]
+                           , li [ class [ Css.ClickableWindow ] ] [ text "Minimizar tudo" ]
+                           , li [ class [ Css.ClickableWindow ] ] [ text "Fechar tudo" ]
+                           ]
+                    )
+                ]
+            ]
+         else
+            []
+        )

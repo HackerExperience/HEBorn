@@ -21,6 +21,7 @@ module OS.WindowManager.Models
         , bringFocus
         , switchContext
         , getContextText
+        , WindowState(..)
         )
 
 import Dict

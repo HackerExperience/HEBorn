@@ -93,7 +93,7 @@ update msg model =
             in
                 ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
                 , Cmd.none
-                , []
+                , [ callDock (DockMsg.WindowsChanges windows_) ]
                 )
 
         ToggleMaximize id ->
