@@ -25,6 +25,41 @@ styles =
     Css.asPairs >> style
 
 
+
+-- VIEW WRAPPER
+
+
+type alias NetAddr =
+    String
+
+
+type alias SysUser =
+    String
+
+
+localhost : NetAddr
+localhost =
+    "localhost"
+
+
+root : SysUser
+root =
+    "root"
+
+
+type LogEventMsg
+    = LogIn NetAddr SysUser
+
+
+
+-- END OF THAT
+
+
+renderEntry : Int -> Bool -> LogEventMsg -> Html Msg
+renderEntry timestamp fullvisible msg =
+    div [] []
+
+
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model id game =
     let
@@ -56,11 +91,13 @@ view model id game =
                         ]
                     ]
                 , div [ class [ EData ] ]
-                    [ span [ class [ IcoCrosshair ] ] []
-                    , span [ class [ IdMe ] ] [ text "174.57.204.104" ]
+                    [ span [ class [ IcoCrosshair, ColorRemote ] ] []
+                    , text " "
+                    , span [ class [ IdMe, ColorRemote ] ] [ text "174.57.204.104" ]
                     , span [] [ text " logged in as " ]
-                    , span [ class [ IcoUser ] ] []
-                    , span [ class [ IdRoot ] ] [ text "root" ]
+                    , span [ class [ IcoUser, ColorRoot ] ] []
+                    , text " "
+                    , span [ class [ IdRoot, ColorRoot ] ] [ text root ]
                     ]
                 , div [ class [ EBottom ] ]
                     [ div [ elasticClass ] []
@@ -78,14 +115,17 @@ view model id game =
                         ]
                     ]
                 , div [ class [ EData ] ]
-                    [ span [ class [ IcoHome ] ] []
-                    , span [ class [ IdLocal ] ] [ text "localhost" ]
+                    [ span [ class [ IcoHome, ColorLocal ] ] []
+                    , text " "
+                    , span [ class [ IdLocal, ColorLocal ] ] [ text localhost ]
                     , span [] [ text " bounced connection from " ]
-                    , span [ class [ IcoCrosshair ] ] []
-                    , span [ class [ IdMe ] ] [ text "174.57.204.104" ]
+                    , span [ class [ IcoCrosshair, ColorRemote ] ] []
+                    , text " "
+                    , span [ class [ IdMe, ColorRemote ] ] [ text "174.57.204.104" ]
                     , span [] [ text " to " ]
-                    , span [ class [ IcoDangerous ] ] []
-                    , span [ class [ IdOther ] ] [ text "209.43.107.189" ]
+                    , span [ class [ IcoDangerous, ColorDangerous ] ] []
+                    , text " "
+                    , span [ class [ IdOther, ColorDangerous ] ] [ text "209.43.107.189" ]
                     ]
                 , div [ class [ EBottom ] ]
                     [ div [ class [ EAct ] ]
@@ -129,11 +169,12 @@ view model id game =
                 ]
             , div [ class [ Entry ] ]
                 [ div [ class [ ETop ] ] [ text "15/03/2016 - 20:24:33.105" ]
-                , div [ class [ EData ] ]
+                , br [] []
+                , div [ class [ EData, BoxifyMe ] ]
                     [ span [] [ text "NOTME" ]
                     , span [] [ text " logged in as " ]
                     , span [ class [ IcoUser ] ] []
-                    , span [] [ text "root" ]
+                    , span [] [ text root ]
                     ]
                 , div [ class [ EBottom ] ]
                     [ div [ class [ EAct ] ]

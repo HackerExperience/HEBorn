@@ -37,6 +37,11 @@ type Classes
     | IdOther
     | IdLocal
     | IdRoot
+    | ColorLocal
+    | ColorRoot
+    | ColorRemote
+    | ColorDangerous
+    | BoxifyMe
 
 
 ico : Mixin
@@ -133,7 +138,6 @@ css =
         , class IcoCrosshair
             [ ico
             , before [ Icon.locationTarget ]
-            , color (hex "00E")
             ]
         , class IcoUser
             [ ico
@@ -148,7 +152,25 @@ css =
             , before [ Icon.dangerous ]
             ]
         , class IdMe
-            [ color (hex "00E")
+            [ textDecoration underline
+            ]
+        , class IdLocal
+            [ fontWeight bold
+            ]
+        , class IdOther
+            [ color (hex "C04839")
             , textDecoration underline
+            ]
+        , class ColorLocal
+            [ color (hex "56822E") ]
+        , class ColorRoot
+            [ color (hex "9B9E5B") ]
+        , class ColorRemote
+            [ color (hex "00E") ]
+        , class ColorDangerous
+            [ color (hex "C04839") ]
+        , class BoxifyMe
+            [ border3 (px 1) solid (hex "444")
+            , padding (px 2)
             ]
         ]
