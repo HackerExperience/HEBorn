@@ -154,6 +154,7 @@ renderBottomActions msg =
         )
 
 
+attachVisibility : Bool -> Attribute msg
 attachVisibility status =
     attribute "data-expanded"
         (if (status) then
@@ -183,6 +184,18 @@ renderEntry timestamp fullvisible msg =
         ]
 
 
+type alias LogViewerEntry =
+    { timestamp : String
+    , visibility : Bool
+    , message : LogEventMsg
+    }
+
+
+renderEntryList : List LogViewerEntry -> List (Html Msg)
+renderEntryList list =
+    List.map (\n -> (renderEntry n.timestamp n.visibility n.message)) list
+
+
 
 -- END OF THAT
 
@@ -194,7 +207,7 @@ view model id game =
             getState model id
     in
         div []
-            [ div [ class [ HeaderBar ] ]
+            ([ div [ class [ HeaderBar ] ]
                 [ div [ class [ ETAct ] ]
                     [ span [ class [ BtnUser ] ] []
                     , text " "
@@ -209,34 +222,44 @@ view model id game =
                         ]
                     ]
                 ]
-            , renderEntry "15/03/2016 - 20:24:33.105" True (LogIn "174.57.204.104" root)
-            , renderEntry "15/03/2016 - 20:24:33.105" True (Connetion localhost "174.57.204.104" "209.43.107.189")
-            , div [ class [ Entry ] ]
-                [ div [ class [ ETop ] ]
-                    [ div [ elasticClass ] []
-                    , div [ class [ ETActMini ] ]
-                        [ span [ class [ BtnLock ] ] []
+             ]
+                ++ renderEntryList
+                    [ { timestamp = "15/03/2016 - 20:24:33.105"
+                      , visibility = True
+                      , message = (LogIn "174.57.204.104" root)
+                      }
+                    , { timestamp = "15/03/2016 - 20:24:33.105"
+                      , visibility = True
+                      , message = (Connetion localhost "174.57.204.104" "209.43.107.189")
+                      }
+                    ]
+                ++ [ div [ class [ Entry ] ]
+                        [ div [ class [ ETop ] ]
+                            [ div [ elasticClass ] []
+                            , div [ class [ ETActMini ] ]
+                                [ span [ class [ BtnLock ] ] []
+                                ]
+                            ]
+                        , div [ class [ EBottom ] ]
+                            [ div [ elasticClass ] []
+                            , div [ class [ CasedBtnExpand, EToggler ] ] []
+                            ]
                         ]
-                    ]
-                , div [ class [ EBottom ] ]
-                    [ div [ elasticClass ] []
-                    , div [ class [ CasedBtnExpand, EToggler ] ] []
-                    ]
-                ]
-            , div [ class [ Entry ] ]
-                [ div [ class [ ETop ] ]
-                    [ div [ elasticClass ] []
-                    , div [ class [ ETActMini ] ]
-                        [ span [ class [ BtnLock ] ] []
+                   , div [ class [ Entry ] ]
+                        [ div [ class [ ETop ] ]
+                            [ div [ elasticClass ] []
+                            , div [ class [ ETActMini ] ]
+                                [ span [ class [ BtnLock ] ] []
+                                ]
+                            ]
+                        , div [ class [ EBottom ] ]
+                            [ div [ class [ EAct ] ]
+                                [ span [ class [ BtnView ] ] []
+                                , text " "
+                                , span [ class [ BtnUnlock ] ] []
+                                ]
+                            ]
                         ]
-                    ]
-                , div [ class [ EBottom ] ]
-                    [ div [ class [ EAct ] ]
-                        [ span [ class [ BtnView ] ] []
-                        , text " "
-                        , span [ class [ BtnUnlock ] ] []
-                        ]
-                    ]
-                ]
-            , renderEntry "15/03/2016 - 20:24:33.105" True (ExternalAcess "NOTME" root)
-            ]
+                   ]
+                ++ [ renderEntry "15/03/2016 - 20:24:33.105" True (ExternalAcess "NOTME" root) ]
+            )
