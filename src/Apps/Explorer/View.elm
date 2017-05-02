@@ -25,6 +25,217 @@ styles =
     Css.asPairs >> style
 
 
+
+-- VIEW WRAPPER
+
+
+type alias Entries =
+    List Entry
+
+
+type alias FileSize =
+    Float
+
+
+type ActionTarget
+    = Active
+    | Passive
+
+
+type alias Action =
+    { target : ActionTarget
+    , ver : ExeVer
+    }
+
+
+type alias ExeVer =
+    Float
+
+
+type ExeMime
+    = Firewall
+    | Virus
+
+
+type EntryGroup
+    = Dir
+    | Branch
+
+
+type ArchiveType
+    = Generic
+    | Executable ExeMime ExeVer (Maybe (List Action))
+
+
+type alias ArchiveProp =
+    { type_ : ArchiveType
+    , size : FileSize
+    }
+
+
+type EntryType
+    = Fantasy
+    | Group Bool EntryGroup (List Entries)
+    | Archive ArchiveProp
+
+
+type alias Entry =
+    { type_ : EntryType
+    , name : String
+    }
+
+
+entryIcon : EntryType -> Classes
+entryIcon type_ =
+    case type_ of
+        Fantasy ->
+            GenericArchiveIcon
+
+        Group expanded groupType ch ->
+            (case groupType of
+                Dir ->
+                    CasedDirIcon
+
+                Branch ->
+                    CasedOpIcon
+            )
+
+        Archive prop ->
+            (case prop.type_ of
+                Generic ->
+                    GenericArchiveIcon
+
+                Executable exeMime ver acts ->
+                    (case exeMime of
+                        Virus ->
+                            VirusIcon
+
+                        Firewall ->
+                            FirewallIcon
+                    )
+            )
+
+
+actionIcon : ActionTarget -> Classes
+actionIcon actType =
+    case actType of
+        Active ->
+            ActiveIcon
+
+        Passive ->
+            PassiveIcon
+
+
+actionName : ActionTarget -> Html Msg
+actionName actType =
+    text
+        (case actType of
+            Active ->
+                "Active"
+
+            Passive ->
+                "Passive"
+        )
+
+
+sizeToText : FileSize -> Html msg
+sizeToText size =
+    text ((toString size) ++ " MB")
+
+
+verToText : ExeVer -> Html msg
+verToText ver =
+    text (toString ver)
+
+
+renderAction : Action -> Html Msg
+renderAction act =
+    div []
+        [ span [ class [ actionIcon act.target ] ] []
+        , span [] [ actionName act.target ]
+        , span [] [ verToText act.ver ]
+        , span [] []
+        ]
+
+
+renderActionList : List Action -> List (Html Msg)
+renderActionList acts =
+    List.map (\o -> renderAction o) acts
+
+
+renderSidebarEntry : Entry -> Html msg
+renderSidebarEntry entry =
+    case entry.type_ of
+        Group expanded gr childs ->
+            renderSidebarGroup expanded childs entry.name gr
+
+        Fantasy ->
+            div
+                [ class [ NavEntry, EntryArchive ] ]
+                [ span [] [ text entry.name ] ]
+
+        Archive prop ->
+            div
+                [ class [ NavEntry, EntryArchive ] ]
+                [ span [ class [ NavIcon, entryIcon entry.type_ ] ] []
+                , span [] [ text entry.name ]
+                ]
+
+
+renderSidebarGroup expanded childs name grType =
+    div [] []
+
+
+renderExplorerEntry : Entry -> Html msg
+renderExplorerEntry entry =
+    case entry.type_ of
+        Group expanded gr childs ->
+            renderExplorerGroup expanded childs entry.name gr
+
+        Fantasy ->
+            div [ class [ CntListEntry, EntryArchive ] ]
+                [ span [] [ text entry.name ] ]
+
+        Archive prop ->
+            (case prop.type_ of
+                Generic ->
+                    div [ class [ CntListEntry, EntryArchive ] ]
+                        [ span [ class [ entryIcon entry.type_ ] ] []
+                        , span [] [ text entry.name ]
+                        , span [] []
+                        , span [] [ sizeToText prop.size ]
+                        ]
+
+                Executable exeMime ver actsCont ->
+                    (case actsCont of
+                        Nothing ->
+                            div [ class [ CntListEntry, EntryArchive ] ]
+                                [ span [ class [ entryIcon entry.type_ ] ] []
+                                , span [] [ text entry.name ]
+                                , span [] [ verToText ver ]
+                                , span [] [ sizeToText prop.size ]
+                                ]
+
+                        Just actions ->
+                            div [ class [ CntListContainer ] ]
+                                [ (renderExplorerEntry { entry | type_ = { entry.type_ | type_ = Archive (Executable exeMime ver Nothing) }} )
+                                , div [ class [ CntListChilds ] ]
+                                    (renderActionList
+                                        actions
+                                    )
+                                ]
+                    )
+            )
+
+
+renderExplorerGroup expanded childs name grType =
+    div [] []
+
+
+
+-- END OF THAT
+
+
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model id game =
     let
