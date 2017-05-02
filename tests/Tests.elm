@@ -7,6 +7,7 @@ import String
 import Game.Servers.Filesystem.ModelTest as FilesystemModel
 import Game.Servers.Logs.ModelTest as LogsModel
 import Game.Servers.Processes.ModelTest as ProcessesModel
+import Apps.Browser.ModelTest as BrowserModel
 import Apps.Explorer.ModelTest as ExplorerModel
 
 
@@ -16,6 +17,6 @@ all =
         [ FilesystemModel.all
         , LogsModel.all
         , ProcessesModel.all
-        , ExplorerModel.all
+        , BrowserModel.all
         , ExplorerModel.all
         ]
