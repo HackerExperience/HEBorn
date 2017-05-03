@@ -53,33 +53,54 @@ renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
     div
         [ class [ Css.Item ]
-        , onClick (MsgOS (MsgWM (OpenWindow application.window)))
-        , attribute "data-icon" application.icon
         , attribute "data-hasinst" (hasInstanceString application.instancesNum)
         ]
-        (if application.instancesNum > 0 then
-            [ div [ class [ Css.DockAppContext ] ]
-                [ ul []
-                    ([ li [] [ text "JAN. ABERTAS" ] ]
-                        ++ (List.map
-                                (\o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text "O" ])
-                                application.openWindows
-                           )
-                        ++ [ hr [] []
-                           , li [] [ text "JAN. MINIMIZADAS" ]
-                           ]
-                        ++ (List.map
-                                (\o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text "M" ])
-                                application.minimizedWindows
-                           )
-                        ++ [ hr [] []
-                           , li [ class [ Css.ClickableWindow ] ] [ text "Nova janela" ]
-                           , li [ class [ Css.ClickableWindow ] ] [ text "Minimizar tudo" ]
-                           , li [ class [ Css.ClickableWindow ] ] [ text "Fechar tudo" ]
-                           ]
-                    )
-                ]
+        ([ div
+            [ class [ Css.ItemIco ]
+            , onClick (MsgOS (MsgWM (OpenOrRestore application.window)))
+            , attribute "data-icon" application.icon
             ]
-         else
             []
+         ]
+            ++ (if application.instancesNum > 0 then
+                    [ div
+                        [ class [ Css.DockAppContext ]
+                        , onClick (MsgOS OS.Messages.NoOp)
+                        ]
+                        [ ul []
+                            ([ li [] [ text "JAN. ABERTAS" ] ]
+                                ++ (List.indexedMap
+                                        (\i o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text (toString i) ])
+                                        application.openWindows
+                                   )
+                                ++ [ hr [] []
+                                   , li [] [ text "JAN. MINIMIZADAS" ]
+                                   ]
+                                ++ (List.indexedMap
+                                        (\i o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text (toString i) ])
+                                        application.minimizedWindows
+                                   )
+                                ++ [ hr [] []
+                                   , li
+                                        [ class [ Css.ClickableWindow ]
+                                        , onClick (MsgOS (MsgWM (Open application.window)))
+                                        ]
+                                        [ text "Nova janela" ]
+                                   , li
+                                        [ class [ Css.ClickableWindow ]
+                                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
+                                        ]
+                                        [ text "Minimizar tudo" ]
+                                   , li
+                                        [ class [ Css.ClickableWindow ]
+                                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
+                                        ]
+                                        [ text "Fechar tudo" ]
+                                   ]
+                            )
+                        ]
+                    ]
+                else
+                    []
+               )
         )
