@@ -91,7 +91,7 @@ windowWrapper window view =
     div
         [ widndowClasses window
         , windowStyle window
-        , onMouseDown (callWM (UpdateFocus (Just window.id)))
+        , onMouseDown (callWM (UpdateFocusTo (Just window.id)))
         ]
         [ Html.map MsgOS (Html.map MsgWM (header window))
         , div
@@ -126,7 +126,7 @@ header window =
         [ Draggable.mouseTrigger window.id DragMsg ]
         [ div
             [ class [ Css.WindowHeader ]
-            , onMouseDown (UpdateFocus (Just window.id))
+            , onMouseDown (UpdateFocusTo (Just window.id))
             ]
             [ headerTitle (windowTitle window) (windowIcon window)
             , headerContext window.id window.context
@@ -160,7 +160,7 @@ headerButtons id =
     div [ class [ Css.HeaderButtons ] ]
         [ span
             [ class [ Css.HeaderButton, Css.HeaderBtnMinimize ]
-            , onClick (MinimizeWindow id)
+            , onClick (Minimize id)
             ]
             []
         , span
@@ -170,7 +170,7 @@ headerButtons id =
             []
         , span
             [ class [ Css.HeaderButton, Css.HeaderBtnClose ]
-            , onClick (CloseWindow id)
+            , onClick (Close id)
             ]
             []
         ]

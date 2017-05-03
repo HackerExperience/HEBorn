@@ -12,12 +12,15 @@ import OS.WindowManager.Models
         , WindowID
         , getWindow
         , openWindow
+        , openOrRestoreWindow
         , closeWindow
         , updateWindowPosition
         , toggleMaximizeWindow
         , minimizeWindow
         , bringFocus
         , switchContext
+        , closeAllWindows
+        , minimizeAllWindows
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
@@ -29,15 +32,30 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 update : Msg -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
 update msg model =
     case msg of
-        OpenWindow window ->
+        Open window ->
+            let
+                ( windows_, seed_, windowID ) =
+                    openWindow model window
+
+                model_ =
+                    { model | windows = windows_, seed = seed_ }
+
+                coreMsg =
+                    [ callInstance
+                        (InstanceBind.open window windowID)
+                    , callDock (DockMsg.WindowsChanges windows_)
+                    ]
+            in
+                ( model_, Cmd.none, coreMsg )
+
+        OpenOrRestore window ->
             let
                 ( windows_, seed_, rNewWindowID ) =
-                    openWindow model window
+                    openOrRestoreWindow model window
 
                 model_ =
                     (bringFocus { model | windows = windows_, seed = seed_ } rNewWindowID)
 
-                -- REVIEW: Why `openWindow` returns *maybe* windowID?
                 windowID =
                     Utils.maybeToString rNewWindowID
 
@@ -52,7 +70,7 @@ update msg model =
                 , coreMsg
                 )
 
-        CloseWindow id ->
+        Close id ->
             let
                 window =
                     (getWindow model id)
@@ -86,7 +104,7 @@ update msg model =
                 , coreMsg
                 )
 
-        MinimizeWindow id ->
+        Minimize id ->
             let
                 windows_ =
                     minimizeWindow model id
@@ -106,7 +124,7 @@ update msg model =
                 , []
                 )
 
-        UpdateFocus target ->
+        UpdateFocusTo target ->
             ( (bringFocus model target), Cmd.none, [] )
 
         SwitchContext id ->
@@ -158,6 +176,26 @@ update msg model =
 
         StopDragging ->
             ( { model | dragging = Nothing }, Cmd.none, [] )
+
+        MinimizeAll window ->
+            let
+                windows_ =
+                    (minimizeAllWindows model.windows window)
+            in
+                ( { model | windows = windows_ }
+                , Cmd.none
+                , [ callDock (DockMsg.WindowsChanges windows_) ]
+                )
+
+        CloseAll window ->
+            let
+                windows_ =
+                    (closeAllWindows model.windows window)
+            in
+                ( { model | windows = windows_ }
+                , Cmd.none
+                , [ callDock (DockMsg.WindowsChanges windows_) ]
+                )
 
 
 dragConfig : Draggable.Config WindowID Msg

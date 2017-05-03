@@ -2,7 +2,7 @@ module OS.Dock.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (ul)
+import Css.Elements exposing (ul, li)
 import Css.Utils exposing (pseudoContent, attrSelector)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Icons as Icon
@@ -18,6 +18,7 @@ type Id
 
 type Class
     = Item
+    | ItemIco
 
 
 css =
@@ -45,13 +46,10 @@ css =
             , zIndex (int 0)
             , cursor pointer
             ]
-        , class Item
-            [ margin3 (px 20) (px 4) (px 0)
+        , class ItemIco
+            [ borderRadius (pct 100)
             , padding (px 8)
-            , borderRadius (pct 100)
             , property "background" "linear-gradient(to bottom, #f3c5bd 0%,#e86c57 50%,#ea2803 51%,#ff6600 75%,#c72200 100%)"
-            , zIndex (int 2)
-            , color (hex "FFF")
             , globalShadow
             , before
                 [ Icon.fontFamily
@@ -61,27 +59,32 @@ css =
                 , textAlign center
                 , display inlineBlock
                 ]
+            ]
+        , class Item
+            [ margin3 (px 8) (px 4) (px 0)
+            , zIndex (int 2)
+            , color (hex "FFF")
             , after
                 [ emptyContent
                 , borderRadius (pct 100)
                 , height (px 1)
                 , width (px 1)
                 , display block
-                , margin2 (px 0) auto
+                , marginTop (px -8)
                 , position absolute
-                , marginLeft (px 12)
+                , marginLeft (px 21)
                 ]
             , hover
                 [ children [ class DockAppContext [ display block ] ] ]
             ]
-        , attrSelector "dockItem"
+        , attrSelector "dockItemIco"
             "data-icon"
             "="
             "explorer"
             [ before
                 [ Icon.explorer ]
             ]
-        , attrSelector "dockItem"
+        , attrSelector "dockItemIco"
             "data-icon"
             "="
             "logvw"
@@ -104,15 +107,22 @@ css =
             , bottom (px 0)
             , backgroundColor (rgba 0 0 0 0.5)
             , marginBottom (px 50)
-            , maxWidth (px 240)
+            , width (px 180)
             , maxHeight (vh 80)
-            , marginLeft (px -(120 - (46 / 2)))
+            , marginLeft (px ((-180 + 46) / 2)) -- (-DockAppContext.width + dockItem.width) / 2
             , borderRadius (px 8)
             , cursor pointer
+            , fontSize (px 12)
             , withClass Visible
                 [ display block ]
             , children
-                [ ul [ padding (px 8), listStyle none ] ]
+                [ ul
+                    [ padding (px 8)
+                    , listStyle none
+                    , children
+                        [ li [ paddingLeft (px 8) ] ]
+                    ]
+                ]
             ]
         , class ClickableWindow
             [ cursor pointer

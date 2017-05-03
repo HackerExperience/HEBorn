@@ -61,6 +61,7 @@ initialApplications =
 
 refreshInstances : Windows -> Application -> Application
 refreshInstances windows app =
+    -- REVIEW: Why not use "Instances" for this?
     let
         appWindows =
             filterAppWindows windows app.window
