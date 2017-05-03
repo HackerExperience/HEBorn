@@ -21,6 +21,7 @@ import OS.WindowManager.Models
         , switchContext
         , closeAllWindows
         , minimizeAllWindows
+        , OpenOrRestoreResult(..)
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
@@ -38,7 +39,7 @@ update msg model =
                     openWindow model window
 
                 model_ =
-                    { model | windows = windows_, seed = seed_ }
+                    (bringFocus { model | windows = windows_, seed = seed_ } (Just windowID))
 
                 coreMsg =
                     [ callInstance
@@ -50,20 +51,29 @@ update msg model =
 
         OpenOrRestore window ->
             let
-                ( windows_, seed_, rNewWindowID ) =
+                ( windows_, result_ ) =
                     openOrRestoreWindow model window
 
-                model_ =
-                    (bringFocus { model | windows = windows_, seed = seed_ } rNewWindowID)
+                ( model_, coreMsg ) =
+                    (case result_ of
+                        Create seed_ windowID ->
+                            ( (bringFocus { model | windows = windows_, seed = seed_ } (Just windowID))
+                            , [ callInstance
+                                    (InstanceBind.open window windowID)
+                              , callDock (DockMsg.WindowsChanges windows_)
+                              ]
+                            )
 
-                windowID =
-                    Utils.maybeToString rNewWindowID
+                        OneRestore windowID ->
+                            ( (bringFocus { model | windows = windows_ } (Just windowID))
+                            , [ callDock (DockMsg.WindowsChanges windows_) ]
+                            )
 
-                coreMsg =
-                    [ callInstance
-                        (InstanceBind.open window windowID)
-                    , callDock (DockMsg.WindowsChanges windows_)
-                    ]
+                        MultiRestore ->
+                            ( (bringFocus { model | windows = windows_ } Nothing)
+                            , [ callDock (DockMsg.WindowsChanges windows_) ]
+                            )
+                    )
             in
                 ( model_
                 , Cmd.none
