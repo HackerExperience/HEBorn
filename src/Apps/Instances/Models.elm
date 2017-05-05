@@ -2,7 +2,7 @@ module Apps.Instances.Models exposing (..)
 
 import Dict
 import Utils
-import OS.WindowManager.ContextHandler.Models as Menu
+import OS.WindowManager.MenuHandler.Models as Menu
 import OS.WindowManager.Models exposing (WindowID)
 
 

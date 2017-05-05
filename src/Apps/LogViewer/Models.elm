@@ -13,7 +13,7 @@ import Apps.Instances.Models as Instance
         , initialState
         )
 import Apps.Context as Context exposing (ContextApp)
-import Apps.LogViewer.Context.Models as Menu
+import Apps.LogViewer.Menu.Models as Menu
 import Date exposing (Date, fromTime)
 
 
@@ -75,7 +75,7 @@ initialLogViewer =
 initialModel : Model
 initialModel =
     { instances = initialState
-    , menu = Menu.initialContext
+    , menu = Menu.initialMenu
     }
 
 

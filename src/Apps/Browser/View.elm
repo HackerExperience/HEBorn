@@ -11,8 +11,8 @@ import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser, getState)
-import Apps.Browser.Context.Models exposing (Context(..))
-import Apps.Browser.Context.View exposing (contextView, contextNav, contextContent)
+import Apps.Browser.Menu.Models exposing (Menu(..))
+import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Browser.Style exposing (Classes(..))
 
 
@@ -33,14 +33,14 @@ view model id game =
     in
         div [ class [ Window ] ]
             [ viewBrowserMain browser game
-            , contextView model id
+            , menuView model id
             ]
 
 
 viewBrowserMain : Browser -> GameModel -> Html Msg
 viewBrowserMain browser game =
     div
-        [ contextContent
+        [ menuContent
         , class
             [ Content ]
         ]

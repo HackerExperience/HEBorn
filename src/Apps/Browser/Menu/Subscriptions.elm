@@ -1,8 +1,8 @@
-module OS.Menu.Subscriptions exposing (..)
+module Apps.Browser.Menu.Subscriptions exposing (..)
 
 import ContextMenu exposing (ContextMenu)
-import OS.Menu.Models exposing (Model)
-import OS.Menu.Messages exposing (Msg(..))
+import Apps.Browser.Menu.Models exposing (Model)
+import Apps.Browser.Menu.Messages exposing (Msg(..))
 
 
 subscriptions : Model -> Sub Msg

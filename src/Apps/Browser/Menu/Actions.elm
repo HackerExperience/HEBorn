@@ -1,11 +1,11 @@
-module Apps.Browser.Context.Actions exposing (actionHandler)
+module Apps.Browser.Menu.Actions exposing (actionHandler)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.Instances.Models exposing (InstanceID)
 import Apps.Browser.Models exposing (Model)
 import Apps.Browser.Messages exposing (Msg)
-import Apps.Browser.Context.Messages exposing (MenuAction(..))
+import Apps.Browser.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :

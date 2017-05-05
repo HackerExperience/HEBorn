@@ -1,61 +1,61 @@
-module Apps.Explorer.Context.View
+module Apps.Explorer.Menu.View
     exposing
-        ( contextView
-        , contextNav
-        , contextContent
+        ( menuView
+        , menuNav
+        , menuContent
         )
 
 import Html exposing (Html)
 import Html.Attributes
 import ContextMenu exposing (ContextMenu)
-import OS.WindowManager.ContextHandler.View
+import OS.WindowManager.MenuHandler.View
     exposing
-        ( contextForCreator
-        , contextViewCreator
+        ( menuForCreator
+        , menuViewCreator
         )
 import Apps.Instances.Models exposing (InstanceID)
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages as ExplorerMsg
-import Apps.Explorer.Context.Messages exposing (Msg(..), MenuAction(..))
-import Apps.Explorer.Context.Models exposing (Context(..))
+import Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.Explorer.Menu.Models exposing (Menu(..))
 
 
-contextView : Model -> InstanceID -> Html ExplorerMsg.Msg
-contextView model id =
-    contextViewCreator
-        ExplorerMsg.ContextMsg
+menuView : Model -> InstanceID -> Html ExplorerMsg.Msg
+menuView model id =
+    menuViewCreator
+        ExplorerMsg.MenuMsg
         model
         model.menu
         MenuMsg
         (menu id)
 
 
-contextFor : Context -> Html.Attribute ExplorerMsg.Msg
-contextFor context =
-    contextForCreator ExplorerMsg.ContextMsg MenuMsg context
+menuFor : Menu -> Html.Attribute ExplorerMsg.Msg
+menuFor context =
+    menuForCreator ExplorerMsg.MenuMsg MenuMsg context
 
 
-menu : InstanceID -> Model -> Context -> List (List ( ContextMenu.Item, Msg ))
+menu : InstanceID -> Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu id model context =
     case context of
-        ContextNav ->
+        MenuNav ->
             [ [ ( ContextMenu.item "A", MenuClick DoA id )
               , ( ContextMenu.item "B", MenuClick DoB id )
               ]
             ]
 
-        ContextContent ->
+        MenuContent ->
             [ [ ( ContextMenu.item "c", MenuClick DoB id )
               , ( ContextMenu.item "d", MenuClick DoA id )
               ]
             ]
 
 
-contextNav : Html.Attribute ExplorerMsg.Msg
-contextNav =
-    contextFor ContextNav
+menuNav : Html.Attribute ExplorerMsg.Msg
+menuNav =
+    menuFor MenuNav
 
 
-contextContent : Html.Attribute ExplorerMsg.Msg
-contextContent =
-    contextFor ContextContent
+menuContent : Html.Attribute ExplorerMsg.Msg
+menuContent =
+    menuFor MenuContent

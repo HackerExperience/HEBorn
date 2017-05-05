@@ -1,17 +1,17 @@
-module Apps.Explorer.Context.Models exposing (..)
+module Apps.Explorer.Menu.Models exposing (..)
 
-import OS.WindowManager.ContextHandler.Models as ContextHandler
+import OS.WindowManager.MenuHandler.Models as MenuHandler
 
 
-type Context
-    = ContextNav
-    | ContextContent
+type Menu
+    = MenuNav
+    | MenuContent
 
 
 type alias Model =
-    ContextHandler.Model Context
+    MenuHandler.Model Menu
 
 
-initialContext : Model
-initialContext =
-    ContextHandler.initialModel
+initialMenu : Model
+initialMenu =
+    MenuHandler.initialModel

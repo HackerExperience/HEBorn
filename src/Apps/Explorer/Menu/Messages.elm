@@ -1,8 +1,8 @@
-module Apps.Explorer.Context.Messages exposing (Msg(..), MenuAction(..))
+module Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
 import Apps.Instances.Models exposing (InstanceID)
-import Apps.Explorer.Context.Models exposing (Context)
+import Apps.Explorer.Menu.Models exposing (Menu)
 
 
 type MenuAction
@@ -11,5 +11,5 @@ type MenuAction
 
 
 type Msg
-    = MenuMsg (ContextMenu.Msg Context)
+    = MenuMsg (ContextMenu.Msg Menu)
     | MenuClick MenuAction InstanceID

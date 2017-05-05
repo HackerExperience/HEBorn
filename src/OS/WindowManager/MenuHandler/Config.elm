@@ -1,4 +1,4 @@
-module OS.WindowManager.ContextHandler.Config exposing (clientConfig)
+module OS.WindowManager.MenuHandler.Config exposing (clientConfig)
 
 import ContextMenu exposing (ContextMenu)
 import ContextMenu exposing (Overflow(..), Cursor(..), Direction(..), defaultConfig)

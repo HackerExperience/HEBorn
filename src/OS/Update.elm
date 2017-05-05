@@ -6,9 +6,9 @@ import OS.Messages exposing (OSMsg(..))
 import OS.Models exposing (Model)
 import OS.WindowManager.Update
 import OS.Dock.Update
-import OS.Context.Messages as MsgContext
-import OS.Context.Update
-import OS.Context.Actions exposing (actionHandler)
+import OS.Menu.Messages as MsgMenu
+import OS.Menu.Update
+import OS.Menu.Actions exposing (actionHandler)
 
 
 update : OSMsg -> Model -> CoreModel -> ( Model, Cmd OSMsg, List CoreMsg )
@@ -28,16 +28,16 @@ update msg model core =
             in
                 ( { model | dock = dock_ }, cmd, coreMsg )
 
-        ContextMsg (MsgContext.MenuClick action) ->
+        ContextMenuMsg (MsgMenu.MenuClick action) ->
             actionHandler action model core.game
 
-        ContextMsg subMsg ->
+        ContextMenuMsg subMsg ->
             let
                 ( context_, cmd, coreMsg ) =
-                    OS.Context.Update.update subMsg model.context core.game
+                    OS.Menu.Update.update subMsg model.context core.game
 
                 cmd_ =
-                    Cmd.map ContextMsg cmd
+                    Cmd.map ContextMenuMsg cmd
             in
                 ( { model | context = context_ }, cmd_, coreMsg )
 

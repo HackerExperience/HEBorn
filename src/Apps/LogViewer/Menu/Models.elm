@@ -1,16 +1,16 @@
-module Apps.LogViewer.Context.Models exposing (..)
+module Apps.LogViewer.Menu.Models exposing (..)
 
-import OS.WindowManager.ContextHandler.Models as ContextHandler
+import OS.WindowManager.MenuHandler.Models as MenuHandler
 
 
-type Context
-    = ContextMain
+type Menu
+    = MenuMain
 
 
 type alias Model =
-    ContextHandler.Model Context
+    MenuHandler.Model Menu
 
 
-initialContext : Model
-initialContext =
-    ContextHandler.initialModel
+initialMenu : Model
+initialMenu =
+    MenuHandler.initialModel

@@ -1,7 +1,7 @@
-module OS.Context.Messages exposing (Msg(..), MenuAction(..))
+module OS.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
-import OS.Context.Models exposing (Context)
+import OS.Menu.Models exposing (Menu)
 
 
 type MenuAction
@@ -9,5 +9,5 @@ type MenuAction
 
 
 type Msg
-    = MenuMsg (ContextMenu.Msg Context)
+    = MenuMsg (ContextMenu.Msg Menu)
     | MenuClick MenuAction

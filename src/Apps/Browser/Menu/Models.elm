@@ -1,16 +1,17 @@
-module OS.Menu.Models exposing (..)
+module Apps.Browser.Menu.Models exposing (..)
 
 import OS.WindowManager.MenuHandler.Models as MenuHandler
 
 
 type Menu
-    = MenuEmpty
+    = MenuNav
+    | MenuContent
 
 
 type alias Model =
     MenuHandler.Model Menu
 
 
-initialContext : Model
-initialContext =
+initialMenu : Model
+initialMenu =
     MenuHandler.initialModel

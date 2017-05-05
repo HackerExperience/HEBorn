@@ -11,8 +11,8 @@ import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model, Explorer, getState)
-import Apps.Explorer.Context.Models exposing (Context(..))
-import Apps.Explorer.Context.View exposing (contextView, contextNav, contextContent)
+import Apps.Explorer.Menu.Models exposing (Menu(..))
+import Apps.Explorer.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Explorer.Style exposing (Classes(..))
 
 
@@ -279,14 +279,14 @@ view model id game =
         div [ class [ Window ] ]
             [ viewExplorerColumn explorer game
             , viewExplorerMain explorer game
-            , contextView model id
+            , menuView model id
             ]
 
 
 viewExplorerColumn : Explorer -> GameModel -> Html Msg
 viewExplorerColumn explorer game =
     div
-        [ contextNav
+        [ menuNav
         , class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
@@ -393,7 +393,7 @@ viewLocBar path =
 viewExplorerMain : Explorer -> GameModel -> Html Msg
 viewExplorerMain explorer game =
     div
-        [ contextContent
+        [ menuContent
         , class
             [ Content ]
         ]

@@ -1,8 +1,8 @@
-module Apps.LogViewer.Context.Subscriptions exposing (..)
+module Apps.LogViewer.Menu.Subscriptions exposing (..)
 
 import ContextMenu exposing (ContextMenu)
-import Apps.LogViewer.Context.Models exposing (Model)
-import Apps.LogViewer.Context.Messages exposing (Msg(..))
+import Apps.LogViewer.Menu.Models exposing (Model)
+import Apps.LogViewer.Menu.Messages exposing (Msg(..))
 
 
 subscriptions : Model -> Sub Msg

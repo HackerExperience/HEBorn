@@ -1,11 +1,11 @@
-module OS.Context.Update exposing (update)
+module OS.Menu.Update exposing (update)
 
 import ContextMenu exposing (ContextMenu)
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
-import OS.Context.Models exposing (Model)
-import OS.Context.Messages exposing (Msg(..))
-import OS.Context.Actions exposing (actionHandler)
+import OS.Menu.Models exposing (Model)
+import OS.Menu.Messages exposing (Msg(..))
+import OS.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )

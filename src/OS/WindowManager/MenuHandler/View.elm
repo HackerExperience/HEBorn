@@ -1,11 +1,11 @@
-module OS.WindowManager.ContextHandler.View exposing (contextForCreator, contextViewCreator)
+module OS.WindowManager.MenuHandler.View exposing (menuForCreator, menuViewCreator)
 
 import Html exposing (Html)
 import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 
 
-contextViewCreator sourceMsg model context msg menu =
+menuViewCreator sourceMsg model context msg menu =
     Html.map sourceMsg
         (ContextMenu.view
             context.config
@@ -15,6 +15,6 @@ contextViewCreator sourceMsg model context msg menu =
         )
 
 
-contextForCreator sourceMsg msg context =
+menuForCreator sourceMsg msg context =
     Html.Attributes.map sourceMsg
         (ContextMenu.open msg context)

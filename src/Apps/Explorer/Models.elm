@@ -21,7 +21,7 @@ import Apps.Instances.Models as Instance
         , initialState
         )
 import Apps.Context as Context exposing (ContextApp)
-import Apps.Explorer.Context.Models as Menu
+import Apps.Explorer.Menu.Models as Menu
 
 
 type alias Explorer =
@@ -50,7 +50,7 @@ initialExplorer =
 initialModel : Model
 initialModel =
     { instances = initialState
-    , menu = Menu.initialContext
+    , menu = Menu.initialMenu
     }
 
 

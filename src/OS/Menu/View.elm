@@ -1,29 +1,29 @@
-module OS.Context.View
+module OS.Menu.View
     exposing
-        ( contextView
-        , contextEmpty
+        ( menuView
+        , menuEmpty
         )
 
 import Html exposing (Html)
 import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 import Core.Messages exposing (CoreMsg(MsgOS))
-import OS.WindowManager.ContextHandler.View
+import OS.WindowManager.MenuHandler.View
     exposing
-        ( contextForCreator
-        , contextViewCreator
+        ( menuForCreator
+        , menuViewCreator
         )
 import OS.Models exposing (Model)
-import OS.Messages exposing (OSMsg(ContextMsg))
-import OS.Context.Messages exposing (Msg(..), MenuAction(..))
-import OS.Context.Models exposing (Context(..))
+import OS.Messages exposing (OSMsg(ContextMenuMsg))
+import OS.Menu.Messages exposing (Msg(..), MenuAction(..))
+import OS.Menu.Models exposing (Menu(..))
 
 
-contextView : Model -> Html CoreMsg
-contextView model =
+menuView : Model -> Html CoreMsg
+menuView model =
     Html.map MsgOS
-        (contextViewCreator
-            ContextMsg
+        (menuViewCreator
+            ContextMenuMsg
             model
             model.context
             MenuMsg
@@ -31,18 +31,18 @@ contextView model =
         )
 
 
-contextFor : Context -> Html.Attribute CoreMsg
-contextFor context =
-    Html.Attributes.map MsgOS (contextForCreator ContextMsg MenuMsg context)
+menuFor : Menu -> Html.Attribute CoreMsg
+menuFor context =
+    Html.Attributes.map MsgOS (menuForCreator ContextMenuMsg MenuMsg context)
 
 
-menu : Model -> Context -> List (List ( ContextMenu.Item, Msg ))
+menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
-        ContextEmpty ->
+        MenuEmpty ->
             []
 
 
-contextEmpty : Html.Attribute CoreMsg
-contextEmpty =
-    contextFor ContextEmpty
+menuEmpty : Html.Attribute CoreMsg
+menuEmpty =
+    menuFor MenuEmpty

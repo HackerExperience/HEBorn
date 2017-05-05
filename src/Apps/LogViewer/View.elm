@@ -14,7 +14,7 @@ import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
-import Apps.LogViewer.Context.Models exposing (Context(..))
+import Apps.LogViewer.Menu.Models exposing (Menu(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)

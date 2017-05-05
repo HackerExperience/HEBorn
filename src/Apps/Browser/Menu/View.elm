@@ -1,4 +1,4 @@
-module Apps.LogViewer.Menu.View
+module Apps.Browser.Menu.View
     exposing
         ( menuView
         , menuNav
@@ -14,25 +14,25 @@ import OS.WindowManager.MenuHandler.View
         , menuViewCreator
         )
 import Apps.Instances.Models exposing (InstanceID)
-import Apps.LogViewer.Models exposing (Model)
-import Apps.LogViewer.Messages as ExplorerMsg
-import Apps.LogViewer.Menu.Messages exposing (Msg(..), MenuAction(..))
-import Apps.LogViewer.Menu.Models exposing (Menu(..))
+import Apps.Browser.Models exposing (Model)
+import Apps.Browser.Messages as BrowserMsg
+import Apps.Browser.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.Browser.Menu.Models exposing (Menu(..))
 
 
-menuView : Model -> InstanceID -> Html ExplorerMsg.Msg
+menuView : Model -> InstanceID -> Html BrowserMsg.Msg
 menuView model id =
     menuViewCreator
-        ExplorerMsg.MenuMsg
+        BrowserMsg.MenuMsg
         model
         model.menu
         MenuMsg
         (menu id)
 
 
-menuFor : Menu -> Html.Attribute ExplorerMsg.Msg
+menuFor : Menu -> Html.Attribute BrowserMsg.Msg
 menuFor context =
-    menuForCreator ExplorerMsg.MenuMsg MenuMsg context
+    menuForCreator BrowserMsg.MenuMsg MenuMsg context
 
 
 menu : InstanceID -> Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
@@ -51,11 +51,11 @@ menu id model context =
             ]
 
 
-menuNav : Html.Attribute ExplorerMsg.Msg
+menuNav : Html.Attribute BrowserMsg.Msg
 menuNav =
-    menuFor menuNav
+    menuFor MenuNav
 
 
-menuContent : Html.Attribute ExplorerMsg.Msg
+menuContent : Html.Attribute BrowserMsg.Msg
 menuContent =
     menuFor MenuContent

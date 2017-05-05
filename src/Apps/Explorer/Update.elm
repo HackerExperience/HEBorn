@@ -13,9 +13,9 @@ import Apps.Explorer.Models
         , getExplorerInstance
         )
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Context.Messages as MsgContext
-import Apps.Explorer.Context.Update
-import Apps.Explorer.Context.Actions exposing (actionHandler)
+import Apps.Explorer.Menu.Messages as MsgMenu
+import Apps.Explorer.Menu.Update
+import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -54,17 +54,17 @@ update msg model game =
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
-        -- Menu
-        ContextMsg (MsgContext.MenuClick action id) ->
+        -- Context
+        MenuMsg (MsgMenu.MenuClick action id) ->
             actionHandler action id model game
 
-        ContextMsg subMsg ->
+        MenuMsg subMsg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.Explorer.Context.Update.update subMsg model.menu game
+                    Apps.Explorer.Menu.Update.update subMsg model.menu game
 
                 cmd_ =
-                    Cmd.map ContextMsg cmd
+                    Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 

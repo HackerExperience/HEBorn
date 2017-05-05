@@ -1,8 +1,8 @@
-module Apps.Browser.Context.Messages exposing (Msg(..), MenuAction(..))
+module Apps.Browser.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
 import Apps.Instances.Models exposing (InstanceID)
-import Apps.Browser.Context.Models exposing (Context)
+import Apps.Browser.Menu.Models exposing (Menu)
 
 
 type MenuAction
@@ -11,5 +11,5 @@ type MenuAction
 
 
 type Msg
-    = MenuMsg (ContextMenu.Msg Context)
+    = MenuMsg (ContextMenu.Msg Menu)
     | MenuClick MenuAction InstanceID
