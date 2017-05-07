@@ -49,6 +49,60 @@ hasInstanceString num =
         "N"
 
 
+renderApplicationSubmenu : CoreModel -> Application -> Html CoreMsg
+renderApplicationSubmenu model application =
+    div
+        [ class [ Css.DockAppContext ]
+        , onClick (MsgOS OS.Messages.NoOp)
+        ]
+        [ ul []
+            ([ li [] [ text "JAN. ABERTAS" ] ]
+                ++ (List.indexedMap
+                        (\i o ->
+                            li
+                                [ class [ Css.ClickableWindow ]
+                                , attribute "data-id" o
+                                , onClick (MsgOS (MsgWM (UpdateFocusTo (Just o))))
+                                ]
+                                [ text (toString i) ]
+                        )
+                        application.openWindows
+                   )
+                ++ [ hr [] []
+                   , li [] [ text "JAN. MINIMIZADAS" ]
+                   ]
+                ++ (List.indexedMap
+                        (\i o ->
+                            li
+                                [ class [ Css.ClickableWindow ]
+                                , attribute "data-id" o
+                                , onClick (MsgOS (MsgWM (Restore o)))
+                                ]
+                                [ text (toString i) ]
+                        )
+                        application.minimizedWindows
+                   )
+                ++ [ hr [] []
+                   , li
+                        [ class [ Css.ClickableWindow ]
+                        , onClick (MsgOS (MsgWM (Open application.window)))
+                        ]
+                        [ text "Nova janela" ]
+                   , li
+                        [ class [ Css.ClickableWindow ]
+                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
+                        ]
+                        [ text "Minimizar tudo" ]
+                   , li
+                        [ class [ Css.ClickableWindow ]
+                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
+                        ]
+                        [ text "Fechar tudo" ]
+                   ]
+            )
+        ]
+
+
 renderApplication : CoreModel -> Application -> Html CoreMsg
 renderApplication model application =
     div
@@ -63,43 +117,7 @@ renderApplication model application =
             []
          ]
             ++ (if application.instancesNum > 0 then
-                    [ div
-                        [ class [ Css.DockAppContext ]
-                        , onClick (MsgOS OS.Messages.NoOp)
-                        ]
-                        [ ul []
-                            ([ li [] [ text "JAN. ABERTAS" ] ]
-                                ++ (List.indexedMap
-                                        (\i o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text (toString i) ])
-                                        application.openWindows
-                                   )
-                                ++ [ hr [] []
-                                   , li [] [ text "JAN. MINIMIZADAS" ]
-                                   ]
-                                ++ (List.indexedMap
-                                        (\i o -> li [ class [ Css.ClickableWindow ], attribute "data-id" o ] [ text (toString i) ])
-                                        application.minimizedWindows
-                                   )
-                                ++ [ hr [] []
-                                   , li
-                                        [ class [ Css.ClickableWindow ]
-                                        , onClick (MsgOS (MsgWM (Open application.window)))
-                                        ]
-                                        [ text "Nova janela" ]
-                                   , li
-                                        [ class [ Css.ClickableWindow ]
-                                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
-                                        ]
-                                        [ text "Minimizar tudo" ]
-                                   , li
-                                        [ class [ Css.ClickableWindow ]
-                                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
-                                        ]
-                                        [ text "Fechar tudo" ]
-                                   ]
-                            )
-                        ]
-                    ]
+                    [ renderApplicationSubmenu model application ]
                 else
                     []
                )

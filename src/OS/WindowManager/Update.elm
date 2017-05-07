@@ -13,6 +13,7 @@ import OS.WindowManager.Models
         , getWindow
         , openWindow
         , openOrRestoreWindow
+        , restoreWindow
         , closeWindow
         , updateWindowPosition
         , toggleMaximizeWindow
@@ -48,6 +49,26 @@ update msg model =
                     ]
             in
                 ( model_, Cmd.none, coreMsg )
+
+        Restore windowID ->
+            let
+                windows_ =
+                    restoreWindow windowID model.windows
+
+                model_ =
+                    bringFocus
+                        { model
+                            | windows = windows_
+                        }
+                        (Just windowID)
+
+                coreMsg =
+                    [ callDock (DockMsg.WindowsChanges windows_) ]
+            in
+                ( model_
+                , Cmd.none
+                , coreMsg
+                )
 
         OpenOrRestore window ->
             let
