@@ -242,24 +242,21 @@ renderDetailedEntry entry =
                                 ]
 
                         Just actions ->
-                            div [ class [ CntListContainer ] ]
-                                [ (renderDetailedEntry
-                                    ({ entry
-                                        | type_ =
-                                            (Archive
-                                                { prop
-                                                    | type_ =
-                                                        (Executable exeMime ver Nothing)
-                                                }
-                                            )
-                                     }
-                                    )
-                                  )
-                                , div [ class [ CntListChilds ] ]
-                                    (renderActionList
-                                        actions
-                                    )
-                                ]
+                            let
+                                type_ =
+                                    (Executable exeMime ver Nothing)
+
+                                archive =
+                                    Archive { prop | type_ = type_ }
+
+                                entry_ =
+                                    { entry | type_ = archive }
+                            in
+                                div [ class [ CntListContainer ] ]
+                                    [ (renderDetailedEntry entry_)
+                                    , div [ class [ CntListChilds ] ]
+                                        (renderActionList actions)
+                                    ]
                     )
             )
 
