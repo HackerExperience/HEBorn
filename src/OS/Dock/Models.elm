@@ -85,7 +85,7 @@ refreshInstances windows app =
 
 updateInstances : Model -> Windows -> Model
 updateInstances model windows =
-    { model | dock = (List.map (\app -> (refreshInstances windows app)) model.dock) }
+    { model | dock = List.map (refreshInstances windows) model.dock }
 
 
 initialDock : Dock
