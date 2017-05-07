@@ -83,12 +83,11 @@ renderUser user =
 
 renderButtons : List Classes -> List (Html Msg)
 renderButtons btns =
-    case List.tail (List.concat (List.map (\d -> [ text " ", span [ class [ d ] ] [] ]) btns)) of
-        Nothing ->
-            []
-
-        Just x ->
-            x
+    btns
+        |> List.map (\d -> [ text " ", span [ class [ d ] ] [] ])
+        |> List.concat
+        |> List.tail
+        |> Maybe.withDefault []
 
 
 renderMsg : LogEventMsg -> Html Msg
