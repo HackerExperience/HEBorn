@@ -18,6 +18,8 @@ css =
             [ width (pct 100)
             , minHeight (pct 100)
             , flexContainerVert
+            , position relative
+            , zIndex (int 0)
             ]
         , header
             [ backgroundColor (hex "EEE")
