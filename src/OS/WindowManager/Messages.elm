@@ -18,6 +18,7 @@ type
     | Minimize WindowID
     | SwitchContext WindowID
     | UpdateFocusTo (Maybe WindowID)
+    | Restore WindowID
       -- WINDOW DRAGGIN'
     | OnDragBy Draggable.Delta
     | StartDragging WindowID

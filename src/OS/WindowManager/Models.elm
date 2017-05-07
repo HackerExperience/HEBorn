@@ -11,6 +11,7 @@ module OS.WindowManager.Models
         , getWindow
         , openWindow
         , openOrRestoreWindow
+        , restoreWindow
         , closeWindow
         , closeAllWindows
         , getOpenWindows
@@ -173,8 +174,8 @@ restoreAllWindow windows window =
         windows
 
 
-restoreWindow : WindowID -> Windows -> GameWindow -> Windows
-restoreWindow winId windows window =
+restoreWindow : WindowID -> Windows -> Windows
+restoreWindow winId windows =
     Dict.update winId
         (\w ->
             case w of
@@ -210,7 +211,7 @@ openOrRestoreWindow model window =
                 Just oWindow ->
                     let
                         windows_t =
-                            (restoreWindow oWindow.id model.windows window)
+                            (restoreWindow oWindow.id model.windows)
                     in
                         ( windows_t, OneRestore oWindow.id )
 
