@@ -1,12 +1,12 @@
 module Gen.Utils exposing (..)
 
-import Fuzz exposing (Fuzzer)
+import Shrink
+import Fuzz as Fuzz exposing (Fuzzer)
 import Random.Pcg as Random exposing (Generator)
 import Random.Pcg.Char as RandomChar
 import Random.Pcg.Int as RandomInt
 import Random.Pcg.Float as RandomFloat
 import Random.Pcg.String as RandomString
-import Shrink exposing (noShrink)
 
 
 type alias Seed =
