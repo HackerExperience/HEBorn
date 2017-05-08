@@ -1,10 +1,12 @@
 module Game.Servers.Logs.ModelTest exposing (all)
 
 import Expect
-import Test exposing (Test, describe)
-import Fuzz exposing (int, tuple)
-import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Logs as Gen
+import Maybe exposing (andThen)
+import Test exposing (Test, describe)
+import Fuzz exposing (tuple, tuple3)
+import Utils exposing (andJust)
+import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Game.Servers.Logs.Models exposing (..)
 
 
@@ -42,25 +44,14 @@ addLogTests =
 
 addLogGenericTests : List Test
 addLogGenericTests =
-    [ fuzz (tuple ( int, int )) "can add a LogEntry but not a NoLog" <|
-        \seed ->
+    [ fuzz
+        (tuple ( Gen.model, Gen.log ))
+        "can add a LogEntry but not a NoLog"
+      <|
+        \( logs, log ) ->
             let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                log =
-                    Gen.log seed1
-
                 model =
-                    addLog (Gen.model seed2) log
-
-                maybeLogExists =
-                    case getLogID log of
-                        Just id ->
-                            Just (logExists model id)
-
-                        Nothing ->
-                            Nothing
+                    addLog logs log
 
                 expectations =
                     case log of
@@ -70,7 +61,10 @@ addLogGenericTests =
                         NoLog ->
                             Nothing
             in
-                Expect.equal expectations maybeLogExists
+                log
+                    |> getLogID
+                    |> andJust (\id -> logExists model id)
+                    |> Expect.equal expectations
     ]
 
 
@@ -89,18 +83,12 @@ updateLogTests =
 
 updateLogGenericTests : List Test
 updateLogGenericTests =
-    [ fuzz (tuple ( int, int )) "update Log contents and noop on NoLog" <|
-        \seed ->
+    [ fuzz
+        (tuple3 ( Gen.model, Gen.log, Gen.logContent ))
+        "update Log contents and noop on NoLog"
+      <|
+        \( logs, log, content ) ->
             let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                content =
-                    Gen.content seed2
-
-                log =
-                    Gen.log seed1
-
                 log_ =
                     case log of
                         LogEntry log ->
@@ -110,24 +98,9 @@ updateLogGenericTests =
                             NoLog
 
                 model =
-                    addLog (Gen.model seed2) log
-
-                model_ =
-                    updateLog model log_
-
-                maybeLogID =
-                    getLogID log
-
-                maybeLog =
-                    case maybeLogID of
-                        Just id ->
-                            getLogByID model_ id
-
-                        Nothing ->
-                            NoLog
-
-                maybeContent =
-                    getLogContent maybeLog
+                    logs
+                        |> (flip addLog) log
+                        |> (flip updateLog) log_
 
                 expectations =
                     case log of
@@ -137,7 +110,11 @@ updateLogGenericTests =
                         NoLog ->
                             Nothing
             in
-                Expect.equal expectations maybeContent
+                log
+                    |> getLogID
+                    |> andJust (getLogByID model)
+                    |> andThen getLogContent
+                    |> Expect.equal expectations
     ]
 
 
@@ -156,28 +133,16 @@ deleteLogTests =
 
 deleteLogGenericTests : List Test
 deleteLogGenericTests =
-    [ fuzz (tuple ( int, int )) "log no longer exists" <|
-        \seed ->
+    [ fuzz
+        (tuple ( Gen.model, Gen.log ))
+        "log no longer exists"
+      <|
+        \( logs, log ) ->
             let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                log =
-                    Gen.log seed1
-
                 model =
-                    addLog (Gen.model seed2) log
-
-                model_ =
-                    removeLog model log
-
-                maybeLogExists =
-                    case getLogID log of
-                        Just id ->
-                            Just (logExists model_ id)
-
-                        Nothing ->
-                            Nothing
+                    logs
+                        |> (flip addLog) log
+                        |> (flip removeLog) log
 
                 expectations =
                     case log of
@@ -187,21 +152,16 @@ deleteLogGenericTests =
                         NoLog ->
                             Nothing
             in
-                Expect.equal expectations maybeLogExists
-    , fuzz (tuple ( int, int )) "can't delete a non-existing log" <|
-        \seed ->
-            let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                log =
-                    Gen.log seed1
-
-                model =
-                    Gen.model seed2
-
-                model_ =
-                    removeLog model log
-            in
-                Expect.equal model model_
+                log
+                    |> getLogID
+                    |> andJust (logExists model)
+                    |> Expect.equal expectations
+    , fuzz
+        (tuple ( Gen.model, Gen.log ))
+        "can't delete a non-existing log"
+      <|
+        \( logs, log ) ->
+            logs
+                |> (flip removeLog) log
+                |> Expect.equal logs
     ]
