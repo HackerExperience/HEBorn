@@ -1,13 +1,4 @@
-module Utils
-    exposing
-        ( msgToCmd
-        , boolToString
-        , maybeToString
-        , delay
-        , safeUpdateDict
-        , swap
-        , andJust
-        )
+module Utils exposing (..)
 
 import Time
 import Task
@@ -70,9 +61,9 @@ safeUpdateDict dict key value =
 
 
 filterMapDict :
-    (comparable -> v -> Maybe v)
-    -> Dict comparable v
-    -> Dict comparable v
+    (comparable -> a -> Maybe b)
+    -> Dict comparable a
+    -> Dict comparable b
 filterMapDict fun dict =
     Dict.foldl
         (\k v acc ->
@@ -88,9 +79,9 @@ filterMapDict fun dict =
 
 
 filterMapList :
-    (a -> Maybe a)
+    (a -> Maybe b)
     -> List a
-    -> List a
+    -> List b
 filterMapList fun list =
     List.foldl
         (\a acc ->
