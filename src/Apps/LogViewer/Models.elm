@@ -1,6 +1,7 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict
+import Utils exposing (filterMapDict)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
 import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
@@ -139,32 +140,28 @@ logContentInterpret src =
                 WrongB
 
 
-logToEntry : NetModel.Log -> LogViewerEntry
+logToEntry : NetModel.Log -> Maybe LogViewerEntry
 logToEntry log =
     case log of
         LogEntry x ->
-            { timestamp =
-                Date.fromTime x.timestamp
-            , expanded =
-                False
-            , message =
-                logContentInterpret x.content
-            , srcID =
-                x.id
-            }
+            Just
+                { timestamp =
+                    Date.fromTime x.timestamp
+                , expanded =
+                    False
+                , message =
+                    logContentInterpret x.content
+                , srcID =
+                    x.id
+                }
 
         NoLog ->
-            -- THIS SHOULD BE FILTERED OUT
-            { timestamp = Date.fromTime 0
-            , expanded = True
-            , message = WrongA
-            , srcID = ""
-            }
+            Nothing
 
 
 logsToEntries : NetModel.Logs -> Entries
 logsToEntries logs =
-    Dict.map (\id oValue -> logToEntry oValue) logs
+    filterMapDict (\id oValue -> logToEntry oValue) logs
 
 
 findLogs : ServerID -> GameModel -> NetModel.Logs

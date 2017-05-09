@@ -175,9 +175,9 @@ renderEntry instanceID entry =
     div
         [ class
             (if entry.expanded then
-                [ Entry ]
-             else
                 [ Entry, EntryExpanded ]
+             else
+                [ Entry ]
             )
         ]
         ([ div [ class [ ETop ] ]
