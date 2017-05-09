@@ -2,7 +2,8 @@ module Game.Servers.Logs.Models exposing (..)
 
 import Dict
 import Utils
-import Time exposing (Time)
+import Task
+import Time exposing (Time, now)
 import Game.Shared exposing (ID)
 
 
@@ -36,7 +37,15 @@ type alias Logs =
 
 initialLogs : Logs
 initialLogs =
-    Dict.empty
+    addLog
+        -- TOY VALUE FOR PLAYING
+        Dict.empty
+        (LogEntry
+            { id = "dummy0000"
+            , content = "test"
+            , timestamp = 0
+            }
+        )
 
 
 getLogByID : Logs -> LogID -> Log
