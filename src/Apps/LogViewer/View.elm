@@ -217,34 +217,38 @@ renderEntryList instanceID list =
 
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model instanceID game =
-    let
-        logvw =
-            getState model instanceID
-    in
-        div []
-            ([ div [ class [ HeaderBar ] ]
-                [ div [ class [ ETAct ] ]
-                    [ span [ class [ BtnUser ] ] []
-                    , text " "
-                    , span [ class [ BtnEdit ] ] []
-                    , text " "
-                    , span [ class [ BtnView ] ] []
-                    ]
-                , div [ class [ ETFilter ] ]
-                    [ div [ class [ BtnFilter ] ] []
-                    , div [ class [ ETFBar ] ]
-                        [ input [ placeholder "Search..." ] []
+    div []
+        ([ div [ class [ HeaderBar ] ]
+            [ div [ class [ ETAct ] ]
+                [ span [ class [ BtnUser ] ] []
+                , text " "
+                , span [ class [ BtnEdit ] ] []
+                , text " "
+                , span [ class [ BtnView ] ] []
+                ]
+            , div [ class [ ETFilter ] ]
+                [ div [ class [ BtnFilter ] ] []
+                , div [ class [ ETFBar ] ]
+                    [ input
+                        [ placeholder "Search..."
+                        , onInput (UpdateFilter instanceID)
                         ]
+                        []
                     ]
                 ]
-             ]
-                ++ renderEntryList
-                    instanceID
-                    (case (getLogViewerInstance model.instances instanceID).gateway of
-                        Just inst ->
-                            Dict.values inst.entries
+            ]
+         ]
+            ++ renderEntryList
+                instanceID
+                (case (getLogViewerInstance model.instances instanceID).gateway of
+                    Just inst ->
+                        Dict.values
+                            (Dict.filter
+                                (\k v -> String.contains inst.filtering v.src)
+                                inst.entries
+                            )
 
-                        Nothing ->
-                            []
-                    )
-            )
+                    Nothing ->
+                        []
+                )
+        )

@@ -61,6 +61,7 @@ type alias LogViewerEntry =
     , expanded : Bool
     , message : LogEventMsg
     , srcID : LogID
+    , src : String
     }
 
 
@@ -153,6 +154,8 @@ logToEntry log =
                     logContentInterpret x.content
                 , srcID =
                     x.id
+                , src =
+                    x.content
                 }
 
         NoLog ->
