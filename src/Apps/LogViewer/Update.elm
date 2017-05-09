@@ -8,6 +8,7 @@ import Apps.LogViewer.Models
     exposing
         ( Model
         , initialLogViewerContext
+        , loadLogViewerContext
         , getLogViewerInstance
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
@@ -27,7 +28,8 @@ update msg model game =
                     Instance.open
                         model.instances
                         id
-                        initialLogViewerContext
+                        --initialLogViewerContext
+                        (loadLogViewerContext "" game)
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
