@@ -35,6 +35,11 @@ invalidServerID =
     "invalidID"
 
 
+localhostServerID : ServerID
+localhostServerID =
+    "localhost"
+
+
 invalidServer : ServerData
 invalidServer =
     { id = invalidServerID
@@ -97,7 +102,15 @@ getServerByID servers id =
 
 initialServers : Servers
 initialServers =
-    Dict.empty
+    addServer
+        -- TOY VALUE FOR PLAYING
+        Dict.empty
+        { id = localhostServerID
+        , ip = "localhost"
+        , filesystem = initialFilesystem
+        , logs = initialLogs
+        , processes = initialProcesses
+        }
 
 
 getFilesystem : Server -> Maybe Filesystem
