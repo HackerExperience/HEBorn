@@ -37,14 +37,12 @@ type alias Logs =
 
 initialLogs : Logs
 initialLogs =
-    addLog
-        -- TOY VALUE FOR PLAYING
-        Dict.empty
-        (LogEntry
-            { id = "dummy0000"
-            , content = "test"
-            , timestamp = 0
-            }
+    Dict.fromList
+        -- DUMMY VALUE FOR PLAYING
+        (List.map (\( x, y ) -> ( x, LogEntry (LogData x y 0) ))
+            [ ( "dummy0000", "174.57.204.104 logged in as root" )
+            , ( "dummy0001", "174.57.204.104 bounced connection from 174.57.204.104 to 209.43.107.189" )
+            ]
         )
 
 

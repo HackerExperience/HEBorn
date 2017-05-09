@@ -1,5 +1,6 @@
 module Apps.LogViewer.View exposing (view)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -12,7 +13,7 @@ import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..))
+import Apps.LogViewer.Models exposing (Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
 import Apps.LogViewer.Context.Models exposing (Context(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
@@ -79,7 +80,7 @@ renderMsg msg =
                     ++ renderUser user
                 )
 
-        Connetion actor src dest ->
+        Connection actor src dest ->
             div [ class [ EData ] ]
                 (renderAddr actor
                     ++ [ span [] [ text " bounced connection from " ]
@@ -100,10 +101,7 @@ renderMsg msg =
                     ++ renderUser aswho
                 )
 
-        WrongA ->
-            div [ class [ EData ] ] []
-
-        WrongB ->
+        _ ->
             div [ class [ EData ] ] []
     )
 
@@ -115,16 +113,13 @@ renderTopActions msg =
             LogIn addr user ->
                 renderButtons [ BtnEdit ]
 
-            Connetion actor src dest ->
+            Connection actor src dest ->
                 renderButtons [ BtnUser, BtnEdit ]
 
             ExternalAcess whom aswho ->
                 []
 
-            WrongA ->
-                renderButtons [ BtnLock ]
-
-            WrongB ->
+            _ ->
                 renderButtons [ BtnLock ]
         )
 
@@ -136,17 +131,14 @@ renderBottomActions msg =
             LogIn addr user ->
                 []
 
-            Connetion actor src dest ->
+            Connection actor src dest ->
                 renderButtons [ IcoUser, BtnView, BtnEdit, BtnDelete ]
 
             ExternalAcess whom aswho ->
                 renderButtons [ BtnApply, BtnCancel ]
 
-            WrongA ->
+            _ ->
                 []
-
-            WrongB ->
-                renderButtons [ BtnView, BtnUnlock ]
         )
 
 
@@ -213,16 +205,11 @@ view model id game =
                 ]
              ]
                 ++ renderEntryList
-                    [ { timestamp = (Date.fromTime 0)
-                      , visibility = True
-                      , message = (LogIn "174.57.204.104" root)
-                      }
-                    , { timestamp = (Date.fromTime 0)
-                      , visibility = True
-                      , message = (Connetion localhost "174.57.204.104" "209.43.107.189")
-                      }
-                    , LogViewerEntry (Date.fromTime 0) True (WrongA)
-                    , LogViewerEntry (Date.fromTime 0) True (WrongB)
-                    , LogViewerEntry (Date.fromTime 0) True (ExternalAcess "NOTME" root)
-                    ]
+                    (case (getLogViewerInstance model.instances id).gateway of
+                        Just inst ->
+                            Dict.values inst.entries
+
+                        Nothing ->
+                            []
+                    )
             )

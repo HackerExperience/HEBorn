@@ -3,7 +3,7 @@ module Apps.LogViewer.Models exposing (..)
 import Dict
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
-import Game.Servers.Models exposing (ServerID, Server(..), getServerByID)
+import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
 import Game.Servers.Logs.Models as NetModel exposing (..)
 import Apps.Instances.Models as Instance
     exposing
@@ -36,10 +36,17 @@ type alias LogID =
     NetModel.LogID
 
 
+type alias FileName =
+    String
+
+
 type LogEventMsg
     = LogIn IP ServerUser
-    | Connetion IP IP IP
+    | LogInto IP
+    | Connection IP IP IP
     | ExternalAcess ServerUser ServerUser
+    | DownloadBy FileName IP
+    | DownloadFrom FileName IP
     | WrongA
     | WrongB
 
@@ -74,6 +81,11 @@ initialLogViewerContext =
     Context.initialContext initialLogViewer
 
 
+loadLogViewerContext : String -> GameModel -> ContextLogViewer
+loadLogViewerContext filtering game =
+    Context.initialContext (LogViewer filtering (logsToEntries (findLogs localhostServerID game)))
+
+
 getLogViewerInstance : Instances ContextLogViewer -> InstanceID -> ContextLogViewer
 getLogViewerInstance model id =
     case (Instance.get model id) of
@@ -100,20 +112,49 @@ getState model id =
         (getLogViewerInstance model.instances id)
 
 
+logContentInterpret : String -> LogEventMsg
+logContentInterpret src =
+    let
+        splitten =
+            String.split " " src
+    in
+        case splitten of
+            [ addr, "logged", "in", "as", user ] ->
+                LogIn addr user
+
+            [ actor, "bounced", "connection", "from", src, "to", dest ] ->
+                Connection actor src dest
+
+            [ "File", fileName, "downloaded", "by", destIP ] ->
+                DownloadBy fileName destIP
+
+            [ "File", fileName, "downloaded", "from", srcIP ] ->
+                DownloadFrom fileName srcIP
+
+            [ "Logged", "into", destinationIP ] ->
+                LogInto destinationIP
+
+            _ ->
+                WrongB
+
+
 logToEntry : NetModel.Log -> LogViewerEntry
 logToEntry log =
-    { timestamp =
-        case log of
-            LogEntry x ->
+    case log of
+        LogEntry x ->
+            { timestamp =
                 Date.fromTime x.timestamp
+            , visibility =
+                False
+            , message =
+                logContentInterpret x.content
+            }
 
-            NoLog ->
-                Date.fromTime 0
-    , visibility =
-        False
-    , message =
-        WrongA
-    }
+        NoLog ->
+            { timestamp = Date.fromTime 0
+            , visibility = True
+            , message = WrongA
+            }
 
 
 logsToEntries : NetModel.Logs -> Entries
