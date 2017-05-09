@@ -57,8 +57,9 @@ type alias Entries =
 
 type alias LogViewerEntry =
     { timestamp : Date.Date
-    , visibility : Bool
+    , expanded : Bool
     , message : LogEventMsg
+    , srcID : LogID
     }
 
 
@@ -144,16 +145,20 @@ logToEntry log =
         LogEntry x ->
             { timestamp =
                 Date.fromTime x.timestamp
-            , visibility =
+            , expanded =
                 False
             , message =
                 logContentInterpret x.content
+            , srcID =
+                x.id
             }
 
         NoLog ->
+            -- THIS SHOULD BE FILTERED OUT
             { timestamp = Date.fromTime 0
-            , visibility = True
+            , expanded = True
             , message = WrongA
+            , srcID = ""
             }
 
 

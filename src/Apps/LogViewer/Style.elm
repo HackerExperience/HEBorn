@@ -10,6 +10,7 @@ import Css.Icons as Icon
 type Classes
     = HeaderBar
     | Entry
+    | EntryExpanded
     | ETop
     | ETAct
     | ETActMini
@@ -134,6 +135,7 @@ css =
         , class CasedBtnExpand
             [ ico
             , before [ Icon.divExpand ]
+            , cursor pointer
             ]
         , class IcoCrosshair
             [ ico
@@ -172,5 +174,15 @@ css =
         , class BoxifyMe
             [ border3 (px 1) solid (hex "444")
             , padding (px 2)
+            ]
+        , class EntryExpanded
+            [ children
+                [ class EBottom
+                    [ children
+                        [ class CasedBtnExpand
+                            [ before [ Icon.divContract ] ]
+                        ]
+                    ]
+                ]
             ]
         ]
