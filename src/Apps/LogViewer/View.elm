@@ -13,7 +13,7 @@ import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
+import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
 import Apps.LogViewer.Context.Models exposing (Context(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
@@ -106,6 +106,25 @@ renderMsg msg =
     )
 
 
+renderMiniMsg : LogEventMsg -> Html Msg
+renderMiniMsg msg =
+    (case msg of
+        Connection actor src dest ->
+            div [ class [ EData ] ]
+                (renderAddr actor
+                    ++ [ span [] [ text " bounced connection from " ]
+                       , span [ class [ IcoCrosshair, ColorRemote ] ] []
+                       , text " "
+                       , span [ class [ IdMe, ColorRemote ] ] [ text src ]
+                       , span [] [ text " to ..." ]
+                       ]
+                )
+
+        _ ->
+            renderMsg msg
+    )
+
+
 renderTopActions : LogEventMsg -> Html Msg
 renderTopActions msg =
     div [ class [ ETActMini ] ]
@@ -142,39 +161,54 @@ renderBottomActions msg =
         )
 
 
-attachVisibility : Bool -> Attribute msg
-attachVisibility status =
-    attribute "data-expanded"
-        (if (status) then
-            "1"
-         else
-            "0"
+renderEntryToggler : InstanceID -> LogID -> Html Msg
+renderEntryToggler instID logID =
+    div
+        [ class [ CasedBtnExpand, EToggler ]
+        , onClick (ToogleLog instID logID)
+        ]
+        []
+
+
+renderEntry : InstanceID -> LogViewerEntry -> Html Msg
+renderEntry instanceID entry =
+    div
+        [ class
+            (if entry.expanded then
+                [ Entry ]
+             else
+                [ Entry, EntryExpanded ]
+            )
+        ]
+        ([ div [ class [ ETop ] ]
+            [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
+            , div [ elasticClass ] []
+            , renderTopActions entry.message
+            ]
+         ]
+            ++ (if entry.expanded then
+                    [ renderMsg entry.message
+                    , div
+                        [ class [ EBottom, EntryExpanded ] ]
+                        [ renderBottomActions entry.message
+                        , renderEntryToggler instanceID entry.srcID
+                        ]
+                    ]
+                else
+                    [ renderMiniMsg entry.message
+                    , div
+                        [ class [ EBottom ] ]
+                        [ div [ class [ EAct ] ] []
+                        , renderEntryToggler instanceID entry.srcID
+                        ]
+                    ]
+               )
         )
 
 
-renderEntry : Date.Date -> Bool -> LogEventMsg -> Html Msg
-renderEntry timestamp fullvisible msg =
-    div [ class [ Entry ] ]
-        [ div [ class [ ETop ] ]
-            [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" timestamp) ]
-            , div [ elasticClass ] []
-            , renderTopActions msg
-            ]
-        , renderMsg msg
-        , div [ class [ EBottom ] ]
-            [ renderBottomActions msg
-            , div
-                [ class [ CasedBtnExpand, EToggler ]
-                , attachVisibility fullvisible
-                ]
-                []
-            ]
-        ]
-
-
-renderEntryList : List LogViewerEntry -> List (Html Msg)
-renderEntryList list =
-    List.map (\n -> (renderEntry n.timestamp n.visibility n.message)) list
+renderEntryList : InstanceID -> List LogViewerEntry -> List (Html Msg)
+renderEntryList instanceID list =
+    List.map (renderEntry instanceID) list
 
 
 
@@ -182,10 +216,10 @@ renderEntryList list =
 
 
 view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
+view model instanceID game =
     let
         logvw =
-            getState model id
+            getState model instanceID
     in
         div []
             ([ div [ class [ HeaderBar ] ]
@@ -205,7 +239,8 @@ view model id game =
                 ]
              ]
                 ++ renderEntryList
-                    (case (getLogViewerInstance model.instances id).gateway of
+                    instanceID
+                    (case (getLogViewerInstance model.instances instanceID).gateway of
                         Just inst ->
                             Dict.values inst.entries
 

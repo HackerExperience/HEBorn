@@ -48,3 +48,13 @@ switch instance =
                     ContextGateway
     in
         { instance | context = context_ }
+
+
+update : ContextApp instance -> Maybe instance -> ContextApp instance
+update instance v =
+    case (active instance) of
+        ContextGateway ->
+            { instance | gateway = v }
+
+        ContextEndpoint ->
+            { instance | remote = v }
