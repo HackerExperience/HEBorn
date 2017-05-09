@@ -108,3 +108,22 @@ update msg model game =
                     Instance.update model.instances instanceID instance_
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
+
+        UpdateFilter instanceID filter ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+
+                context_ =
+                    { context | filtering = filter }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
