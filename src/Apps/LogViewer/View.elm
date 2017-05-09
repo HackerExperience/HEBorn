@@ -6,14 +6,17 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (asPairs)
 import Css.Common exposing (elasticClass)
+import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
 import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (Model, LogViewer, getState)
+import Apps.LogViewer.Models exposing (Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..))
 import Apps.LogViewer.Context.Models exposing (Context(..))
 import Apps.LogViewer.Style exposing (Classes(..))
+import Date exposing (Date, fromTime)
+import Date.Format as DateFormat exposing (format)
 
 
 { id, class, classList } =
@@ -29,31 +32,7 @@ styles =
 -- VIEW WRAPPER
 
 
-type alias NetAddr =
-    String
-
-
-type alias SysUser =
-    String
-
-
-localhost : NetAddr
-localhost =
-    "localhost"
-
-
-root : SysUser
-root =
-    "root"
-
-
-type LogEventMsg
-    = LogIn NetAddr SysUser
-    | Connetion NetAddr NetAddr NetAddr
-    | ExternalAcess SysUser SysUser
-
-
-renderAddr : NetAddr -> List (Html Msg)
+renderAddr : IP -> List (Html Msg)
 renderAddr addr =
     if (addr == localhost) then
         [ span [ class [ IcoHome, ColorLocal ] ] []
@@ -67,7 +46,7 @@ renderAddr addr =
         ]
 
 
-renderUser : SysUser -> List (Html Msg)
+renderUser : ServerUser -> List (Html Msg)
 renderUser user =
     if (user == root) then
         [ span [ class [ IcoUser, ColorRoot ] ] []
@@ -120,6 +99,12 @@ renderMsg msg =
                     ++ [ span [] [ text " logged in as " ] ]
                     ++ renderUser aswho
                 )
+
+        WrongA ->
+            div [ class [ EData ] ] []
+
+        WrongB ->
+            div [ class [ EData ] ] []
     )
 
 
@@ -135,6 +120,12 @@ renderTopActions msg =
 
             ExternalAcess whom aswho ->
                 []
+
+            WrongA ->
+                renderButtons [ BtnLock ]
+
+            WrongB ->
+                renderButtons [ BtnLock ]
         )
 
 
@@ -150,6 +141,12 @@ renderBottomActions msg =
 
             ExternalAcess whom aswho ->
                 renderButtons [ BtnApply, BtnCancel ]
+
+            WrongA ->
+                []
+
+            WrongB ->
+                renderButtons [ BtnView, BtnUnlock ]
         )
 
 
@@ -163,11 +160,11 @@ attachVisibility status =
         )
 
 
-renderEntry : String -> Bool -> LogEventMsg -> Html Msg
+renderEntry : Date.Date -> Bool -> LogEventMsg -> Html Msg
 renderEntry timestamp fullvisible msg =
     div [ class [ Entry ] ]
         [ div [ class [ ETop ] ]
-            [ div [] [ text timestamp ]
+            [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" timestamp) ]
             , div [ elasticClass ] []
             , renderTopActions msg
             ]
@@ -181,13 +178,6 @@ renderEntry timestamp fullvisible msg =
                 []
             ]
         ]
-
-
-type alias LogViewerEntry =
-    { timestamp : String
-    , visibility : Bool
-    , message : LogEventMsg
-    }
 
 
 renderEntryList : List LogViewerEntry -> List (Html Msg)
@@ -223,42 +213,16 @@ view model id game =
                 ]
              ]
                 ++ renderEntryList
-                    [ { timestamp = "15/03/2016 - 20:24:33.105"
+                    [ { timestamp = (Date.fromTime 0)
                       , visibility = True
                       , message = (LogIn "174.57.204.104" root)
                       }
-                    , { timestamp = "15/03/2016 - 20:24:33.105"
+                    , { timestamp = (Date.fromTime 0)
                       , visibility = True
                       , message = (Connetion localhost "174.57.204.104" "209.43.107.189")
                       }
+                    , LogViewerEntry (Date.fromTime 0) True (WrongA)
+                    , LogViewerEntry (Date.fromTime 0) True (WrongB)
+                    , LogViewerEntry (Date.fromTime 0) True (ExternalAcess "NOTME" root)
                     ]
-                ++ [ div [ class [ Entry ] ]
-                        [ div [ class [ ETop ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ ETActMini ] ]
-                                [ span [ class [ BtnLock ] ] []
-                                ]
-                            ]
-                        , div [ class [ EBottom ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ CasedBtnExpand, EToggler ] ] []
-                            ]
-                        ]
-                   , div [ class [ Entry ] ]
-                        [ div [ class [ ETop ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ ETActMini ] ]
-                                [ span [ class [ BtnLock ] ] []
-                                ]
-                            ]
-                        , div [ class [ EBottom ] ]
-                            [ div [ class [ EAct ] ]
-                                [ span [ class [ BtnView ] ] []
-                                , text " "
-                                , span [ class [ BtnUnlock ] ] []
-                                ]
-                            ]
-                        ]
-                   ]
-                ++ [ renderEntry "15/03/2016 - 20:24:33.105" True (ExternalAcess "NOTME" root) ]
             )
