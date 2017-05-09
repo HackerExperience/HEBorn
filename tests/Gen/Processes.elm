@@ -1,217 +1,230 @@
 module Gen.Processes exposing (..)
 
+import Fuzz exposing (Fuzzer)
 import Gen.Filesystem exposing (fileID)
+import Random.Pcg
+    exposing
+        ( Generator
+        , constant
+        , int
+        , float
+        , list
+        , choices
+        , map
+        , andThen
+        )
+import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Processes.Models exposing (..)
 import Gen.Utils exposing (..)
 
 
-processID : Int -> ProcessID
-processID seedInt =
-    fuzz1 seedInt processIDSeed
+--------------------------------------------------------------------------------
+-- Fuzzers
+--------------------------------------------------------------------------------
 
 
-processIDSeed : Seed -> ( ProcessID, Seed )
-processIDSeed seed =
-    smallStringSeed seed
+processID : Fuzzer ProcessID
+processID =
+    fuzzer genProcessID
 
 
-processType : Int -> ProcessType
-processType seedInt =
-    fuzz1 seedInt processTypeSeed
+gatewayID : Fuzzer GatewayID
+gatewayID =
+    fuzzer genGatewayID
 
 
-processTypeSeed : Seed -> ( ProcessType, Seed )
-processTypeSeed seed =
+networkID : Fuzzer NetworkID
+networkID =
+    fuzzer genNetworkID
+
+
+targetServerID : Fuzzer TargetServerID
+targetServerID =
+    fuzzer genTargetServerID
+
+
+connectionID : Fuzzer ConnectionID
+connectionID =
+    fuzzer genConnectionID
+
+
+priority : Fuzzer ProcessPriority
+priority =
+    fuzzer genPriority
+
+
+processType : Fuzzer ProcessType
+processType =
+    fuzzer genProcessType
+
+
+processRunning : Fuzzer ProcessState
+processRunning =
+    fuzzer genProcessRunning
+
+
+processState : Fuzzer ProcessState
+processState =
+    fuzzer genProcessState
+
+
+progress : Fuzzer Float
+progress =
+    fuzzer genProgress
+
+
+process : Fuzzer Process
+process =
+    fuzzer genProcess
+
+
+processList : Fuzzer (List Process)
+processList =
+    fuzzer genProcessList
+
+
+emptyProcesses : Fuzzer Processes
+emptyProcesses =
+    fuzzer genEmptyProcesses
+
+
+nonEmptyProcesses : Fuzzer Processes
+nonEmptyProcesses =
+    fuzzer genNonEmptyProcesses
+
+
+processes : Fuzzer Processes
+processes =
+    fuzzer genProcesses
+
+
+model : Fuzzer Processes
+model =
+    fuzzer genModel
+
+
+
+--------------------------------------------------------------------------------
+-- Generators
+--------------------------------------------------------------------------------
+
+
+genProcessID : Generator ProcessID
+genProcessID =
+    unique
+
+
+{-| Remove this as soon as Gen.Filesystem gets updated
+-}
+genFileID : Generator String
+genFileID =
+    unique
+
+
+genGatewayID : Generator GatewayID
+genGatewayID =
+    unique
+
+
+genNetworkID : Generator NetworkID
+genNetworkID =
+    unique
+
+
+genTargetServerID : Generator TargetServerID
+genTargetServerID =
+    unique
+
+
+genConnectionID : Generator ConnectionID
+genConnectionID =
+    unique
+
+
+genPriority : Generator ProcessPriority
+genPriority =
+    int 0 5
+
+
+genProcessType : Generator ProcessType
+genProcessType =
+    [ Cracker, Decryptor, Encryptor, FileDownload, LogDeleter ]
+        |> List.map constant
+        |> choices
+
+
+genProcessRunning : Generator ProcessState
+genProcessRunning =
+    float 1 60
+        |> map StateRunning
+
+
+genProcessState : Generator ProcessState
+genProcessState =
+    [ StateStandby, StatePaused, StateComplete ]
+        |> List.map constant
+        |> (::) genProcessRunning
+        |> choices
+
+
+genProgress : Generator Float
+genProgress =
+    percentage
+
+
+genProcess : Generator Process
+genProcess =
     let
-        ( value, seed_ ) =
-            (intRangeSeed 0 5 seed)
-
-        result =
-            case value of
-                1 ->
-                    Cracker
-
-                2 ->
-                    Decryptor
-
-                3 ->
-                    Encryptor
-
-                4 ->
-                    FileDownload
-
-                _ ->
-                    LogDeleter
+        buildProcessRecord =
+            \id fID gID nID cID tID priority type_ state progress ->
+                { id = id
+                , fileID = fID
+                , gatewayID = gID
+                , networkID = nID
+                , connectionID = cID
+                , targetServerID = tID
+                , priority = priority
+                , processType = type_
+                , state = state
+                , progress = progress
+                }
     in
-        ( result, seed_ )
+        genProcessID
+            |> map buildProcessRecord
+            |> andMap genFileID
+            |> andMap genGatewayID
+            |> andMap genNetworkID
+            |> andMap genConnectionID
+            |> andMap genTargetServerID
+            |> andMap genPriority
+            |> andMap genProcessType
+            |> andMap genProcessState
+            |> andMap genProgress
 
 
-priority : Int -> ProcessPriority
-priority seedInt =
-    fuzz1 seedInt prioritySeed
+genProcessList : Generator (List Process)
+genProcessList =
+    int 1 8
+        |> andThen (\num -> list num genProcess)
 
 
-prioritySeed : Seed -> ( ProcessPriority, Seed )
-prioritySeed seed =
-    (intRangeSeed 0 5 seed)
+genEmptyProcesses : Generator Processes
+genEmptyProcesses =
+    constant initialProcesses
 
 
-processState : Int -> ProcessState
-processState seedInt =
-    fuzz1 seedInt processStateSeed
+genNonEmptyProcesses : Generator Processes
+genNonEmptyProcesses =
+    andThen
+        ((List.foldl addProcess initialProcesses) >> constant)
+        genProcessList
 
 
-processStateSeed : Seed -> ( ProcessState, Seed )
-processStateSeed seed =
-    let
-        ( value, seed_ ) =
-            (intRangeSeed 1 4 seed)
-
-        result =
-            case value of
-                1 ->
-                    stateRunning seed
-
-                2 ->
-                    StateStandby
-
-                3 ->
-                    StatePaused
-
-                _ ->
-                    StateComplete
-    in
-        ( result, seed_ )
+genProcesses : Generator Processes
+genProcesses =
+    choices [ genEmptyProcesses, genNonEmptyProcesses ]
 
 
-stateRunning : Seed -> ProcessState
-stateRunning seed =
-    let
-        ( completionDate, _ ) =
-            floatSeed seed
-    in
-        StateRunning completionDate
-
-
-progress : Int -> Progress
-progress seedInt =
-    fuzz1 seedInt progressSeed
-
-
-progressSeed : Seed -> ( Float, Seed )
-progressSeed seed =
-    percentageSeed seed
-
-
-gatewayID : Int -> GatewayID
-gatewayID seedInt =
-    fuzz1 seedInt gatewayIDSeed
-
-
-gatewayIDSeed : Seed -> ( GatewayID, Seed )
-gatewayIDSeed seed =
-    smallStringSeed seed
-
-
-networkID : Int -> NetworkID
-networkID seedInt =
-    fuzz1 seedInt networkIDSeed
-
-
-networkIDSeed : Seed -> ( NetworkID, Seed )
-networkIDSeed seed =
-    smallStringSeed seed
-
-
-targetServerID : Int -> NetworkID
-targetServerID seedInt =
-    fuzz1 seedInt targetServerIDSeed
-
-
-targetServerIDSeed : Seed -> ( TargetServerID, Seed )
-targetServerIDSeed seed =
-    smallStringSeed seed
-
-
-connectionID : Int -> ConnectionID
-connectionID seedInt =
-    fuzz1 seedInt connectionIDSeed
-
-
-connectionIDSeed : Seed -> ( ConnectionID, Seed )
-connectionIDSeed seed =
-    smallStringSeed seed
-
-
-process : Int -> Process
-process seedInt =
-    fuzz1 seedInt processSeed
-
-
-processSeed : Seed -> ( Process, Seed )
-processSeed seed =
-    let
-        ( seedInt, seed_ ) =
-            intSeed seed
-
-        result =
-            { id = processID seedInt
-            , processType = processType seedInt
-            , priority = priority seedInt
-            , state = processState seedInt
-            , progress = progress seedInt
-            , fileID = fileID seedInt
-            , gatewayID = gatewayID seedInt
-            , targetServerID = targetServerID seedInt
-            , networkID = networkID seedInt
-            , connectionID = connectionID seedInt
-            }
-    in
-        ( result, seed_ )
-
-
-processList : Int -> List Process
-processList seedInt =
-    fuzz1 seedInt processListSeed
-
-
-processListSeed : Seed -> ( List Process, Seed )
-processListSeed seed =
-    let
-        ( size, seed_ ) =
-            intRangeSeed 1 100 seed
-
-        list =
-            List.range 1 size
-
-        reducer =
-            \_ ( processes, seed ) ->
-                let
-                    ( process, seed_ ) =
-                        processSeed seed
-                in
-                    ( process :: processes, seed_ )
-    in
-        List.foldl reducer ( [], seed_ ) list
-
-
-processesEmpty : Processes
-processesEmpty =
-    initialProcesses
-
-
-processes : Int -> Processes
-processes seedInt =
-    fuzz1 seedInt processesSeed
-
-
-processesSeed : Seed -> ( Processes, Seed )
-processesSeed seed =
-    let
-        ( processList, seed_ ) =
-            processListSeed seed
-
-        processes =
-            List.foldl addProcess processesEmpty processList
-    in
-        ( processes, seed_ )
+genModel : Generator Processes
+genModel =
+    genNonEmptyProcesses

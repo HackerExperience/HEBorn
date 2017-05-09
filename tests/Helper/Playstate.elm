@@ -1,12 +1,16 @@
 module Helper.Playstate exposing (..)
 
-import Game.Models exposing (GameModel)
-import Game.Servers.Models exposing (..)
-import Game.Servers.Filesystem.Models exposing (File, addFile, getFileName)
+import Gen.Filesystem
 import Gen.Game
 import Gen.Servers
-import Gen.Filesystem
+import Fuzz exposing (Fuzzer)
+import Game.Models exposing (GameModel)
+import Game.Servers.Filesystem.Models exposing (File, addFile, getFileName)
 import Helper.Filesystem exposing (addFileRecursively)
+import Random.Pcg as Random exposing (Generator)
+import Random.Pcg.Extra as RandomExtra exposing (andMap)
+import Game.Servers.Models exposing (..)
+import Gen.Utils exposing (..)
 
 
 type alias ValidState =
@@ -29,57 +33,61 @@ type alias State =
     }
 
 
-one : Int -> Int -> State
-one seed1 seed2 =
+
+--------------------------------------------------------------------------------
+-- Fuzzers
+--------------------------------------------------------------------------------
+
+
+one : Fuzzer State
+one =
+    fuzzer genOne
+
+
+
+--------------------------------------------------------------------------------
+-- Generators
+--------------------------------------------------------------------------------
+
+
+genOne : Generator State
+genOne =
     let
-        game0 =
-            Gen.Game.model seed1
+        generateStateRecord =
+            \game server file1 file2 folder1 folder2 ->
+                let
+                    servers =
+                        server
+                            |> getFilesystemSafe
+                            |> addFileRecursively file1
+                            |> addFileRecursively folder1
+                            |> updateFilesystem server
+                            |> getServerSafe
+                            |> addServer game.servers
 
-        server =
-            Gen.Servers.server seed2
+                    game_ =
+                        { game | servers = servers }
 
-        file =
-            Gen.Filesystem.stdFile (seed1 + 1)
+                    valid =
+                        ValidState
+                            file1
+                            folder1
 
-        folder =
-            Gen.Filesystem.folder (seed2 + 1)
-
-        filesystem1 =
-            addFileRecursively file (getFilesystemSafe server)
-
-        filesystem_ =
-            addFileRecursively folder filesystem1
-
-        server_ =
-            updateFilesystem server filesystem_
-
-        servers =
-            addServer game0.servers (getServerSafe server_)
-
-        game =
-            { game0
-                | servers = servers
-            }
-
-        unboudedFile =
-            Gen.Filesystem.stdFile (seed1 + 2)
-
-        unboudedFolder =
-            Gen.Filesystem.folder (seed2 + 2)
+                    invalid =
+                        InvalidState
+                            file2
+                            folder2
+                in
+                    { game = game_
+                    , server = server
+                    , valid = valid
+                    , invalid = invalid
+                    }
     in
-        let
-            valid =
-                ValidState
-                    file
-                    folder
-
-            invalid =
-                InvalidState
-                    unboudedFile
-                    unboudedFolder
-        in
-            { game = game
-            , server = server
-            , valid = valid
-            , invalid = invalid
-            }
+        Gen.Game.genModel
+            |> Random.map generateStateRecord
+            |> andMap Gen.Servers.genServer
+            |> andMap Gen.Filesystem.genStdFile
+            |> andMap Gen.Filesystem.genStdFile
+            |> andMap Gen.Filesystem.genFolder
+            |> andMap Gen.Filesystem.genFolder

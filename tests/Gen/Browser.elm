@@ -1,116 +1,184 @@
 module Gen.Browser exposing (..)
 
-import Apps.Browser.Messages exposing (Msg(..))
-import Gen.Utils exposing (..)
+import Fuzz exposing (Fuzzer)
+import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
+import Random.Pcg
+    exposing
+        ( Generator
+        , constant
+        , int
+        , list
+        , choices
+        , map3
+        , andThen
+        )
 import Apps.Browser.Models exposing (..)
 
 
-url : Int -> PageURL
-url seedInt =
-    fuzz1 seedInt urlSeed
+--------------------------------------------------------------------------------
+-- Fuzzers
+--------------------------------------------------------------------------------
 
 
-urlSeed : Seed -> ( PageURL, Seed )
-urlSeed seed =
-    smallStringSeed seed
+pageURL : Fuzzer PageURL
+pageURL =
+    fuzzer genPageURL
 
 
-page : Int -> BrowserPage
-page seedInt =
-    fuzz1 seedInt pageSeed
+title : Fuzzer PageTitle
+title =
+    fuzzer genTitle
 
 
-pageSeed : Seed -> ( BrowserPage, Seed )
-pageSeed seed =
-    let
-        ( url, seed_ ) =
-            urlSeed seed
-
-        -- FIXME: update the content
-        page =
-            { url = url, title = "", content = "" }
-    in
-        ( page, seed_ )
+content : Fuzzer PageContent
+content =
+    fuzzer genContent
 
 
-emptyPage : BrowserPage
+page : Fuzzer BrowserPage
+page =
+    fuzzer genPage
+
+
+emptyPage : Fuzzer BrowserPage
 emptyPage =
-    -- FIXME: update the content
-    { url = "about:blank", title = "", content = "" }
+    fuzzer genEmptyPage
 
 
-history : Int -> BrowserHistory
-history seedInt =
-    fuzz1 seedInt historySeed
+pageList : Fuzzer (List BrowserPage)
+pageList =
+    fuzzer genPageList
 
 
-historySeed : Seed -> ( BrowserHistory, Seed )
-historySeed seed =
-    let
-        ( size, seed_ ) =
-            intRangeSeed 1 10 seed
-
-        list =
-            List.range 0 size
-
-        reducer =
-            \_ ( pages, seed ) ->
-                let
-                    ( page, seed_ ) =
-                        pageSeed seed
-                in
-                    ( page :: pages, seed_ )
-    in
-        List.foldl reducer ( [], seed_ ) list
+emptyHistory : Fuzzer BrowserHistory
+emptyHistory =
+    fuzzer genEmptyHistory
 
 
-browser : Int -> Browser
-browser seedInt =
-    fuzz1 seedInt browserSeed
+nonEmptyHistory : Fuzzer BrowserHistory
+nonEmptyHistory =
+    fuzzer genNonEmptyHistory
 
 
-browserSeed : Seed -> ( Browser, Seed )
-browserSeed seed =
-    let
-        ( prevHistory, seed1 ) =
-            historySeed seed
-
-        ( nextHistory, seed2 ) =
-            historySeed seed1
-
-        ( currentPage, seed_ ) =
-            pageSeed seed2
-
-        browser =
-            browserParams prevHistory nextHistory currentPage
-    in
-        ( browser, seed_ )
+history : Fuzzer BrowserHistory
+history =
+    fuzzer genHistory
 
 
-browserParams : BrowserHistory -> BrowserHistory -> BrowserPage -> Browser
-browserParams prevHistory nextHistory page =
-    { addressBar = getPageURL page
-    , page = page
-    , previousPages = prevHistory
-    , nextPages = nextHistory
-    }
-
-
-emptyBrowser : Browser
+emptyBrowser : Fuzzer Browser
 emptyBrowser =
-    initialBrowser
+    fuzzer genEmptyBrowser
 
 
-model : Int -> Browser
-model seedInt =
-    fuzz1 seedInt modelSeed
+nonEmptyBrowser : Fuzzer Browser
+nonEmptyBrowser =
+    fuzzer genNonEmptyBrowser
 
 
-modelSeed : Seed -> ( Browser, Seed )
-modelSeed seed =
-    browserSeed seed
+browser : Fuzzer Browser
+browser =
+    fuzzer genBrowser
 
 
-emptyModel : Browser
+model : Fuzzer Browser
+model =
+    fuzzer genModel
+
+
+emptyModel : Fuzzer Browser
 emptyModel =
-    emptyBrowser
+    fuzzer genEmptyModel
+
+
+
+--------------------------------------------------------------------------------
+-- Generators
+--------------------------------------------------------------------------------
+
+
+genPageURL : Generator PageURL
+genPageURL =
+    -- TODO: add url generator
+    unique
+
+
+genTitle : Generator PageTitle
+genTitle =
+    -- TODO: add title generator
+    unique
+
+
+genContent : Generator PageContent
+genContent =
+    -- TODO: add random html content generator
+    unique
+
+
+genPage : Generator BrowserPage
+genPage =
+    map3 BrowserPage
+        genPageURL
+        genTitle
+        genContent
+
+
+genEmptyPage : Generator BrowserPage
+genEmptyPage =
+    constant (BrowserPage "about:blank" "" "")
+
+
+genPageList : Generator (List BrowserPage)
+genPageList =
+    andThen ((flip list) genPage) (int 2 10)
+
+
+genEmptyHistory : Generator BrowserHistory
+genEmptyHistory =
+    constant []
+
+
+genNonEmptyHistory : Generator BrowserHistory
+genNonEmptyHistory =
+    genPageList
+
+
+genHistory : Generator BrowserHistory
+genHistory =
+    choices [ genEmptyHistory, genNonEmptyHistory ]
+
+
+genEmptyBrowser : Generator Browser
+genEmptyBrowser =
+    constant initialBrowser
+
+
+genNonEmptyBrowser : Generator Browser
+genNonEmptyBrowser =
+    let
+        mapper =
+            \past future current ->
+                Browser
+                    (getPageTitle current)
+                    current
+                    past
+                    future
+    in
+        map3 mapper
+            genNonEmptyHistory
+            genNonEmptyHistory
+            genPage
+
+
+genBrowser : Generator Browser
+genBrowser =
+    choices [ genEmptyBrowser, genNonEmptyBrowser ]
+
+
+genModel : Generator Browser
+genModel =
+    genNonEmptyBrowser
+
+
+genEmptyModel : Generator Browser
+genEmptyModel =
+    genEmptyBrowser

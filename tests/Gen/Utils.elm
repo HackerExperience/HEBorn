@@ -6,7 +6,7 @@ import Random.Pcg.Extra as RandomExtra
 import Random.Pcg.Float as RandomFloat
 import Random.Pcg.Int as RandomInt
 import Random.Pcg.String as RandomString
-import Fuzz as Fuzz exposing (Fuzzer)
+import Fuzz exposing (Fuzzer)
 import Random.Pcg as Random exposing (Generator)
 
 
@@ -102,10 +102,6 @@ intRange min max seedInt =
     fuzz1 seedInt (intRangeSeed min max)
 
 
-float seedInt =
-    fuzz1 seedInt floatSeed
-
-
 floatSeed seed =
     Random.step
         RandomFloat.anyFloat
@@ -120,11 +116,6 @@ floatRangeSeed min max seed =
     Random.step
         (Random.float min max)
         seed
-
-
-percentageSeed : Seed -> ( Float, Seed )
-percentageSeed seed =
-    floatRangeSeed 0 1 seed
 
 
 smallStringSeed : StringSeed

@@ -1,247 +1,243 @@
 module Gen.Filesystem exposing (..)
 
-import Gen.Utils exposing (..)
+import Fuzz exposing (Fuzzer)
+import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
+import Helper.Filesystem exposing (addFileRecursively)
+import Random.Pcg
+    exposing
+        ( Generator
+        , constant
+        , int
+        , list
+        , choices
+        , map
+        , andThen
+        )
+import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Filesystem.Models exposing (..)
-import Helper.Filesystem as Helper
 
 
-fileID : Int -> FileID
-fileID seedInt =
-    fuzz1 seedInt fileIDSeed
+--------------------------------------------------------------------------------
+-- Fuzzers
+--------------------------------------------------------------------------------
 
 
-fileIDSeed : StringSeed
-fileIDSeed seed =
-    smallStringSeed seed
+fileID : Fuzzer FileID
+fileID =
+    fuzzer genFileID
 
 
-name : Int -> String
-name seedInt =
-    fuzz1 seedInt nameSeed
+name : Fuzzer String
+name =
+    fuzzer genName
 
 
-nameSeed : StringSeed
-nameSeed seed =
-    smallStringSeed seed
+path : Fuzzer String
+path =
+    fuzzer genPath
 
 
-path : Int -> String
-path seedInt =
-    fuzz1 seedInt pathSeed
+extension : Fuzzer String
+extension =
+    fuzzer genExtension
 
 
-pathSeed : StringSeed
-pathSeed seed =
-    let
-        ( level, seed1 ) =
-            intRangeSeed 1 10 seed
-
-        ( path, s ) =
-            smallStringSeed seed1
-
-        ( seedList, seed2 ) =
-            listOfSeed level seed1
-
-        directoryList =
-            List.repeat level ""
-
-        list =
-            List.map2 (,) directoryList seedList
-
-        funOverwrite : ( FilePath, Seed ) -> ( FilePath, Seed )
-        funOverwrite item =
-            let
-                ( _, seed_ ) =
-                    item
-
-                ( directory_, _ ) =
-                    smallStringSeed seed_
-            in
-                ( directory_, seed_ )
-
-        ( list_, _ ) =
-            List.unzip (List.map funOverwrite list)
-
-        joined =
-            "/" ++ (String.join "/" list_)
-    in
-        ( joined, s )
+noSize : Fuzzer FileSize
+noSize =
+    fuzzer genNoSize
 
 
-extension : Int -> String
-extension seedInt =
-    fuzz1 seedInt extensionSeed
+fileSizeNumber : Fuzzer FileSize
+fileSizeNumber =
+    fuzzer genFileSizeNumber
 
 
-extensionSeed : StringSeed
-extensionSeed seed =
-    stringSeed 1 4 seed
-
-
-folder : Int -> File
-folder seedInt =
-    fuzz1 seedInt folderSeed
-
-
-folderSeed : Seed -> ( File, Seed )
-folderSeed seed =
-    let
-        ( id, seed1 ) =
-            fileIDSeed seed
-
-        ( name, seed2 ) =
-            nameSeed seed1
-
-        ( path, seed3 ) =
-            pathSeed seed2
-
-        folder =
-            folderArgs id name path
-    in
-        ( folder, seed3 )
-
-
-folderArgs : FileID -> String -> String -> File
-folderArgs id name path =
-    Folder { id = id, name = name, path = path }
-
-
-stdFile : Int -> File
-stdFile seedInt =
-    fuzz1 seedInt stdFileSeed
-
-
-stdFileSeed : Seed -> ( File, Seed )
-stdFileSeed seed =
-    let
-        ( id, seed1 ) =
-            fileIDSeed seed
-
-        ( name, seed2 ) =
-            nameSeed seed1
-
-        ( path, seed3 ) =
-            pathSeed seed2
-
-        ( extension, seed4 ) =
-            extensionSeed seed3
-
-        ( version, size ) =
-            ( fileVersion, fileSize )
-
-        stdFile =
-            stdFileArgs
-                id
-                name
-                path
-                extension
-                version
-                size
-                []
-    in
-        ( stdFile, seed4 )
-
-
-stdFileArgs :
-    FileID
-    -> String
-    -> FilePath
-    -> String
-    -> FileVersion
-    -> FileSize
-    -> FileModules
-    -> File
-stdFileArgs id name path extension version size modules =
-    StdFile
-        { id = id
-        , name = name
-        , path = path
-        , extension = extension
-        , version = version
-        , size = size
-        , modules = modules
-        }
-
-
-fileVersion : FileVersion
-fileVersion =
-    FileVersionNumber 10
-
-
-fileSize : FileSize
+fileSize : Fuzzer FileSize
 fileSize =
-    FileSizeNumber 100
+    fuzzer genFileSize
 
 
-fsEmpty : Filesystem
-fsEmpty =
-    initialFilesystem
+noVersion : Fuzzer FileVersion
+noVersion =
+    fuzzer genNoVersion
 
 
-file : Int -> File
-file seedInt =
-    fuzz1 seedInt fileSeed
+fileVersionNumber : Fuzzer FileVersion
+fileVersionNumber =
+    fuzzer genFileVersionNumber
 
 
-fileSeed : Seed -> ( File, Seed )
-fileSeed seed =
+fileVersion : Fuzzer FileVersion
+fileVersion =
+    fuzzer genFileVersion
+
+
+folder : Fuzzer File
+folder =
+    fuzzer genFolder
+
+
+stdFile : Fuzzer File
+stdFile =
+    fuzzer genStdFile
+
+
+file : Fuzzer File
+file =
+    fuzzer genFile
+
+
+fileList : Fuzzer (List File)
+fileList =
+    fuzzer genFileList
+
+
+emptyFilesystem : Fuzzer Filesystem
+emptyFilesystem =
+    fuzzer genEmptyFilesystem
+
+
+nonEmptyFilesystem : Fuzzer Filesystem
+nonEmptyFilesystem =
+    fuzzer genNonEmptyFilesystem
+
+
+filesystem : Fuzzer Filesystem
+filesystem =
+    fuzzer genFilesystem
+
+
+model : Fuzzer Filesystem
+model =
+    fuzzer genModel
+
+
+
+--------------------------------------------------------------------------------
+-- Generators
+--------------------------------------------------------------------------------
+
+
+genFileID : Generator FileID
+genFileID =
+    unique
+
+
+genName : Generator String
+genName =
+    stringRange 1 24
+
+
+genPath : Generator String
+genPath =
+    stringRange 3 16
+        |> listRange 1 10
+        |> map (\paths -> "/" ++ (String.join "/" paths))
+
+
+genExtension : Generator String
+genExtension =
+    stringRange 1 8
+
+
+genNoSize : Generator FileSize
+genNoSize =
+    constant NoSize
+
+
+genFileSizeNumber : Generator FileSize
+genFileSizeNumber =
+    map FileSizeNumber (int 1 32768)
+
+
+genFileSize : Generator FileSize
+genFileSize =
+    choices [ genNoSize, genFileSizeNumber ]
+
+
+genNoVersion : Generator FileVersion
+genNoVersion =
+    constant NoVersion
+
+
+genFileVersionNumber : Generator FileVersion
+genFileVersionNumber =
+    map FileVersionNumber (int 1 999)
+
+
+genFileVersion : Generator FileVersion
+genFileVersion =
+    choices [ genNoVersion, genFileVersionNumber ]
+
+
+genFolder : Generator File
+genFolder =
     let
-        ( buildStdFile, seed_ ) =
-            boolSeed (seed)
+        buildFolderRecord =
+            \id name path ->
+                Folder
+                    { id = id
+                    , name = name
+                    , path = path
+                    }
     in
-        if buildStdFile then
-            stdFileSeed seed_
-        else
-            folderSeed seed_
+        genFileID
+            |> map buildFolderRecord
+            |> andMap genName
+            |> andMap genPath
 
 
-fileList : Int -> List File
-fileList seedInt =
-    fuzz1 seedInt fileListSeed
-
-
-fileListSeed : Seed -> ( List File, Seed )
-fileListSeed seed =
+genStdFile : Generator File
+genStdFile =
     let
-        ( size, seed_ ) =
-            intRangeSeed 1 100 seed
-
-        list =
-            List.range 1 size
-
-        reducer =
-            \_ ( filesystem, seed ) ->
-                let
-                    ( file, seed_ ) =
-                        fileSeed seed
-                in
-                    ( file :: filesystem, seed_ )
+        buildStdFileRecord =
+            \id name path extension version size ->
+                StdFile
+                    { id = id
+                    , name = name
+                    , path = path
+                    , extension = extension
+                    , version = version
+                    , size = size
+                    , modules = []
+                    }
     in
-        List.foldl reducer ( [], seed_ ) list
+        genFileID
+            |> map buildStdFileRecord
+            |> andMap genName
+            |> andMap genPath
+            |> andMap genExtension
+            |> andMap genFileVersion
+            |> andMap genFileSize
 
 
-model : Int -> Filesystem
-model seedInt =
-    fuzz1 seedInt modelSeed
+genFile : Generator File
+genFile =
+    choices [ genFolder, genStdFile ]
 
 
-modelSeed : Seed -> ( Filesystem, Seed )
-modelSeed seed =
-    fsRandomSeed seed
+genFileList : Generator (List File)
+genFileList =
+    andThen ((flip list) genFile) (int 1 32)
 
 
-fsRandom : Int -> Filesystem
-fsRandom seedInt =
-    fuzz1 seedInt fsRandomSeed
+genEmptyFilesystem : Generator Filesystem
+genEmptyFilesystem =
+    constant initialFilesystem
 
 
-fsRandomSeed : Seed -> ( Filesystem, Seed )
-fsRandomSeed seed =
-    let
-        ( fileList, seed_ ) =
-            fileListSeed seed
+genNonEmptyFilesystem : Generator Filesystem
+genNonEmptyFilesystem =
+    List.foldl addFileRecursively initialFilesystem
+        >> constant
+        |> (flip andThen) genFileList
 
-        filesystem =
-            List.foldl Helper.addFileRecursively fsEmpty fileList
-    in
-        ( filesystem, seed_ )
+
+genFilesystem : Generator Filesystem
+genFilesystem =
+    choices [ genEmptyFilesystem, genNonEmptyFilesystem ]
+
+
+genModel : Generator Filesystem
+genModel =
+    genFilesystem
