@@ -106,7 +106,7 @@ initialServers =
         -- TOY VALUE FOR PLAYING
         Dict.empty
         { id = localhostServerID
-        , ip = "localhost"
+        , ip = localhost
         , filesystem = initialFilesystem
         , logs = initialLogs
         , processes = initialProcesses

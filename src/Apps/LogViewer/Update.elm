@@ -1,5 +1,6 @@
 module Apps.LogViewer.Update exposing (update)
 
+import Dict
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.Instances.Models as Instance
@@ -7,6 +8,7 @@ import Apps.Context as Context
 import Apps.LogViewer.Models
     exposing
         ( Model
+        , initialLogViewer
         , initialLogViewerContext
         , loadLogViewerContext
         , getLogViewerInstance
@@ -28,7 +30,6 @@ update msg model game =
                     Instance.open
                         model.instances
                         id
-                        --initialLogViewerContext
                         (loadLogViewerContext "" game)
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
@@ -77,3 +78,33 @@ update msg model game =
 
         Response request data ->
             ( model, Cmd.none, [] )
+
+        -- Real acts
+        ToogleLog instanceID logID ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+
+                entries =
+                    context.entries
+
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | expanded = not x.expanded })
+                        )
+                        entries
+
+                context_ =
+                    { context | entries = entries_ }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
