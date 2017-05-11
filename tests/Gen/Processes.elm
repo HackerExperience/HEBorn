@@ -1,7 +1,6 @@
 module Gen.Processes exposing (..)
 
 import Fuzz exposing (Fuzzer)
-import Gen.Filesystem exposing (fileID)
 import Random.Pcg
     exposing
         ( Generator

@@ -39,8 +39,8 @@ initialLogs =
     Dict.empty
 
 
-getLogByID : Logs -> LogID -> Log
-getLogByID logs id =
+getLogByID : LogID -> Logs -> Log
+getLogByID id logs =
     case Dict.get id logs of
         Just log ->
             log
@@ -49,8 +49,8 @@ getLogByID logs id =
             NoLog
 
 
-logExists : Logs -> LogID -> Bool
-logExists logs id =
+logExists : LogID -> Logs -> Bool
+logExists id logs =
     Dict.member id logs
 
 
@@ -84,8 +84,8 @@ getLogID log =
             Nothing
 
 
-addLog : Logs -> Log -> Logs
-addLog logs log =
+addLog : Log -> Logs -> Logs
+addLog log logs =
     case (getLogID log) of
         Just id ->
             Dict.insert id log logs
@@ -94,8 +94,8 @@ addLog logs log =
             logs
 
 
-removeLog : Logs -> Log -> Logs
-removeLog logs log =
+removeLog : Log -> Logs -> Logs
+removeLog log logs =
     case (getLogID log) of
         Just id ->
             Dict.remove id logs
@@ -104,8 +104,8 @@ removeLog logs log =
             logs
 
 
-updateLog : Logs -> Log -> Logs
-updateLog logs log =
+updateLog : Log -> Logs -> Logs
+updateLog log logs =
     case log of
         LogEntry entry ->
             Utils.safeUpdateDict logs entry.id log
