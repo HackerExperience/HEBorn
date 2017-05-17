@@ -6,7 +6,7 @@
     "source-directories": [
         ".",
         "../src",
-	"../src/vendor/elm-phoenix/src"
+	"../vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],
     "dependencies": {
