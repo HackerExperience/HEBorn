@@ -54,6 +54,10 @@ make compile
 make release
 ```
 
+## Contributing
+
+Interested in contributing? There are several ways you can help, even if you don't know a thing about computer programming. Please take a look at our [Contribution Guidelines](CONTRIBUTING.md).
+
 ## Support
 You can get development support on our [online chat](https://chatops.hackerexperience.com/).
 
