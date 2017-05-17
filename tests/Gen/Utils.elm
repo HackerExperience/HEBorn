@@ -55,6 +55,18 @@ listOfSeed size seed =
         ( list, seed2 )
 
 
+boolSeed : Seed -> ( Bool, Seed )
+boolSeed seed =
+    Random.step
+        Random.bool
+        seed
+
+
+bool : Int -> Bool
+bool seedInt =
+    fuzz1 seedInt boolSeed
+
+
 intSeed seed =
     Random.step
         (Random.Int.anyInt)
@@ -62,11 +74,7 @@ intSeed seed =
 
 
 int seedInt =
-    let
-        ( int, _ ) =
-            intSeed (Random.initialSeed seedInt)
-    in
-        int
+    fuzz1 seedInt intSeed
 
 
 intRangeSeed min max seed =
@@ -76,11 +84,7 @@ intRangeSeed min max seed =
 
 
 intRange min max seedInt =
-    let
-        ( int, _ ) =
-            intRangeSeed min max (Random.initialSeed seedInt)
-    in
-        int
+    fuzz1 seedInt (intRangeSeed min max)
 
 
 floatRange min max seedInt =
