@@ -7,6 +7,7 @@ type Component
     | ComponentApp
     | ComponentExplorer
     | ComponentLogViewer
+    | ComponentBrowser
     | ComponentLogin
     | ComponentSignUp
     | ComponentInvalid

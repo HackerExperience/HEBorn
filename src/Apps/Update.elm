@@ -10,6 +10,8 @@ import Apps.Explorer.Update
 import Apps.Explorer.Messages
 import Apps.LogViewer.Update
 import Apps.LogViewer.Messages
+import Apps.Browser.Update
+import Apps.Browser.Messages
 
 
 update : AppMsg -> AppModel -> CoreModel -> ( AppModel, Cmd AppMsg, List CoreMsg )
@@ -34,6 +36,13 @@ update msg model core =
                     Apps.LogViewer.Update.update subMsg model.logViewer core.game
             in
                 ( { model | logViewer = logViewer_ }, Cmd.map MsgLogViewer cmd, coreMsg )
+
+        MsgBrowser subMsg ->
+            let
+                ( browser_, cmd, coreMsg ) =
+                    Apps.Browser.Update.update subMsg model.browser core.game
+            in
+                ( { model | browser = browser_ }, Cmd.map MsgBrowser cmd, coreMsg )
 
         Event _ ->
             ( model, Cmd.none, [] )

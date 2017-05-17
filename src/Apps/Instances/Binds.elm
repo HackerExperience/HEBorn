@@ -4,6 +4,7 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.Messages as Explorer
 import Apps.LogViewer.Messages as LogViewer
+import Apps.Browser.Messages as Browser
 
 
 open window msg =
@@ -14,6 +15,9 @@ open window msg =
         LogViewerWindow ->
             MsgLogViewer (LogViewer.OpenInstance msg)
 
+        BrowserWindow ->
+            MsgBrowser (Browser.OpenInstance msg)
+
 
 close window msg =
     case window of
@@ -23,6 +27,9 @@ close window msg =
         LogViewerWindow ->
             MsgLogViewer (LogViewer.OpenInstance msg)
 
+        BrowserWindow ->
+            MsgBrowser (Browser.OpenInstance msg)
+
 
 context window msg =
     case window of
@@ -31,3 +38,6 @@ context window msg =
 
         LogViewerWindow ->
             MsgLogViewer (LogViewer.OpenInstance msg)
+
+        BrowserWindow ->
+            MsgBrowser (Browser.OpenInstance msg)
