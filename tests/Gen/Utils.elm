@@ -2,6 +2,7 @@ module Gen.Utils exposing (..)
 
 import Random
 import Random.Int
+import Random.Float
 import Random.String
 import Random.Char
 
@@ -85,6 +86,16 @@ intRangeSeed min max seed =
 
 intRange min max seedInt =
     fuzz1 seedInt (intRangeSeed min max)
+
+
+float seedInt =
+    fuzz1 seedInt floatSeed
+
+
+floatSeed seed =
+    Random.step
+        Random.Float.anyFloat
+        seed
 
 
 floatRange min max seedInt =
