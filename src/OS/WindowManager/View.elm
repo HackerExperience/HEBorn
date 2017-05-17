@@ -25,6 +25,7 @@ import OS.WindowManager.Style as Css
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.View
 import Apps.LogViewer.View
+import Apps.Browser.View
 
 
 { id, class, classList } =
@@ -75,6 +76,19 @@ renderWindow model window =
                     )
                 )
 
+        BrowserWindow ->
+            windowWrapper
+                window
+                (Html.map MsgApp
+                    (Html.map MsgBrowser
+                        (Apps.Browser.View.view
+                            model.apps.browser
+                            window.id
+                            model.game
+                        )
+                    )
+                )
+
 
 widndowClasses window =
     if (window.maximized) then
@@ -109,6 +123,9 @@ windowTitle window =
         LogViewerWindow ->
             "Log Viewer"
 
+        BrowserWindow ->
+            "Browser"
+
 
 windowIcon : Window -> String
 windowIcon window =
@@ -118,6 +135,9 @@ windowIcon window =
 
         LogViewerWindow ->
             "logviewer"
+
+        BrowserWindow ->
+            "browser"
 
 
 header : Window -> Html Msg

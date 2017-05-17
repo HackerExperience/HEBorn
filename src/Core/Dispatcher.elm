@@ -26,6 +26,7 @@ import OS.Dock.Messages as Dock
 import Apps.Explorer.Messages as Explorer
 import Game.Servers.Models exposing (ServerID)
 import Apps.LogViewer.Messages as LogViewer
+import Apps.Browser.Messages as Browser
 import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
@@ -97,6 +98,11 @@ callExplorer msg =
 callLogViewer : LogViewer.Msg -> CoreMsg
 callLogViewer msg =
     callApps (MsgLogViewer msg)
+
+
+callBrowser : Browser.Msg -> CoreMsg
+callBrowser msg =
+    callApps (MsgBrowser msg)
 
 
 callInstance msg =
