@@ -18,6 +18,8 @@ css =
             [ width (pct 100)
             , minHeight (pct 100)
             , flexContainerVert
+            , position relative
+            , zIndex (int 0)
             ]
         , header
             [ backgroundColor (hex "EEE")
@@ -47,5 +49,9 @@ css =
                 ]
             ]
         , id DesktopVersion
-            []
+            [ position absolute
+            , left (px 0)
+            , bottom (px 0)
+            , color (hex "DDD")
+            ]
         ]

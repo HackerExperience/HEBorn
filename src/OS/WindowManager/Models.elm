@@ -10,7 +10,10 @@ module OS.WindowManager.Models
         , updateWindows
         , getWindow
         , openWindow
+        , openOrRestoreWindow
+        , restoreWindow
         , closeWindow
+        , closeAllWindows
         , getOpenWindows
         , filterAppWindows
         , updateWindowPosition
@@ -18,9 +21,12 @@ module OS.WindowManager.Models
         , hasWindowOpen
         , toggleMaximizeWindow
         , minimizeWindow
+        , minimizeAllWindows
         , bringFocus
         , switchContext
         , getContextText
+        , WindowState(..)
+        , OpenOrRestoreResult(..)
         )
 
 import Dict
@@ -141,71 +147,80 @@ filterAppMinimizedWindows windows app =
         windows
 
 
-unMinimizeIfGameWindow : Window -> GameWindow -> Window
-unMinimizeIfGameWindow window app =
+unMinimizeAllWindow : Window -> GameWindow -> Window
+unMinimizeAllWindow window app =
     if (window.window == app) then
         { window | state = Open }
     else
         window
 
 
-openWindow : Model -> GameWindow -> ( Windows, Seed, Maybe WindowID )
+openWindow : Model -> GameWindow -> ( Windows, Seed, WindowID )
 openWindow model window =
+    let
+        ( window_, seed_ ) =
+            newWindow model window
+
+        windows_ =
+            Dict.insert window_.id window_ model.windows
+    in
+        ( windows_, seed_, window_.id )
+
+
+restoreAllWindow : Windows -> GameWindow -> Windows
+restoreAllWindow windows window =
+    Dict.map
+        (\id oWindow -> (unMinimizeAllWindow oWindow window))
+        windows
+
+
+restoreWindow : WindowID -> Windows -> Windows
+restoreWindow winId windows =
+    Dict.update winId
+        (\w ->
+            case w of
+                Just w ->
+                    Just { w | state = Open }
+
+                Nothing ->
+                    Nothing
+        )
+        windows
+
+
+type OpenOrRestoreResult
+    = MultiRestore
+    | OneRestore WindowID
+    | Create Seed WindowID
+
+
+openOrRestoreWindow : Model -> GameWindow -> ( Windows, OpenOrRestoreResult )
+openOrRestoreWindow model window =
     let
         minimizeds =
             (filterAppMinimizedWindows model.windows window)
-
-        countMin =
-            (Dict.size minimizeds)
-
-        unminimizeOrCreate =
-            if (countMin > 1) then
-                ( Dict.map
-                    (\id oWindow -> (unMinimizeIfGameWindow oWindow window))
-                    model.windows
-                , model.seed
-                , Nothing
-                )
-            else if (countMin == 1) then
-                let
-                    pWindow =
-                        List.head (Dict.values minimizeds)
-
-                    safeResult =
-                        case pWindow of
-                            Just oWindow ->
-                                let
-                                    mWindow w =
-                                        case w of
-                                            Just w ->
-                                                Just { oWindow | state = Open }
-
-                                            Nothing ->
-                                                Nothing
-
-                                    id =
-                                        oWindow.id
-                                in
-                                    ( (Dict.update id mWindow model.windows)
-                                    , model.seed
-                                    , Just id
-                                    )
-
-                            Nothing ->
-                                ( model.windows, model.seed, Nothing )
-                in
-                    safeResult
-            else
-                let
-                    ( rNewWindow, newSeed ) =
-                        newWindow model window
-                in
-                    ( Dict.insert rNewWindow.id rNewWindow model.windows
-                    , newSeed
-                    , Just rNewWindow.id
-                    )
     in
-        unminimizeOrCreate
+        if ((Dict.size minimizeds) > 1) then
+            let
+                windows_ =
+                    (restoreAllWindow model.windows window)
+            in
+                ( windows_, MultiRestore )
+        else
+            case List.head (Dict.values minimizeds) of
+                Just oWindow ->
+                    let
+                        windows_t =
+                            (restoreWindow oWindow.id model.windows)
+                    in
+                        ( windows_t, OneRestore oWindow.id )
+
+                Nothing ->
+                    let
+                        ( newWindows, newSeed, newWindowId ) =
+                            openWindow model window
+                    in
+                        ( newWindows, (Create newSeed newWindowId) )
 
 
 closeWindow : Model -> WindowID -> Windows
@@ -320,6 +335,29 @@ minimizeWindow model id =
                     updateWindows model id window_
             in
                 windows_
+
+
+minimizeAllWindows : Windows -> GameWindow -> Windows
+minimizeAllWindows windows app =
+    Dict.map
+        (\k v ->
+            { v
+                | state =
+                    (if v.window == app then
+                        Minimized
+                     else
+                        v.state
+                    )
+            }
+        )
+        windows
+
+
+closeAllWindows : Windows -> GameWindow -> Windows
+closeAllWindows windows app =
+    Dict.filter
+        (\k v -> v.window /= app)
+        windows
 
 
 bringFocus : Model -> Maybe WindowID -> Model
