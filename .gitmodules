@@ -1,3 +1,3 @@
-[submodule "src/vendor/elm-phoenix"]
-	path = src/vendor/elm-phoenix
+[submodule "vendor/elm-phoenix"]
+	path = vendor/elm-phoenix
 	url = https://github.com/saschatimme/elm-phoenix.git
