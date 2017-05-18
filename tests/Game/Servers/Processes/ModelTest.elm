@@ -1,12 +1,12 @@
 module Game.Servers.Processes.ModelTest exposing (all)
 
 import Expect
-import Utils exposing (swap, andJust)
-import Test exposing (Test, describe)
+import Gen.Processes as Gen
 import Fuzz exposing (int, tuple)
 import Maybe exposing (andThen)
+import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
-import Gen.Processes as Gen
+import Utils exposing (swap, andJust)
 import Game.Servers.Processes.Models exposing (..)
 
 
@@ -48,18 +48,15 @@ addProcessTests =
 
 addProcessGenericTests : List Test
 addProcessGenericTests =
-    [ fuzz int "can add a process" <|
-        \seed ->
-            let
-                process =
-                    Gen.process seed
-
-                result =
-                    Gen.processesEmpty
-                        |> addProcess process
-                        |> getProcessByID process.id
-            in
-                Expect.equal (Just process) result
+    [ fuzz
+        (tuple ( Gen.emptyProcesses, Gen.process ))
+        "can add a process"
+      <|
+        \( processes, process ) ->
+            processes
+                |> addProcess process
+                |> getProcessByID process.id
+                |> Expect.equal (Just process)
     ]
 
 
@@ -78,28 +75,24 @@ pauseProcessTests =
 
 pauseProcessGenericTests : List Test
 pauseProcessGenericTests =
-    [ fuzz int "can pause a process" <|
-        \seed ->
-            let
-                process =
-                    Gen.process seed
-
-                maybeState =
-                    seed
-                        |> Gen.processes
-                        |> addProcess process
-                        |> pauseProcess process
-                        |> getProcessByID process.id
-                        |> andThen (\process_ -> Just process_.state)
-            in
-                Expect.equal (Just StatePaused) maybeState
+    [ fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can pause a process"
+      <|
+        \( model, process ) ->
+            model
+                |> addProcess process
+                |> pauseProcess process
+                |> getProcessByID process.id
+                |> andThen (\process_ -> Just process_.state)
+                |> Expect.equal (Just StatePaused)
     ]
 
 
 
---------------------------------------------------------------------------------
--- Resume Process
---------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+-- -- Resume Process
+-- --------------------------------------------------------------------------------
 
 
 resumeProcessTests : List Test
@@ -111,46 +104,42 @@ resumeProcessTests =
 
 resumeProcessGenericTests : List Test
 resumeProcessGenericTests =
-    [ fuzz int "can resume a paused process" <|
-        \seed ->
+    [ fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can resume a paused process"
+      <|
+        \( processes, process ) ->
             let
-                process =
-                    Gen.process seed
-
-                processes =
-                    seed
-                        |> Gen.processes
+                model =
+                    processes
                         |> addProcess process
                         |> pauseProcess process
 
                 maybeState =
-                    processes
+                    model
                         |> getProcessByID process.id
-                        |> andJust ((swap resumeProcess) processes 1)
+                        |> andJust ((swap resumeProcess) model 1)
                         |> andThen (getProcessByID process.id)
                         |> andJust (\process_ -> process_.state)
             in
                 Expect.equal (Just (StateRunning 1)) maybeState
-    , fuzz int "can't resume a running process" <|
-        \seed ->
+    , fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can't resume a running process"
+      <|
+        \( processes, process ) ->
             let
-                process =
-                    Gen.process seed
-
-                processes =
-                    seed
-                        |> Gen.processes
+                model =
+                    processes
                         |> addProcess process
                         |> resumeProcess process 1
-
-                maybeState =
-                    processes
-                        |> getProcessByID process.id
-                        |> andJust ((swap resumeProcess) processes 2)
-                        |> andThen (getProcessByID process.id)
-                        |> andJust (\process_ -> process_.state)
             in
-                Expect.notEqual (Just (StateRunning 2)) maybeState
+                model
+                    |> getProcessByID process.id
+                    |> andJust ((swap resumeProcess) model 2)
+                    |> andThen (getProcessByID process.id)
+                    |> andJust (\process_ -> process_.state)
+                    |> Expect.notEqual (Just (StateRunning 2))
     ]
 
 
@@ -169,31 +158,28 @@ completeProcessTests =
 
 completeProcessGenericTests : List Test
 completeProcessGenericTests =
-    [ fuzz int "can complete a process" <|
-        \seed ->
+    [ fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can complete a process"
+      <|
+        \( processes, process ) ->
             let
-                process =
-                    Gen.process seed
-
-                processes =
-                    seed
-                        |> Gen.processes
+                model =
+                    processes
                         |> addProcess process
                         |> completeProcess process
-
-                maybeState =
-                    processes
-                        |> getProcessByID process.id
-                        |> andJust (\process_ -> process_.state)
             in
-                Expect.equal (Just StateComplete) maybeState
+                model
+                    |> getProcessByID process.id
+                    |> andJust (\process_ -> process_.state)
+                    |> Expect.equal (Just StateComplete)
     ]
 
 
 
---------------------------------------------------------------------------------
--- Delete Process
---------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+-- -- Delete Process
+-- --------------------------------------------------------------------------------
 
 
 deleteProcessTests : List Test
@@ -205,26 +191,22 @@ deleteProcessTests =
 
 deleteProcessGenericTests : List Test
 deleteProcessGenericTests =
-    [ fuzz int "can delete a process" <|
-        \seed ->
-            let
-                process =
-                    Gen.process seed
-
-                processes =
-                    Gen.processesEmpty
-                        |> addProcess process
-                        |> removeProcess process
-            in
-                Expect.equal Nothing (getProcessByID process.id processes)
-    , fuzz int "can't delete a non-existing process" <|
-        \seed ->
-            let
-                processes =
-                    Gen.processes seed
-
-                processes_ =
-                    removeProcess (Gen.process seed) processes
-            in
-                Expect.equal processes processes_
+    [ fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can delete a process"
+      <|
+        \( processes, process ) ->
+            processes
+                |> addProcess process
+                |> removeProcess process
+                |> getProcessByID process.id
+                |> Expect.equal Nothing
+    , fuzz
+        (tuple ( Gen.processes, Gen.process ))
+        "can't delete a non-existing process"
+      <|
+        \( processes, process ) ->
+            processes
+                |> removeProcess process
+                |> Expect.equal processes
     ]

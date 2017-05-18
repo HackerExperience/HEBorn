@@ -1,6 +1,7 @@
 module Gen.Logs exposing (..)
 
-import Random.Pcg as Random
+import Fuzz exposing (Fuzzer)
+import Random.Pcg
     exposing
         ( Generator
         , constant
@@ -9,8 +10,9 @@ import Random.Pcg as Random
         , choices
         , andThen
         , list
+        , int
+        , float
         )
-import Fuzz exposing (Fuzzer)
 import Gen.Utils exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 
@@ -112,7 +114,7 @@ genLog =
 
 genLogList : Generator (List Log)
 genLogList =
-    andThen (\num -> list num genLog) (Random.int 1 64)
+    andThen (genLog |> flip list) (int 1 10)
 
 
 genEmptyLogs : Generator Logs
@@ -137,4 +139,4 @@ genModel =
 
 genTimestamp : Generator LogTimestamp
 genTimestamp =
-    Random.float 1420070400 4102444799
+    float 1420070400 4102444799

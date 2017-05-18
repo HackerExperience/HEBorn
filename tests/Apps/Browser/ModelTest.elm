@@ -2,7 +2,7 @@ module Apps.Browser.ModelTest exposing (all)
 
 import Expect
 import Test exposing (Test, describe, test)
-import Fuzz exposing (int, tuple)
+import Fuzz exposing (int, tuple, tuple3, tuple4)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Browser as Gen
 import Apps.Browser.Models exposing (..)
@@ -42,56 +42,35 @@ browseOperations =
 
 walkBackwardHistoryTests : List Test
 walkBackwardHistoryTests =
-    [ fuzz int "can go to previous page" <|
-        \seed ->
+    [ fuzz Gen.model "can go to previous page" <|
+        \model ->
             let
-                model =
-                    Gen.model seed
-
                 expectations =
                     model
                         |> getPreviousPages
                         |> List.head
-
-                page =
-                    model
-                        |> gotoPreviousPage
-                        |> getPage
             in
-                Expect.equal expectations (Just page)
-    , test "can't go to non-existing previous page" <|
-        \() ->
-            let
-                model =
-                    Gen.emptyModel
-
-                model_ =
-                    gotoPreviousPage model
-            in
-                Expect.equal model model_
-    , fuzz (tuple ( int, int )) "browsing moves current page to past history" <|
-        \seed ->
-            let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                page1 =
-                    Gen.page seed1
-
-                page2 =
-                    Gen.page seed2
-
-                pages =
-                    Gen.emptyModel
-                        |> gotoPage page1
-                        |> gotoPage page2
-                        |> gotoPage page1
-                        |> getPreviousPages
-
-                expetations =
-                    [ page2, page1, Gen.emptyPage ]
-            in
-                Expect.equal expetations pages
+                model
+                    |> gotoPreviousPage
+                    |> getPage
+                    |> Just
+                    |> Expect.equal expectations
+    , fuzz Gen.emptyModel "can't go to non-existing previous page" <|
+        \model ->
+            model
+                |> gotoPreviousPage
+                |> Expect.equal model
+    , fuzz
+        (tuple4 ( Gen.emptyModel, Gen.page, Gen.page, Gen.emptyPage ))
+        "browsing moves current page to past history"
+      <|
+        \( model, page1, page2, emptyPage ) ->
+            model
+                |> gotoPage page1
+                |> gotoPage page2
+                |> gotoPage page1
+                |> getPreviousPages
+                |> Expect.equal [ page2, page1, emptyPage ]
     ]
 
 
@@ -103,62 +82,38 @@ walkBackwardHistoryTests =
 
 walkForwardHistoryTests : List Test
 walkForwardHistoryTests =
-    [ fuzz int "can go to next page" <|
-        \seed ->
+    [ fuzz Gen.model "can go to next page" <|
+        \model ->
             let
-                model =
-                    Gen.model seed
-
                 expectations =
                     model
                         |> getNextPages
                         |> List.head
-
-                page =
-                    model
-                        |> gotoNextPage
-                        |> getPage
             in
-                Expect.equal expectations (Just page)
-    , test "can't go to non-existing next page" <|
-        \() ->
-            let
-                model =
-                    Gen.emptyModel
-
-                model_ =
-                    gotoNextPage model
-            in
-                Expect.equal model model_
+                model
+                    |> gotoNextPage
+                    |> getPage
+                    |> Just
+                    |> Expect.equal expectations
+    , fuzz Gen.emptyModel "can't go to non-existing next page" <|
+        \model ->
+            model
+                |> gotoNextPage
+                |> Expect.equal model
     , fuzz
-        (tuple ( int, int ))
+        (tuple3 ( Gen.emptyModel, Gen.page, Gen.page ))
         "browsing back on history moves current page to future history"
       <|
-        \seed ->
-            let
-                ( seed1, seed2 ) =
-                    ensureDifferentSeed seed
-
-                page1 =
-                    Gen.page seed1
-
-                page2 =
-                    Gen.page seed2
-
-                pages =
-                    Gen.emptyModel
-                        |> gotoPage page1
-                        |> gotoPage page2
-                        |> gotoPage page1
-                        |> gotoPreviousPage
-                        |> gotoPreviousPage
-                        |> gotoPreviousPage
-                        |> getNextPages
-
-                expetations =
-                    [ page1, page2, page1 ]
-            in
-                Expect.equal expetations pages
+        \( model, page1, page2 ) ->
+            model
+                |> gotoPage page1
+                |> gotoPage page2
+                |> gotoPage page1
+                |> gotoPreviousPage
+                |> gotoPreviousPage
+                |> gotoPreviousPage
+                |> getNextPages
+                |> Expect.equal [ page1, page2, page1 ]
     ]
 
 
@@ -170,25 +125,19 @@ walkForwardHistoryTests =
 
 gotoPageTests : List Test
 gotoPageTests =
-    [ fuzz int "browsing the current page doesn't change the history" <|
-        \seed ->
-            let
-                model =
-                    Gen.model seed
-
-                model_ =
-                    gotoPage (getPage model) model
-            in
-                Expect.equal model model_
-    , fuzz int "browsing erases future history" <|
-        \seed ->
-            let
-                maybeEmptyHistory =
-                    seed
-                        |> Gen.model
-                        |> gotoPage Gen.emptyPage
-                        |> getNextPages
-                        |> List.isEmpty
-            in
-                Expect.equal True maybeEmptyHistory
+    [ fuzz Gen.model "browsing the current page doesn't change the history" <|
+        \model ->
+            model
+                |> gotoPage (getPage model)
+                |> Expect.equal model
+    , fuzz
+        (tuple ( Gen.model, Gen.emptyPage ))
+        "browsing erases future history"
+      <|
+        \( model, page ) ->
+            model
+                |> gotoPage page
+                |> getNextPages
+                |> List.isEmpty
+                |> Expect.equal True
     ]
