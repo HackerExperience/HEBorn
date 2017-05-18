@@ -1,18 +1,9 @@
-module Utils
-    exposing
-        ( msgToCmd
-        , boolToString
-        , maybeToString
-        , delay
-        , safeUpdateDict
-        , swap
-        , andJust
-        )
+module Utils exposing (..)
 
-import Dict
 import Time
 import Task
 import Process
+import Dict exposing (Dict)
 
 
 -- I know this is not how it's supposed to be done but until I get a better
@@ -67,6 +58,42 @@ safeUpdateDict dict key value =
                     Nothing
     in
         Dict.update key fnUpdate dict
+
+
+filterMapDict :
+    (comparable -> a -> Maybe b)
+    -> Dict comparable a
+    -> Dict comparable b
+filterMapDict fun dict =
+    Dict.foldl
+        (\k v acc ->
+            case fun k v of
+                Just v_ ->
+                    Dict.insert k v_ acc
+
+                Nothing ->
+                    acc
+        )
+        Dict.empty
+        dict
+
+
+filterMapList :
+    (a -> Maybe b)
+    -> List a
+    -> List b
+filterMapList fun list =
+    List.foldl
+        (\a acc ->
+            case fun a of
+                Just a_ ->
+                    a_ :: acc
+
+                Nothing ->
+                    acc
+        )
+        []
+        list
 
 
 {-| Swaps the first argument of a 3-arity function with the last. Can be

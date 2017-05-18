@@ -1,19 +1,23 @@
 module Apps.LogViewer.View exposing (view)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (asPairs)
 import Css.Common exposing (elasticClass)
+import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
 import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (Model, LogViewer, getState)
+import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
 import Apps.LogViewer.Context.Models exposing (Context(..))
 import Apps.LogViewer.Style exposing (Classes(..))
+import Date exposing (Date, fromTime)
+import Date.Format as DateFormat exposing (format)
 
 
 { id, class, classList } =
@@ -29,31 +33,7 @@ styles =
 -- VIEW WRAPPER
 
 
-type alias NetAddr =
-    String
-
-
-type alias SysUser =
-    String
-
-
-localhost : NetAddr
-localhost =
-    "localhost"
-
-
-root : SysUser
-root =
-    "root"
-
-
-type LogEventMsg
-    = LogIn NetAddr SysUser
-    | Connetion NetAddr NetAddr NetAddr
-    | ExternalAcess SysUser SysUser
-
-
-renderAddr : NetAddr -> List (Html Msg)
+renderAddr : IP -> List (Html Msg)
 renderAddr addr =
     if (addr == localhost) then
         [ span [ class [ IcoHome, ColorLocal ] ] []
@@ -67,7 +47,7 @@ renderAddr addr =
         ]
 
 
-renderUser : SysUser -> List (Html Msg)
+renderUser : ServerUser -> List (Html Msg)
 renderUser user =
     if (user == root) then
         [ span [ class [ IcoUser, ColorRoot ] ] []
@@ -100,7 +80,7 @@ renderMsg msg =
                     ++ renderUser user
                 )
 
-        Connetion actor src dest ->
+        Connection actor src dest ->
             div [ class [ EData ] ]
                 (renderAddr actor
                     ++ [ span [] [ text " bounced connection from " ]
@@ -120,6 +100,28 @@ renderMsg msg =
                     ++ [ span [] [ text " logged in as " ] ]
                     ++ renderUser aswho
                 )
+
+        _ ->
+            div [ class [ EData ] ] []
+    )
+
+
+renderMiniMsg : LogEventMsg -> Html Msg
+renderMiniMsg msg =
+    (case msg of
+        Connection actor src dest ->
+            div [ class [ EData ] ]
+                (renderAddr actor
+                    ++ [ span [] [ text " bounced connection from " ]
+                       , span [ class [ IcoCrosshair, ColorRemote ] ] []
+                       , text " "
+                       , span [ class [ IdMe, ColorRemote ] ] [ text src ]
+                       , span [] [ text " to ..." ]
+                       ]
+                )
+
+        _ ->
+            renderMsg msg
     )
 
 
@@ -130,11 +132,14 @@ renderTopActions msg =
             LogIn addr user ->
                 renderButtons [ BtnEdit ]
 
-            Connetion actor src dest ->
+            Connection actor src dest ->
                 renderButtons [ BtnUser, BtnEdit ]
 
             ExternalAcess whom aswho ->
                 []
+
+            _ ->
+                renderButtons [ BtnLock ]
         )
 
 
@@ -145,54 +150,65 @@ renderBottomActions msg =
             LogIn addr user ->
                 []
 
-            Connetion actor src dest ->
+            Connection actor src dest ->
                 renderButtons [ IcoUser, BtnView, BtnEdit, BtnDelete ]
 
             ExternalAcess whom aswho ->
                 renderButtons [ BtnApply, BtnCancel ]
-        )
 
-
-attachVisibility : Bool -> Attribute msg
-attachVisibility status =
-    attribute "data-expanded"
-        (if (status) then
-            "1"
-         else
-            "0"
-        )
-
-
-renderEntry : String -> Bool -> LogEventMsg -> Html Msg
-renderEntry timestamp fullvisible msg =
-    div [ class [ Entry ] ]
-        [ div [ class [ ETop ] ]
-            [ div [] [ text timestamp ]
-            , div [ elasticClass ] []
-            , renderTopActions msg
-            ]
-        , renderMsg msg
-        , div [ class [ EBottom ] ]
-            [ renderBottomActions msg
-            , div
-                [ class [ CasedBtnExpand, EToggler ]
-                , attachVisibility fullvisible
-                ]
+            _ ->
                 []
-            ]
+        )
+
+
+renderEntryToggler : InstanceID -> LogID -> Html Msg
+renderEntryToggler instID logID =
+    div
+        [ class [ CasedBtnExpand, EToggler ]
+        , onClick (ToogleLog instID logID)
         ]
+        []
 
 
-type alias LogViewerEntry =
-    { timestamp : String
-    , visibility : Bool
-    , message : LogEventMsg
-    }
+renderEntry : InstanceID -> LogViewerEntry -> Html Msg
+renderEntry instanceID entry =
+    div
+        [ class
+            (if entry.expanded then
+                [ Entry, EntryExpanded ]
+             else
+                [ Entry ]
+            )
+        ]
+        ([ div [ class [ ETop ] ]
+            [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
+            , div [ elasticClass ] []
+            , renderTopActions entry.message
+            ]
+         ]
+            ++ (if entry.expanded then
+                    [ renderMsg entry.message
+                    , div
+                        [ class [ EBottom, EntryExpanded ] ]
+                        [ renderBottomActions entry.message
+                        , renderEntryToggler instanceID entry.srcID
+                        ]
+                    ]
+                else
+                    [ renderMiniMsg entry.message
+                    , div
+                        [ class [ EBottom ] ]
+                        [ div [ class [ EAct ] ] []
+                        , renderEntryToggler instanceID entry.srcID
+                        ]
+                    ]
+               )
+        )
 
 
-renderEntryList : List LogViewerEntry -> List (Html Msg)
-renderEntryList list =
-    List.map (\n -> (renderEntry n.timestamp n.visibility n.message)) list
+renderEntryList : InstanceID -> List LogViewerEntry -> List (Html Msg)
+renderEntryList instanceID list =
+    List.map (renderEntry instanceID) list
 
 
 
@@ -200,65 +216,39 @@ renderEntryList list =
 
 
 view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
-    let
-        logvw =
-            getState model id
-    in
-        div []
-            ([ div [ class [ HeaderBar ] ]
-                [ div [ class [ ETAct ] ]
-                    [ span [ class [ BtnUser ] ] []
-                    , text " "
-                    , span [ class [ BtnEdit ] ] []
-                    , text " "
-                    , span [ class [ BtnView ] ] []
-                    ]
-                , div [ class [ ETFilter ] ]
-                    [ div [ class [ BtnFilter ] ] []
-                    , div [ class [ ETFBar ] ]
-                        [ input [ placeholder "Search..." ] []
+view model instanceID game =
+    div []
+        ([ div [ class [ HeaderBar ] ]
+            [ div [ class [ ETAct ] ]
+                [ span [ class [ BtnUser ] ] []
+                , text " "
+                , span [ class [ BtnEdit ] ] []
+                , text " "
+                , span [ class [ BtnView ] ] []
+                ]
+            , div [ class [ ETFilter ] ]
+                [ div [ class [ BtnFilter ] ] []
+                , div [ class [ ETFBar ] ]
+                    [ input
+                        [ placeholder "Search..."
+                        , onInput (UpdateFilter instanceID)
                         ]
+                        []
                     ]
                 ]
-             ]
-                ++ renderEntryList
-                    [ { timestamp = "15/03/2016 - 20:24:33.105"
-                      , visibility = True
-                      , message = (LogIn "174.57.204.104" root)
-                      }
-                    , { timestamp = "15/03/2016 - 20:24:33.105"
-                      , visibility = True
-                      , message = (Connetion localhost "174.57.204.104" "209.43.107.189")
-                      }
-                    ]
-                ++ [ div [ class [ Entry ] ]
-                        [ div [ class [ ETop ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ ETActMini ] ]
-                                [ span [ class [ BtnLock ] ] []
-                                ]
-                            ]
-                        , div [ class [ EBottom ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ CasedBtnExpand, EToggler ] ] []
-                            ]
-                        ]
-                   , div [ class [ Entry ] ]
-                        [ div [ class [ ETop ] ]
-                            [ div [ elasticClass ] []
-                            , div [ class [ ETActMini ] ]
-                                [ span [ class [ BtnLock ] ] []
-                                ]
-                            ]
-                        , div [ class [ EBottom ] ]
-                            [ div [ class [ EAct ] ]
-                                [ span [ class [ BtnView ] ] []
-                                , text " "
-                                , span [ class [ BtnUnlock ] ] []
-                                ]
-                            ]
-                        ]
-                   ]
-                ++ [ renderEntry "15/03/2016 - 20:24:33.105" True (ExternalAcess "NOTME" root) ]
-            )
+            ]
+         ]
+            ++ renderEntryList
+                instanceID
+                (case (getLogViewerInstance model.instances instanceID).gateway of
+                    Just inst ->
+                        Dict.values
+                            (Dict.filter
+                                (\k v -> String.contains inst.filtering v.src)
+                                inst.entries
+                            )
+
+                    Nothing ->
+                        []
+                )
+        )
