@@ -124,7 +124,7 @@ genEmptyLogs =
 
 genNonEmptyLogs : Generator Logs
 genNonEmptyLogs =
-    andThen ((List.foldl (flip addLog) initialLogs) >> constant) genLogList
+    andThen ((List.foldl addLog initialLogs) >> constant) genLogList
 
 
 genLogs : Generator Logs

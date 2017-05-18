@@ -2,7 +2,7 @@ module Game.Servers.Logs.ModelTest exposing (all)
 
 import Expect
 import Gen.Logs as Gen
-import Maybe exposing (andThen)
+import Maybe exposing (andThen, withDefault)
 import Test exposing (Test, describe)
 import Fuzz exposing (tuple, tuple3)
 import Utils exposing (andJust)
@@ -51,7 +51,7 @@ addLogGenericTests =
         \( logs, log ) ->
             let
                 model =
-                    addLog logs log
+                    addLog log logs
 
                 expectations =
                     case log of
@@ -63,7 +63,7 @@ addLogGenericTests =
             in
                 log
                     |> getLogID
-                    |> andJust (\id -> logExists model id)
+                    |> andJust (model |> flip logExists)
                     |> Expect.equal expectations
     ]
 
@@ -99,8 +99,8 @@ updateLogGenericTests =
 
                 model =
                     logs
-                        |> (flip addLog) log
-                        |> (flip updateLog) log_
+                        |> addLog log
+                        |> updateLog log_
 
                 expectations =
                     case log of
@@ -112,7 +112,7 @@ updateLogGenericTests =
             in
                 log
                     |> getLogID
-                    |> andJust (getLogByID model)
+                    |> andJust (model |> flip getLogByID)
                     |> andThen getLogContent
                     |> Expect.equal expectations
     ]
@@ -141,8 +141,8 @@ deleteLogGenericTests =
             let
                 model =
                     logs
-                        |> (flip addLog) log
-                        |> (flip removeLog) log
+                        |> addLog log
+                        |> removeLog log
 
                 expectations =
                     case log of
@@ -154,7 +154,7 @@ deleteLogGenericTests =
             in
                 log
                     |> getLogID
-                    |> andJust (logExists model)
+                    |> andJust (model |> flip logExists)
                     |> Expect.equal expectations
     , fuzz
         (tuple ( Gen.model, Gen.log ))
@@ -162,6 +162,6 @@ deleteLogGenericTests =
       <|
         \( logs, log ) ->
             logs
-                |> (flip removeLog) log
+                |> removeLog log
                 |> Expect.equal logs
     ]
