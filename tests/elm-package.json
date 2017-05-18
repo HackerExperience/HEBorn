@@ -6,7 +6,7 @@
     "source-directories": [
         ".",
         "../src",
-	"../vendor/elm-phoenix/src"
+	    "../vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],
     "dependencies": {
@@ -14,12 +14,13 @@
         "danyx23/elm-uuid": "2.0.2 <= v < 3.0.0",
         "elm-community/elm-test": "3.0.0 <= v < 4.0.0",
         "elm-community/json-extra": "2.0.0 <= v < 3.0.0",
-        "elm-community/random-extra": "2.0.0 <= v < 3.0.0",
+        "elm-community/shrink": "2.0.0 <= v < 3.0.0",
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0",
         "elm-lang/navigation": "2.1.0 <= v < 3.0.0",
         "evancz/url-parser": "2.0.1 <= v < 3.0.0",
         "jinjor/elm-contextmenu": "1.0.3 <= v < 2.0.0",
+        "kress95/random-pcg-extra": "1.0.1 <= v < 2.0.0",
         "lynn/elm-arithmetic": "2.0.3 <= v < 3.0.0",
         "mgold/elm-random-pcg": "4.0.2 <= v < 5.0.0",
         "rtfeldman/node-test-runner": "3.0.0 <= v < 4.0.0",
