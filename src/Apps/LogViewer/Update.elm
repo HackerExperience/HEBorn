@@ -14,9 +14,9 @@ import Apps.LogViewer.Models
         , getLogViewerInstance
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Context.Messages as MsgContext
-import Apps.LogViewer.Context.Update
-import Apps.LogViewer.Context.Actions exposing (actionHandler)
+import Apps.LogViewer.Menu.Messages as MsgMenu
+import Apps.LogViewer.Menu.Update
+import Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -55,17 +55,17 @@ update msg model game =
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
-        -- Menu
-        ContextMsg (MsgContext.MenuClick action id) ->
+        -- Context
+        MenuMsg (MsgMenu.MenuClick action id) ->
             actionHandler action id model game
 
-        ContextMsg subMsg ->
+        MenuMsg subMsg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.LogViewer.Context.Update.update subMsg model.menu game
+                    Apps.LogViewer.Menu.Update.update subMsg model.menu game
 
                 cmd_ =
-                    Cmd.map ContextMsg cmd
+                    Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 

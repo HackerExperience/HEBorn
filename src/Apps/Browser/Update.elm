@@ -13,9 +13,9 @@ import Apps.Browser.Models
         , getBrowserInstance
         )
 import Apps.Browser.Messages exposing (Msg(..))
-import Apps.Browser.Context.Messages as MsgContext
-import Apps.Browser.Context.Update
-import Apps.Browser.Context.Actions exposing (actionHandler)
+import Apps.Browser.Menu.Messages as MsgMenu
+import Apps.Browser.Menu.Update
+import Apps.Browser.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -55,16 +55,16 @@ update msg model game =
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
         -- Menu
-        ContextMsg (MsgContext.MenuClick action id) ->
+        MenuMsg (MsgMenu.MenuClick action id) ->
             actionHandler action id model game
 
-        ContextMsg subMsg ->
+        MenuMsg subMsg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.Browser.Context.Update.update subMsg model.menu game
+                    Apps.Browser.Menu.Update.update subMsg model.menu game
 
                 cmd_ =
-                    Cmd.map ContextMsg cmd
+                    Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 

@@ -34,7 +34,7 @@ import Apps.Instances.Models as Instance
         )
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Context as Context exposing (ContextApp)
-import Apps.Browser.Context.Models as Menu
+import Apps.Browser.Menu.Models as Menu
 
 
 type alias PageURL =
@@ -92,7 +92,7 @@ initialBrowser =
 initialModel : Model
 initialModel =
     { instances = initialState
-    , menu = Menu.initialContext
+    , menu = Menu.initialMenu
     }
 
 

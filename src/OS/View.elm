@@ -10,7 +10,7 @@ import OS.Style as Css
 import OS.WindowManager.View
 import OS.Header.View
 import OS.Dock.View
-import OS.Context.View exposing (contextView, contextEmpty)
+import OS.Menu.View exposing (menuView, menuEmpty)
 
 
 { id, class, classList } =
@@ -31,12 +31,12 @@ viewDashboard : CoreModel -> Html CoreMsg
 viewDashboard model =
     div
         [ id Css.Dashboard
-        , contextEmpty
+        , menuEmpty
         ]
         [ viewHeader model
         , viewMain model
         , viewFooter model
-        , contextView model.os
+        , menuView model.os
         ]
 
 
