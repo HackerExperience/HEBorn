@@ -48,8 +48,14 @@ type LogEventMsg
     | ExternalAcess ServerUser ServerUser
     | DownloadBy FileName IP
     | DownloadFrom FileName IP
-    | WrongA
-    | WrongB
+    | Invalid
+
+
+type LogEventStatus
+    = Normal Bool
+    | Editing
+    | Cryptographed Bool
+    | Hidden
 
 
 type alias Entries =
@@ -58,11 +64,40 @@ type alias Entries =
 
 type alias LogViewerEntry =
     { timestamp : Date.Date
-    , expanded : Bool
+    , status : LogEventStatus
     , message : LogEventMsg
     , srcID : LogID
     , src : String
     }
+
+
+isEntryExpanded : LogViewerEntry -> Bool
+isEntryExpanded entry =
+    case entry.status of
+        Normal True ->
+            True
+
+        Cryptographed True ->
+            True
+
+        Editing ->
+            True
+
+        _ ->
+            False
+
+
+toggleExpanded : LogEventStatus -> LogEventStatus
+toggleExpanded status =
+    case status of
+        Normal x ->
+            Normal (not x)
+
+        Cryptographed x ->
+            Normal (not x)
+
+        _ ->
+            status
 
 
 initialLogViewer : LogViewer
@@ -138,7 +173,7 @@ logContentInterpret src =
                 LogInto destinationIP
 
             _ ->
-                WrongB
+                Invalid
 
 
 logToEntry : NetModel.Log -> Maybe LogViewerEntry
@@ -148,8 +183,8 @@ logToEntry log =
             Just
                 { timestamp =
                     Date.fromTime x.timestamp
-                , expanded =
-                    False
+                , status =
+                    Normal False
                 , message =
                     logContentInterpret x.content
                 , srcID =

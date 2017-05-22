@@ -12,6 +12,7 @@ import Apps.LogViewer.Models
         , initialLogViewerContext
         , loadLogViewerContext
         , getLogViewerInstance
+        , toggleExpanded
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as MsgMenu
@@ -94,7 +95,7 @@ update msg model game =
                 entries_ =
                     Dict.update logID
                         (Maybe.andThen
-                            (\x -> Just { x | expanded = not x.expanded })
+                            (\x -> Just { x | status = (toggleExpanded x.status) })
                         )
                         entries
 

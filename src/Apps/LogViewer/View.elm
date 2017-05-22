@@ -13,7 +13,7 @@ import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
+import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
@@ -125,35 +125,35 @@ renderMiniMsg msg =
     )
 
 
-renderTopActions : LogEventMsg -> Html Msg
-renderTopActions msg =
+renderTopActions : LogEventStatus -> Html Msg
+renderTopActions status =
     div [ class [ ETActMini ] ]
-        (case msg of
-            LogIn addr user ->
-                renderButtons [ BtnEdit ]
+        (case status of
+            Normal expanded ->
+                if expanded then
+                    renderButtons [ BtnUser, BtnEdit ]
+                else
+                    renderButtons [ BtnEdit ]
 
-            Connection actor src dest ->
-                renderButtons [ BtnUser, BtnEdit ]
-
-            ExternalAcess whom aswho ->
-                []
+            Cryptographed True ->
+                renderButtons [ BtnLock ]
 
             _ ->
-                renderButtons [ BtnLock ]
+                []
         )
 
 
-renderBottomActions : LogEventMsg -> Html Msg
-renderBottomActions msg =
+renderBottomActions : LogEventStatus -> Html Msg
+renderBottomActions status =
     div [ class [ EAct ] ]
-        (case msg of
-            LogIn addr user ->
-                []
+        (case status of
+            Normal True ->
+                renderButtons [ BtnLock, BtnView, BtnEdit, BtnDelete ]
 
-            Connection actor src dest ->
-                renderButtons [ IcoUser, BtnView, BtnEdit, BtnDelete ]
+            Cryptographed True ->
+                renderButtons [ BtnView, BtnUnlock ]
 
-            ExternalAcess whom aswho ->
+            Editing ->
                 renderButtons [ BtnApply, BtnCancel ]
 
             _ ->
@@ -174,7 +174,7 @@ renderEntry : InstanceID -> LogViewerEntry -> Html Msg
 renderEntry instanceID entry =
     div
         [ class
-            (if entry.expanded then
+            (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
                 [ Entry ]
@@ -183,14 +183,14 @@ renderEntry instanceID entry =
         ([ div [ class [ ETop ] ]
             [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
             , div [ elasticClass ] []
-            , renderTopActions entry.message
+            , renderTopActions entry.status
             ]
          ]
-            ++ (if entry.expanded then
+            ++ (if (isEntryExpanded entry) then
                     [ renderMsg entry.message
                     , div
                         [ class [ EBottom, EntryExpanded ] ]
-                        [ renderBottomActions entry.message
+                        [ renderBottomActions entry.status
                         , renderEntryToggler instanceID entry.srcID
                         ]
                     ]
