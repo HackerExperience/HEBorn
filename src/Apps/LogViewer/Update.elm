@@ -13,6 +13,7 @@ import Apps.LogViewer.Models
         , loadLogViewerContext
         , getLogViewerInstance
         , toggleExpanded
+        , LogEventStatus(..)
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as MsgMenu
@@ -120,6 +121,35 @@ update msg model game =
 
                 context_ =
                     { context | filtering = filter }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        EnterEditing instanceID logID ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+
+                entries =
+                    context.entries
+
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Editing })
+                        )
+                        entries
+
+                context_ =
+                    { context | entries = entries_ }
 
                 instance_ =
                     Context.update instance (Just context_)
