@@ -4,6 +4,9 @@ import Time
 import Task
 import Process
 import Dict exposing (Dict)
+import Html exposing (Attribute)
+import Html.Events exposing (on, keyCode)
+import Json.Decode as Json
 
 
 -- I know this is not how it's supposed to be done but until I get a better
@@ -121,3 +124,8 @@ andJust callback maybe =
 
         Nothing ->
             Nothing
+
+
+onKeyDown : (Int -> msg) -> Attribute msg
+onKeyDown tagger =
+    on "keydown" (Json.map tagger keyCode)
