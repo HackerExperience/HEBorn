@@ -172,3 +172,8 @@ divContract =
 dangerous : Icon
 dangerous =
     faIcon FA.exclamationTriangle
+
+
+browser : Icon
+browser =
+    faIcon FA.globe

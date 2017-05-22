@@ -86,8 +86,19 @@ viewStaticContent : Html Msg
 viewStaticContent =
     div [ class [ PageContent ] ]
         [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-        , div [ class [ LoginPageForm ] ] [ input [ placeholder "Password" ] [], text "E" ]
-        , div [ class [ LoginPageFooter ] ] [ text "Crack", text "AnyMap" ]
+        , div [ class [ LoginPageForm ] ] [ div [] [ input [ placeholder "Password" ] [], text "E" ] ]
+        , div [ class [ LoginPageFooter ] ]
+            [ div []
+                [ text "C"
+                , br [] []
+                , text "Crack"
+                ]
+            , div []
+                [ text "M"
+                , br [] []
+                , text "AnyMap"
+                ]
+            ]
         ]
 
 

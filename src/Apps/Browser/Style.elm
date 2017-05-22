@@ -61,7 +61,7 @@ css =
         , class Window
             [ height (pct 100) ]
         , class LoginPageHeader
-            [ lineHeight (int 5)
+            [ lineHeight (int 3)
             , flex (int 0)
             , textAlign center
             ]
@@ -70,10 +70,19 @@ css =
             , textAlign center
             , borderTop3 (px 3) solid (hex "000")
             , borderBottom3 (px 3) solid (hex "000")
+            , flexContainerVert
+            , justifyContent center
             ]
-        , class LoginPageHeader
-            [ lineHeight (int 5)
+        , class LoginPageFooter
+            [ lineHeight (int 2)
             , flex (int 0)
             , flexContainerHorz
+            , justifyContent center
+            , children
+                [ everything
+                    [ textAlign center
+                    , margin2 (px 0) internalPaddingSz
+                    ]
+                ]
             ]
         ]
