@@ -174,6 +174,8 @@ css =
         , class BoxifyMe
             [ border3 (px 1) solid (hex "444")
             , padding (px 2)
+            , display block
+            , width (pct 100)
             ]
         , class EntryExpanded
             [ children

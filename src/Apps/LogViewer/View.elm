@@ -13,7 +13,7 @@ import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Instances.Models as Instance exposing (InstanceID)
 import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventMsg(..), getLogViewerInstance)
+import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
@@ -61,10 +61,27 @@ renderUser user =
         ]
 
 
-renderButtons : List Classes -> List (Html Msg)
-renderButtons btns =
+renderButton : InstanceID -> LogID -> Classes -> List (Html Msg)
+renderButton instID logID btn =
+    [ text " "
+    , span
+        ([ class [ btn ] ]
+            ++ (case btn of
+                    BtnEdit ->
+                        [ onClick (EnterEditing instID logID) ]
+
+                    _ ->
+                        []
+               )
+        )
+        []
+    ]
+
+
+renderButtons : InstanceID -> LogID -> List Classes -> List (Html Msg)
+renderButtons instID logID btns =
     btns
-        |> List.map (\d -> [ text " ", span [ class [ d ] ] [] ])
+        |> List.map (renderButton instID logID)
         |> List.concat
         |> List.tail
         |> Maybe.withDefault []
@@ -72,16 +89,15 @@ renderButtons btns =
 
 renderMsg : LogEventMsg -> Html Msg
 renderMsg msg =
-    (case msg of
-        LogIn addr user ->
-            div [ class [ EData ] ]
+    div [ class [ EData ] ]
+        (case msg of
+            LogIn addr user ->
                 (renderAddr addr
                     ++ [ span [] [ text " logged in as " ] ]
                     ++ renderUser user
                 )
 
-        Connection actor src dest ->
-            div [ class [ EData ] ]
+            Connection actor src dest ->
                 (renderAddr actor
                     ++ [ span [] [ text " bounced connection from " ]
                        , span [ class [ IcoCrosshair, ColorRemote ] ] []
@@ -94,16 +110,15 @@ renderMsg msg =
                        ]
                 )
 
-        ExternalAcess whom aswho ->
-            div [ class [ EData, BoxifyMe ] ]
+            ExternalAcess whom aswho ->
                 (renderUser whom
                     ++ [ span [] [ text " logged in as " ] ]
                     ++ renderUser aswho
                 )
 
-        _ ->
-            div [ class [ EData ] ] []
-    )
+            _ ->
+                []
+        )
 
 
 renderMiniMsg : LogEventMsg -> Html Msg
@@ -125,39 +140,51 @@ renderMiniMsg msg =
     )
 
 
-renderTopActions : LogEventMsg -> Html Msg
-renderTopActions msg =
+renderEditing : String -> Html Msg
+renderEditing src =
+    input [ class [ EData, BoxifyMe ], value src ] []
+
+
+renderTopActions : InstanceID -> LogViewerEntry -> Html Msg
+renderTopActions instID entry =
     div [ class [ ETActMini ] ]
-        (case msg of
-            LogIn addr user ->
-                renderButtons [ BtnEdit ]
+        (renderButtons instID
+            entry.srcID
+            (case entry.status of
+                Normal expanded ->
+                    (if expanded then
+                        [ BtnUser, BtnEdit ]
+                     else
+                        [ BtnEdit ]
+                    )
 
-            Connection actor src dest ->
-                renderButtons [ BtnUser, BtnEdit ]
+                Cryptographed True ->
+                    [ BtnLock ]
 
-            ExternalAcess whom aswho ->
-                []
-
-            _ ->
-                renderButtons [ BtnLock ]
+                _ ->
+                    []
+            )
         )
 
 
-renderBottomActions : LogEventMsg -> Html Msg
-renderBottomActions msg =
+renderBottomActions : InstanceID -> LogViewerEntry -> Html Msg
+renderBottomActions instID entry =
     div [ class [ EAct ] ]
-        (case msg of
-            LogIn addr user ->
-                []
+        (renderButtons instID
+            entry.srcID
+            (case entry.status of
+                Normal True ->
+                    [ BtnLock, BtnView, BtnEdit, BtnDelete ]
 
-            Connection actor src dest ->
-                renderButtons [ IcoUser, BtnView, BtnEdit, BtnDelete ]
+                Cryptographed True ->
+                    [ BtnView, BtnUnlock ]
 
-            ExternalAcess whom aswho ->
-                renderButtons [ BtnApply, BtnCancel ]
+                Editing ->
+                    [ BtnApply, BtnCancel ]
 
-            _ ->
-                []
+                _ ->
+                    []
+            )
         )
 
 
@@ -170,11 +197,41 @@ renderEntryToggler instID logID =
         []
 
 
+renderData : LogViewerEntry -> Html Msg
+renderData entry =
+    if (entry.status == Editing) then
+        renderEditing entry.src
+    else if (isEntryExpanded entry) then
+        renderMsg entry.message
+    else
+        renderMiniMsg entry.message
+
+
+renderBottom : InstanceID -> LogViewerEntry -> Html Msg
+renderBottom instanceID entry =
+    if (entry.status == Editing) then
+        div
+            [ class [ EBottom ] ]
+            [ renderBottomActions instanceID entry ]
+    else if (isEntryExpanded entry) then
+        div
+            [ class [ EBottom, EntryExpanded ] ]
+            [ renderBottomActions instanceID entry
+            , renderEntryToggler instanceID entry.srcID
+            ]
+    else
+        div
+            [ class [ EBottom ] ]
+            [ div [ class [ EAct ] ] []
+            , renderEntryToggler instanceID entry.srcID
+            ]
+
+
 renderEntry : InstanceID -> LogViewerEntry -> Html Msg
 renderEntry instanceID entry =
     div
         [ class
-            (if entry.expanded then
+            (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
                 [ Entry ]
@@ -183,26 +240,11 @@ renderEntry instanceID entry =
         ([ div [ class [ ETop ] ]
             [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
             , div [ elasticClass ] []
-            , renderTopActions entry.message
+            , renderTopActions instanceID entry
             ]
+         , renderData entry
+         , renderBottom instanceID entry
          ]
-            ++ (if entry.expanded then
-                    [ renderMsg entry.message
-                    , div
-                        [ class [ EBottom, EntryExpanded ] ]
-                        [ renderBottomActions entry.message
-                        , renderEntryToggler instanceID entry.srcID
-                        ]
-                    ]
-                else
-                    [ renderMiniMsg entry.message
-                    , div
-                        [ class [ EBottom ] ]
-                        [ div [ class [ EAct ] ] []
-                        , renderEntryToggler instanceID entry.srcID
-                        ]
-                    ]
-               )
         )
 
 

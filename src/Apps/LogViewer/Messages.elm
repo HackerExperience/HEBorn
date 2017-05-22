@@ -17,3 +17,4 @@ type Msg
     | Response Requests.Models.Request Requests.Models.Response
     | ToogleLog InstanceID NetModel.LogID
     | UpdateFilter InstanceID String
+    | EnterEditing InstanceID String
