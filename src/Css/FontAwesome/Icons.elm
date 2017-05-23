@@ -106,6 +106,11 @@ thumbTack =
     "f08d"
 
 
+globe : UnicodeTag
+globe =
+    "f0ac"
+
+
 filter : UnicodeTag
 filter =
     "f0b0"

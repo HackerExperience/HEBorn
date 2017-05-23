@@ -186,6 +186,7 @@ gotoPreviousPage browser =
                     | page = page
                     , previousPages = prev
                     , nextPages = next
+                    , addressBar = (getPageURL page)
                 }
 
             Nothing ->
@@ -204,6 +205,7 @@ gotoNextPage browser =
                     | page = page
                     , previousPages = prev
                     , nextPages = next
+                    , addressBar = (getPageURL page)
                 }
 
             Nothing ->

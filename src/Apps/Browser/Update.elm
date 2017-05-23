@@ -9,8 +9,12 @@ import Apps.Context as Context
 import Apps.Browser.Models
     exposing
         ( Model
+        , initialBrowser
         , initialBrowserContext
         , getBrowserInstance
+        , gotoPage
+        , gotoPreviousPage
+        , gotoNextPage
         )
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Messages as MsgMenu
@@ -77,3 +81,83 @@ update msg model game =
 
         Response request data ->
             ( model, Cmd.none, [] )
+
+        UpdateAddress instanceID newAddr ->
+            let
+                instance =
+                    getBrowserInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialBrowser
+
+                context_ =
+                    { context | addressBar = newAddr }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        AddressKeyDown instanceID key ->
+            if key == 13 then
+                let
+                    instance =
+                        getBrowserInstance model.instances instanceID
+
+                    context =
+                        instance |> Context.state |> Maybe.withDefault initialBrowser
+
+                    -- TODO: REAL MAGIC
+                    context_ =
+                        gotoPage { url = context.addressBar, content = "", title = "" } context
+
+                    instance_ =
+                        Context.update instance (Just context_)
+
+                    instances_ =
+                        Instance.update model.instances instanceID instance_
+                in
+                    ( { model | instances = instances_ }, Cmd.none, [] )
+            else
+                ( model, Cmd.none, [] )
+
+        GoPrevious instanceID ->
+            let
+                instance =
+                    getBrowserInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialBrowser
+
+                context_ =
+                    gotoPreviousPage context
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        GoNext instanceID ->
+            let
+                instance =
+                    getBrowserInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialBrowser
+
+                context_ =
+                    gotoNextPage context
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
