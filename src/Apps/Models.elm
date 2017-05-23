@@ -1,20 +1,61 @@
-module Apps.Models exposing (AppModel, initialModel)
+module Apps.Models
+    exposing
+        ( AppModel(..)
+        , App(..)
+        , Contexts(..)
+        , contexts
+        , name
+        , title
+        , icon
+        , model
+        )
 
-import Apps.Explorer.Models
-import Apps.LogViewer.Models
-import Apps.Browser.Models
+import Apps.LogViewer.Models as LogViewer
 
 
-type alias AppModel =
-    { explorer : Apps.Explorer.Models.Model
-    , logViewer : Apps.LogViewer.Models.Model
-    , browser : Apps.Browser.Models.Model
-    }
+type App
+    = LogViewerApp
 
 
-initialModel : AppModel
-initialModel =
-    { explorer = Apps.Explorer.Models.initialModel
-    , logViewer = Apps.LogViewer.Models.initialModel
-    , browser = Apps.Browser.Models.initialModel
-    }
+type AppModel
+    = LogViewerModel LogViewer.Model
+
+
+type Contexts
+    = ContextualApp
+    | ContextlessApp
+
+
+contexts : App -> Contexts
+contexts app =
+    case app of
+        LogViewerApp ->
+            ContextualApp
+
+
+name : App -> String
+name app =
+    case app of
+        LogViewerApp ->
+            LogViewer.name
+
+
+icon : App -> String
+icon app =
+    case app of
+        LogViewerApp ->
+            LogViewer.icon
+
+
+title : AppModel -> String
+title model =
+    case model of
+        LogViewerModel model ->
+            LogViewer.title model
+
+
+model : App -> AppModel
+model app =
+    case app of
+        LogViewerApp ->
+            LogViewerModel LogViewer.initialModel
