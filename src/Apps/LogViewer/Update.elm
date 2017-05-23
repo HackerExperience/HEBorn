@@ -13,7 +13,11 @@ import Apps.LogViewer.Models
         , initialLogViewerContext
         , loadLogViewerContext
         , getLogViewerInstance
-        , toggleExpanded
+        , entryToggle
+        , entryEnterEditing
+        , entryApplyEditing
+        , entryLeaveEditing
+        , entryUpdateEditing
         , LogEventStatus(..)
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
@@ -91,15 +95,8 @@ update msg model game =
                 context =
                     instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
-                entries =
-                    context.entries
-
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = (toggleExpanded x.status) })
-                        )
-                        entries
+                    entryToggle logID context.entries
 
                 context_ =
                     { context | entries = entries_ }
@@ -139,15 +136,8 @@ update msg model game =
                 context =
                     instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
-                entries =
-                    context.entries
-
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Editing x.src })
-                        )
-                        entries
+                    entryEnterEditing logID context.entries
 
                 context_ =
                     { context | entries = entries_ }
@@ -168,15 +158,8 @@ update msg model game =
                 context =
                     instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
-                entries =
-                    context.entries
-
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Editing input })
-                        )
-                        entries
+                    entryUpdateEditing input logID context.entries
 
                 context_ =
                     { context | entries = entries_ }
@@ -197,15 +180,8 @@ update msg model game =
                 context =
                     instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
-                entries =
-                    context.entries
-
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Normal True })
-                        )
-                        entries
+                    entryLeaveEditing logID context.entries
 
                 context_ =
                     { context | entries = entries_ }
@@ -226,16 +202,8 @@ update msg model game =
                 context =
                     instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
-                entries =
-                    context.entries
-
-                -- TODO: Sendo Update do Game Models
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Normal True })
-                        )
-                        entries
+                    entryApplyEditing logID context.entries
 
                 context_ =
                     { context | entries = entries_ }

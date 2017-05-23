@@ -15,7 +15,7 @@ import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
-import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry)
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
@@ -36,10 +36,10 @@ styles =
 
 renderAddr : IP -> List (Html Msg)
 renderAddr addr =
-    if (addr == localhost) then
+    if (isLocalHost addr) then
         [ span [ class [ IcoHome, ColorLocal ] ] []
         , text " "
-        , span [ class [ IdLocal, ColorLocal ] ] [ text localhost ]
+        , span [ class [ IdLocal, ColorLocal ] ] [ text addr ]
         ]
     else
         [ span [ class [ IcoCrosshair, ColorRemote ] ] []
@@ -245,17 +245,30 @@ renderBottom instanceID entry =
                     ]
 
 
+menuInclude entry =
+    case entry.status of
+        Normal _ ->
+            [ menuNormalEntry entry.srcID ]
+
+        Editing _ ->
+            [ menuEditingEntry entry.srcID ]
+
+        _ ->
+            []
+
+
 renderEntry : InstanceID -> LogViewerEntry -> Html Msg
 renderEntry instanceID entry =
     div
-        [ menuNormalEntry
-        , class
+        ([ class
             (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
                 [ Entry ]
             )
-        ]
+         ]
+            ++ (menuInclude entry)
+        )
         ([ div [ class [ ETop ] ]
             [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
             , div [ elasticClass ] []
@@ -278,7 +291,7 @@ renderEntryList instanceID list =
 
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model instanceID game =
-    div []
+    div [ menuFilter ]
         ([ menuView model instanceID
          , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]

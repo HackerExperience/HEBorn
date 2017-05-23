@@ -14,7 +14,6 @@ import Apps.Browser.Models exposing (Model, Browser, getState)
 import Apps.Browser.Menu.Models exposing (Menu(..))
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Browser.Style exposing (Classes(..))
-import Utils exposing (onKeyDown)
 
 
 { id, class, classList } =
@@ -72,12 +71,14 @@ viewToolbar instanceID browser =
             [ text "%" ]
         , div
             [ class [ AddressBar ] ]
-            [ input
-                [ value browser.addressBar
-                , onInput (UpdateAddress instanceID)
-                , Utils.onKeyDown (AddressKeyDown instanceID)
+            [ Html.form
+                [ onSubmit (AddressEnter instanceID) ]
+                [ input
+                    [ value browser.addressBar
+                    , onInput (UpdateAddress instanceID)
+                    ]
+                    []
                 ]
-                []
             ]
         ]
 
@@ -86,7 +87,12 @@ viewStaticContent : Html Msg
 viewStaticContent =
     div [ class [ PageContent ] ]
         [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-        , div [ class [ LoginPageForm ] ] [ div [] [ input [ placeholder "Password" ] [], text "E" ] ]
+        , div [ class [ LoginPageForm ] ]
+            [ div []
+                [ input [ placeholder "Password" ] []
+                , text "E"
+                ]
+            ]
         , div [ class [ LoginPageFooter ] ]
             [ div []
                 [ text "C"

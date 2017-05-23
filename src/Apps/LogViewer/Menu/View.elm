@@ -2,6 +2,8 @@ module Apps.LogViewer.Menu.View
     exposing
         ( menuView
         , menuNormalEntry
+        , menuEditingEntry
+        , menuFilter
         )
 
 import Html exposing (Html)
@@ -12,6 +14,7 @@ import OS.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
+import Game.Servers.Logs.Models exposing (LogID)
 import Apps.Instances.Models exposing (InstanceID)
 import Apps.LogViewer.Models exposing (Model)
 import Apps.LogViewer.Messages as LogVwMsg
@@ -37,12 +40,32 @@ menuFor context =
 menu : InstanceID -> Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu id model context =
     case context of
-        MenuNormalEntry ->
-            [ [ ( ContextMenu.item "Edit", MenuClick NormalEntryEdit id )
+        MenuNormalEntry logID ->
+            [ [ ( ContextMenu.item "Edit", MenuClick (NormalEntryEdit logID) id )
               ]
             ]
 
+        MenuEditingEntry logID ->
+            [ [ ( ContextMenu.item "Apply", MenuClick (EdittingEntryApply logID) id )
+              , ( ContextMenu.item "Cancel", MenuClick (EdittingEntryCancel logID) id )
+              ]
+            ]
 
-menuNormalEntry : Html.Attribute LogVwMsg.Msg
-menuNormalEntry =
-    menuFor MenuNormalEntry
+        MenuFilter ->
+            -- TODO: Filter by flags
+            []
+
+
+menuNormalEntry : LogID -> Html.Attribute LogVwMsg.Msg
+menuNormalEntry logID =
+    menuFor (MenuNormalEntry logID)
+
+
+menuEditingEntry : LogID -> Html.Attribute LogVwMsg.Msg
+menuEditingEntry logID =
+    menuFor (MenuEditingEntry logID)
+
+
+menuFilter : Html.Attribute LogVwMsg.Msg
+menuFilter =
+    menuFor MenuFilter
