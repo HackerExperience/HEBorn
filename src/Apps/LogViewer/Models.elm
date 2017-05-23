@@ -3,16 +3,8 @@ module Apps.LogViewer.Models exposing (..)
 import Dict
 import Utils exposing (filterMapDict)
 import Game.Shared exposing (..)
-import Game.Models exposing (GameModel)
 import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
 import Game.Servers.Logs.Models as NetModel exposing (..)
-import Apps.Instances.Models as Instance
-    exposing
-        ( Instances
-        , InstanceID
-        , initialState
-        )
-import Apps.Context as Context exposing (ContextApp)
 import Apps.LogViewer.Menu.Models as Menu
 import Date exposing (Date, fromTime)
 
@@ -23,12 +15,8 @@ type alias LogViewer =
     }
 
 
-type alias ContextLogViewer =
-    ContextApp LogViewer
-
-
 type alias Model =
-    { instances : Instances ContextLogViewer
+    { app : LogViewer
     , menu : Menu.Model
     }
 
@@ -71,6 +59,21 @@ type alias LogViewerEntry =
     }
 
 
+name : String
+name =
+    "Log Viewer"
+
+
+title : Model -> String
+title model =
+    "Log Viewer"
+
+
+icon : String
+icon =
+    "logvw"
+
+
 isEntryExpanded : LogViewerEntry -> Bool
 isEntryExpanded entry =
     case entry.status of
@@ -100,54 +103,18 @@ toggleExpanded status =
             status
 
 
+initialModel : Model
+initialModel =
+    { app = initialLogViewer
+    , menu = Menu.initialMenu
+    }
+
+
 initialLogViewer : LogViewer
 initialLogViewer =
     { filtering = ""
     , entries = Dict.empty
     }
-
-
-initialModel : Model
-initialModel =
-    { instances = initialState
-    , menu = Menu.initialMenu
-    }
-
-
-initialLogViewerContext : ContextLogViewer
-initialLogViewerContext =
-    Context.initialContext initialLogViewer
-
-
-loadLogViewerContext : String -> GameModel -> ContextLogViewer
-loadLogViewerContext filtering game =
-    Context.initialContext (LogViewer filtering (logsToEntries (findLogs localhostServerID game)))
-
-
-getLogViewerInstance : Instances ContextLogViewer -> InstanceID -> ContextLogViewer
-getLogViewerInstance model id =
-    case (Instance.get model id) of
-        Just instance ->
-            instance
-
-        Nothing ->
-            initialLogViewerContext
-
-
-getLogViewerContext : ContextApp LogViewer -> LogViewer
-getLogViewerContext instance =
-    case (Context.state instance) of
-        Just context ->
-            context
-
-        Nothing ->
-            initialLogViewer
-
-
-getState : Model -> InstanceID -> LogViewer
-getState model id =
-    getLogViewerContext
-        (getLogViewerInstance model.instances id)
 
 
 logContentInterpret : String -> LogEventMsg
@@ -202,7 +169,6 @@ logsToEntries logs =
     filterMapDict (\id oValue -> logToEntry oValue) logs
 
 
-findLogs : ServerID -> GameModel -> NetModel.Logs
 findLogs serverID game =
     case (getServerByID game.servers serverID) of
         StdServer server ->
