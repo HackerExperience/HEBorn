@@ -15,6 +15,6 @@ type Msg
     | Request Requests.Models.Request
     | Response Requests.Models.Request Requests.Models.Response
     | UpdateAddress InstanceID String
-    | AddressKeyDown InstanceID Int
+    | AddressEnter InstanceID
     | GoPrevious InstanceID
     | GoNext InstanceID

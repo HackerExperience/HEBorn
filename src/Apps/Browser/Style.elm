@@ -2,7 +2,7 @@ module Apps.Browser.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (input)
+import Css.Elements exposing (input, form)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
 import Css.Icons as Icon
 
@@ -42,7 +42,13 @@ css =
             -- THIS PADDING FIX A STRANGE INPUT WIDTH BEHAVIOR
             , paddingRight (px 18)
             , children
-                [ input [ width (pct 100) ] ]
+                [ form
+                    [ children
+                        [ input
+                            [ width (pct 100) ]
+                        ]
+                    ]
+                ]
             ]
         , class Client
             [ flexContainerVert

@@ -176,3 +176,50 @@ findLogs serverID game =
 
         NoServer ->
             Dict.empty
+
+
+entriesUpdate : (LogViewerEntry -> Maybe LogViewerEntry) -> LogID -> Entries -> Entries
+entriesUpdate fn logID entries =
+    Dict.update logID (Maybe.andThen fn) entries
+
+
+entryToggle : LogID -> Entries -> Entries
+entryToggle =
+    entriesUpdate (\x -> Just { x | status = (toggleExpanded x.status) })
+
+
+entryEnterEditing : LogID -> Entries -> Entries
+entryEnterEditing =
+    entriesUpdate (\x -> Just { x | status = Editing x.src })
+
+
+entryLeaveEditing : LogID -> Entries -> Entries
+entryLeaveEditing =
+    entriesUpdate (\x -> Just { x | status = Normal True })
+
+
+entryApplyEditing : LogID -> Entries -> Entries
+entryApplyEditing =
+    -- TODO: Send update do Game Models && refresh logs
+    entriesUpdate
+        (\x ->
+            case x.status of
+                Editing input ->
+                    Just
+                        { x
+                            | status =
+                                Normal True
+                            , message =
+                                logContentInterpret input
+                            , src =
+                                input
+                        }
+
+                _ ->
+                    Nothing
+        )
+
+
+entryUpdateEditing : String -> LogID -> Entries -> Entries
+entryUpdateEditing input =
+    entriesUpdate (\x -> Just { x | status = Editing input })

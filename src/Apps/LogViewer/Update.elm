@@ -7,7 +7,14 @@ import Apps.LogViewer.Models
     exposing
         ( Model
         , initialLogViewer
-        , toggleExpanded
+        , initialLogViewerContext
+        , loadLogViewerContext
+        , getLogViewerInstance
+        , entryToggle
+        , entryEnterEditing
+        , entryApplyEditing
+        , entryLeaveEditing
+        , entryUpdateEditing
         , LogEventStatus(..)
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
@@ -37,11 +44,7 @@ update msg game ({ app } as model) =
         ToogleLog logID ->
             let
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = (toggleExpanded x.status) })
-                        )
-                        app.entries
+                    entryToggle logID app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
@@ -58,11 +61,7 @@ update msg game ({ app } as model) =
         EnterEditing logID ->
             let
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Editing x.src })
-                        )
-                        app.entries
+                    entryEnterEditing logID app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
@@ -72,11 +71,7 @@ update msg game ({ app } as model) =
         UpdateEditing logID input ->
             let
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Editing input })
-                        )
-                        apps.entries
+                    entryUpdateEditing input logID app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
@@ -86,11 +81,7 @@ update msg game ({ app } as model) =
         LeaveEditing logID ->
             let
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Normal True })
-                        )
-                        app.entries
+                    entryLeaveEditing logID app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
@@ -99,13 +90,8 @@ update msg game ({ app } as model) =
 
         ApplyEditing logID ->
             let
-                -- TODO: Sendo Update do Game Models
                 entries_ =
-                    Dict.update logID
-                        (Maybe.andThen
-                            (\x -> Just { x | status = Normal True })
-                        )
-                        app.entries
+                    entryApplyEditing logID app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
