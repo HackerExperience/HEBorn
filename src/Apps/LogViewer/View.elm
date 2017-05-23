@@ -15,6 +15,7 @@ import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry)
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
@@ -247,7 +248,8 @@ renderBottom instanceID entry =
 renderEntry : InstanceID -> LogViewerEntry -> Html Msg
 renderEntry instanceID entry =
     div
-        [ class
+        [ menuNormalEntry
+        , class
             (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
@@ -277,7 +279,8 @@ renderEntryList instanceID list =
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model instanceID game =
     div []
-        ([ div [ class [ HeaderBar ] ]
+        ([ menuView model instanceID
+         , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
                 [ span [ class [ BtnUser ] ] []
                 , text " "
