@@ -57,7 +57,7 @@ renderApplicationSubmenu model application =
         , onClick (MsgOS OS.Messages.NoOp)
         ]
         [ ul []
-            ([ li [] [ text "JAN. ABERTAS" ] ]
+            ([ li [] [ text "OPEN WINDOWS" ] ]
                 ++ (List.indexedMap
                         (\i o ->
                             li
@@ -70,7 +70,7 @@ renderApplicationSubmenu model application =
                         application.openWindows
                    )
                 ++ [ hr [] []
-                   , li [] [ text "JAN. MINIMIZADAS" ]
+                   , li [] [ text "MINIMIZED LINUXES" ]
                    ]
                 ++ (List.indexedMap
                         (\i o ->
@@ -88,17 +88,17 @@ renderApplicationSubmenu model application =
                         [ class [ Css.ClickableWindow ]
                         , onClick (MsgOS (MsgWM (Open application.app)))
                         ]
-                        [ text "Nova janela" ]
+                        [ text "New window" ]
                    , li
                         [ class [ Css.ClickableWindow ]
                         , onClick (MsgOS (MsgWM (MinimizeAll application.app)))
                         ]
-                        [ text "Minimizar tudo" ]
+                        [ text "Minimize all" ]
                    , li
                         [ class [ Css.ClickableWindow ]
                         , onClick (MsgOS (MsgWM (CloseAll application.app)))
                         ]
-                        [ text "Fechar tudo" ]
+                        [ text "Close all" ]
                    ]
             )
         ]
