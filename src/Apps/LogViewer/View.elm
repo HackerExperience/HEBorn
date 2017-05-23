@@ -63,10 +63,16 @@ renderButton : LogID -> Classes -> List (Html Msg)
 renderButton logID btn =
     [ text " "
     , span
-        ([ class [ btn ] ]
+        ([ class [ btn, BottomButton ] ]
             ++ (case btn of
                     BtnEdit ->
                         [ onClick (EnterEditing logID) ]
+
+                    BtnApply ->
+                        [ onClick (ApplyEditing logID) ]
+
+                    BtnCancel ->
+                        [ onClick (LeaveEditing logID) ]
 
                     _ ->
                         []
@@ -83,6 +89,21 @@ renderButtons logID btns =
         |> List.concat
         |> List.tail
         |> Maybe.withDefault []
+
+
+renderFlag : Classes -> List (Html Msg)
+renderFlag flag =
+    [ text " "
+    , span [ class [ flag ] ] []
+    ]
+
+
+renderFlags : List Classes -> List (Html Msg)
+renderFlags =
+    List.map renderFlag
+        >> List.concat
+        >> List.tail
+        >> Maybe.withDefault []
 
 
 renderMsg : LogEventMsg -> Html Msg
@@ -138,30 +159,21 @@ renderMiniMsg msg =
     )
 
 
-renderEditing : String -> Html Msg
-renderEditing src =
-    input [ class [ EData, BoxifyMe ], value src ] []
+renderEditing : InstanceID -> LogID -> String -> Html Msg
+renderEditing instanceID logID src =
+    input
+        [ class [ EData, BoxifyMe ]
+        , value src
+        , onInput (UpdateEditing instanceID logID)
+        ]
+        []
 
 
 renderTopActions : LogViewerEntry -> Html Msg
 renderTopActions entry =
     div [ class [ ETActMini ] ]
-        (renderButtons entry.srcID
-            (case entry.status of
-                Normal expanded ->
-                    (if expanded then
-                        [ BtnUser, BtnEdit ]
-                     else
-                        [ BtnEdit ]
-                    )
-
-                Cryptographed True ->
-                    [ BtnLock ]
-
-                _ ->
-                    []
-            )
-        )
+        -- TODO: Catch the flags for real
+        (renderFlags [ BtnUser, BtnEdit, BtnLock ])
 
 
 renderBottomActions : LogViewerEntry -> Html Msg
@@ -176,7 +188,7 @@ renderBottomActions entry =
                 Cryptographed True ->
                     [ BtnView, BtnUnlock ]
 
-                Editing ->
+                Editing _ ->
                     [ BtnApply, BtnCancel ]
 
                 _ ->
@@ -194,34 +206,40 @@ renderEntryToggler logID =
         []
 
 
-renderData : LogViewerEntry -> Html Msg
-renderData entry =
-    if (entry.status == Editing) then
-        renderEditing entry.src
-    else if (isEntryExpanded entry) then
-        renderMsg entry.message
-    else
-        renderMiniMsg entry.message
+renderData : InstanceID -> LogViewerEntry -> Html Msg
+renderData instanceID entry =
+    case entry.status of
+        Editing x ->
+            renderEditing instanceID entry.srcID x
+
+        _ ->
+            if (isEntryExpanded entry) then
+                renderMsg entry.message
+            else
+                renderMiniMsg entry.message
 
 
 renderBottom : LogViewerEntry -> Html Msg
 renderBottom entry =
-    if (entry.status == Editing) then
-        div
-            [ class [ EBottom ] ]
-            [ renderBottomActions entry ]
-    else if (isEntryExpanded entry) then
-        div
-            [ class [ EBottom, EntryExpanded ] ]
-            [ renderBottomActions entry
-            , renderEntryToggler entry.srcID
-            ]
-    else
-        div
-            [ class [ EBottom ] ]
-            [ div [ class [ EAct ] ] []
-            , renderEntryToggler entry.srcID
-            ]
+    case entry.status of
+        Editing _ ->
+            div
+                [ class [ EBottom ] ]
+                [ renderBottomActions entry ]
+
+        _ ->
+            if (isEntryExpanded entry) then
+                div
+                    [ class [ EBottom, EntryExpanded ] ]
+                    [ renderBottomActions entry
+                    , renderEntryToggler entry.srcID
+                    ]
+            else
+                div
+                    [ class [ EBottom ] ]
+                    [ div [ class [ EAct ] ] []
+                    , renderEntryToggler entry.srcID
+                    ]
 
 
 renderEntry : LogViewerEntry -> Html Msg

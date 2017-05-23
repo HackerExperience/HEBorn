@@ -36,15 +36,12 @@ update msg game ({ app } as model) =
         -- -- Real acts
         ToogleLog logID ->
             let
-                entries =
-                    app.entries
-
                 entries_ =
                     Dict.update logID
                         (Maybe.andThen
                             (\x -> Just { x | status = (toggleExpanded x.status) })
                         )
-                        entries
+                        app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }
@@ -60,15 +57,55 @@ update msg game ({ app } as model) =
 
         EnterEditing logID ->
             let
-                entries =
-                    app.entries
-
                 entries_ =
                     Dict.update logID
                         (Maybe.andThen
-                            (\x -> Just { x | status = Editing })
+                            (\x -> Just { x | status = Editing x.src })
                         )
-                        entries
+                        app.entries
+
+                model_ =
+                    { model | app = { app | entries = entries_ } }
+            in
+                ( model_, Cmd.none, [] )
+
+        UpdateEditing logID input ->
+            let
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Editing input })
+                        )
+                        apps.entries
+
+                model_ =
+                    { model | app = { app | entries = entries_ } }
+            in
+                ( model_, Cmd.none, [] )
+
+        LeaveEditing logID ->
+            let
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Normal True })
+                        )
+                        app.entries
+
+                model_ =
+                    { model | app = { app | entries = entries_ } }
+            in
+                ( model_, Cmd.none, [] )
+
+        ApplyEditing logID ->
+            let
+                -- TODO: Sendo Update do Game Models
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Normal True })
+                        )
+                        app.entries
 
                 model_ =
                     { model | app = { app | entries = entries_ } }

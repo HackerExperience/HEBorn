@@ -10,9 +10,7 @@ type Msg
     = MenuMsg Menu.Msg
     | ToogleLog NetModel.LogID
     | UpdateFilter String
-    | EnterEditing String
-
-
-
--- | Event Events.Models.Event
--- | Request Requests.Models.Request
+    | EnterEditing LogID
+    | UpdateEditing LogID String
+    | ApplyEditing LogID
+    | LeaveEditing LogID

@@ -41,7 +41,7 @@ type LogEventMsg
 
 type LogEventStatus
     = Normal Bool
-    | Editing
+    | Editing String
     | Cryptographed Bool
     | Hidden
 
@@ -83,7 +83,7 @@ isEntryExpanded entry =
         Cryptographed True ->
             True
 
-        Editing ->
+        Editing _ ->
             True
 
         _ ->
