@@ -1,5 +1,7 @@
 module Game.Servers.Logs.Messages exposing (LogMsg(..))
 
+import Game.Servers.Logs.Models exposing (LogData)
+
 
 type LogMsg
-    = ToDo
+    = UpdateLogs LogData
