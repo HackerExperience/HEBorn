@@ -20,6 +20,7 @@ import Date exposing (Date, fromTime)
 type alias LogViewer =
     { filtering : String
     , entries : Entries
+    , server : ServerID
     }
 
 
@@ -53,7 +54,7 @@ type LogEventMsg
 
 type LogEventStatus
     = Normal Bool
-    | Editing
+    | Editing String
     | Cryptographed Bool
     | Hidden
 
@@ -80,7 +81,7 @@ isEntryExpanded entry =
         Cryptographed True ->
             True
 
-        Editing ->
+        Editing _ ->
             True
 
         _ ->
@@ -100,10 +101,11 @@ toggleExpanded status =
             status
 
 
-initialLogViewer : LogViewer
-initialLogViewer =
+initialLogViewer : ServerID -> LogViewer
+initialLogViewer server =
     { filtering = ""
     , entries = Dict.empty
+    , server = server
     }
 
 
@@ -114,14 +116,14 @@ initialModel =
     }
 
 
-initialLogViewerContext : ContextLogViewer
-initialLogViewerContext =
-    Context.initialContext initialLogViewer
+initialLogViewerContext : ServerID -> ContextLogViewer
+initialLogViewerContext server =
+    Context.initialContext (initialLogViewer server)
 
 
-loadLogViewerContext : String -> GameModel -> ContextLogViewer
-loadLogViewerContext filtering game =
-    Context.initialContext (LogViewer filtering (logsToEntries (findLogs localhostServerID game)))
+loadLogViewerContext : ServerID -> GameModel -> ContextLogViewer
+loadLogViewerContext server game =
+    Context.initialContext (LogViewer "" (logsToEntries (findLogs server game)) server)
 
 
 getLogViewerInstance : Instances ContextLogViewer -> InstanceID -> ContextLogViewer
@@ -131,7 +133,7 @@ getLogViewerInstance model id =
             instance
 
         Nothing ->
-            initialLogViewerContext
+            initialLogViewerContext localhostServerID
 
 
 getLogViewerContext : ContextApp LogViewer -> LogViewer
@@ -141,7 +143,7 @@ getLogViewerContext instance =
             context
 
         Nothing ->
-            initialLogViewer
+            initialLogViewer localhostServerID
 
 
 getState : Model -> InstanceID -> LogViewer

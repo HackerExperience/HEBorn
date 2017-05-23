@@ -15,6 +15,7 @@ import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry)
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
@@ -62,13 +63,19 @@ renderUser user =
 
 
 renderButton : InstanceID -> LogID -> Classes -> List (Html Msg)
-renderButton instID logID btn =
+renderButton instanceID logID btn =
     [ text " "
     , span
-        ([ class [ btn ] ]
+        ([ class [ btn, BottomButton ] ]
             ++ (case btn of
                     BtnEdit ->
-                        [ onClick (EnterEditing instID logID) ]
+                        [ onClick (EnterEditing instanceID logID) ]
+
+                    BtnApply ->
+                        [ onClick (ApplyEditing instanceID logID) ]
+
+                    BtnCancel ->
+                        [ onClick (LeaveEditing instanceID logID) ]
 
                     _ ->
                         []
@@ -79,12 +86,27 @@ renderButton instID logID btn =
 
 
 renderButtons : InstanceID -> LogID -> List Classes -> List (Html Msg)
-renderButtons instID logID btns =
+renderButtons instanceID logID btns =
     btns
-        |> List.map (renderButton instID logID)
+        |> List.map (renderButton instanceID logID)
         |> List.concat
         |> List.tail
         |> Maybe.withDefault []
+
+
+renderFlag : Classes -> List (Html Msg)
+renderFlag flag =
+    [ text " "
+    , span [ class [ flag ] ] []
+    ]
+
+
+renderFlags : List Classes -> List (Html Msg)
+renderFlags =
+    List.map renderFlag
+        >> List.concat
+        >> List.tail
+        >> Maybe.withDefault []
 
 
 renderMsg : LogEventMsg -> Html Msg
@@ -140,37 +162,27 @@ renderMiniMsg msg =
     )
 
 
-renderEditing : String -> Html Msg
-renderEditing src =
-    input [ class [ EData, BoxifyMe ], value src ] []
+renderEditing : InstanceID -> LogID -> String -> Html Msg
+renderEditing instanceID logID src =
+    input
+        [ class [ EData, BoxifyMe ]
+        , value src
+        , onInput (UpdateEditing instanceID logID)
+        ]
+        []
 
 
 renderTopActions : InstanceID -> LogViewerEntry -> Html Msg
-renderTopActions instID entry =
+renderTopActions instanceID entry =
     div [ class [ ETActMini ] ]
-        (renderButtons instID
-            entry.srcID
-            (case entry.status of
-                Normal expanded ->
-                    (if expanded then
-                        [ BtnUser, BtnEdit ]
-                     else
-                        [ BtnEdit ]
-                    )
-
-                Cryptographed True ->
-                    [ BtnLock ]
-
-                _ ->
-                    []
-            )
-        )
+        -- TODO: Catch the flags for real
+        (renderFlags [ BtnUser, BtnEdit, BtnLock ])
 
 
 renderBottomActions : InstanceID -> LogViewerEntry -> Html Msg
-renderBottomActions instID entry =
+renderBottomActions instanceID entry =
     div [ class [ EAct ] ]
-        (renderButtons instID
+        (renderButtons instanceID
             entry.srcID
             (case entry.status of
                 Normal True ->
@@ -179,7 +191,7 @@ renderBottomActions instID entry =
                 Cryptographed True ->
                     [ BtnView, BtnUnlock ]
 
-                Editing ->
+                Editing _ ->
                     [ BtnApply, BtnCancel ]
 
                 _ ->
@@ -189,48 +201,55 @@ renderBottomActions instID entry =
 
 
 renderEntryToggler : InstanceID -> LogID -> Html Msg
-renderEntryToggler instID logID =
+renderEntryToggler instanceID logID =
     div
         [ class [ CasedBtnExpand, EToggler ]
-        , onClick (ToogleLog instID logID)
+        , onClick (ToogleLog instanceID logID)
         ]
         []
 
 
-renderData : LogViewerEntry -> Html Msg
-renderData entry =
-    if (entry.status == Editing) then
-        renderEditing entry.src
-    else if (isEntryExpanded entry) then
-        renderMsg entry.message
-    else
-        renderMiniMsg entry.message
+renderData : InstanceID -> LogViewerEntry -> Html Msg
+renderData instanceID entry =
+    case entry.status of
+        Editing x ->
+            renderEditing instanceID entry.srcID x
+
+        _ ->
+            if (isEntryExpanded entry) then
+                renderMsg entry.message
+            else
+                renderMiniMsg entry.message
 
 
 renderBottom : InstanceID -> LogViewerEntry -> Html Msg
 renderBottom instanceID entry =
-    if (entry.status == Editing) then
-        div
-            [ class [ EBottom ] ]
-            [ renderBottomActions instanceID entry ]
-    else if (isEntryExpanded entry) then
-        div
-            [ class [ EBottom, EntryExpanded ] ]
-            [ renderBottomActions instanceID entry
-            , renderEntryToggler instanceID entry.srcID
-            ]
-    else
-        div
-            [ class [ EBottom ] ]
-            [ div [ class [ EAct ] ] []
-            , renderEntryToggler instanceID entry.srcID
-            ]
+    case entry.status of
+        Editing _ ->
+            div
+                [ class [ EBottom ] ]
+                [ renderBottomActions instanceID entry ]
+
+        _ ->
+            if (isEntryExpanded entry) then
+                div
+                    [ class [ EBottom, EntryExpanded ] ]
+                    [ renderBottomActions instanceID entry
+                    , renderEntryToggler instanceID entry.srcID
+                    ]
+            else
+                div
+                    [ class [ EBottom ] ]
+                    [ div [ class [ EAct ] ] []
+                    , renderEntryToggler instanceID entry.srcID
+                    ]
 
 
 renderEntry : InstanceID -> LogViewerEntry -> Html Msg
 renderEntry instanceID entry =
     div
-        [ class
+        [ menuNormalEntry
+        , class
             (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
@@ -242,7 +261,7 @@ renderEntry instanceID entry =
             , div [ elasticClass ] []
             , renderTopActions instanceID entry
             ]
-         , renderData entry
+         , renderData instanceID entry
          , renderBottom instanceID entry
          ]
         )
@@ -260,7 +279,8 @@ renderEntryList instanceID list =
 view : Model -> InstanceID -> GameModel -> Html Msg
 view model instanceID game =
     div []
-        ([ div [ class [ HeaderBar ] ]
+        ([ menuView model instanceID
+         , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
                 [ span [ class [ BtnUser ] ] []
                 , text " "

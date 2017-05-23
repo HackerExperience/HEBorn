@@ -91,6 +91,13 @@ css =
             [ before
                 [ Icon.logvw ]
             ]
+        , attrSelector "dockItemIco"
+            "data-icon"
+            "="
+            "browser"
+            [ before
+                [ Icon.browser ]
+            ]
         , attrSelector "dockItem"
             "data-hasinst"
             "="

@@ -29,6 +29,7 @@ type Classes
     | BtnUnlock
     | BtnApply
     | BtnCancel
+    | BottomButton
     | CasedBtnExpand
     | IcoCrosshair
     | IcoUser
@@ -137,6 +138,8 @@ css =
             , before [ Icon.divExpand ]
             , cursor pointer
             ]
+        , class BottomButton
+            [ cursor pointer ]
         , class IcoCrosshair
             [ ico
             , before [ Icon.locationTarget ]

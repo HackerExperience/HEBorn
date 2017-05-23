@@ -3,6 +3,7 @@ module Apps.LogViewer.Update exposing (update)
 import Dict
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (localhostServerID)
 import Apps.Instances.Models as Instance
 import Apps.Context as Context
 import Apps.LogViewer.Models
@@ -32,7 +33,7 @@ update msg model game =
                     Instance.open
                         model.instances
                         id
-                        (loadLogViewerContext "" game)
+                        (loadLogViewerContext localhostServerID game)
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
@@ -88,7 +89,7 @@ update msg model game =
                     getLogViewerInstance model.instances instanceID
 
                 context =
-                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
                 entries =
                     context.entries
@@ -117,7 +118,7 @@ update msg model game =
                     getLogViewerInstance model.instances instanceID
 
                 context =
-                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
                 context_ =
                     { context | filtering = filter }
@@ -136,7 +137,7 @@ update msg model game =
                     getLogViewerInstance model.instances instanceID
 
                 context =
-                    instance |> Context.state |> Maybe.withDefault initialLogViewer
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
 
                 entries =
                     context.entries
@@ -144,7 +145,95 @@ update msg model game =
                 entries_ =
                     Dict.update logID
                         (Maybe.andThen
-                            (\x -> Just { x | status = Editing })
+                            (\x -> Just { x | status = Editing x.src })
+                        )
+                        entries
+
+                context_ =
+                    { context | entries = entries_ }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        UpdateEditing instanceID logID input ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
+
+                entries =
+                    context.entries
+
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Editing input })
+                        )
+                        entries
+
+                context_ =
+                    { context | entries = entries_ }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        LeaveEditing instanceID logID ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
+
+                entries =
+                    context.entries
+
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Normal True })
+                        )
+                        entries
+
+                context_ =
+                    { context | entries = entries_ }
+
+                instance_ =
+                    Context.update instance (Just context_)
+
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
+
+        ApplyEditing instanceID logID ->
+            let
+                instance =
+                    getLogViewerInstance model.instances instanceID
+
+                context =
+                    instance |> Context.state |> Maybe.withDefault (initialLogViewer localhostServerID)
+
+                entries =
+                    context.entries
+
+                -- TODO: Sendo Update do Game Models
+                entries_ =
+                    Dict.update logID
+                        (Maybe.andThen
+                            (\x -> Just { x | status = Normal True })
                         )
                         entries
 

@@ -6,6 +6,8 @@ import OS.WindowManager.Windows exposing (GameWindow(..))
 import Apps.Models exposing (AppModel)
 import Apps.Messages exposing (AppMsg(..))
 import Apps.Explorer.Subscriptions as Explorer
+import Apps.Browser.Subscriptions as Browser
+import Apps.LogViewer.Subscriptions as LogViewer
 
 
 subscriptions : AppModel -> CoreModel -> Sub AppMsg
@@ -16,9 +18,23 @@ subscriptions model core =
                 ExplorerWindow
                 MsgExplorer
                 (Explorer.subscriptions model.explorer)
+
+        browser =
+            subOnOpenWindow core
+                BrowserWindow
+                MsgBrowser
+                (Browser.subscriptions model.browser)
+
+        logViewer =
+            subOnOpenWindow core
+                LogViewerWindow
+                MsgLogViewer
+                (LogViewer.subscriptions model.logViewer)
     in
         Sub.batch
             [ explorer
+            , browser
+            , logViewer
             ]
 
 
