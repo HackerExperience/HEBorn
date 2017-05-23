@@ -5,8 +5,7 @@ import Apps.LogViewer.Menu.Models exposing (Menu)
 
 
 type MenuAction
-    = DoA
-    | DoB
+    = NormalEntryEdit
 
 
 type Msg

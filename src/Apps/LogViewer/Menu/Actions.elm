@@ -14,8 +14,5 @@ actionHandler :
     -> ( Model, Cmd Msg, List CoreMsg )
 actionHandler action model game =
     case action of
-        DoA ->
-            ( model, Cmd.none, [] )
-
-        DoB ->
+        NormalEntryEdit ->
             ( model, Cmd.none, [] )

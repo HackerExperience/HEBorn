@@ -4,7 +4,7 @@ import OS.WindowManager.MenuHandler.Models as MenuHandler
 
 
 type Menu
-    = MenuMain
+    = MenuNormalEntry
 
 
 type alias Model =

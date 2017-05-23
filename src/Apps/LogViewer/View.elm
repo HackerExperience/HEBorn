@@ -13,6 +13,7 @@ import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry)
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
@@ -245,7 +246,8 @@ renderBottom entry =
 renderEntry : LogViewerEntry -> Html Msg
 renderEntry entry =
     div
-        [ class
+        [ menuNormalEntry
+        , class
             (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
@@ -275,7 +277,8 @@ renderEntryList =
 view : GameModel -> Model -> Html Msg
 view game model =
     div []
-        ([ div [ class [ HeaderBar ] ]
+        ([ menuView model instanceID
+         , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
                 [ span [ class [ BtnUser ] ] []
                 , text " "
