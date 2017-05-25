@@ -5,6 +5,7 @@ import Core.Messages exposing (CoreMsg)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (AppMsg(..))
 import Apps.LogViewer.Update as LogViewer
+import Apps.TaskManager.Update as TaskManager
 
 
 update :
@@ -16,6 +17,12 @@ update msg game model =
     case ( msg, model ) of
         ( LogViewerMsg msg, LogViewerModel model ) ->
             map LogViewerModel LogViewerMsg (LogViewer.update msg game model)
+
+        ( TaskManagerMsg msg, TaskManagerModel model ) ->
+            map TaskManagerModel TaskManagerMsg (TaskManager.update msg game model)
+
+        _ ->
+            ( model, Cmd.none, [] )
 
 
 map :
