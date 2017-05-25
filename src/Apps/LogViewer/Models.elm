@@ -33,10 +33,9 @@ type LogEventMsg
     = LogIn IP ServerUser
     | LogInto IP
     | Connection IP IP IP
-    | ExternalAcess ServerUser ServerUser
     | DownloadBy FileName IP
     | DownloadFrom FileName IP
-    | Invalid
+    | Invalid String
 
 
 type LogEventStatus
@@ -140,7 +139,7 @@ logContentInterpret src =
                 LogInto destinationIP
 
             _ ->
-                Invalid
+                Invalid src
 
 
 logToEntry : NetModel.Log -> Maybe LogViewerEntry

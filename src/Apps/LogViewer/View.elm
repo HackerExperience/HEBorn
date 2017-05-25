@@ -9,13 +9,10 @@ import Css exposing (asPairs)
 import Css.Common exposing (elasticClass)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
-import Apps.LogViewer.Menu.Models exposing (Menu(..))
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
 import Apps.LogViewer.Style exposing (Classes(..))
-import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
 
 
@@ -58,6 +55,11 @@ renderUser user =
         , text " "
         , span [] [ text user ]
         ]
+
+
+renderFile : FileName -> List (Html Msg)
+renderFile fileName =
+    [ span [] [ text fileName ] ]
 
 
 renderButton : LogID -> Classes -> List (Html Msg)
@@ -112,32 +114,37 @@ renderMsg msg =
     div [ class [ EData ] ]
         (case msg of
             LogIn addr user ->
-                (renderAddr addr
+                (renderAddr addr)
                     ++ [ span [] [ text " logged in as " ] ]
-                    ++ renderUser user
-                )
+                    ++ (renderUser user)
+
+            LogInto dest ->
+                [ span [] [ text "Logged into " ] ]
+                    ++ (renderAddr dest)
 
             Connection actor src dest ->
-                (renderAddr actor
-                    ++ [ span [] [ text " bounced connection from " ]
-                       , span [ class [ IcoCrosshair, ColorRemote ] ] []
-                       , text " "
-                       , span [ class [ IdMe, ColorRemote ] ] [ text src ]
-                       , span [] [ text " to " ]
-                       , span [ class [ IcoDangerous, ColorDangerous ] ] []
-                       , text " "
-                       , span [ class [ IdOther, ColorDangerous ] ] [ text dest ]
-                       ]
-                )
+                (renderAddr actor)
+                    ++ [ span [] [ text "bounced connection from " ] ]
+                    ++ (renderAddr src)
+                    ++ [ span [] [ text " to " ] ]
+                    ++ (renderAddr dest)
 
-            ExternalAcess whom aswho ->
-                (renderUser whom
-                    ++ [ span [] [ text " logged in as " ] ]
-                    ++ renderUser aswho
-                )
+            DownloadBy fileName destIP ->
+                [ span [] [ text "File " ] ]
+                    ++ (renderFile fileName)
+                    ++ [ span [] [ text " downloaded by " ] ]
+                    ++ renderAddr destIP
 
-            _ ->
-                []
+            DownloadFrom fileName srcIP ->
+                [ span [] [ text "File " ] ]
+                    ++ (renderFile fileName)
+                    ++ [ span [] [ text " downloaded from " ] ]
+                    ++ (renderAddr srcIP)
+
+            Invalid msg ->
+                [ span [] [ text "Corrupted: " ]
+                , span [] [ text msg ]
+                ]
         )
 
 
@@ -243,6 +250,7 @@ renderBottom entry =
                     ]
 
 
+menuInclude : LogViewerEntry -> List (Attribute Msg)
 menuInclude entry =
     case entry.status of
         Normal _ ->
