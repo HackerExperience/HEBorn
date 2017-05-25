@@ -11,6 +11,7 @@ import OS.Dock.Style
 
 import Apps.LogViewer.Style
 import Apps.Browser.Style
+import Apps.TaskManager.Style
 
 
 port files : CssFileStructure -> Cmd msg
@@ -29,6 +30,7 @@ fileStructure =
                 -- , Apps.Explorer.Style.css
                 , Apps.LogViewer.Style.css
                 , Apps.Browser.Style.css
+                , Apps.TaskManager.Style.css
                 ]
           )
         ]
