@@ -20,9 +20,44 @@ styles =
     Css.asPairs >> style
 
 
+toMegaValues : Float -> String
+toMegaValues x =
+    -- TODO: Move this function to a better place
+    -- TODO: Use "round 2" from elm-round
+    if (x > (10 ^ 9)) then
+        toString (x / (10 ^ 9)) ++ " G"
+    else if (x > (10 ^ 6)) then
+        toString (x / (10 ^ 6)) ++ " M"
+    else if (x > (10 ^ 3)) then
+        toString (x / (10 ^ 3)) ++ " K"
+    else
+        toString (x) ++ " "
+
+
+viewTaskRowUsage : ResourceUsage -> List (Html Msg)
+viewTaskRowUsage usage =
+    [ div [] [ text ((toMegaValues usage.cpu) ++ "Hz") ]
+    , div [] [ text ((toMegaValues usage.mem) ++ "iB") ]
+    , div [] [ text ((toMegaValues usage.down) ++ "bps") ]
+    , div [] [ text ((toMegaValues usage.up) ++ "bps") ]
+    ]
+
+
 viewTaskRow : TaskEntry -> Html Msg
 viewTaskRow entry =
-    div [] []
+    div [ class [ EntryDivision ] ]
+        [ div []
+            [ div [] [ text entry.title ]
+            , div [] [ text "Target: ", text entry.target ]
+            , div []
+                [ text "File: "
+                , text entry.appFile
+                , span [] [ text (toString entry.appVer) ]
+                ]
+            ]
+        , div [] [ text (toString entry.eta) ]
+        , div [] (viewTaskRowUsage entry.usage)
+        ]
 
 
 viewTasksTable : Entries -> Html Msg

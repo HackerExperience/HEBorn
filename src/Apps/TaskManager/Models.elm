@@ -14,9 +14,9 @@ type alias ResourceUsage =
 type alias TaskEntry =
     { title : String
     , target : String
-    , eta : Int
     , appFile : String
     , appVer : Float
+    , eta : Int
     , usage : ResourceUsage
     }
 
@@ -61,4 +61,14 @@ initialModel =
 
 initialTaskManager : TaskManager
 initialTaskManager =
-    TaskManager [] (ResourceUsage 0.0 0.0 0.0 0.0)
+    TaskManager
+        [ (TaskEntry
+            "Encrypt Connection"
+            "89.32.182.204"
+            "CantTouchThis.enc"
+            4.3
+            20
+            (ResourceUsage 1900000000 786000000 0 0)
+          )
+        ]
+        (ResourceUsage 0 0 0 0)

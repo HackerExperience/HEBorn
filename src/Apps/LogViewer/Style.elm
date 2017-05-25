@@ -62,6 +62,7 @@ css =
         [ class HeaderBar
             [ flexContainerHorz
             , borderBottom3 (px 1) solid (hex "000")
+            , internalPadding
             ]
         , class ETAct
             [ flex (int 1)
@@ -91,6 +92,7 @@ css =
             [ fontSize (px 12)
             , borderBottom3 (px 1) solid (hex "000")
             , padding (px 16)
+            , internalPadding
             ]
         , class EAct
             [ width (pct 100)

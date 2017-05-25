@@ -2,7 +2,7 @@ module Apps.TaskManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz)
+import Css.Common exposing (flexContainerHorz, internalPadding)
 
 
 type Classes
@@ -27,6 +27,7 @@ css =
                     , nthChild "3"
                         [ flex (int 2) ]
                     , borderBottom3 (px 1) solid (rgb 0 0 0)
+                    , internalPadding
                     ]
                 ]
             ]
