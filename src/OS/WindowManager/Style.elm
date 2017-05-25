@@ -52,7 +52,6 @@ css =
             [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
             , backgroundColor (hex "EEE")
             , flex (int 1)
-            , internalPadding
             , maxHeight (pct 100)
             , overflowY auto
 
