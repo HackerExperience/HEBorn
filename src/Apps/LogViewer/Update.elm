@@ -6,16 +6,11 @@ import Game.Models exposing (GameModel)
 import Apps.LogViewer.Models
     exposing
         ( Model
-        , initialLogViewer
-        , initialLogViewerContext
-        , loadLogViewerContext
-        , getLogViewerInstance
         , entryToggle
         , entryEnterEditing
         , entryApplyEditing
         , entryLeaveEditing
         , entryUpdateEditing
-        , LogEventStatus(..)
         )
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as MsgMenu

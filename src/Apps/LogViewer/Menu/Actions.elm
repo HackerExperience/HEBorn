@@ -6,9 +6,6 @@ import Game.Models exposing (GameModel)
 import Apps.LogViewer.Models
     exposing
         ( Model
-        , initialLogViewer
-        , getLogViewerInstance
-        , LogEventStatus(..)
         , entryEnterEditing
         , entryApplyEditing
         , entryLeaveEditing

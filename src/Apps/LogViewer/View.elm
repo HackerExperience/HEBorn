@@ -160,12 +160,12 @@ renderMiniMsg msg =
     )
 
 
-renderEditing : InstanceID -> LogID -> String -> Html Msg
-renderEditing instanceID logID src =
+renderEditing : LogID -> String -> Html Msg
+renderEditing logID src =
     input
         [ class [ EData, BoxifyMe ]
         , value src
-        , onInput (UpdateEditing instanceID logID)
+        , onInput (UpdateEditing logID)
         ]
         []
 
@@ -207,11 +207,11 @@ renderEntryToggler logID =
         []
 
 
-renderData : InstanceID -> LogViewerEntry -> Html Msg
-renderData instanceID entry =
+renderData : LogViewerEntry -> Html Msg
+renderData entry =
     case entry.status of
         Editing x ->
-            renderEditing instanceID entry.srcID x
+            renderEditing entry.srcID x
 
         _ ->
             if (isEntryExpanded entry) then
@@ -290,7 +290,7 @@ renderEntryList =
 view : GameModel -> Model -> Html Msg
 view game model =
     div [ menuFilter ]
-        ([ menuView model instanceID
+        ([ menuView model
          , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
                 [ span [ class [ BtnUser ] ] []
