@@ -3,7 +3,7 @@ module Apps.TaskManager.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.CssHelpers
-import Svg exposing (svg, polyline)
+import Svg exposing (svg, polyline, polygon)
 import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio, fillOpacity, strokeOpacity)
 import Css exposing (asPairs)
 import Game.Models exposing (GameModel)
@@ -121,6 +121,18 @@ viewGraphUsage title color history limit =
     let
         sz =
             toFloat ((List.length history) - 1)
+
+        commonPts =
+            (List.indexedMap
+                (\i x ->
+                    String.concat
+                        [ toString (1 - toFloat (i) / sz)
+                        , ","
+                        , toString (1 - x / limit)
+                        ]
+                )
+                history
+            )
     in
         div [ class [ Graph ] ]
             [ text title
@@ -131,26 +143,27 @@ viewGraphUsage title color history limit =
                 , SvgA.preserveAspectRatio "none"
                 , viewBox "0 0 1 1"
                 ]
-                [ polyline
+                [ polygon
                     [ SvgA.fill color
-                    , SvgA.stroke color
-                    , SvgA.strokeOpacity "0.9"
                     , SvgA.fillOpacity "0.4"
-                    , SvgA.strokeWidth "0.012"
+                    , SvgA.stroke "none"
                     , SvgA.points
                         (String.join " "
-                            ((List.indexedMap
-                                (\i x ->
-                                    String.concat
-                                        [ toString (1 - toFloat (i) / sz)
-                                        , ","
-                                        , toString (1 - x / limit)
-                                        ]
-                                )
-                                history
-                             )
-                                ++ [ "0,1", "1,1" ]
+                            ([ "1,1" ]
+                                ++ commonPts
+                                ++ [ "0,1" ]
                             )
+                        )
+                    ]
+                    []
+                , polyline
+                    [ SvgA.fill "none"
+                    , SvgA.stroke color
+                    , SvgA.strokeOpacity "0.9"
+                    , SvgA.strokeWidth "0.02"
+                    , SvgA.points
+                        (String.join " "
+                            commonPts
                         )
                     ]
                     []
