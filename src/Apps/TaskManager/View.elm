@@ -22,8 +22,8 @@ styles =
     Css.asPairs >> style
 
 
-toMegaValues : Float -> String
-toMegaValues x =
+toPrefixedValues : Float -> String
+toPrefixedValues x =
     -- TODO: Move this function to a better place
     -- TODO: Use "round 2" from elm-round
     if (x > (10 ^ 9)) then
@@ -36,12 +36,42 @@ toMegaValues x =
         toString (x) ++ " "
 
 
+toTimeNotation : Int -> String
+toTimeNotation count =
+    if (count > 3600) then
+        let
+            h =
+                (toString (count // 3600))
+
+            l =
+                (count % 3600)
+
+            m =
+                (toString (l // 60))
+
+            s =
+                (toString (l % 60))
+        in
+            h ++ "h" ++ m ++ "m" ++ s ++ "s"
+    else if (count > 60) then
+        let
+            m =
+                (toString (count // 60))
+
+            s =
+                (toString (count % 60))
+        in
+            m ++ "m" ++ s ++ "s"
+    else
+        (toString count) ++ "s"
+
+
 viewTaskRowUsage : ResourceUsage -> List (Html Msg)
 viewTaskRowUsage usage =
-    [ div [] [ text ((toMegaValues usage.cpu) ++ "Hz") ]
-    , div [] [ text ((toMegaValues usage.mem) ++ "iB") ]
-    , div [] [ text ((toMegaValues usage.down) ++ "bps") ]
-    , div [] [ text ((toMegaValues usage.up) ++ "bps") ]
+    [ div [] [ text ((toPrefixedValues usage.cpu) ++ "Hz") ]
+    , div [] [ text ((toPrefixedValues usage.mem) ++ "iB") ]
+    , div [] [ text ((toPrefixedValues usage.down) ++ "bps") ]
+    , div [] [ text ((toPrefixedValues usage.up) ++ "bps") ]
     ]
 
 
@@ -65,6 +95,8 @@ viewTaskRow entry =
                         / (toFloat entry.etaTotal)
                     )
                 )
+            , br [] []
+            , text (toTimeNotation entry.etaNow)
             ]
         , div [] (viewTaskRowUsage entry.usage)
         ]
