@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.CssHelpers
 import Svg exposing (svg, polyline)
-import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio)
+import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio, fillOpacity, strokeOpacity)
 import Css exposing (asPairs)
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Messages exposing (Msg(..))
@@ -84,14 +84,16 @@ viewTasksTable entries =
         )
 
 
-viewGraphUsage : String -> List Float -> Float -> Html Msg
-viewGraphUsage color history limit =
+viewGraphUsage : String -> String -> List Float -> Float -> Html Msg
+viewGraphUsage title color history limit =
     let
         sz =
             toFloat ((List.length history) - 1)
     in
         div [ class [ Graph ] ]
-            [ svg
+            [ text title
+            , br [] []
+            , svg
                 [ SvgA.width "100%"
                 , SvgA.height "50"
                 , SvgA.preserveAspectRatio "none"
@@ -99,7 +101,10 @@ viewGraphUsage color history limit =
                 ]
                 [ polyline
                     [ SvgA.fill color
-                    , SvgA.strokeWidth "0"
+                    , SvgA.stroke color
+                    , SvgA.strokeOpacity "0.9"
+                    , SvgA.fillOpacity "0.4"
+                    , SvgA.strokeWidth "0.012"
                     , SvgA.points
                         (String.join " "
                             ((List.indexedMap
@@ -124,10 +129,10 @@ viewGraphUsage color history limit =
 viewTotalResources : TaskManager -> Html Msg
 viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } as app) =
     div [ class [ BottomGraphsRow ] ]
-        [ viewGraphUsage "green" historyCPU limits.cpu
-        , viewGraphUsage "blue" historyMem limits.mem
-        , viewGraphUsage "red" historyDown limits.down
-        , viewGraphUsage "yellow" historyUp limits.up
+        [ viewGraphUsage "CPU" "green" historyCPU limits.cpu
+        , viewGraphUsage "Memory" "blue" historyMem limits.mem
+        , viewGraphUsage "Downlink" "red" historyDown limits.down
+        , viewGraphUsage "Uplink" "yellow" historyUp limits.up
         ]
 
 
