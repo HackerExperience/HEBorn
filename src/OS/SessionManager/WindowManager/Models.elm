@@ -1,4 +1,4 @@
-module OS.WindowManager.Models
+module OS.SessionManager.WindowManager.Models
     exposing
         ( Model
         , Windows
@@ -30,6 +30,7 @@ module OS.WindowManager.Models
         , updateWindowSize
         , updateAppModel
         , getWindow
+        , setWindow
         , getContext
         , getAppModel
         , startDragging
@@ -42,7 +43,7 @@ import Maybe exposing (Maybe)
 import Apps.Models as Apps
 import Dict exposing (Dict)
 import Random.Pcg exposing (Seed, step, initialSeed)
-import OS.WindowManager.Context exposing (..)
+import OS.SessionManager.WindowManager.Context exposing (..)
 
 
 type alias Position =
@@ -112,10 +113,10 @@ initialWindows =
     Dict.empty
 
 
-initialModel : Model
-initialModel =
+initialModel : Seed -> Model
+initialModel seed =
     { windows = initialWindows
-    , seed = initialSeed 42
+    , seed = seed
     , drag = Draggable.init
     , dragging = Nothing
     , focus = Nothing
@@ -334,6 +335,15 @@ updateAppModel windowID appModel ({ windows } as model) =
 getWindow : WindowID -> Model -> Maybe Window
 getWindow windowId { windows } =
     Dict.get windowId windows
+
+
+setWindow : WindowID -> Window -> Model -> Model
+setWindow windowId window ({ windows } as model) =
+    let
+        windows_ =
+            Dict.insert windowId window windows
+    in
+        { model | windows = windows_ }
 
 
 getContext : Window -> Context

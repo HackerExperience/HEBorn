@@ -47,14 +47,18 @@ initialModel :
     -> String
     -> CoreModel
 initialModel route seedInt apiHttpUrl apiWsUrl version =
-    { route = route
-    , requests = Requests.Models.initialModel seedInt
-    , game = Game.Models.initialModel
-    , os = OS.Models.initialModel
-    , landing = Landing.Models.initialModel
-    , websocket = Driver.Websocket.Models.initialModel apiWsUrl
-    , config = generateConfig apiHttpUrl apiWsUrl version
-    }
+    let
+        game =
+            Game.Models.initialModel
+    in
+        { route = route
+        , requests = Requests.Models.initialModel seedInt
+        , game = game
+        , os = OS.Models.initialModel game
+        , landing = Landing.Models.initialModel
+        , websocket = Driver.Websocket.Models.initialModel apiWsUrl
+        , config = generateConfig apiHttpUrl apiWsUrl version
+        }
 
 
 generateConfig : String -> String -> String -> Config

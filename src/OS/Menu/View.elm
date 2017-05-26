@@ -8,7 +8,7 @@ import Html exposing (Html)
 import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 import Core.Messages exposing (CoreMsg(MsgOS))
-import OS.WindowManager.MenuHandler.View
+import OS.SessionManager.WindowManager.MenuHandler.View
     exposing
         ( menuForCreator
         , menuViewCreator
@@ -25,7 +25,7 @@ menuView model =
         (menuViewCreator
             ContextMenuMsg
             model
-            model.context
+            model.menu
             MenuMsg
             menu
         )

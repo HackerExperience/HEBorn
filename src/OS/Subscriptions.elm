@@ -1,15 +1,44 @@
 module OS.Subscriptions exposing (subscriptions)
 
-import Core.Models exposing (CoreModel)
-import OS.Models exposing (Model)
-import OS.Messages exposing (OSMsg(MsgWM, ContextMenuMsg))
-import OS.Menu.Subscriptions as OSMenu
-import OS.WindowManager.Subscriptions as WindowManager
+import OS.Models exposing (..)
+import OS.Messages exposing (..)
+import Game.Models exposing (GameModel)
+import OS.Menu.Models as Menu
+import OS.Menu.Subscriptions as Menu
+import OS.SessionManager.Models as SessionManager
+import OS.SessionManager.Subscriptions as SessionManager
 
 
-subscriptions : Model -> CoreModel -> Sub OSMsg
-subscriptions model core =
-    Sub.batch
-        [ Sub.map ContextMenuMsg (OSMenu.subscriptions model.context)
-        , Sub.map MsgWM (WindowManager.subscriptions model.wm core)
-        ]
+{-| TODO: change signature to GameModel -> Model -> Sub Msg
+-}
+subscriptions : GameModel -> Model -> Sub OSMsg
+subscriptions game model =
+    let
+        menuSub =
+            menu model.menu
+
+        sessionSub =
+            session game model.session
+    in
+        Sub.batch
+            [ menuSub
+            , sessionSub
+            ]
+
+
+
+-- internals
+
+
+menu : Menu.Model -> Sub OSMsg
+menu model =
+    model
+        |> Menu.subscriptions
+        |> Sub.map ContextMenuMsg
+
+
+session : GameModel -> SessionManager.Model -> Sub OSMsg
+session game model =
+    model
+        |> SessionManager.subscriptions game
+        |> Sub.map SessionManagerMsg
