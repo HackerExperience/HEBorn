@@ -1,7 +1,7 @@
-module OS.WindowManager.MenuHandler.Models exposing (..)
+module OS.SessionManager.WindowManager.MenuHandler.Models exposing (..)
 
 import ContextMenu exposing (ContextMenu)
-import OS.WindowManager.MenuHandler.Config exposing (clientConfig)
+import OS.SessionManager.WindowManager.MenuHandler.Config exposing (clientConfig)
 
 
 type alias Model context =

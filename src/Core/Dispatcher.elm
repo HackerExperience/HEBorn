@@ -5,8 +5,6 @@ module Core.Dispatcher
         , callServer
         , callFilesystem
         , callMeta
-        , callWM
-        , callDock
         )
 
 import Core.Messages exposing (CoreMsg(MsgGame, MsgOS))
@@ -18,8 +16,7 @@ import Game.Account.Messages as Account
 import Game.Network.Messages as Network
 import Game.Servers.Messages as Server
 import Game.Servers.Filesystem.Messages as Filesystem
-import OS.WindowManager.Messages as WM
-import OS.Dock.Messages as Dock
+import OS.SessionManager.WindowManager.Messages as WM
 import Game.Servers.Models exposing (ServerID)
 
 
@@ -66,13 +63,3 @@ callFilesystem serverID msg =
 callMeta : Meta.MetaMsg -> CoreMsg
 callMeta msg =
     callGame (MsgMeta msg)
-
-
-callWM : WM.Msg -> CoreMsg
-callWM msg =
-    callOS (MsgWM msg)
-
-
-callDock : Dock.Msg -> CoreMsg
-callDock msg =
-    callOS (MsgDock msg)

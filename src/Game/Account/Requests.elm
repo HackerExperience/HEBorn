@@ -1,7 +1,5 @@
 module Game.Account.Requests exposing (..)
 
-import Json.Decode exposing (Decoder, string, decodeString, dict)
-import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Models
     exposing
         ( createRequestData

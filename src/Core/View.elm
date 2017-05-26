@@ -1,6 +1,7 @@
 module Core.View exposing (view)
 
-import Html exposing (Html, div, text)
+import Html exposing (..)
+import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
@@ -10,7 +11,12 @@ import Landing.View
 
 view : CoreModel -> Html CoreMsg
 view model =
-    page model
+    case model.route of
+        RouteNotFound ->
+            notFoundView
+
+        _ ->
+            page model
 
 
 page : CoreModel -> Html CoreMsg

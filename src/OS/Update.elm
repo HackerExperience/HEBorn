@@ -1,45 +1,37 @@
 module OS.Update exposing (update)
 
-import Core.Models exposing (CoreModel)
+import OS.Messages exposing (..)
+import OS.Models exposing (..)
+import Game.Models exposing (GameModel)
 import Core.Messages exposing (CoreMsg)
-import OS.Messages exposing (OSMsg(..))
-import OS.Models exposing (Model)
-import OS.WindowManager.Update
-import OS.Dock.Update
-import OS.Menu.Messages as MsgMenu
-import OS.Menu.Update
-import OS.Menu.Actions exposing (actionHandler)
+import OS.Menu.Messages as Menu
+import OS.Menu.Update as Menu
+import OS.Menu.Actions as MenuActions
+import OS.SessionManager.Update as SessionManager
+import OS.SessionManager.Messages as SessionManager
+import OS.SessionManager.Models as SessionManager
 
 
-update : OSMsg -> Model -> CoreModel -> ( Model, Cmd OSMsg, List CoreMsg )
-update msg model core =
+update : OSMsg -> GameModel -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
+update msg game model =
     case msg of
-        MsgWM subMsg ->
-            let
-                ( wm_, cmd, coreMsg ) =
-                    OS.WindowManager.Update.update subMsg core model.wm
-            in
-                ( { model | wm = wm_ }, cmd, coreMsg )
+        SessionManagerMsg msg ->
+            model
+                |> sessionManager msg game
+                |> map (\m -> { model | session = m }) SessionManagerMsg
 
-        MsgDock subMsg ->
-            let
-                ( dock_, cmd, coreMsg ) =
-                    OS.Dock.Update.update subMsg model.dock
-            in
-                ( { model | dock = dock_ }, cmd, coreMsg )
-
-        ContextMenuMsg (MsgMenu.MenuClick action) ->
-            actionHandler action model core.game
+        ContextMenuMsg (Menu.MenuClick action) ->
+            MenuActions.actionHandler action model game
 
         ContextMenuMsg subMsg ->
             let
-                ( context_, cmd, coreMsg ) =
-                    OS.Menu.Update.update subMsg model.context core.game
+                ( menu_, cmd, coreMsg ) =
+                    Menu.update subMsg model.menu game
 
                 cmd_ =
                     Cmd.map ContextMenuMsg cmd
             in
-                ( { model | context = context_ }, cmd_, coreMsg )
+                ( { model | menu = menu_ }, cmd_, coreMsg )
 
         Event _ ->
             ( model, Cmd.none, [] )
@@ -50,15 +42,24 @@ update msg model core =
         Response _ _ ->
             ( model, Cmd.none, [] )
 
-        NoOp ->
-            ( model, Cmd.none, [] )
 
 
-getOSMsg : List OSMsg -> OSMsg
-getOSMsg msg =
-    case msg of
-        [] ->
-            NoOp
+-- internals
 
-        m :: _ ->
-            m
+
+sessionManager :
+    SessionManager.Msg
+    -> GameModel
+    -> Model
+    -> ( SessionManager.Model, Cmd SessionManager.Msg, List CoreMsg )
+sessionManager msg game model =
+    SessionManager.update msg game model.session
+
+
+map :
+    (model -> Model)
+    -> (msg -> OSMsg)
+    -> ( model, Cmd msg, List CoreMsg )
+    -> ( Model, Cmd OSMsg, List CoreMsg )
+map mapModel mapMsg ( model, msg, cmds ) =
+    ( mapModel model, Cmd.map mapMsg msg, cmds )
