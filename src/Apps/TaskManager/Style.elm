@@ -2,11 +2,15 @@ module Apps.TaskManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz, internalPadding)
+import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding)
 
 
 type Classes
     = EntryDivision
+    | MainLayout
+    | TaskTable
+    | BottomGraphsRow
+    | Graph
 
 
 css : Stylesheet
@@ -31,4 +35,16 @@ css =
                     ]
                 ]
             ]
+        , class MainLayout
+            [ flexContainerVert
+            , height (pct 100)
+            ]
+        , class BottomGraphsRow
+            [ flex (int 0)
+            , flexContainerHorz
+            ]
+        , class Graph
+            [ flex (int 1) ]
+        , class TaskTable
+            [ flex (int 1) ]
         ]

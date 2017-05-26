@@ -16,7 +16,8 @@ type alias TaskEntry =
     , target : String
     , appFile : String
     , appVer : Float
-    , eta : Int
+    , etaTotal : Int
+    , etaNow : Int
     , usage : ResourceUsage
     }
 
@@ -27,7 +28,11 @@ type alias Entries =
 
 type alias TaskManager =
     { tasks : Entries
-    , usage : ResourceUsage
+    , historyCPU : List Float
+    , historyMem : List Float
+    , historyDown : List Float
+    , historyUp : List Float
+    , limits : ResourceUsage
     }
 
 
@@ -59,6 +64,11 @@ initialModel =
     }
 
 
+increaseHistory : a -> List a -> List a
+increaseHistory new old =
+    new :: (List.take 9 old)
+
+
 initialTaskManager : TaskManager
 initialTaskManager =
     TaskManager
@@ -68,7 +78,12 @@ initialTaskManager =
             "CantTouchThis.enc"
             4.3
             20
+            5
             (ResourceUsage 1900000000 786000000 0 0)
           )
         ]
-        (ResourceUsage 0 0 0 0)
+        [ 2100000000, 1800000000, 2100000000, 1800000000 ]
+        [ 4096000000, 3464846848, 3164846848 ]
+        [ 123, 500, 120000, 123000, 1170000, 140, 160 ]
+        [ 123, 500, 120000, 123000, 1170000, 140, 160 ]
+        (ResourceUsage 2100000000 4096000000 1024000 512000)

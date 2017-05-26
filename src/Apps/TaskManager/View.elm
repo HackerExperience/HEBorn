@@ -3,6 +3,8 @@ module Apps.TaskManager.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.CssHelpers
+import Svg exposing (svg, polyline)
+import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio)
 import Css exposing (asPairs)
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Messages exposing (Msg(..))
@@ -55,14 +57,22 @@ viewTaskRow entry =
                 , span [] [ text (toString entry.appVer) ]
                 ]
             ]
-        , div [] [ text (toString entry.eta) ]
+        , div []
+            [ text
+                (toString
+                    (1
+                        - (toFloat entry.etaNow)
+                        / (toFloat entry.etaTotal)
+                    )
+                )
+            ]
         , div [] (viewTaskRowUsage entry.usage)
         ]
 
 
 viewTasksTable : Entries -> Html Msg
 viewTasksTable entries =
-    div []
+    div [ class [ TaskTable ] ]
         ([ div [ class [ EntryDivision ] ]
             -- TODO: Hide when too small (responsive design)
             [ div [] [ text "Process" ]
@@ -74,14 +84,56 @@ viewTasksTable entries =
         )
 
 
-viewTotalResources : ResourceUsage -> Html Msg
-viewTotalResources usage =
-    div [] []
+viewGraphUsage : String -> List Float -> Float -> Html Msg
+viewGraphUsage color history limit =
+    let
+        sz =
+            toFloat ((List.length history) - 1)
+    in
+        div [ class [ Graph ] ]
+            [ svg
+                [ SvgA.width "100%"
+                , SvgA.height "50"
+                , SvgA.preserveAspectRatio "none"
+                , viewBox "0 0 1 1"
+                ]
+                [ polyline
+                    [ SvgA.fill color
+                    , SvgA.strokeWidth "0"
+                    , SvgA.points
+                        (String.join " "
+                            ((List.indexedMap
+                                (\i x ->
+                                    String.concat
+                                        [ toString (1 - toFloat (i) / sz)
+                                        , ","
+                                        , toString (1 - x / limit)
+                                        ]
+                                )
+                                history
+                             )
+                                ++ [ "0,1", "1,1" ]
+                            )
+                        )
+                    ]
+                    []
+                ]
+            ]
+
+
+viewTotalResources : TaskManager -> Html Msg
+viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } as app) =
+    div [ class [ BottomGraphsRow ] ]
+        [ viewGraphUsage "green" historyCPU limits.cpu
+        , viewGraphUsage "blue" historyMem limits.mem
+        , viewGraphUsage "red" historyDown limits.down
+        , viewGraphUsage "yellow" historyUp limits.up
+        ]
 
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div []
+    div [ class [ MainLayout ] ]
         [ viewTasksTable app.tasks
-        , viewTotalResources app.usage
+        , viewTotalResources app
         ]
