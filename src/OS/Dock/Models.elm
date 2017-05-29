@@ -53,7 +53,7 @@ refreshInstances windows application =
 
         openeds =
             Dict.filter
-                (\id oWindow -> (oWindow.state == MinimizedState))
+                (\id oWindow -> (oWindow.state == NormalState))
                 appWindows
     in
         { application

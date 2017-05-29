@@ -5,7 +5,7 @@ import Html.Attributes exposing (style)
 import Html.CssHelpers
 import Svg exposing (svg, polyline, polygon)
 import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio, fillOpacity, strokeOpacity)
-import Css exposing (asPairs)
+import Css exposing (asPairs, width, pct)
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
@@ -75,6 +75,34 @@ viewTaskRowUsage usage =
     ]
 
 
+progressBar : Float -> String -> Html Msg
+progressBar percent floatText =
+    -- TODO: Make this one into "UI.Widgets"
+    node "progressbar"
+        []
+        [ node "fill"
+            [ styles
+                [ Css.width
+                    (pct
+                        (percent * 100)
+                    )
+                ]
+            ]
+            []
+        , node "label" [] [ text floatText ]
+        ]
+
+
+etaBar : Int -> Int -> Html Msg
+etaBar now total =
+    progressBar
+        (1
+            - (toFloat now)
+            / (toFloat total)
+        )
+        (toTimeNotation now)
+
+
 viewTaskRow : TaskEntry -> Html Msg
 viewTaskRow entry =
     div [ class [ EntryDivision ] ]
@@ -87,17 +115,7 @@ viewTaskRow entry =
                 , span [] [ text (toString entry.appVer) ]
                 ]
             ]
-        , div []
-            [ text
-                (toString
-                    (1
-                        - (toFloat entry.etaNow)
-                        / (toFloat entry.etaTotal)
-                    )
-                )
-            , br [] []
-            , text (toTimeNotation entry.etaNow)
-            ]
+        , div [] [ etaBar entry.etaNow entry.etaTotal ]
         , div [] (viewTaskRowUsage entry.usage)
         ]
 
@@ -126,7 +144,7 @@ viewGraphUsage title color history limit =
             (List.indexedMap
                 (\i x ->
                     String.concat
-                        [ toString (1 - toFloat (i) / sz)
+                        [ toString ((1 - toFloat (i) / sz) * 3)
                         , ","
                         , toString (1 - x / limit)
                         ]
@@ -140,8 +158,7 @@ viewGraphUsage title color history limit =
             , svg
                 [ SvgA.width "100%"
                 , SvgA.height "50"
-                , SvgA.preserveAspectRatio "none"
-                , viewBox "0 0 1 1"
+                , viewBox "0 0 3 1"
                 ]
                 [ polygon
                     [ SvgA.fill color
@@ -149,7 +166,7 @@ viewGraphUsage title color history limit =
                     , SvgA.stroke "none"
                     , SvgA.points
                         (String.join " "
-                            ([ "1,1" ]
+                            ([ "3,1" ]
                                 ++ commonPts
                                 ++ [ "0,1" ]
                             )

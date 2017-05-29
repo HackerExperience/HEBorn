@@ -100,6 +100,13 @@ css =
             [ before
                 [ Icon.browser ]
             ]
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "taskmngr"
+            [ before
+                [ Icon.taskMngr ]
+            ]
         , class HeaderButtons
             [ flex (int 0)
             , flexContainerHorz

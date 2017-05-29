@@ -36,6 +36,11 @@ arrowCircleOUp =
     "f01b"
 
 
+listAlt : UnicodeTag
+listAlt =
+    "f022"
+
+
 lock : UnicodeTag
 lock =
     "f023"

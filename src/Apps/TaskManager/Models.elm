@@ -87,3 +87,39 @@ initialTaskManager =
         [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
         [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
         (ResourceUsage 2100000000 4096000000 1024000 512000)
+
+
+updateTasks : Entries -> ResourceUsage -> TaskManager -> TaskManager
+updateTasks tasks_ limit old =
+    let
+        ( cpu, mem, down, up ) =
+            List.foldr
+                (\({ usage } as entry) ( cpu_, mem_, down_, up_ ) ->
+                    ( cpu_ + usage.cpu
+                    , mem_ + usage.mem
+                    , down_ + usage.down
+                    , up_ + usage.up
+                    )
+                )
+                ( 0.0, 0.0, 0.0, 0.0 )
+                tasks_
+
+        historyCPU =
+            (increaseHistory cpu old.historyCPU)
+
+        historyMem =
+            (increaseHistory mem old.historyMem)
+
+        historyDown =
+            (increaseHistory down old.historyDown)
+
+        historyUp =
+            (increaseHistory up old.historyUp)
+    in
+        TaskManager
+            tasks_
+            historyCPU
+            historyMem
+            historyDown
+            historyUp
+            limit

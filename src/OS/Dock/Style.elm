@@ -98,6 +98,13 @@ css =
             [ before
                 [ Icon.browser ]
             ]
+        , attrSelector "dockItemIco"
+            "data-icon"
+            "="
+            "taskmngr"
+            [ before
+                [ Icon.taskMngr ]
+            ]
         , attrSelector "dockItem"
             "data-hasinst"
             "="
