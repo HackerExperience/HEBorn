@@ -8,6 +8,8 @@ import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Messages exposing (Msg(..))
+import OS.WindowManager.Models exposing (getWindow, WindowID)
+import OS.WindowManager.View exposing (windowTitle)
 import OS.Dock.Style as Css
 import Apps.Models as Apps
 import OS.Dock.Models
@@ -50,6 +52,27 @@ hasInstanceString num =
         "N"
 
 
+andThenWithDefault : (a -> b) -> b -> Maybe a -> b
+andThenWithDefault callback default maybe =
+    case maybe of
+        Just value ->
+            callback value
+
+        Nothing ->
+            default
+
+
+filteredTile : Int -> WindowID -> CoreModel -> String
+filteredTile i windowID model =
+    (toString i)
+        ++ ": "
+        ++ (andThenWithDefault
+                windowTitle
+                "404"
+                (getWindow windowID model.os.wm)
+           )
+
+
 renderApplicationSubmenu : CoreModel -> Application -> Html CoreMsg
 renderApplicationSubmenu model application =
     div
@@ -59,13 +82,13 @@ renderApplicationSubmenu model application =
         [ ul []
             ([ li [] [ text "OPEN WINDOWS" ] ]
                 ++ (List.indexedMap
-                        (\i o ->
+                        (\i windowID ->
                             li
                                 [ class [ Css.ClickableWindow ]
-                                , attribute "data-id" o
-                                , onClick (MsgOS (MsgWM (UpdateFocusTo (Just o))))
+                                , attribute "data-id" windowID
+                                , onClick (MsgOS (MsgWM (UpdateFocusTo (Just windowID))))
                                 ]
-                                [ text (toString i) ]
+                                [ text (filteredTile i windowID model) ]
                         )
                         application.openWindows
                    )
@@ -73,13 +96,13 @@ renderApplicationSubmenu model application =
                    , li [] [ text "MINIMIZED LINUXES" ]
                    ]
                 ++ (List.indexedMap
-                        (\i o ->
+                        (\i windowID ->
                             li
                                 [ class [ Css.ClickableWindow ]
-                                , attribute "data-id" o
-                                , onClick (MsgOS (MsgWM (Restore o)))
+                                , attribute "data-id" windowID
+                                , onClick (MsgOS (MsgWM (Restore windowID)))
                                 ]
-                                [ text (toString i) ]
+                                [ text (filteredTile i windowID model) ]
                         )
                         application.minimizedWindows
                    )

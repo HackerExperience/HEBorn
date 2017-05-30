@@ -64,8 +64,13 @@ name =
 
 
 title : Model -> String
-title model =
-    "Log Viewer"
+title ({ app } as model) =
+    if (String.length app.filtering) > 12 then
+        "Log Viewer: \"" ++ (String.left 10 app.filtering) ++ "[...]\""
+    else if (String.length app.filtering) > 0 then
+        "Log Viewer: \"" ++ app.filtering ++ "\""
+    else
+        "Log Viewer"
 
 
 icon : String

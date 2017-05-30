@@ -1,4 +1,4 @@
-module OS.WindowManager.View exposing (renderWindows)
+module OS.WindowManager.View exposing (renderWindows, windowTitle)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
