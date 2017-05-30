@@ -6,11 +6,8 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
-import Apps.Instances.Models as Instance exposing (InstanceID)
-import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, getState)
+import Apps.Explorer.Models exposing (Model, Explorer, FilePath)
 import Apps.Explorer.Menu.Models exposing (Menu(..))
 import Apps.Explorer.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Explorer.Style exposing (Classes(..))
@@ -270,17 +267,13 @@ renderDetailedEntryList list =
 -- END OF THAT
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
-    let
-        explorer =
-            getState model id
-    in
-        div [ class [ Window ] ]
-            [ viewExplorerColumn explorer game
-            , viewExplorerMain explorer game
-            , menuView model id
-            ]
+view : GameModel -> Model -> Html Msg
+view game ({ app } as model) =
+    div [ class [ Window ] ]
+        [ viewExplorerColumn app game
+        , viewExplorerMain app game
+        , menuView model
+        ]
 
 
 viewExplorerColumn : Explorer -> GameModel -> Html Msg

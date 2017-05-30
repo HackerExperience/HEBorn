@@ -39,6 +39,7 @@ initialApplications =
     List.map generateApplication
         [ Apps.TaskManagerApp
         , Apps.BrowserApp
+        , Apps.ExplorerApp
         , Apps.LogViewerApp
         ]
 

@@ -4,59 +4,19 @@ import Core.Messages exposing (CoreMsg)
 import Core.Dispatcher exposing (callFilesystem)
 import Game.Models exposing (GameModel)
 import Game.Servers.Filesystem.Messages as Filesystem
-import Apps.Instances.Models as Instance
-import Apps.Context as Context
-import Apps.Explorer.Models
-    exposing
-        ( Model
-        , initialExplorerContext
-        , getExplorerInstance
-        )
+import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as MsgMenu
 import Apps.Explorer.Menu.Update
 import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
-update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
-update msg model game =
+update : Msg -> GameModel -> Model -> ( Model, Cmd Msg, List CoreMsg )
+update msg game ({ app } as model) =
     case msg of
-        -- Explorer
-        -- Instance
-        OpenInstance id ->
-            let
-                instances_ =
-                    Instance.open
-                        model.instances
-                        id
-                        initialExplorerContext
-            in
-                ( { model | instances = instances_ }, Cmd.none, [] )
-
-        CloseInstance id ->
-            let
-                instances_ =
-                    Instance.close model.instances id
-            in
-                ( { model | instances = instances_ }, Cmd.none, [] )
-
-        -- Context
-        SwitchContext id ->
-            let
-                instance =
-                    getExplorerInstance model.instances id
-
-                instance_ =
-                    Context.switch instance
-
-                instances_ =
-                    Instance.update model.instances id instance_
-            in
-                ( { model | instances = instances_ }, Cmd.none, [] )
-
-        -- Context
-        MenuMsg (MsgMenu.MenuClick action id) ->
-            actionHandler action id model game
+        -- Menu
+        MenuMsg (MsgMenu.MenuClick action) ->
+            actionHandler action model game
 
         MenuMsg subMsg ->
             let
@@ -67,13 +27,3 @@ update msg model game =
                     Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
-
-        -- Server-side notifications
-        Event event ->
-            ( model, Cmd.none, [] )
-
-        Request _ ->
-            ( model, Cmd.none, [] )
-
-        Response request data ->
-            ( model, Cmd.none, [] )

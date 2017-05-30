@@ -50,6 +50,7 @@ css =
         [ class Window
             [ flexContainerHorz
             , height (pct 100)
+            , internalPadding
             ]
         , class Content
             [ flex (int 1)
@@ -98,7 +99,8 @@ css =
                 ]
             ]
         , class NewBtn
-            [ after
+            [ position relative
+            , after
                 [ Icon.add
                 , fontSize (px 14)
                 , position absolute

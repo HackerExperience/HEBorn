@@ -6,6 +6,7 @@ import Apps.Messages exposing (AppMsg(..))
 import Apps.LogViewer.View as LogViewer
 import Apps.TaskManager.View as TaskManager
 import Apps.Browser.View as Browser
+import Apps.Explorer.View as Explorer
 
 
 view game model =
@@ -18,3 +19,6 @@ view game model =
 
         BrowserModel model ->
             Html.map BrowserMsg (Browser.view game model)
+
+        ExplorerModel model ->
+            Html.map ExplorerMsg (Explorer.view game model)

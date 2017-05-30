@@ -13,18 +13,21 @@ module Apps.Models
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
+import Apps.Explorer.Models as Explorer
 
 
 type App
     = LogViewerApp
     | TaskManagerApp
     | BrowserApp
+    | ExplorerApp
 
 
 type AppModel
     = LogViewerModel LogViewer.Model
     | TaskManagerModel TaskManager.Model
     | BrowserModel Browser.Model
+    | ExplorerModel Explorer.Model
 
 
 type Contexts
@@ -44,6 +47,9 @@ contexts app =
         BrowserApp ->
             ContextlessApp
 
+        ExplorerApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -56,6 +62,9 @@ name app =
 
         BrowserApp ->
             Browser.name
+
+        ExplorerApp ->
+            Explorer.name
 
 
 icon : App -> String
@@ -70,6 +79,9 @@ icon app =
         BrowserApp ->
             Browser.icon
 
+        ExplorerApp ->
+            Explorer.icon
+
 
 title : AppModel -> String
 title model =
@@ -83,6 +95,9 @@ title model =
         BrowserModel model ->
             Browser.title model
 
+        ExplorerModel model ->
+            Explorer.title model
+
 
 model : App -> AppModel
 model app =
@@ -95,3 +110,6 @@ model app =
 
         BrowserApp ->
             BrowserModel Browser.initialModel
+
+        ExplorerApp ->
+            ExplorerModel Explorer.initialModel

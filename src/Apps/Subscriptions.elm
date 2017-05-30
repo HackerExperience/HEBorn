@@ -11,6 +11,9 @@ import Apps.TaskManager.Subscriptions as TaskManager
 import Apps.Browser.Models as Browser
 import Apps.Browser.Messages as Browser
 import Apps.Browser.Subscriptions as Browser
+import Apps.Explorer.Models as Explorer
+import Apps.Explorer.Messages as Explorer
+import Apps.Explorer.Subscriptions as Explorer
 
 
 subscriptions game model =
@@ -26,3 +29,7 @@ subscriptions game model =
         BrowserModel model ->
             Browser.subscriptions game model
                 |> Sub.map BrowserMsg
+
+        ExplorerModel model ->
+            Explorer.subscriptions game model
+                |> Sub.map ExplorerMsg

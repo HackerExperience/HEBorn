@@ -7,6 +7,7 @@ import Apps.Messages exposing (AppMsg(..))
 import Apps.LogViewer.Update as LogViewer
 import Apps.TaskManager.Update as TaskManager
 import Apps.Browser.Update as Browser
+import Apps.Explorer.Update as Explorer
 
 
 update :
@@ -24,6 +25,9 @@ update msg game model =
 
         ( BrowserMsg msg, BrowserModel model ) ->
             map BrowserModel BrowserMsg (Browser.update msg game model)
+
+        ( ExplorerMsg msg, ExplorerModel model ) ->
+            map ExplorerModel ExplorerMsg (Explorer.update msg game model)
 
         _ ->
             ( model, Cmd.none, [] )

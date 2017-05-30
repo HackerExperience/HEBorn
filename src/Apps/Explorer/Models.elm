@@ -1,27 +1,23 @@
 module Apps.Explorer.Models exposing (..)
 
 import Dict
-import Game.Models exposing (GameModel)
 import Game.Servers.Models
     exposing
         ( ServerID
         , getFilesystem
         , getServerByID
         )
-import Game.Servers.Filesystem.Models
+import Game.Servers.Filesystem.Models as NetModel
     exposing
         ( FilePath
         , rootPath
         , pathExists
         )
-import Apps.Instances.Models as Instance
-    exposing
-        ( Instances
-        , InstanceID
-        , initialState
-        )
-import Apps.Context as Context exposing (ContextApp)
 import Apps.Explorer.Menu.Models as Menu
+
+
+type alias FilePath =
+    NetModel.FilePath
 
 
 type alias Explorer =
@@ -30,14 +26,25 @@ type alias Explorer =
     }
 
 
-type alias ContextExplorer =
-    ContextApp Explorer
-
-
 type alias Model =
-    { instances : Instances ContextExplorer
+    { app : Explorer
     , menu : Menu.Model
     }
+
+
+name : String
+name =
+    "Explorer"
+
+
+title : Model -> String
+title model =
+    "File Explorer"
+
+
+icon : String
+icon =
+    "explorer"
 
 
 initialExplorer : Explorer
@@ -49,40 +56,9 @@ initialExplorer =
 
 initialModel : Model
 initialModel =
-    { instances = initialState
+    { app = initialExplorer
     , menu = Menu.initialMenu
     }
-
-
-initialExplorerContext : ContextExplorer
-initialExplorerContext =
-    Context.initialContext initialExplorer
-
-
-getExplorerInstance : Instances ContextExplorer -> InstanceID -> ContextExplorer
-getExplorerInstance model id =
-    case (Instance.get model id) of
-        Just instance ->
-            instance
-
-        Nothing ->
-            initialExplorerContext
-
-
-getExplorerContext : ContextApp Explorer -> Explorer
-getExplorerContext instance =
-    case (Context.state instance) of
-        Just context ->
-            context
-
-        Nothing ->
-            initialExplorer
-
-
-getState : Model -> InstanceID -> Explorer
-getState model id =
-    getExplorerContext
-        (getExplorerInstance model.instances id)
 
 
 getPath : Explorer -> FilePath
@@ -95,8 +71,7 @@ setPath explorer path =
     { explorer | path = path }
 
 
-changePath : Explorer -> GameModel -> FilePath -> Explorer
-changePath explorer game path =
+changePath path explorer game =
     let
         server =
             getServerByID game.servers explorer.serverID
