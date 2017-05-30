@@ -117,7 +117,9 @@ initialModel =
 initialLogViewer : LogViewer
 initialLogViewer =
     { filtering = ""
-    , entries = Dict.empty
+    , entries =
+        -- HARD IMPORT OUR DUMMNY VALUES
+        logsToEntries NetModel.initialLogs
     }
 
 
