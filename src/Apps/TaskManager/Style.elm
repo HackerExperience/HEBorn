@@ -44,7 +44,9 @@ css =
             , flexContainerHorz
             ]
         , class Graph
-            [ flex (int 1) ]
+            [ flex (int 1)
+            , marginBottom (px -4)
+            ]
         , class TaskTable
             [ flex (int 1) ]
         , selector "progressbar"
