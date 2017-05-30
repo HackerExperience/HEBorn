@@ -87,7 +87,7 @@ css =
         , attrSelector "wmHeaderTitle"
             "data-icon"
             "="
-            "logviewer"
+            "logvw"
             [ before
                 [ Icon.logvw ]
             ]
