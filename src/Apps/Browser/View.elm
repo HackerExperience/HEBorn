@@ -25,8 +25,12 @@ styles =
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div [ class [ Window ] ]
-        [ viewBrowserMain app
+    div
+        [ menuContent
+        , class [ Window, Content, Client ]
+        ]
+        [ viewToolbar app
+        , viewStaticContent
         , menuView model
         ]
 
@@ -100,16 +104,4 @@ viewStaticContent =
                 , text "AnyMap"
                 ]
             ]
-        ]
-
-
-viewBrowserMain : Browser -> Html Msg
-viewBrowserMain browser =
-    div
-        [ menuContent
-        , class
-            [ Content, Client ]
-        ]
-        [ viewToolbar browser
-        , viewStaticContent
         ]

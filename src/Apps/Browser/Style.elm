@@ -53,19 +53,21 @@ css =
         , class Client
             [ flexContainerVert
             , height (pct 100)
+            , internalPadding
             , children
                 [ everything
                     [ flex (int 0) ]
                 , class PageContent
-                    [ flex (int 1) ]
+                    [ flex (int 1)
+                    , height (px 0)
+                    , overflowY scroll
+                    ]
                 ]
             ]
         , class PageContent
             [ margin (px -8)
             , flexContainerVert
             ]
-        , class Window
-            [ height (pct 100) ]
         , class LoginPageHeader
             [ lineHeight (int 3)
             , flex (int 0)

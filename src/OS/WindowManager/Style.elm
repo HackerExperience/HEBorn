@@ -3,7 +3,7 @@ module OS.WindowManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (pseudoContent, attrSelector)
-import Css.Common exposing (globalShadow, flexContainerHorz, internalPadding)
+import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
 import Css.Icons as Icon
 
 
@@ -52,10 +52,8 @@ css =
             [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
             , backgroundColor (hex "EEE")
             , flex (int 1)
-            , maxHeight (pct 100)
-            , overflowY auto
-
-            -- TODO: Consider header height
+            , overflowY hidden
+            , flexContainerVert
             ]
         , class WindowHeader
             [ displayFlex
