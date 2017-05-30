@@ -22,13 +22,17 @@ type Class
     | HeaderContextSw
 
 
+wmBorderRadius =
+    (px 4)
+
+
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
         [ class Window
             [ position (absolute)
             , displayFlex
-            , borderRadius4 (px 8) (px 8) (px 8) (px 8)
+            , borderRadius wmBorderRadius
             , flexDirection column
             , globalShadow
             , flex (int 0)
@@ -49,7 +53,7 @@ css =
                 ]
             ]
         , class WindowBody
-            [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
+            [ borderRadius4 (px 0) (px 0) wmBorderRadius wmBorderRadius
             , backgroundColor (hex "EEE")
             , flex (int 1)
             , overflowY hidden
@@ -61,7 +65,7 @@ css =
             , property "background" "linear-gradient(to bottom, #6c6c6c 0%,#4c4c4c 100%)"
             , color (hex "FFF")
             , flex (int 0)
-            , borderRadius4 (px 8) (px 8) (px 0) (px 0)
+            , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
             , internalPadding
             , lineHeight (px 16)
             , borderBottom3 (px 1) solid (rgb 0 140 255)
