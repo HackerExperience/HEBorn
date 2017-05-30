@@ -36,7 +36,11 @@ generateApplication app =
 
 initialApplications : List Application
 initialApplications =
-    List.map generateApplication [ Apps.LogViewerApp, Apps.TaskManagerApp ]
+    List.map generateApplication
+        [ Apps.TaskManagerApp
+        , Apps.BrowserApp
+        , Apps.LogViewerApp
+        ]
 
 
 refreshInstances : Windows -> Application -> Application

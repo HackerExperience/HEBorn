@@ -1,39 +1,7 @@
-module Apps.Browser.Models
-    exposing
-        ( Browser
-        , ContextBrowser
-        , Model
-        , BrowserHistory
-        , BrowserPage
-        , PageURL
-        , PageTitle
-        , PageContent
-        , initialBrowser
-        , initialModel
-        , initialBrowserContext
-        , getBrowserInstance
-        , getBrowserContext
-        , getState
-        , getPage
-        , getPageURL
-        , getPageContent
-        , getPageTitle
-        , getPreviousPages
-        , getNextPages
-        , gotoPage
-        , gotoPreviousPage
-        , gotoNextPage
-        )
+module Apps.Browser.Models exposing (..)
 
 import Maybe
-import Apps.Instances.Models as Instance
-    exposing
-        ( Instances
-        , InstanceID
-        , initialState
-        )
 import Apps.Browser.Messages exposing (Msg(..))
-import Apps.Context as Context exposing (ContextApp)
 import Apps.Browser.Menu.Models as Menu
 
 
@@ -68,14 +36,25 @@ type alias Browser =
     }
 
 
-type alias ContextBrowser =
-    ContextApp Browser
-
-
 type alias Model =
-    { instances : Instances ContextBrowser
+    { app : Browser
     , menu : Menu.Model
     }
+
+
+name : String
+name =
+    "Browser"
+
+
+title : Model -> String
+title model =
+    "Browser"
+
+
+icon : String
+icon =
+    "browser"
 
 
 initialBrowser : Browser
@@ -91,40 +70,9 @@ initialBrowser =
 
 initialModel : Model
 initialModel =
-    { instances = initialState
+    { app = initialBrowser
     , menu = Menu.initialMenu
     }
-
-
-initialBrowserContext : ContextBrowser
-initialBrowserContext =
-    Context.initialContext initialBrowser
-
-
-getBrowserInstance : Instances ContextBrowser -> InstanceID -> ContextBrowser
-getBrowserInstance model id =
-    case (Instance.get model id) of
-        Just instance ->
-            instance
-
-        Nothing ->
-            initialBrowserContext
-
-
-getBrowserContext : ContextApp Browser -> Browser
-getBrowserContext instance =
-    case (Context.state instance) of
-        Just context ->
-            context
-
-        Nothing ->
-            initialBrowser
-
-
-getState : Model -> InstanceID -> Browser
-getState model id =
-    getBrowserContext
-        (getBrowserInstance model.instances id)
 
 
 getPage : Browser -> BrowserPage

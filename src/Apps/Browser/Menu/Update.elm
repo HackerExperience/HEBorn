@@ -18,5 +18,5 @@ update msg model game =
             in
                 ( { model | menu = menu_ }, Cmd.map MenuMsg cmd, [] )
 
-        MenuClick action id ->
+        MenuClick action ->
             ( model, Cmd.none, [] )

@@ -6,6 +6,7 @@ import Apps.Models exposing (..)
 import Apps.Messages exposing (AppMsg(..))
 import Apps.LogViewer.Update as LogViewer
 import Apps.TaskManager.Update as TaskManager
+import Apps.Browser.Update as Browser
 
 
 update :
@@ -20,6 +21,9 @@ update msg game model =
 
         ( TaskManagerMsg msg, TaskManagerModel model ) ->
             map TaskManagerModel TaskManagerMsg (TaskManager.update msg game model)
+
+        ( BrowserMsg msg, BrowserModel model ) ->
+            map BrowserModel BrowserMsg (Browser.update msg game model)
 
         _ ->
             ( model, Cmd.none, [] )
