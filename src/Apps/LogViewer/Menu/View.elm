@@ -7,7 +7,6 @@ module Apps.LogViewer.Menu.View
         )
 
 import Html exposing (Html)
-import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 import OS.WindowManager.MenuHandler.View
     exposing

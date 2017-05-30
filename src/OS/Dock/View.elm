@@ -4,6 +4,7 @@ import Html exposing (Html, div, text, button, ul, li, hr)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
+import Utils exposing (andThenWithDefault)
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
@@ -50,16 +51,6 @@ hasInstanceString num =
         "Y"
     else
         "N"
-
-
-andThenWithDefault : (a -> b) -> b -> Maybe a -> b
-andThenWithDefault callback default maybe =
-    case maybe of
-        Just value ->
-            callback value
-
-        Nothing ->
-            default
 
 
 filteredTile : Int -> WindowID -> CoreModel -> String

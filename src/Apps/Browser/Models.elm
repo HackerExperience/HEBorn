@@ -1,6 +1,6 @@
 module Apps.Browser.Models exposing (..)
 
-import Maybe
+import Utils exposing (andThenWithDefault)
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Models as Menu
 
@@ -48,8 +48,20 @@ name =
 
 
 title : Model -> String
-title model =
-    "Browser"
+title ({ app } as model) =
+    let
+        pgTitle =
+            app.page.title
+
+        posfix =
+            if (String.length pgTitle) > 12 then
+                Just (": \"" ++ (String.left 10 pgTitle) ++ "[...]\"")
+            else if (String.length pgTitle) > 0 then
+                Just (": \"" ++ pgTitle ++ "\"")
+            else
+                Nothing
+    in
+        andThenWithDefault (\posfix -> name ++ posfix) name posfix
 
 
 icon : String
@@ -62,7 +74,7 @@ initialBrowser =
     { addressBar = "about:blank"
 
     -- FIXME: update the content
-    , page = { url = "about:blank", title = "", content = "" }
+    , page = { url = "about:blank", title = "Blank", content = "" }
     , previousPages = []
     , nextPages = []
     }

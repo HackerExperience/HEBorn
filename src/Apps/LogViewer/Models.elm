@@ -1,7 +1,7 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict
-import Utils exposing (filterMapDict)
+import Utils exposing (filterMapDict, andThenWithDefault)
 import Game.Shared exposing (..)
 import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
 import Game.Servers.Logs.Models as NetModel exposing (..)
@@ -65,12 +65,19 @@ name =
 
 title : Model -> String
 title ({ app } as model) =
-    if (String.length app.filtering) > 12 then
-        "Log Viewer: \"" ++ (String.left 10 app.filtering) ++ "[...]\""
-    else if (String.length app.filtering) > 0 then
-        "Log Viewer: \"" ++ app.filtering ++ "\""
-    else
-        "Log Viewer"
+    let
+        filter =
+            app.filtering
+
+        posfix =
+            if (String.length filter) > 12 then
+                Just (": \"" ++ (String.left 10 filter) ++ "[...]\"")
+            else if (String.length filter) > 0 then
+                Just (": \"" ++ filter ++ "\"")
+            else
+                Nothing
+    in
+        andThenWithDefault (\posfix -> name ++ posfix) name posfix
 
 
 icon : String

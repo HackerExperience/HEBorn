@@ -48,7 +48,7 @@ contexts app =
             ContextlessApp
 
         ExplorerApp ->
-            ContextlessApp
+            ContextualApp
 
 
 name : App -> String

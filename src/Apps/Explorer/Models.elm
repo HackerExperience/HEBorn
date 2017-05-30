@@ -1,6 +1,7 @@
 module Apps.Explorer.Models exposing (..)
 
 import Dict
+import Utils exposing (andThenWithDefault)
 import Game.Servers.Models
     exposing
         ( ServerID
@@ -38,8 +39,26 @@ name =
 
 
 title : Model -> String
-title model =
-    "File Explorer"
+title ({ app } as model) =
+    let
+        path =
+            app.path
+
+        posfix =
+            if (String.length path) > 12 then
+                Just
+                    (": \""
+                        ++ (String.left 5 path)
+                        ++ "[...]"
+                        ++ (String.right 5 path)
+                        ++ "\""
+                    )
+            else if (String.length path) > 0 then
+                Just (": \"" ++ path ++ "\"")
+            else
+                Nothing
+    in
+        andThenWithDefault (\posfix -> name ++ posfix) name posfix
 
 
 icon : String
