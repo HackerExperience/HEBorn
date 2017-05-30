@@ -296,7 +296,7 @@ renderEntryList =
 
 
 view : GameModel -> Model -> Html Msg
-view game model =
+view game ({ app } as model) =
     div [ menuFilter ]
         ([ menuView model
          , div [ class [ HeaderBar ] ]
@@ -312,6 +312,7 @@ view game model =
                 , div [ class [ ETFBar ] ]
                     [ input
                         [ placeholder "Search..."
+                        , value app.filtering
                         , onInput UpdateFilter
                         ]
                         []
@@ -319,9 +320,9 @@ view game model =
                 ]
             ]
          ]
-            ++ (model.app.entries
+            ++ (app.entries
                     |> Dict.filter
-                        (\k v -> String.contains model.app.filtering v.src)
+                        (\k v -> String.contains app.filtering v.src)
                     |> Dict.values
                     |> renderEntryList
                )
