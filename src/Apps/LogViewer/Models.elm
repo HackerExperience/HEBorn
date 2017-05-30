@@ -182,6 +182,12 @@ logsToEntries logs =
     filterMapDict (\id oValue -> logToEntry oValue) logs
 
 
+type alias GameModelCompat =
+    -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
+    { servers : Game.Servers.Models.Servers }
+
+
+findLogs : ServerID -> GameModelCompat -> NetModel.Logs
 findLogs serverID game =
     case (getServerByID game.servers serverID) of
         StdServer server ->

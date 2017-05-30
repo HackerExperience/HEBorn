@@ -1,6 +1,5 @@
 module Apps.LogViewer.Update exposing (update)
 
-import Dict
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.LogViewer.Models

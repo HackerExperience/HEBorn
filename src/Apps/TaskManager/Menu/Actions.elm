@@ -1,6 +1,5 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
-import Dict
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Models

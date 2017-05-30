@@ -1,6 +1,5 @@
 module Apps.Explorer.Models exposing (..)
 
-import Dict
 import Utils exposing (andThenWithDefault)
 import Game.Servers.Models
     exposing
@@ -90,6 +89,16 @@ setPath explorer path =
     { explorer | path = path }
 
 
+type alias GameModelCompat =
+    -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
+    { servers : Game.Servers.Models.Servers }
+
+
+changePath :
+    FilePath
+    -> Explorer
+    -> GameModelCompat
+    -> Explorer
 changePath path explorer game =
     let
         server =

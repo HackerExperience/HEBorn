@@ -9,7 +9,6 @@ import Css exposing (asPairs, width, pct)
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
-import Apps.TaskManager.Menu.View exposing (menuView)
 import Apps.TaskManager.Style exposing (Classes(..))
 
 

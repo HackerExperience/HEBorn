@@ -4,7 +4,6 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (input, form)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
-import Css.Icons as Icon
 
 
 type Classes

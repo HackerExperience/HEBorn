@@ -1,9 +1,7 @@
 module Apps.Explorer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callFilesystem)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Messages as Filesystem
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as MsgMenu

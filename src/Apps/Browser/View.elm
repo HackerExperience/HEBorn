@@ -6,10 +6,8 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser)
-import Apps.Browser.Menu.Models exposing (Menu(..))
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Browser.Style exposing (Classes(..))
 

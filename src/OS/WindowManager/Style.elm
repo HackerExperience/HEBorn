@@ -22,6 +22,7 @@ type Class
     | HeaderContextSw
 
 
+wmBorderRadius : Px
 wmBorderRadius =
     (px 4)
 

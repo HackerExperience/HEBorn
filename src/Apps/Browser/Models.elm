@@ -1,7 +1,6 @@
 module Apps.Browser.Models exposing (..)
 
 import Utils exposing (andThenWithDefault)
-import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Models as Menu
 
 

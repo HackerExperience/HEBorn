@@ -2,13 +2,11 @@ module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model, Explorer, FilePath)
-import Apps.Explorer.Menu.Models exposing (Menu(..))
 import Apps.Explorer.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Explorer.Style exposing (Classes(..))
 
@@ -184,6 +182,7 @@ renderTreeEntryList list =
     List.map (\o -> renderTreeEntry o) list
 
 
+renderSidebarGroup : List Entry -> String -> EntryGroup -> Html Msg
 renderSidebarGroup childs name grType =
     div
         [ class

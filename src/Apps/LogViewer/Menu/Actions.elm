@@ -1,6 +1,5 @@
 module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
-import Dict
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.LogViewer.Models

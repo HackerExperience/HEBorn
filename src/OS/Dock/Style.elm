@@ -21,6 +21,7 @@ type Class
     | ItemIco
 
 
+css : Stylesheet
 css =
     (stylesheet << namespace "dock")
         [ id DockMain

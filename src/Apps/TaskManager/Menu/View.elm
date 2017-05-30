@@ -1,17 +1,12 @@
-module Apps.TaskManager.Menu.View
-    exposing
-        ( menuView
-        )
+module Apps.TaskManager.Menu.View exposing (menuView)
 
 import Html exposing (Html)
-import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 import OS.WindowManager.MenuHandler.View
     exposing
         ( menuForCreator
         , menuViewCreator
         )
-import Game.Servers.Logs.Models exposing (LogID)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg
 import Apps.TaskManager.Menu.Messages exposing (Msg(..), MenuAction(..))

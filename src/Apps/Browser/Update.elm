@@ -1,9 +1,7 @@
 module Apps.Browser.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callFilesystem)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Messages as Filesystem
 import Apps.Browser.Models
     exposing
         ( Model
