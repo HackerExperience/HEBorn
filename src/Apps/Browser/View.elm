@@ -40,9 +40,9 @@ viewToolbar browser =
             -- TODO: Add classes
             [ class
                 (if (List.length browser.previousPages) > 0 then
-                    []
+                    [ Btn ]
                  else
-                    []
+                    [ Btn, InactiveBtn ]
                 )
             , onClick GoPrevious
             ]
@@ -50,9 +50,9 @@ viewToolbar browser =
         , div
             [ class
                 (if (List.length browser.nextPages) > 0 then
-                    []
+                    [ Btn ]
                  else
-                    []
+                    [ Btn, InactiveBtn ]
                 )
             , onClick GoNext
             ]
@@ -60,9 +60,9 @@ viewToolbar browser =
         , div
             [ class
                 (if (String.length browser.addressBar) > 0 then
-                    []
+                    [ Btn ]
                  else
-                    []
+                    [ Btn, InactiveBtn ]
                 )
             ]
             [ text "%" ]

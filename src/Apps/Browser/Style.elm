@@ -16,6 +16,8 @@ type Classes
     | LoginPageHeader
     | LoginPageForm
     | LoginPageFooter
+    | Btn
+    | InactiveBtn
 
 
 css : Stylesheet
@@ -90,6 +92,13 @@ css =
                     [ textAlign center
                     , margin2 (px 0) internalPaddingSz
                     ]
+                ]
+            ]
+        , class Btn
+            [ cursor pointer
+            , withClass InactiveBtn
+                [ cursor default
+                , color (hex "EEE")
                 ]
             ]
         ]
