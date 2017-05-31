@@ -3,6 +3,7 @@ module Apps.TaskManager.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.CssHelpers
+import Utils exposing (floatToPrefixedValues, secondsToTimeNotation)
 import Svg exposing (svg, polyline, polygon)
 import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio, fillOpacity, strokeOpacity)
 import Css exposing (asPairs, width, pct)
@@ -21,56 +22,12 @@ styles =
     Css.asPairs >> style
 
 
-toPrefixedValues : Float -> String
-toPrefixedValues x =
-    -- TODO: Move this function to a better place
-    -- TODO: Use "round 2" from elm-round
-    if (x > (10 ^ 9)) then
-        toString (x / (10 ^ 9)) ++ " G"
-    else if (x > (10 ^ 6)) then
-        toString (x / (10 ^ 6)) ++ " M"
-    else if (x > (10 ^ 3)) then
-        toString (x / (10 ^ 3)) ++ " K"
-    else
-        toString (x) ++ " "
-
-
-toTimeNotation : Int -> String
-toTimeNotation count =
-    if (count > 3600) then
-        let
-            h =
-                (toString (count // 3600))
-
-            l =
-                (count % 3600)
-
-            m =
-                (toString (l // 60))
-
-            s =
-                (toString (l % 60))
-        in
-            h ++ "h" ++ m ++ "m" ++ s ++ "s"
-    else if (count > 60) then
-        let
-            m =
-                (toString (count // 60))
-
-            s =
-                (toString (count % 60))
-        in
-            m ++ "m" ++ s ++ "s"
-    else
-        (toString count) ++ "s"
-
-
 viewTaskRowUsage : ResourceUsage -> List (Html Msg)
 viewTaskRowUsage usage =
-    [ div [] [ text ((toPrefixedValues usage.cpu) ++ "Hz") ]
-    , div [] [ text ((toPrefixedValues usage.mem) ++ "iB") ]
-    , div [] [ text ((toPrefixedValues usage.down) ++ "bps") ]
-    , div [] [ text ((toPrefixedValues usage.up) ++ "bps") ]
+    [ div [] [ text ((floatToPrefixedValues usage.cpu) ++ "Hz") ]
+    , div [] [ text ((floatToPrefixedValues usage.mem) ++ "iB") ]
+    , div [] [ text ((floatToPrefixedValues usage.down) ++ "bps") ]
+    , div [] [ text ((floatToPrefixedValues usage.up) ++ "bps") ]
     ]
 
 
@@ -99,7 +56,7 @@ etaBar now total =
             - (toFloat now)
             / (toFloat total)
         )
-        (toTimeNotation now)
+        (secondsToTimeNotation now)
 
 
 viewTaskRow : TaskEntry -> Html Msg

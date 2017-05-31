@@ -5,8 +5,7 @@ import Apps.Explorer.Menu.Models exposing (Menu)
 
 
 type MenuAction
-    = DoA
-    | DoB
+    = Dummy
 
 
 type Msg

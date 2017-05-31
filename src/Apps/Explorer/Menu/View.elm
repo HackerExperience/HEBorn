@@ -1,8 +1,13 @@
 module Apps.Explorer.Menu.View
     exposing
         ( menuView
-        , menuNav
-        , menuContent
+        , menuMainDir
+        , menuTreeDir
+        , menuMainArchive
+        , menuTreeArchive
+        , menuExecutable
+        , menuActiveAction
+        , menuPassiveAction
         )
 
 import Html exposing (Html)
@@ -36,24 +41,80 @@ menuFor context =
 menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
-        MenuNav ->
-            [ [ ( ContextMenu.item "A", MenuClick DoA )
-              , ( ContextMenu.item "B", MenuClick DoB )
+        MenuMainDir ->
+            [ [ ( ContextMenu.item "Enter", MenuClick Dummy )
               ]
             ]
 
-        MenuContent ->
-            [ [ ( ContextMenu.item "c", MenuClick DoB )
-              , ( ContextMenu.item "d", MenuClick DoA )
+        MenuTreeDir ->
+            [ [ ( ContextMenu.item "Toogle expansion", MenuClick Dummy )
+              ]
+            ]
+
+        MenuMainArchive ->
+            [ [ ( ContextMenu.item "Delete", MenuClick Dummy )
+              , ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Move", MenuClick Dummy )
+              ]
+            ]
+
+        MenuTreeArchive ->
+            [ [ ( ContextMenu.item "Delete", MenuClick Dummy )
+              , ( ContextMenu.item "Rename", MenuClick Dummy )
+              ]
+            ]
+
+        MenuExecutable ->
+            [ [ ( ContextMenu.item "Run", MenuClick Dummy )
+              , ( ContextMenu.item "Research", MenuClick Dummy )
+              , ( ContextMenu.item "Delete", MenuClick Dummy )
+              , ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Move", MenuClick Dummy )
+              ]
+            ]
+
+        MenuActiveAction ->
+            [ [ ( ContextMenu.item "Run", MenuClick Dummy )
+              ]
+            ]
+
+        MenuPassiveAction ->
+            [ [ ( ContextMenu.item "Start", MenuClick Dummy )
+              , ( ContextMenu.item "Stop", MenuClick Dummy )
               ]
             ]
 
 
-menuNav : Html.Attribute ExplorerMsg.Msg
-menuNav =
-    menuFor MenuNav
+menuMainDir : Html.Attribute ExplorerMsg.Msg
+menuMainDir =
+    menuFor MenuMainDir
 
 
-menuContent : Html.Attribute ExplorerMsg.Msg
-menuContent =
-    menuFor MenuContent
+menuTreeDir : Html.Attribute ExplorerMsg.Msg
+menuTreeDir =
+    menuFor MenuTreeDir
+
+
+menuMainArchive : Html.Attribute ExplorerMsg.Msg
+menuMainArchive =
+    menuFor MenuMainArchive
+
+
+menuTreeArchive : Html.Attribute ExplorerMsg.Msg
+menuTreeArchive =
+    menuFor MenuTreeArchive
+
+
+menuExecutable : Html.Attribute ExplorerMsg.Msg
+menuExecutable =
+    menuFor MenuExecutable
+
+
+menuPassiveAction : Html.Attribute ExplorerMsg.Msg
+menuPassiveAction =
+    menuFor MenuPassiveAction
+
+
+menuActiveAction : Html.Attribute ExplorerMsg.Msg
+menuActiveAction =
+    menuFor MenuActiveAction
