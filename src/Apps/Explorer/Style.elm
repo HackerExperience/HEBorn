@@ -40,8 +40,6 @@ type Classes
     | NavIcon
     | EntryView
     | EntryChilds
-    | ProgBar
-    | ProgFill
 
 
 css : Stylesheet
@@ -264,17 +262,5 @@ css =
                         ]
                     ]
                 ]
-            ]
-        , class ProgBar
-            [ borderRadius (px 8)
-            , border3 (px 1) solid (hex "000")
-            , display inlineBlock
-            , width (pct 80)
-            , height (px 8)
-            ]
-        , class ProgFill
-            [ width (pct 100)
-            , height (pct 100)
-            , backgroundColor (hex "555")
             ]
         ]

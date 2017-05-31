@@ -3,7 +3,8 @@ module Apps.Explorer.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
-import Utils exposing (floatToPrefixedValues)
+import UI.Widgets exposing (progressBar)
+import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
 import Apps.Explorer.Messages exposing (Msg(..))
@@ -167,7 +168,7 @@ verToText ver =
 
 sizeToText : FileSize -> Html Msg
 sizeToText size =
-    text ((floatToPrefixedValues size) ++ "B")
+    text (bytesToString size)
 
 
 renderAction : Action -> Html Msg
@@ -311,30 +312,22 @@ viewUsage : FileSize -> FileSize -> Html Msg
 viewUsage min max =
     let
         usage =
-            ((min / max) * 100)
+            min / max
 
         minStr =
-            floatToPrefixedValues min
+            bytesToString min
 
         maxStr =
-            floatToPrefixedValues max
+            bytesToString max
     in
         div [ class [ NavData ] ]
             [ text "Data usage"
             , br [] []
-            , text ((toString (floor usage)) ++ "%")
+            , text (toString (floor (usage * 100)) ++ "%")
             , br [] []
-            , div
-                -- TODO: Replace this one with the one I want into "UI.Widgets"
-                [ class [ ProgBar ] ]
-                [ div
-                    [ class [ [ ProgFill ] ]
-                    , styles [ Css.width (pct usage) ]
-                    ]
-                    []
-                ]
+            , progressBar usage "" 12
             , br [] []
-            , text (minStr ++ "B / " ++ maxStr ++ "B")
+            , text (minStr ++ " / " ++ maxStr)
             ]
 
 
