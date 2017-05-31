@@ -89,17 +89,17 @@ setPath explorer path =
     { explorer | path = path }
 
 
-type alias GameModelCompat =
+type alias GameModelCompat a =
     -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
-    { servers : Game.Servers.Models.Servers }
+    { a | servers : Game.Servers.Models.Servers }
 
 
 changePath :
     FilePath
+    -> GameModelCompat a
     -> Explorer
-    -> GameModelCompat
     -> Explorer
-changePath path explorer game =
+changePath path game explorer =
     let
         server =
             getServerByID game.servers explorer.serverID

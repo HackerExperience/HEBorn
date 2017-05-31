@@ -24,8 +24,8 @@ appSubcriptions core model =
         |> List.map
             (\( windowID, window ) ->
                 window
-                |> getAppModel
-                |> Apps.subscriptions core.game
-                |> Sub.map (WindowMsg windowID)
+                    |> getAppModel
+                    |> Apps.subscriptions core.game
+                    |> Sub.map (WindowMsg windowID)
             )
         |> Sub.batch
