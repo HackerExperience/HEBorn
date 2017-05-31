@@ -51,7 +51,7 @@ pathMoveAroundTests =
                 explorer =
                     initialExplorer
                         |> changeServer (getServerIDSafe server)
-                        |> (swap changePath) (getFilePath folder) game
+                        |> changePath (getFilePath folder) game
             in
                 folder
                     |> getFilePath
@@ -62,6 +62,6 @@ pathMoveAroundTests =
       <|
         \( { game }, path ) ->
             initialExplorer
-                |> (swap changePath) path game
+                |> changePath path game
                 |> Expect.equal initialExplorer
     ]
