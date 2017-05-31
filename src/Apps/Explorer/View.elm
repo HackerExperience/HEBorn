@@ -7,8 +7,10 @@ import UI.Widgets exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
+import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, FilePath)
+import Apps.Explorer.Models exposing (Model, Explorer)
+import Apps.Explorer.Lib exposing (..)
 import Apps.Explorer.Menu.View
     exposing
         ( menuView
@@ -27,111 +29,31 @@ import Apps.Explorer.Style exposing (Classes(..))
     Html.CssHelpers.withNamespace "explorer"
 
 
-styles : List Css.Mixin -> Attribute Msg
-styles =
-    Css.asPairs >> style
-
-
 
 -- VIEW WRAPPER
 
 
-type alias FileSize =
-    Float
-
-
-type ActionTarget
-    = Active
-    | Passive
-
-
-type alias Action =
-    { target : ActionTarget
-    , ver : ExeVer
-    }
-
-
-type alias ExeVer =
-    Float
-
-
-type ExeMime
-    = Firewall
-    | Virus
-
-
-type EntryGroup
-    = Dir
-    | Branch
-
-
-type ActionVer
-    = EqualsExe
-    | Unavailable
-    | Just Float
-
-
-type ArchiveType
-    = Generic
-    | Executable ExeMime ExeVer ActionVer ActionVer
-
-
-type alias ArchiveProp =
-    { size : FileSize
-    , type_ : ArchiveType
-    }
-
-
-type EntryType
-    = Fantasy
-    | Group EntryGroup (List Entry)
-    | Archive ArchiveProp
-
-
-type alias Entry =
-    { name : String
-    , type_ : EntryType
-    }
-
-
-groupIcon : EntryGroup -> Classes
-groupIcon type_ =
-    case type_ of
-        Dir ->
+entryIcon : File -> Classes
+entryIcon file =
+    case file of
+        Folder _ ->
             CasedDirIcon
 
-        Branch ->
-            CasedOpIcon
+        StdFile prop ->
+            case (extensionInterpret prop.extension) of
+                Virus ->
+                    VirusIcon
 
+                Firewall ->
+                    FirewallIcon
 
-entryIcon : EntryType -> Classes
-entryIcon type_ =
-    case type_ of
-        Fantasy ->
-            GenericArchiveIcon
-
-        Group groupType ch ->
-            groupIcon groupType
-
-        Archive prop ->
-            (case prop.type_ of
-                Generic ->
+                GenericArchive ->
                     GenericArchiveIcon
 
-                Executable exeMime ver _ _ ->
-                    (case exeMime of
-                        Virus ->
-                            VirusIcon
 
-                        Firewall ->
-                            FirewallIcon
-                    )
-            )
-
-
-actionIcon : ActionTarget -> Classes
-actionIcon actType =
-    case actType of
+moduleIcon : KnownModule -> Classes
+moduleIcon modType =
+    case modType of
         Active ->
             ActiveIcon
 
@@ -139,21 +61,9 @@ actionIcon actType =
             PassiveIcon
 
 
-actionName : ActionTarget -> Html Msg
-actionName actType =
-    text
-        (case actType of
-            Active ->
-                "Active"
-
-            Passive ->
-                "Passive"
-        )
-
-
-actionMenu : ActionTarget -> Attribute Msg
-actionMenu actType =
-    case actType of
+moduleMenu : KnownModule -> Attribute Msg
+moduleMenu modType =
+    case modType of
         Active ->
             menuActiveAction
 
@@ -161,136 +71,119 @@ actionMenu actType =
             menuPassiveAction
 
 
-verToText : ExeVer -> Html Msg
-verToText ver =
+fileVerToText : FileVersion -> Html Msg
+fileVerToText ver =
+    text
+        (case ver of
+            FileVersionNumber pure ->
+                toString pure
+
+            NoVersion ->
+                "N/V"
+        )
+
+
+moduleVerToText : ModuleVersion -> Html Msg
+moduleVerToText ver =
     text (toString ver)
 
 
 sizeToText : FileSize -> Html Msg
 sizeToText size =
-    text (bytesToString size)
+    text
+        (case size of
+            FileSizeNumber pure ->
+                bytesToString (toFloat pure)
+
+            NoSize ->
+                "N/S"
+        )
 
 
-renderAction : Action -> Html Msg
-renderAction act =
-    div [ actionMenu act.target ]
-        [ span [ class [ actionIcon act.target ] ] []
-        , span [] [ actionName act.target ]
-        , span [] [ verToText act.ver ]
-        , span [] []
+renderModule : FileModule -> Html Msg
+renderModule act =
+    let
+        target =
+            moduleInterpret act.name
+    in
+        div [ moduleMenu target ]
+            [ span [ class [ moduleIcon target ] ] []
+            , span [] [ text act.name ]
+            , span [] [ moduleVerToText act.version ]
+            , span [] []
+            ]
+
+
+renderModuleList : List FileModule -> List (Html Msg)
+renderModuleList acts =
+    List.map (\o -> renderModule o) acts
+
+
+indvidualEntryName : File -> String
+indvidualEntryName file =
+    case file of
+        StdFile _ ->
+            getFileName file
+
+        Folder data ->
+            data.name
+
+
+renderTreeEntry : File -> Html Msg
+renderTreeEntry file =
+    div
+        [ class [ NavEntry, EntryArchive ], menuTreeArchive ]
+        [ span [ class [ NavIcon, entryIcon file ] ] []
+        , span [] [ text (indvidualEntryName file) ]
         ]
 
 
-renderActionList : List Action -> List (Html Msg)
-renderActionList acts =
-    List.map (\o -> renderAction o) acts
-
-
-renderTreeEntry : Entry -> Html Msg
-renderTreeEntry entry =
-    case entry.type_ of
-        Group gr childs ->
-            renderTreeGroup childs entry.name gr
-
-        Fantasy ->
-            div
-                [ class [ NavEntry, EntryArchive ] ]
-                [ span [] [ text entry.name ] ]
-
-        Archive prop ->
-            div
-                [ class [ NavEntry, EntryArchive ], menuTreeArchive ]
-                [ span [ class [ NavIcon, entryIcon entry.type_ ] ] []
-                , span [] [ text entry.name ]
-                ]
-
-
-renderTreeEntryList : List Entry -> List (Html Msg)
+renderTreeEntryList : List File -> List (Html Msg)
 renderTreeEntryList list =
     List.map (\o -> renderTreeEntry o) list
 
 
-renderTreeGroup : List Entry -> String -> EntryGroup -> Html Msg
-renderTreeGroup childs name grType =
-    div
-        [ class
-            ([ NavEntry, EntryDir ]
-                ++ if ((List.length childs) > 0) then
-                    [ EntryExpanded ]
-                   else
-                    []
-            )
-        ]
-        [ div
-            [ class [ EntryView ], menuTreeDir ]
-            [ span [ class [ (groupIcon grType), NavIcon ] ] []
-            , span [] [ text name ]
-            ]
-        , div
-            [ class [ EntryChilds ] ]
-            (renderTreeEntryList childs)
-        ]
-
-
-renderDetailedEntry : Entry -> Html Msg
-renderDetailedEntry entry =
-    case entry.type_ of
-        Group gr childs ->
+renderDetailedEntry : File -> Html Msg
+renderDetailedEntry file =
+    case file of
+        Folder data ->
             div [ class [ CntListEntry, EntryDir ], menuMainDir ]
                 [ span [ class [ DirIcon ] ] []
-                , span [] [ text entry.name ]
+                , span [] [ text data.name ]
                 ]
 
-        Fantasy ->
-            div [ class [ CntListEntry, EntryArchive ] ]
-                [ span [] [ text entry.name ] ]
-
-        Archive prop ->
-            (case prop.type_ of
-                Generic ->
+        StdFile prop ->
+            (case (extensionInterpret prop.extension) of
+                GenericArchive ->
                     div [ class [ CntListEntry, EntryArchive ], menuMainArchive ]
-                        [ span [ class [ entryIcon entry.type_ ] ] []
-                        , span [] [ text entry.name ]
-                        , span [] []
+                        [ span [ class [ entryIcon file ] ] []
+                        , span [] [ text (indvidualEntryName file) ]
+                        , span [] [ fileVerToText prop.version ]
                         , span [] [ sizeToText prop.size ]
                         ]
 
-                Executable exeMime ver active passive ->
-                    (case ( active, passive ) of
-                        ( Just activeVer, Just passiveVer ) ->
-                            let
-                                type_ =
-                                    (Executable exeMime ver Unavailable Unavailable)
-
-                                archive =
-                                    Archive { prop | type_ = type_ }
-
-                                entry_ =
-                                    { entry | type_ = archive }
-
-                                actions =
-                                    [ Action Active activeVer
-                                    , Action Passive passiveVer
-                                    ]
-                            in
-                                div [ class [ CntListContainer ] ]
-                                    [ (renderDetailedEntry entry_)
-                                    , div [ class [ CntListChilds ] ]
-                                        (renderActionList actions)
-                                    ]
-
-                        _ ->
+                _ ->
+                    let
+                        baseEntry =
                             div [ class [ CntListEntry, EntryArchive ], menuExecutable ]
-                                [ span [ class [ entryIcon entry.type_ ] ] []
-                                , span [] [ text entry.name ]
-                                , span [] [ verToText ver ]
+                                [ span [ class [ entryIcon file ] ] []
+                                , span [] [ text (indvidualEntryName file) ]
+                                , span [] [ fileVerToText prop.version ]
                                 , span [] [ sizeToText prop.size ]
                                 ]
-                    )
+                    in
+                        if (List.length prop.modules > 0) then
+                            div [ class [ CntListContainer ] ]
+                                [ baseEntry
+                                , div [ class [ CntListChilds ] ]
+                                    (renderModuleList prop.modules)
+                                ]
+                        else
+                            baseEntry
             )
 
 
-renderDetailedEntryList : List Entry -> List (Html Msg)
+renderDetailedEntryList : List File -> List (Html Msg)
 renderDetailedEntryList list =
     List.map (\o -> renderDetailedEntry o) list
 
@@ -308,7 +201,7 @@ view game ({ app } as model) =
         ]
 
 
-viewUsage : FileSize -> FileSize -> Html Msg
+viewUsage : Float -> Float -> Html Msg
 viewUsage min max =
     let
         usage =
@@ -337,26 +230,9 @@ viewExplorerColumn explorer game =
         [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            (renderTreeEntryList dummyMain)
+            (renderTreeEntryList [])
         , (viewUsage 256000000 1024000000)
         ]
-
-
-stripPath : FilePath -> FilePath
-stripPath path =
-    let
-        stripRight =
-            (if (String.right 1 path == "/") then
-                (String.dropRight 1 path)
-             else
-                path
-            )
-    in
-        (if (String.left 1 stripRight == "/") then
-            (String.dropLeft 1 stripRight)
-         else
-            stripRight
-        )
 
 
 viewLocBar : FilePath -> Html Msg
@@ -369,7 +245,7 @@ viewLocBar path =
                     [ class [ BreadcrumbItem ] ]
                     [ text o ]
             )
-            (String.split "/" (stripPath path))
+            (path |> pathInterpret |> pathFuckStart)
         )
 
 
@@ -397,87 +273,5 @@ viewExplorerMain explorer game =
             ]
         , div
             [ class [ ContentList ] ]
-            (renderDetailedEntryList dummySidebar)
+            (renderDetailedEntryList [])
         ]
-
-
-
--- DUMMY VALUES
-
-
-dummySidebar : List Entry
-dummySidebar =
-    [ { name = "Downloads"
-      , type_ =
-            Group
-                Dir
-                []
-      }
-    , { name = "MyVirus.spam"
-      , type_ =
-            Archive { size = 230000, type_ = Executable Virus 2.3 EqualsExe Unavailable }
-      }
-    , { name = "TheWall.fwl"
-      , type_ =
-            Archive
-                { size = 240000
-                , type_ =
-                    Executable Firewall
-                        4.0
-                        (Just 4.5)
-                        (Just 3.5)
-                }
-      }
-    ]
-
-
-dummyMain : List Entry
-dummyMain =
-    [ { name = "Pictures"
-      , type_ =
-            Group
-                Dir
-                [ { name = "Purple Lotus 1.jpg"
-                  , type_ =
-                        Archive
-                            { size = 0
-                            , type_ = Generic
-                            }
-                  }
-                , { name = "Blue Orchid.png"
-                  , type_ =
-                        Archive
-                            { size = 0
-                            , type_ = Generic
-                            }
-                  }
-                , { name = "Other Flowers"
-                  , type_ =
-                        Group
-                            Dir
-                            []
-                  }
-                ]
-      }
-    , { name = "Tree"
-      , type_ =
-            Group
-                Branch
-                [ { name = "Branch"
-                  , type_ =
-                        Group
-                            Branch
-                            []
-                  }
-                , { name = "AnotherBranch"
-                  , type_ =
-                        Group
-                            Branch
-                            []
-                  }
-                , { name = "A Leaf"
-                  , type_ = Fantasy
-                  }
-                ]
-      }
-    ]

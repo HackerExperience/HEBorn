@@ -7,7 +7,7 @@ import Game.Servers.Models
         , getFilesystem
         , getServerByID
         )
-import Game.Servers.Filesystem.Models as NetModel
+import Game.Servers.Filesystem.Models
     exposing
         ( FilePath
         , rootPath
@@ -16,14 +16,8 @@ import Game.Servers.Filesystem.Models as NetModel
 import Apps.Explorer.Menu.Models as Menu
 
 
-type alias FilePath =
-    NetModel.FilePath
-
-
 type alias Explorer =
-    { serverID : ServerID
-    , path : FilePath
-    }
+    { path : FilePath }
 
 
 type alias Model =
@@ -67,8 +61,7 @@ icon =
 
 initialExplorer : Explorer
 initialExplorer =
-    { serverID = "invalid"
-    , path = rootPath
+    { path = rootPath
     }
 
 
@@ -89,20 +82,15 @@ setPath explorer path =
     { explorer | path = path }
 
 
-type alias GameModelCompat =
-    -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
-    { servers : Game.Servers.Models.Servers }
-
-
 changePath :
     FilePath
     -> Explorer
-    -> GameModelCompat
+    -> { servers : Game.Servers.Models.Servers }
     -> Explorer
 changePath path explorer game =
     let
         server =
-            getServerByID game.servers explorer.serverID
+            getServerByID game.servers "localhost"
 
         filesystem =
             getFilesystem server
