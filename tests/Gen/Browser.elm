@@ -124,7 +124,7 @@ genPage =
 
 genEmptyPage : Generator BrowserPage
 genEmptyPage =
-    constant (BrowserPage "about:blank" "" "")
+    constant (BrowserPage "about:blank" "" "Blank")
 
 
 genPageList : Generator (List BrowserPage)
