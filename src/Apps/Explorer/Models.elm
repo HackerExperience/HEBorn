@@ -12,6 +12,8 @@ import Game.Servers.Filesystem.Models
         ( FilePath
         , rootPath
         , pathExists
+        , File
+        , getFilesOnPath
         )
 import Apps.Explorer.Menu.Models as Menu
 
@@ -107,3 +109,17 @@ changePath path explorer game =
                     explorer
     in
         explorer_
+
+
+resolvePath game path =
+    let
+        server =
+            getServerByID game.servers "localhost"
+
+        filesystem =
+            getFilesystem server
+    in
+        andThenWithDefault
+            (getFilesOnPath path)
+            []
+            filesystem

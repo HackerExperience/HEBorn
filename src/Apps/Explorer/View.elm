@@ -9,7 +9,7 @@ import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer)
+import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
 import Apps.Explorer.Lib exposing (..)
 import Apps.Explorer.Menu.View
     exposing
@@ -230,7 +230,7 @@ viewExplorerColumn explorer game =
         [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            (renderTreeEntryList [])
+            (renderTreeEntryList (resolvePath game explorer.path))
         , (viewUsage 256000000 1024000000)
         ]
 
@@ -273,5 +273,5 @@ viewExplorerMain explorer game =
             ]
         , div
             [ class [ ContentList ] ]
-            (renderDetailedEntryList [])
+            (renderDetailedEntryList (resolvePath game explorer.path))
         ]
