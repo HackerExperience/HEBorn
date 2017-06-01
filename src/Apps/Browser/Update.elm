@@ -101,28 +101,25 @@ update msg model game =
             in
                 ( { model | instances = instances_ }, Cmd.none, [] )
 
-        AddressKeyDown instanceID key ->
-            if key == 13 then
-                let
-                    instance =
-                        getBrowserInstance model.instances instanceID
+        AddressEnter instanceID ->
+            let
+                instance =
+                    getBrowserInstance model.instances instanceID
 
-                    context =
-                        instance |> Context.state |> Maybe.withDefault initialBrowser
+                context =
+                    instance |> Context.state |> Maybe.withDefault initialBrowser
 
-                    -- TODO: REAL MAGIC
-                    context_ =
-                        gotoPage { url = context.addressBar, content = "", title = "" } context
+                -- TODO: REAL MAGIC
+                context_ =
+                    gotoPage { url = context.addressBar, content = "", title = "" } context
 
-                    instance_ =
-                        Context.update instance (Just context_)
+                instance_ =
+                    Context.update instance (Just context_)
 
-                    instances_ =
-                        Instance.update model.instances instanceID instance_
-                in
-                    ( { model | instances = instances_ }, Cmd.none, [] )
-            else
-                ( model, Cmd.none, [] )
+                instances_ =
+                    Instance.update model.instances instanceID instance_
+            in
+                ( { model | instances = instances_ }, Cmd.none, [] )
 
         GoPrevious instanceID ->
             let

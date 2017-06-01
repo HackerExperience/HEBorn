@@ -9,14 +9,10 @@ import Css exposing (asPairs)
 import Css.Common exposing (elasticClass)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
-import Apps.Instances.Models as Instance exposing (InstanceID)
-import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
-import Apps.LogViewer.Menu.Models exposing (Menu(..))
+import Apps.LogViewer.Models exposing (..)
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
 import Apps.LogViewer.Style exposing (Classes(..))
-import Date exposing (Date, fromTime)
 import Date.Format as DateFormat exposing (format)
 
 
@@ -35,10 +31,10 @@ styles =
 
 renderAddr : IP -> List (Html Msg)
 renderAddr addr =
-    if (addr == localhost) then
+    if (isLocalHost addr) then
         [ span [ class [ IcoHome, ColorLocal ] ] []
         , text " "
-        , span [ class [ IdLocal, ColorLocal ] ] [ text localhost ]
+        , span [ class [ IdLocal, ColorLocal ] ] [ text addr ]
         ]
     else
         [ span [ class [ IcoCrosshair, ColorRemote ] ] []
@@ -61,14 +57,25 @@ renderUser user =
         ]
 
 
-renderButton : InstanceID -> LogID -> Classes -> List (Html Msg)
-renderButton instID logID btn =
+renderFile : FileName -> List (Html Msg)
+renderFile fileName =
+    [ span [] [ text fileName ] ]
+
+
+renderButton : LogID -> Classes -> List (Html Msg)
+renderButton logID btn =
     [ text " "
     , span
-        ([ class [ btn ] ]
+        ([ class [ btn, BottomButton ] ]
             ++ (case btn of
                     BtnEdit ->
-                        [ onClick (EnterEditing instID logID) ]
+                        [ onClick (EnterEditing logID) ]
+
+                    BtnApply ->
+                        [ onClick (ApplyEditing logID) ]
+
+                    BtnCancel ->
+                        [ onClick (LeaveEditing logID) ]
 
                     _ ->
                         []
@@ -78,13 +85,28 @@ renderButton instID logID btn =
     ]
 
 
-renderButtons : InstanceID -> LogID -> List Classes -> List (Html Msg)
-renderButtons instID logID btns =
+renderButtons : LogID -> List Classes -> List (Html Msg)
+renderButtons logID btns =
     btns
-        |> List.map (renderButton instID logID)
+        |> List.map (renderButton logID)
         |> List.concat
         |> List.tail
         |> Maybe.withDefault []
+
+
+renderFlag : Classes -> List (Html Msg)
+renderFlag flag =
+    [ text " "
+    , span [ class [ flag ] ] []
+    ]
+
+
+renderFlags : List Classes -> List (Html Msg)
+renderFlags =
+    List.map renderFlag
+        >> List.concat
+        >> List.tail
+        >> Maybe.withDefault []
 
 
 renderMsg : LogEventMsg -> Html Msg
@@ -92,32 +114,37 @@ renderMsg msg =
     div [ class [ EData ] ]
         (case msg of
             LogIn addr user ->
-                (renderAddr addr
+                (renderAddr addr)
                     ++ [ span [] [ text " logged in as " ] ]
-                    ++ renderUser user
-                )
+                    ++ (renderUser user)
+
+            LogInto dest ->
+                [ span [] [ text "Logged into " ] ]
+                    ++ (renderAddr dest)
 
             Connection actor src dest ->
-                (renderAddr actor
-                    ++ [ span [] [ text " bounced connection from " ]
-                       , span [ class [ IcoCrosshair, ColorRemote ] ] []
-                       , text " "
-                       , span [ class [ IdMe, ColorRemote ] ] [ text src ]
-                       , span [] [ text " to " ]
-                       , span [ class [ IcoDangerous, ColorDangerous ] ] []
-                       , text " "
-                       , span [ class [ IdOther, ColorDangerous ] ] [ text dest ]
-                       ]
-                )
+                (renderAddr actor)
+                    ++ [ span [] [ text "bounced connection from " ] ]
+                    ++ (renderAddr src)
+                    ++ [ span [] [ text " to " ] ]
+                    ++ (renderAddr dest)
 
-            ExternalAcess whom aswho ->
-                (renderUser whom
-                    ++ [ span [] [ text " logged in as " ] ]
-                    ++ renderUser aswho
-                )
+            DownloadBy fileName destIP ->
+                [ span [] [ text "File " ] ]
+                    ++ (renderFile fileName)
+                    ++ [ span [] [ text " downloaded by " ] ]
+                    ++ renderAddr destIP
 
-            _ ->
-                []
+            DownloadFrom fileName srcIP ->
+                [ span [] [ text "File " ] ]
+                    ++ (renderFile fileName)
+                    ++ [ span [] [ text " downloaded from " ] ]
+                    ++ (renderAddr srcIP)
+
+            Invalid msg ->
+                [ span [] [ text "Corrupted: " ]
+                , span [] [ text msg ]
+                ]
         )
 
 
@@ -140,37 +167,27 @@ renderMiniMsg msg =
     )
 
 
-renderEditing : String -> Html Msg
-renderEditing src =
-    input [ class [ EData, BoxifyMe ], value src ] []
+renderEditing : LogID -> String -> Html Msg
+renderEditing logID src =
+    input
+        [ class [ EData, BoxifyMe ]
+        , value src
+        , onInput (UpdateEditing logID)
+        ]
+        []
 
 
-renderTopActions : InstanceID -> LogViewerEntry -> Html Msg
-renderTopActions instID entry =
+renderTopActions : LogViewerEntry -> Html Msg
+renderTopActions entry =
     div [ class [ ETActMini ] ]
-        (renderButtons instID
-            entry.srcID
-            (case entry.status of
-                Normal expanded ->
-                    (if expanded then
-                        [ BtnUser, BtnEdit ]
-                     else
-                        [ BtnEdit ]
-                    )
-
-                Cryptographed True ->
-                    [ BtnLock ]
-
-                _ ->
-                    []
-            )
-        )
+        -- TODO: Catch the flags for real
+        (renderFlags [ BtnUser, BtnEdit, BtnLock ])
 
 
-renderBottomActions : InstanceID -> LogViewerEntry -> Html Msg
-renderBottomActions instID entry =
+renderBottomActions : LogViewerEntry -> Html Msg
+renderBottomActions entry =
     div [ class [ EAct ] ]
-        (renderButtons instID
+        (renderButtons
             entry.srcID
             (case entry.status of
                 Normal True ->
@@ -179,7 +196,7 @@ renderBottomActions instID entry =
                 Cryptographed True ->
                     [ BtnView, BtnUnlock ]
 
-                Editing ->
+                Editing _ ->
                     [ BtnApply, BtnCancel ]
 
                 _ ->
@@ -188,79 +205,101 @@ renderBottomActions instID entry =
         )
 
 
-renderEntryToggler : InstanceID -> LogID -> Html Msg
-renderEntryToggler instID logID =
+renderEntryToggler : LogID -> Html Msg
+renderEntryToggler logID =
     div
         [ class [ CasedBtnExpand, EToggler ]
-        , onClick (ToogleLog instID logID)
+        , onClick (ToogleLog logID)
         ]
         []
 
 
 renderData : LogViewerEntry -> Html Msg
 renderData entry =
-    if (entry.status == Editing) then
-        renderEditing entry.src
-    else if (isEntryExpanded entry) then
-        renderMsg entry.message
-    else
-        renderMiniMsg entry.message
+    case entry.status of
+        Editing x ->
+            renderEditing entry.srcID x
+
+        _ ->
+            if (isEntryExpanded entry) then
+                renderMsg entry.message
+            else
+                renderMiniMsg entry.message
 
 
-renderBottom : InstanceID -> LogViewerEntry -> Html Msg
-renderBottom instanceID entry =
-    if (entry.status == Editing) then
-        div
-            [ class [ EBottom ] ]
-            [ renderBottomActions instanceID entry ]
-    else if (isEntryExpanded entry) then
-        div
-            [ class [ EBottom, EntryExpanded ] ]
-            [ renderBottomActions instanceID entry
-            , renderEntryToggler instanceID entry.srcID
-            ]
-    else
-        div
-            [ class [ EBottom ] ]
-            [ div [ class [ EAct ] ] []
-            , renderEntryToggler instanceID entry.srcID
-            ]
+renderBottom : LogViewerEntry -> Html Msg
+renderBottom entry =
+    case entry.status of
+        Editing _ ->
+            div
+                [ class [ EBottom ] ]
+                [ renderBottomActions entry ]
+
+        _ ->
+            if (isEntryExpanded entry) then
+                div
+                    [ class [ EBottom, EntryExpanded ] ]
+                    [ renderBottomActions entry
+                    , renderEntryToggler entry.srcID
+                    ]
+            else
+                div
+                    [ class [ EBottom ] ]
+                    [ div [ class [ EAct ] ] []
+                    , renderEntryToggler entry.srcID
+                    ]
 
 
-renderEntry : InstanceID -> LogViewerEntry -> Html Msg
-renderEntry instanceID entry =
+menuInclude : LogViewerEntry -> List (Attribute Msg)
+menuInclude entry =
+    case entry.status of
+        Normal _ ->
+            [ menuNormalEntry entry.srcID ]
+
+        Editing _ ->
+            [ menuEditingEntry entry.srcID ]
+
+        _ ->
+            []
+
+
+renderEntry : LogViewerEntry -> Html Msg
+renderEntry entry =
     div
-        [ class
+        ([ class
             (if (isEntryExpanded entry) then
                 [ Entry, EntryExpanded ]
              else
                 [ Entry ]
             )
-        ]
+         ]
+            ++ (menuInclude entry)
+        )
         ([ div [ class [ ETop ] ]
             [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
             , div [ elasticClass ] []
-            , renderTopActions instanceID entry
+            , renderTopActions entry
             ]
          , renderData entry
-         , renderBottom instanceID entry
+         , renderBottom entry
          ]
         )
 
 
-renderEntryList : InstanceID -> List LogViewerEntry -> List (Html Msg)
-renderEntryList instanceID list =
-    List.map (renderEntry instanceID) list
+renderEntryList : List LogViewerEntry -> List (Html Msg)
+renderEntryList =
+    List.map renderEntry
 
 
 
 -- END OF THAT
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model instanceID game =
-    div []
-        ([ div [ class [ HeaderBar ] ]
+view : GameModel -> Model -> Html Msg
+view game model =
+    div [ menuFilter ]
+        ([ menuView model
+         , div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
                 [ span [ class [ BtnUser ] ] []
                 , text " "
@@ -273,24 +312,17 @@ view model instanceID game =
                 , div [ class [ ETFBar ] ]
                     [ input
                         [ placeholder "Search..."
-                        , onInput (UpdateFilter instanceID)
+                        , onInput UpdateFilter
                         ]
                         []
                     ]
                 ]
             ]
          ]
-            ++ renderEntryList
-                instanceID
-                (case (getLogViewerInstance model.instances instanceID).gateway of
-                    Just inst ->
-                        Dict.values
-                            (Dict.filter
-                                (\k v -> String.contains inst.filtering v.src)
-                                inst.entries
-                            )
-
-                    Nothing ->
-                        []
-                )
+            ++ (model.app.entries
+                    |> Dict.filter
+                        (\k v -> String.contains model.app.filtering v.src)
+                    |> Dict.values
+                    |> renderEntryList
+               )
         )

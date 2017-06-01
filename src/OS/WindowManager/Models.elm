@@ -1,55 +1,48 @@
 module OS.WindowManager.Models
     exposing
         ( Model
-        , initialModel
-        , Window
-        , WindowID
-        , Position
         , Windows
-        , defaultSize
-        , updateWindows
-        , getWindow
-        , openWindow
-        , openOrRestoreWindow
-        , restoreWindow
-        , closeWindow
-        , closeAllWindows
-        , getOpenWindows
-        , filterAppWindows
-        , updateWindowPosition
-        , windowsFoldr
-        , hasWindowOpen
-        , toggleMaximizeWindow
-        , minimizeWindow
-        , minimizeAllWindows
-        , bringFocus
-        , switchContext
-        , getContextText
+        , Window
+        , Position
+        , Size
         , WindowState(..)
-        , OpenOrRestoreResult(..)
+        , WindowInstance(..)
+        , WindowID
+        , initialModel
+        , openWindow
+        , closeWindow
+        , closeAppWindows
+        , restoreWindow
+        , restoreAppWindows
+        , minimizeWindow
+        , minimizeAppWindows
+        , toggleWindowMaximization
+        , unfocusWindow
+        , focusWindow
+        , openOrRestoreWindow
+        , filterMinimizedAppWindows
+        , filterOpenedWindows
+        , filterAppWindows
+        , foldlWindows
+        , toggleWindowContext
+        , updateWindow
+        , updateWindowPosition
+        , updateWindowSize
+        , updateAppModel
+        , getWindow
+        , getContext
+        , getAppModel
+        , startDragging
+        , stopDragging
         )
 
-import Dict
 import Uuid
-import Random.Pcg exposing (Seed, step, initialSeed)
 import Draggable
-import Utils
-import OS.WindowManager.Windows exposing (GameWindow(..))
-import Apps.Context as Context exposing (ActiveContext(..))
-
-
-type alias Model =
-    { windows : Windows
-    , seed : Seed
-    , drag : Draggable.State WindowID
-    , dragging : Maybe WindowID
-    , focus : Maybe WindowID
-    , highestZ : Int
-    }
-
-
-type alias WindowID =
-    String
+import Maybe exposing (Maybe)
+import Apps.Models as Apps
+import Dict exposing (Dict)
+import Random.Pcg exposing (Seed, step, initialSeed)
+import OS.WindowManager.Context exposing (..)
 
 
 type alias Position =
@@ -66,24 +59,47 @@ type alias Size =
 
 
 type WindowState
-    = Open
-    | Minimized
+    = NormalState
+    | MinimizedState
+
+
+type WindowInstance
+    = TogglableInstance Apps.AppModel Apps.AppModel
+    | FixedInstance Apps.AppModel
 
 
 type alias Window =
-    { id : WindowID
-    , window : GameWindow
-    , state : WindowState
-    , position : Position
-    , title : String
+    { position : Position
     , size : Size
+    , state : WindowState
     , maximized : Bool
-    , context : ActiveContext
+    , app : Apps.App
+    , context : Context
+    , instance : WindowInstance
     }
 
 
+type alias WindowID =
+    String
+
+
 type alias Windows =
-    Dict.Dict WindowID Window
+    Dict WindowID Window
+
+
+type alias Model =
+    { windows : Windows
+    , seed : Seed
+    , drag : Draggable.State WindowID
+    , dragging : Maybe WindowID
+    , focus : Maybe WindowID
+    , highestZ : Int
+    }
+
+
+defaultSize : Size
+defaultSize =
+    Size 600 400
 
 
 initialPosition : Int -> Position
@@ -91,18 +107,9 @@ initialPosition off =
     Position (toFloat (32 * off)) (44 + (toFloat (32 * off))) off
 
 
-
--- initialPosition: 44 is header height hardwritten
-
-
-initialWindows : Dict.Dict WindowID Window
+initialWindows : Windows
 initialWindows =
     Dict.empty
-
-
-defaultSize : Size
-defaultSize =
-    Size 600 400
 
 
 initialModel : Model
@@ -116,317 +123,338 @@ initialModel =
     }
 
 
-newWindow : Model -> GameWindow -> ( Window, Seed )
-newWindow model window =
+openWindow : Apps.App -> Model -> Model
+openWindow app ({ seed, windows } as model) =
     let
-        ( id, seed ) =
-            step Uuid.uuidGenerator model.seed
+        ( uuid, seed_ ) =
+            step Uuid.uuidGenerator seed
 
-        window_ =
-            { id = (Uuid.toString id)
-            , window = window
-            , state = Open
-            , position = initialPosition (Dict.size model.windows)
-            , title = "Sem titulo"
-            , size = defaultSize
-            , maximized = False
-            , context = ContextGateway
-            }
-    in
-        ( window_, seed )
+        windowID =
+            Uuid.toString uuid
 
+        context =
+            case Apps.contexts app of
+                Apps.ContextualApp ->
+                    GatewayContext
 
-filterAppMinimizedWindows : Windows -> GameWindow -> Windows
-filterAppMinimizedWindows windows app =
-    Dict.filter
-        (\id oWindow ->
-            ((oWindow.state == Minimized)
-                && (oWindow.window == app)
-            )
-        )
-        windows
+                Apps.ContextlessApp ->
+                    NoContext
 
+        instance =
+            case Apps.contexts app of
+                Apps.ContextualApp ->
+                    TogglableInstance (Apps.model app) (Apps.model app)
 
-unMinimizeAllWindow : Window -> GameWindow -> Window
-unMinimizeAllWindow window app =
-    if (window.window == app) then
-        { window | state = Open }
-    else
-        window
+                Apps.ContextlessApp ->
+                    FixedInstance (Apps.model app)
 
-
-openWindow : Model -> GameWindow -> ( Windows, Seed, WindowID )
-openWindow model window =
-    let
-        ( window_, seed_ ) =
-            newWindow model window
+        window =
+            Window
+                (initialPosition (Dict.size model.windows))
+                defaultSize
+                NormalState
+                False
+                app
+                context
+                instance
 
         windows_ =
-            Dict.insert window_.id window_ model.windows
+            Dict.insert windowID window windows
     in
-        ( windows_, seed_, window_.id )
+        focusWindow windowID { model | windows = windows_, seed = seed_ }
 
 
-restoreAllWindow : Windows -> GameWindow -> Windows
-restoreAllWindow windows window =
-    Dict.map
-        (\id oWindow -> (unMinimizeAllWindow oWindow window))
-        windows
-
-
-restoreWindow : WindowID -> Windows -> Windows
-restoreWindow winId windows =
-    Dict.update winId
-        (\w ->
-            case w of
-                Just w ->
-                    Just { w | state = Open }
-
-                Nothing ->
-                    Nothing
-        )
-        windows
-
-
-type OpenOrRestoreResult
-    = MultiRestore
-    | OneRestore WindowID
-    | Create Seed WindowID
-
-
-openOrRestoreWindow : Model -> GameWindow -> ( Windows, OpenOrRestoreResult )
-openOrRestoreWindow model window =
+closeWindow : WindowID -> Model -> Model
+closeWindow windowID ({ windows } as model) =
     let
-        minimizeds =
-            (filterAppMinimizedWindows model.windows window)
+        windows_ =
+            Dict.remove windowID windows
     in
-        if ((Dict.size minimizeds) > 1) then
-            let
-                windows_ =
-                    (restoreAllWindow model.windows window)
-            in
-                ( windows_, MultiRestore )
+        { model | windows = windows_ }
+
+
+closeAppWindows : Apps.App -> Model -> Model
+closeAppWindows app ({ windows } as model) =
+    let
+        windows_ =
+            Dict.filter (\id win -> app /= win.app) windows
+    in
+        { model | windows = windows_ }
+
+
+restoreWindow : WindowID -> Model -> Model
+restoreWindow windowID ({ windows } as model) =
+    lift restore windowID model
+
+
+restoreAppWindows : Apps.App -> Model -> Model
+restoreAppWindows app ({ windows } as model) =
+    { model | windows = map (mapApp restore app) windows }
+
+
+minimizeWindow : WindowID -> Model -> Model
+minimizeWindow windowID ({ windows } as model) =
+    lift minimize windowID model
+
+
+minimizeAppWindows : Apps.App -> Model -> Model
+minimizeAppWindows app ({ windows } as model) =
+    { model | windows = map (mapApp minimize app) windows }
+
+
+toggleWindowMaximization : WindowID -> Model -> Model
+toggleWindowMaximization windowID ({ windows } as model) =
+    lift toggleMaximize windowID model
+
+
+unfocusWindow : Model -> Model
+unfocusWindow model =
+    { model | focus = Nothing, dragging = Nothing }
+
+
+focusWindow : WindowID -> Model -> Model
+focusWindow windowID ({ windows, highestZ } as model) =
+    let
+        highestZ_ =
+            highestZ + 1
+
+        model_ =
+            lift
+                (\window ->
+                    move
+                        window.position.x
+                        window.position.y
+                        highestZ_
+                        window
+                )
+                windowID
+                model
+    in
+        { model_ | highestZ = highestZ_ }
+
+
+openOrRestoreWindow : Apps.App -> Model -> Model
+openOrRestoreWindow app model =
+    -- this could be better optimized
+    let
+        minimizedCount =
+            Dict.size (filterMinimizedAppWindows app model)
+    in
+        if (minimizedCount == 0) then
+            openWindow app model
         else
-            case List.head (Dict.values minimizeds) of
-                Just oWindow ->
-                    let
-                        windows_t =
-                            (restoreWindow oWindow.id model.windows)
-                    in
-                        ( windows_t, OneRestore oWindow.id )
-
-                Nothing ->
-                    let
-                        ( newWindows, newSeed, newWindowId ) =
-                            openWindow model window
-                    in
-                        ( newWindows, (Create newSeed newWindowId) )
+            restoreAppWindows app model
 
 
-closeWindow : Model -> WindowID -> Windows
-closeWindow model id =
-    Dict.remove id model.windows
+{-| we really need a filterMinimized |> groupByApp
+-}
+filterMinimizedAppWindows : Apps.App -> Model -> Windows
+filterMinimizedAppWindows app { windows } =
+    filter
+        (\window -> window.state == MinimizedState && window.app == app)
+        windows
 
 
-getOpenWindows : Model -> Windows
-getOpenWindows model =
-    Dict.filter (\id window -> window.state == Open) model.windows
+filterOpenedWindows : Model -> Windows
+filterOpenedWindows { windows } =
+    filter (\window -> window.state == NormalState) windows
 
 
-filterAppWindows : Windows -> GameWindow -> Windows
-filterAppWindows windows app =
-    Dict.filter (\id window -> window.window == app) windows
+{-| we really need a groupByApp
+-}
+filterAppWindows : Apps.App -> Windows -> Windows
+filterAppWindows app windows =
+    filter (\window -> window.app == app) windows
 
 
-windowsFoldr : (comparable -> v -> a -> a) -> a -> Dict.Dict comparable v -> a
-windowsFoldr fun acc windows =
-    Dict.foldr (fun) acc windows
+foldlWindows : (WindowID -> Window -> a -> a) -> a -> Windows -> a
+foldlWindows fold init windows =
+    Dict.foldl fold init windows
 
 
-getWindow : Model -> WindowID -> Maybe Window
-getWindow model id =
-    Dict.get id model.windows
+toggleWindowContext : WindowID -> Model -> Model
+toggleWindowContext windowID model =
+    lift (toggleContext) windowID model
 
 
-updateWindows : Model -> WindowID -> Window -> Windows
-updateWindows model id window =
-    Utils.safeUpdateDict model.windows id window
+updateWindow : WindowID -> Window -> Model -> Model
+updateWindow windowID window model =
+    lift (always window) windowID model
 
 
-updateWindowPosition : Model -> ( Float, Float ) -> Windows
-updateWindowPosition model delta =
+updateWindowPosition : ( Float, Float ) -> Model -> Model
+updateWindowPosition ( dx, dy ) model =
     case model.dragging of
         Nothing ->
-            model.windows
+            model
 
-        Just id ->
+        Just windowID ->
+            lift
+                (\window ->
+                    move
+                        (window.position.x + dx)
+                        (window.position.y + dy)
+                        window.position.z
+                        window
+                )
+                windowID
+                model
+
+
+updateWindowSize : Float -> Float -> Int -> WindowID -> Model -> Model
+updateWindowSize x y z windowID model =
+    lift (move x y z) windowID model
+
+
+updateAppModel : WindowID -> Apps.AppModel -> Model -> Model
+updateAppModel windowID appModel ({ windows } as model) =
+    case Dict.get windowID windows of
+        Just ({ instance } as window) ->
             let
-                windows_ =
-                    case (getWindow model id) of
-                        Nothing ->
-                            model.windows
+                instance_ =
+                    case window.instance of
+                        TogglableInstance _ model ->
+                            TogglableInstance appModel model
 
-                        Just window ->
-                            let
-                                ( dx, dy ) =
-                                    delta
+                        FixedInstance _ ->
+                            FixedInstance appModel
 
-                                x_ =
-                                    window.position.x + dx
-
-                                y_ =
-                                    window.position.y + dy
-
-                                position_ =
-                                    Position x_ y_ window.position.z
-
-                                window_ =
-                                    { window | position = position_ }
-
-                                windows_ =
-                                    updateWindows model id window_
-                            in
-                                windows_
-            in
-                windows_
-
-
-hasWindowOpen : Model -> GameWindow -> Bool
-hasWindowOpen model window =
-    let
-        filter id w =
-            w.state == Open && w.window == window
-
-        open =
-            Dict.filter filter model.windows
-    in
-        not (Dict.isEmpty open)
-
-
-toggleMaximizeWindow : Model -> WindowID -> Windows
-toggleMaximizeWindow model id =
-    case (getWindow model id) of
-        Nothing ->
-            model.windows
-
-        Just window ->
-            let
                 window_ =
-                    { window | maximized = not window.maximized }
+                    { window | instance = instance_ }
 
                 windows_ =
-                    updateWindows model id window_
+                    Dict.insert windowID window_ windows
             in
-                windows_
+                { model | windows = windows_ }
 
-
-minimizeWindow : Model -> WindowID -> Windows
-minimizeWindow model id =
-    case (getWindow model id) of
         Nothing ->
-            model.windows
-
-        Just window ->
-            let
-                window_ =
-                    { window | state = Minimized }
-
-                windows_ =
-                    updateWindows model id window_
-            in
-                windows_
+            model
 
 
-minimizeAllWindows : Windows -> GameWindow -> Windows
-minimizeAllWindows windows app =
-    Dict.map
-        (\k v ->
-            { v
-                | state =
-                    (if v.window == app then
-                        Minimized
-                     else
-                        v.state
-                    )
-            }
-        )
-        windows
+getWindow : WindowID -> Model -> Maybe Window
+getWindow windowId { windows } =
+    Dict.get windowId windows
 
 
-closeAllWindows : Windows -> GameWindow -> Windows
-closeAllWindows windows app =
-    Dict.filter
-        (\k v -> v.window /= app)
-        windows
-
-
-bringFocus : Model -> Maybe WindowID -> Model
-bringFocus model target =
-    case (target) of
-        Nothing ->
-            { model | focus = Nothing }
-
-        Just id ->
-            case (getWindow model id) of
-                Nothing ->
-                    model
-
-                Just window ->
-                    let
-                        incHighestZ =
-                            model.highestZ + 1
-
-                        position_ =
-                            Position window.position.x window.position.y incHighestZ
-
-                        window_ =
-                            { window | position = position_ }
-
-                        windows_ =
-                            updateWindows model id window_
-                    in
-                        { model
-                            | highestZ = incHighestZ
-                            , windows = windows_
-                            , focus = Just id
-                        }
-
-
-getContext : Window -> ActiveContext
+getContext : Window -> Context
 getContext window =
     window.context
 
 
-getContextText : ActiveContext -> String
-getContextText context =
-    case context of
-        ContextGateway ->
-            "Gateway"
-
-        ContextEndpoint ->
-            "Remote"
-
-
-switchContext : Model -> WindowID -> Model
-switchContext model id =
-    case (getWindow model id) of
-        Nothing ->
+getAppModel : Window -> Apps.AppModel
+getAppModel window =
+    case window.instance of
+        TogglableInstance model _ ->
             model
 
-        Just window ->
+        FixedInstance model ->
+            model
+
+
+startDragging : WindowID -> Model -> Model
+startDragging id model =
+    { model | dragging = Just id }
+
+
+stopDragging : Model -> Model
+stopDragging model =
+    { model | dragging = Nothing }
+
+
+
+-- internals
+
+
+lift : (Window -> Window) -> WindowID -> Model -> Model
+lift fun windowID ({ windows } as model) =
+    let
+        windows_ =
+            windows
+                |> Dict.get windowID
+                |> Maybe.map
+                    (\instance ->
+                        Dict.insert windowID (fun instance) windows
+                    )
+                |> Maybe.withDefault windows
+    in
+        { model | windows = windows_ }
+
+
+map : (Window -> Window) -> Windows -> Windows
+map func =
+    Dict.map (\id window -> func window)
+
+
+filter : (Window -> Bool) -> Windows -> Windows
+filter func =
+    Dict.filter (\id window -> func window)
+
+
+move : Float -> Float -> Int -> Window -> Window
+move x y z ({ position } as window) =
+    let
+        position_ =
+            { position | x = x, y = y, z = z }
+    in
+        { window | position = position_ }
+
+
+resize : Float -> Float -> Window -> Window
+resize width height ({ size } as window) =
+    let
+        size_ =
+            { size | width = width, height = height }
+    in
+        { window | size = size_ }
+
+
+restore : Window -> Window
+restore window =
+    { window | state = NormalState }
+
+
+minimize : Window -> Window
+minimize window =
+    { window | state = MinimizedState }
+
+
+toggleMaximize : Window -> Window
+toggleMaximize ({ maximized } as window) =
+    { window | maximized = (not maximized) }
+
+
+toggleContext : Window -> Window
+toggleContext ({ context, instance } as window) =
+    case instance of
+        TogglableInstance modelA modelB ->
             let
+                instance_ =
+                    TogglableInstance modelB modelA
+
                 context_ =
-                    case (getContext window) of
-                        ContextGateway ->
-                            ContextEndpoint
+                    case context of
+                        GatewayContext ->
+                            EndpointContext
 
-                        ContextEndpoint ->
-                            ContextGateway
+                        EndpointContext ->
+                            GatewayContext
 
-                window_ =
-                    { window | context = context_ }
-
-                windows_ =
-                    updateWindows model id window_
+                        NoContext ->
+                            NoContext
             in
-                { model | windows = windows_ }
+                { window | instance = instance_, context = context_ }
+
+        FixedInstance model ->
+            window
+
+
+
+-- this could also be replaced when starting to use groupBy
+
+
+mapApp : (Window -> Window) -> Apps.App -> Window -> Window
+mapApp fun app win =
+    if win.app == app then
+        fun win
+    else
+        win

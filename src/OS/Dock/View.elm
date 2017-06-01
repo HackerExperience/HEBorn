@@ -9,6 +9,7 @@ import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Style as Css
+import Apps.Models as Apps
 import OS.Dock.Models
     exposing
         ( Application
@@ -56,7 +57,7 @@ renderApplicationSubmenu model application =
         , onClick (MsgOS OS.Messages.NoOp)
         ]
         [ ul []
-            ([ li [] [ text "JAN. ABERTAS" ] ]
+            ([ li [] [ text "OPEN WINDOWS" ] ]
                 ++ (List.indexedMap
                         (\i o ->
                             li
@@ -69,7 +70,7 @@ renderApplicationSubmenu model application =
                         application.openWindows
                    )
                 ++ [ hr [] []
-                   , li [] [ text "JAN. MINIMIZADAS" ]
+                   , li [] [ text "MINIMIZED LINUXES" ]
                    ]
                 ++ (List.indexedMap
                         (\i o ->
@@ -85,19 +86,19 @@ renderApplicationSubmenu model application =
                 ++ [ hr [] []
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (Open application.window)))
+                        , onClick (MsgOS (MsgWM (Open application.app)))
                         ]
-                        [ text "Nova janela" ]
+                        [ text "New window" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
+                        , onClick (MsgOS (MsgWM (MinimizeAll application.app)))
                         ]
-                        [ text "Minimizar tudo" ]
+                        [ text "Minimize all" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
+                        , onClick (MsgOS (MsgWM (CloseAll application.app)))
                         ]
-                        [ text "Fechar tudo" ]
+                        [ text "Close all" ]
                    ]
             )
         ]
@@ -111,8 +112,8 @@ renderApplication model application =
         ]
         ([ div
             [ class [ Css.ItemIco ]
-            , onClick (MsgOS (MsgWM (OpenOrRestore application.window)))
-            , attribute "data-icon" application.icon
+            , onClick (MsgOS (MsgWM (OpenOrRestore application.app)))
+            , attribute "data-icon" (Apps.icon application.app)
             ]
             []
          ]
