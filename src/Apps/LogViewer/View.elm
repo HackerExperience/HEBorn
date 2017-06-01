@@ -10,10 +10,8 @@ import Css.Common exposing (elasticClass)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
 import Game.Servers.Filesystem.Models exposing (FilePath)
-import Apps.Instances.Models as Instance exposing (InstanceID)
-import Apps.Context as Context
 import Apps.LogViewer.Messages exposing (Msg(..))
-import Apps.LogViewer.Models exposing (LogID, Model, LogViewer, getState, LogViewerEntry, LogEventStatus(..), LogEventMsg(..), getLogViewerInstance, isEntryExpanded)
+import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
 import Apps.LogViewer.Style exposing (Classes(..))
 import Date exposing (Date, fromTime)
@@ -61,14 +59,14 @@ renderUser user =
         ]
 
 
-renderButton : InstanceID -> LogID -> Classes -> List (Html Msg)
-renderButton instID logID btn =
+renderButton : LogID -> Classes -> List (Html Msg)
+renderButton logID btn =
     [ text " "
     , span
         ([ class [ btn ] ]
             ++ (case btn of
                     BtnEdit ->
-                        [ onClick (EnterEditing instID logID) ]
+                        [ onClick (EnterEditing logID) ]
 
                     _ ->
                         []
@@ -78,10 +76,10 @@ renderButton instID logID btn =
     ]
 
 
-renderButtons : InstanceID -> LogID -> List Classes -> List (Html Msg)
-renderButtons instID logID btns =
+renderButtons : LogID -> List Classes -> List (Html Msg)
+renderButtons logID btns =
     btns
-        |> List.map (renderButton instID logID)
+        |> List.map (renderButton logID)
         |> List.concat
         |> List.tail
         |> Maybe.withDefault []
@@ -145,11 +143,10 @@ renderEditing src =
     input [ class [ EData, BoxifyMe ], value src ] []
 
 
-renderTopActions : InstanceID -> LogViewerEntry -> Html Msg
-renderTopActions instID entry =
+renderTopActions : LogViewerEntry -> Html Msg
+renderTopActions entry =
     div [ class [ ETActMini ] ]
-        (renderButtons instID
-            entry.srcID
+        (renderButtons entry.srcID
             (case entry.status of
                 Normal expanded ->
                     (if expanded then
@@ -167,10 +164,10 @@ renderTopActions instID entry =
         )
 
 
-renderBottomActions : InstanceID -> LogViewerEntry -> Html Msg
-renderBottomActions instID entry =
+renderBottomActions : LogViewerEntry -> Html Msg
+renderBottomActions entry =
     div [ class [ EAct ] ]
-        (renderButtons instID
+        (renderButtons
             entry.srcID
             (case entry.status of
                 Normal True ->
@@ -188,11 +185,11 @@ renderBottomActions instID entry =
         )
 
 
-renderEntryToggler : InstanceID -> LogID -> Html Msg
-renderEntryToggler instID logID =
+renderEntryToggler : LogID -> Html Msg
+renderEntryToggler logID =
     div
         [ class [ CasedBtnExpand, EToggler ]
-        , onClick (ToogleLog instID logID)
+        , onClick (ToogleLog logID)
         ]
         []
 
@@ -207,28 +204,28 @@ renderData entry =
         renderMiniMsg entry.message
 
 
-renderBottom : InstanceID -> LogViewerEntry -> Html Msg
-renderBottom instanceID entry =
+renderBottom : LogViewerEntry -> Html Msg
+renderBottom entry =
     if (entry.status == Editing) then
         div
             [ class [ EBottom ] ]
-            [ renderBottomActions instanceID entry ]
+            [ renderBottomActions entry ]
     else if (isEntryExpanded entry) then
         div
             [ class [ EBottom, EntryExpanded ] ]
-            [ renderBottomActions instanceID entry
-            , renderEntryToggler instanceID entry.srcID
+            [ renderBottomActions entry
+            , renderEntryToggler entry.srcID
             ]
     else
         div
             [ class [ EBottom ] ]
             [ div [ class [ EAct ] ] []
-            , renderEntryToggler instanceID entry.srcID
+            , renderEntryToggler entry.srcID
             ]
 
 
-renderEntry : InstanceID -> LogViewerEntry -> Html Msg
-renderEntry instanceID entry =
+renderEntry : LogViewerEntry -> Html Msg
+renderEntry entry =
     div
         [ class
             (if (isEntryExpanded entry) then
@@ -240,25 +237,25 @@ renderEntry instanceID entry =
         ([ div [ class [ ETop ] ]
             [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
             , div [ elasticClass ] []
-            , renderTopActions instanceID entry
+            , renderTopActions entry
             ]
          , renderData entry
-         , renderBottom instanceID entry
+         , renderBottom entry
          ]
         )
 
 
-renderEntryList : InstanceID -> List LogViewerEntry -> List (Html Msg)
-renderEntryList instanceID list =
-    List.map (renderEntry instanceID) list
+renderEntryList : List LogViewerEntry -> List (Html Msg)
+renderEntryList =
+    List.map renderEntry
 
 
 
 -- END OF THAT
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model instanceID game =
+view : GameModel -> Model -> Html Msg
+view game model =
     div []
         ([ div [ class [ HeaderBar ] ]
             [ div [ class [ ETAct ] ]
@@ -273,24 +270,17 @@ view model instanceID game =
                 , div [ class [ ETFBar ] ]
                     [ input
                         [ placeholder "Search..."
-                        , onInput (UpdateFilter instanceID)
+                        , onInput UpdateFilter
                         ]
                         []
                     ]
                 ]
             ]
          ]
-            ++ renderEntryList
-                instanceID
-                (case (getLogViewerInstance model.instances instanceID).gateway of
-                    Just inst ->
-                        Dict.values
-                            (Dict.filter
-                                (\k v -> String.contains inst.filtering v.src)
-                                inst.entries
-                            )
-
-                    Nothing ->
-                        []
-                )
+            ++ (model.app.entries
+                    |> Dict.filter
+                        (\k v -> String.contains model.app.filtering v.src)
+                    |> Dict.values
+                    |> renderEntryList
+               )
         )

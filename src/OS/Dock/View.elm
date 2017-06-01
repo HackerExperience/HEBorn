@@ -9,6 +9,7 @@ import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Style as Css
+import Apps.Models as Apps
 import OS.Dock.Models
     exposing
         ( Application
@@ -85,17 +86,17 @@ renderApplicationSubmenu model application =
                 ++ [ hr [] []
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (Open application.window)))
+                        , onClick (MsgOS (MsgWM (Open application.app)))
                         ]
                         [ text "Nova janela" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
+                        , onClick (MsgOS (MsgWM (MinimizeAll application.app)))
                         ]
                         [ text "Minimizar tudo" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
+                        , onClick (MsgOS (MsgWM (CloseAll application.app)))
                         ]
                         [ text "Fechar tudo" ]
                    ]
@@ -111,8 +112,8 @@ renderApplication model application =
         ]
         ([ div
             [ class [ Css.ItemIco ]
-            , onClick (MsgOS (MsgWM (OpenOrRestore application.window)))
-            , attribute "data-icon" application.icon
+            , onClick (MsgOS (MsgWM (OpenOrRestore application.app)))
+            , attribute "data-icon" (Apps.icon application.app)
             ]
             []
          ]

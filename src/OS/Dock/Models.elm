@@ -8,14 +8,12 @@ module OS.Dock.Models
         )
 
 import Dict
-import OS.WindowManager.Windows exposing (GameWindow(..))
-import OS.WindowManager.Models exposing (Windows, WindowID, filterAppWindows, WindowState(..))
+import OS.WindowManager.Models exposing (Windows, WindowID, WindowState(..), filterAppWindows)
+import Apps.Models as Apps
 
 
 type alias Application =
-    { name : String
-    , window : GameWindow
-    , icon : String
+    { app : Apps.App
     , instancesNum : Int
     , openWindows : List WindowID
     , minimizedWindows : List WindowID
@@ -31,56 +29,39 @@ type alias Model =
     }
 
 
-generateApplication : GameWindow -> Application
-generateApplication window =
-    let
-        name =
-            case window of
-                ExplorerWindow ->
-                    "explorer"
-
-                LogViewerWindow ->
-                    "logvw"
-
-                BrowserWindow ->
-                    "browser"
-
-        icon =
-            name
-    in
-        { name = name, window = window, icon = icon, instancesNum = 0, openWindows = [], minimizedWindows = [] }
+generateApplication : Apps.App -> Application
+generateApplication app =
+    { app = app, instancesNum = 0, openWindows = [], minimizedWindows = [] }
 
 
 initialApplications : List Application
 initialApplications =
     let
         applications =
-            [ generateApplication ExplorerWindow
-            , generateApplication LogViewerWindow
-            , generateApplication BrowserWindow
+            [ generateApplication Apps.LogViewerApp
             ]
     in
         applications
 
 
 refreshInstances : Windows -> Application -> Application
-refreshInstances windows app =
+refreshInstances windows application =
     -- REVIEW: Why not use "Instances" for this?
     let
         appWindows =
-            filterAppWindows windows app.window
+            filterAppWindows application.app windows
 
         minimizeds =
             Dict.filter
-                (\id oWindow -> (oWindow.state == Minimized))
+                (\id oWindow -> (oWindow.state == MinimizedState))
                 appWindows
 
         openeds =
             Dict.filter
-                (\id oWindow -> (oWindow.state == Open))
+                (\id oWindow -> (oWindow.state == MinimizedState))
                 appWindows
     in
-        { app
+        { application
             | instancesNum = (Dict.size appWindows)
             , openWindows = (Dict.keys openeds)
             , minimizedWindows = (Dict.keys minimizeds)
