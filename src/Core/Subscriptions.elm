@@ -3,6 +3,7 @@ module Core.Subscriptions exposing (subscriptions)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Models exposing (GameModel)
+import Game.Subscriptions as Game
 import Driver.Websocket.Models as Websocket
 import Driver.Websocket.Subscriptions as Websocket
 import OS.Models as OS
@@ -17,10 +18,14 @@ subscriptions model =
 
         websocketSub =
             websocket model model.websocket
+
+        gameSub =
+            game model.game
     in
         Sub.batch
             [ osSub
             , websocketSub
+            , gameSub
             ]
 
 
@@ -40,3 +45,10 @@ websocket core model =
     core
         |> Websocket.subscriptions model
         |> Sub.map MsgWebsocket
+
+
+game : GameModel -> Sub CoreMsg
+game game =
+    core
+        |> Game.subscriptions game
+        |> Sub.map MsgGame
