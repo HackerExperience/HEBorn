@@ -1,6 +1,9 @@
 module Apps.TaskManager.Models exposing (..)
 
+import Dict
+import Utils exposing (andThenWithDefault)
 import Apps.TaskManager.Menu.Models as Menu
+import Game.Servers.Processes.Models as Processes exposing (..)
 
 
 type alias ResourceUsage =
@@ -11,23 +14,12 @@ type alias ResourceUsage =
     }
 
 
-type alias TaskEntry =
-    { title : String
-    , target : String
-    , appFile : String
-    , appVer : Float
-    , etaTotal : Int
-    , etaNow : Int
-    , usage : ResourceUsage
-    }
-
-
 type alias Entries =
-    List TaskEntry
+    List Processes.Process
 
 
 type alias TaskManager =
-    { tasks : Entries
+    { localTasks : Processes
     , historyCPU : List Float
     , historyMem : List Float
     , historyDown : List Float
@@ -72,16 +64,7 @@ increaseHistory new old =
 initialTaskManager : TaskManager
 initialTaskManager =
     TaskManager
-        [ (TaskEntry
-            "Encrypt Connection"
-            "89.32.182.204"
-            "CantTouchThis.enc"
-            4.3
-            20
-            5
-            (ResourceUsage 1900000000 786000000 0 0)
-          )
-        ]
+        Processes.initialProcesses
         [ 2100000000, 1800000000, 2100000000, 1800000000 ]
         [ 4096000000, 3464846848, 3164846848 ]
         [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
@@ -89,20 +72,25 @@ initialTaskManager =
         (ResourceUsage 2100000000 4096000000 1024000 512000)
 
 
-updateTasks : Entries -> ResourceUsage -> TaskManager -> TaskManager
+packUsage : Process -> ResourceUsage
+packUsage ({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) =
+    ResourceUsage cpuUsage memusage downloadUsage uploadUsage
+
+
+updateTasks : Processes -> ResourceUsage -> TaskManager -> TaskManager
 updateTasks tasks_ limit old =
     let
         ( cpu, mem, down, up ) =
             List.foldr
-                (\({ usage } as entry) ( cpu_, mem_, down_, up_ ) ->
-                    ( cpu_ + usage.cpu
-                    , mem_ + usage.mem
-                    , down_ + usage.down
-                    , up_ + usage.up
+                (\({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) ->
+                    ( cpu_ + cpuUsage
+                    , mem_ + memusage
+                    , down_ + downloadUsage
+                    , up_ + uploadUsage
                     )
                 )
                 ( 0.0, 0.0, 0.0, 0.0 )
-                tasks_
+                (Dict.values tasks_)
 
         historyCPU =
             (increaseHistory cpu old.historyCPU)
@@ -123,3 +111,33 @@ updateTasks tasks_ limit old =
             historyDown
             historyUp
             limit
+
+
+doJob : (Processes -> Process -> Processes) -> TaskManager -> ProcessID -> TaskManager
+doJob job app pID =
+    let
+        process =
+            getProcessByID pID app.localTasks
+
+        tasks_ =
+            andThenWithDefault
+                (job app.localTasks)
+                app.localTasks
+                process
+    in
+        { app | localTasks = tasks_ }
+
+
+pauseProcess : TaskManager -> ProcessID -> TaskManager
+pauseProcess =
+    doJob Processes.pauseProcess
+
+
+resumeProcess : TaskManager -> ProcessID -> TaskManager
+resumeProcess =
+    doJob (Processes.resumeProcess 0)
+
+
+removeProcess : TaskManager -> ProcessID -> TaskManager
+removeProcess =
+    doJob Processes.removeProcess

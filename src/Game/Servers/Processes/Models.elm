@@ -66,11 +66,18 @@ type alias Process =
     , priority : ProcessPriority
     , state : ProcessState
     , progress : Progress
-    , fileID : FileID
+    , fileID : Maybe FileID
+    , version : Maybe Float
     , gatewayID : GatewayID
     , targetServerID : TargetServerID
     , networkID : NetworkID
     , connectionID : ConnectionID
+
+    -- REVISE: USAGE WASN'T IMPLEMENTED YET
+    , cpuUsage : Float
+    , memusage : Float
+    , downloadUsage : Float
+    , uploadUsage : Float
     }
 
 
@@ -80,7 +87,15 @@ type alias Processes =
 
 initialProcesses : Processes
 initialProcesses =
-    Dict.empty
+    Dict.fromList
+        -- DUMMY VALUE FOR PLAYING
+        [ ( "dummy0000"
+          , (Process "dummy0000" Cracker 1 (StateRunning 0) 0.5 (Just "dummym0") (Just 1.1) "me" "you" "san" "francisco" 1900000000 786000000 0 0)
+          )
+        , ( "dummy0001"
+          , (Process "dummy0001" Decryptor 1 (StateRunning 0) 0.7 (Just "dummym1") (Just 2.0) "you" "me" "new" "york" 1900000000 786000000 512000 256000)
+          )
+        ]
 
 
 {-| REVIEW: this doesn't look that useful
@@ -100,18 +115,18 @@ processExists id processes =
     Dict.member id processes
 
 
-addProcess : Process -> Processes -> Processes
-addProcess process processes =
+addProcess : Processes -> Process -> Processes
+addProcess processes process =
     Dict.insert process.id process processes
 
 
-removeProcess : Process -> Processes -> Processes
-removeProcess process processes =
+removeProcess : Processes -> Process -> Processes
+removeProcess processes process =
     Dict.remove process.id processes
 
 
-pauseProcess : Process -> Processes -> Processes
-pauseProcess process processes =
+pauseProcess : Processes -> Process -> Processes
+pauseProcess processes process =
     case process.state of
         StatePaused ->
             processes
@@ -124,8 +139,8 @@ pauseProcess process processes =
                 Utils.safeUpdateDict processes process_.id process_
 
 
-resumeProcess : Process -> CompletionDate -> Processes -> Processes
-resumeProcess process completionDate processes =
+resumeProcess : CompletionDate -> Processes -> Process -> Processes
+resumeProcess completionDate processes process =
     case process.state of
         StateRunning _ ->
             processes
@@ -138,8 +153,8 @@ resumeProcess process completionDate processes =
                 Utils.safeUpdateDict processes process_.id process_
 
 
-completeProcess : Process -> Processes -> Processes
-completeProcess process processes =
+completeProcess : Processes -> Process -> Processes
+completeProcess processes process =
     case process.state of
         StateComplete ->
             processes
