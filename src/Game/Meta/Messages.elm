@@ -1,5 +1,7 @@
 module Game.Meta.Messages exposing (..)
 
+import Time exposing (Time)
+
 
 type MetaMsg
-    = ToDo
+    = Tick Time
