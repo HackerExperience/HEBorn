@@ -1,18 +1,41 @@
 module Apps.TaskManager.View exposing (view)
 
+import Dict
+import Utils exposing (andThenWithDefault)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar, lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
+import Game.Servers.Processes.Models as Processes exposing (..)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Style exposing (Classes(..))
+import Apps.TaskManager.Menu.View exposing (..)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "taskmngr"
+
+
+processName : Process -> String
+processName it =
+    case it.processType of
+        Cracker ->
+            "Cracker"
+
+        Decryptor ->
+            "Decryptor"
+
+        Encryptor ->
+            "Encryptor"
+
+        FileDownload ->
+            "FileDownload"
+
+        LogDeleter ->
+            "LogDeleter"
 
 
 viewTaskRowUsage : ResourceUsage -> List (Html Msg)
@@ -24,32 +47,71 @@ viewTaskRowUsage usage =
     ]
 
 
-etaBar : Int -> Int -> Html Msg
-etaBar now total =
+etaBar : Float -> Float -> Html Msg
+etaBar secondsLeft progress =
     progressBar
-        (1
-            - (toFloat now)
-            / (toFloat total)
-        )
-        (secondsToTimeNotation now)
+        progress
+        (secondsToTimeNotation (floor secondsLeft))
         16
 
 
-viewTaskRow : TaskEntry -> Html Msg
+viewState : Process -> Html Msg
+viewState entry =
+    case entry.state of
+        StateRunning completeTime ->
+            etaBar (completeTime - 0) entry.progress
+
+        StateStandby ->
+            text "Processing..."
+
+        StatePaused ->
+            text "Paused"
+
+        StateComplete ->
+            text "Finished"
+
+
+processMenu : Process -> Attribute Msg
+processMenu entry =
+    case entry.state of
+        StateRunning completeTime ->
+            menuForRunning entry.id
+
+        StatePaused ->
+            menuForPaused entry.id
+
+        _ ->
+            menuForComplete entry.id
+
+
+viewTaskRow : Process -> Html Msg
 viewTaskRow entry =
-    div [ class [ EntryDivision ] ]
-        [ div []
-            [ div [] [ text entry.title ]
-            , div [] [ text "Target: ", text entry.target ]
-            , div []
-                [ text "File: "
-                , text entry.appFile
-                , span [] [ text (toString entry.appVer) ]
+    let
+        name =
+            processName entry
+
+        fileName =
+            Maybe.withDefault "N/F" entry.fileID
+
+        fileVer =
+            andThenWithDefault toString "N/V" entry.version
+
+        usage =
+            packUsage entry
+    in
+        div [ class [ EntryDivision ], (processMenu entry) ]
+            [ div []
+                [ div [] [ text name ]
+                , div [] [ text "Target: ", text entry.targetServerID ]
+                , div []
+                    [ text "File: "
+                    , text fileName
+                    , span [] [ text fileVer ]
+                    ]
                 ]
+            , div [] [ viewState entry ]
+            , div [] (viewTaskRowUsage usage)
             ]
-        , div [] [ etaBar entry.etaNow entry.etaTotal ]
-        , div [] (viewTaskRowUsage entry.usage)
-        ]
 
 
 viewTasksTable : Entries -> Html Msg
@@ -98,6 +160,7 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
     div [ class [ MainLayout ] ]
-        [ viewTasksTable app.tasks
+        [ viewTasksTable (Dict.values app.localTasks)
         , viewTotalResources app
+        , menuView model
         ]
