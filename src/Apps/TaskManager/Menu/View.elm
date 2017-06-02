@@ -1,4 +1,4 @@
-module Apps.TaskManager.Menu.View exposing (menuView)
+module Apps.TaskManager.Menu.View exposing (menuView, menuForRunning, menuForPaused, menuForComplete)
 
 import Html exposing (Html)
 import ContextMenu exposing (ContextMenu)
@@ -7,6 +7,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
+import Game.Servers.Processes.Models exposing (ProcessID)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg
 import Apps.TaskManager.Menu.Messages exposing (Msg(..), MenuAction(..))
@@ -31,5 +32,34 @@ menuFor context =
 menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
-        MenuGeneric ->
-            []
+        MenuRunningProcess pID ->
+            [ [ ( ContextMenu.item "Pause", MenuClick (PauseProcess pID) )
+              , ( ContextMenu.item "Remove", MenuClick (RemoveProcess pID) )
+              ]
+            ]
+
+        MenuPausedProcess pID ->
+            [ [ ( ContextMenu.item "Resume", MenuClick (ResumeProcess pID) )
+              , ( ContextMenu.item "Remove", MenuClick (RemoveProcess pID) )
+              ]
+            ]
+
+        MenuCompleteProcess pID ->
+            [ [ ( ContextMenu.item "Remove", MenuClick (RemoveProcess pID) )
+              ]
+            ]
+
+
+menuForRunning : ProcessID -> Html.Attribute TaskManagerMsg.Msg
+menuForRunning pID =
+    (menuFor (MenuRunningProcess pID))
+
+
+menuForPaused : ProcessID -> Html.Attribute TaskManagerMsg.Msg
+menuForPaused pID =
+    (menuFor (MenuPausedProcess pID))
+
+
+menuForComplete : ProcessID -> Html.Attribute TaskManagerMsg.Msg
+menuForComplete pID =
+    (menuFor (MenuCompleteProcess pID))
