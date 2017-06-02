@@ -1,9 +1,12 @@
 module Apps.TaskManager.Models exposing (..)
 
 import Dict
-import Utils exposing (andThenWithDefault)
+import Utils exposing (andThenWithDefault, filterMapList)
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Processes.Types.Shared as Processes exposing (..)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
+import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 
 
 type alias ResourceUsage =
@@ -72,9 +75,43 @@ initialTaskManager =
         (ResourceUsage 2100000000 4096000000 1024000 512000)
 
 
-packUsage : Process -> ResourceUsage
+packUsage : Local.ProcessProp -> ResourceUsage
 packUsage ({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) =
-    ResourceUsage cpuUsage memusage downloadUsage uploadUsage
+    ResourceUsage
+        (toFloat cpuUsage)
+        (toFloat memusage)
+        (toFloat downloadUsage)
+        (toFloat uploadUsage)
+
+
+taskUsageSum : Local.ProcessProp -> ( Float, Float, Float, Float ) -> ( Float, Float, Float, Float )
+taskUsageSum ({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) =
+    ( cpu_ + (toFloat cpuUsage)
+    , mem_ + (toFloat memusage)
+    , down_ + (toFloat downloadUsage)
+    , up_ + (toFloat uploadUsage)
+    )
+
+
+onlyLocalTasks : Processes -> List Local.ProcessProp
+onlyLocalTasks tasks =
+    let
+        tasksValues =
+            Dict.values tasks
+
+        localTasks =
+            filterMapList
+                (\v ->
+                    case v.prop of
+                        LocalProcess p ->
+                            Just p
+
+                        _ ->
+                            Nothing
+                )
+                tasksValues
+    in
+        localTasks
 
 
 updateTasks : Processes -> ResourceUsage -> TaskManager -> TaskManager
@@ -82,15 +119,9 @@ updateTasks tasks_ limit old =
     let
         ( cpu, mem, down, up ) =
             List.foldr
-                (\({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) ->
-                    ( cpu_ + cpuUsage
-                    , mem_ + memusage
-                    , down_ + downloadUsage
-                    , up_ + uploadUsage
-                    )
-                )
+                taskUsageSum
                 ( 0.0, 0.0, 0.0, 0.0 )
-                (Dict.values tasks_)
+                (onlyLocalTasks tasks_)
 
         historyCPU =
             (increaseHistory cpu old.historyCPU)
@@ -135,7 +166,7 @@ pauseProcess =
 
 resumeProcess : TaskManager -> ProcessID -> TaskManager
 resumeProcess =
-    doJob (Processes.resumeProcess 0)
+    doJob Processes.resumeProcess
 
 
 removeProcess : TaskManager -> ProcessID -> TaskManager

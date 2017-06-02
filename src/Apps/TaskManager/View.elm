@@ -9,6 +9,9 @@ import UI.Widgets exposing (progressBar, lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Processes.Types.Shared as Processes exposing (..)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
+import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Style exposing (Classes(..))
@@ -20,22 +23,46 @@ import Apps.TaskManager.Menu.View exposing (..)
 
 
 processName : Process -> String
-processName it =
-    case it.processType of
-        Cracker ->
-            "Cracker"
+processName entry =
+    case entry.prop of
+        LocalProcess it ->
+            (case it.processType of
+                Local.Cracker _ ->
+                    "Cracker"
 
-        Decryptor ->
-            "Decryptor"
+                Local.Decryptor _ _ _ ->
+                    "Decryptor"
 
-        Encryptor ->
-            "Encryptor"
+                Local.Encryptor _ _ ->
+                    "Encryptor"
 
-        FileDownload ->
-            "FileDownload"
+                Local.FileTransference _ ->
+                    "File Transference"
 
-        LogDeleter ->
-            "LogDeleter"
+                Local.LogForge _ _ _ ->
+                    "Log Forge"
+
+                Local.PassiveFirewall _ ->
+                    "Passive Firewall"
+            )
+
+        RemoteProcess it ->
+            (case it.processType of
+                Remote.Cracker ->
+                    "Cracker"
+
+                Remote.Decryptor _ _ ->
+                    "Decryptor"
+
+                Remote.Encryptor _ ->
+                    "Encryptor"
+
+                Remote.FileTransference _ ->
+                    "File Transference"
+
+                Remote.LogForge _ ->
+                    "Log Forge"
+            )
 
 
 viewTaskRowUsage : ResourceUsage -> List (Html Msg)
@@ -57,31 +84,79 @@ etaBar secondsLeft progress =
 
 viewState : Process -> Html Msg
 viewState entry =
-    case entry.state of
-        StateRunning completeTime ->
-            etaBar (completeTime - 0) entry.progress
+    case entry.prop of
+        LocalProcess prop ->
+            (case prop.state of
+                StateRunning ->
+                    etaBar
+                        (Maybe.withDefault 0 prop.eta)
+                        (Maybe.withDefault 0 prop.progress)
 
-        StateStandby ->
-            text "Processing..."
+                StateStandby ->
+                    text "Processing..."
 
-        StatePaused ->
-            text "Paused"
+                StatePaused ->
+                    text "Paused"
 
-        StateComplete ->
-            text "Finished"
+                StateComplete ->
+                    text "Finished"
+            )
+
+        RemoteProcess _ ->
+            text "Running"
 
 
 processMenu : Process -> Attribute Msg
-processMenu entry =
-    case entry.state of
-        StateRunning completeTime ->
-            menuForRunning entry.id
+processMenu process =
+    (case process.prop of
+        LocalProcess entry ->
+            (case entry.state of
+                StateRunning ->
+                    menuForRunning
 
-        StatePaused ->
-            menuForPaused entry.id
+                StatePaused ->
+                    menuForPaused
+
+                _ ->
+                    menuForComplete
+            )
+
+        RemoteProcess entry ->
+            menuForRemote
+    )
+        process.id
+
+
+fromLocal : (Local.ProcessProp -> a) -> a -> Process -> a
+fromLocal toGet default process =
+    case process.prop of
+        LocalProcess data ->
+            toGet data
 
         _ ->
-            menuForComplete entry.id
+            default
+
+
+getVersion : Local.ProcessProp -> Maybe Float
+getVersion prop =
+    case prop.processType of
+        Local.Cracker v ->
+            Just v
+
+        Local.Decryptor v _ _ ->
+            Just v
+
+        Local.Encryptor v _ ->
+            Just v
+
+        Local.FileTransference _ ->
+            Nothing
+
+        Local.LogForge v _ _ ->
+            Just v
+
+        Local.PassiveFirewall v ->
+            Just v
 
 
 viewTaskRow : Process -> Html Msg
@@ -91,18 +166,37 @@ viewTaskRow entry =
             processName entry
 
         fileName =
-            Maybe.withDefault "N/F" entry.fileID
+            fromLocal
+                (\d -> Maybe.withDefault "UNKNOWN" d.fileID)
+                "HIDDEN"
+                entry
 
         fileVer =
-            andThenWithDefault toString "N/V" entry.version
+            andThenWithDefault
+                toString
+                "N/V"
+                (fromLocal
+                    getVersion
+                    Nothing
+                    entry
+                )
 
         usage =
-            packUsage entry
+            fromLocal
+                (\d -> packUsage d)
+                (ResourceUsage -1 -1 -1 -1)
+                entry
+
+        target =
+            fromLocal
+                (\d -> d.targetServerID)
+                "localhost"
+                entry
     in
         div [ class [ EntryDivision ], (processMenu entry) ]
             [ div []
                 [ div [] [ text name ]
-                , div [] [ text "Target: ", text entry.targetServerID ]
+                , div [] [ text "Target: ", text target ]
                 , div []
                     [ text "File: "
                     , text fileName

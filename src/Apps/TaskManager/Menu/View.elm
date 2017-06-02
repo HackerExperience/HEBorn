@@ -1,4 +1,4 @@
-module Apps.TaskManager.Menu.View exposing (menuView, menuForRunning, menuForPaused, menuForComplete)
+module Apps.TaskManager.Menu.View exposing (menuView, menuForRunning, menuForPaused, menuForComplete, menuForRemote)
 
 import Html exposing (Html)
 import ContextMenu exposing (ContextMenu)
@@ -7,7 +7,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
-import Game.Servers.Processes.Models exposing (ProcessID)
+import Game.Servers.Processes.Types.Shared exposing (ProcessID)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg
 import Apps.TaskManager.Menu.Messages exposing (Msg(..), MenuAction(..))
@@ -49,6 +49,9 @@ menu model context =
               ]
             ]
 
+        MenuRemoteProcess pID ->
+            []
+
 
 menuForRunning : ProcessID -> Html.Attribute TaskManagerMsg.Msg
 menuForRunning pID =
@@ -63,3 +66,8 @@ menuForPaused pID =
 menuForComplete : ProcessID -> Html.Attribute TaskManagerMsg.Msg
 menuForComplete pID =
     (menuFor (MenuCompleteProcess pID))
+
+
+menuForRemote : ProcessID -> Html.Attribute TaskManagerMsg.Msg
+menuForRemote pID =
+    (menuFor (MenuRemoteProcess pID))
