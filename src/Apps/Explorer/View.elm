@@ -2,6 +2,7 @@ module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
@@ -147,7 +148,11 @@ renderDetailedEntry : File -> Html Msg
 renderDetailedEntry file =
     case file of
         Folder data ->
-            div [ class [ CntListEntry, EntryDir ], menuMainDir ]
+            div
+                [ class [ CntListEntry, EntryDir ]
+                , menuMainDir
+                , onClick (GoPath (data.path))
+                ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text data.name ]
                 ]
@@ -185,20 +190,13 @@ renderDetailedEntry file =
 
 renderDetailedEntryList : List File -> List (Html Msg)
 renderDetailedEntryList list =
-    List.map (\o -> renderDetailedEntry o) list
+    List.map
+        renderDetailedEntry
+        list
 
 
 
 -- END OF THAT
-
-
-view : GameModel -> Model -> Html Msg
-view game ({ app } as model) =
-    div [ class [ Window ] ]
-        [ viewExplorerColumn app game
-        , viewExplorerMain app game
-        , menuView model
-        ]
 
 
 viewUsage : Float -> Float -> Html Msg
@@ -224,18 +222,23 @@ viewUsage min max =
             ]
 
 
-viewExplorerColumn : Explorer -> GameModel -> Html Msg
-viewExplorerColumn explorer game =
+viewExplorerColumn : SmartPath -> GameModel -> Html Msg
+viewExplorerColumn path game =
     div
         [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            (renderTreeEntryList (resolvePath game explorer.path))
+            (renderTreeEntryList
+                (resolvePath
+                    game.servers
+                    (path |> pathToString)
+                )
+            )
         , (viewUsage 256000000 1024000000)
         ]
 
 
-viewLocBar : FilePath -> Html Msg
+viewLocBar : SmartPath -> Html Msg
 viewLocBar path =
     div
         [ class [ LocBar ] ]
@@ -245,23 +248,25 @@ viewLocBar path =
                     [ class [ BreadcrumbItem ] ]
                     [ text o ]
             )
-            (path |> pathInterpret |> pathFuckStart)
+            (path |> pathFuckStart)
         )
 
 
-viewExplorerMain : Explorer -> GameModel -> Html Msg
-viewExplorerMain explorer game =
+viewExplorerMain : SmartPath -> GameModel -> Html Msg
+viewExplorerMain path game =
     div
         [ class
             [ Content ]
         ]
         [ div
             [ class [ ContentHeader ] ]
-            [ viewLocBar explorer.path
+            [ viewLocBar path
             , div
                 [ class [ ActBtns ] ]
                 [ span
-                    [ class [ GoUpBtn ] ]
+                    [ class [ GoUpBtn ]
+                    , onClick (GoPath ((pathGoUp path) |> pathToString))
+                    ]
                     []
                 , span
                     [ class [ DocBtn, NewBtn ] ]
@@ -273,5 +278,26 @@ viewExplorerMain explorer game =
             ]
         , div
             [ class [ ContentList ] ]
-            (renderDetailedEntryList (resolvePath game explorer.path))
+            (renderDetailedEntryList
+                (resolvePath
+                    game.servers
+                    (path |> pathToString)
+                )
+            )
         ]
+
+
+view : GameModel -> Model -> Html Msg
+view game ({ app } as model) =
+    let
+        nowPath =
+            app.path |> pathInterpret
+
+        x =
+            Debug.log "Path: " nowPath
+    in
+        div [ class [ Window ] ]
+            [ viewExplorerColumn nowPath game
+            , viewExplorerMain nowPath game
+            , menuView model
+            ]

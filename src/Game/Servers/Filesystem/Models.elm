@@ -11,6 +11,8 @@ module Game.Servers.Filesystem.Models
         , FileModule
         , ModuleName
         , ModuleVersion
+        , StdFileData
+        , FolderData
         , addFile
         , removeFile
         , getFilePath

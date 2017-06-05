@@ -2,7 +2,7 @@ module Apps.Explorer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
-import Apps.Explorer.Models exposing (Model)
+import Apps.Explorer.Models exposing (Model, changePath)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as MsgMenu
 import Apps.Explorer.Menu.Update
@@ -25,3 +25,14 @@ update msg game ({ app } as model) =
                     Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
+
+        -- General Acts
+        GoPath newPath ->
+            let
+                newApp =
+                    changePath
+                        newPath
+                        app
+                        game.servers
+            in
+                ( { model | app = newApp }, Cmd.none, [] )
