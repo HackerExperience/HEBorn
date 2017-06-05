@@ -36,8 +36,7 @@ update msg game ({ app } as model) =
             let
                 newApp =
                     updateTasks
-                        --TODO: Search for tasks update
-                        initialProcesses
+                        game.servers
                         --TODO: Recalculate limits
                         app.limits
                         app

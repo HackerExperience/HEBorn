@@ -133,7 +133,18 @@ indvidualEntryName file =
 renderTreeEntry : File -> Html Msg
 renderTreeEntry file =
     div
-        [ class [ NavEntry, EntryArchive ], menuTreeArchive ]
+        (case file of
+            Folder data ->
+                [ class [ NavEntry, EntryDir ]
+                , menuTreeArchive
+                , onClick (GoPath (data.path))
+                ]
+
+            StdFile _ ->
+                [ class [ NavEntry, EntryArchive ]
+                , menuMainArchive
+                ]
+        )
         [ span [ class [ NavIcon, entryIcon file ] ] []
         , span [] [ text (indvidualEntryName file) ]
         ]
@@ -297,7 +308,7 @@ view game ({ app } as model) =
             Debug.log "Path: " nowPath
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn nowPath game
+            [ viewExplorerColumn (Absolute [ "favorites" ]) game
             , viewExplorerMain nowPath game
             , menuView model
             ]
