@@ -2,9 +2,11 @@ module Apps.TaskManager.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
+import Game.Servers.Processes.Models exposing (initialProcesses)
 import Apps.TaskManager.Models
     exposing
         ( Model
+        , updateTasks
         )
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Menu.Messages as MsgMenu
@@ -28,3 +30,16 @@ update msg game ({ app } as model) =
                     Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
+
+        --- Every update
+        Tick _ ->
+            let
+                newApp =
+                    updateTasks
+                        --TODO: Search for tasks update
+                        initialProcesses
+                        --TODO: Recalculate limits
+                        app.limits
+                        app
+            in
+                ( { model | app = newApp }, Cmd.none, [] )
