@@ -1,6 +1,7 @@
 module Apps.TaskManager.View exposing (view)
 
 import Dict
+import Time exposing (Time)
 import Utils exposing (andThenWithDefault)
 import Html exposing (..)
 import Html.Attributes exposing (style)
@@ -74,22 +75,22 @@ viewTaskRowUsage usage =
     ]
 
 
-etaBar : Float -> Float -> Html Msg
+etaBar : Time -> Float -> Html Msg
 etaBar secondsLeft progress =
     progressBar
         progress
-        (secondsToTimeNotation (floor secondsLeft))
+        (secondsToTimeNotation secondsLeft)
         16
 
 
-viewState : Process -> Html Msg
-viewState entry =
+viewState : Time -> Process -> Html Msg
+viewState now entry =
     case entry.prop of
         LocalProcess prop ->
             (case prop.state of
                 StateRunning ->
                     etaBar
-                        (Maybe.withDefault 0 prop.eta)
+                        (andThenWithDefault (\end -> (end - now)) 0 prop.eta)
                         (Maybe.withDefault 0 prop.progress)
 
                 StateStandby ->
@@ -159,8 +160,8 @@ getVersion prop =
             Just v
 
 
-viewTaskRow : Process -> Html Msg
-viewTaskRow entry =
+viewTaskRow : Time -> Process -> Html Msg
+viewTaskRow now entry =
     let
         name =
             processName entry
@@ -203,13 +204,13 @@ viewTaskRow entry =
                     , span [] [ text fileVer ]
                     ]
                 ]
-            , div [] [ viewState entry ]
+            , div [] [ viewState now entry ]
             , div [] (viewTaskRowUsage usage)
             ]
 
 
-viewTasksTable : Entries -> Html Msg
-viewTasksTable entries =
+viewTasksTable : Entries -> Time -> Html Msg
+viewTasksTable entries now =
     div [ class [ TaskTable ] ]
         ([ div [ class [ EntryDivision ] ]
             -- TODO: Hide when too small (responsive design)
@@ -218,7 +219,7 @@ viewTasksTable entries =
             , div [] [ text "Resources" ]
             ]
          ]
-            ++ (List.map viewTaskRow entries)
+            ++ (List.map (viewTaskRow now) entries)
         )
 
 
@@ -254,7 +255,7 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
     div [ class [ MainLayout ] ]
-        [ viewTasksTable (Dict.values app.localTasks)
+        [ viewTasksTable (Dict.values app.localTasks) game.meta.lastTick
         , viewTotalResources app
         , menuView model
         ]
