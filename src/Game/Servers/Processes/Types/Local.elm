@@ -55,3 +55,22 @@ type alias ProcessProp =
     , downloadUsage : Int
     , uploadUsage : Int
     }
+
+
+dummyLocalProcess : ProcessProp
+dummyLocalProcess =
+    ProcessProp
+        (Cracker 1.1)
+        3
+        StateRunning
+        (Just 1496710800000)
+        (Just 0.5)
+        Nothing
+        "san"
+        "francisco"
+        Nothing
+        Nothing
+        1900000000
+        786000000
+        0
+        0
