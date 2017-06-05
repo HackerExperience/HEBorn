@@ -234,7 +234,9 @@ css =
             , textAlign center
             ]
         , class NavEntry
-            [ margin3 (px 8) (px 0) (px 0) ]
+            [ margin3 (px 8) (px 0) (px 0)
+            , cursor pointer
+            ]
         , class NavIcon
             [ marginRight (px 8)
             , Icon.fontFamily

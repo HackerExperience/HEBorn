@@ -3,7 +3,7 @@ module Game.Servers.Processes.Models exposing (..)
 import Dict
 import Utils
 import Game.Servers.Processes.Types.Shared exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..), dummyLocalProcess)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 
 
@@ -24,10 +24,7 @@ type alias Processes =
 
 initialProcesses : Processes
 initialProcesses =
-    Dict.fromList
-        -- DUMMY VALUE FOR PLAYING
-        [ ( "dummy0000", (Process "dummy0000" (LocalProcess dummyLocalProcess)) )
-        ]
+    Dict.empty
 
 
 {-| REVIEW: this doesn't look that useful
