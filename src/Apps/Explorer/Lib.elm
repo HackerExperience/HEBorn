@@ -23,7 +23,7 @@ pathInterpret path =
         splitPath =
             String.split pathSeparator
     in
-        if (String.startsWith rootPath stripRight) then
+        if (String.startsWith rootPath path) then
             Absolute (splitPath (String.dropLeft (String.length rootPath) stripRight))
         else
             Relative (splitPath stripRight)
@@ -51,6 +51,21 @@ pathFuckStart path =
 
         Relative entries ->
             entries
+
+
+dropRight : Int -> List a -> List a
+dropRight num list =
+    (List.take ((List.length list) - num) list)
+
+
+pathGoUp : SmartPath -> SmartPath
+pathGoUp path =
+    case path of
+        Absolute entries ->
+            Absolute (dropRight 1 entries)
+
+        Relative entries ->
+            Relative (dropRight 1 entries)
 
 
 

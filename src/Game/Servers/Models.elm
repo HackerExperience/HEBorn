@@ -4,6 +4,7 @@ import Dict
 import Utils
 import Game.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
+import Game.Servers.Filesystem.Dummy exposing (dummyFS)
 import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
 import Game.Servers.Processes.Models as Processes exposing (Processes, initialProcesses)
 
@@ -107,7 +108,7 @@ initialServers =
         Dict.empty
         { id = localhostServerID
         , ip = localhost
-        , filesystem = initialFilesystem
+        , filesystem = dummyFS
         , logs = initialLogs
         , processes = initialProcesses
         }
