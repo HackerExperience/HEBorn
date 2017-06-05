@@ -1,5 +1,7 @@
 module UI.ToString exposing (..)
 
+import Time exposing (Time, inHours, inMinutes, inSeconds)
+
 
 bytesToString : Float -> String
 bytesToString value =
@@ -40,31 +42,38 @@ pointToSvgAttr ( x, y ) =
     (toString x) ++ "," ++ (toString y)
 
 
-secondsToTimeNotation : Int -> String
-secondsToTimeNotation count =
-    if (count > 3600) then
-        let
-            h =
-                (toString (count // 3600))
+secondsToTimeNotation : Time -> String
+secondsToTimeNotation timeLeft =
+    let
+        totalHours =
+            floor (inHours timeLeft)
 
-            l =
-                (count % 3600)
+        days =
+            totalHours // 24
 
-            m =
-                (toString (l // 60))
+        hours =
+            totalHours % 24
 
-            s =
-                (toString (l % 60))
-        in
-            h ++ "h" ++ m ++ "m" ++ s ++ "s"
-    else if (count > 60) then
-        let
-            m =
-                (toString (count // 60))
+        minutes =
+            (floor (inMinutes timeLeft)) % 60
 
-            s =
-                (toString (count % 60))
-        in
-            m ++ "m" ++ s ++ "s"
-    else
-        (toString count) ++ "s"
+        seconds =
+            (floor (inSeconds timeLeft)) % 60
+
+        showFun ( value, posfix ) accum =
+            if (String.isEmpty accum) && (value <= 0) then
+                accum
+            else
+                (accum ++ " " ++ (toString value) ++ posfix)
+
+        show =
+            List.foldl
+                showFun
+                ""
+                [ ( days, "d" )
+                , ( hours, "h" )
+                , ( minutes, "m" )
+                , ( seconds, "s" )
+                ]
+    in
+        show
