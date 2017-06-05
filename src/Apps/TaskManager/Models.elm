@@ -61,17 +61,18 @@ initialModel =
 
 increaseHistory : a -> List a -> List a
 increaseHistory new old =
-    new :: (List.take 9 old)
+    new :: (List.take 19 old)
 
 
 initialTaskManager : TaskManager
 initialTaskManager =
     TaskManager
         Processes.initialProcesses
-        [ 2100000000, 1800000000, 2100000000, 1800000000 ]
-        [ 4096000000, 3464846848, 3164846848 ]
-        [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
-        [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
+        [ 2100000000 ]
+        []
+        []
+        []
+        --TODO: Remove DUMMY limits
         (ResourceUsage 2100000000 4096000000 1024000 512000)
 
 
