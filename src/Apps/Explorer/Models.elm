@@ -6,6 +6,7 @@ import Game.Servers.Models
         ( ServerID
         , getFilesystem
         , getServerByID
+        , Servers
         )
 import Game.Servers.Filesystem.Models
     exposing
@@ -87,12 +88,12 @@ setPath explorer path =
 changePath :
     FilePath
     -> Explorer
-    -> { servers : Game.Servers.Models.Servers }
+    -> Servers
     -> Explorer
-changePath path explorer game =
+changePath path explorer servers =
     let
         server =
-            getServerByID game.servers "localhost"
+            getServerByID servers "localhost"
 
         filesystem =
             getFilesystem server
@@ -111,10 +112,11 @@ changePath path explorer game =
         explorer_
 
 
-resolvePath game path =
+resolvePath : Servers -> FilePath -> List File
+resolvePath servers path =
     let
         server =
-            getServerByID game.servers "localhost"
+            getServerByID servers "localhost"
 
         filesystem =
             getFilesystem server
