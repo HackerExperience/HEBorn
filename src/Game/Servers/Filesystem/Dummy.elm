@@ -40,4 +40,8 @@ dummyFS =
                 )
             ]
           )
+        , ( "/favorites"
+          , [ Folder (FolderData "" "User Home" "/home/me")
+            ]
+          )
         ]

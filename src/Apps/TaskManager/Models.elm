@@ -3,6 +3,13 @@ module Apps.TaskManager.Models exposing (..)
 import Dict
 import Utils exposing (andThenWithDefault, filterMapList)
 import Apps.TaskManager.Menu.Models as Menu
+import Game.Servers.Models
+    exposing
+        ( ServerID
+        , getProcesses
+        , getServerByID
+        , Servers
+        )
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Shared as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
@@ -115,9 +122,17 @@ onlyLocalTasks tasks =
         localTasks
 
 
-updateTasks : Processes -> ResourceUsage -> TaskManager -> TaskManager
-updateTasks tasks_ limit old =
+updateTasks : Servers -> ResourceUsage -> TaskManager -> TaskManager
+updateTasks servers limit old =
     let
+        server =
+            getServerByID servers "localhost"
+
+        tasks_ =
+            Maybe.withDefault
+                initialProcesses
+                (getProcesses server)
+
         ( cpu, mem, down, up ) =
             List.foldr
                 taskUsageSum
