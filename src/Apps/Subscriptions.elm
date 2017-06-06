@@ -1,17 +1,15 @@
 module Apps.Subscriptions exposing (subscriptions)
 
+import Game.Models exposing (GameModel)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (AppMsg(..))
-import Apps.LogViewer.Messages as LogViewer
 import Apps.LogViewer.Subscriptions as LogViewer
-import Apps.TaskManager.Messages as TaskManager
 import Apps.TaskManager.Subscriptions as TaskManager
-import Apps.Browser.Messages as Browser
 import Apps.Browser.Subscriptions as Browser
-import Apps.Explorer.Messages as Explorer
 import Apps.Explorer.Subscriptions as Explorer
 
 
+subscriptions : GameModel -> AppModel -> Sub AppMsg
 subscriptions game model =
     case model of
         LogViewerModel model ->

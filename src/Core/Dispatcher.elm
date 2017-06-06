@@ -4,6 +4,7 @@ module Core.Dispatcher
         , callNetwork
         , callServer
         , callFilesystem
+        , callProcesses
         , callMeta
         )
 
@@ -15,6 +16,7 @@ import Game.Account.Messages as Account
 import Game.Network.Messages as Network
 import Game.Servers.Messages as Server
 import Game.Servers.Filesystem.Messages as Filesystem
+import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Models exposing (ServerID)
 
 
@@ -53,9 +55,14 @@ callServer msg =
     callGame (MsgServers msg)
 
 
-callFilesystem : ServerID -> Filesystem.FilesystemMsg -> CoreMsg
+callFilesystem : ServerID -> Filesystem.Msg -> CoreMsg
 callFilesystem serverID msg =
     callServer (Server.MsgFilesystem serverID msg)
+
+
+callProcesses : ServerID -> Processes.Msg -> CoreMsg
+callProcesses serverID msg =
+    callServer (Server.MsgProcess serverID msg)
 
 
 callMeta : Meta.MetaMsg -> CoreMsg

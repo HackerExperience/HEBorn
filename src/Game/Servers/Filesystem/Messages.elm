@@ -1,7 +1,7 @@
-module Game.Servers.Filesystem.Messages exposing (FilesystemMsg(..))
+module Game.Servers.Filesystem.Messages exposing (Msg(..))
 
 import Game.Servers.Filesystem.Models exposing (FileID)
 
 
-type FilesystemMsg
-    = DeleteFile FileID
+type Msg
+    = Delete FileID
