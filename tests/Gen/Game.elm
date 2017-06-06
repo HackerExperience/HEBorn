@@ -33,7 +33,7 @@ genModel =
             { account = initialAccountModel
             , servers = servers
             , network = initialNetworkModel
-            , meta = initialMetaModel
+            , meta = initialMetaModel "" "" ""
             }
         )
         Gen.Servers.genModel

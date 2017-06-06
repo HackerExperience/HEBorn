@@ -33,17 +33,14 @@ update msg game model =
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
-        Event _ ->
-            ( model, Cmd.none, [] )
-
-        Request _ ->
-            ( model, Cmd.none, [] )
-
-        Response _ _ ->
-            ( model, Cmd.none, [] )
 
 
-
+-- Event _ ->
+--     ( model, Cmd.none, [] )
+-- Request _ ->
+--     ( model, Cmd.none, [] )
+-- Response _ _ ->
+--     ( model, Cmd.none, [] )
 -- internals
 
 

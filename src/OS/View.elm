@@ -28,7 +28,7 @@ view model =
         ]
         [ viewHeader model.game model.os
         , viewMain model.game model.os
-        , displayVersion model.config.version
+        , displayVersion model.game.meta.config.version
         , menuView model.os
         ]
 

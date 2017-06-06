@@ -3,8 +3,6 @@ module Game.Update exposing (..)
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
-import Game.Requests exposing (responseHandler)
-import Game.Events exposing (eventHandler)
 import Game.Account.Update
 import Game.Servers.Update
 import Game.Network.Update
@@ -17,9 +15,15 @@ update msg model =
         MsgAccount subMsg ->
             let
                 ( account_, cmd, coreMsg ) =
-                    Game.Account.Update.update subMsg model.account model
+                    Game.Account.Update.update
+                        subMsg
+                        model.account
+                        model
+
+                cmd_ =
+                    Cmd.map MsgAccount cmd
             in
-                ( { model | account = account_ }, cmd, coreMsg )
+                ( { model | account = account_ }, cmd_, coreMsg )
 
         MsgServers subMsg ->
             let
@@ -42,22 +46,5 @@ update msg model =
             in
                 ( { model | meta = meta_ }, cmd, coreMsg )
 
-        Event event ->
-            let
-                ( model_, cmd, coreMsg ) =
-                    eventHandler model event
-            in
-                ( model_, cmd, coreMsg )
-
-        Request _ ->
-            ( model, Cmd.none, [] )
-
-        Response request data ->
-            let
-                ( model_, cmd, coreMsg ) =
-                    responseHandler request data model
-            in
-                ( model_, cmd, coreMsg )
-
-        NoOp ->
+        _ ->
             ( model, Cmd.none, [] )

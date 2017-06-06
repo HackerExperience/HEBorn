@@ -33,7 +33,7 @@ viewLogin model =
 
 viewSignUp : CoreModel -> Html LandMsg
 viewSignUp model =
-    if model.config.version == "dev" then
+    if model.game.meta.config.version == "dev" then
         Html.map MsgSignUp (Landing.SignUp.View.view model.landing.signUp model.game)
     else
         div [] []
