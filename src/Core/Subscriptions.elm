@@ -1,6 +1,5 @@
 module Core.Subscriptions exposing (subscriptions)
 
-import Driver.Websocket.Subscriptions
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Models exposing (GameModel)

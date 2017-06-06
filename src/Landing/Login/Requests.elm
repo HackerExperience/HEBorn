@@ -1,137 +1,62 @@
-module Landing.Login.Requests exposing (..)
-
-import Json.Decode exposing (Decoder, string, decodeString, dict, decodeValue)
-import Json.Decode.Pipeline exposing (decode, required, optional)
-import Requests.Models
+module Landing.Login.Requests
     exposing
-        ( createRequestData
-        , RequestPayloadArgs
-            ( RequestUsernamePayload
-            , RequestLoginPayload
-            )
-        , Request
-            ( NewRequest
-            , RequestUsername
-            , RequestLogin
-            )
-        , RequestTopic(TopicAccountLogin)
-        , emptyTopicContext
-        , Response
-            ( ResponseUsernameExists
-            , ResponseLogin
-            , ResponseInvalid
-            )
-        , ResponseDecoder
-        , ResponseCode(..)
-        , ResponseForUsernameExists(..)
-        , ResponseUsernameExistsPayload
-        , ResponseForLogin(..)
-        , ResponseLoginPayload
-        )
-import Requests.Update exposing (queueRequest)
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
-import Core.Dispatcher exposing (callAccount)
-import Game.Account.Messages exposing (AccountMsg(Login))
-import Landing.Login.Messages exposing (Msg(Request))
-import Landing.Login.Models exposing (Model)
-
-
-type alias ResponseType =
-    Response
-    -> Model
-    -> CoreModel
-    -> ( Model, Cmd Msg, List CoreMsg )
-
-
-
-{-
-   Request: Sign Up
-   Description: Create a new account
--}
-
-
-requestLogin : String -> String -> Cmd Msg
-requestLogin username password =
-    queueRequest
-        (Request
-            (NewRequest
-                (createRequestData
-                    RequestLogin
-                    decodeLogin
-                    TopicAccountLogin
-                    emptyTopicContext
-                    (RequestLoginPayload
-                        { password = password
-                        , username = username
-                        }
-                    )
-                )
-            )
+        ( Response(..)
+        , login
+        , handler
         )
 
+import Core.Config exposing (Config)
+import Landing.Login.Messages exposing (..)
+import Requests.Requests exposing (request, report)
+import Requests.Types exposing (Code(..))
+import Requests.Topics exposing (Topic(..))
+import Json.Encode as Encode
+import Json.Decode exposing (Value, string, decodeString, dict, decodeValue)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 
-decodeLogin : ResponseDecoder
-decodeLogin rawMsg code =
+
+type Response
+    = LoginResponse String String
+    | NoOp
+
+
+login : String -> String -> Config -> Cmd Msg
+login username password =
     let
-        k =
-            Debug.log "<<<" (rawMsg)
+        payload =
+            Encode.object
+                [ ( "username", Encode.string username )
+                , ( "password", Encode.string password )
+                ]
+    in
+        request AccountLoginTopic
+            (LoginRequestMsg >> Request)
+            Nothing
+            payload
 
+
+handler : RequestMsg -> Response
+handler request =
+    case request of
+        LoginRequestMsg ( code, json ) ->
+            loginHandler code json
+
+
+
+-- internals
+
+
+loginHandler : Code -> String -> Response
+loginHandler code json =
+    let
         decoder =
-            decode ResponseLoginPayload
+            decode LoginResponse
                 |> required "token" string
                 |> required "account_id" string
     in
         case code of
-            ResponseCodeOk ->
-                case decodeValue decoder rawMsg of
-                    Ok msg ->
-                        ResponseLogin (ResponseLoginOk msg)
-
-                    Err r ->
-                        let
-                            k =
-                                Debug.log ">>>>>>>" (toString r)
-                        in
-                            ResponseLogin (ResponseLoginInvalid)
-
-            ResponseCodeNotFound ->
-                ResponseLogin (ResponseLoginFailed)
+            OkCode ->
+                report (decodeString decoder json)
 
             _ ->
-                ResponseLogin (ResponseLoginInvalid)
-
-
-requestLoginHandler : ResponseType
-requestLoginHandler response model core =
-    case response of
-        ResponseLogin (ResponseLoginOk data) ->
-            let
-                loginCmd =
-                    callAccount
-                        (Login data)
-            in
-                ( { model | loginFailed = False }, Cmd.none, [ loginCmd ] )
-
-        ResponseLogin ResponseLoginFailed ->
-            ( { model | loginFailed = True }, Cmd.none, [] )
-
-        ResponseLogin ResponseLoginInvalid ->
-            ( { model | loginFailed = True }, Cmd.none, [] )
-
-        _ ->
-            ( model, Cmd.none, [] )
-
-
-
--- Top-level response handler
-
-
-responseHandler : Request -> ResponseType
-responseHandler request data model core =
-    case request of
-        RequestLogin ->
-            requestLoginHandler data model core
-
-        _ ->
-            ( model, Cmd.none, [] )
+                NoOp

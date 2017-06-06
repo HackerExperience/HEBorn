@@ -1,15 +1,10 @@
-module Landing.SignUp.Update exposing (..)
+module Landing.SignUp.Update exposing (update)
 
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
 import Landing.SignUp.Models exposing (Model, FormError)
 import Landing.SignUp.Messages exposing (Msg(..))
-import Landing.SignUp.Requests
-    exposing
-        ( responseHandler
-        , requestSignUp
-          -- , requestUsernameExists
-        )
+import Landing.SignUp.Requests exposing (..)
+import Core.Messages exposing (CoreMsg)
+import Core.Models exposing (CoreModel)
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -17,11 +12,12 @@ update msg model core =
     case msg of
         SubmitForm ->
             let
-                formErrors =
-                    getErrors model
-
                 cmd =
-                    requestSignUp model.email model.username model.password
+                    create
+                        model.email
+                        model.username
+                        model.password
+                        core.game.meta.config
             in
                 ( model, cmd, [] )
 
@@ -73,16 +69,27 @@ update msg model core =
             in
                 ( { model | formErrors = newFormErrors }, Cmd.none, [] )
 
-        Event event ->
-            case event of
-                _ ->
-                    ( model, Cmd.none, [] )
+        Request data ->
+            response (handler data) model core
 
-        Request _ ->
+
+
+-- internals
+
+
+response :
+    Response
+    -> Model
+    -> CoreModel
+    -> ( Model, Cmd Msg, List CoreMsg )
+response response model core =
+    case response of
+        -- TODO: add more types to match response status
+        CreateResponse _ _ _ ->
             ( model, Cmd.none, [] )
 
-        Response request data ->
-            responseHandler request data model core
+        NoOp ->
+            ( model, Cmd.none, [] )
 
 
 getErrorsUsername : Model -> String

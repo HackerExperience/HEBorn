@@ -1,137 +1,60 @@
-module Landing.SignUp.Requests exposing (..)
-
-import Requests.Models
+module Landing.SignUp.Requests
     exposing
-        ( createRequestData
-        , RequestPayloadArgs
-            ( RequestUsernamePayload
-            , RequestSignUpPayload
-            )
-        , Request
-            ( NewRequest
-            , RequestUsername
-            , RequestSignUp
-            )
-        , RequestTopic(TopicAccountCreate)
-        , emptyTopicContext
-        , Response
-            ( ResponseUsernameExists
-            , ResponseSignUp
-            , ResponseInvalid
-            )
-        , ResponseDecoder
-        , ResponseCode(..)
-        , ResponseForUsernameExists(..)
-        , ResponseUsernameExistsPayload
-        , ResponseForSignUp(..)
-        , ResponseSignUpPayload
+        ( Response(..)
+        , create
+        , handler
         )
-import Requests.Update exposing (queueRequest)
-import Requests.Decoder exposing (decodeRequest)
-import Json.Decode exposing (Decoder, string, decodeString, dict)
+
+import Landing.SignUp.Messages exposing (..)
+import Core.Config exposing (Config)
+import Requests.Requests exposing (request, report)
+import Requests.Types exposing (Code(..))
+import Requests.Topics exposing (Topic(..))
+import Json.Encode as Encode
+import Json.Decode exposing (Value, string, decodeString, dict, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
-import Landing.SignUp.Messages exposing (Msg(Request))
-import Landing.SignUp.Models exposing (Model)
 
 
-type alias ResponseType =
-    Response
-    -> Model
-    -> CoreModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+type Response
+    = CreateResponse String String String
+    | NoOp
 
 
-
--- requestUsernameExists : String -> Cmd Msg
--- requestUsernameExists username =
---     queueRequest (Request
---                       (NewRequest
---                            (createRequestData
---                                 RequestUsername
---                                 decodeUsernameExists
---                                 "account.query"
---                                 (RequestUsernamePayload
---                                      { user = username
---                                      }))))
-{-
-   Request: Sign Up
-   Description: Create a new account
--}
+create : String -> String -> String -> Config -> Cmd Msg
+create email username password =
+    let
+        payload =
+            Encode.object
+                [ ( "email", Encode.string email )
+                , ( "username", Encode.string username )
+                , ( "password", Encode.string password )
+                ]
+    in
+        request AccountCreateTopic
+            (CreateRequestMsg >> Request)
+            Nothing
+            payload
 
 
-requestSignUp : String -> String -> String -> Cmd Msg
-requestSignUp email username password =
-    queueRequest
-        (Request
-            (NewRequest
-                (createRequestData
-                    RequestSignUp
-                    decodeSignUp
-                    TopicAccountCreate
-                    emptyTopicContext
-                    (RequestSignUpPayload
-                        { email = email
-                        , password = password
-                        , username = username
-                        }
-                    )
-                )
-            )
-        )
+handler : RequestMsg -> Response
+handler request =
+    case request of
+        CreateRequestMsg ( code, json ) ->
+            createHandler code json
 
 
-decodeSignUp : ResponseDecoder
-decodeSignUp rawMsg code =
+createHandler : Code -> String -> Response
+createHandler code json =
     let
         decoder =
-            decode ResponseSignUpPayload
+            decode CreateResponse
                 |> required "username" string
                 |> required "email" string
                 |> required "account_id" string
     in
         case code of
-            ResponseCodeOk ->
-                case decodeRequest decoder rawMsg of
-                    Ok msg ->
-                        ResponseSignUp (ResponseSignUpOk msg)
-
-                    Err _ ->
-                        Debug.log "errrr"
-                            ResponseSignUp
-                            (ResponseSignUpInvalid)
+            OkCode ->
+                report (decodeString decoder json)
 
             _ ->
-                Debug.log "code is"
-                    ResponseSignUp
-                    (ResponseSignUpInvalid)
-
-
-requestSignUpHandler : ResponseType
-requestSignUpHandler response model core =
-    case response of
-        ResponseSignUp (ResponseSignUpOk data) ->
-            Debug.log "ok"
-                ( model, Cmd.none, [] )
-
-        ResponseSignUp ResponseSignUpInvalid ->
-            Debug.log "invalid"
-                ( model, Cmd.none, [] )
-
-        _ ->
-            ( model, Cmd.none, [] )
-
-
-
--- Top-level response handler
-
-
-responseHandler : Request -> ResponseType
-responseHandler request data model core =
-    case request of
-        RequestSignUp ->
-            requestSignUpHandler data model core
-
-        _ ->
-            ( model, Cmd.none, [] )
+                NoOp

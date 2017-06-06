@@ -1,7 +1,10 @@
-module Landing.Login.Messages exposing (..)
+module Landing.Login.Messages
+    exposing
+        ( Msg(..)
+        , RequestMsg(..)
+        )
 
-import Events.Models
-import Requests.Models
+import Requests.Types exposing (ResponseType)
 
 
 type Msg
@@ -10,6 +13,8 @@ type Msg
     | ValidateUsername
     | SetPassword String
     | ValidatePassword
-    | Event Events.Models.Event
-    | Request Requests.Models.Request
-    | Response Requests.Models.Request Requests.Models.Response
+    | Request RequestMsg
+
+
+type RequestMsg
+    = LoginRequestMsg ResponseType

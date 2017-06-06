@@ -1,23 +1,9 @@
-module Game.Models
-    exposing
-        ( GameModel
-        , initialModel
-        , ResponseType
-        )
+module Game.Models exposing (GameModel, initialModel)
 
-import Requests.Models exposing (Response)
-import Core.Messages exposing (CoreMsg)
-import Game.Messages exposing (GameMsg)
 import Game.Account.Models exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Network.Models exposing (..)
 import Game.Meta.Models exposing (..)
-
-
-type alias ResponseType =
-    Response
-    -> GameModel
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
 
 
 type alias GameModel =
@@ -28,10 +14,10 @@ type alias GameModel =
     }
 
 
-initialModel : GameModel
-initialModel =
+initialModel : String -> String -> String -> GameModel
+initialModel apiHttpUrl apiWsUrl version =
     { account = initialAccountModel
     , servers = initialServers
     , network = initialNetworkModel
-    , meta = initialMetaModel
+    , meta = initialMetaModel apiHttpUrl apiWsUrl version
     }
