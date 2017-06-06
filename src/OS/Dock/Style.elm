@@ -21,6 +21,7 @@ type Class
     | ItemIco
 
 
+css : Stylesheet
 css =
     (stylesheet << namespace "dock")
         [ id DockMain
@@ -97,6 +98,13 @@ css =
             "browser"
             [ before
                 [ Icon.browser ]
+            ]
+        , attrSelector "dockItemIco"
+            "data-icon"
+            "="
+            "taskmngr"
+            [ before
+                [ Icon.taskMngr ]
             ]
         , attrSelector "dockItem"
             "data-hasinst"

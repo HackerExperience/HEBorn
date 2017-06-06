@@ -1,18 +1,27 @@
 module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Events exposing (onClick)
 import Html.CssHelpers
-import Css exposing (pct, width, asPairs)
+import UI.Widgets exposing (progressBar)
+import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
-import Apps.Instances.Models as Instance exposing (InstanceID)
-import Apps.Context as Context
+import Game.Servers.Models exposing (Servers)
+import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, getState)
-import Apps.Explorer.Menu.Models exposing (Menu(..))
-import Apps.Explorer.Menu.View exposing (menuView, menuNav, menuContent)
+import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
+import Apps.Explorer.Lib exposing (..)
+import Apps.Explorer.Menu.View
+    exposing
+        ( menuView
+        , menuMainDir
+        , menuTreeDir
+        , menuMainArchive
+        , menuTreeArchive
+        , menuExecutable
+        , menuActiveAction
+        , menuPassiveAction
+        )
 import Apps.Explorer.Style exposing (Classes(..))
 
 
@@ -20,105 +29,31 @@ import Apps.Explorer.Style exposing (Classes(..))
     Html.CssHelpers.withNamespace "explorer"
 
 
-styles : List Css.Mixin -> Attribute Msg
-styles =
-    Css.asPairs >> style
-
-
 
 -- VIEW WRAPPER
 
 
-type alias FileSize =
-    Float
-
-
-type ActionTarget
-    = Active
-    | Passive
-
-
-type alias Action =
-    { target : ActionTarget
-    , ver : ExeVer
-    }
-
-
-type alias ExeVer =
-    Float
-
-
-type ExeMime
-    = Firewall
-    | Virus
-
-
-type EntryGroup
-    = Dir
-    | Branch
-
-
-type ArchiveType
-    = Generic
-    | Executable ExeMime ExeVer (Maybe (List Action))
-
-
-type alias ArchiveProp =
-    { size : FileSize
-    , type_ : ArchiveType
-    }
-
-
-type EntryType
-    = Fantasy
-    | Group EntryGroup (List Entry)
-    | Archive ArchiveProp
-
-
-type alias Entry =
-    { name : String
-    , type_ : EntryType
-    }
-
-
-groupIcon : EntryGroup -> Classes
-groupIcon type_ =
-    case type_ of
-        Dir ->
+entryIcon : File -> Classes
+entryIcon file =
+    case file of
+        Folder _ ->
             CasedDirIcon
 
-        Branch ->
-            CasedOpIcon
+        StdFile prop ->
+            case (extensionInterpret prop.extension) of
+                Virus ->
+                    VirusIcon
 
+                Firewall ->
+                    FirewallIcon
 
-entryIcon : EntryType -> Classes
-entryIcon type_ =
-    case type_ of
-        Fantasy ->
-            GenericArchiveIcon
-
-        Group groupType ch ->
-            groupIcon groupType
-
-        Archive prop ->
-            (case prop.type_ of
-                Generic ->
+                GenericArchive ->
                     GenericArchiveIcon
 
-                Executable exeMime ver acts ->
-                    (case exeMime of
-                        Virus ->
-                            VirusIcon
 
-                        Firewall ->
-                            FirewallIcon
-                    )
-            )
-
-
-actionIcon : ActionTarget -> Classes
-actionIcon actType =
-    case actType of
+moduleIcon : KnownModule -> Classes
+moduleIcon modType =
+    case modType of
         Active ->
             ActiveIcon
 
@@ -126,257 +61,216 @@ actionIcon actType =
             PassiveIcon
 
 
-actionName : ActionTarget -> Html Msg
-actionName actType =
-    text
-        (case actType of
-            Active ->
-                "Active"
+moduleMenu : FileID -> KnownModule -> Attribute Msg
+moduleMenu fileID modType =
+    case modType of
+        Active ->
+            menuActiveAction fileID
 
-            Passive ->
-                "Passive"
+        Passive ->
+            menuPassiveAction fileID
+
+
+fileVerToText : FileVersion -> Html Msg
+fileVerToText ver =
+    text
+        (case ver of
+            FileVersionNumber pure ->
+                toString pure
+
+            NoVersion ->
+                "N/V"
         )
 
 
-sizeToText : FileSize -> Html msg
-sizeToText size =
-    text ((toString size) ++ " MB")
-
-
-verToText : ExeVer -> Html msg
-verToText ver =
+moduleVerToText : ModuleVersion -> Html Msg
+moduleVerToText ver =
     text (toString ver)
 
 
-renderAction : Action -> Html Msg
-renderAction act =
-    div []
-        [ span [ class [ actionIcon act.target ] ] []
-        , span [] [ actionName act.target ]
-        , span [] [ verToText act.ver ]
-        , span [] []
-        ]
+sizeToText : FileSize -> Html Msg
+sizeToText size =
+    text
+        (case size of
+            FileSizeNumber pure ->
+                bytesToString (toFloat pure)
+
+            NoSize ->
+                "N/S"
+        )
 
 
-renderActionList : List Action -> List (Html Msg)
-renderActionList acts =
-    List.map (\o -> renderAction o) acts
-
-
-renderTreeEntry : Entry -> Html Msg
-renderTreeEntry entry =
-    case entry.type_ of
-        Group gr childs ->
-            renderSidebarGroup childs entry.name gr
-
-        Fantasy ->
-            div
-                [ class [ NavEntry, EntryArchive ] ]
-                [ span [] [ text entry.name ] ]
-
-        Archive prop ->
-            div
-                [ class [ NavEntry, EntryArchive ] ]
-                [ span [ class [ NavIcon, entryIcon entry.type_ ] ] []
-                , span [] [ text entry.name ]
-                ]
-
-
-renderTreeEntryList : List Entry -> List (Html Msg)
-renderTreeEntryList list =
-    List.map (\o -> renderTreeEntry o) list
-
-
-renderSidebarGroup childs name grType =
-    div
-        [ class
-            ([ NavEntry, EntryDir ]
-                ++ if ((List.length childs) > 0) then
-                    [ EntryExpanded ]
-                   else
-                    []
-            )
-        ]
-        [ div
-            [ class [ EntryView ] ]
-            [ span [ class [ (groupIcon grType), NavIcon ] ] []
-            , span [] [ text name ]
+renderModule : FileID -> FileModule -> Html Msg
+renderModule fileID act =
+    let
+        target =
+            moduleInterpret act.name
+    in
+        div [ moduleMenu fileID target ]
+            [ span [ class [ moduleIcon target ] ] []
+            , span [] [ text act.name ]
+            , span [] [ moduleVerToText act.version ]
+            , span [] []
             ]
-        , div
-            [ class [ EntryChilds ] ]
-            (renderTreeEntryList childs)
-        ]
 
 
-renderDetailedEntry : Entry -> Html Msg
-renderDetailedEntry entry =
-    case entry.type_ of
-        Group gr childs ->
-            div [ class [ CntListEntry, EntryDir ] ]
+renderModuleList : FileID -> List FileModule -> List (Html Msg)
+renderModuleList fileID acts =
+    List.map (renderModule fileID) acts
+
+
+indvidualEntryName : File -> String
+indvidualEntryName file =
+    case file of
+        StdFile _ ->
+            getFileName file
+
+        Folder data ->
+            data.name
+
+
+renderTreeEntry : Servers -> File -> Html Msg
+renderTreeEntry servers file =
+    let
+        icon =
+            span [ class [ NavIcon, entryIcon file ] ] []
+
+        label =
+            span [] [ text (indvidualEntryName file) ]
+    in
+        case file of
+            Folder data ->
+                div
+                    [ class [ NavEntry, EntryDir, EntryExpanded ]
+                    , menuTreeDir data.id
+                    , onClick (GoPath (fullFilePath file))
+                    ]
+                    [ div
+                        [ class [ EntryView ] ]
+                        [ icon, label ]
+                    , div
+                        [ class [ EntryChilds ] ]
+                        (renderTreeEntryPath servers (pathInterpret (fullFilePath file)))
+                    ]
+
+            StdFile prop ->
+                div
+                    [ class [ NavEntry, EntryArchive ]
+                    , menuTreeArchive prop.id
+                    ]
+                    [ icon, label ]
+
+
+renderTreeEntryPath : Servers -> SmartPath -> List (Html Msg)
+renderTreeEntryPath servers path =
+    let
+        entries =
+            resolvePath
+                servers
+                (path |> pathToString)
+    in
+        List.map (renderTreeEntry servers) entries
+
+
+renderDetailedEntry : File -> Html Msg
+renderDetailedEntry file =
+    case file of
+        Folder data ->
+            div
+                [ class [ CntListEntry, EntryDir ]
+                , menuMainDir data.id
+                , onClick (GoPath (fullFilePath file))
+                ]
                 [ span [ class [ DirIcon ] ] []
-                , span [] [ text entry.name ]
+                , span [] [ text data.name ]
                 ]
 
-        Fantasy ->
-            div [ class [ CntListEntry, EntryArchive ] ]
-                [ span [] [ text entry.name ] ]
-
-        Archive prop ->
-            (case prop.type_ of
-                Generic ->
-                    div [ class [ CntListEntry, EntryArchive ] ]
-                        [ span [ class [ entryIcon entry.type_ ] ] []
-                        , span [] [ text entry.name ]
-                        , span [] []
+        StdFile prop ->
+            (case (extensionInterpret prop.extension) of
+                GenericArchive ->
+                    div
+                        [ class [ CntListEntry, EntryArchive ]
+                        , menuMainArchive prop.id
+                        ]
+                        [ span [ class [ entryIcon file ] ] []
+                        , span [] [ text (indvidualEntryName file) ]
+                        , span [] [ fileVerToText prop.version ]
                         , span [] [ sizeToText prop.size ]
                         ]
 
-                Executable exeMime ver actsCont ->
-                    (case actsCont of
-                        Nothing ->
-                            div [ class [ CntListEntry, EntryArchive ] ]
-                                [ span [ class [ entryIcon entry.type_ ] ] []
-                                , span [] [ text entry.name ]
-                                , span [] [ verToText ver ]
+                _ ->
+                    let
+                        baseEntry =
+                            div
+                                [ class [ CntListEntry, EntryArchive ]
+                                , menuExecutable prop.id
+                                ]
+                                [ span [ class [ entryIcon file ] ] []
+                                , span [] [ text (indvidualEntryName file) ]
+                                , span [] [ fileVerToText prop.version ]
                                 , span [] [ sizeToText prop.size ]
                                 ]
-
-                        Just actions ->
-                            let
-                                type_ =
-                                    (Executable exeMime ver Nothing)
-
-                                archive =
-                                    Archive { prop | type_ = type_ }
-
-                                entry_ =
-                                    { entry | type_ = archive }
-                            in
-                                div [ class [ CntListContainer ] ]
-                                    [ (renderDetailedEntry entry_)
-                                    , div [ class [ CntListChilds ] ]
-                                        (renderActionList actions)
-                                    ]
-                    )
+                    in
+                        if (List.length prop.modules > 0) then
+                            div [ class [ CntListContainer ] ]
+                                [ baseEntry
+                                , div [ class [ CntListChilds ] ]
+                                    (renderModuleList prop.id prop.modules)
+                                ]
+                        else
+                            baseEntry
             )
 
 
-renderDetailedEntryList : List Entry -> List (Html Msg)
+renderDetailedEntryList : List File -> List (Html Msg)
 renderDetailedEntryList list =
-    List.map (\o -> renderDetailedEntry o) list
+    List.map
+        renderDetailedEntry
+        list
 
 
 
 -- END OF THAT
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
+viewUsage : Float -> Float -> Html Msg
+viewUsage min max =
     let
-        explorer =
-            getState model id
+        usage =
+            min / max
+
+        minStr =
+            bytesToString min
+
+        maxStr =
+            bytesToString max
     in
-        div [ class [ Window ] ]
-            [ viewExplorerColumn explorer game
-            , viewExplorerMain explorer game
-            , menuView model id
-            ]
-
-
-viewExplorerColumn : Explorer -> GameModel -> Html Msg
-viewExplorerColumn explorer game =
-    div
-        [ menuNav
-        , class [ Nav ]
-        ]
-        [ div [ class [ NavTree ] ]
-            (renderTreeEntryList
-                [ { name = "Pictures"
-                  , type_ =
-                        Group
-                            Dir
-                            [ { name = "Purple Lotus 1.jpg"
-                              , type_ =
-                                    Archive
-                                        { size = 0
-                                        , type_ = Generic
-                                        }
-                              }
-                            , { name = "Blue Orchid.png"
-                              , type_ =
-                                    Archive
-                                        { size = 0
-                                        , type_ = Generic
-                                        }
-                              }
-                            , { name = "Other Flowers"
-                              , type_ =
-                                    Group
-                                        Dir
-                                        []
-                              }
-                            ]
-                  }
-                , { name = "Tree"
-                  , type_ =
-                        Group
-                            Branch
-                            [ { name = "Branch"
-                              , type_ =
-                                    Group
-                                        Branch
-                                        []
-                              }
-                            , { name = "AnotherBranch"
-                              , type_ =
-                                    Group
-                                        Dir
-                                        []
-                              }
-                            , { name = "A Leaf"
-                              , type_ = Fantasy
-                              }
-                            ]
-                  }
-                ]
-            )
-        , div [ class [ NavData ] ]
+        div [ class [ NavData ] ]
             [ text "Data usage"
             , br [] []
-            , text "82%"
+            , text (toString (floor (usage * 100)) ++ "%")
             , br [] []
-            , div
-                [ class [ ProgBar ] ]
-                [ div
-                    [ class [ [ ProgFill ] ]
-                    , styles [ Css.width (pct 50) ]
-                    ]
-                    []
-                ]
+            , progressBar usage "" 12
             , br [] []
-            , text "289 MB / 1000 MB"
+            , text (minStr ++ " / " ++ maxStr)
             ]
+
+
+viewExplorerColumn : SmartPath -> Servers -> Html Msg
+viewExplorerColumn path servers =
+    div
+        [ class [ Nav ]
+        ]
+        [ div [ class [ NavTree ] ]
+            (renderTreeEntryPath
+                servers
+                path
+            )
+        , (viewUsage 256000000 1024000000)
         ]
 
 
-stripPath : FilePath -> FilePath
-stripPath path =
-    let
-        stripRight =
-            (if (String.right 1 path == "/") then
-                (String.dropRight 1 path)
-             else
-                path
-            )
-    in
-        (if (String.left 1 stripRight == "/") then
-            (String.dropLeft 1 stripRight)
-         else
-            stripRight
-        )
-
-
-viewLocBar : FilePath -> Html Msg
+viewLocBar : SmartPath -> Html Msg
 viewLocBar path =
     div
         [ class [ LocBar ] ]
@@ -386,24 +280,25 @@ viewLocBar path =
                     [ class [ BreadcrumbItem ] ]
                     [ text o ]
             )
-            (String.split "/" (stripPath path))
+            (path |> pathFuckStart)
         )
 
 
-viewExplorerMain : Explorer -> GameModel -> Html Msg
-viewExplorerMain explorer game =
+viewExplorerMain : SmartPath -> Servers -> Html Msg
+viewExplorerMain path servers =
     div
-        [ menuContent
-        , class
+        [ class
             [ Content ]
         ]
         [ div
             [ class [ ContentHeader ] ]
-            [ viewLocBar explorer.path
+            [ viewLocBar path
             , div
                 [ class [ ActBtns ] ]
                 [ span
-                    [ class [ GoUpBtn ] ]
+                    [ class [ GoUpBtn ]
+                    , onClick (GoPath ((pathGoUp path) |> pathToString))
+                    ]
                     []
                 , span
                     [ class [ DocBtn, NewBtn ] ]
@@ -416,30 +311,22 @@ viewExplorerMain explorer game =
         , div
             [ class [ ContentList ] ]
             (renderDetailedEntryList
-                [ { name = "Downloads"
-                  , type_ =
-                        Group
-                            Dir
-                            []
-                  }
-                , { name = "MyVirus.spam"
-                  , type_ =
-                        Archive { size = 230, type_ = Executable Virus 2.3 Nothing }
-                  }
-                , { name = "TheWall.fwl"
-                  , type_ =
-                        Archive
-                            { size = 230
-                            , type_ =
-                                Executable Firewall
-                                    4.0
-                                    (Just
-                                        [ { target = Active, ver = 4.5 }
-                                        , { target = Passive, ver = 3.5 }
-                                        ]
-                                    )
-                            }
-                  }
-                ]
+                (resolvePath
+                    servers
+                    (path |> pathToString)
+                )
             )
         ]
+
+
+view : GameModel -> Model -> Html Msg
+view game ({ app } as model) =
+    let
+        nowPath =
+            app.path |> pathInterpret
+    in
+        div [ class [ Window ] ]
+            [ viewExplorerColumn (Relative [ "%favorites" ]) game.servers
+            , viewExplorerMain nowPath game.servers
+            , menuView model
+            ]

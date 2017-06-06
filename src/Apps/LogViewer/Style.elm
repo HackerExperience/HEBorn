@@ -29,6 +29,7 @@ type Classes
     | BtnUnlock
     | BtnApply
     | BtnCancel
+    | BottomButton
     | CasedBtnExpand
     | IcoCrosshair
     | IcoUser
@@ -61,6 +62,7 @@ css =
         [ class HeaderBar
             [ flexContainerHorz
             , borderBottom3 (px 1) solid (hex "000")
+            , internalPadding
             ]
         , class ETAct
             [ flex (int 1)
@@ -90,6 +92,7 @@ css =
             [ fontSize (px 12)
             , borderBottom3 (px 1) solid (hex "000")
             , padding (px 16)
+            , internalPadding
             ]
         , class EAct
             [ width (pct 100)
@@ -137,6 +140,8 @@ css =
             , before [ Icon.divExpand ]
             , cursor pointer
             ]
+        , class BottomButton
+            [ cursor pointer ]
         , class IcoCrosshair
             [ ico
             , before [ Icon.locationTarget ]

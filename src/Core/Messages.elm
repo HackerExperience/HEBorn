@@ -23,7 +23,6 @@ import Requests.Models
 import Core.Components exposing (..)
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
-import Apps.Messages exposing (AppMsg(..), appBinds)
 import Landing.Messages exposing (LandMsg(..), landBinds)
 import Driver.Websocket.Messages
 
@@ -31,7 +30,6 @@ import Driver.Websocket.Messages
 type CoreMsg
     = MsgGame Game.Messages.GameMsg
     | MsgOS OS.Messages.OSMsg
-    | MsgApp Apps.Messages.AppMsg
     | MsgLand Landing.Messages.LandMsg
     | MsgWebsocket Driver.Websocket.Messages.Msg
     | OnLocationChange Location
@@ -55,7 +53,6 @@ type CoreMsg
 type alias EventBinds =
     { game : Event -> Game.Messages.GameMsg
     , os : Event -> OS.Messages.OSMsg
-    , apps : Event -> Apps.Messages.AppMsg
     }
 
 
@@ -63,7 +60,6 @@ eventBinds : EventBinds
 eventBinds =
     { game = Game.Messages.Event
     , os = OS.Messages.Event
-    , apps = Apps.Messages.Event
     }
 
 
@@ -76,7 +72,6 @@ eventBinds =
 type alias RequestBinds =
     { game : Request -> Response -> Game.Messages.GameMsg
     , os : Request -> Response -> OS.Messages.OSMsg
-    , apps : Request -> Response -> Apps.Messages.AppMsg
     , land : Request -> Response -> Landing.Messages.LandMsg
     }
 
@@ -85,7 +80,6 @@ requestBinds : RequestBinds
 requestBinds =
     { game = Game.Messages.Response
     , os = OS.Messages.Response
-    , apps = Apps.Messages.Response
     , land = Landing.Messages.Response
     }
 
@@ -99,21 +93,12 @@ getRequestMsg component request response =
         ComponentOS ->
             MsgOS (requestBinds.os request response)
 
-        ComponentApp ->
-            MsgApp (requestBinds.apps request response)
-
-        ComponentExplorer ->
-            MsgApp
-                (MsgExplorer (appBinds.explorer request response))
-
-        ComponentLogViewer ->
-            MsgApp
-                (MsgLogViewer (appBinds.logViewer request response))
-
-        ComponentBrowser ->
-            MsgApp
-                (MsgBrowser (appBinds.browser request response))
-
+        -- ComponentExplorer ->
+        --     MsgApp
+        --         (MsgExplorer (appBinds.explorer request response))
+        -- ComponentBrowser ->
+        --     MsgApp
+        --         (MsgBrowser (appBinds.browser request response))
         ComponentLogin ->
             MsgLand
                 (MsgLogin (landBinds.login request response))

@@ -177,3 +177,8 @@ dangerous =
 browser : Icon
 browser =
     faIcon FA.globe
+
+
+taskMngr : Icon
+taskMngr =
+    faIcon FA.listAlt

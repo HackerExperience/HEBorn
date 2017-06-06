@@ -4,30 +4,24 @@ module Core.Dispatcher
         , callNetwork
         , callServer
         , callFilesystem
+        , callProcesses
         , callMeta
         , callWM
         , callDock
-        , callExplorer
-        , callLogViewer
-        , callInstance
         )
 
-import Core.Messages exposing (CoreMsg(MsgGame, MsgOS, MsgApp))
+import Core.Messages exposing (CoreMsg(MsgGame, MsgOS))
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
-import Apps.Messages exposing (AppMsg(..))
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
 import Game.Servers.Messages as Server
-import Game.Servers.Filesystem.Messages as Filesystem
+import Game.Servers.Filesystem.Messages as Filesystem exposing (Msg)
+import Game.Servers.Processes.Messages as Processes exposing (Msg)
 import OS.WindowManager.Messages as WM
 import OS.Dock.Messages as Dock
-import Apps.Explorer.Messages as Explorer
 import Game.Servers.Models exposing (ServerID)
-import Apps.LogViewer.Messages as LogViewer
-import Apps.Browser.Messages as Browser
-import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
 -- Would love to do something like below, but I can't =(
@@ -50,11 +44,6 @@ callOS =
     MsgOS
 
 
-callApps : AppMsg -> CoreMsg
-callApps =
-    MsgApp
-
-
 callAccount : Account.AccountMsg -> CoreMsg
 callAccount msg =
     callGame (MsgAccount msg)
@@ -70,9 +59,14 @@ callServer msg =
     callGame (MsgServers msg)
 
 
-callFilesystem : ServerID -> Filesystem.FilesystemMsg -> CoreMsg
+callFilesystem : ServerID -> Filesystem.Msg -> CoreMsg
 callFilesystem serverID msg =
     callServer (Server.MsgFilesystem serverID msg)
+
+
+callProcesses : ServerID -> Processes.Msg -> CoreMsg
+callProcesses serverID msg =
+    callServer (Server.MsgProcess serverID msg)
 
 
 callMeta : Meta.MetaMsg -> CoreMsg
@@ -88,22 +82,3 @@ callWM msg =
 callDock : Dock.Msg -> CoreMsg
 callDock msg =
     callOS (MsgDock msg)
-
-
-callExplorer : Explorer.Msg -> CoreMsg
-callExplorer msg =
-    callApps (MsgExplorer msg)
-
-
-callLogViewer : LogViewer.Msg -> CoreMsg
-callLogViewer msg =
-    callApps (MsgLogViewer msg)
-
-
-callBrowser : Browser.Msg -> CoreMsg
-callBrowser msg =
-    callApps (MsgBrowser msg)
-
-
-callInstance msg =
-    callApps msg

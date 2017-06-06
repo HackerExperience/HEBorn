@@ -129,3 +129,13 @@ andJust callback maybe =
 onKeyDown : (Int -> msg) -> Attribute msg
 onKeyDown tagger =
     on "keydown" (Json.map tagger keyCode)
+
+
+andThenWithDefault : (a -> b) -> b -> Maybe a -> b
+andThenWithDefault callback default maybe =
+    case maybe of
+        Just value ->
+            callback value
+
+        Nothing ->
+            default

@@ -1,232 +1,183 @@
 module OS.WindowManager.Update exposing (..)
 
-import Utils
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
+import Game.Models exposing (GameModel)
 import Core.Messages exposing (CoreMsg(NoOp))
-import Core.Dispatcher exposing (callDock, callInstance)
+import Core.Dispatcher exposing (callDock)
+import Core.Models exposing (CoreModel)
+import Apps.Update as Apps
+import Apps.Messages as Apps
 import OS.Messages exposing (OSMsg(MsgWM))
 import OS.WindowManager.Models
     exposing
         ( Model
         , WindowID
-        , getWindow
         , openWindow
         , openOrRestoreWindow
-        , restoreWindow
         , closeWindow
-        , updateWindowPosition
-        , toggleMaximizeWindow
+        , closeAppWindows
+        , restoreWindow
         , minimizeWindow
-        , bringFocus
-        , switchContext
-        , closeAllWindows
-        , minimizeAllWindows
-        , OpenOrRestoreResult(..)
+        , minimizeAppWindows
+        , toggleWindowMaximization
+        , unfocusWindow
+        , focusWindow
+        , updateWindowPosition
+        , getAppModel
+        , getWindow
+        , updateAppModel
+        , toggleWindowContext
+        , startDragging
+        , stopDragging
         )
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.Dock.Messages as DockMsg
-import Apps.Instances.Binds as InstanceBind
-import Apps.Explorer.Messages as ExplorerMsg
-import OS.WindowManager.Windows exposing (GameWindow(..))
 
 
-update : Msg -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
-update msg model =
+update : Msg -> CoreModel -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
+update msg core model =
     case msg of
-        Open window ->
-            let
-                ( windows_, seed_, windowID ) =
-                    openWindow model window
+        Open app ->
+            model
+                |> openWindow app
+                |> wrapEmpty
+                |> refreshDock
 
-                model_ =
-                    (bringFocus { model | windows = windows_, seed = seed_ } (Just windowID))
+        OpenOrRestore app ->
+            model
+                |> openOrRestoreWindow app
+                |> wrapEmpty
+                |> refreshDock
 
-                coreMsg =
-                    [ callInstance
-                        (InstanceBind.open window windowID)
-                    , callDock (DockMsg.WindowsChanges windows_)
-                    ]
-            in
-                ( model_, Cmd.none, coreMsg )
+        Close windowID ->
+            model
+                |> closeWindow windowID
+                |> unfocusWindow
+                |> wrapEmpty
+                |> refreshDock
+
+        CloseAll app ->
+            model
+                |> closeAppWindows app
+                |> unfocusWindow
+                |> wrapEmpty
+                |> refreshDock
 
         Restore windowID ->
-            let
-                windows_ =
-                    restoreWindow windowID model.windows
+            model
+                |> restoreWindow windowID
+                |> focusWindow windowID
+                |> wrapEmpty
+                |> refreshDock
 
-                model_ =
-                    bringFocus
-                        { model
-                            | windows = windows_
-                        }
-                        (Just windowID)
+        ToggleMaximize windowID ->
+            model
+                |> toggleWindowMaximization windowID
+                |> unfocusWindow
+                |> focusWindow windowID
+                |> wrapEmpty
 
-                coreMsg =
-                    [ callDock (DockMsg.WindowsChanges windows_) ]
-            in
-                ( model_
-                , Cmd.none
-                , coreMsg
-                )
+        Minimize windowID ->
+            model
+                |> minimizeWindow windowID
+                |> unfocusWindow
+                |> wrapEmpty
+                |> refreshDock
 
-        OpenOrRestore window ->
-            let
-                ( windows_, result_ ) =
-                    openOrRestoreWindow model window
+        MinimizeAll app ->
+            model
+                |> minimizeAppWindows app
+                |> unfocusWindow
+                |> wrapEmpty
+                |> refreshDock
 
-                ( model_, coreMsg ) =
-                    (case result_ of
-                        Create seed_ windowID ->
-                            ( (bringFocus { model | windows = windows_, seed = seed_ } (Just windowID))
-                            , [ callInstance
-                                    (InstanceBind.open window windowID)
-                              , callDock (DockMsg.WindowsChanges windows_)
-                              ]
-                            )
+        UpdateFocusTo maybeWindowID ->
+            case maybeWindowID of
+                Just windowID ->
+                    model
+                        |> focusWindow windowID
+                        |> wrapEmpty
 
-                        OneRestore windowID ->
-                            ( (bringFocus { model | windows = windows_ } (Just windowID))
-                            , [ callDock (DockMsg.WindowsChanges windows_) ]
-                            )
+                Nothing ->
+                    model
+                        |> unfocusWindow
+                        |> wrapEmpty
 
-                        MultiRestore ->
-                            ( (bringFocus { model | windows = windows_ } Nothing)
-                            , [ callDock (DockMsg.WindowsChanges windows_) ]
-                            )
-                    )
-            in
-                ( model_
-                , Cmd.none
-                , coreMsg
-                )
+        SwitchContext windowID ->
+            model
+                |> toggleWindowContext windowID
+                |> wrapEmpty
 
-        Close id ->
-            let
-                window =
-                    (getWindow model id)
-
-                windows_ =
-                    closeWindow model id
-
-                model_ =
-                    { model
-                        | windows = windows_
-                        , focus = Nothing
-                        , dragging = Nothing
-                    }
-
-                instanceMsg =
-                    case window of
-                        Just w ->
-                            callInstance
-                                (InstanceBind.close w.window id)
-
-                        Nothing ->
-                            NoOp
-
-                coreMsg =
-                    [ instanceMsg
-                    , callDock (DockMsg.WindowsChanges windows_)
-                    ]
-            in
-                ( model_
-                , Cmd.none
-                , coreMsg
-                )
-
-        Minimize id ->
-            let
-                windows_ =
-                    minimizeWindow model id
-            in
-                ( { model | windows = windows_, focus = Nothing, dragging = Nothing }
-                , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_) ]
-                )
-
-        ToggleMaximize id ->
-            let
-                windows_ =
-                    toggleMaximizeWindow model id
-            in
-                ( { model | windows = windows_, dragging = Nothing }
-                , Cmd.none
-                , []
-                )
-
-        UpdateFocusTo target ->
-            ( (bringFocus model target), Cmd.none, [] )
-
-        SwitchContext id ->
-            let
-                window =
-                    getWindow model id
-
-                model_ =
-                    switchContext model id
-
-                instanceMsg =
-                    case window of
-                        Just w ->
-                            callInstance
-                                ((InstanceBind.context w.window) id)
-
-                        Nothing ->
-                            NoOp
-
-                coreMsg =
-                    [ instanceMsg
-                    ]
-            in
-                ( model_, Cmd.none, coreMsg )
-
-        -- Drag
         OnDragBy delta ->
-            let
-                windows_ =
-                    updateWindowPosition model delta
-            in
-                ( { model | windows = windows_ }, Cmd.none, [] )
+            model
+                |> updateWindowPosition delta
+                |> wrapEmpty
 
         DragMsg dragMsg ->
             let
                 ( model_, cmd ) =
                     Draggable.update dragConfig dragMsg model
-
-                cmd_ =
-                    Cmd.map MsgWM cmd
             in
-                ( model_, cmd_, [] )
+                ( model_, Cmd.map MsgWM cmd, [] )
 
-        StartDragging id ->
-            ( { model | dragging = Just id }
-            , Cmd.none
-            , []
-            )
+        StartDragging windowID ->
+            model
+                |> startDragging windowID
+                |> wrapEmpty
 
         StopDragging ->
-            ( { model | dragging = Nothing }, Cmd.none, [] )
+            model
+                |> stopDragging
+                |> wrapEmpty
 
-        MinimizeAll window ->
+        WindowMsg windowID msg ->
             let
-                windows_ =
-                    (minimizeAllWindows model.windows window)
-            in
-                ( { model | windows = windows_ }
-                , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_) ]
-                )
+                ( model_, cmd, msgs ) =
+                    updateApp core.game windowID msg model
 
-        CloseAll window ->
-            let
-                windows_ =
-                    (closeAllWindows model.windows window)
+                cmd_ =
+                    cmd
+                        |> Cmd.map (WindowMsg windowID)
+                        |> Cmd.map MsgWM
             in
-                ( { model | windows = windows_ }
-                , Cmd.none
-                , [ callDock (DockMsg.WindowsChanges windows_) ]
-                )
+                ( model_, cmd_, msgs )
+
+
+
+-- internals
+
+
+updateApp :
+    GameModel
+    -> WindowID
+    -> Apps.AppMsg
+    -> Model
+    -> ( Model, Cmd Apps.AppMsg, List CoreMsg )
+updateApp game windowID msg model =
+    case getWindow windowID model of
+        Just window ->
+            let
+                ( appModel, cmd, msgs ) =
+                    Apps.update msg game (getAppModel window)
+
+                model_ =
+                    (updateAppModel windowID appModel model)
+            in
+                ( model_, cmd, msgs )
+
+        Nothing ->
+            ( model, Cmd.none, [] )
+
+
+wrapEmpty : Model -> ( Model, Cmd OSMsg, List CoreMsg )
+wrapEmpty model =
+    ( model, Cmd.none, [] )
+
+
+refreshDock : ( Model, Cmd OSMsg, List CoreMsg ) -> ( Model, Cmd OSMsg, List CoreMsg )
+refreshDock ( { windows } as model, cmd, msgs ) =
+    ( model, cmd, callDock (DockMsg.WindowsChanges windows) :: msgs )
 
 
 dragConfig : Draggable.Config WindowID Msg

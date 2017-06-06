@@ -1,15 +1,15 @@
 module Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
-import Apps.Instances.Models exposing (InstanceID)
+import Game.Servers.Filesystem.Models exposing (FileID)
 import Apps.Explorer.Menu.Models exposing (Menu)
 
 
 type MenuAction
-    = DoA
-    | DoB
+    = Dummy
+    | DeleteFile FileID
 
 
 type Msg
     = MenuMsg (ContextMenu.Msg Menu)
-    | MenuClick MenuAction InstanceID
+    | MenuClick MenuAction

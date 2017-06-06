@@ -1,56 +1,29 @@
 module Apps.Subscriptions exposing (subscriptions)
 
-import Core.Models exposing (CoreModel)
-import OS.WindowManager.Models exposing (hasWindowOpen)
-import OS.WindowManager.Windows exposing (GameWindow(..))
-import Apps.Models exposing (AppModel)
+import Game.Models exposing (GameModel)
+import Apps.Models exposing (..)
 import Apps.Messages exposing (AppMsg(..))
-import Apps.Explorer.Subscriptions as Explorer
-import Apps.Browser.Subscriptions as Browser
 import Apps.LogViewer.Subscriptions as LogViewer
+import Apps.TaskManager.Subscriptions as TaskManager
+import Apps.Browser.Subscriptions as Browser
+import Apps.Explorer.Subscriptions as Explorer
 
 
-subscriptions : AppModel -> CoreModel -> Sub AppMsg
-subscriptions model core =
-    let
-        explorer =
-            subOnOpenWindow core
-                ExplorerWindow
-                MsgExplorer
-                (Explorer.subscriptions model.explorer)
+subscriptions : GameModel -> AppModel -> Sub AppMsg
+subscriptions game model =
+    case model of
+        LogViewerModel model ->
+            LogViewer.subscriptions game model
+                |> Sub.map LogViewerMsg
 
-        browser =
-            subOnOpenWindow core
-                BrowserWindow
-                MsgBrowser
-                (Browser.subscriptions model.browser)
+        TaskManagerModel model ->
+            TaskManager.subscriptions game model
+                |> Sub.map TaskManagerMsg
 
-        logViewer =
-            subOnOpenWindow core
-                LogViewerWindow
-                MsgLogViewer
-                (LogViewer.subscriptions model.logViewer)
-    in
-        Sub.batch
-            [ explorer
-            , browser
-            , logViewer
-            ]
+        BrowserModel model ->
+            Browser.subscriptions game model
+                |> Sub.map BrowserMsg
 
-
-subOnOpenWindow :
-    CoreModel
-    -> GameWindow
-    -> (a -> AppMsg)
-    -> Sub a
-    -> Sub AppMsg
-subOnOpenWindow core window map sub =
-    subOnTrue (hasWindowOpen core.os.wm window) map sub
-
-
-subOnTrue : Bool -> (a -> AppMsg) -> Sub a -> Sub AppMsg
-subOnTrue condition map sub =
-    if condition then
-        Sub.map map sub
-    else
-        Sub.none
+        ExplorerModel model ->
+            Explorer.subscriptions game model
+                |> Sub.map ExplorerMsg

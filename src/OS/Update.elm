@@ -17,7 +17,7 @@ update msg model core =
         MsgWM subMsg ->
             let
                 ( wm_, cmd, coreMsg ) =
-                    OS.WindowManager.Update.update subMsg model.wm
+                    OS.WindowManager.Update.update subMsg core model.wm
             in
                 ( { model | wm = wm_ }, cmd, coreMsg )
 
