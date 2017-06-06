@@ -21,7 +21,7 @@ subscriptions model =
             websocket model model.websocket
 
         gameSub =
-            game model.game
+            game model model.game
     in
         Sub.batch
             [ osSub
@@ -48,8 +48,8 @@ websocket core model =
         |> Sub.map MsgWebsocket
 
 
-game : GameModel -> Sub CoreMsg
-game game =
+game : CoreModel -> GameModel -> Sub CoreMsg
+game core game =
     core
         |> Game.subscriptions game
         |> Sub.map MsgGame

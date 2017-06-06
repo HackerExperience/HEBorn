@@ -17,8 +17,6 @@ import Game.Network.Messages as Network
 import Game.Servers.Messages as Server
 import Game.Servers.Filesystem.Messages as Filesystem exposing (Msg)
 import Game.Servers.Processes.Messages as Processes exposing (Msg)
-import OS.SessionManager.WindowManager.Messages as WM
-import OS.Dock.Messages as Dock
 import Game.Servers.Models exposing (ServerID)
 
 

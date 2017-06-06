@@ -87,7 +87,6 @@ setPath explorer path =
 
 changePath :
     FilePath
-    -> GameModelCompat a
     -> Explorer
     -> Servers
     -> Explorer
