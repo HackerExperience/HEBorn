@@ -1,9 +1,7 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
-import Core.Messages exposing (CoreMsg(MsgGame))
-import Game.Messages exposing (GameMsg(MsgServers))
-import Game.Servers.Models exposing (ServerID)
-import Game.Servers.Messages exposing (ServerMsg(MsgProcess))
+import Core.Dispatcher exposing (callProcesses)
+import Core.Messages exposing (CoreMsg)
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
 import Game.Models exposing (GameModel)
 import Apps.TaskManager.Models
@@ -15,13 +13,6 @@ import Apps.TaskManager.Models
         )
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)
 import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
-
-
-msgProcesses : ServerID -> Processes.Msg -> CoreMsg
-msgProcesses serverID msg =
-    MsgProcess serverID msg
-        |> MsgServers
-        |> MsgGame
 
 
 actionHandler :
@@ -40,7 +31,7 @@ actionHandler action ({ app } as model) game =
                     { model | app = app_ }
 
                 gameMsg =
-                    msgProcesses
+                    callProcesses
                         "localhost"
                         (Processes.Pause pID)
             in
@@ -55,7 +46,7 @@ actionHandler action ({ app } as model) game =
                     { model | app = app_ }
 
                 gameMsg =
-                    msgProcesses
+                    callProcesses
                         "localhost"
                         (Processes.Resume pID)
             in
@@ -70,7 +61,7 @@ actionHandler action ({ app } as model) game =
                     { model | app = app_ }
 
                 gameMsg =
-                    msgProcesses
+                    callProcesses
                         "localhost"
                         (Processes.Remove pID)
             in

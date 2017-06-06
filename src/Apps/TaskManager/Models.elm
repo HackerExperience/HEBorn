@@ -13,7 +13,6 @@ import Game.Servers.Models
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Shared as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
-import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 
 
 type alias ResourceUsage =

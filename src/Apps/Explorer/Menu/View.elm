@@ -12,6 +12,7 @@ module Apps.Explorer.Menu.View
 
 import Html exposing (Html)
 import ContextMenu exposing (ContextMenu)
+import Game.Servers.Filesystem.Models exposing (FileID)
 import OS.SessionManager.WindowManager.MenuHandler.View
     exposing
         ( menuForCreator
@@ -41,80 +42,85 @@ menuFor context =
 menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
-        MenuMainDir ->
+        MenuMainDir fileID ->
             [ [ ( ContextMenu.item "Enter", MenuClick Dummy )
-              ]
-            ]
-
-        MenuTreeDir ->
-            [ [ ( ContextMenu.item "Toogle expansion", MenuClick Dummy )
-              ]
-            ]
-
-        MenuMainArchive ->
-            [ [ ( ContextMenu.item "Delete", MenuClick Dummy )
               , ( ContextMenu.item "Rename", MenuClick Dummy )
               , ( ContextMenu.item "Move", MenuClick Dummy )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
               ]
             ]
 
-        MenuTreeArchive ->
-            [ [ ( ContextMenu.item "Delete", MenuClick Dummy )
+        MenuTreeDir fileID ->
+            [ [ ( ContextMenu.item "Toogle expansion", MenuClick Dummy )
               , ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Delete Link", MenuClick Dummy )
               ]
             ]
 
-        MenuExecutable ->
+        MenuMainArchive fileID ->
+            [ [ ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Move", MenuClick Dummy )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+              ]
+            ]
+
+        MenuTreeArchive fileID ->
+            [ [ ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+              ]
+            ]
+
+        MenuExecutable fileID ->
             [ [ ( ContextMenu.item "Run", MenuClick Dummy )
               , ( ContextMenu.item "Research", MenuClick Dummy )
-              , ( ContextMenu.item "Delete", MenuClick Dummy )
               , ( ContextMenu.item "Rename", MenuClick Dummy )
               , ( ContextMenu.item "Move", MenuClick Dummy )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
               ]
             ]
 
-        MenuActiveAction ->
+        MenuActiveAction fileID ->
             [ [ ( ContextMenu.item "Run", MenuClick Dummy )
               ]
             ]
 
-        MenuPassiveAction ->
+        MenuPassiveAction fileID ->
             [ [ ( ContextMenu.item "Start", MenuClick Dummy )
               , ( ContextMenu.item "Stop", MenuClick Dummy )
               ]
             ]
 
 
-menuMainDir : Html.Attribute ExplorerMsg.Msg
-menuMainDir =
-    menuFor MenuMainDir
+menuMainDir : FileID -> Html.Attribute ExplorerMsg.Msg
+menuMainDir fileID =
+    menuFor (MenuMainDir fileID)
 
 
-menuTreeDir : Html.Attribute ExplorerMsg.Msg
-menuTreeDir =
-    menuFor MenuTreeDir
+menuTreeDir : FileID -> Html.Attribute ExplorerMsg.Msg
+menuTreeDir fileID =
+    menuFor (MenuTreeDir fileID)
 
 
-menuMainArchive : Html.Attribute ExplorerMsg.Msg
-menuMainArchive =
-    menuFor MenuMainArchive
+menuMainArchive : FileID -> Html.Attribute ExplorerMsg.Msg
+menuMainArchive fileID =
+    menuFor (MenuMainArchive fileID)
 
 
-menuTreeArchive : Html.Attribute ExplorerMsg.Msg
-menuTreeArchive =
-    menuFor MenuTreeArchive
+menuTreeArchive : FileID -> Html.Attribute ExplorerMsg.Msg
+menuTreeArchive fileID =
+    menuFor (MenuTreeArchive fileID)
 
 
-menuExecutable : Html.Attribute ExplorerMsg.Msg
-menuExecutable =
-    menuFor MenuExecutable
+menuExecutable : FileID -> Html.Attribute ExplorerMsg.Msg
+menuExecutable fileID =
+    menuFor (MenuExecutable fileID)
 
 
-menuPassiveAction : Html.Attribute ExplorerMsg.Msg
-menuPassiveAction =
-    menuFor MenuPassiveAction
+menuPassiveAction : FileID -> Html.Attribute ExplorerMsg.Msg
+menuPassiveAction fileID =
+    menuFor (MenuPassiveAction fileID)
 
 
-menuActiveAction : Html.Attribute ExplorerMsg.Msg
-menuActiveAction =
-    menuFor MenuActiveAction
+menuActiveAction : FileID -> Html.Attribute ExplorerMsg.Msg
+menuActiveAction fileID =
+    menuFor (MenuActiveAction fileID)

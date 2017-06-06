@@ -10,38 +10,31 @@ import Game.Servers.Filesystem.Models
         , StdFileData
         , FileModule
         , FileSize(..)
+        , initialFilesystem
+        , addFile
         )
 
 
 dummyFS : Filesystem
 dummyFS =
-    Dict.fromList
-        [ ( "/"
-          , [ Folder (FolderData "" "bin" "/bin")
-            , Folder (FolderData "" "lib" "/lib")
-            , Folder (FolderData "" "share" "/share")
-            , Folder (FolderData "" "etc" "/etc")
-            , Folder (FolderData "" "home" "/home")
-            ]
-          )
-        , ( "/home"
-          , [ Folder (FolderData "" "me" "/home/me") ]
-          )
-        , ( "/home/me"
-          , [ StdFile
-                (StdFileData
-                    ""
-                    "Test"
-                    "fwl"
-                    (FileVersionNumber 2)
-                    (FileSizeNumber 900000)
-                    "/home/me/Test.fwl"
-                    [ (FileModule "Active" 1) ]
-                )
-            ]
-          )
-        , ( "/favorites"
-          , [ Folder (FolderData "" "User Home" "/home/me")
-            ]
-          )
-        ]
+    let
+        unhackedFS =
+            initialFilesystem
+                |> addFile (Folder (FolderData "001" "home" "/"))
+                |> addFile (Folder (FolderData "002" "root" "/home"))
+                |> addFile
+                    (StdFile
+                        (StdFileData
+                            "003"
+                            "Test"
+                            "fwl"
+                            (FileVersionNumber 2)
+                            (FileSizeNumber 900000)
+                            "/home/root"
+                            [ (FileModule "Active" 1) ]
+                        )
+                    )
+    in
+        { unhackedFS
+            | pathIndex = Dict.insert ("/favorites") [ "002" ] unhackedFS.pathIndex
+        }

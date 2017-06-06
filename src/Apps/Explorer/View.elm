@@ -1,13 +1,12 @@
 module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
-import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (Servers)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
@@ -62,14 +61,14 @@ moduleIcon modType =
             PassiveIcon
 
 
-moduleMenu : KnownModule -> Attribute Msg
-moduleMenu modType =
+moduleMenu : FileID -> KnownModule -> Attribute Msg
+moduleMenu fileID modType =
     case modType of
         Active ->
-            menuActiveAction
+            menuActiveAction fileID
 
         Passive ->
-            menuPassiveAction
+            menuPassiveAction fileID
 
 
 fileVerToText : FileVersion -> Html Msg
@@ -101,13 +100,13 @@ sizeToText size =
         )
 
 
-renderModule : FileModule -> Html Msg
-renderModule act =
+renderModule : FileID -> FileModule -> Html Msg
+renderModule fileID act =
     let
         target =
             moduleInterpret act.name
     in
-        div [ moduleMenu target ]
+        div [ moduleMenu fileID target ]
             [ span [ class [ moduleIcon target ] ] []
             , span [] [ text act.name ]
             , span [] [ moduleVerToText act.version ]
@@ -115,9 +114,9 @@ renderModule act =
             ]
 
 
-renderModuleList : List FileModule -> List (Html Msg)
-renderModuleList acts =
-    List.map (\o -> renderModule o) acts
+renderModuleList : FileID -> List FileModule -> List (Html Msg)
+renderModuleList fileID acts =
+    List.map (renderModule fileID) acts
 
 
 indvidualEntryName : File -> String
@@ -130,29 +129,47 @@ indvidualEntryName file =
             data.name
 
 
-renderTreeEntry : File -> Html Msg
-renderTreeEntry file =
-    div
-        (case file of
+renderTreeEntry : Servers -> File -> Html Msg
+renderTreeEntry servers file =
+    let
+        icon =
+            span [ class [ NavIcon, entryIcon file ] ] []
+
+        label =
+            span [] [ text (indvidualEntryName file) ]
+    in
+        case file of
             Folder data ->
-                [ class [ NavEntry, EntryDir ]
-                , menuTreeArchive
-                , onClick (GoPath (data.path))
-                ]
+                div
+                    [ class [ NavEntry, EntryDir, EntryExpanded ]
+                    , menuTreeDir data.id
+                    , onClick (GoPath (fullFilePath file))
+                    ]
+                    [ div
+                        [ class [ EntryView ] ]
+                        [ icon, label ]
+                    , div
+                        [ class [ EntryChilds ] ]
+                        (renderTreeEntryPath servers (pathInterpret (fullFilePath file)))
+                    ]
 
-            StdFile _ ->
-                [ class [ NavEntry, EntryArchive ]
-                , menuMainArchive
-                ]
-        )
-        [ span [ class [ NavIcon, entryIcon file ] ] []
-        , span [] [ text (indvidualEntryName file) ]
-        ]
+            StdFile prop ->
+                div
+                    [ class [ NavEntry, EntryArchive ]
+                    , menuTreeArchive prop.id
+                    ]
+                    [ icon, label ]
 
 
-renderTreeEntryList : List File -> List (Html Msg)
-renderTreeEntryList list =
-    List.map (\o -> renderTreeEntry o) list
+renderTreeEntryPath : Servers -> SmartPath -> List (Html Msg)
+renderTreeEntryPath servers path =
+    let
+        entries =
+            resolvePath
+                servers
+                (path |> pathToString)
+    in
+        List.map (renderTreeEntry servers) entries
 
 
 renderDetailedEntry : File -> Html Msg
@@ -161,8 +178,8 @@ renderDetailedEntry file =
         Folder data ->
             div
                 [ class [ CntListEntry, EntryDir ]
-                , menuMainDir
-                , onClick (GoPath (data.path))
+                , menuMainDir data.id
+                , onClick (GoPath (fullFilePath file))
                 ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text data.name ]
@@ -171,7 +188,10 @@ renderDetailedEntry file =
         StdFile prop ->
             (case (extensionInterpret prop.extension) of
                 GenericArchive ->
-                    div [ class [ CntListEntry, EntryArchive ], menuMainArchive ]
+                    div
+                        [ class [ CntListEntry, EntryArchive ]
+                        , menuMainArchive prop.id
+                        ]
                         [ span [ class [ entryIcon file ] ] []
                         , span [] [ text (indvidualEntryName file) ]
                         , span [] [ fileVerToText prop.version ]
@@ -181,7 +201,10 @@ renderDetailedEntry file =
                 _ ->
                     let
                         baseEntry =
-                            div [ class [ CntListEntry, EntryArchive ], menuExecutable ]
+                            div
+                                [ class [ CntListEntry, EntryArchive ]
+                                , menuExecutable prop.id
+                                ]
                                 [ span [ class [ entryIcon file ] ] []
                                 , span [] [ text (indvidualEntryName file) ]
                                 , span [] [ fileVerToText prop.version ]
@@ -192,7 +215,7 @@ renderDetailedEntry file =
                             div [ class [ CntListContainer ] ]
                                 [ baseEntry
                                 , div [ class [ CntListChilds ] ]
-                                    (renderModuleList prop.modules)
+                                    (renderModuleList prop.id prop.modules)
                                 ]
                         else
                             baseEntry
@@ -233,17 +256,15 @@ viewUsage min max =
             ]
 
 
-viewExplorerColumn : SmartPath -> GameModel -> Html Msg
-viewExplorerColumn path game =
+viewExplorerColumn : SmartPath -> Servers -> Html Msg
+viewExplorerColumn path servers =
     div
         [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            (renderTreeEntryList
-                (resolvePath
-                    game.servers
-                    (path |> pathToString)
-                )
+            (renderTreeEntryPath
+                servers
+                path
             )
         , (viewUsage 256000000 1024000000)
         ]
@@ -263,8 +284,8 @@ viewLocBar path =
         )
 
 
-viewExplorerMain : SmartPath -> GameModel -> Html Msg
-viewExplorerMain path game =
+viewExplorerMain : SmartPath -> Servers -> Html Msg
+viewExplorerMain path servers =
     div
         [ class
             [ Content ]
@@ -291,7 +312,7 @@ viewExplorerMain path game =
             [ class [ ContentList ] ]
             (renderDetailedEntryList
                 (resolvePath
-                    game.servers
+                    servers
                     (path |> pathToString)
                 )
             )
@@ -308,7 +329,7 @@ view game ({ app } as model) =
             Debug.log "Path: " nowPath
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn (Absolute [ "favorites" ]) game
-            , viewExplorerMain nowPath game
+            [ viewExplorerColumn (Absolute [ "favorites" ]) game.servers
+            , viewExplorerMain nowPath game.servers
             , menuView model
             ]
