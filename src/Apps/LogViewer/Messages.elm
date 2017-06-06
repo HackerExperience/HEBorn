@@ -1,14 +1,14 @@
 module Apps.LogViewer.Messages exposing (Msg(..))
 
-import Game.Servers.Logs.Models as NetModel exposing (LogID)
+import Game.Servers.Logs.Models exposing (ID)
 import Apps.LogViewer.Menu.Messages as Menu
 
 
 type Msg
     = MenuMsg Menu.Msg
-    | ToogleLog NetModel.LogID
+    | ToogleLog ID
     | UpdateFilter String
-    | EnterEditing LogID
-    | UpdateEditing LogID String
-    | ApplyEditing LogID
-    | LeaveEditing LogID
+    | EnterEditing ID
+    | UpdateEditing ID String
+    | ApplyEditing ID
+    | LeaveEditing ID

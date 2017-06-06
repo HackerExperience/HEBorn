@@ -11,7 +11,6 @@ import Game.Servers.Models
         , Servers
         )
 import Game.Servers.Processes.Models as Processes exposing (..)
-import Game.Servers.Processes.Types.Shared as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 
 
