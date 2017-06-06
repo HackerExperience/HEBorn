@@ -324,12 +324,9 @@ view game ({ app } as model) =
     let
         nowPath =
             app.path |> pathInterpret
-
-        x =
-            Debug.log "Path: " nowPath
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn (Absolute [ "favorites" ]) game.servers
+            [ viewExplorerColumn (Relative [ "%favorites" ]) game.servers
             , viewExplorerMain nowPath game.servers
             , menuView model
             ]

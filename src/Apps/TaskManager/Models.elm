@@ -28,12 +28,11 @@ type alias Entries =
 
 
 type alias TaskManager =
-    { localTasks : Processes
+    { limits : ResourceUsage
     , historyCPU : List Float
     , historyMem : List Float
     , historyDown : List Float
     , historyUp : List Float
-    , limits : ResourceUsage
     }
 
 
@@ -73,13 +72,12 @@ increaseHistory new old =
 initialTaskManager : TaskManager
 initialTaskManager =
     TaskManager
-        Processes.initialProcesses
-        []
-        []
-        []
-        []
         --TODO: Remove DUMMY limits
         (ResourceUsage 2100000000 4096000000 1024000 512000)
+        []
+        []
+        []
+        []
 
 
 packUsage : Local.ProcessProp -> ResourceUsage
@@ -151,39 +149,8 @@ updateTasks servers limit old =
             (increaseHistory up old.historyUp)
     in
         TaskManager
-            tasks_
+            limit
             historyCPU
             historyMem
             historyDown
             historyUp
-            limit
-
-
-doJob : (Processes -> Process -> Processes) -> TaskManager -> ProcessID -> TaskManager
-doJob job app pID =
-    let
-        process =
-            getProcessByID pID app.localTasks
-
-        tasks_ =
-            andThenWithDefault
-                (job app.localTasks)
-                app.localTasks
-                process
-    in
-        { app | localTasks = tasks_ }
-
-
-pauseProcess : TaskManager -> ProcessID -> TaskManager
-pauseProcess =
-    doJob Processes.pauseProcess
-
-
-resumeProcess : TaskManager -> ProcessID -> TaskManager
-resumeProcess =
-    doJob Processes.resumeProcess
-
-
-removeProcess : TaskManager -> ProcessID -> TaskManager
-removeProcess =
-    doJob Processes.removeProcess

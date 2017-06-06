@@ -206,9 +206,11 @@ getFilesIdOnPath path filesystem =
 
 getFilesOnPath : FilePath -> Filesystem -> List File
 getFilesOnPath path filesystem =
-    List.map
-        (getFileById filesystem)
-        (getFilesIdOnPath path filesystem)
+    Debug.log "Files: "
+        (List.map
+            (getFileById filesystem)
+            (getFilesIdOnPath path filesystem)
+        )
 
 
 pathExists : FilePath -> Filesystem -> Bool
@@ -241,21 +243,22 @@ removeFile file filesystem =
 
         id =
             getFileId file
-
-        newFilesId =
-            filesystem
-                |> getFilesIdOnPath path
-                |> List.filter (\x -> x /= id)
     in
         case file of
             StdFile _ ->
                 { entries = Dict.remove id filesystem.entries
-                , pathIndex = Dict.insert path newFilesId filesystem.pathIndex
+                , pathIndex =
+                    Dict.insert path
+                        (filesystem
+                            |> getFilesIdOnPath path
+                            |> List.filter (\x -> x /= id)
+                        )
+                        filesystem.pathIndex
                 }
 
             Folder _ ->
                 -- just like rmdir, it can't remove non-empty folders
-                if List.isEmpty newFilesId then
+                if List.isEmpty (getFilesIdOnPath (fullFilePath file) filesystem) then
                     { entries = Dict.remove id filesystem.entries
                     , pathIndex = Dict.remove path filesystem.pathIndex
                     }
@@ -270,7 +273,7 @@ getFileById filesystem fileID =
             x
 
         Nothing ->
-            Folder (FolderData "invalid" "" "")
+            Folder (FolderData "invalid" "%invalid" "%")
 
 
 initialFilesystem : Filesystem
@@ -290,27 +293,32 @@ pathSeparator =
     "/"
 
 
+extensionSeparator : String
+extensionSeparator =
+    "."
+
+
+getFileNameWithExtension : File -> String
+getFileNameWithExtension file =
+    case file of
+        StdFile prop ->
+            -- TODO: add extension with a new function like getFileExtension
+            (getFileName file) ++ extensionSeparator ++ prop.extension
+
+        Folder _ ->
+            getFileName file
+
+
 fullFilePath : File -> String
 fullFilePath file =
     let
         name =
-            getFileName file
+            getFileNameWithExtension file
 
         path =
             getFilePath file
     in
-        case file of
-            StdFile prop ->
-                -- TODO: add extension with a new function like getFileExtension
-                (if (path == "/") then
-                    path ++ name
-                 else
-                    path ++ pathSeparator ++ name
-                )
-                    ++ prop.extension
-
-            Folder _ ->
-                if (path == "/") then
-                    path ++ name
-                else
-                    path ++ pathSeparator ++ name
+        if (path == "/") then
+            path ++ name
+        else
+            path ++ pathSeparator ++ name
