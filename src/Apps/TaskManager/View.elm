@@ -8,6 +8,7 @@ import Html.CssHelpers
 import UI.Widgets exposing (progressBar, lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (getServerByID, getProcesses)
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
@@ -252,8 +253,17 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div [ class [ MainLayout ] ]
-        [ viewTasksTable (Dict.values app.localTasks) game.meta.lastTick
-        , viewTotalResources app
-        , menuView model
-        ]
+    let
+        server =
+            getServerByID game.servers "localhost"
+
+        tasks =
+            Maybe.withDefault
+                initialProcesses
+                (getProcesses server)
+    in
+        div [ class [ MainLayout ] ]
+            [ viewTasksTable (Dict.values tasks) game.meta.lastTick
+            , viewTotalResources app
+            , menuView model
+            ]

@@ -26,15 +26,27 @@ dummyFS =
                     (StdFile
                         (StdFileData
                             "003"
-                            "Test"
+                            "Firewall"
                             "fwl"
                             (FileVersionNumber 2)
                             (FileSizeNumber 900000)
+                            "/home/root"
+                            [ (FileModule "Active" 1), (FileModule "Passive" 2) ]
+                        )
+                    )
+                |> addFile
+                    (StdFile
+                        (StdFileData
+                            "004"
+                            "Virus"
+                            "spam"
+                            (FileVersionNumber 2)
+                            (FileSizeNumber 752000)
                             "/home/root"
                             [ (FileModule "Active" 1) ]
                         )
                     )
     in
         { unhackedFS
-            | pathIndex = Dict.insert ("/favorites") [ "002" ] unhackedFS.pathIndex
+            | pathIndex = Dict.insert ("%favorites") [ "002" ] unhackedFS.pathIndex
         }
