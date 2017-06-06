@@ -18,13 +18,15 @@ module Game.Servers.Filesystem.Models
         , getFilePath
         , getFileName
         , getFileId
+        , getFilesIdOnPath
         , getFilesOnPath
         , pathExists
         , rootPath
-        , listFilesystem
+        , getFileById
         , moveFile
         , setFilePath
         , pathSeparator
+        , fullFilePath
         )
 
 import Dict
@@ -92,8 +94,18 @@ type File
     | Folder FolderData
 
 
+type alias Entries =
+    Dict.Dict FileID File
+
+
+type alias PathIndex =
+    Dict.Dict FilePath (List FileID)
+
+
 type alias Filesystem =
-    Dict.Dict FilePath (List File)
+    { entries : Entries
+    , pathIndex : PathIndex
+    }
 
 
 getFileModules : File -> FileModules
@@ -152,27 +164,39 @@ addFile file filesystem =
         path =
             getFilePath file
 
+        id =
+            getFileId file
+
         files =
-            (getFilesOnPath path filesystem) ++ [ file ]
+            (getFilesIdOnPath path filesystem) ++ [ id ]
     in
         case file of
             StdFile _ ->
                 if pathExists path filesystem then
-                    Dict.insert path files filesystem
+                    { entries = Dict.insert id file filesystem.entries
+                    , pathIndex = Dict.insert path files filesystem.pathIndex
+                    }
                 else
                     filesystem
 
             -- when adding a new folder we also need to insert a new
             -- path to hold it's files
             Folder _ ->
-                filesystem
-                    |> Dict.insert path files
-                    |> Dict.insert (fullFilePath file) []
+                let
+                    pathIndex =
+                        filesystem.pathIndex
+                            |> Dict.insert path files
+                            |> Dict.insert (fullFilePath file) []
+
+                    entries =
+                        Dict.insert id file filesystem.entries
+                in
+                    Filesystem entries pathIndex
 
 
-getFilesOnPath : FilePath -> Filesystem -> List File
-getFilesOnPath path filesystem =
-    case Dict.get path filesystem of
+getFilesIdOnPath : FilePath -> Filesystem -> List FileID
+getFilesIdOnPath path filesystem =
+    case Dict.get path filesystem.pathIndex of
         Just files ->
             files
 
@@ -180,9 +204,16 @@ getFilesOnPath path filesystem =
             []
 
 
+getFilesOnPath : FilePath -> Filesystem -> List File
+getFilesOnPath path filesystem =
+    List.map
+        (getFileById filesystem)
+        (getFilesIdOnPath path filesystem)
+
+
 pathExists : FilePath -> Filesystem -> Bool
 pathExists path filesystem =
-    case Dict.get path filesystem of
+    case Dict.get path filesystem.pathIndex of
         Just _ ->
             True
 
@@ -211,31 +242,42 @@ removeFile file filesystem =
         id =
             getFileId file
 
-        newFiles =
+        newFilesId =
             filesystem
-                |> getFilesOnPath path
-                |> List.filter (\x -> (getFileId x) /= id)
+                |> getFilesIdOnPath path
+                |> List.filter (\x -> x /= id)
     in
         case file of
             StdFile _ ->
-                Dict.insert path newFiles filesystem
+                { entries = Dict.remove id filesystem.entries
+                , pathIndex = Dict.insert path newFilesId filesystem.pathIndex
+                }
 
             Folder _ ->
                 -- just like rmdir, it can't remove non-empty folders
-                if List.isEmpty newFiles then
-                    Dict.remove path filesystem
+                if List.isEmpty newFilesId then
+                    { entries = Dict.remove id filesystem.entries
+                    , pathIndex = Dict.remove path filesystem.pathIndex
+                    }
                 else
                     filesystem
 
 
-listFilesystem : Filesystem -> String
-listFilesystem filesystem =
-    toString filesystem
+getFileById : Filesystem -> FileID -> File
+getFileById filesystem fileID =
+    case (Dict.get fileID filesystem.entries) of
+        Just x ->
+            x
+
+        Nothing ->
+            Folder (FolderData "invalid" "" "")
 
 
 initialFilesystem : Filesystem
 initialFilesystem =
-    Dict.empty
+    Filesystem
+        (Dict.fromList [ ( "root", Folder (FolderData "root" "/" ".") ) ])
+        (Dict.fromList [ ( "/", [] ) ])
 
 
 rootPath : FilePath
@@ -258,9 +300,17 @@ fullFilePath file =
             getFilePath file
     in
         case file of
-            StdFile _ ->
+            StdFile prop ->
                 -- TODO: add extension with a new function like getFileExtension
-                path ++ pathSeparator ++ name
+                (if (path == "/") then
+                    path ++ name
+                 else
+                    path ++ pathSeparator ++ name
+                )
+                    ++ prop.extension
 
             Folder _ ->
-                path ++ pathSeparator ++ name
+                if (path == "/") then
+                    path ++ name
+                else
+                    path ++ pathSeparator ++ name

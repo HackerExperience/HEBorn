@@ -1,14 +1,13 @@
 module Apps.TaskManager.Update exposing (update)
 
 import Dict
+import Time exposing (Time)
 import Utils exposing (andThenWithDefault)
-import Core.Messages exposing (CoreMsg(MsgGame))
+import Core.Dispatcher exposing (callProcesses)
+import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(MsgServers))
-import Game.Servers.Models exposing (ServerID)
-import Game.Servers.Messages exposing (ServerMsg(MsgProcess))
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
-import Game.Servers.Processes.Models exposing (ProcessProp(LocalProcess))
+import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
 import Apps.TaskManager.Models
     exposing
@@ -22,13 +21,7 @@ import Apps.TaskManager.Menu.Update
 import Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 
-msgProcesses : ServerID -> Processes.Msg -> CoreMsg
-msgProcesses serverID msg =
-    MsgProcess serverID msg
-        |> MsgServers
-        |> MsgGame
-
-
+processComplete : Processes -> Time -> List CoreMsg
 processComplete tasks now =
     List.filterMap
         (\process ->
@@ -38,7 +31,7 @@ processComplete tasks now =
                         (prop.state == StateRunning)
                             && (andThenWithDefault (\eta -> now > (Debug.log "ETA: " eta)) False prop.eta)
                     then
-                        Just (msgProcesses "localhost" (Processes.Complete process.id))
+                        Just (callProcesses "localhost" (Processes.Complete process.id))
                     else
                         Nothing
 

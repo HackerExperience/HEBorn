@@ -4,13 +4,11 @@ import Dict
 import Time exposing (Time)
 import Utils exposing (andThenWithDefault)
 import Html exposing (..)
-import Html.Attributes exposing (style)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar, lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
 import Game.Servers.Processes.Models as Processes exposing (..)
-import Game.Servers.Processes.Types.Shared as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 import Apps.TaskManager.Messages exposing (Msg(..))
