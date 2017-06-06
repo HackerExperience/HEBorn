@@ -6,6 +6,7 @@ import Utils exposing (andThenWithDefault)
 import Core.Dispatcher exposing (callProcesses)
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (getServerByID, getProcesses)
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
 import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
@@ -68,7 +69,18 @@ update msg game ({ app } as model) =
                         app.limits
                         app
 
+                server =
+                    getServerByID game.servers "localhost"
+
+                tasks =
+                    getProcesses server
+
                 completeMsgs =
-                    processComplete app.localTasks now
+                    case tasks of
+                        Just tasks ->
+                            processComplete tasks now
+
+                        Nothing ->
+                            []
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )
