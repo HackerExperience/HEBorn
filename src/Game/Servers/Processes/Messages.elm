@@ -1,5 +1,10 @@
-module Game.Servers.Processes.Messages exposing (ProcessMsg(..))
+module Game.Servers.Processes.Messages exposing (Msg(..))
+
+import Game.Servers.Processes.Types.Shared exposing (ProcessID)
 
 
-type ProcessMsg
-    = ToDo
+type Msg
+    = Pause ProcessID
+    | Resume ProcessID
+    | Complete ProcessID
+    | Remove ProcessID
