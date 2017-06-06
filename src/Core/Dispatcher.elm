@@ -14,7 +14,7 @@ import OS.Messages exposing (OSMsg(..))
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
-import Game.Servers.Messages as Server
+import Game.Servers.Messages as Serve
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Models exposing (ServerID)
