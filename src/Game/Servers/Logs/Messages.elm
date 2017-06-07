@@ -1,7 +1,7 @@
-module Game.Servers.Logs.Messages exposing (LogMsg(..))
+module Game.Servers.Logs.Messages exposing (Msg(..))
 
-import Game.Servers.Logs.Models exposing (Data)
+import Game.Servers.Logs.Models exposing (ID, StdData)
 
 
-type LogMsg
-    = UpdateLogs Data
+type Msg
+    = UpdateContent ID String

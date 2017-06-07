@@ -14,7 +14,7 @@ type alias RawContent =
     String
 
 
-type alias Data =
+type alias StdData =
     { id : ID
     , status : Status
     , timestamp : Time
@@ -25,7 +25,7 @@ type alias Data =
 
 
 type Log
-    = StdLog Data
+    = StdLog StdData
     | NoLog
 
 
@@ -171,3 +171,24 @@ interpretRawContent src =
 
             _ ->
                 Invalid src
+
+
+updateContent : Logs -> ID -> RawContent -> Logs
+updateContent model logId newRaw =
+    let
+        oldLog =
+            Dict.get logId model
+
+        newLog =
+            case oldLog of
+                Just (StdLog oldLogData) ->
+                    StdLog
+                        { oldLogData
+                            | raw = newRaw
+                            , smart = newRaw |> interpretRawContent
+                        }
+
+                _ ->
+                    NoLog
+    in
+        Dict.insert logId newLog model

@@ -2,10 +2,17 @@ module Apps.LogViewer.Models exposing (..)
 
 import Dict
 import Utils exposing (andThenWithDefault)
-import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
+import Game.Servers.Models as Servers
+    exposing
+        ( ServerID
+        , Servers
+        , Server(..)
+        , getServerByID
+        , localhostServerID
+        , getLogs
+        )
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
-import Date exposing (Date, fromTime)
 
 
 type alias LogViewer =
@@ -81,23 +88,133 @@ initialLogViewer =
     }
 
 
-updateFilter : LogViewer -> String -> Logs -> LogViewer
-updateFilter app newFilter =
-    updateFilterCache { app | filtering = newFilter }
+catchDataWhenFiltering : List ID -> Log -> Maybe StdData
+catchDataWhenFiltering filterCache log =
+    case log of
+        StdLog logData ->
+            if (List.member logData.id filterCache) then
+                Just logData
+            else
+                Nothing
+
+        NoLog ->
+            Nothing
 
 
-updateFilterCache : LogViewer -> Logs -> LogViewer
-updateFilterCache app input =
+catchData : Log -> Maybe StdData
+catchData log =
+    case log of
+        StdLog logData ->
+            Just logData
+
+        NoLog ->
+            Nothing
+
+
+applyFilter : LogViewer -> Logs -> List StdData
+applyFilter app logs =
+    logs
+        |> Dict.values
+        |> List.filterMap
+            (if ((String.length app.filtering) > 0) then
+                catchDataWhenFiltering app.filterCache
+             else
+                catchData
+            )
+
+
+getLogs : LogViewer -> Servers -> Logs
+getLogs app servers =
+    let
+        server =
+            getServerByID servers "localhost"
+    in
+        Maybe.withDefault
+            initialLogs
+            (Servers.getLogs server)
+
+
+enterEditing : Servers -> Model -> ID -> Model
+enterEditing servers ({ app } as model) logId =
+    let
+        logs =
+            getLogs app servers
+
+        log =
+            Dict.get logId logs
+
+        app_ =
+            (case log of
+                Just (StdLog log) ->
+                    Just (updateEditing app log.id log.raw)
+
+                _ ->
+                    Nothing
+            )
+    in
+        andThenWithDefault
+            (\v -> { model | app = v })
+            model
+            app_
+
+
+updateEditing : LogViewer -> ID -> String -> LogViewer
+updateEditing app logId value =
+    let
+        editing_ =
+            Dict.insert logId value app.editing
+    in
+        { app | editing = editing_ }
+
+
+toggleExpand : LogViewer -> ID -> LogViewer
+toggleExpand app logId =
     { app
-        | filterCache =
-            List.filterMap getID
-                (List.filter
-                    (\log ->
-                        andThenWithDefault
-                            (String.contains app.filtering)
-                            False
-                            (getRawContent log)
-                    )
-                    (Dict.values input)
-                )
+        | expanded =
+            if (List.member logId app.expanded) then
+                List.filter ((/=) logId) app.expanded
+            else
+                logId :: app.expanded
     }
+
+
+leaveEditing : LogViewer -> ID -> LogViewer
+leaveEditing app logId =
+    let
+        editing_ =
+            Dict.filter (\k _ -> k /= logId) app.editing
+    in
+        { app | editing = editing_ }
+
+
+getEdit : LogViewer -> ID -> Maybe String
+getEdit app logId =
+    Dict.get logId app.editing
+
+
+logFilterMapFun : String -> Log -> Maybe ID
+logFilterMapFun filter log =
+    case log of
+        NoLog ->
+            Nothing
+
+        StdLog data ->
+            if (String.contains filter data.raw) then
+                Just data.id
+            else
+                Nothing
+
+
+updateFilter : LogViewer -> Servers -> String -> LogViewer
+updateFilter app servers newFilter =
+    let
+        newFilterCache =
+            getLogs app servers
+                |> Dict.values
+                |> List.filterMap
+                    (logFilterMapFun newFilter)
+    in
+        { app
+            | filtering = newFilter
+            , filterCache = newFilterCache
+        }

@@ -1,32 +1,34 @@
 module Apps.LogViewer.View exposing (view)
 
 import Dict
+import Date exposing (fromTime)
+import Date.Format as DateFormat exposing (format)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Css exposing (asPairs)
 import Css.Common exposing (elasticClass)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
+import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
 import Apps.LogViewer.Style exposing (Classes(..))
-import Date.Format as DateFormat exposing (format)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "logvw"
 
 
-styles : List Css.Mixin -> Attribute Msg
-styles =
-    Css.asPairs >> style
+isEntryExpanded : LogViewer -> StdData -> Bool
+isEntryExpanded app log =
+    List.member log.id app.expanded
 
 
-
--- VIEW WRAPPER
+isEntryEditing : LogViewer -> StdData -> Bool
+isEntryEditing app log =
+    Dict.member log.id app.editing
 
 
 renderAddr : IP -> List (Html Msg)
@@ -62,7 +64,7 @@ renderFile fileName =
     [ span [] [ text fileName ] ]
 
 
-renderButton : LogID -> Classes -> List (Html Msg)
+renderButton : Logs.ID -> Classes -> List (Html Msg)
 renderButton logID btn =
     [ text " "
     , span
@@ -85,7 +87,7 @@ renderButton logID btn =
     ]
 
 
-renderButtons : LogID -> List Classes -> List (Html Msg)
+renderButtons : Logs.ID -> List Classes -> List (Html Msg)
 renderButtons logID btns =
     btns
         |> List.map (renderButton logID)
@@ -109,22 +111,22 @@ renderFlags =
         >> Maybe.withDefault []
 
 
-renderMsg : LogEventMsg -> Html Msg
+renderMsg : SmartContent -> Html Msg
 renderMsg msg =
     div [ class [ EData ] ]
         (case msg of
-            LogIn addr user ->
+            LoginLocal addr user ->
                 (renderAddr addr)
                     ++ [ span [] [ text " logged in as " ] ]
                     ++ (renderUser user)
 
-            LogInto dest ->
+            LoginRemote dest ->
                 [ span [] [ text "Logged into " ] ]
                     ++ (renderAddr dest)
 
             Connection actor src dest ->
                 (renderAddr actor)
-                    ++ [ span [] [ text "bounced connection from " ] ]
+                    ++ [ span [] [ text " bounced connection from " ] ]
                     ++ (renderAddr src)
                     ++ [ span [] [ text " to " ] ]
                     ++ (renderAddr dest)
@@ -148,7 +150,7 @@ renderMsg msg =
         )
 
 
-renderMiniMsg : LogEventMsg -> Html Msg
+renderMiniMsg : SmartContent -> Html Msg
 renderMiniMsg msg =
     (case msg of
         Connection actor src dest ->
@@ -167,7 +169,7 @@ renderMiniMsg msg =
     )
 
 
-renderEditing : LogID -> String -> Html Msg
+renderEditing : Logs.ID -> String -> Html Msg
 renderEditing logID src =
     input
         [ class [ EData, BoxifyMe ]
@@ -177,35 +179,34 @@ renderEditing logID src =
         []
 
 
-renderTopActions : LogViewerEntry -> Html Msg
+renderTopActions : StdData -> Html Msg
 renderTopActions entry =
     div [ class [ ETActMini ] ]
         -- TODO: Catch the flags for real
         (renderFlags [ BtnUser, BtnEdit, BtnLock ])
 
 
-renderBottomActions : LogViewerEntry -> Html Msg
-renderBottomActions entry =
+renderBottomActions : LogViewer -> StdData -> Html Msg
+renderBottomActions app entry =
     div [ class [ EAct ] ]
         (renderButtons
-            entry.srcID
-            (case entry.status of
-                Normal True ->
-                    [ BtnLock, BtnView, BtnEdit, BtnDelete ]
+            entry.id
+            (if (isEntryEditing app entry) then
+                [ BtnApply, BtnCancel ]
+             else if (isEntryExpanded app entry) then
+                case entry.status of
+                    StatusNormal ->
+                        [ BtnLock, BtnView, BtnEdit, BtnDelete ]
 
-                Cryptographed True ->
-                    [ BtnView, BtnUnlock ]
-
-                Editing _ ->
-                    [ BtnApply, BtnCancel ]
-
-                _ ->
-                    []
+                    Cryptographed ->
+                        [ BtnView, BtnUnlock ]
+             else
+                []
             )
         )
 
 
-renderEntryToggler : LogID -> Html Msg
+renderEntryToggler : Logs.ID -> Html Msg
 renderEntryToggler logID =
     div
         [ class [ CasedBtnExpand, EToggler ]
@@ -214,85 +215,85 @@ renderEntryToggler logID =
         []
 
 
-renderData : LogViewerEntry -> Html Msg
-renderData entry =
-    case entry.status of
-        Editing x ->
-            renderEditing entry.srcID x
+renderData : LogViewer -> StdData -> Html Msg
+renderData app entry =
+    case (Dict.get entry.id app.editing) of
+        Just x ->
+            renderEditing entry.id x
 
-        _ ->
-            if (isEntryExpanded entry) then
-                renderMsg entry.message
+        Nothing ->
+            if (isEntryExpanded app entry) then
+                renderMsg entry.smart
             else
-                renderMiniMsg entry.message
+                renderMiniMsg entry.smart
 
 
-renderBottom : LogViewerEntry -> Html Msg
-renderBottom entry =
-    case entry.status of
-        Editing _ ->
-            div
-                [ class [ EBottom ] ]
-                [ renderBottomActions entry ]
-
-        _ ->
-            if (isEntryExpanded entry) then
-                div
-                    [ class [ EBottom, EntryExpanded ] ]
-                    [ renderBottomActions entry
-                    , renderEntryToggler entry.srcID
-                    ]
-            else
-                div
-                    [ class [ EBottom ] ]
-                    [ div [ class [ EAct ] ] []
-                    , renderEntryToggler entry.srcID
-                    ]
+renderBottom : LogViewer -> StdData -> Html Msg
+renderBottom app entry =
+    if (isEntryEditing app entry) then
+        div
+            [ class [ EBottom ] ]
+            [ renderBottomActions app entry ]
+    else if (isEntryExpanded app entry) then
+        div
+            [ class [ EBottom, EntryExpanded ] ]
+            [ renderBottomActions app entry
+            , renderEntryToggler entry.id
+            ]
+    else
+        div
+            [ class [ EBottom ] ]
+            [ div [ class [ EAct ] ] []
+            , renderEntryToggler entry.id
+            ]
 
 
-menuInclude : LogViewerEntry -> List (Attribute Msg)
-menuInclude entry =
-    case entry.status of
-        Normal _ ->
-            [ menuNormalEntry entry.srcID ]
+menuInclude : LogViewer -> StdData -> List (Attribute Msg)
+menuInclude app entry =
+    if (isEntryEditing app entry) then
+        [ menuEditingEntry entry.id ]
+    else
+        case entry.status of
+            StatusNormal ->
+                [ menuNormalEntry entry.id ]
 
-        Editing _ ->
-            [ menuEditingEntry entry.srcID ]
-
-        _ ->
-            []
+            _ ->
+                []
 
 
-renderEntry : LogViewerEntry -> Html Msg
-renderEntry entry =
+getLogDateString : StdData -> String
+getLogDateString log =
+    DateFormat.format
+        "%d/%m/%Y - %H:%M:%S"
+        (Date.fromTime log.timestamp)
+
+
+renderEntry : LogViewer -> StdData -> Html Msg
+renderEntry app entry =
     div
         ([ class
-            (if (isEntryExpanded entry) then
+            (if (isEntryExpanded app entry) then
                 [ Entry, EntryExpanded ]
              else
                 [ Entry ]
             )
          ]
-            ++ (menuInclude entry)
+            ++ (menuInclude app entry)
         )
         ([ div [ class [ ETop ] ]
-            [ div [] [ text (DateFormat.format "%d/%m/%Y - %H:%M:%S" entry.timestamp) ]
+            [ div [] [ entry |> getLogDateString |> text ]
             , div [ elasticClass ] []
             , renderTopActions entry
             ]
-         , renderData entry
-         , renderBottom entry
+         , renderData app entry
+         , renderBottom app entry
          ]
         )
 
 
-renderEntryList : List LogViewerEntry -> List (Html Msg)
-renderEntryList =
-    List.map renderEntry
-
-
-
--- END OF THAT
+renderEntryList : LogViewer -> List StdData -> List (Html Msg)
+renderEntryList app =
+    List.map (renderEntry app)
 
 
 view : GameModel -> Model -> Html Msg
@@ -320,10 +321,8 @@ view game ({ app } as model) =
                 ]
             ]
          ]
-            ++ (app.entries
-                    |> Dict.filter
-                        (\k v -> String.contains app.filtering v.src)
-                    |> Dict.values
-                    |> renderEntryList
+            ++ (getLogs app game.servers
+                    |> applyFilter app
+                    |> renderEntryList app
                )
         )
