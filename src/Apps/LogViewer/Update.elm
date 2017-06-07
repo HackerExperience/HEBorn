@@ -1,23 +1,17 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
+import Core.Dispatcher exposing (callLogs)
 import Game.Models exposing (GameModel)
-import Apps.LogViewer.Models
-    exposing
-        ( Model
-        , entryToggle
-        , entryEnterEditing
-        , entryApplyEditing
-        , entryLeaveEditing
-        , entryUpdateEditing
-        )
-import Apps.LogViewer.Messages exposing (Msg(..))
+import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Apps.LogViewer.Models exposing (..)
+import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as MsgMenu
 import Apps.LogViewer.Menu.Update
 import Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 
-update : Msg -> GameModel -> Model -> ( Model, Cmd Msg, List CoreMsg )
+update : LogViewer.Msg -> GameModel -> Model -> ( Model, Cmd LogViewer.Msg, List CoreMsg )
 update msg game ({ app } as model) =
     case msg of
         -- -- Context
@@ -35,59 +29,58 @@ update msg game ({ app } as model) =
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
         -- -- Real acts
-        ToogleLog logID ->
+        ToogleLog logId ->
             let
-                entries_ =
-                    entryToggle logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    toggleExpand app logId
             in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, [] )
 
         UpdateFilter filter ->
             let
-                model_ =
-                    { model | app = { app | filtering = filter } }
+                app_ =
+                    updateFilter app game.servers filter
             in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, [] )
 
-        EnterEditing logID ->
+        EnterEditing logId ->
+            ( enterEditing game.servers model logId
+            , Cmd.none
+            , []
+            )
+
+        UpdateEditing logId input ->
             let
-                entries_ =
-                    entryEnterEditing logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    updateEditing app logId input
             in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, [] )
 
-        UpdateEditing logID input ->
+        LeaveEditing logId ->
             let
-                entries_ =
-                    entryUpdateEditing input logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    leaveEditing app logId
             in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, [] )
 
-        LeaveEditing logID ->
+        ApplyEditing logId ->
             let
-                entries_ =
-                    entryLeaveEditing logID app.entries
+                edited =
+                    getEdit app logId
 
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    leaveEditing app logId
+
+                gameMsg =
+                    (case edited of
+                        Just edited ->
+                            [ callLogs
+                                "localhost"
+                                (Logs.UpdateContent logId edited)
+                            ]
+
+                        Nothing ->
+                            []
+                    )
             in
-                ( model_, Cmd.none, [] )
-
-        ApplyEditing logID ->
-            let
-                entries_ =
-                    entryApplyEditing logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
-            in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, gameMsg )

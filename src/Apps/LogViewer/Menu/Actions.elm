@@ -1,16 +1,11 @@
 module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 import Core.Messages exposing (CoreMsg)
+import Core.Dispatcher exposing (callLogs)
 import Game.Models exposing (GameModel)
-import Apps.LogViewer.Models
-    exposing
-        ( Model
-        , entryEnterEditing
-        , entryApplyEditing
-        , entryLeaveEditing
-        , entryUpdateEditing
-        )
-import Apps.LogViewer.Messages exposing (Msg)
+import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Apps.LogViewer.Models exposing (..)
+import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
@@ -18,14 +13,40 @@ actionHandler :
     MenuAction
     -> Model
     -> GameModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( Model, Cmd LogViewer.Msg, List CoreMsg )
 actionHandler action ({ app } as model) game =
     case action of
-        NormalEntryEdit logID ->
-            ( model, Cmd.none, [] )
+        NormalEntryEdit logId ->
+            ( enterEditing game.servers model logId
+            , Cmd.none
+            , []
+            )
 
-        EdittingEntryApply logID ->
-            ( model, Cmd.none, [] )
+        EdittingEntryApply logId ->
+            let
+                edited =
+                    getEdit app logId
 
-        EdittingEntryCancel logID ->
-            ( model, Cmd.none, [] )
+                app_ =
+                    leaveEditing app logId
+
+                gameMsg =
+                    (case edited of
+                        Just edited ->
+                            [ callLogs
+                                "localhost"
+                                (Logs.UpdateContent logId edited)
+                            ]
+
+                        Nothing ->
+                            []
+                    )
+            in
+                ( { model | app = app_ }, Cmd.none, gameMsg )
+
+        EdittingEntryCancel logId ->
+            let
+                app_ =
+                    leaveEditing app logId
+            in
+                ( { model | app = app_ }, Cmd.none, [] )
