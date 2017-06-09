@@ -42,6 +42,9 @@ update msg model game =
         Request data ->
             response (handler data) model game
 
+        _ ->
+            ( model, Cmd.none, [] )
+
 
 response :
     Response

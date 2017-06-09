@@ -66,3 +66,6 @@ update msg model game =
 
                 NoServer ->
                     ( model, Cmd.none, [] )
+
+        _ ->
+            ( model, Cmd.none, [] )

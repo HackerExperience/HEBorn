@@ -4,6 +4,7 @@ module Game.Account.Messages
         , RequestMsg(..)
         )
 
+import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 
 
@@ -11,6 +12,7 @@ type AccountMsg
     = Login String String
     | Logout
     | Request RequestMsg
+    | Event Events.Response
 
 
 type RequestMsg

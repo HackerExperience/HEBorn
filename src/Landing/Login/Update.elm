@@ -3,6 +3,7 @@ module Landing.Login.Update exposing (..)
 import Landing.Login.Models exposing (Model)
 import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Requests exposing (..)
+import Driver.Websocket.Channels exposing (..)
 import Core.Messages exposing (CoreMsg(MsgWebsocket))
 import Core.Models exposing (CoreModel)
 import Core.Dispatcher exposing (callAccount)
@@ -54,11 +55,11 @@ response response model core =
                 msgs =
                     [ callAccount (Login token id)
                     , MsgWebsocket
-                        (Ws.UpdateSocketParams ( token, id ))
+                        (Ws.UpdateSocket token)
                     , MsgWebsocket
-                        (Ws.JoinChannel ( "account:" ++ id, "notification" ))
+                        (Ws.JoinChannel AccountChannel (Just id))
                     , MsgWebsocket
-                        (Ws.JoinChannel ( "requests", "requests" ))
+                        (Ws.JoinChannel RequestsChannel Nothing)
                     ]
             in
                 ( model_, Cmd.none, msgs )

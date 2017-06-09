@@ -6,27 +6,21 @@ import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
 import OS.Update as OS
 import Game.Update
+import Game.Messages as Game
 import Landing.Update
 import Driver.Websocket.Update
+import Driver.Websocket.Messages as Websocket
 
 
 update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
 update msg model =
     case (onDebug model received msg) of
-        MsgGame subMsg ->
-            let
-                ( game, cmd, msgs ) =
-                    Game.Update.update
-                        subMsg
-                        model.game
+        MsgGame msg ->
+            updateGame msg model
 
-                model_ =
-                    { model | game = game }
-
-                cmd_ =
-                    Cmd.map MsgGame cmd
-            in
-                route model_ cmd_ msgs
+        MsgWebsocket (Websocket.Broadcast event) ->
+            -- special trap to route broadcasts to Game
+            updateGame (Game.Event event) model
 
         MsgOS msg ->
             let
@@ -80,6 +74,21 @@ update msg model =
 
 
 -- internals
+
+
+updateGame : Game.GameMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
+updateGame msg model =
+    let
+        ( game, cmd, msgs ) =
+            Game.Update.update msg model.game
+
+        model_ =
+            { model | game = game }
+
+        cmd_ =
+            Cmd.map MsgGame cmd
+    in
+        route model_ cmd_ msgs
 
 
 isDev : CoreModel -> Bool
