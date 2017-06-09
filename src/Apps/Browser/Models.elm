@@ -1,19 +1,10 @@
 module Apps.Browser.Models exposing (..)
 
+import Html exposing (Html)
 import Utils exposing (andThenWithDefault)
+import Apps.Browser.Messages exposing (Msg)
 import Apps.Browser.Menu.Models as Menu
-
-
-type alias PageURL =
-    String
-
-
-type alias PageTitle =
-    String
-
-
-type alias PageContent =
-    String
+import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent, getPageInitialContent)
 
 
 type alias BrowserPage =
@@ -60,7 +51,7 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault (\posfix -> name ++ posfix) name posfix
+        andThenWithDefault ((++) name) name posfix
 
 
 icon : String
@@ -73,7 +64,7 @@ initialBrowser =
     { addressBar = "about:blank"
 
     -- FIXME: update the content
-    , page = { url = "about:blank", title = "Blank", content = "" }
+    , page = { url = "about:blank", title = "Blank", content = [] }
     , previousPages = []
     , nextPages = []
     }
@@ -202,3 +193,12 @@ reorderHistory getFromList getToList browser =
 
             Nothing ->
                 Nothing
+
+
+enterAddress : Browser -> Browser
+enterAddress app =
+    let
+        url_ =
+            app.addressBar
+    in
+        gotoPage { url = url_, content = getPageInitialContent url_, title = "" } app

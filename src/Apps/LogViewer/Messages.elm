@@ -6,8 +6,8 @@ import Apps.LogViewer.Menu.Messages as Menu
 
 type Msg
     = MenuMsg Menu.Msg
-    | ToogleLog ID
-    | UpdateFilter String
+    | ToogleExpand ID
+    | UpdateTextFilter String
     | EnterEditing ID
     | UpdateEditing ID String
     | ApplyEditing ID

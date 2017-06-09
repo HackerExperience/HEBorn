@@ -54,7 +54,7 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault (\posfix -> name ++ posfix) name posfix
+        andThenWithDefault ((++) name) name posfix
 
 
 icon : String

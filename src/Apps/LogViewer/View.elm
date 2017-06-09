@@ -210,7 +210,7 @@ renderEntryToggler : Logs.ID -> Html Msg
 renderEntryToggler logID =
     div
         [ class [ CasedBtnExpand, EToggler ]
-        , onClick (ToogleLog logID)
+        , onClick (ToogleExpand logID)
         ]
         []
 
@@ -313,8 +313,8 @@ view game ({ app } as model) =
                 , div [ class [ ETFBar ] ]
                     [ input
                         [ placeholder "Search..."
-                        , value app.filtering
-                        , onInput UpdateFilter
+                        , value app.filterText
+                        , onInput UpdateTextFilter
                         ]
                         []
                     ]

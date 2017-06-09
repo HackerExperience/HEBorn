@@ -29,17 +29,17 @@ update msg game ({ app } as model) =
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
         -- -- Real acts
-        ToogleLog logId ->
+        ToogleExpand logId ->
             let
                 app_ =
                     toggleExpand app logId
             in
                 ( { model | app = app_ }, Cmd.none, [] )
 
-        UpdateFilter filter ->
+        UpdateTextFilter filter ->
             let
                 app_ =
-                    updateFilter app game.servers filter
+                    updateTextFilter app game.servers filter
             in
                 ( { model | app = app_ }, Cmd.none, [] )
 

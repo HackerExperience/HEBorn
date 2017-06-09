@@ -8,10 +8,12 @@ import Apps.Browser.Models
         , gotoPage
         , gotoPreviousPage
         , gotoNextPage
+        , enterAddress
         )
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Messages as MsgMenu
 import Apps.Browser.Menu.Update
+import Apps.Browser.Menu.Actions exposing (actionHandler)
 import Apps.Browser.Menu.Actions exposing (actionHandler)
 
 
@@ -40,11 +42,7 @@ update msg game ({ app } as model) =
                 ( { model | app = app_ }, Cmd.none, [] )
 
         AddressEnter ->
-            let
-                app_ =
-                    gotoPage { url = app.addressBar, content = "", title = "" } app
-            in
-                ( { model | app = app_ }, Cmd.none, [] )
+            ( { model | app = enterAddress app }, Cmd.none, [] )
 
         GoPrevious ->
             let
