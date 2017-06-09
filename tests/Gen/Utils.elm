@@ -5,7 +5,7 @@ import Random.Pcg.Char as RandomChar exposing (english)
 import Random.Pcg.Extra as RandomExtra exposing (rangeLengthList)
 import Random.Pcg.String as RandomString exposing (rangeLengthString)
 import Fuzz exposing (Fuzzer)
-import Random.Pcg as Random exposing (Generator)
+import Random.Pcg as Random exposing (Generator, constant, map, choices)
 
 
 unique : Generator String
@@ -36,3 +36,11 @@ listRange min max =
 percentage : Generator Float
 percentage =
     Random.float 0 1
+
+
+maybe : Generator a -> Generator (Maybe a)
+maybe a =
+    Random.choices
+        [ Random.constant Nothing
+        , Random.map Just a
+        ]

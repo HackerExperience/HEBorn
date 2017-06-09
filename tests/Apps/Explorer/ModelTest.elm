@@ -44,14 +44,9 @@ pathMoveAroundTests =
                 { folder } =
                     valid
 
-                -- this function could be added to the model
-                changeServer =
-                    (\id explorer -> { explorer | serverID = id })
-
                 explorer =
                     initialExplorer
-                        |> changeServer (getServerIDSafe server)
-                        |> changePath (getFilePath folder) game
+                        |> (\app -> changePath (getFilePath folder) app game.servers)
             in
                 folder
                     |> getFilePath
@@ -62,6 +57,6 @@ pathMoveAroundTests =
       <|
         \( { game }, path ) ->
             initialExplorer
-                |> changePath path game
+                |> (\app -> changePath path app game.servers)
                 |> Expect.equal initialExplorer
     ]

@@ -80,18 +80,18 @@ initialTaskManager =
 
 
 packUsage : Local.ProcessProp -> ResourceUsage
-packUsage ({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) =
+packUsage ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) =
     ResourceUsage
         (toFloat cpuUsage)
-        (toFloat memusage)
+        (toFloat memUsage)
         (toFloat downloadUsage)
         (toFloat uploadUsage)
 
 
 taskUsageSum : Local.ProcessProp -> ( Float, Float, Float, Float ) -> ( Float, Float, Float, Float )
-taskUsageSum ({ cpuUsage, memusage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) =
+taskUsageSum ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) =
     ( cpu_ + (toFloat cpuUsage)
-    , mem_ + (toFloat memusage)
+    , mem_ + (toFloat memUsage)
     , down_ + (toFloat downloadUsage)
     , up_ + (toFloat uploadUsage)
     )
