@@ -51,7 +51,7 @@ type alias ProcessProp =
     , networkID : Maybe NetworkID
     , connectionID : Maybe ConnectionID
     , cpuUsage : Int
-    , memusage : Int
+    , memUsage : Int
     , downloadUsage : Int
     , uploadUsage : Int
     }

@@ -44,9 +44,9 @@ processExists id processes =
     Dict.member id processes
 
 
-addProcess : Processes -> Process -> Processes
-addProcess processes process =
-    Dict.insert process.id process processes
+addProcess : Process -> Processes -> Processes
+addProcess process =
+    Dict.insert process.id process
 
 
 removeProcess : Processes -> Process -> Processes

@@ -1,5 +1,6 @@
 module Gen.Logs exposing (..)
 
+import Time exposing (Time)
 import Fuzz exposing (Fuzzer)
 import Random.Pcg
     exposing
@@ -13,8 +14,9 @@ import Random.Pcg
         , int
         , float
         )
+import Random.Pcg.Extra exposing (andMap)
 import Gen.Utils exposing (..)
-import Game.Servers.Logs.Models exposing (..)
+import Game.Servers.Logs.Models as Logs exposing (..)
 
 
 --------------------------------------------------------------------------------
@@ -22,12 +24,12 @@ import Game.Servers.Logs.Models exposing (..)
 --------------------------------------------------------------------------------
 
 
-logID : Fuzzer LogID
+logID : Fuzzer ID
 logID =
     fuzzer genLogID
 
 
-logContent : Fuzzer LogContent
+logContent : Fuzzer RawContent
 logContent =
     fuzzer genLogContent
 
@@ -78,28 +80,34 @@ model =
 --------------------------------------------------------------------------------
 
 
-genLogID : Generator LogID
+genLogID : Generator ID
 genLogID =
     unique
 
 
-genLogContent : Generator LogContent
+genLogContent : Generator RawContent
 genLogContent =
     stringRange 0 32
 
 
-genLogData : Generator LogData
+genLogData : Generator StdData
 genLogData =
-    map3
-        LogData
+    let
+        raw =
+            genLogContent
+    in
         genLogID
-        genLogContent
-        genTimestamp
+            |> map StdData
+            |> andMap genStatus
+            |> andMap genTimestamp
+            |> andMap raw
+            |> andMap (constant (Invalid ""))
+            |> andMap genEvent
 
 
 genLogEntry : Generator Log
 genLogEntry =
-    map LogEntry genLogData
+    map StdLog genLogData
 
 
 genNoLog : Generator Log
@@ -110,6 +118,20 @@ genNoLog =
 genLog : Generator Log
 genLog =
     choices [ genLogEntry, genNoLog ]
+
+
+genStatus : Generator Status
+genStatus =
+    [ StatusNormal, Cryptographed ]
+        |> List.map constant
+        |> choices
+
+
+genEvent : Generator Event
+genEvent =
+    [ NoEvent, EventRecentlyFound, EventRecentlyCreated ]
+        |> List.map constant
+        |> choices
 
 
 genLogList : Generator (List Log)
@@ -124,7 +146,7 @@ genEmptyLogs =
 
 genNonEmptyLogs : Generator Logs
 genNonEmptyLogs =
-    andThen ((List.foldl addLog initialLogs) >> constant) genLogList
+    andThen ((List.foldl Logs.add initialLogs) >> constant) genLogList
 
 
 genLogs : Generator Logs
@@ -137,6 +159,6 @@ genModel =
     genNonEmptyLogs
 
 
-genTimestamp : Generator LogTimestamp
+genTimestamp : Generator Time
 genTimestamp =
     float 1420070400 4102444799
