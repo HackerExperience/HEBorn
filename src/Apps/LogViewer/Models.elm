@@ -15,9 +15,15 @@ import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
 
 
+type Sorting
+    = DefaultSort
+
+
 type alias LogViewer =
-    { filtering : String
+    { filterText : String
+    , filterFlags : List Never
     , filterCache : List ID
+    , sorting : Sorting
     , expanded : List ID
     , editing : Dict.Dict ID String
     }
@@ -38,7 +44,7 @@ title : Model -> String
 title ({ app } as model) =
     let
         filter =
-            app.filtering
+            app.filterText
 
         posfix =
             if (String.length filter) > 12 then
@@ -48,7 +54,7 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault (\posfix -> name ++ posfix) name posfix
+        andThenWithDefault ((++) name) name posfix
 
 
 icon : String
@@ -81,8 +87,10 @@ initialModel =
 
 initialLogViewer : LogViewer
 initialLogViewer =
-    { filtering = ""
+    { filterText = ""
+    , filterFlags = []
     , filterCache = []
+    , sorting = DefaultSort
     , expanded = []
     , editing = Dict.empty
     }
@@ -116,7 +124,7 @@ applyFilter app logs =
     logs
         |> Dict.values
         |> List.filterMap
-            (if ((String.length app.filtering) > 0) then
+            (if ((String.length app.filterText) > 0) then
                 catchDataWhenFiltering app.filterCache
              else
                 catchData
@@ -205,8 +213,8 @@ logFilterMapFun filter log =
                 Nothing
 
 
-updateFilter : LogViewer -> Servers -> String -> LogViewer
-updateFilter app servers newFilter =
+updateTextFilter : LogViewer -> Servers -> String -> LogViewer
+updateTextFilter app servers newFilter =
     let
         newFilterCache =
             getLogs app servers
@@ -215,6 +223,6 @@ updateFilter app servers newFilter =
                     (logFilterMapFun newFilter)
     in
         { app
-            | filtering = newFilter
+            | filterText = newFilter
             , filterCache = newFilterCache
         }
