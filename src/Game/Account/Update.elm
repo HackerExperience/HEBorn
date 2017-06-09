@@ -34,7 +34,7 @@ update msg model game =
                         cmd =
                             logout token game.meta.config
                     in
-                        ( model, cmd, [] )
+                        ( model_, cmd, [] )
 
                 _ ->
                     ( model, Cmd.none, [] )

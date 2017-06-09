@@ -52,7 +52,6 @@ response response model core =
                     }
 
                 msgs =
-                    -- TODO: fix the websocket API
                     [ callAccount (Login token id)
                     , MsgWebsocket
                         (Ws.UpdateSocketParams ( token, id ))
