@@ -1,15 +1,14 @@
 module Landing.Login.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
 import Landing.Login.Models exposing (Model)
 import Landing.Login.Messages exposing (Msg(..))
-import Landing.Login.Requests
-    exposing
-        ( responseHandler
-        , requestLogin
-          -- , requestUsernameExists
-        )
+import Landing.Login.Requests exposing (..)
+import Driver.Websocket.Channels exposing (..)
+import Core.Messages exposing (CoreMsg(MsgWebsocket))
+import Core.Models exposing (CoreModel)
+import Core.Dispatcher exposing (callAccount)
+import Game.Account.Messages exposing (AccountMsg(Login))
+import Driver.Websocket.Messages as Ws
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -18,7 +17,7 @@ update msg model core =
         SubmitLogin ->
             let
                 cmd =
-                    requestLogin model.username model.password
+                    login model.username model.password core.game.meta.config
             in
                 ( model, cmd, [] )
 
@@ -34,11 +33,36 @@ update msg model core =
         ValidatePassword ->
             ( model, Cmd.none, [] )
 
-        Event event ->
-            ( model, Cmd.none, [] )
+        Request data ->
+            response (handler data) model core
 
-        Request _ ->
-            ( model, Cmd.none, [] )
 
-        Response request data ->
-            responseHandler request data model core
+response :
+    Response
+    -> Model
+    -> CoreModel
+    -> ( Model, Cmd Msg, List CoreMsg )
+response response model core =
+    case response of
+        LoginResponse token id ->
+            let
+                model_ =
+                    { model
+                        | username = ""
+                        , password = ""
+                    }
+
+                msgs =
+                    [ callAccount (Login token id)
+                    , MsgWebsocket
+                        (Ws.UpdateSocket token)
+                    , MsgWebsocket
+                        (Ws.JoinChannel AccountChannel (Just id))
+                    , MsgWebsocket
+                        (Ws.JoinChannel RequestsChannel Nothing)
+                    ]
+            in
+                ( model_, Cmd.none, msgs )
+
+        NoOp ->
+            ( model, Cmd.none, [] )

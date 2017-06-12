@@ -1,52 +1,46 @@
-module Game.Account.Requests exposing (..)
-
-import Requests.Models
+module Game.Account.Requests
     exposing
-        ( createRequestData
-        , RequestPayloadArgs(RequestLogoutPayload)
-        , Request
-            ( NewRequest
-            , RequestLogout
-            )
-        , RequestTopic(TopicAccountLogout)
-        , TopicContext
-        , Response(ResponseLogout)
-        , ResponseDecoder
-        , ResponseForLogout(..)
-        )
-import Requests.Update exposing (queueRequest)
-import Game.Messages exposing (GameMsg(Request))
-import Game.Models exposing (GameModel, ResponseType)
-
-
-requestLogout : TopicContext -> String -> Cmd GameMsg
-requestLogout accountId token =
-    queueRequest
-        (Request
-            (NewRequest
-                (createRequestData
-                    RequestLogout
-                    decodeLogout
-                    TopicAccountLogout
-                    accountId
-                    (RequestLogoutPayload
-                        { token = token
-                        }
-                    )
-                )
-            )
+        ( Response(..)
+        , logout
+        , handler
         )
 
+import Core.Config exposing (Config)
+import Game.Account.Messages exposing (..)
+import Requests.Requests exposing (request, report)
+import Requests.Types exposing (Code(..))
+import Requests.Topics exposing (Topic(..))
+import Json.Encode as Encode
 
-decodeLogout : ResponseDecoder
-decodeLogout rawMsg code =
-    case code of
-        _ ->
-            ResponseLogout (ResponseLogoutOk)
+
+type Response
+    = LogoutResponse
 
 
-requestLogoutHandler : ResponseType
-requestLogoutHandler response model =
-    case response of
-        _ ->
-            ( model, Cmd.none, [] )
+logout : String -> Config -> Cmd AccountMsg
+logout token =
+    let
+        payload =
+            Encode.object
+                [ ( "token", Encode.string token ) ]
+    in
+        request AccountLogoutTopic
+            (LogoutRequestMsg >> Request)
+            Nothing
+            payload
+
+
+handler : RequestMsg -> Response
+handler request =
+    case request of
+        LogoutRequestMsg ( code, json ) ->
+            logoutHandler code json
+
+
+
+-- internals
+
+
+logoutHandler : Code -> String -> Response
+logoutHandler code json =
+    LogoutResponse

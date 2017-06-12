@@ -3,61 +3,119 @@ module Game.Update exposing (..)
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
-import Game.Requests exposing (responseHandler)
-import Game.Events exposing (eventHandler)
-import Game.Account.Update
-import Game.Servers.Update
-import Game.Network.Update
-import Game.Meta.Update
+import Game.Account.Update as Account
+import Game.Account.Messages as Account
+import Game.Servers.Update as Servers
+import Game.Servers.Messages as Servers
+import Game.Network.Update as Network
+import Game.Network.Messages as Network
+import Game.Meta.Update as Meta
+import Game.Meta.Messages as Meta
 
 
 update : GameMsg -> GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg )
 update msg model =
     case msg of
-        MsgAccount subMsg ->
-            let
-                ( account_, cmd, coreMsg ) =
-                    Game.Account.Update.update subMsg model.account model
-            in
-                ( { model | account = account_ }, cmd, coreMsg )
+        MsgAccount msg ->
+            account msg model
 
-        MsgServers subMsg ->
-            let
-                ( servers_, cmd, coreMsg ) =
-                    Game.Servers.Update.update subMsg model.servers model
-            in
-                ( { model | servers = servers_ }, cmd, coreMsg )
+        MsgServers msg ->
+            servers msg model
 
-        MsgNetwork subMsg ->
-            let
-                ( network_, cmd, coreMsg ) =
-                    Game.Network.Update.update subMsg model.network model
-            in
-                ( { model | network = network_ }, cmd, coreMsg )
+        MsgNetwork msg ->
+            network msg model
 
-        MsgMeta subMsg ->
-            let
-                ( meta_, cmd, coreMsg ) =
-                    Game.Meta.Update.update subMsg model.meta model
-            in
-                ( { model | meta = meta_ }, cmd, coreMsg )
+        MsgMeta msg ->
+            meta msg model
 
         Event event ->
-            let
-                ( model_, cmd, coreMsg ) =
-                    eventHandler model event
-            in
-                ( model_, cmd, coreMsg )
+            model
+                |> account (Account.Event event)
+                |> andThen (servers (Servers.Event event))
+                |> andThen (network (Network.Event event))
+                |> andThen (meta (Meta.Event event))
 
-        Request _ ->
+        _ ->
             ( model, Cmd.none, [] )
 
-        Response request data ->
-            let
-                ( model_, cmd, coreMsg ) =
-                    responseHandler request data model
-            in
-                ( model_, cmd, coreMsg )
 
-        NoOp ->
-            ( model, Cmd.none, [] )
+
+-- internals
+
+
+account :
+    Account.AccountMsg
+    -> GameModel
+    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+account msg model =
+    let
+        ( account, cmd, msgs ) =
+            Account.update msg model.account model
+
+        model_ =
+            { model | account = account }
+
+        cmd_ =
+            Cmd.map MsgAccount cmd
+    in
+        ( model_, cmd_, msgs )
+
+
+servers :
+    Servers.ServerMsg
+    -> GameModel
+    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+servers msg model =
+    let
+        ( servers, cmd, msgs ) =
+            Servers.update msg model.servers model
+
+        model_ =
+            { model | servers = servers }
+    in
+        ( model_, cmd, msgs )
+
+
+network :
+    Network.NetworkMsg
+    -> GameModel
+    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+network msg model =
+    let
+        ( network, cmd, msgs ) =
+            Network.update msg model.network model
+
+        model_ =
+            { model | network = network }
+    in
+        ( model_, cmd, msgs )
+
+
+meta : Meta.MetaMsg -> GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg )
+meta msg model =
+    let
+        ( meta, cmd, msgs ) =
+            Meta.update msg model.meta model
+
+        model_ =
+            { model | meta = meta }
+    in
+        ( model_, cmd, msgs )
+
+
+andThen :
+    (GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg ))
+    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+andThen func ( model, cmd, msgs ) =
+    let
+        ( model_, cmd1, msgs1 ) =
+            func model
+
+        cmd_ =
+            Cmd.batch [ cmd, cmd1 ]
+
+        msgs_ =
+            msgs1 ++ msgs
+    in
+        ( model_, cmd_, msgs_ )

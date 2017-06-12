@@ -1,45 +1,57 @@
 module Game.Account.Update exposing (..)
 
-import Utils
-import Driver.Websocket.Messages exposing (Msg(UpdateSocketParams, JoinChannel))
-import Core.Messages exposing (CoreMsg(MsgWebsocket))
+import Game.Account.Models exposing (..)
+import Game.Account.Messages exposing (..)
+import Game.Account.Requests exposing (..)
 import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg)
-import Game.Account.Messages exposing (AccountMsg(..))
-import Game.Account.Models exposing (setToken, getToken, AccountModel)
-import Game.Account.Requests exposing (requestLogout)
+import Core.Messages exposing (CoreMsg(MsgWebsocket))
 
 
-update : AccountMsg -> AccountModel -> GameModel -> ( AccountModel, Cmd GameMsg, List CoreMsg )
+update :
+    AccountMsg
+    -> AccountModel
+    -> GameModel
+    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
 update msg model game =
     case msg of
-        Login data ->
+        Login token id ->
             let
-                { token, account_id } =
-                    data
-
-                model_ =
+                model1 =
                     setToken model (Just token)
 
-                coreCmd =
-                    [ MsgWebsocket
-                        (UpdateSocketParams ( token, account_id ))
-                    , MsgWebsocket
-                        (JoinChannel ( "account:" ++ account_id, "notification" ))
-                    , MsgWebsocket
-                        (JoinChannel ( "requests", "requests" ))
-                    ]
+                model_ =
+                    { model1 | id = Just id }
             in
-                ( { model_ | id = Just account_id }, Cmd.none, coreCmd )
+                ( model_, Cmd.none, [] )
 
         Logout ->
-            let
-                cmd =
-                    requestLogout
-                        (Utils.maybeToString model.id)
-                        (Utils.maybeToString (getToken model))
+            case getToken model of
+                Just token ->
+                    let
+                        model_ =
+                            setToken model Nothing
 
-                model_ =
-                    setToken model Nothing
-            in
-                ( model_, cmd, [] )
+                        cmd =
+                            logout token game.meta.config
+                    in
+                        ( model_, cmd, [] )
+
+                _ ->
+                    ( model, Cmd.none, [] )
+
+        Request data ->
+            response (handler data) model game
+
+        _ ->
+            ( model, Cmd.none, [] )
+
+
+response :
+    Response
+    -> AccountModel
+    -> GameModel
+    -> ( AccountModel, Cmd msg, List CoreMsg )
+response response model game =
+    case response of
+        LogoutResponse ->
+            ( model, Cmd.none, [] )

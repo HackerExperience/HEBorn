@@ -10,13 +10,11 @@ module Core.Dispatcher
 import Core.Messages exposing (CoreMsg(MsgGame, MsgOS))
 import Game.Messages exposing (GameMsg(..))
 import OS.Messages exposing (OSMsg(..))
-import Apps.Messages exposing (AppMsg(..))
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
 import Game.Servers.Messages as Server
 import Game.Servers.Filesystem.Messages as Filesystem
-import OS.SessionManager.WindowManager.Messages as WM
 import Game.Servers.Models exposing (ServerID)
 
 

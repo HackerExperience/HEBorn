@@ -1,153 +1,143 @@
 module Core.Update exposing (update)
 
-import Update.Extra as Update
 import Utils
-import Requests.Models exposing (Request(RequestInvalid, NewRequest), getResponseCode)
-import Requests.Update exposing (getRequestData, makeRequest, removeRequestId)
-import Events.Models exposing (Event(EventUnknown))
 import Router.Router exposing (parseLocation)
-import Core.Messages exposing (CoreMsg(..), eventBinds, getRequestMsg)
+import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
-import Core.Components exposing (Component(..))
-import OS.Messages
 import OS.Update as OS
 import Game.Update
-import Game.Messages
-import Landing.Messages
+import Game.Messages as Game
 import Landing.Update
 import Driver.Websocket.Update
-
-
-logMsg : a -> a
-logMsg =
-    Debug.log "Message: "
+import Driver.Websocket.Messages as Websocket
 
 
 update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
 update msg model =
-    case (logMsg msg) of
-        -- Game
-        MsgGame (Game.Messages.Request (NewRequest requestData)) ->
-            makeRequest model requestData ComponentGame
+    case (onDebug model received msg) of
+        MsgGame msg ->
+            updateGame msg model
 
-        MsgGame subMsg ->
-            let
-                ( game_, cmd, coreMsg ) =
-                    Game.Update.update subMsg model.game
-            in
-                ( { model | game = game_ }, Cmd.map MsgGame cmd )
-                    |> Update.addCmd (batchMsgs coreMsg)
-
-        -- OS
-        MsgOS (OS.Messages.Request (NewRequest requestData)) ->
-            makeRequest model requestData ComponentOS
+        MsgWebsocket (Websocket.Broadcast event) ->
+            -- special trap to route broadcasts to Game
+            updateGame (Game.Event event) model
 
         MsgOS msg ->
             let
-                ( os, cmd, coreMsg ) =
+                ( os, cmd, msgs ) =
                     OS.update msg model.game model.os
 
                 model_ =
                     { model | os = os }
+
+                cmd_ =
+                    Cmd.map MsgOS cmd
             in
-                ( model_, Cmd.map MsgOS cmd )
-                    |> Update.addCmd (batchMsgs coreMsg)
+                route model_ cmd_ msgs
 
-        -- Landing
-        MsgLand (Landing.Messages.Request (NewRequest requestData) component) ->
-            makeRequest model requestData component
-
-        MsgLand subMsg ->
+        MsgLand msg ->
             let
-                ( landing_, cmd, coreMsg ) =
-                    Landing.Update.update subMsg model.landing model
-            in
-                ( { model | landing = landing_ }, Cmd.map MsgLand cmd )
-                    |> Update.addCmd (batchMsgs coreMsg)
-
-        -- Channel
-        MsgWebsocket subMsg ->
-            let
-                ( websocket_, cmd, coreMsg ) =
-                    Driver.Websocket.Update.update subMsg model.websocket model
-            in
-                ( { model | websocket = websocket_ }, Cmd.map MsgWebsocket cmd )
-                    |> Update.addCmd (batchMsgs coreMsg)
-
-        -- Router
-        OnLocationChange location ->
-            let
-                newRoute =
-                    parseLocation location
-            in
-                ( { model | route = newRoute }, Cmd.none )
-
-        -- Dispatchers
-        {-
-           DispatchEvent is triggered when the server notifies the client
-           about any event that happened to the player. The event is sent
-           to all components, and it's up to each component to decide what
-           to do with it.
-        -}
-        DispatchEvent EventUnknown ->
-            Debug.log "received event is unknown"
-                ( model, Cmd.none )
-
-        DispatchEvent event ->
-            Debug.log "eventoo"
-                model
-                ! []
-
-        -- |> Update.andThen update (MsgGame (eventBinds.game event))
-        -- |> Update.andThen update (MsgSignUp (eventBinds.signUp event))
-        -- |> Update.andThen update (MsgLogin (eventBinds.login event))
-        -- Responses
-        NewResponse ( requestId, code, body ) ->
-            let
-                requestData =
-                    getRequestData model.requests requestId
-
-                requests_ =
-                    removeRequestId model.requests requestId
+                ( landing, cmd, msgs ) =
+                    Landing.Update.update msg model.landing model
 
                 model_ =
-                    { model | requests = requests_ }
+                    { model | landing = landing }
+
+                cmd_ =
+                    Cmd.map MsgLand cmd
             in
-                update (DispatchResponse requestData ( code, body ))
-                    model_
+                route model_ cmd_ msgs
 
-        {-
-           DispatchResponse is triggered when the client sends a message to
-           the server and the message is answered. It is the classic
-           request-reply model in action. Once the server reply is received,
-           we will dispatch the response to the component that made the
-           request. Notice how this is totally different from DispatchEvent,
-           which will broadcast the message to ALL components.
-        -}
-        DispatchResponse ( _, RequestInvalid, _ ) _ ->
-            Debug.log "received reply never was requested"
-                ( model, Cmd.none )
-
-        DispatchResponse ( component, request, decoder ) ( code, body ) ->
+        MsgWebsocket subMsg ->
             let
-                response =
-                    decoder body code
+                ( websocket_, cmd, msgs ) =
+                    Driver.Websocket.Update.update subMsg model.websocket model
 
-                requestMsg =
-                    getRequestMsg component request response
+                model_ =
+                    { model | websocket = websocket_ }
+
+                cmd_ =
+                    Cmd.map MsgWebsocket cmd
             in
-                update requestMsg model
+                route model_ cmd_ msgs
 
-        -- Misc
-        {- Perform no operation -}
-        NoOp ->
+        OnLocationChange location ->
+            let
+                model_ =
+                    { model | route = parseLocation location }
+            in
+                ( model_, Cmd.none )
+
+        _ ->
             ( model, Cmd.none )
 
 
-{-| Transform multiple Msgs into a single, batched Cmd. We reverse the msg list
-so they can get executed in the order they were specified.
--}
-batchMsgs : List CoreMsg -> Cmd CoreMsg
-batchMsgs msg =
-    Cmd.batch
-        (List.reverse (List.map Utils.msgToCmd msg))
+
+-- internals
+
+
+updateGame : Game.GameMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
+updateGame msg model =
+    let
+        ( game, cmd, msgs ) =
+            Game.Update.update msg model.game
+
+        model_ =
+            { model | game = game }
+
+        cmd_ =
+            Cmd.map MsgGame cmd
+    in
+        route model_ cmd_ msgs
+
+
+isDev : CoreModel -> Bool
+isDev model =
+    -- make this function return False to test the game on production mode
+    model.game.meta.config.version == "dev"
+
+
+onDebug : CoreModel -> (a -> a) -> a -> a
+onDebug model fun a =
+    if isDev model then
+        fun a
+    else
+        a
+
+
+received : a -> a
+received =
+    Debug.log "▶ Message"
+
+
+sent : a -> a
+sent =
+    Debug.log "◀ Message"
+
+
+route : CoreModel -> Cmd CoreMsg -> List CoreMsg -> ( CoreModel, Cmd CoreMsg )
+route model cmd msgs =
+    if isDev model then
+        let
+            cmds =
+                msgs
+                    -- TODO: eval if reverse is really needed
+                    |> List.reverse
+                    |> List.map (sent >> Utils.msgToCmd)
+
+            cmd_ =
+                Cmd.batch (cmd :: cmds)
+        in
+            ( model, cmd_ )
+    else
+        -- TODO: eval if foldr is really needed
+        List.foldr reducer ( model, cmd ) msgs
+
+
+reducer : CoreMsg -> ( CoreModel, Cmd CoreMsg ) -> ( CoreModel, Cmd CoreMsg )
+reducer msg ( model, cmd ) =
+    let
+        ( model_, cmd_ ) =
+            update msg model
+    in
+        ( model_, Cmd.batch [ cmd, cmd_ ] )

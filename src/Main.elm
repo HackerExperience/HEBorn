@@ -1,6 +1,5 @@
 module Main exposing (init, main)
 
-import TimeTravel.Navigation
 import Navigation exposing (Location)
 import Router.Router exposing (parseLocation)
 import Core.Subscriptions exposing (subscriptions)
@@ -8,6 +7,9 @@ import Core.Messages exposing (CoreMsg(OnLocationChange))
 import Core.Models exposing (CoreModel, Flags, initialModel)
 import Core.Update exposing (update)
 import Core.View exposing (view)
+
+
+-- import TimeTravel.Navigation
 
 
 init : Flags -> Location -> ( CoreModel, Cmd CoreMsg )
@@ -26,10 +28,7 @@ init flags location =
         )
 
 
-
--- main : Program Flags CoreModel CoreMsg
-
-
+main : Program Flags CoreModel CoreMsg
 main =
     {- Toggle comment below to switch on/off TimeTravel debugger. It's a great
        option to debug changes on models (and quickly go back in time to apply
@@ -38,8 +37,8 @@ main =
        TimeTravel only when debugging specific models.
 
     -}
+    -- TimeTravel.Navigation.programWithFlags OnLocationChange
     Navigation.programWithFlags OnLocationChange
-        -- TimeTravel.Navigation.programWithFlags OnLocationChange
         { init = init
         , view = view
         , update = update

@@ -1,11 +1,12 @@
 module Driver.Websocket.Messages exposing (Msg(..))
 
-import Json.Decode
-import Requests.Models exposing (RequestID)
+import Events.Events as Events
+import Driver.Websocket.Channels exposing (..)
+import Json.Encode exposing (Value)
 
 
 type Msg
-    = UpdateSocketParams ( String, String )
-    | JoinChannel ( String, String )
-    | NewNotification Json.Decode.Value
-    | NewReply Json.Decode.Value RequestID
+    = UpdateSocket String
+    | JoinChannel Channel (Maybe String)
+    | NewEvent Events.Event Value
+    | Broadcast Events.Response

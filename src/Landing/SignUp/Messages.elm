@@ -1,7 +1,6 @@
-module Landing.SignUp.Messages exposing (Msg(..))
+module Landing.SignUp.Messages exposing (Msg(..), RequestMsg(..))
 
-import Events.Models
-import Requests.Models
+import Requests.Types exposing (ResponseType)
 
 
 type Msg
@@ -12,6 +11,8 @@ type Msg
     | ValidatePassword
     | SetEmail String
     | ValidateEmail
-    | Event Events.Models.Event
-    | Request Requests.Models.Request
-    | Response Requests.Models.Request Requests.Models.Response
+    | Request RequestMsg
+
+
+type RequestMsg
+    = CreateRequestMsg ResponseType

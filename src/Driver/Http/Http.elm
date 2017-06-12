@@ -1,15 +1,17 @@
-module Driver.Http.Http exposing (..)
+module Driver.Http.Http exposing (send)
 
 import Http
-import Driver.Http.Models exposing (decodeMsg)
-import Requests.Models exposing (RequestID)
-import Core.Messages exposing (CoreMsg)
 
 
-send : String -> String -> RequestID -> String -> Cmd CoreMsg
-send apiHttpUrl path id payload =
+send :
+    (Result Http.Error String -> msg)
+    -> String
+    -> String
+    -> String
+    -> Cmd msg
+send msg apiHttpUrl path payload =
     Http.send
-        (decodeMsg id)
+        msg
         (Http.request
             { method = "POST"
             , headers = []

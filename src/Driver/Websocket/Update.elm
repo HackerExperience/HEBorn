@@ -3,92 +3,92 @@ module Driver.Websocket.Update exposing (update)
 import Utils
 import Phoenix.Socket as Socket
 import Phoenix.Channel as Channel
-import Driver.Websocket.Models
-    exposing
-        ( Model
-        , getWSMsgType
-        , getWSMsgMeta
-        , WSMsgType(..)
-        , getResponse
-        )
-import Driver.Websocket.Messages exposing (Msg(..))
-import Events.Models exposing (decodeEvent)
-import Core.Messages exposing (CoreMsg(NoOp, DispatchEvent, NewResponse))
+import Driver.Websocket.Models exposing (..)
+import Driver.Websocket.Messages exposing (..)
+import Driver.Websocket.Channels exposing (..)
+import Events.Events as Events
+import Core.Messages exposing (CoreMsg)
 import Core.Models exposing (CoreModel)
 
 
 update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
 update msg model core =
     case msg of
-        UpdateSocketParams params ->
+        UpdateSocket token ->
             let
-                ( token, account_id ) =
-                    params
+                socket =
+                    Socket.withParams [ ( "token", token ) ] model.socket
 
-                socket_ =
-                    model.socket
-                        |> Socket.withParams [ ( "token", token ) ]
+                model_ =
+                    { model | socket = socket }
             in
-                ( { model | socket = socket_ }, Cmd.none, [] )
+                ( model_, Cmd.none, [] )
 
-        JoinChannel args ->
+        JoinChannel channel topic ->
+            if model.defer then
+                defer channel topic model
+            else
+                join channel topic model
+
+        NewEvent event value ->
             let
-                ( model_, cmd ) =
-                    if model.defer then
-                        ( { model | defer = False }
-                        , Utils.delay 0.5 <| JoinChannel args
-                        )
-                    else
-                        let
-                            ( topic, event ) =
-                                args
-
-                            channel =
-                                Channel.init topic
-                                    |> Channel.on event (\m -> NewNotification m)
-                                    |> Channel.withDebug
-
-                            channels_ =
-                                model.channels ++ [ channel ]
-                        in
-                            ( { model | channels = channels_ }, Cmd.none )
+                response =
+                    Events.handler event value
             in
-                ( model_, cmd, [] )
+                ( model, Cmd.none, [] )
 
-        NewNotification msg ->
-            let
-                meta =
-                    getWSMsgMeta msg
+        Broadcast _ ->
+            -- ignore broadcasts
+            ( model, Cmd.none, [] )
 
-                coreMsg =
-                    case (getWSMsgType meta) of
-                        WSEvent ->
-                            let
-                                event =
-                                    decodeEvent msg
-                            in
-                                DispatchEvent event
 
-                        WSResponse ->
-                            let
-                                d =
-                                    Debug.log
-                                        "received a reply on an event topic"
-                                        (toString msg)
-                            in
-                                NoOp
 
-                        WSInvalid ->
-                            NoOp
-            in
-                ( model, Cmd.none, [ coreMsg ] )
+-- internals
 
-        NewReply msg requestId ->
-            let
-                ( meta, code ) =
-                    getResponse msg
 
-                coreMsg =
-                    NewResponse ( requestId, code, meta.data )
-            in
-                ( model, Cmd.none, [ coreMsg ] )
+defer :
+    Channel
+    -> Maybe String
+    -> Model
+    -> ( Model, Cmd Msg, List CoreMsg )
+defer channel topic model =
+    let
+        model_ =
+            { model | defer = False }
+
+        cmd =
+            Utils.delay 0.5 (JoinChannel channel topic)
+    in
+        ( model_, cmd, [] )
+
+
+join :
+    Channel
+    -> Maybe String
+    -> Model
+    -> ( Model, Cmd Msg, List CoreMsg )
+join channel topic model =
+    let
+        events =
+            eventsFromChannel channel model
+
+        channel_ =
+            topic
+                |> getAddress channel
+                |> Channel.init
+                |> flip (List.foldl reducer) events
+                -- TODO: remove debug flag on production
+                |> Channel.withDebug
+
+        channels =
+            channel_ :: model.channels
+
+        model_ =
+            { model | channels = channels }
+    in
+        ( model_, Cmd.none, [] )
+
+
+reducer : ( String, Events.Event ) -> Channel.Channel Msg -> Channel.Channel Msg
+reducer ( name, event ) =
+    Channel.on name (\value -> NewEvent event value)

@@ -1,9 +1,19 @@
-module Game.Account.Messages exposing (AccountMsg(..))
+module Game.Account.Messages
+    exposing
+        ( AccountMsg(..)
+        , RequestMsg(..)
+        )
 
-import Requests.Models exposing (ResponseLoginPayload)
-import Game.Account.Models exposing (AccountID)
+import Events.Events as Events
+import Requests.Types exposing (ResponseType)
 
 
 type AccountMsg
-    = Login ResponseLoginPayload
+    = Login String String
     | Logout
+    | Request RequestMsg
+    | Event Events.Response
+
+
+type RequestMsg
+    = LogoutRequestMsg ResponseType
