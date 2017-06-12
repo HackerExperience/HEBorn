@@ -79,6 +79,9 @@ renderButton logID btn =
                     BtnCancel ->
                         [ onClick (LeaveEditing logID) ]
 
+                    BtnCrypt ->
+                        [ onClick (StartCrypting logID) ]
+
                     _ ->
                         []
                )
@@ -147,6 +150,9 @@ renderMsg msg =
                 [ span [] [ text "Corrupted: " ]
                 , span [] [ text msg ]
                 ]
+
+            Unintelligible ->
+                [ span [] [ text "● ◐ ◑ ◒ ◓ ◔ ◕ ◖ ◗" ] ]
         )
 
 
@@ -183,7 +189,7 @@ renderTopActions : StdData -> Html Msg
 renderTopActions entry =
     div [ class [ ETActMini ] ]
         -- TODO: Catch the flags for real
-        (renderFlags [ BtnUser, BtnEdit, BtnLock ])
+        (renderFlags [ BtnUser, BtnEdit, BtnCrypt ])
 
 
 renderBottomActions : LogViewer -> StdData -> Html Msg
@@ -196,10 +202,10 @@ renderBottomActions app entry =
              else if (isEntryExpanded app entry) then
                 case entry.status of
                     StatusNormal ->
-                        [ BtnLock, BtnView, BtnEdit, BtnDelete ]
+                        [ BtnCrypt, BtnHide, BtnEdit, BtnDelete ]
 
                     Cryptographed ->
-                        [ BtnView, BtnUnlock ]
+                        [ BtnHide, BtnUnlock ]
              else
                 []
             )
@@ -306,7 +312,7 @@ view game ({ app } as model) =
                 , text " "
                 , span [ class [ BtnEdit ] ] []
                 , text " "
-                , span [ class [ BtnView ] ] []
+                , span [ class [ BtnHide ] ] []
                 ]
             , div [ class [ ETFilter ] ]
                 [ div [ class [ BtnFilter ] ] []

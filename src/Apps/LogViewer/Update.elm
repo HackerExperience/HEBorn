@@ -84,3 +84,13 @@ update msg game ({ app } as model) =
                     )
             in
                 ( { model | app = app_ }, Cmd.none, gameMsg )
+
+        StartCrypting logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Crypt logId)
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )

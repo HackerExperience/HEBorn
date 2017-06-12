@@ -12,3 +12,4 @@ type Msg
     | UpdateEditing ID String
     | ApplyEditing ID
     | LeaveEditing ID
+    | StartCrypting ID

@@ -22,9 +22,9 @@ type Classes
     | EToggler
     | BtnUser
     | BtnEdit
-    | BtnView
+    | BtnHide
     | BtnFilter
-    | BtnLock
+    | BtnCrypt
     | BtnDelete
     | BtnUnlock
     | BtnApply
@@ -107,7 +107,7 @@ css =
             [ ico
             , before [ Icon.edit ]
             ]
-        , class BtnView
+        , class BtnHide
             [ ico
             , before [ Icon.view ]
             ]
@@ -115,7 +115,7 @@ css =
             [ ico
             , before [ Icon.filter ]
             ]
-        , class BtnLock
+        , class BtnCrypt
             [ ico
             , before [ Icon.lock ]
             ]

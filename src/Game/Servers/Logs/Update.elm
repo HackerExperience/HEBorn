@@ -4,7 +4,7 @@ import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Game.Messages exposing (GameMsg(..))
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
-import Game.Servers.Logs.Models exposing (Logs, updateContent)
+import Game.Servers.Logs.Models exposing (..)
 
 
 update :
@@ -20,3 +20,13 @@ update msg model game =
                     updateContent model logId value
             in
                 ( model_, Cmd.none, [] )
+
+        Crypt logId ->
+            let
+                model_ =
+                    crypt model logId
+            in
+                ( model_, Cmd.none, [] )
+
+        Uncrypt logId restauredContent ->
+            ( model, Cmd.none, [] )

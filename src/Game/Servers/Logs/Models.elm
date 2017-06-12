@@ -44,6 +44,7 @@ type SmartContent
     | DownloadBy FileName IP
     | DownloadFrom FileName IP
     | Invalid String
+    | Unintelligible
 
 
 type Event
@@ -186,6 +187,50 @@ updateContent model logId newRaw =
                         { oldLogData
                             | raw = newRaw
                             , smart = newRaw |> interpretRawContent
+                        }
+
+                _ ->
+                    NoLog
+    in
+        Dict.insert logId newLog model
+
+
+crypt : Logs -> ID -> Logs
+crypt model logId =
+    let
+        oldLog =
+            Dict.get logId model
+
+        newLog =
+            case oldLog of
+                Just (StdLog oldLogData) ->
+                    StdLog
+                        { oldLogData
+                            | raw = ""
+                            , status = Cryptographed
+                            , smart = Unintelligible
+                        }
+
+                _ ->
+                    NoLog
+    in
+        Dict.insert logId newLog model
+
+
+uncrypt : Logs -> ID -> RawContent -> Logs
+uncrypt model logId restoredValue =
+    let
+        oldLog =
+            Dict.get logId model
+
+        newLog =
+            case oldLog of
+                Just (StdLog oldLogData) ->
+                    StdLog
+                        { oldLogData
+                            | raw = restoredValue
+                            , status = StatusNormal
+                            , smart = restoredValue |> interpretRawContent
                         }
 
                 _ ->
