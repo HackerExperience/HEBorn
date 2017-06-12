@@ -1,6 +1,6 @@
 module OS.Menu.Models exposing (..)
 
-import OS.WindowManager.MenuHandler.Models as MenuHandler
+import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 
 
 type Menu

@@ -1,16 +1,19 @@
 module OS.View exposing (view)
 
+import OS.Models exposing (..)
+import OS.Messages exposing (..)
+import OS.Style as Css
 import Html exposing (..)
-import Html.Events exposing (onClick)
 import Html.CssHelpers
-import Router.Router exposing (Route(..))
 import Core.Models exposing (CoreModel)
 import Core.Messages exposing (CoreMsg(..))
-import OS.Style as Css
-import OS.WindowManager.View
-import OS.Header.View
-import OS.Dock.View
+import Game.Models exposing (GameModel)
+import OS.Header.View as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
+import OS.SessionManager.View as SessionManager
+
+
+-- this module should return OSMsgs instead of CoreMsg, but let's deffer it
 
 
 { id, class, classList } =
@@ -19,54 +22,32 @@ import OS.Menu.View exposing (menuView, menuEmpty)
 
 view : CoreModel -> Html CoreMsg
 view model =
-    case model.route of
-        RouteNotFound ->
-            viewNotFound
-
-        _ ->
-            viewDashboard model
-
-
-viewDashboard : CoreModel -> Html CoreMsg
-viewDashboard model =
     div
         [ id Css.Dashboard
         , menuEmpty
         ]
-        [ viewHeader model
-        , viewMain model
-        , viewFooter model
+        [ viewHeader model.game model.os
+        , viewMain model.game model.os
+        , displayVersion model.config.version
         , menuView model.os
         ]
 
 
-viewHeader : CoreModel -> Html CoreMsg
-viewHeader model =
+viewHeader : GameModel -> Model -> Html CoreMsg
+viewHeader game model =
     header []
-        [ (OS.Header.View.view model) ]
+        [ (Header.view game model.header) ]
 
 
-viewMain : CoreModel -> Html CoreMsg
-viewMain model =
-    main_ [] (OS.WindowManager.View.renderWindows model)
-
-
-viewFooter : CoreModel -> Html CoreMsg
-viewFooter model =
-    footer []
-        [ OS.Dock.View.view model
-        , displayVersion model.config.version
-        ]
+viewMain : GameModel -> Model -> Html CoreMsg
+viewMain game model =
+    model.session
+        |> SessionManager.view game
+        |> Html.map SessionManagerMsg
+        |> Html.map MsgOS
 
 
 displayVersion : String -> Html CoreMsg
 displayVersion version =
     div [ id Css.DesktopVersion ]
         [ text version ]
-
-
-viewNotFound : Html CoreMsg
-viewNotFound =
-    div []
-        [ text "Not found"
-        ]

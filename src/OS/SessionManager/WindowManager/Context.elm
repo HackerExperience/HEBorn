@@ -1,4 +1,4 @@
-module OS.WindowManager.Context exposing (Context(..), toString)
+module OS.SessionManager.WindowManager.Context exposing (Context(..), toString)
 
 
 type Context

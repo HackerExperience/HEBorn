@@ -1,4 +1,4 @@
-module OS.WindowManager.MenuHandler.View exposing (menuForCreator, menuViewCreator)
+module OS.SessionManager.WindowManager.MenuHandler.View exposing (menuForCreator, menuViewCreator)
 
 import Html exposing (Html)
 import Html.Attributes

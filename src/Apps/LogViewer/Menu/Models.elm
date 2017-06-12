@@ -1,6 +1,6 @@
 module Apps.LogViewer.Menu.Models exposing (..)
 
-import OS.WindowManager.MenuHandler.Models as MenuHandler
+import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 import Game.Servers.Logs.Models exposing (LogID)
 
 

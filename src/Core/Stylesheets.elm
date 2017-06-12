@@ -1,10 +1,10 @@
 port module Stylesheets exposing (..)
 
 import Css.File exposing (CssFileStructure, CssCompilerProgram)
-import Core.Style
-import OS.Style
-import OS.WindowManager.Style
-import OS.Dock.Style
+import Core.Style as Core
+import OS.Style as OS
+import OS.SessionManager.WindowManager.Style as WindowManager
+import OS.SessionManager.Dock.Style as Dock
 import Apps.Explorer.Style
 import Apps.LogViewer.Style
 import Apps.Browser.Style
@@ -19,10 +19,10 @@ fileStructure =
     Css.File.toFileStructure
         [ ( "index.css"
           , Css.File.compile
-                [ Core.Style.css
-                , OS.Style.css
-                , OS.WindowManager.Style.css
-                , OS.Dock.Style.css
+                [ Core.css
+                , OS.css
+                , WindowManager.css
+                , Dock.css
                 , Apps.Explorer.Style.css
                 , Apps.LogViewer.Style.css
                 , Apps.Browser.Style.css

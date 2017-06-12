@@ -1,4 +1,4 @@
-module OS.Dock.Style exposing (..)
+module OS.SessionManager.Dock.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)

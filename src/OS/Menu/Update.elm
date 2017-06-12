@@ -5,7 +5,6 @@ import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import OS.Menu.Models exposing (Model)
 import OS.Menu.Messages exposing (Msg(..))
-import OS.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )

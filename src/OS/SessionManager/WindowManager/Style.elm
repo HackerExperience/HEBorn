@@ -1,4 +1,4 @@
-module OS.WindowManager.Style exposing (..)
+module OS.SessionManager.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
