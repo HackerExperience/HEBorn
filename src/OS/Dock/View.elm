@@ -4,11 +4,15 @@ import Html exposing (Html, div, text, button, ul, li, hr)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
+import Utils exposing (andThenWithDefault)
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
 import OS.Messages exposing (OSMsg(..))
 import OS.WindowManager.Messages exposing (Msg(..))
+import OS.WindowManager.Models exposing (getWindow, WindowID)
+import OS.WindowManager.View exposing (windowTitle)
 import OS.Dock.Style as Css
+import Apps.Models as Apps
 import OS.Dock.Models
     exposing
         ( Application
@@ -49,6 +53,17 @@ hasInstanceString num =
         "N"
 
 
+filteredTile : Int -> WindowID -> CoreModel -> String
+filteredTile i windowID model =
+    (toString i)
+        ++ ": "
+        ++ (andThenWithDefault
+                windowTitle
+                "404"
+                (getWindow windowID model.os.wm)
+           )
+
+
 renderApplicationSubmenu : CoreModel -> Application -> Html CoreMsg
 renderApplicationSubmenu model application =
     div
@@ -56,48 +71,48 @@ renderApplicationSubmenu model application =
         , onClick (MsgOS OS.Messages.NoOp)
         ]
         [ ul []
-            ([ li [] [ text "JAN. ABERTAS" ] ]
+            ([ li [] [ text "OPEN WINDOWS" ] ]
                 ++ (List.indexedMap
-                        (\i o ->
+                        (\i windowID ->
                             li
                                 [ class [ Css.ClickableWindow ]
-                                , attribute "data-id" o
-                                , onClick (MsgOS (MsgWM (UpdateFocusTo (Just o))))
+                                , attribute "data-id" windowID
+                                , onClick (MsgOS (MsgWM (UpdateFocusTo (Just windowID))))
                                 ]
-                                [ text (toString i) ]
+                                [ text (filteredTile i windowID model) ]
                         )
                         application.openWindows
                    )
                 ++ [ hr [] []
-                   , li [] [ text "JAN. MINIMIZADAS" ]
+                   , li [] [ text "MINIMIZED LINUXES" ]
                    ]
                 ++ (List.indexedMap
-                        (\i o ->
+                        (\i windowID ->
                             li
                                 [ class [ Css.ClickableWindow ]
-                                , attribute "data-id" o
-                                , onClick (MsgOS (MsgWM (Restore o)))
+                                , attribute "data-id" windowID
+                                , onClick (MsgOS (MsgWM (Restore windowID)))
                                 ]
-                                [ text (toString i) ]
+                                [ text (filteredTile i windowID model) ]
                         )
                         application.minimizedWindows
                    )
                 ++ [ hr [] []
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (Open application.window)))
+                        , onClick (MsgOS (MsgWM (Open application.app)))
                         ]
-                        [ text "Nova janela" ]
+                        [ text "New window" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (MinimizeAll application.window)))
+                        , onClick (MsgOS (MsgWM (MinimizeAll application.app)))
                         ]
-                        [ text "Minimizar tudo" ]
+                        [ text "Minimize all" ]
                    , li
                         [ class [ Css.ClickableWindow ]
-                        , onClick (MsgOS (MsgWM (CloseAll application.window)))
+                        , onClick (MsgOS (MsgWM (CloseAll application.app)))
                         ]
-                        [ text "Fechar tudo" ]
+                        [ text "Close all" ]
                    ]
             )
         ]
@@ -111,8 +126,8 @@ renderApplication model application =
         ]
         ([ div
             [ class [ Css.ItemIco ]
-            , onClick (MsgOS (MsgWM (OpenOrRestore application.window)))
-            , attribute "data-icon" application.icon
+            , onClick (MsgOS (MsgWM (OpenOrRestore application.app)))
+            , attribute "data-icon" (Apps.icon application.app)
             ]
             []
          ]

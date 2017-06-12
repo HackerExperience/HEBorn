@@ -10,7 +10,6 @@ import Requests.Models
 import Router.Router exposing (Route)
 import Game.Models
 import OS.Models
-import Apps.Models
 import Landing.Models
 
 
@@ -19,7 +18,6 @@ type alias CoreModel =
     , requests : Requests.Models.Model
     , game : Game.Models.GameModel
     , os : OS.Models.Model
-    , apps : Apps.Models.AppModel
     , landing : Landing.Models.LandModel
     , websocket : Driver.Websocket.Models.Model
     , config : Config
@@ -53,7 +51,6 @@ initialModel route seedInt apiHttpUrl apiWsUrl version =
     , requests = Requests.Models.initialModel seedInt
     , game = Game.Models.initialModel
     , os = OS.Models.initialModel
-    , apps = Apps.Models.initialModel
     , landing = Landing.Models.initialModel
     , websocket = Driver.Websocket.Models.initialModel apiWsUrl
     , config = generateConfig apiHttpUrl apiWsUrl version

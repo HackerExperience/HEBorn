@@ -5,7 +5,6 @@ import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
 import Apps.LogViewer.Menu.Models exposing (Model)
 import Apps.LogViewer.Menu.Messages exposing (Msg(..))
-import Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 
 update : Msg -> Model -> GameModel -> ( Model, Cmd Msg, List CoreMsg )
@@ -18,5 +17,5 @@ update msg model game =
             in
                 ( { model | menu = menu_ }, Cmd.map MenuMsg cmd, [] )
 
-        MenuClick action id ->
+        MenuClick action ->
             ( model, Cmd.none, [] )

@@ -12,6 +12,7 @@ type Id
     | DesktopVersion
 
 
+css : Stylesheet
 css =
     (stylesheet << namespace "os")
         [ id Dashboard

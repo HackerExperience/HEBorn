@@ -3,7 +3,7 @@ module OS.WindowManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (pseudoContent, attrSelector)
-import Css.Common exposing (globalShadow, flexContainerHorz, internalPadding)
+import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
 import Css.Icons as Icon
 
 
@@ -22,13 +22,18 @@ type Class
     | HeaderContextSw
 
 
+wmBorderRadius : Px
+wmBorderRadius =
+    (px 4)
+
+
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
         [ class Window
             [ position (absolute)
             , displayFlex
-            , borderRadius4 (px 8) (px 8) (px 8) (px 8)
+            , borderRadius wmBorderRadius
             , flexDirection column
             , globalShadow
             , flex (int 0)
@@ -49,14 +54,11 @@ css =
                 ]
             ]
         , class WindowBody
-            [ borderRadius4 (px 0) (px 0) (px 8) (px 8)
+            [ borderRadius4 (px 0) (px 0) wmBorderRadius wmBorderRadius
             , backgroundColor (hex "EEE")
             , flex (int 1)
-            , internalPadding
-            , maxHeight (pct 100)
-            , overflowY auto
-
-            -- TODO: Consider header height
+            , overflowY hidden
+            , flexContainerVert
             ]
         , class WindowHeader
             [ displayFlex
@@ -64,7 +66,7 @@ css =
             , property "background" "linear-gradient(to bottom, #6c6c6c 0%,#4c4c4c 100%)"
             , color (hex "FFF")
             , flex (int 0)
-            , borderRadius4 (px 8) (px 8) (px 0) (px 0)
+            , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
             , internalPadding
             , lineHeight (px 16)
             , borderBottom3 (px 1) solid (rgb 0 140 255)
@@ -90,7 +92,7 @@ css =
         , attrSelector "wmHeaderTitle"
             "data-icon"
             "="
-            "logviewer"
+            "logvw"
             [ before
                 [ Icon.logvw ]
             ]
@@ -100,6 +102,13 @@ css =
             "browser"
             [ before
                 [ Icon.browser ]
+            ]
+        , attrSelector "wmHeaderTitle"
+            "data-icon"
+            "="
+            "taskmngr"
+            [ before
+                [ Icon.taskMngr ]
             ]
         , class HeaderButtons
             [ flex (int 0)

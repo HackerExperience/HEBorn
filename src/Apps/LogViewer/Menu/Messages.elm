@@ -1,15 +1,16 @@
 module Apps.LogViewer.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
-import Apps.Instances.Models exposing (InstanceID)
+import Game.Servers.Logs.Models exposing (LogID)
 import Apps.LogViewer.Menu.Models exposing (Menu)
 
 
 type MenuAction
-    = DoA
-    | DoB
+    = NormalEntryEdit LogID
+    | EdittingEntryApply LogID
+    | EdittingEntryCancel LogID
 
 
 type Msg
     = MenuMsg (ContextMenu.Msg Menu)
-    | MenuClick MenuAction InstanceID
+    | MenuClick MenuAction

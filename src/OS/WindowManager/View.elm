@@ -1,4 +1,4 @@
-module OS.WindowManager.View exposing (renderWindows)
+module OS.WindowManager.View exposing (renderWindows, windowTitle)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, id, style)
@@ -9,23 +9,24 @@ import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Core.Messages exposing (CoreMsg(..))
 import Core.Models exposing (CoreModel)
-import Core.Dispatcher exposing (callWM, callExplorer)
+import Core.Dispatcher exposing (callWM)
 import OS.Messages exposing (OSMsg(..))
-import OS.WindowManager.Windows exposing (GameWindow(..))
 import OS.WindowManager.Models
     exposing
         ( Window
         , WindowID
-        , getOpenWindows
-        , windowsFoldr
-        , getContextText
+        , foldlWindows
+        , filterOpenedWindows
+        , getAppModel
         )
+import OS.WindowManager.Context as Context
 import OS.WindowManager.Messages exposing (Msg(..))
 import OS.WindowManager.Style as Css
-import Apps.Messages exposing (AppMsg(..))
-import Apps.Explorer.View
-import Apps.LogViewer.View
-import Apps.Browser.View
+import Apps.Models as Apps
+import Apps.View as Apps
+
+
+-- TODO: refactor most of this module to not rely so much on CoreMsg
 
 
 { id, class, classList } =
@@ -38,59 +39,33 @@ styles =
 
 
 renderWindows : CoreModel -> List (Html CoreMsg)
-renderWindows model =
-    (windowsFoldr (renderLoop model) [] (getOpenWindows model.os.wm))
+renderWindows core =
+    foldlWindows (renderLoop core) [] (filterOpenedWindows core.os.wm)
 
 
-renderLoop : CoreModel -> WindowID -> Window -> List (Html CoreMsg) -> List (Html CoreMsg)
-renderLoop model id window acc =
-    [ (renderWindow model window) ] ++ acc
+renderLoop :
+    CoreModel
+    -> WindowID
+    -> Window
+    -> List (Html CoreMsg)
+    -> List (Html CoreMsg)
+renderLoop game id window html =
+    (renderWindow id game window) :: html
 
 
-renderWindow : CoreModel -> Window -> Html CoreMsg
-renderWindow model window =
-    case window.window of
-        ExplorerWindow ->
-            windowWrapper
-                window
-                (Html.map MsgApp
-                    (Html.map MsgExplorer
-                        (Apps.Explorer.View.view
-                            model.apps.explorer
-                            window.id
-                            model.game
-                        )
-                    )
-                )
-
-        LogViewerWindow ->
-            windowWrapper
-                window
-                (Html.map MsgApp
-                    (Html.map MsgLogViewer
-                        (Apps.LogViewer.View.view
-                            model.apps.logViewer
-                            window.id
-                            model.game
-                        )
-                    )
-                )
-
-        BrowserWindow ->
-            windowWrapper
-                window
-                (Html.map MsgApp
-                    (Html.map MsgBrowser
-                        (Apps.Browser.View.view
-                            model.apps.browser
-                            window.id
-                            model.game
-                        )
-                    )
-                )
+renderWindow : WindowID -> CoreModel -> Window -> Html CoreMsg
+renderWindow id model window =
+    window
+        |> getAppModel
+        |> Apps.view model.game
+        |> Html.map (WindowMsg id)
+        |> Html.map MsgWM
+        |> Html.map MsgOS
+        |> windowWrapper id window
 
 
-widndowClasses window =
+windowClasses : { a | maximized : Bool } -> Attribute msg
+windowClasses window =
     if (window.maximized) then
         class
             [ Css.Window
@@ -100,14 +75,14 @@ widndowClasses window =
         class [ Css.Window ]
 
 
-windowWrapper : Window -> Html CoreMsg -> Html CoreMsg
-windowWrapper window view =
+windowWrapper : WindowID -> Window -> Html CoreMsg -> Html CoreMsg
+windowWrapper id window view =
     div
-        [ widndowClasses window
+        [ windowClasses window
         , windowStyle window
-        , onMouseDown (callWM (UpdateFocusTo (Just window.id)))
+        , onMouseDown (callWM (UpdateFocusTo (Just id)))
         ]
-        [ Html.map MsgOS (Html.map MsgWM (header window))
+        [ Html.map MsgOS (Html.map MsgWM (header id window))
         , div
             [ class [ Css.WindowBody ] ]
             [ view ]
@@ -116,52 +91,34 @@ windowWrapper window view =
 
 windowTitle : Window -> String
 windowTitle window =
-    case window.window of
-        ExplorerWindow ->
-            "File Explorer"
-
-        LogViewerWindow ->
-            "Log Viewer"
-
-        BrowserWindow ->
-            "Browser"
+    window
+        |> getAppModel
+        |> Apps.title
 
 
-windowIcon : Window -> String
-windowIcon window =
-    case window.window of
-        ExplorerWindow ->
-            "explorer"
-
-        LogViewerWindow ->
-            "logviewer"
-
-        BrowserWindow ->
-            "browser"
-
-
-header : Window -> Html Msg
-header window =
+header : WindowID -> Window -> Html Msg
+header id window =
     div
-        [ Draggable.mouseTrigger window.id DragMsg ]
+        [ Draggable.mouseTrigger id DragMsg ]
         [ div
             [ class [ Css.WindowHeader ]
-            , onMouseDown (UpdateFocusTo (Just window.id))
+            , onMouseDown (UpdateFocusTo (Just id))
             ]
-            [ headerTitle (windowTitle window) (windowIcon window)
-            , headerContext window.id window.context
-            , headerButtons window.id
+            [ headerTitle (windowTitle window) (Apps.icon window.app)
+            , headerContext id window.context
+            , headerButtons id
             ]
         ]
 
 
+headerContext : WindowID -> Context.Context -> Html Msg
 headerContext id context =
     div []
         [ span
             [ class [ Css.HeaderContextSw ]
             , onClick (SwitchContext id)
             ]
-            [ text (getContextText context)
+            [ text (Context.toString context)
             ]
         ]
 

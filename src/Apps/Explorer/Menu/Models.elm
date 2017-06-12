@@ -4,8 +4,13 @@ import OS.WindowManager.MenuHandler.Models as MenuHandler
 
 
 type Menu
-    = MenuNav
-    | MenuContent
+    = MenuMainDir
+    | MenuTreeDir
+    | MenuMainArchive
+    | MenuTreeArchive
+    | MenuExecutable
+    | MenuActiveAction
+    | MenuPassiveAction
 
 
 type alias Model =

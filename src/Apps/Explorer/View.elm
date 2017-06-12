@@ -2,17 +2,23 @@ module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Html.CssHelpers
+import Utils exposing (floatToPrefixedValues)
 import Css exposing (pct, width, asPairs)
 import Game.Models exposing (GameModel)
-import Game.Servers.Filesystem.Models exposing (FilePath)
-import Apps.Instances.Models as Instance exposing (InstanceID)
-import Apps.Context as Context
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, getState)
-import Apps.Explorer.Menu.Models exposing (Menu(..))
-import Apps.Explorer.Menu.View exposing (menuView, menuNav, menuContent)
+import Apps.Explorer.Models exposing (Model, Explorer, FilePath)
+import Apps.Explorer.Menu.View
+    exposing
+        ( menuView
+        , menuMainDir
+        , menuTreeDir
+        , menuMainArchive
+        , menuTreeArchive
+        , menuExecutable
+        , menuActiveAction
+        , menuPassiveAction
+        )
 import Apps.Explorer.Style exposing (Classes(..))
 
 
@@ -58,9 +64,15 @@ type EntryGroup
     | Branch
 
 
+type ActionVer
+    = EqualsExe
+    | Unavailable
+    | Just Float
+
+
 type ArchiveType
     = Generic
-    | Executable ExeMime ExeVer (Maybe (List Action))
+    | Executable ExeMime ExeVer ActionVer ActionVer
 
 
 type alias ArchiveProp =
@@ -105,7 +117,7 @@ entryIcon type_ =
                 Generic ->
                     GenericArchiveIcon
 
-                Executable exeMime ver acts ->
+                Executable exeMime ver _ _ ->
                     (case exeMime of
                         Virus ->
                             VirusIcon
@@ -138,19 +150,29 @@ actionName actType =
         )
 
 
-sizeToText : FileSize -> Html msg
-sizeToText size =
-    text ((toString size) ++ " MB")
+actionMenu : ActionTarget -> Attribute Msg
+actionMenu actType =
+    case actType of
+        Active ->
+            menuActiveAction
+
+        Passive ->
+            menuPassiveAction
 
 
-verToText : ExeVer -> Html msg
+verToText : ExeVer -> Html Msg
 verToText ver =
     text (toString ver)
 
 
+sizeToText : FileSize -> Html Msg
+sizeToText size =
+    text ((floatToPrefixedValues size) ++ "B")
+
+
 renderAction : Action -> Html Msg
 renderAction act =
-    div []
+    div [ actionMenu act.target ]
         [ span [ class [ actionIcon act.target ] ] []
         , span [] [ actionName act.target ]
         , span [] [ verToText act.ver ]
@@ -167,7 +189,7 @@ renderTreeEntry : Entry -> Html Msg
 renderTreeEntry entry =
     case entry.type_ of
         Group gr childs ->
-            renderSidebarGroup childs entry.name gr
+            renderTreeGroup childs entry.name gr
 
         Fantasy ->
             div
@@ -176,7 +198,7 @@ renderTreeEntry entry =
 
         Archive prop ->
             div
-                [ class [ NavEntry, EntryArchive ] ]
+                [ class [ NavEntry, EntryArchive ], menuTreeArchive ]
                 [ span [ class [ NavIcon, entryIcon entry.type_ ] ] []
                 , span [] [ text entry.name ]
                 ]
@@ -187,7 +209,8 @@ renderTreeEntryList list =
     List.map (\o -> renderTreeEntry o) list
 
 
-renderSidebarGroup childs name grType =
+renderTreeGroup : List Entry -> String -> EntryGroup -> Html Msg
+renderTreeGroup childs name grType =
     div
         [ class
             ([ NavEntry, EntryDir ]
@@ -198,7 +221,7 @@ renderSidebarGroup childs name grType =
             )
         ]
         [ div
-            [ class [ EntryView ] ]
+            [ class [ EntryView ], menuTreeDir ]
             [ span [ class [ (groupIcon grType), NavIcon ] ] []
             , span [] [ text name ]
             ]
@@ -212,7 +235,7 @@ renderDetailedEntry : Entry -> Html Msg
 renderDetailedEntry entry =
     case entry.type_ of
         Group gr childs ->
-            div [ class [ CntListEntry, EntryDir ] ]
+            div [ class [ CntListEntry, EntryDir ], menuMainDir ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text entry.name ]
                 ]
@@ -224,39 +247,44 @@ renderDetailedEntry entry =
         Archive prop ->
             (case prop.type_ of
                 Generic ->
-                    div [ class [ CntListEntry, EntryArchive ] ]
+                    div [ class [ CntListEntry, EntryArchive ], menuMainArchive ]
                         [ span [ class [ entryIcon entry.type_ ] ] []
                         , span [] [ text entry.name ]
                         , span [] []
                         , span [] [ sizeToText prop.size ]
                         ]
 
-                Executable exeMime ver actsCont ->
-                    (case actsCont of
-                        Nothing ->
-                            div [ class [ CntListEntry, EntryArchive ] ]
-                                [ span [ class [ entryIcon entry.type_ ] ] []
-                                , span [] [ text entry.name ]
-                                , span [] [ verToText ver ]
-                                , span [] [ sizeToText prop.size ]
-                                ]
-
-                        Just actions ->
+                Executable exeMime ver active passive ->
+                    (case ( active, passive ) of
+                        ( Just activeVer, Just passiveVer ) ->
                             let
                                 type_ =
-                                    (Executable exeMime ver Nothing)
+                                    (Executable exeMime ver Unavailable Unavailable)
 
                                 archive =
                                     Archive { prop | type_ = type_ }
 
                                 entry_ =
                                     { entry | type_ = archive }
+
+                                actions =
+                                    [ Action Active activeVer
+                                    , Action Passive passiveVer
+                                    ]
                             in
                                 div [ class [ CntListContainer ] ]
                                     [ (renderDetailedEntry entry_)
                                     , div [ class [ CntListChilds ] ]
                                         (renderActionList actions)
                                     ]
+
+                        _ ->
+                            div [ class [ CntListEntry, EntryArchive ], menuExecutable ]
+                                [ span [ class [ entryIcon entry.type_ ] ] []
+                                , span [] [ text entry.name ]
+                                , span [] [ verToText ver ]
+                                , span [] [ sizeToText prop.size ]
+                                ]
                     )
             )
 
@@ -270,92 +298,54 @@ renderDetailedEntryList list =
 -- END OF THAT
 
 
-view : Model -> InstanceID -> GameModel -> Html Msg
-view model id game =
+view : GameModel -> Model -> Html Msg
+view game ({ app } as model) =
+    div [ class [ Window ] ]
+        [ viewExplorerColumn app game
+        , viewExplorerMain app game
+        , menuView model
+        ]
+
+
+viewUsage : FileSize -> FileSize -> Html Msg
+viewUsage min max =
     let
-        explorer =
-            getState model id
+        usage =
+            ((min / max) * 100)
+
+        minStr =
+            floatToPrefixedValues min
+
+        maxStr =
+            floatToPrefixedValues max
     in
-        div [ class [ Window ] ]
-            [ viewExplorerColumn explorer game
-            , viewExplorerMain explorer game
-            , menuView model id
+        div [ class [ NavData ] ]
+            [ text "Data usage"
+            , br [] []
+            , text ((toString (floor usage)) ++ "%")
+            , br [] []
+            , div
+                -- TODO: Replace this one with the one I want into "UI.Widgets"
+                [ class [ ProgBar ] ]
+                [ div
+                    [ class [ [ ProgFill ] ]
+                    , styles [ Css.width (pct usage) ]
+                    ]
+                    []
+                ]
+            , br [] []
+            , text (minStr ++ "B / " ++ maxStr ++ "B")
             ]
 
 
 viewExplorerColumn : Explorer -> GameModel -> Html Msg
 viewExplorerColumn explorer game =
     div
-        [ menuNav
-        , class [ Nav ]
+        [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
-            (renderTreeEntryList
-                [ { name = "Pictures"
-                  , type_ =
-                        Group
-                            Dir
-                            [ { name = "Purple Lotus 1.jpg"
-                              , type_ =
-                                    Archive
-                                        { size = 0
-                                        , type_ = Generic
-                                        }
-                              }
-                            , { name = "Blue Orchid.png"
-                              , type_ =
-                                    Archive
-                                        { size = 0
-                                        , type_ = Generic
-                                        }
-                              }
-                            , { name = "Other Flowers"
-                              , type_ =
-                                    Group
-                                        Dir
-                                        []
-                              }
-                            ]
-                  }
-                , { name = "Tree"
-                  , type_ =
-                        Group
-                            Branch
-                            [ { name = "Branch"
-                              , type_ =
-                                    Group
-                                        Branch
-                                        []
-                              }
-                            , { name = "AnotherBranch"
-                              , type_ =
-                                    Group
-                                        Dir
-                                        []
-                              }
-                            , { name = "A Leaf"
-                              , type_ = Fantasy
-                              }
-                            ]
-                  }
-                ]
-            )
-        , div [ class [ NavData ] ]
-            [ text "Data usage"
-            , br [] []
-            , text "82%"
-            , br [] []
-            , div
-                [ class [ ProgBar ] ]
-                [ div
-                    [ class [ [ ProgFill ] ]
-                    , styles [ Css.width (pct 50) ]
-                    ]
-                    []
-                ]
-            , br [] []
-            , text "289 MB / 1000 MB"
-            ]
+            (renderTreeEntryList dummyMain)
+        , (viewUsage 256000000 1024000000)
         ]
 
 
@@ -393,8 +383,7 @@ viewLocBar path =
 viewExplorerMain : Explorer -> GameModel -> Html Msg
 viewExplorerMain explorer game =
     div
-        [ menuContent
-        , class
+        [ class
             [ Content ]
         ]
         [ div
@@ -415,31 +404,87 @@ viewExplorerMain explorer game =
             ]
         , div
             [ class [ ContentList ] ]
-            (renderDetailedEntryList
-                [ { name = "Downloads"
+            (renderDetailedEntryList dummySidebar)
+        ]
+
+
+
+-- DUMMY VALUES
+
+
+dummySidebar : List Entry
+dummySidebar =
+    [ { name = "Downloads"
+      , type_ =
+            Group
+                Dir
+                []
+      }
+    , { name = "MyVirus.spam"
+      , type_ =
+            Archive { size = 230000, type_ = Executable Virus 2.3 EqualsExe Unavailable }
+      }
+    , { name = "TheWall.fwl"
+      , type_ =
+            Archive
+                { size = 240000
+                , type_ =
+                    Executable Firewall
+                        4.0
+                        (Just 4.5)
+                        (Just 3.5)
+                }
+      }
+    ]
+
+
+dummyMain : List Entry
+dummyMain =
+    [ { name = "Pictures"
+      , type_ =
+            Group
+                Dir
+                [ { name = "Purple Lotus 1.jpg"
+                  , type_ =
+                        Archive
+                            { size = 0
+                            , type_ = Generic
+                            }
+                  }
+                , { name = "Blue Orchid.png"
+                  , type_ =
+                        Archive
+                            { size = 0
+                            , type_ = Generic
+                            }
+                  }
+                , { name = "Other Flowers"
                   , type_ =
                         Group
                             Dir
                             []
                   }
-                , { name = "MyVirus.spam"
+                ]
+      }
+    , { name = "Tree"
+      , type_ =
+            Group
+                Branch
+                [ { name = "Branch"
                   , type_ =
-                        Archive { size = 230, type_ = Executable Virus 2.3 Nothing }
+                        Group
+                            Branch
+                            []
                   }
-                , { name = "TheWall.fwl"
+                , { name = "AnotherBranch"
                   , type_ =
-                        Archive
-                            { size = 230
-                            , type_ =
-                                Executable Firewall
-                                    4.0
-                                    (Just
-                                        [ { target = Active, ver = 4.5 }
-                                        , { target = Passive, ver = 3.5 }
-                                        ]
-                                    )
-                            }
+                        Group
+                            Branch
+                            []
+                  }
+                , { name = "A Leaf"
+                  , type_ = Fantasy
                   }
                 ]
-            )
-        ]
+      }
+    ]
