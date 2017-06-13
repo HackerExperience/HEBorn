@@ -79,14 +79,14 @@ progress =
     fuzzer genProgress
 
 
-process : Fuzzer Process
-process =
-    fuzzer genProcess
+localProcess : Fuzzer Process
+localProcess =
+    fuzzer genLocalProcess
 
 
-processList : Fuzzer (List Process)
-processList =
-    fuzzer genProcessList
+localProcessList : Fuzzer (List Process)
+localProcessList =
+    fuzzer genLocalProcessList
 
 
 emptyProcesses : Fuzzer Processes
@@ -94,14 +94,34 @@ emptyProcesses =
     fuzzer genEmptyProcesses
 
 
-nonEmptyProcesses : Fuzzer Processes
-nonEmptyProcesses =
-    fuzzer genNonEmptyProcesses
+nonEmptyLocalProcesses : Fuzzer Processes
+nonEmptyLocalProcesses =
+    fuzzer genNonEmptyLocalProcesses
 
 
-processes : Fuzzer Processes
-processes =
-    fuzzer genProcesses
+localProcesses : Fuzzer Processes
+localProcesses =
+    fuzzer genLocalProcesses
+
+
+remoteProcess : Fuzzer Process
+remoteProcess =
+    fuzzer genRemoteProcess
+
+
+remoteProcessList : Fuzzer (List Process)
+remoteProcessList =
+    fuzzer genRemoteProcessList
+
+
+nonEmptyRemoteProcesses : Fuzzer Processes
+nonEmptyRemoteProcesses =
+    fuzzer genNonEmptyRemoteProcesses
+
+
+remoteProcesses : Fuzzer Processes
+remoteProcesses =
+    fuzzer genRemoteProcesses
 
 
 model : Fuzzer Processes
@@ -209,8 +229,8 @@ genETA =
     float 1420070400 4102444799
 
 
-genLocalProcess : Generator Local.ProcessProp
-genLocalProcess =
+genLocalProcessProp : Generator Local.ProcessProp
+genLocalProcessProp =
     let
         buildProcessRecord =
             \fID gID nID cID tID priority type_ state eta progress cpuU memU downU upU ->
@@ -247,8 +267,8 @@ genLocalProcess =
             |> andMap genUsage
 
 
-genRemoteProcess : Generator Remote.ProcessProp
-genRemoteProcess =
+genRemoteProcessProp : Generator Remote.ProcessProp
+genRemoteProcessProp =
     let
         buildProcessRecord =
             \gID nID cID type_ ->
@@ -265,16 +285,8 @@ genRemoteProcess =
             |> andMap genRemoteProcessType
 
 
-genProcessProp : Generator Logs.ProcessProp
-genProcessProp =
-    choices
-        [ map LocalProcess genLocalProcess
-        , map RemoteProcess genRemoteProcess
-        ]
-
-
-genProcess : Generator Process
-genProcess =
+genLocalProcess : Generator Process
+genLocalProcess =
     let
         buildProcessRecord =
             \id prop ->
@@ -284,13 +296,33 @@ genProcess =
     in
         genProcessID
             |> map buildProcessRecord
-            |> andMap genProcessProp
+            |> andMap (map LocalProcess genLocalProcessProp)
 
 
-genProcessList : Generator (List Process)
-genProcessList =
+genRemoteProcess : Generator Process
+genRemoteProcess =
+    let
+        buildProcessRecord =
+            \id prop ->
+                { id = id
+                , prop = prop
+                }
+    in
+        genProcessID
+            |> map buildProcessRecord
+            |> andMap (map RemoteProcess genRemoteProcessProp)
+
+
+genLocalProcessList : Generator (List Process)
+genLocalProcessList =
     int 1 8
-        |> andThen (\num -> list num genProcess)
+        |> andThen (\num -> list num genLocalProcess)
+
+
+genRemoteProcessList : Generator (List Process)
+genRemoteProcessList =
+    int 1 8
+        |> andThen (\num -> list num genRemoteProcess)
 
 
 genEmptyProcesses : Generator Processes
@@ -298,18 +330,30 @@ genEmptyProcesses =
     constant initialProcesses
 
 
-genNonEmptyProcesses : Generator Processes
-genNonEmptyProcesses =
+genNonEmptyLocalProcesses : Generator Processes
+genNonEmptyLocalProcesses =
     andThen
         ((List.foldl addProcess initialProcesses) >> constant)
-        genProcessList
+        genLocalProcessList
 
 
-genProcesses : Generator Processes
-genProcesses =
-    choices [ genEmptyProcesses, genNonEmptyProcesses ]
+genNonEmptyRemoteProcesses : Generator Processes
+genNonEmptyRemoteProcesses =
+    andThen
+        ((List.foldl addProcess initialProcesses) >> constant)
+        genRemoteProcessList
+
+
+genLocalProcesses : Generator Processes
+genLocalProcesses =
+    choices [ genEmptyProcesses, genNonEmptyLocalProcesses ]
+
+
+genRemoteProcesses : Generator Processes
+genRemoteProcesses =
+    choices [ genEmptyProcesses, genNonEmptyRemoteProcesses ]
 
 
 genModel : Generator Processes
 genModel =
-    genNonEmptyProcesses
+    genNonEmptyLocalProcesses

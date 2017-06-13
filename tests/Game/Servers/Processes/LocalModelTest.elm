@@ -1,4 +1,4 @@
-module Game.Servers.Processes.ModelTest exposing (all)
+module Game.Servers.Processes.LocalModelTest exposing (all)
 
 import Expect
 import Gen.Processes as Gen
@@ -66,7 +66,7 @@ addProcessTests =
 addProcessGenericTests : List Test
 addProcessGenericTests =
     [ fuzz
-        (tuple ( Gen.emptyProcesses, Gen.process ))
+        (tuple ( Gen.emptyProcesses, Gen.localProcess ))
         "can add a process"
       <|
         \( processes, process ) ->
@@ -94,7 +94,7 @@ pauseProcessGenericTests : List Test
 pauseProcessGenericTests =
     -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can pause a process"
       <|
         \( model, process ) ->
@@ -124,7 +124,7 @@ resumeProcessGenericTests : List Test
 resumeProcessGenericTests =
     -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can resume a paused process"
       <|
         \( processes, process ) ->
@@ -143,7 +143,7 @@ resumeProcessGenericTests =
             in
                 Expect.equal (Just StateRunning) maybeState
     , fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can't resume a running process"
       <|
         \( processes, process ) ->
@@ -179,7 +179,7 @@ completeProcessGenericTests : List Test
 completeProcessGenericTests =
     -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can complete a process"
       <|
         \( processes, process ) ->
@@ -212,7 +212,7 @@ deleteProcessTests =
 deleteProcessGenericTests : List Test
 deleteProcessGenericTests =
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can delete a process"
       <|
         \( processes, process ) ->
@@ -222,7 +222,7 @@ deleteProcessGenericTests =
                 |> getProcessByID process.id
                 |> Expect.equal Nothing
     , fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can't delete a non-existing process"
       <|
         \( processes, process ) ->
