@@ -5,7 +5,7 @@ module Landing.Login.Requests.Login
         , receive
         )
 
-import Json.Decode as Decode exposing (Decoder, Value, decodeString)
+import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
 import Core.Config exposing (Config)
@@ -29,12 +29,12 @@ request username password =
         (encoder username password)
 
 
-receive : Code -> String -> Response
+receive : Code -> Value -> Response
 receive code json =
     case code of
         OkCode ->
             json
-                |> decodeString decoder
+                |> decodeValue decoder
                 |> Requests.report
 
         NotFoundCode ->
@@ -48,7 +48,7 @@ receive code json =
 -- internals
 
 
-encoder : String -> String -> Encode.Value
+encoder : String -> String -> Value
 encoder username password =
     Encode.object
         [ ( "username", Encode.string username )

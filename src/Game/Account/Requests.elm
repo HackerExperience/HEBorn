@@ -10,7 +10,7 @@ import Game.Account.Messages exposing (..)
 import Requests.Requests exposing (request, report)
 import Requests.Types exposing (Code(..))
 import Requests.Topics exposing (Topic(..))
-import Json.Encode as Encode
+import Json.Encode as Encode exposing (Value)
 
 
 type Response
@@ -41,6 +41,6 @@ handler request =
 -- internals
 
 
-logoutHandler : Code -> String -> Response
+logoutHandler : Code -> Value -> Response
 logoutHandler code json =
     LogoutResponse

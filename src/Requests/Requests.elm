@@ -9,6 +9,8 @@ import Driver.Websocket.Websocket as WebsocketDriver
 import Requests.Types exposing (..)
 import Requests.Topics exposing (..)
 import Json.Encode as Encode
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required, optional)
 
 
 report : Result String a -> a
@@ -89,10 +91,10 @@ genericHttp : (ResponseType -> msg) -> Result Http.Error String -> msg
 genericHttp msg result =
     case result of
         Ok data ->
-            msg ( OkCode, data )
+            msg ( OkCode, toValue data )
 
         Err (Http.BadStatus response) ->
-            msg ( getCode response.status.code, response.body )
+            msg ( getCode response.status.code, toValue response.body )
 
         _ ->
             Debug.crash "Http Driver failure"
@@ -100,5 +102,25 @@ genericHttp msg result =
 
 genericWs : (ResponseType -> msg) -> Encode.Value -> msg
 genericWs msg value =
-    -- TODO: handle error code
-    msg ( OkCode, toString value )
+    let
+        -- TODO: handle error messages
+        decoder =
+            decode WebsocketResponse
+                |> required "data" Decode.value
+
+        result =
+            Decode.decodeValue decoder value
+    in
+        case result of
+            Ok response ->
+                msg ( OkCode, response.data )
+
+            Err str ->
+                msg ( UnknownErrorCode, toValue str )
+
+
+toValue : String -> Decode.Value
+toValue str =
+    str
+        |> Decode.decodeString Decode.value
+        |> Result.withDefault Encode.null
