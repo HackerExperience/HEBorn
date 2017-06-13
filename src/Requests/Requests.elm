@@ -9,6 +9,8 @@ import Driver.Websocket.Websocket as WebsocketDriver
 import Requests.Types exposing (..)
 import Requests.Topics exposing (..)
 import Json.Encode as Encode
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required, optional)
 
 
 report : Result String a -> a
@@ -100,5 +102,18 @@ genericHttp msg result =
 
 genericWs : (ResponseType -> msg) -> Encode.Value -> msg
 genericWs msg value =
-    -- TODO: handle error code
-    msg ( OkCode, toString value )
+    let
+        -- TODO: handle error messages
+        decoder =
+            decode WebsocketResponse
+                |> required "data" Decode.value
+
+        result =
+            Decode.decodeValue decoder value
+    in
+        case result of
+            Ok response ->
+                msg ( OkCode, toString response.data )
+
+            Err _ ->
+                msg ( UnknownErrorCode, "" )
