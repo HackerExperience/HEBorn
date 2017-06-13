@@ -3,13 +3,20 @@ module Requests.Types
         ( Driver(..)
         , Code(..)
         , ResponseType
+        , WebsocketResponse
         , Context
         , getCode
         )
 
+import Json.Decode
+
 
 type alias ResponseType =
     ( Code, String )
+
+
+type alias WebsocketResponse =
+    { data : Json.Decode.Value }
 
 
 type Driver
