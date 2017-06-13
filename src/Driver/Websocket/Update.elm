@@ -6,6 +6,7 @@ import Phoenix.Channel as Channel
 import Driver.Websocket.Models exposing (..)
 import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Channels exposing (..)
+import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events
 import Core.Messages exposing (CoreMsg)
 import Core.Models exposing (CoreModel)
@@ -76,9 +77,8 @@ join channel topic model =
             topic
                 |> getAddress channel
                 |> Channel.init
+                |> Channel.onJoin (reportJoin channel)
                 |> flip (List.foldl reducer) events
-                -- TODO: remove debug flag on production
-                |> Channel.withDebug
 
         channels =
             channel_ :: model.channels
@@ -92,3 +92,15 @@ join channel topic model =
 reducer : ( String, Events.Event ) -> Channel.Channel Msg -> Channel.Channel Msg
 reducer ( name, event ) =
     Channel.on name (\value -> NewEvent event value)
+
+
+
+-- reports
+
+
+reportJoin : Channel -> a -> Msg
+reportJoin channel _ =
+    channel
+        |> Joined
+        |> Events.Report
+        |> Broadcast
