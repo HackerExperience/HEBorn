@@ -13,12 +13,12 @@ type Response
 receive : RequestMsg -> Response
 receive response =
     case response of
-        LogoutRequestMsg ( code, data ) ->
+        LogoutRequest ( code, data ) ->
             data
                 |> Logout.receive code
                 |> LogoutResponse
 
-        ServerIndexRequestMsg ( code, data ) ->
+        ServerIndexRequest ( code, data ) ->
             data
                 |> ServerIndex.receive code
                 |> ServerIndexResponse
