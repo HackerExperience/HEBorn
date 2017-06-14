@@ -3,10 +3,8 @@ module Apps.Explorer.Models exposing (..)
 import Utils exposing (andThenWithDefault)
 import Game.Servers.Models
     exposing
-        ( ServerID
-        , getFilesystem
-        , getServerByID
-        , Servers
+        ( getFilesystem
+        , Server
         )
 import Game.Servers.Filesystem.Models
     exposing
@@ -88,13 +86,10 @@ setPath explorer path =
 changePath :
     FilePath
     -> Explorer
-    -> Servers
+    -> Server
     -> Explorer
-changePath path explorer servers =
+changePath path explorer server =
     let
-        server =
-            getServerByID servers "localhost"
-
         filesystem =
             getFilesystem server
 
@@ -112,12 +107,9 @@ changePath path explorer servers =
         explorer_
 
 
-resolvePath : Servers -> FilePath -> List File
-resolvePath servers path =
+resolvePath : Server -> FilePath -> List File
+resolvePath server path =
     let
-        server =
-            getServerByID servers "localhost"
-
         filesystem =
             getFilesystem server
     in

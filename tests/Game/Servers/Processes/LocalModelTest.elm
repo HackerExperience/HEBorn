@@ -158,7 +158,7 @@ resumeProcessGenericTests =
                     |> andJust (resumeProcess model)
                     |> andThen (getProcessByID process.id)
                     |> andJust getStateForJust
-                    |> Expect.notEqual (Just StateRunning)
+                    |> Expect.equal (Just StateRunning)
     ]
 
 

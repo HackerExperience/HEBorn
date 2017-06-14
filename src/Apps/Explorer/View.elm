@@ -6,7 +6,7 @@ import Html.CssHelpers
 import UI.Widgets exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
-import Game.Servers.Models exposing (Servers)
+import Game.Servers.Models exposing (Server, getServerByID)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
@@ -129,8 +129,8 @@ indvidualEntryName file =
             data.name
 
 
-renderTreeEntry : Servers -> File -> Html Msg
-renderTreeEntry servers file =
+renderTreeEntry : Server -> File -> Html Msg
+renderTreeEntry server file =
     let
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
@@ -143,14 +143,14 @@ renderTreeEntry servers file =
                 div
                     [ class [ NavEntry, EntryDir, EntryExpanded ]
                     , menuTreeDir data.id
-                    , onClick (GoPath (fullFilePath file))
+                    , onClick (GoPath (getAbsolutePath file))
                     ]
                     [ div
                         [ class [ EntryView ] ]
                         [ icon, label ]
                     , div
                         [ class [ EntryChilds ] ]
-                        (renderTreeEntryPath servers (pathInterpret (fullFilePath file)))
+                        (renderTreeEntryPath server (pathInterpret (getAbsolutePath file)))
                     ]
 
             StdFile prop ->
@@ -161,15 +161,15 @@ renderTreeEntry servers file =
                     [ icon, label ]
 
 
-renderTreeEntryPath : Servers -> SmartPath -> List (Html Msg)
-renderTreeEntryPath servers path =
+renderTreeEntryPath : Server -> SmartPath -> List (Html Msg)
+renderTreeEntryPath server path =
     let
         entries =
             resolvePath
-                servers
+                server
                 (path |> pathToString)
     in
-        List.map (renderTreeEntry servers) entries
+        List.map (renderTreeEntry server) entries
 
 
 renderDetailedEntry : File -> Html Msg
@@ -179,7 +179,7 @@ renderDetailedEntry file =
             div
                 [ class [ CntListEntry, EntryDir ]
                 , menuMainDir data.id
-                , onClick (GoPath (fullFilePath file))
+                , onClick (GoPath (getAbsolutePath file))
                 ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text data.name ]
@@ -256,14 +256,14 @@ viewUsage min max =
             ]
 
 
-viewExplorerColumn : SmartPath -> Servers -> Html Msg
-viewExplorerColumn path servers =
+viewExplorerColumn : SmartPath -> Server -> Html Msg
+viewExplorerColumn path server =
     div
         [ class [ Nav ]
         ]
         [ div [ class [ NavTree ] ]
             (renderTreeEntryPath
-                servers
+                server
                 path
             )
         , (viewUsage 256000000 1024000000)
@@ -284,8 +284,8 @@ viewLocBar path =
         )
 
 
-viewExplorerMain : SmartPath -> Servers -> Html Msg
-viewExplorerMain path servers =
+viewExplorerMain : SmartPath -> Server -> Html Msg
+viewExplorerMain path server =
     div
         [ class
             [ Content ]
@@ -312,7 +312,7 @@ viewExplorerMain path servers =
             [ class [ ContentList ] ]
             (renderDetailedEntryList
                 (resolvePath
-                    servers
+                    server
                     (path |> pathToString)
                 )
             )
@@ -322,11 +322,14 @@ viewExplorerMain path servers =
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
     let
+        server =
+            getServerByID game.servers "localhost"
+
         nowPath =
             app.path |> pathInterpret
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn (Relative [ "%favorites" ]) game.servers
-            , viewExplorerMain nowPath game.servers
+            [ viewExplorerColumn (Relative [ "%favorites" ]) server
+            , viewExplorerMain nowPath server
             , menuView model
             ]

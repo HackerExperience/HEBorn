@@ -26,7 +26,7 @@ module Game.Servers.Filesystem.Models
         , moveFile
         , setFilePath
         , pathSeparator
-        , fullFilePath
+        , getAbsolutePath
         )
 
 import Dict
@@ -186,7 +186,7 @@ addFile file filesystem =
                     pathIndex =
                         filesystem.pathIndex
                             |> Dict.insert path files
-                            |> Dict.insert (fullFilePath file) []
+                            |> Dict.insert (getAbsolutePath file) []
 
                     entries =
                         Dict.insert id file filesystem.entries
@@ -206,32 +206,23 @@ getFilesIdOnPath path filesystem =
 
 getFilesOnPath : FilePath -> Filesystem -> List File
 getFilesOnPath path filesystem =
-    Debug.log "Files: "
-        (List.map
-            (getFileById filesystem)
-            (getFilesIdOnPath path filesystem)
-        )
+    List.map
+        (getFileById filesystem)
+        (getFilesIdOnPath path filesystem)
 
 
 pathExists : FilePath -> Filesystem -> Bool
 pathExists path filesystem =
-    case Dict.get path filesystem.pathIndex of
-        Just _ ->
-            True
-
-        Nothing ->
-            False
+    Dict.member path filesystem.pathIndex
 
 
 moveFile : FilePath -> File -> Filesystem -> Filesystem
 moveFile path file filesystem =
     if (pathExists path filesystem) then
-        -- TODO: remove flips after moving filesystem to the last param
         filesystem
-            |> addFile (setFilePath path file)
             |> removeFile file
+            |> addFile (setFilePath path file)
     else
-        -- Moving to a non-existing path
         filesystem
 
 
@@ -257,13 +248,17 @@ removeFile file filesystem =
                 }
 
             Folder _ ->
-                -- just like rmdir, it can't remove non-empty folders
-                if List.isEmpty (getFilesIdOnPath (fullFilePath file) filesystem) then
-                    { entries = Dict.remove id filesystem.entries
-                    , pathIndex = Dict.remove path filesystem.pathIndex
-                    }
-                else
-                    filesystem
+                let
+                    absPath =
+                        getAbsolutePath file
+                in
+                    -- just like rmdir, it can't remove non-empty folders
+                    if List.isEmpty (getFilesIdOnPath absPath filesystem) then
+                        { entries = Dict.remove id filesystem.entries
+                        , pathIndex = Dict.remove absPath filesystem.pathIndex
+                        }
+                    else
+                        filesystem
 
 
 getFileById : Filesystem -> FileID -> File
@@ -309,8 +304,8 @@ getFileNameWithExtension file =
             getFileName file
 
 
-fullFilePath : File -> String
-fullFilePath file =
+getAbsolutePath : File -> String
+getAbsolutePath file =
     let
         name =
             getFileNameWithExtension file

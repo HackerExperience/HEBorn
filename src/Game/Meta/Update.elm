@@ -12,3 +12,6 @@ update msg model game =
     case msg of
         Tick time ->
             ( { model | lastTick = time }, Cmd.none, [] )
+
+        _ ->
+            ( model, Cmd.none, [] )

@@ -2,6 +2,7 @@ module Apps.Explorer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (getServerByID)
 import Apps.Explorer.Models exposing (Model, changePath)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as MsgMenu
@@ -29,10 +30,13 @@ update msg game ({ app } as model) =
         -- General Acts
         GoPath newPath ->
             let
+                server =
+                    getServerByID game.servers "localhost"
+
                 newApp =
                     changePath
                         newPath
                         app
-                        game.servers
+                        server
             in
                 ( { model | app = newApp }, Cmd.none, [] )

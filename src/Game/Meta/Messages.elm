@@ -5,6 +5,5 @@ import Time exposing (Time)
 
 
 type MetaMsg
-    = ToDo
-    | Event Events.Response
+    = Event Events.Response
     | Tick Time
