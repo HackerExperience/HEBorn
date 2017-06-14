@@ -113,7 +113,7 @@ type ServerType
 request : String -> Config -> Cmd AccountMsg
 request account =
     Requests.request AccountServerIndexTopic
-        (ServerIndexRequestMsg >> Request)
+        (ServerIndexRequest >> Request)
         (Just account)
         Encode.null
 

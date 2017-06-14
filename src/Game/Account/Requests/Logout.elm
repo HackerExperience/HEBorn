@@ -25,7 +25,7 @@ request token =
                 [ ( "token", Encode.string token ) ]
     in
         Requests.request AccountLogoutTopic
-            (LogoutRequestMsg >> Request)
+            (LogoutRequest >> Request)
             Nothing
             payload
 
