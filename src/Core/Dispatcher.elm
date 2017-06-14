@@ -52,7 +52,7 @@ callNetwork msg =
     callGame (MsgNetwork msg)
 
 
-callServer : Server.ServerMsg -> CoreMsg
+callServer : Server.Msg -> CoreMsg
 callServer msg =
     callGame (MsgServers msg)
 

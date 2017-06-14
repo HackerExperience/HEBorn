@@ -9,7 +9,7 @@ import Events.Events as Events
 
 type GameMsg
     = MsgAccount Game.Account.Messages.AccountMsg
-    | MsgServers Game.Servers.Messages.ServerMsg
+    | MsgServers Game.Servers.Messages.Msg
     | MsgNetwork Game.Network.Messages.NetworkMsg
     | MsgMeta Game.Meta.Messages.MetaMsg
     | Event Events.Response
