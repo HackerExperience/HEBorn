@@ -1,46 +1,24 @@
-module Game.Account.Requests
-    exposing
-        ( Response(..)
-        , logout
-        , handler
-        )
+module Game.Account.Requests exposing (Response(..), receive)
 
-import Core.Config exposing (Config)
+import Game.Account.Requests.Logout as Logout
+import Game.Account.Requests.ServerIndex as ServerIndex
 import Game.Account.Messages exposing (..)
-import Requests.Requests exposing (request, report)
-import Requests.Types exposing (Code(..))
-import Requests.Topics exposing (Topic(..))
-import Json.Encode as Encode
 
 
 type Response
-    = LogoutResponse
+    = LogoutResponse Logout.Response
+    | ServerIndexResponse ServerIndex.Response
 
 
-logout : String -> Config -> Cmd AccountMsg
-logout token =
-    let
-        payload =
-            Encode.object
-                [ ( "token", Encode.string token ) ]
-    in
-        request AccountLogoutTopic
-            (LogoutRequestMsg >> Request)
-            Nothing
-            payload
+receive : RequestMsg -> Response
+receive response =
+    case response of
+        LogoutRequestMsg ( code, data ) ->
+            data
+                |> Logout.receive code
+                |> LogoutResponse
 
-
-handler : RequestMsg -> Response
-handler request =
-    case request of
-        LogoutRequestMsg ( code, json ) ->
-            logoutHandler code json
-
-
-
--- internals
-
-
-logoutHandler : Code -> String -> Response
-logoutHandler code json =
-    LogoutResponse
+        ServerIndexRequestMsg ( code, data ) ->
+            data
+                |> ServerIndex.receive code
+                |> ServerIndexResponse
