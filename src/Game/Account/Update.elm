@@ -17,35 +17,20 @@ update :
 update msg model game =
     case msg of
         Login token id ->
-            let
-                model1 =
-                    setToken model (Just token)
-
-                model_ =
-                    { model1 | id = Just id }
-            in
-                ( model_, Cmd.none, [] )
+            login token id model game
 
         Logout ->
-            case getToken model of
-                Just token ->
-                    let
-                        model_ =
-                            setToken model Nothing
-
-                        cmd =
-                            Logout.request token game.meta.config
-                    in
-                        ( model_, cmd, [] )
-
-                _ ->
-                    ( model, Cmd.none, [] )
+            logout model game
 
         Request data ->
             response (receive data) model game
 
         _ ->
             ( model, Cmd.none, [] )
+
+
+
+-- internals
 
 
 response :
@@ -57,6 +42,43 @@ response response model game =
     case response of
         LogoutResponse Logout.OkResponse ->
             ( model, Cmd.none, [] )
+
+        _ ->
+            ( model, Cmd.none, [] )
+
+
+login :
+    Token
+    -> String
+    -> AccountModel
+    -> GameModel
+    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+login token id model game =
+    let
+        model1 =
+            setToken model (Just token)
+
+        model_ =
+            { model1 | id = Just id }
+    in
+        ( model_, Cmd.none, [] )
+
+
+logout :
+    AccountModel
+    -> GameModel
+    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+logout model game =
+    case getToken model of
+        Just token ->
+            let
+                model_ =
+                    setToken model Nothing
+
+                cmd =
+                    Logout.request token game.meta.config
+            in
+                ( model_, cmd, [] )
 
         _ ->
             ( model, Cmd.none, [] )
