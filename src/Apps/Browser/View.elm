@@ -28,7 +28,7 @@ view game ({ app } as model) =
         , class [ Window, Content, Client ]
         ]
         [ viewToolbar app
-        , viewStaticContent
+        , viewPg app.page.content
         , menuView model
         ]
 
@@ -80,26 +80,6 @@ viewToolbar browser =
         ]
 
 
-viewStaticContent : Html Msg
-viewStaticContent =
-    div [ class [ PageContent ] ]
-        [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-        , div [ class [ LoginPageForm ] ]
-            [ div []
-                [ input [ placeholder "Password" ] []
-                , text "E"
-                ]
-            ]
-        , div [ class [ LoginPageFooter ] ]
-            [ div []
-                [ text "C"
-                , br [] []
-                , text "Crack"
-                ]
-            , div []
-                [ text "M"
-                , br [] []
-                , text "AnyMap"
-                ]
-            ]
-        ]
+viewPg : List (Html Msg) -> Html Msg
+viewPg pageContent =
+    div [ class [ PageContent ] ] pageContent

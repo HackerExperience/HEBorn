@@ -3,27 +3,22 @@ module Apps.Explorer.Models exposing (..)
 import Utils exposing (andThenWithDefault)
 import Game.Servers.Models
     exposing
-        ( ServerID
-        , getFilesystem
-        , getServerByID
+        ( getFilesystem
+        , Server
         )
-import Game.Servers.Filesystem.Models as NetModel
+import Game.Servers.Filesystem.Models
     exposing
         ( FilePath
         , rootPath
         , pathExists
+        , File
+        , getFilesOnPath
         )
 import Apps.Explorer.Menu.Models as Menu
 
 
-type alias FilePath =
-    NetModel.FilePath
-
-
 type alias Explorer =
-    { serverID : ServerID
-    , path : FilePath
-    }
+    { path : FilePath }
 
 
 type alias Model =
@@ -57,7 +52,7 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault (\posfix -> name ++ posfix) name posfix
+        andThenWithDefault ((++) name) name posfix
 
 
 icon : String
@@ -67,8 +62,7 @@ icon =
 
 initialExplorer : Explorer
 initialExplorer =
-    { serverID = "invalid"
-    , path = rootPath
+    { path = rootPath
     }
 
 
@@ -89,21 +83,13 @@ setPath explorer path =
     { explorer | path = path }
 
 
-type alias GameModelCompat a =
-    -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
-    { a | servers : Game.Servers.Models.Servers }
-
-
 changePath :
     FilePath
-    -> GameModelCompat a
     -> Explorer
+    -> Server
     -> Explorer
-changePath path game explorer =
+changePath path explorer server =
     let
-        server =
-            getServerByID game.servers explorer.serverID
-
         filesystem =
             getFilesystem server
 
@@ -119,3 +105,15 @@ changePath path game explorer =
                     explorer
     in
         explorer_
+
+
+resolvePath : Server -> FilePath -> List File
+resolvePath server path =
+    let
+        filesystem =
+            getFilesystem server
+    in
+        andThenWithDefault
+            (getFilesOnPath path)
+            []
+            filesystem

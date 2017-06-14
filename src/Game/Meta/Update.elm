@@ -10,5 +10,8 @@ import Game.Meta.Models exposing (MetaModel)
 update : MetaMsg -> MetaModel -> GameModel -> ( MetaModel, Cmd GameMsg, List CoreMsg )
 update msg model game =
     case msg of
+        Tick time ->
+            ( { model | lastTick = time }, Cmd.none, [] )
+
         _ ->
             ( model, Cmd.none, [] )

@@ -277,13 +277,13 @@ moveFolderTests =
         \( model, folder1, folder2 ) ->
             let
                 destination =
-                    getFilePath folder2
+                    getAbsolutePath folder2
             in
                 model
                     |> addFileRecursively folder1
                     |> addFileRecursively folder2
                     |> moveFile destination folder1
-                    |> pathExists (getFilePath folder1)
+                    |> pathExists (getAbsolutePath folder1)
                     |> Expect.equal False
     ]
 
@@ -366,7 +366,7 @@ deleteFolderTests =
         \( filesystem, file, folder ) ->
             let
                 file_ =
-                    setFilePath (getFilePath folder) file
+                    setFilePath (getAbsolutePath folder) file
 
                 model =
                     filesystem
@@ -400,6 +400,6 @@ deleteFolderTests =
             model
                 |> addFileRecursively folder
                 |> removeFile folder
-                |> pathExists (getFilePath folder)
+                |> pathExists (getAbsolutePath folder)
                 |> Expect.equal False
     ]

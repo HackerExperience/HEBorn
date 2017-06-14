@@ -10,11 +10,14 @@ import Game.Servers.Filesystem.Models exposing (..)
 {-| Private function used by a reducer in addPathParents to add folder to given
 filesystem.
 -}
-addFolderReducer : String -> ( Filesystem, String ) -> ( Filesystem, String )
-addFolderReducer folderName ( filesystem, path ) =
+addFolderReducer : String -> ( Filesystem, String, String ) -> ( Filesystem, String, String )
+addFolderReducer folderName ( filesystem, path, baseId ) =
     let
+        newBaseId =
+            baseId ++ folderName
+
         folder =
-            Folder { id = "id", name = folderName, path = path }
+            Folder { id = baseId, name = folderName, path = path }
 
         filesystem_ =
             addFile folder filesystem
@@ -25,22 +28,23 @@ addFolderReducer folderName ( filesystem, path ) =
             else
                 path ++ folderName
     in
-        ( filesystem_, path_ )
+        ( filesystem_, path_, newBaseId ++ "_" )
 
 
 {-| Like "mkdir -p", add folders recursively for given path.
 -}
-addPathParents : String -> Filesystem -> Filesystem
-addPathParents path filesystem =
+addPathParents : String -> String -> Filesystem -> Filesystem
+addPathParents path baseId filesystem =
     if pathExists path filesystem then
         filesystem
     else
         let
-            ( filesystem_, _ ) =
+            ( filesystem_, _, _ ) =
                 path
                     |> String.split "/"
-                    |> List.filter ((/=) "")
-                    |> List.foldl addFolderReducer ( filesystem, "" )
+                    |> List.tail
+                    |> Maybe.withDefault []
+                    |> List.foldl addFolderReducer ( filesystem, "/", baseId )
         in
             filesystem_
 
@@ -54,6 +58,10 @@ the assumption that the path the file is being added to must exist.
 -}
 addFileRecursively : File -> Filesystem -> Filesystem
 addFileRecursively file filesystem =
-    filesystem
-        |> addPathParents (getFilePath file)
-        |> addFile file
+    let
+        baseId =
+            (getFileId file) ++ "_"
+    in
+        filesystem
+            |> addPathParents (getFilePath file) baseId
+            |> addFile file
