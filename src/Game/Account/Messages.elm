@@ -16,5 +16,5 @@ type AccountMsg
 
 
 type RequestMsg
-    = LogoutRequestMsg ResponseType
-    | ServerIndexRequestMsg ResponseType
+    = LogoutRequest ResponseType
+    | ServerIndexRequest ResponseType
