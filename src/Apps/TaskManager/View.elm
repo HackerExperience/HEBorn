@@ -1,83 +1,215 @@
 module Apps.TaskManager.View exposing (view)
 
+import Dict
+import Time exposing (Time)
+import Utils exposing (andThenWithDefault)
 import Html exposing (..)
-import Html.Attributes exposing (style)
 import Html.CssHelpers
-import Utils exposing (floatToPrefixedValues, secondsToTimeNotation)
-import Svg exposing (svg, polyline, polygon)
-import Svg.Attributes as SvgA exposing (width, height, viewBox, fill, stroke, strokeWidth, points, preserveAspectRatio, fillOpacity, strokeOpacity)
-import Css exposing (asPairs, width, pct)
+import UI.Widgets exposing (progressBar, lineGraph)
+import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
+import Game.Servers.Models exposing (getServerByID, getProcesses)
+import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
+import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Style exposing (Classes(..))
+import Apps.TaskManager.Menu.View exposing (..)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "taskmngr"
 
 
-styles : List Css.Mixin -> Attribute Msg
-styles =
-    Css.asPairs >> style
+processName : Process -> String
+processName entry =
+    case entry.prop of
+        LocalProcess it ->
+            (case it.processType of
+                Local.Cracker _ ->
+                    "Cracker"
+
+                Local.Decryptor _ _ _ ->
+                    "Decryptor"
+
+                Local.Encryptor _ _ ->
+                    "Encryptor"
+
+                Local.FileTransference _ ->
+                    "File Transference"
+
+                Local.LogForge _ _ _ ->
+                    "Log Forge"
+
+                Local.PassiveFirewall _ ->
+                    "Passive Firewall"
+            )
+
+        RemoteProcess it ->
+            (case it.processType of
+                Remote.Cracker ->
+                    "Cracker"
+
+                Remote.Decryptor _ _ ->
+                    "Decryptor"
+
+                Remote.Encryptor _ ->
+                    "Encryptor"
+
+                Remote.FileTransference _ ->
+                    "File Transference"
+
+                Remote.LogForge _ ->
+                    "Log Forge"
+            )
 
 
 viewTaskRowUsage : ResourceUsage -> List (Html Msg)
 viewTaskRowUsage usage =
-    [ div [] [ text ((floatToPrefixedValues usage.cpu) ++ "Hz") ]
-    , div [] [ text ((floatToPrefixedValues usage.mem) ++ "iB") ]
-    , div [] [ text ((floatToPrefixedValues usage.down) ++ "bps") ]
-    , div [] [ text ((floatToPrefixedValues usage.up) ++ "bps") ]
+    [ div [] [ text (frequencyToString usage.cpu) ]
+    , div [] [ text (bibytesToString usage.mem) ]
+    , div [] [ text (bitsPerSecondToString usage.down) ]
+    , div [] [ text (bitsPerSecondToString usage.up) ]
     ]
 
 
-progressBar : Float -> String -> Html Msg
-progressBar percent floatText =
-    -- TODO: Make this one into "UI.Widgets"
-    node "progressbar"
-        []
-        [ node "fill"
-            [ styles
-                [ Css.width
-                    (pct
-                        (percent * 100)
-                    )
-                ]
-            ]
-            []
-        , node "label" [] [ text floatText ]
-        ]
-
-
-etaBar : Int -> Int -> Html Msg
-etaBar now total =
+etaBar : Time -> Float -> Html Msg
+etaBar secondsLeft progress =
     progressBar
-        (1
-            - (toFloat now)
-            / (toFloat total)
-        )
-        (secondsToTimeNotation now)
+        progress
+        (secondsToTimeNotation secondsLeft)
+        16
 
 
-viewTaskRow : TaskEntry -> Html Msg
-viewTaskRow entry =
-    div [ class [ EntryDivision ] ]
-        [ div []
-            [ div [] [ text entry.title ]
-            , div [] [ text "Target: ", text entry.target ]
-            , div []
-                [ text "File: "
-                , text entry.appFile
-                , span [] [ text (toString entry.appVer) ]
+viewState : Time -> Process -> Html Msg
+viewState now entry =
+    case entry.prop of
+        LocalProcess prop ->
+            (case prop.state of
+                StateRunning ->
+                    etaBar
+                        (andThenWithDefault (\end -> (end - now)) 0 prop.eta)
+                        (Maybe.withDefault 0 prop.progress)
+
+                StateStandby ->
+                    text "Processing..."
+
+                StatePaused ->
+                    text "Paused"
+
+                StateComplete ->
+                    text "Finished"
+            )
+
+        RemoteProcess _ ->
+            text "Running"
+
+
+processMenu : Process -> Attribute Msg
+processMenu process =
+    (case process.prop of
+        LocalProcess entry ->
+            (case entry.state of
+                StateRunning ->
+                    menuForRunning
+
+                StatePaused ->
+                    menuForPaused
+
+                _ ->
+                    menuForComplete
+            )
+
+        RemoteProcess entry ->
+            menuForRemote
+    )
+        process.id
+
+
+fromLocal : (Local.ProcessProp -> a) -> a -> Process -> a
+fromLocal toGet default process =
+    case process.prop of
+        LocalProcess data ->
+            toGet data
+
+        _ ->
+            default
+
+
+getVersion : Local.ProcessProp -> Maybe Float
+getVersion prop =
+    case prop.processType of
+        Local.Cracker v ->
+            Just v
+
+        Local.Decryptor v _ _ ->
+            Just v
+
+        Local.Encryptor v _ ->
+            Just v
+
+        Local.FileTransference _ ->
+            Nothing
+
+        Local.LogForge v _ _ ->
+            Just v
+
+        Local.PassiveFirewall v ->
+            Just v
+
+
+viewTaskRow : Time -> Process -> Html Msg
+viewTaskRow now entry =
+    let
+        name =
+            processName entry
+
+        fileName =
+            fromLocal
+                (\d -> Maybe.withDefault "UNKNOWN" d.fileID)
+                "HIDDEN"
+                entry
+
+        fileVer =
+            andThenWithDefault
+                toString
+                "N/V"
+                (fromLocal
+                    getVersion
+                    Nothing
+                    entry
+                )
+
+        usage =
+            fromLocal
+                (\d -> packUsage d)
+                (ResourceUsage -1 -1 -1 -1)
+                entry
+
+        target =
+            fromLocal
+                (\d -> d.targetServerID)
+                "localhost"
+                entry
+    in
+        div [ class [ EntryDivision ], (processMenu entry) ]
+            [ div []
+                [ div [] [ text name ]
+                , div [] [ text "Target: ", text target ]
+                , div []
+                    [ text "File: "
+                    , text fileName
+                    , span [] [ text fileVer ]
+                    ]
                 ]
+            , div [] [ viewState now entry ]
+            , div [] (viewTaskRowUsage usage)
             ]
-        , div [] [ etaBar entry.etaNow entry.etaTotal ]
-        , div [] (viewTaskRowUsage entry.usage)
-        ]
 
 
-viewTasksTable : Entries -> Html Msg
-viewTasksTable entries =
+viewTasksTable : Entries -> Time -> Html Msg
+viewTasksTable entries now =
     div [ class [ TaskTable ] ]
         ([ div [ class [ EntryDivision ] ]
             -- TODO: Hide when too small (responsive design)
@@ -86,7 +218,7 @@ viewTasksTable entries =
             , div [] [ text "Resources" ]
             ]
          ]
-            ++ (List.map viewTaskRow entries)
+            ++ (List.map (viewTaskRow now) entries)
         )
 
 
@@ -96,52 +228,17 @@ viewGraphUsage title color history limit =
         sz =
             toFloat ((List.length history) - 1)
 
-        commonPts =
+        points =
             (List.indexedMap
                 (\i x ->
-                    String.concat
-                        [ toString ((1 - toFloat (i) / sz) * 3)
-                        , ","
-                        , toString (1 - x / limit)
-                        ]
+                    ( (1 - toFloat (i) / sz)
+                    , (1 - x / limit)
+                    )
                 )
                 history
             )
     in
-        div [ class [ Graph ] ]
-            [ text title
-            , br [] []
-            , svg
-                [ SvgA.width "100%"
-                , SvgA.height "50"
-                , viewBox "0 0 3 1"
-                ]
-                [ polygon
-                    [ SvgA.fill color
-                    , SvgA.fillOpacity "0.4"
-                    , SvgA.stroke "none"
-                    , SvgA.points
-                        (String.join " "
-                            ([ "3,1" ]
-                                ++ commonPts
-                                ++ [ "0,1" ]
-                            )
-                        )
-                    ]
-                    []
-                , polyline
-                    [ SvgA.fill "none"
-                    , SvgA.stroke color
-                    , SvgA.strokeOpacity "0.9"
-                    , SvgA.strokeWidth "0.02"
-                    , SvgA.points
-                        (String.join " "
-                            commonPts
-                        )
-                    ]
-                    []
-                ]
-            ]
+        lineGraph points color 50 True ( 3, 1 )
 
 
 viewTotalResources : TaskManager -> Html Msg
@@ -156,7 +253,17 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div [ class [ MainLayout ] ]
-        [ viewTasksTable app.tasks
-        , viewTotalResources app
-        ]
+    let
+        server =
+            getServerByID game.servers "localhost"
+
+        tasks =
+            Maybe.withDefault
+                initialProcesses
+                (getProcesses server)
+    in
+        div [ class [ MainLayout ] ]
+            [ viewTasksTable (Dict.values tasks) game.meta.lastTick
+            , viewTotalResources app
+            , menuView model
+            ]

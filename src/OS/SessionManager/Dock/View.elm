@@ -1,14 +1,16 @@
 module OS.SessionManager.Dock.View exposing (view)
 
-import OS.SessionManager.Dock.Messages exposing (..)
-import OS.SessionManager.Models as SessionManager exposing (..)
+import Utils exposing (andThenWithDefault)
 import Dict exposing (Dict)
 import Html exposing (Html, div, text, button, ul, li, hr, footer)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
+import OS.SessionManager.Models as SessionManager exposing (..)
+import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Style as Css
 import OS.SessionManager.WindowManager.Models as WindowManager
+import OS.SessionManager.WindowManager.View exposing (windowTitle)
 import Apps.Models as Apps
 import Game.Models exposing (GameModel)
 
@@ -171,7 +173,7 @@ openedWindows app refs model =
         wins =
             refs
                 |> filterWinState filter app model
-                |> windowList FocusWindow
+                |> windowList model FocusWindow
     in
         (li [] [ text "OPEN WINDOWS" ]) :: wins
 
@@ -192,21 +194,32 @@ minimizedWindows app refs model =
         wins =
             refs
                 |> filterWinState filter app model
-                |> windowList RestoreWindow
+                |> windowList model RestoreWindow
     in
         (li [] [ text "MINIMIZED LINUXES" ]) :: wins
 
 
-windowList : (( a, String ) -> msg) -> List ( a, String ) -> List (Html msg)
-windowList event =
+windowLabel : Int -> WindowRef -> Model -> String
+windowLabel i refs model =
+    (toString i)
+        ++ ": "
+        ++ (andThenWithDefault
+                windowTitle
+                "404"
+                (getWindow refs model)
+           )
+
+
+windowList : Model -> (WindowRef -> msg) -> List WindowRef -> List (Html msg)
+windowList model event =
     List.indexedMap
-        (\i ( sID, id ) ->
+        (\i (( sID, id ) as refs) ->
             li
                 [ class [ Css.ClickableWindow ]
                 , attribute "data-id" id
-                , onClick (event ( sID, id ))
+                , onClick (event refs)
                 ]
-                [ text (toString i) ]
+                [ text (windowLabel i refs model) ]
         )
 
 

@@ -1,16 +1,11 @@
 module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 import Core.Messages exposing (CoreMsg)
+import Core.Dispatcher exposing (callLogs)
 import Game.Models exposing (GameModel)
-import Apps.LogViewer.Models
-    exposing
-        ( Model
-        , entryEnterEditing
-        , entryApplyEditing
-        , entryLeaveEditing
-        , entryUpdateEditing
-        )
-import Apps.LogViewer.Messages exposing (Msg)
+import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Apps.LogViewer.Models exposing (..)
+import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
@@ -18,35 +13,40 @@ actionHandler :
     MenuAction
     -> Model
     -> GameModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( Model, Cmd LogViewer.Msg, List CoreMsg )
 actionHandler action ({ app } as model) game =
     case action of
-        NormalEntryEdit logID ->
+        NormalEntryEdit logId ->
+            ( enterEditing game.servers model logId
+            , Cmd.none
+            , []
+            )
+
+        EdittingEntryApply logId ->
             let
-                entries_ =
-                    entryEnterEditing logID app.entries
+                edited =
+                    getEdit app logId
 
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    leaveEditing app logId
+
+                gameMsg =
+                    (case edited of
+                        Just edited ->
+                            [ callLogs
+                                "localhost"
+                                (Logs.UpdateContent logId edited)
+                            ]
+
+                        Nothing ->
+                            []
+                    )
             in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, gameMsg )
 
-        EdittingEntryApply logID ->
+        EdittingEntryCancel logId ->
             let
-                entries_ =
-                    entryApplyEditing logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
+                app_ =
+                    leaveEditing app logId
             in
-                ( model_, Cmd.none, [] )
-
-        EdittingEntryCancel logID ->
-            let
-                entries_ =
-                    entryLeaveEditing logID app.entries
-
-                model_ =
-                    { model | app = { app | entries = entries_ } }
-            in
-                ( model_, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, [] )

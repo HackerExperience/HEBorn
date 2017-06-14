@@ -1,60 +1,37 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict
-import Utils exposing (filterMapDict, andThenWithDefault)
-import Game.Shared exposing (..)
-import Game.Servers.Models exposing (ServerID, Server(..), getServerByID, localhostServerID)
-import Game.Servers.Logs.Models as NetModel exposing (..)
+import Utils exposing (andThenWithDefault)
+import Game.Servers.Models as Servers
+    exposing
+        ( ServerID
+        , Servers
+        , Server(..)
+        , getServerByID
+        , localhostServerID
+        , getLogs
+        )
+import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
-import Date exposing (Date, fromTime)
+
+
+type Sorting
+    = DefaultSort
 
 
 type alias LogViewer =
-    { filtering : String
-    , entries : Entries
+    { filterText : String
+    , filterFlags : List Never
+    , filterCache : List ID
+    , sorting : Sorting
+    , expanded : List ID
+    , editing : Dict.Dict ID String
     }
 
 
 type alias Model =
     { app : LogViewer
     , menu : Menu.Model
-    }
-
-
-type alias LogID =
-    NetModel.LogID
-
-
-type alias FileName =
-    String
-
-
-type LogEventMsg
-    = LogIn IP ServerUser
-    | LogInto IP
-    | Connection IP IP IP
-    | DownloadBy FileName IP
-    | DownloadFrom FileName IP
-    | Invalid String
-
-
-type LogEventStatus
-    = Normal Bool
-    | Editing String
-    | Cryptographed Bool
-    | Hidden
-
-
-type alias Entries =
-    Dict.Dict LogID LogViewerEntry
-
-
-type alias LogViewerEntry =
-    { timestamp : Date.Date
-    , status : LogEventStatus
-    , message : LogEventMsg
-    , srcID : LogID
-    , src : String
     }
 
 
@@ -67,7 +44,7 @@ title : Model -> String
 title ({ app } as model) =
     let
         filter =
-            app.filtering
+            app.filterText
 
         posfix =
             if (String.length filter) > 12 then
@@ -77,7 +54,7 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault (\posfix -> name ++ posfix) name posfix
+        andThenWithDefault ((++) name) name posfix
 
 
 icon : String
@@ -85,33 +62,20 @@ icon =
     "logvw"
 
 
-isEntryExpanded : LogViewerEntry -> Bool
-isEntryExpanded entry =
-    case entry.status of
-        Normal True ->
-            True
-
-        Cryptographed True ->
-            True
-
-        Editing _ ->
-            True
-
-        _ ->
-            False
+isEntryExpanded : LogViewer -> ID -> Bool
+isEntryExpanded app log =
+    List.member log app.expanded
 
 
-toggleExpanded : LogEventStatus -> LogEventStatus
-toggleExpanded status =
-    case status of
-        Normal x ->
-            Normal (not x)
-
-        Cryptographed x ->
-            Normal (not x)
-
-        _ ->
-            status
+toggleExpanded : LogViewer -> ID -> LogViewer
+toggleExpanded app log =
+    { app
+        | expanded =
+            if (isEntryExpanded app log) then
+                List.filter ((/=) log) app.expanded
+            else
+                log :: app.expanded
+    }
 
 
 initialModel : Model
@@ -123,122 +87,142 @@ initialModel =
 
 initialLogViewer : LogViewer
 initialLogViewer =
-    { filtering = ""
-    , entries =
-        -- HARD IMPORT OUR DUMMNY VALUES
-        logsToEntries NetModel.initialLogs
+    { filterText = ""
+    , filterFlags = []
+    , filterCache = []
+    , sorting = DefaultSort
+    , expanded = []
+    , editing = Dict.empty
     }
 
 
-logContentInterpret : String -> LogEventMsg
-logContentInterpret src =
-    let
-        splitten =
-            String.split " " src
-    in
-        case splitten of
-            [ addr, "logged", "in", "as", user ] ->
-                LogIn addr user
-
-            [ actor, "bounced", "connection", "from", src, "to", dest ] ->
-                Connection actor src dest
-
-            [ "File", fileName, "downloaded", "by", destIP ] ->
-                DownloadBy fileName destIP
-
-            [ "File", fileName, "downloaded", "from", srcIP ] ->
-                DownloadFrom fileName srcIP
-
-            [ "Logged", "into", destinationIP ] ->
-                LogInto destinationIP
-
-            _ ->
-                Invalid src
-
-
-logToEntry : NetModel.Log -> Maybe LogViewerEntry
-logToEntry log =
+catchDataWhenFiltering : List ID -> Log -> Maybe StdData
+catchDataWhenFiltering filterCache log =
     case log of
-        LogEntry x ->
-            Just
-                { timestamp =
-                    Date.fromTime x.timestamp
-                , status =
-                    Normal False
-                , message =
-                    logContentInterpret x.content
-                , srcID =
-                    x.id
-                , src =
-                    x.content
-                }
+        StdLog logData ->
+            if (List.member logData.id filterCache) then
+                Just logData
+            else
+                Nothing
 
         NoLog ->
             Nothing
 
 
-logsToEntries : NetModel.Logs -> Entries
-logsToEntries logs =
-    filterMapDict (\id oValue -> logToEntry oValue) logs
+catchData : Log -> Maybe StdData
+catchData log =
+    case log of
+        StdLog logData ->
+            Just logData
+
+        NoLog ->
+            Nothing
 
 
-type alias GameModelCompat =
-    -- FIXME: THIS IS FOR NOT CREATING A DEP-CYCLE WITH GameModel
-    { servers : Game.Servers.Models.Servers }
+applyFilter : LogViewer -> Logs -> List StdData
+applyFilter app logs =
+    logs
+        |> Dict.values
+        |> List.filterMap
+            (if ((String.length app.filterText) > 0) then
+                catchDataWhenFiltering app.filterCache
+             else
+                catchData
+            )
 
 
-findLogs : ServerID -> GameModelCompat -> NetModel.Logs
-findLogs serverID game =
-    case (getServerByID game.servers serverID) of
-        StdServer server ->
-            server.logs
-
-        NoServer ->
-            Dict.empty
-
-
-entriesUpdate : (LogViewerEntry -> Maybe LogViewerEntry) -> LogID -> Entries -> Entries
-entriesUpdate fn logID entries =
-    Dict.update logID (Maybe.andThen fn) entries
+getLogs : LogViewer -> Servers -> Logs
+getLogs app servers =
+    let
+        server =
+            getServerByID servers "localhost"
+    in
+        Maybe.withDefault
+            initialLogs
+            (Servers.getLogs server)
 
 
-entryToggle : LogID -> Entries -> Entries
-entryToggle =
-    entriesUpdate (\x -> Just { x | status = (toggleExpanded x.status) })
+enterEditing : Servers -> Model -> ID -> Model
+enterEditing servers ({ app } as model) logId =
+    let
+        logs =
+            getLogs app servers
 
+        log =
+            Dict.get logId logs
 
-entryEnterEditing : LogID -> Entries -> Entries
-entryEnterEditing =
-    entriesUpdate (\x -> Just { x | status = Editing x.src })
-
-
-entryLeaveEditing : LogID -> Entries -> Entries
-entryLeaveEditing =
-    entriesUpdate (\x -> Just { x | status = Normal True })
-
-
-entryApplyEditing : LogID -> Entries -> Entries
-entryApplyEditing =
-    -- TODO: Send update do Game Models && refresh logs
-    entriesUpdate
-        (\x ->
-            case x.status of
-                Editing input ->
-                    Just
-                        { x
-                            | status =
-                                Normal True
-                            , message =
-                                logContentInterpret input
-                            , src =
-                                input
-                        }
+        app_ =
+            (case log of
+                Just (StdLog log) ->
+                    Just (updateEditing app log.id log.raw)
 
                 _ ->
                     Nothing
-        )
+            )
+    in
+        andThenWithDefault
+            (\v -> { model | app = v })
+            model
+            app_
 
 
-entryUpdateEditing : String -> LogID -> Entries -> Entries
-entryUpdateEditing input =
-    entriesUpdate (\x -> Just { x | status = Editing input })
+updateEditing : LogViewer -> ID -> String -> LogViewer
+updateEditing app logId value =
+    let
+        editing_ =
+            Dict.insert logId value app.editing
+    in
+        { app | editing = editing_ }
+
+
+toggleExpand : LogViewer -> ID -> LogViewer
+toggleExpand app logId =
+    { app
+        | expanded =
+            if (List.member logId app.expanded) then
+                List.filter ((/=) logId) app.expanded
+            else
+                logId :: app.expanded
+    }
+
+
+leaveEditing : LogViewer -> ID -> LogViewer
+leaveEditing app logId =
+    let
+        editing_ =
+            Dict.filter (\k _ -> k /= logId) app.editing
+    in
+        { app | editing = editing_ }
+
+
+getEdit : LogViewer -> ID -> Maybe String
+getEdit app logId =
+    Dict.get logId app.editing
+
+
+logFilterMapFun : String -> Log -> Maybe ID
+logFilterMapFun filter log =
+    case log of
+        NoLog ->
+            Nothing
+
+        StdLog data ->
+            if (String.contains filter data.raw) then
+                Just data.id
+            else
+                Nothing
+
+
+updateTextFilter : LogViewer -> Servers -> String -> LogViewer
+updateTextFilter app servers newFilter =
+    let
+        newFilterCache =
+            getLogs app servers
+                |> Dict.values
+                |> List.filterMap
+                    (logFilterMapFun newFilter)
+    in
+        { app
+            | filterText = newFilter
+            , filterCache = newFilterCache
+        }

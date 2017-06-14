@@ -51,19 +51,19 @@ addLogGenericTests =
         \( logs, log ) ->
             let
                 model =
-                    addLog log logs
+                    add log logs
 
                 expectations =
                     case log of
-                        LogEntry log ->
+                        StdLog log ->
                             Just True
 
                         NoLog ->
                             Nothing
             in
                 log
-                    |> getLogID
-                    |> andJust (model |> flip logExists)
+                    |> getID
+                    |> andJust (model |> flip exists)
                     |> Expect.equal expectations
     ]
 
@@ -91,29 +91,29 @@ updateLogGenericTests =
             let
                 log_ =
                     case log of
-                        LogEntry log ->
-                            LogEntry { log | content = content }
+                        StdLog log ->
+                            StdLog { log | raw = content }
 
                         NoLog ->
                             NoLog
 
                 model =
                     logs
-                        |> addLog log
-                        |> updateLog log_
+                        |> add log
+                        |> update log_
 
                 expectations =
                     case log of
-                        LogEntry _ ->
+                        StdLog _ ->
                             Just content
 
                         NoLog ->
                             Nothing
             in
                 log
-                    |> getLogID
-                    |> andJust (model |> flip getLogByID)
-                    |> andThen getLogContent
+                    |> getID
+                    |> andJust (model |> flip getByID)
+                    |> andThen getRawContent
                     |> Expect.equal expectations
     ]
 
@@ -141,20 +141,20 @@ deleteLogGenericTests =
             let
                 model =
                     logs
-                        |> addLog log
-                        |> removeLog log
+                        |> add log
+                        |> remove log
 
                 expectations =
                     case log of
-                        LogEntry log ->
+                        StdLog log ->
                             Just False
 
                         NoLog ->
                             Nothing
             in
                 log
-                    |> getLogID
-                    |> andJust (model |> flip logExists)
+                    |> getID
+                    |> andJust (model |> flip exists)
                     |> Expect.equal expectations
     , fuzz
         (tuple ( Gen.model, Gen.log ))
@@ -162,6 +162,6 @@ deleteLogGenericTests =
       <|
         \( logs, log ) ->
             logs
-                |> removeLog log
+                |> remove log
                 |> Expect.equal logs
     ]

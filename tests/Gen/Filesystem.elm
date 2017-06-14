@@ -228,7 +228,9 @@ genEmptyFilesystem =
 
 genNonEmptyFilesystem : Generator Filesystem
 genNonEmptyFilesystem =
-    List.foldl addFileRecursively initialFilesystem
+    List.foldl
+        addFileRecursively
+        initialFilesystem
         >> constant
         |> (flip andThen) genFileList
 
