@@ -17,4 +17,4 @@ type Msg
 
 
 type RequestMsg
-    = LoginRequestMsg ResponseType
+    = LoginRequest ResponseType

@@ -3,6 +3,7 @@ module Landing.SignUp.Update exposing (update)
 import Landing.SignUp.Models exposing (Model, FormError)
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Requests exposing (..)
+import Landing.SignUp.Requests.SignUp as SignUp
 import Core.Messages exposing (CoreMsg)
 import Core.Models exposing (CoreModel)
 
@@ -13,7 +14,7 @@ update msg model core =
         SubmitForm ->
             let
                 cmd =
-                    create
+                    SignUp.request
                         model.email
                         model.username
                         model.password
@@ -70,7 +71,7 @@ update msg model core =
                 ( { model | formErrors = newFormErrors }, Cmd.none, [] )
 
         Request data ->
-            response (handler data) model core
+            response (receive data) model core
 
 
 
@@ -85,10 +86,10 @@ response :
 response response model core =
     case response of
         -- TODO: add more types to match response status
-        CreateResponse _ _ _ ->
+        SignUpResponse (SignUp.OkResponse _ _ _) ->
             ( model, Cmd.none, [] )
 
-        NoOp ->
+        _ ->
             ( model, Cmd.none, [] )
 
 

@@ -15,4 +15,4 @@ type Msg
 
 
 type RequestMsg
-    = CreateRequestMsg ResponseType
+    = SignUpRequest ResponseType
