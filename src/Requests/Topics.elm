@@ -15,19 +15,20 @@ type Topic
     = AccountLoginTopic
     | AccountCreateTopic
     | AccountLogoutTopic
+    | AccountServerIndexTopic
 
 
 getChannel : Topic -> Channel
 getChannel topic =
     case topic of
-        AccountLoginTopic ->
-            AccountChannel
-
-        AccountCreateTopic ->
-            AccountChannel
-
         AccountLogoutTopic ->
             RequestsChannel
+
+        AccountServerIndexTopic ->
+            AccountChannel
+
+        _ ->
+            Debug.crash ("No channel for topic " ++ (toString topic))
 
 
 getDriver : Topic -> Driver
@@ -39,7 +40,7 @@ getDriver topic =
         AccountLoginTopic ->
             HttpDriver
 
-        AccountLogoutTopic ->
+        _ ->
             WebsocketDriver
 
 
@@ -48,6 +49,9 @@ getWebsocketMsg topic =
     case topic of
         AccountLogoutTopic ->
             "account.logout"
+
+        AccountServerIndexTopic ->
+            "server.index"
 
         _ ->
             Debug.crash ("No msg for topic " ++ (toString topic))
