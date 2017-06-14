@@ -16,6 +16,8 @@ type Topic
     | AccountCreateTopic
     | AccountLogoutTopic
     | AccountServerIndexTopic
+    | ServerLogIndexTopic
+    | ServerFileIndexTopic
 
 
 getChannel : Topic -> Channel
@@ -26,6 +28,12 @@ getChannel topic =
 
         AccountServerIndexTopic ->
             AccountChannel
+
+        ServerLogIndexTopic ->
+            ServerChannel
+
+        ServerFileIndexTopic ->
+            ServerChannel
 
         _ ->
             Debug.crash ("No channel for topic " ++ (toString topic))
@@ -51,6 +59,12 @@ getWebsocketMsg topic =
             "account.logout"
 
         AccountServerIndexTopic ->
+            "server.index"
+
+        ServerLogIndexTopic ->
+            "log.index"
+
+        ServerFileIndexTopic ->
             "server.index"
 
         _ ->

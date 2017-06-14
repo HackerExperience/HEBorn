@@ -4,6 +4,7 @@ module Driver.Websocket.Channels exposing (Channel(..), getAddress)
 type Channel
     = AccountChannel
     | RequestsChannel
+    | ServerChannel
 
 
 getAddress : Channel -> Maybe String -> String
@@ -32,6 +33,9 @@ getAddressHead channel =
     case channel of
         AccountChannel ->
             "account:"
+
+        ServerChannel ->
+            "server:"
 
         RequestsChannel ->
             "requests"
