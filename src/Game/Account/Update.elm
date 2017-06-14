@@ -1,10 +1,12 @@
 module Game.Account.Update exposing (..)
 
-import Game.Account.Models exposing (..)
-import Game.Account.Messages exposing (..)
-import Game.Account.Requests exposing (..)
-import Game.Models exposing (GameModel)
+import Maybe
 import Core.Messages exposing (CoreMsg(MsgWebsocket))
+import Game.Account.Messages exposing (..)
+import Game.Account.Models exposing (..)
+import Game.Account.Requests exposing (..)
+import Game.Account.Requests.Logout as Logout
+import Game.Models exposing (GameModel)
 
 
 update :
@@ -32,7 +34,7 @@ update msg model game =
                             setToken model Nothing
 
                         cmd =
-                            logout token game.meta.config
+                            Logout.request token game.meta.config
                     in
                         ( model_, cmd, [] )
 
@@ -40,7 +42,7 @@ update msg model game =
                     ( model, Cmd.none, [] )
 
         Request data ->
-            response (handler data) model game
+            response (receive data) model game
 
         _ ->
             ( model, Cmd.none, [] )
@@ -53,5 +55,8 @@ response :
     -> ( AccountModel, Cmd msg, List CoreMsg )
 response response model game =
     case response of
-        LogoutResponse ->
+        LogoutResponse Logout.OkResponse ->
+            ( model, Cmd.none, [] )
+
+        _ ->
             ( model, Cmd.none, [] )
