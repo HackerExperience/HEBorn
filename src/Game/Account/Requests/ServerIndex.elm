@@ -25,7 +25,6 @@ import Json.Decode
         , decodeString
         , succeed
         , fail
-        , map
         , andThen
         , list
         , string
