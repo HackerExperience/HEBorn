@@ -1,4 +1,4 @@
-module Game.Servers.Processes.ModelTest exposing (all)
+module Game.Servers.Processes.LocalModelTest exposing (all)
 
 import Expect
 import Gen.Processes as Gen
@@ -7,6 +7,8 @@ import Maybe exposing (andThen)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Utils exposing (swap, andJust)
+import Game.Servers.Processes.Types.Shared exposing (..)
+import Game.Servers.Processes.Types.Local exposing (ProcessState(..))
 import Game.Servers.Processes.Models exposing (..)
 
 
@@ -33,6 +35,21 @@ processOperationsTests =
         ]
 
 
+getState : Process -> Maybe ProcessState
+getState process =
+    case process.prop of
+        LocalProcess prop ->
+            Just prop.state
+
+        _ ->
+            Nothing
+
+
+getStateForJust : Process -> ProcessState
+getStateForJust process =
+    Maybe.withDefault StateStandby (getState process)
+
+
 
 --------------------------------------------------------------------------------
 -- Add Process
@@ -49,7 +66,7 @@ addProcessTests =
 addProcessGenericTests : List Test
 addProcessGenericTests =
     [ fuzz
-        (tuple ( Gen.emptyProcesses, Gen.process ))
+        (tuple ( Gen.emptyProcesses, Gen.localProcess ))
         "can add a process"
       <|
         \( processes, process ) ->
@@ -75,16 +92,17 @@ pauseProcessTests =
 
 pauseProcessGenericTests : List Test
 pauseProcessGenericTests =
+    -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can pause a process"
       <|
         \( model, process ) ->
             model
                 |> addProcess process
-                |> pauseProcess process
+                |> (flip pauseProcess) process
                 |> getProcessByID process.id
-                |> andThen (\process_ -> Just process_.state)
+                |> andThen getState
                 |> Expect.equal (Just StatePaused)
     ]
 
@@ -104,8 +122,9 @@ resumeProcessTests =
 
 resumeProcessGenericTests : List Test
 resumeProcessGenericTests =
+    -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can resume a paused process"
       <|
         \( processes, process ) ->
@@ -113,18 +132,18 @@ resumeProcessGenericTests =
                 model =
                     processes
                         |> addProcess process
-                        |> pauseProcess process
+                        |> (flip pauseProcess) process
 
                 maybeState =
                     model
                         |> getProcessByID process.id
-                        |> andJust ((swap resumeProcess) model 1)
+                        |> andJust (resumeProcess model)
                         |> andThen (getProcessByID process.id)
-                        |> andJust (\process_ -> process_.state)
+                        |> andJust getStateForJust
             in
-                Expect.equal (Just (StateRunning 1)) maybeState
+                Expect.equal (Just StateRunning) maybeState
     , fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can't resume a running process"
       <|
         \( processes, process ) ->
@@ -132,14 +151,14 @@ resumeProcessGenericTests =
                 model =
                     processes
                         |> addProcess process
-                        |> resumeProcess process 1
+                        |> (flip resumeProcess) process
             in
                 model
                     |> getProcessByID process.id
-                    |> andJust ((swap resumeProcess) model 2)
+                    |> andJust (resumeProcess model)
                     |> andThen (getProcessByID process.id)
-                    |> andJust (\process_ -> process_.state)
-                    |> Expect.notEqual (Just (StateRunning 2))
+                    |> andJust getStateForJust
+                    |> Expect.equal (Just StateRunning)
     ]
 
 
@@ -158,8 +177,9 @@ completeProcessTests =
 
 completeProcessGenericTests : List Test
 completeProcessGenericTests =
+    -- FIXME: TEST ONLY LOCAL PROCESSES
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can complete a process"
       <|
         \( processes, process ) ->
@@ -167,11 +187,11 @@ completeProcessGenericTests =
                 model =
                     processes
                         |> addProcess process
-                        |> completeProcess process
+                        |> (flip completeProcess) process
             in
                 model
-                    |> getProcessByID process.id
-                    |> andJust (\process_ -> process_.state)
+                    |> getProcessByID (getProcessID process)
+                    |> andJust getStateForJust
                     |> Expect.equal (Just StateComplete)
     ]
 
@@ -192,21 +212,21 @@ deleteProcessTests =
 deleteProcessGenericTests : List Test
 deleteProcessGenericTests =
     [ fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can delete a process"
       <|
         \( processes, process ) ->
             processes
                 |> addProcess process
-                |> removeProcess process
+                |> (flip removeProcess) process
                 |> getProcessByID process.id
                 |> Expect.equal Nothing
     , fuzz
-        (tuple ( Gen.processes, Gen.process ))
+        (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can't delete a non-existing process"
       <|
         \( processes, process ) ->
             processes
-                |> removeProcess process
+                |> (flip removeProcess) process
                 |> Expect.equal processes
     ]
