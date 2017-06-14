@@ -17,7 +17,7 @@ import Requests.Types exposing (Code(..))
 
 type Response
     = OkResponse String String String
-    | ErrorResponse String
+    | ErrorResponse
 
 
 request : String -> String -> String -> Config -> Cmd Msg
@@ -35,8 +35,7 @@ receive code json =
             Requests.report (decodeString decoder json)
 
         _ ->
-            -- WIP: handle error message (#117)
-            ErrorResponse ""
+            ErrorResponse
 
 
 

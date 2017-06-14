@@ -17,7 +17,8 @@ import Requests.Types exposing (Code(..))
 
 type Response
     = OkResponse String String
-    | ErrorResponse String
+    | ErrorResponse
+    | NoOp
 
 
 request : String -> String -> Config -> Cmd Msg
@@ -36,9 +37,11 @@ receive code json =
                 |> decodeString decoder
                 |> Requests.report
 
+        NotFoundCode ->
+            ErrorResponse
+
         _ ->
-            -- WIP: handle error message (#117)
-            ErrorResponse ""
+            NoOp
 
 
 

@@ -54,6 +54,7 @@ response response model core =
                     { model
                         | username = ""
                         , password = ""
+                        , loginFailed = False
                     }
 
                 msgs =
@@ -67,6 +68,13 @@ response response model core =
                     ]
             in
                 ( model_, Cmd.none, msgs )
+
+        LoginResponse Login.ErrorResponse ->
+            let
+                model_ =
+                    { model | loginFailed = True }
+            in
+                ( model_, Cmd.none, [] )
 
         _ ->
             ( model, Cmd.none, [] )
