@@ -11,17 +11,22 @@ import Json.Decode
         ( Decoder
         , Value
         , decodeValue
+        , succeed
+        , fail
+        , andThen
         , list
         , string
         )
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Json.Encode as Encode
 import Result exposing (Result(..))
+import Date exposing (Date)
 import Core.Config exposing (Config)
 import Game.Servers.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (Code(..))
+import Utils.Json.Decode exposing (date)
 
 
 type Response
@@ -40,8 +45,7 @@ type alias Logs =
 type alias Log =
     { id : String
     , message : String
-
-    -- , inserted_at : ?
+    , insertedAt : Date
     }
 
 
@@ -89,7 +93,7 @@ root =
 
 log : Decoder Log
 log =
-    -- TODO: add timestamp once format is figured out
     decode Log
         |> required "log_id" string
         |> required "message" string
+        |> required "inserted_at" date
