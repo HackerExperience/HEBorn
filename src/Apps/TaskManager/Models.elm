@@ -1,6 +1,17 @@
 module Apps.TaskManager.Models exposing (..)
 
+import Dict
+import Utils exposing (andThenWithDefault, filterMapList)
 import Apps.TaskManager.Menu.Models as Menu
+import Game.Servers.Models
+    exposing
+        ( ServerID
+        , getProcesses
+        , getServerByID
+        , Servers
+        )
+import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 
 
 type alias ResourceUsage =
@@ -11,28 +22,16 @@ type alias ResourceUsage =
     }
 
 
-type alias TaskEntry =
-    { title : String
-    , target : String
-    , appFile : String
-    , appVer : Float
-    , etaTotal : Int
-    , etaNow : Int
-    , usage : ResourceUsage
-    }
-
-
 type alias Entries =
-    List TaskEntry
+    List Processes.Process
 
 
 type alias TaskManager =
-    { tasks : Entries
+    { limits : ResourceUsage
     , historyCPU : List Float
     , historyMem : List Float
     , historyDown : List Float
     , historyUp : List Float
-    , limits : ResourceUsage
     }
 
 
@@ -66,43 +65,75 @@ initialModel =
 
 increaseHistory : a -> List a -> List a
 increaseHistory new old =
-    new :: (List.take 9 old)
+    new :: (List.take 19 old)
 
 
 initialTaskManager : TaskManager
 initialTaskManager =
     TaskManager
-        [ (TaskEntry
-            "Encrypt Connection"
-            "89.32.182.204"
-            "CantTouchThis.enc"
-            4.3
-            20
-            5
-            (ResourceUsage 1900000000 786000000 0 0)
-          )
-        ]
-        [ 2100000000, 1800000000, 2100000000, 1800000000 ]
-        [ 4096000000, 3464846848, 3164846848 ]
-        [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
-        [ 123, 500, 120000, 123000, 1017000, 140, 160 ]
+        --TODO: Remove DUMMY limits
         (ResourceUsage 2100000000 4096000000 1024000 512000)
+        []
+        []
+        []
+        []
 
 
-updateTasks : Entries -> ResourceUsage -> TaskManager -> TaskManager
-updateTasks tasks_ limit old =
+packUsage : Local.ProcessProp -> ResourceUsage
+packUsage ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) =
+    ResourceUsage
+        (toFloat cpuUsage)
+        (toFloat memUsage)
+        (toFloat downloadUsage)
+        (toFloat uploadUsage)
+
+
+taskUsageSum : Local.ProcessProp -> ( Float, Float, Float, Float ) -> ( Float, Float, Float, Float )
+taskUsageSum ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) =
+    ( cpu_ + (toFloat cpuUsage)
+    , mem_ + (toFloat memUsage)
+    , down_ + (toFloat downloadUsage)
+    , up_ + (toFloat uploadUsage)
+    )
+
+
+onlyLocalTasks : Processes -> List Local.ProcessProp
+onlyLocalTasks tasks =
     let
+        tasksValues =
+            Dict.values tasks
+
+        localTasks =
+            filterMapList
+                (\v ->
+                    case v.prop of
+                        LocalProcess p ->
+                            Just p
+
+                        _ ->
+                            Nothing
+                )
+                tasksValues
+    in
+        localTasks
+
+
+updateTasks : Servers -> ResourceUsage -> TaskManager -> TaskManager
+updateTasks servers limit old =
+    let
+        server =
+            getServerByID servers "localhost"
+
+        tasks_ =
+            Maybe.withDefault
+                initialProcesses
+                (getProcesses server)
+
         ( cpu, mem, down, up ) =
             List.foldr
-                (\({ usage } as entry) ( cpu_, mem_, down_, up_ ) ->
-                    ( cpu_ + usage.cpu
-                    , mem_ + usage.mem
-                    , down_ + usage.down
-                    , up_ + usage.up
-                    )
-                )
+                taskUsageSum
                 ( 0.0, 0.0, 0.0, 0.0 )
-                tasks_
+                (onlyLocalTasks tasks_)
 
         historyCPU =
             (increaseHistory cpu old.historyCPU)
@@ -117,9 +148,8 @@ updateTasks tasks_ limit old =
             (increaseHistory up old.historyUp)
     in
         TaskManager
-            tasks_
+            limit
             historyCPU
             historyMem
             historyDown
             historyUp
-            limit

@@ -8,6 +8,13 @@ import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
 import Game.Servers.Processes.Models as Processes exposing (Processes, initialProcesses)
 
 
+-- DUMMIES
+
+import Game.Servers.Filesystem.Dummy exposing (dummyFS)
+import Game.Servers.Logs.Dummy exposing (dummyLogs)
+import Game.Servers.Processes.Dummy exposing (dummyProcesses)
+
+
 type alias ServerID =
     ID
 
@@ -103,13 +110,13 @@ getServerByID servers id =
 initialServers : Servers
 initialServers =
     addServer
-        -- TOY VALUE FOR PLAYING
+        -- DUMMY VALUE FOR PLAYING
         Dict.empty
         { id = localhostServerID
         , ip = localhost
-        , filesystem = initialFilesystem
-        , logs = initialLogs
-        , processes = initialProcesses
+        , filesystem = dummyFS
+        , logs = dummyLogs
+        , processes = dummyProcesses
         }
 
 

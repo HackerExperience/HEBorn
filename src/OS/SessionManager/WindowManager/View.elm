@@ -1,4 +1,4 @@
-module OS.SessionManager.WindowManager.View exposing (view)
+module OS.SessionManager.WindowManager.View exposing (view, windowTitle)
 
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
