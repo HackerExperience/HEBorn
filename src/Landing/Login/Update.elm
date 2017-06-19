@@ -3,6 +3,7 @@ module Landing.Login.Update exposing (..)
 import Landing.Login.Models exposing (Model)
 import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Requests exposing (..)
+import Landing.Login.Requests.Login as Login
 import Driver.Websocket.Channels exposing (..)
 import Core.Messages exposing (CoreMsg(MsgWebsocket))
 import Core.Models exposing (CoreModel)
@@ -17,7 +18,10 @@ update msg model core =
         SubmitLogin ->
             let
                 cmd =
-                    login model.username model.password core.game.meta.config
+                    Login.request
+                        model.username
+                        model.password
+                        core.game.meta.config
             in
                 ( model, cmd, [] )
 
@@ -34,7 +38,7 @@ update msg model core =
             ( model, Cmd.none, [] )
 
         Request data ->
-            response (handler data) model core
+            response (receive data) model core
 
 
 response :
@@ -44,12 +48,13 @@ response :
     -> ( Model, Cmd Msg, List CoreMsg )
 response response model core =
     case response of
-        LoginResponse token id ->
+        LoginResponse (Login.OkResponse token id) ->
             let
                 model_ =
                     { model
                         | username = ""
                         , password = ""
+                        , loginFailed = False
                     }
 
                 msgs =
@@ -64,5 +69,12 @@ response response model core =
             in
                 ( model_, Cmd.none, msgs )
 
-        NoOp ->
+        LoginResponse Login.ErrorResponse ->
+            let
+                model_ =
+                    { model | loginFailed = True }
+            in
+                ( model_, Cmd.none, [] )
+
+        _ ->
             ( model, Cmd.none, [] )

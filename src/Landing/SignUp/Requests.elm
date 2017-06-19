@@ -1,60 +1,17 @@
-module Landing.SignUp.Requests
-    exposing
-        ( Response(..)
-        , create
-        , handler
-        )
+module Landing.SignUp.Requests exposing (Response(..), receive)
 
 import Landing.SignUp.Messages exposing (..)
-import Core.Config exposing (Config)
-import Requests.Requests exposing (request, report)
-import Requests.Types exposing (Code(..))
-import Requests.Topics exposing (Topic(..))
-import Json.Encode as Encode
-import Json.Decode exposing (Value, string, decodeString, dict, decodeValue)
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Landing.SignUp.Requests.SignUp as SignUp
 
 
 type Response
-    = CreateResponse String String String
-    | NoOp
+    = SignUpResponse SignUp.Response
 
 
-create : String -> String -> String -> Config -> Cmd Msg
-create email username password =
-    let
-        payload =
-            Encode.object
-                [ ( "email", Encode.string email )
-                , ( "username", Encode.string username )
-                , ( "password", Encode.string password )
-                ]
-    in
-        request AccountCreateTopic
-            (CreateRequestMsg >> Request)
-            Nothing
-            payload
-
-
-handler : RequestMsg -> Response
-handler request =
+receive : RequestMsg -> Response
+receive request =
     case request of
-        CreateRequestMsg ( code, json ) ->
-            createHandler code json
-
-
-createHandler : Code -> String -> Response
-createHandler code json =
-    let
-        decoder =
-            decode CreateResponse
-                |> required "username" string
-                |> required "email" string
-                |> required "account_id" string
-    in
-        case code of
-            OkCode ->
-                report (decodeString decoder json)
-
-            _ ->
-                NoOp
+        SignUpRequest ( code, json ) ->
+            json
+                |> SignUp.receive code
+                |> SignUpResponse
