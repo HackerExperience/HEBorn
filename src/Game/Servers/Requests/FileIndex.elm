@@ -3,6 +3,19 @@ module Game.Servers.Requests.FileIndex
         ( Response(..)
         , request
         , receive
+        , Index
+        , Files
+        , File
+        , SoftwareType(..)
+        , SoftwareModule(..)
+        , CrackerModule(..)
+        , ExploitModule(..)
+        , FirewallModule(..)
+        , HasherModule(..)
+        , LogForgerModule(..)
+        , LogRecoverModule(..)
+        , EncryptorModule(..)
+        , DecryptorModule(..)
         )
 
 import Dict exposing (Dict)
@@ -20,13 +33,14 @@ import Json.Decode
         , int
         )
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
-import Json.Encode as Encode
 import Result exposing (Result(..))
+import Date exposing (Date)
 import Core.Config exposing (Config)
 import Game.Servers.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (Code(..), emptyPayload)
+import Utils.Json.Decode exposing (date)
 
 
 type Response
@@ -47,11 +61,11 @@ type alias File =
     , path : String -- full path
     , type_ : SoftwareType
     , size : Int
+    , insertedAt : Date
+    , updatedAt : Date
 
     -- , modules : {}
     -- , meta : {}
-    -- , inserted_at : ?
-    -- , updated_at : ?
     }
 
 
@@ -130,7 +144,7 @@ request =
     Requests.request ServerFileIndexTopic
         (FileIndexRequest >> Request)
         Nothing
-        Encode.null
+        emptyPayload
 
 
 receive : Code -> String -> Response
@@ -168,6 +182,8 @@ file =
         |> required "path" string
         |> required "software_type" softwareType
         |> required "size" int
+        |> required "inserted_at" date
+        |> required "updated_at" date
 
 
 softwareType : Decoder SoftwareType
@@ -180,30 +196,33 @@ decodeSoftwareType str =
     case str of
         "text" ->
             succeed Text
-        
+
         "cracker" ->
             succeed Cracker
-        
+
         "exploit" ->
             succeed Exploit
-        
+
         "firewall" ->
             succeed Firewall
-        
+
         "hasher" ->
             succeed Hasher
-        
+
         "log_forger" ->
             succeed LogForger
-        
+
         "log_recover" ->
             succeed LogRecover
-        
+
         "encryptor" ->
             succeed Encryptor
-        
+
         "decryptor" ->
             succeed Decryptor
+
+        "anymap" ->
+            succeed AnyMap
 
         error ->
             fail <|
