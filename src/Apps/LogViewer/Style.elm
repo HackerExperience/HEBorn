@@ -26,7 +26,7 @@ type Classes
     | BtnFilter
     | BtnCrypt
     | BtnDelete
-    | BtnUnlock
+    | BtnUncrypt
     | BtnApply
     | BtnCancel
     | BottomButton
@@ -123,7 +123,7 @@ css =
             [ ico
             , before [ Icon.trash ]
             ]
-        , class BtnUnlock
+        , class BtnUncrypt
             [ ico
             , before [ Icon.unlock ]
             ]

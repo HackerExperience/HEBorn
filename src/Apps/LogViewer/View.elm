@@ -82,6 +82,15 @@ renderButton logID btn =
                     BtnCrypt ->
                         [ onClick (StartCrypting logID) ]
 
+                    BtnUncrypt ->
+                        [ onClick (StartUncrypting logID) ]
+
+                    BtnHide ->
+                        [ onClick (StartHiding logID) ]
+
+                    BtnDelete ->
+                        [ onClick (StartDeleting logID) ]
+
                     _ ->
                         []
                )
@@ -205,7 +214,7 @@ renderBottomActions app entry =
                         [ BtnCrypt, BtnHide, BtnEdit, BtnDelete ]
 
                     Cryptographed ->
-                        [ BtnHide, BtnUnlock ]
+                        [ BtnHide, BtnUncrypt ]
              else
                 []
             )

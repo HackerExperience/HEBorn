@@ -94,3 +94,33 @@ update msg game ({ app } as model) =
                     ]
             in
                 ( model, Cmd.none, gameMsg )
+
+        StartUncrypting logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Uncrypt logId "NOT IMPLEMENTED YET")
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )
+
+        StartHiding logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Hide logId)
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )
+
+        StartDeleting logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Delete logId)
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )

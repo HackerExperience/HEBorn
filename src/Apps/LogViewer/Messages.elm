@@ -13,3 +13,6 @@ type Msg
     | ApplyEditing ID
     | LeaveEditing ID
     | StartCrypting ID
+    | StartUncrypting ID
+    | StartHiding ID
+    | StartDeleting ID
