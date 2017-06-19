@@ -6,9 +6,11 @@ module Requests.Types
         , WebsocketResponse
         , Context
         , getCode
+        , emptyPayload
         )
 
 import Json.Decode exposing (Value)
+import Json.Encode as Encode
 
 
 type alias ResponseType =
@@ -49,3 +51,9 @@ getCode code =
 
         _ ->
             UnknownErrorCode
+
+
+emptyPayload : Encode.Value
+emptyPayload =
+    -- empty payload for request
+    Encode.object []
