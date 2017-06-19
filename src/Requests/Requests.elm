@@ -92,7 +92,7 @@ genericHttp msg result =
             msg ( OkCode, data )
 
         Err (Http.BadStatus response) ->
-            msg ( getCode response.status.code, "" )
+            msg ( getCode response.status.code, response.body )
 
         _ ->
             Debug.crash "Http Driver failure"

@@ -20,6 +20,7 @@ type Driver
 type Code
     = OkCode
     | NotFoundCode
+    | BadRequestCode
     | UnknownErrorCode
 
 
@@ -35,6 +36,9 @@ getCode code =
 
         404 ->
             NotFoundCode
+
+        400 ->
+            BadRequestCode
 
         _ ->
             UnknownErrorCode
