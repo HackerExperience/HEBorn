@@ -32,13 +32,12 @@ import Json.Decode
         )
 import Json.Decode.Extra exposing (dict2)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
-import Json.Encode as Encode
 import Result exposing (Result(..))
 import Core.Config exposing (Config)
 import Game.Account.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (Code(..), emptyPayload)
 
 
 type Response
@@ -114,7 +113,7 @@ request account =
     Requests.request AccountServerIndexTopic
         (ServerIndexRequest >> Request)
         (Just account)
-        Encode.null
+        emptyPayload
 
 
 receive : Code -> String -> Response
