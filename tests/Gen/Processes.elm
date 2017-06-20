@@ -196,7 +196,7 @@ genLocalProcessType =
         , map3 Local.Decryptor genVersion genFileID genScope
         , map2 Local.Encryptor genVersion genFileID
         , map Local.FileTransference genFileID
-        , map3 Local.LogForge genVersion genLogID genLogContent
+        , map3 Local.LogForge genVersion genLogID genLogForgeAction
         , map PassiveFirewall genVersion
         ]
 
@@ -352,6 +352,16 @@ genLocalProcesses =
 genRemoteProcesses : Generator Processes
 genRemoteProcesses =
     choices [ genEmptyProcesses, genNonEmptyRemoteProcesses ]
+
+
+genLogForgeAction : Generator LogForgeAction
+genLogForgeAction =
+    choices
+        [ map LogForgeMessage genLogContent
+        , constant LogCrypt
+        , constant LogUncrypt
+        , constant LogHide
+        ]
 
 
 genModel : Generator Processes

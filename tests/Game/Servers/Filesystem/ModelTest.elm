@@ -65,7 +65,7 @@ addFileGenericTests =
                     addFileRecursively file filesystem
             in
                 file
-                    |> getFilePath
+                    |> getFileLocation
                     |> (flip getFilesOnPath) model
                     |> List.filter (\x -> (getFileId x) == fileID)
                     |> List.head
@@ -83,7 +83,7 @@ addFileGenericTests =
         \( model, folder ) ->
             model
                 |> addFileRecursively folder
-                |> pathExists (getFilePath folder)
+                |> pathExists (getFileLocation folder)
                 |> Expect.equal True
     , fuzz
         (tuple4 ( Gen.model, Gen.folder, Gen.stdFile, Gen.stdFile ))
@@ -92,7 +92,7 @@ addFileGenericTests =
         \( model, folder, file1, file2 ) ->
             let
                 path =
-                    getFilePath folder
+                    getFileLocation folder
 
                 file1_ =
                     setFilePath path file1
@@ -155,7 +155,7 @@ moveStdFileTests =
                     getFileId file
 
                 destination =
-                    getFilePath folder
+                    getFileLocation folder
             in
                 model
                     |> addFileRecursively file
@@ -178,8 +178,8 @@ moveStdFileTests =
                 model
                     |> addFileRecursively file
                     |> addFileRecursively folder
-                    |> moveFile (getFilePath folder) file
-                    |> getFilesOnPath (getFilePath file)
+                    |> moveFile (getFileLocation folder) file
+                    |> getFilesOnPath (getFileLocation file)
                     |> List.filter (\x -> (getFileId x) == fileID)
                     |> List.head
                     |> Expect.equal Nothing
@@ -191,8 +191,8 @@ moveStdFileTests =
             model
                 |> addFileRecursively file
                 |> addFileRecursively folder
-                |> moveFile (getFilePath folder) file
-                |> pathExists (getFilePath file)
+                |> moveFile (getFileLocation folder) file
+                |> pathExists (getFileLocation file)
                 |> Expect.equal True
     ]
 
@@ -209,7 +209,7 @@ moveFolderTests =
                     getFileId file
 
                 destination =
-                    getFilePath folder
+                    getFileLocation folder
             in
                 model
                     |> addFileRecursively file
@@ -231,7 +231,7 @@ moveFolderTests =
         \( model, origin, target ) ->
             let
                 destination =
-                    getFilePath target
+                    getFileLocation target
 
                 newPath =
                     destination ++ pathSeparator ++ (getFileName origin)
@@ -249,7 +249,7 @@ moveFolderTests =
         \( model, file, folder1, folder2 ) ->
             let
                 destination =
-                    getFilePath folder2
+                    getFileLocation folder2
 
                 newPath =
                     destination ++ pathSeparator ++ (getFileName folder1)
@@ -317,7 +317,7 @@ deleteStdFileTests =
                 model
                     |> addFileRecursively file
                     |> removeFile file
-                    |> getFilesOnPath (getFilePath file)
+                    |> getFilesOnPath (getFileLocation file)
                     |> List.filter (\x -> (getFileId x) == fileID)
                     |> List.head
                     |> Expect.equal Nothing
@@ -329,7 +329,7 @@ deleteStdFileTests =
             model
                 |> addFileRecursively file
                 |> removeFile file
-                |> pathExists (getFilePath file)
+                |> pathExists (getFileLocation file)
                 |> Expect.equal True
     , fuzz
         (tuple3 ( Gen.model, Gen.stdFile, Gen.stdFile ))
@@ -338,7 +338,7 @@ deleteStdFileTests =
         \( model, file, file2 ) ->
             let
                 path =
-                    getFilePath file
+                    getFileLocation file
 
                 sister =
                     setFilePath path file2
@@ -388,7 +388,7 @@ deleteFolderTests =
                 model
                     |> addFileRecursively folder
                     |> removeFile folder
-                    |> getFilesOnPath (getFilePath folder)
+                    |> getFilesOnPath (getFileLocation folder)
                     |> List.filter (\x -> (getFileId x) == folderID)
                     |> List.head
                     |> Expect.equal Nothing

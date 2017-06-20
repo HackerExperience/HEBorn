@@ -1,10 +1,8 @@
 module Apps.Browser.Models exposing (..)
 
-import Html exposing (Html)
 import Utils exposing (andThenWithDefault)
-import Apps.Browser.Messages exposing (Msg)
 import Apps.Browser.Menu.Models as Menu
-import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent, getPageInitialContent)
+import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(PgBlank), urlParse)
 
 
 type alias BrowserPage =
@@ -64,7 +62,7 @@ initialBrowser =
     { addressBar = "about:blank"
 
     -- FIXME: update the content
-    , page = { url = "about:blank", title = "Blank", content = [] }
+    , page = { url = "about:blank", title = "Blank", content = PgBlank }
     , previousPages = []
     , nextPages = []
     }
@@ -201,4 +199,4 @@ enterAddress app =
         url_ =
             app.addressBar
     in
-        gotoPage { url = url_, content = getPageInitialContent url_, title = "" } app
+        gotoPage { url = url_, content = urlParse url_, title = "" } app

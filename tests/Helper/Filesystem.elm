@@ -63,5 +63,5 @@ addFileRecursively file filesystem =
             (getFileId file) ++ "_"
     in
         filesystem
-            |> addPathParents (getFilePath file) baseId
+            |> addPathParents (getFileLocation file) baseId
             |> addFile file
