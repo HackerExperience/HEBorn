@@ -3,7 +3,7 @@ module Apps.Explorer.View exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
-import UI.Widgets exposing (progressBar)
+import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Models exposing (GameModel)
 import Game.Servers.Models exposing (Server, getServerByID)

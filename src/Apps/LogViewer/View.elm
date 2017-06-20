@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css.Common exposing (elasticClass)
+import UI.Entries.FilterHeader exposing (filterHeader)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
 import Game.Servers.Logs.Models as Logs exposing (..)
@@ -313,28 +314,14 @@ renderEntryList app =
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div [ menuFilter ]
+    div []
         ([ menuView model
-         , div [ class [ HeaderBar ] ]
-            [ div [ class [ ETAct ] ]
-                [ span [ class [ BtnUser ] ] []
-                , text " "
-                , span [ class [ BtnEdit ] ] []
-                , text " "
-                , span [ class [ BtnHide ] ] []
-                ]
-            , div [ class [ ETFilter ] ]
-                [ div [ class [ BtnFilter ] ] []
-                , div [ class [ ETFBar ] ]
-                    [ input
-                        [ placeholder "Search..."
-                        , value app.filterText
-                        , onInput UpdateTextFilter
-                        ]
-                        []
-                    ]
-                ]
-            ]
+         , filterHeader
+            [ ( BtnUser, DummyNoOp, False ), ( BtnEdit, DummyNoOp, False ), ( BtnHide, DummyNoOp, False ) ]
+            []
+            app.filterText
+            "Search..."
+            UpdateTextFilter
          ]
             ++ (getLogs app game.servers
                     |> applyFilter app

@@ -125,3 +125,6 @@ update msg game ({ app } as model) =
                     ]
             in
                 ( model, Cmd.none, gameMsg )
+
+        DummyNoOp ->
+            ( model, Cmd.none, [] )
