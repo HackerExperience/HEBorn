@@ -62,7 +62,7 @@ account msg model =
 
 
 servers :
-    Servers.ServerMsg
+    Servers.Msg
     -> GameModel
     -> ( GameModel, Cmd GameMsg, List CoreMsg )
 servers msg model =
