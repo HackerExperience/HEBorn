@@ -33,8 +33,11 @@ type alias TargetLogID =
     String
 
 
-type alias LogMessage =
-    String
+type LogForgeAction
+    = LogForgeMessage String
+    | LogCrypt
+    | LogUncrypt
+    | LogHide
 
 
 type alias GatewayID =

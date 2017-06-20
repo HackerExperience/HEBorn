@@ -11,9 +11,10 @@ import Game.Servers.Processes.Models
         , getProcessByID
         , pauseProcess
         , resumeProcess
-        , completeProcess
         , removeProcess
+        , addProcess
         )
+import Game.Servers.Processes.ResultHandler exposing (completeProcess)
 
 
 update :
@@ -49,15 +50,15 @@ update msg model game =
 
         Complete pID ->
             let
-                processes_ =
+                ( processes_, feedback ) =
                     andThenWithDefault
                         (\process ->
                             completeProcess model process
                         )
-                        model
+                        ( model, [] )
                         (getProcessByID pID model)
             in
-                ( processes_, Cmd.none, [] )
+                ( processes_, Cmd.none, feedback )
 
         Remove pID ->
             let
@@ -68,5 +69,14 @@ update msg model game =
                         )
                         model
                         (getProcessByID pID model)
+            in
+                ( processes_, Cmd.none, [] )
+
+        Create process ->
+            let
+                processes_ =
+                    addProcess
+                        process
+                        model
             in
                 ( processes_, Cmd.none, [] )
