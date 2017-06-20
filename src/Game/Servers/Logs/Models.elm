@@ -132,10 +132,15 @@ remove : Log -> Logs -> Logs
 remove log logs =
     case (getID log) of
         Just id ->
-            Dict.remove id logs
+            removeById id logs
 
         Nothing ->
             logs
+
+
+removeById : ID -> Logs -> Logs
+removeById logId logs =
+    Dict.remove logId logs
 
 
 update : Log -> Logs -> Logs

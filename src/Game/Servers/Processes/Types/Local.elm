@@ -35,7 +35,7 @@ type ProcessType
     | Decryptor Version TargetFileID Scope
     | Encryptor Version TargetFileID
     | FileTransference TargetFileID
-    | LogForge Version TargetLogID LogMessage
+    | LogForge Version TargetLogID LogForgeAction
     | PassiveFirewall Version
 
 

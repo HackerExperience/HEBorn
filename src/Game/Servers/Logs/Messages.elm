@@ -7,3 +7,6 @@ type Msg
     = UpdateContent ID String
     | Crypt ID
     | Uncrypt ID String
+    | Hide ID
+    | Unhide StdData
+    | Delete ID

@@ -15,7 +15,7 @@ module Game.Servers.Filesystem.Models
         , FolderData
         , addFile
         , removeFile
-        , getFilePath
+        , getFileLocation
         , getFileName
         , getFileId
         , getFilesIdOnPath
@@ -128,8 +128,8 @@ getFileId file =
             folder.id
 
 
-getFilePath : File -> FilePath
-getFilePath file =
+getFileLocation : File -> FilePath
+getFileLocation file =
     case file of
         StdFile file_ ->
             file_.path
@@ -162,7 +162,7 @@ addFile : File -> Filesystem -> Filesystem
 addFile file filesystem =
     let
         path =
-            getFilePath file
+            getFileLocation file
 
         id =
             getFileId file
@@ -230,7 +230,7 @@ removeFile : File -> Filesystem -> Filesystem
 removeFile file filesystem =
     let
         path =
-            getFilePath file
+            getFileLocation file
 
         id =
             getFileId file
@@ -311,7 +311,7 @@ getAbsolutePath file =
             getFileNameWithExtension file
 
         path =
-            getFilePath file
+            getFileLocation file
     in
         if (path == "/") then
             path ++ name

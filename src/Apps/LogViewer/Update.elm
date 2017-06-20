@@ -1,9 +1,10 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Core.Messages exposing (CoreMsg)
-import Core.Dispatcher exposing (callLogs)
+import Core.Dispatcher exposing (callLogs, callProcesses)
 import Game.Models exposing (GameModel)
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as MsgMenu
@@ -88,9 +89,39 @@ update msg game ({ app } as model) =
         StartCrypting logId ->
             let
                 gameMsg =
+                    [ callProcesses
+                        "localhost"
+                        (NewProcesses.localLogCrypt 1.0 logId game.meta.lastTick)
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )
+
+        StartUncrypting logId ->
+            let
+                gameMsg =
                     [ callLogs
                         "localhost"
-                        (Logs.Crypt logId)
+                        (Logs.Uncrypt logId "NOT IMPLEMENTED YET")
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )
+
+        StartHiding logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Hide logId)
+                    ]
+            in
+                ( model, Cmd.none, gameMsg )
+
+        StartDeleting logId ->
+            let
+                gameMsg =
+                    [ callLogs
+                        "localhost"
+                        (Logs.Delete logId)
                     ]
             in
                 ( model, Cmd.none, gameMsg )

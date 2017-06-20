@@ -13,7 +13,7 @@ import Random.Pcg
         , andThen
         )
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent)
+import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(..))
 
 
 --------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ genTitle =
 genContent : Generator PageContent
 genContent =
     -- TODO: add random html content generator
-    constant []
+    constant PgBlank
 
 
 genPage : Generator BrowserPage
@@ -125,7 +125,7 @@ genPage =
 
 genEmptyPage : Generator BrowserPage
 genEmptyPage =
-    constant (BrowserPage "about:blank" [] "Blank")
+    constant (BrowserPage "about:blank" PgBlank "Blank")
 
 
 genPageList : Generator (List BrowserPage)

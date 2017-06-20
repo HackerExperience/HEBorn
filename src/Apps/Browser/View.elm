@@ -9,6 +9,7 @@ import Game.Models exposing (GameModel)
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
+import Apps.Browser.Pages exposing (PageContent(..))
 import Apps.Browser.Style exposing (Classes(..))
 
 
@@ -80,6 +81,50 @@ viewToolbar browser =
         ]
 
 
-viewPg : List (Html Msg) -> Html Msg
-viewPg pageContent =
-    div [ class [ PageContent ] ] pageContent
+viewPg : PageContent -> Html Msg
+viewPg pg =
+    div [ class [ PageContent ] ] (contentPg pg)
+
+
+
+-- PAGES
+
+
+contentPg : PageContent -> List (Html Msg)
+contentPg pg =
+    case pg of
+        PgBlank ->
+            []
+
+        PgWelcome addr ->
+            pgWelcomeHost addr
+
+        PgCustom realContent ->
+            realContent
+
+        PgError404 ->
+            [ text "404" ]
+
+
+pgWelcomeHost : String -> List (Html Msg)
+pgWelcomeHost ip =
+    [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
+    , div [ class [ LoginPageForm ] ]
+        [ div []
+            [ input [ placeholder "Password" ] []
+            , text "E"
+            ]
+        ]
+    , div [ class [ LoginPageFooter ] ]
+        [ div []
+            [ text "C"
+            , br [] []
+            , text "Crack"
+            ]
+        , div []
+            [ text "M"
+            , br [] []
+            , text "AnyMap"
+            ]
+        ]
+    ]

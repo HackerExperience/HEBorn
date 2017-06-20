@@ -29,4 +29,26 @@ update msg model game =
                 ( model_, Cmd.none, [] )
 
         Uncrypt logId restauredContent ->
+            let
+                model_ =
+                    uncrypt model logId restauredContent
+            in
+                ( model_, Cmd.none, [] )
+
+        Hide logId ->
+            let
+                model_ =
+                    removeById logId model
+            in
+                ( model_, Cmd.none, [] )
+
+        Unhide log ->
+            -- TODO
             ( model, Cmd.none, [] )
+
+        Delete logId ->
+            let
+                model_ =
+                    removeById logId model
+            in
+                ( model_, Cmd.none, [] )
