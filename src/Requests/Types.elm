@@ -8,15 +8,15 @@ module Requests.Types
         , getCode
         )
 
-import Json.Decode
+import Json.Decode exposing (Value)
 
 
 type alias ResponseType =
-    ( Code, String )
+    ( Code, Value )
 
 
 type alias WebsocketResponse =
-    { data : Json.Decode.Value }
+    { data : Value }
 
 
 type Driver

@@ -5,7 +5,7 @@ module Landing.SignUp.Requests.SignUp
         , receive
         )
 
-import Json.Decode as Decode exposing (Value, decodeString)
+import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
 import Core.Config exposing (Config)
@@ -28,11 +28,11 @@ request email username password =
         (encoder email username password)
 
 
-receive : Code -> String -> Response
+receive : Code -> Value -> Response
 receive code json =
     case code of
         OkCode ->
-            Requests.report (decodeString decoder json)
+            Requests.report (decodeValue decoder json)
 
         _ ->
             ErrorResponse
@@ -42,6 +42,7 @@ receive code json =
 -- internals
 
 
+encoder : String -> String -> String -> Value
 encoder email username password =
     Encode.object
         [ ( "email", Encode.string email )
@@ -50,6 +51,7 @@ encoder email username password =
         ]
 
 
+decoder : Decoder Response
 decoder =
     decode OkResponse
         |> required "username" Decode.string
