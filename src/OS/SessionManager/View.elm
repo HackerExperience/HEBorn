@@ -3,13 +3,13 @@ module OS.SessionManager.View exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import Html exposing (..)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.Dock.View as Dock
 
 
-view : GameModel -> Model -> Html Msg
+view : Game.Model -> Model -> Html Msg
 view game model =
     div []
         [ viewWM game model
@@ -21,20 +21,20 @@ view game model =
 -- internals
 
 
-viewDock : GameModel -> Model -> Html Msg
+viewDock : Game.Model -> Model -> Html Msg
 viewDock game model =
     model
         |> Dock.view game
         |> Html.map DockMsg
 
 
-viewWM : GameModel -> Model -> Html Msg
+viewWM : Game.Model -> Model -> Html Msg
 viewWM game model =
     div [] (List.filterMap (maybeViewWindow game model) (windows model))
 
 
 maybeViewWindow :
-    GameModel
+    Game.Model
     -> Model
     -> WindowRef
     -> Maybe (Html Msg)

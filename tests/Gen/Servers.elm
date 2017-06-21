@@ -50,22 +50,22 @@ server =
     fuzzer genServer
 
 
-emptyServers : Fuzzer Servers
-emptyServers =
-    fuzzer genEmptyServers
+emptyModel : Fuzzer Model
+emptyModel =
+    fuzzer genEmptyModel
 
 
-nonEmptyServers : Fuzzer Servers
-nonEmptyServers =
-    fuzzer genNonEmptyServers
+nonEmptyModel : Fuzzer Model
+nonEmptyModel =
+    fuzzer genNonEmptyModel
 
 
-servers : Fuzzer Servers
+servers : Fuzzer Model
 servers =
-    fuzzer genServers
+    fuzzer genModel
 
 
-model : Fuzzer Servers
+model : Fuzzer Model
 model =
     fuzzer genModel
 
@@ -118,25 +118,20 @@ genServer =
     map StdServer genServerData
 
 
-genEmptyServers : Generator Servers
-genEmptyServers =
-    constant initialServers
+genEmptyModel : Generator Model
+genEmptyModel =
+    constant initialModel
 
 
-genNonEmptyServers : Generator Servers
-genNonEmptyServers =
+genNonEmptyModel : Generator Model
+genNonEmptyModel =
     let
         reducer =
-            (List.foldl (flip addServer) initialServers) >> constant
+            (List.foldl (flip addServer) initialModel) >> constant
     in
         andThen reducer genServerDataList
 
 
-genServers : Generator Servers
-genServers =
-    choices [ genEmptyServers, genNonEmptyServers ]
-
-
-genModel : Generator Servers
+genModel : Generator Model
 genModel =
-    map (addServer initialServers) genServerData
+    map (addServer initialModel) genServerData

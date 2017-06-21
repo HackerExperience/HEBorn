@@ -1,8 +1,8 @@
 module Game.Servers.Logs.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
+import Core.Messages as Core
+import Game.Models as Game
+import Game.Messages as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Logs.Models exposing (..)
 
@@ -10,8 +10,8 @@ import Game.Servers.Logs.Models exposing (..)
 update :
     Msg
     -> Logs
-    -> GameModel
-    -> ( Logs, Cmd GameMsg, List CoreMsg )
+    -> Game.Model
+    -> ( Logs, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
         UpdateContent logId value ->

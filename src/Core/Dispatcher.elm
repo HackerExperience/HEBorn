@@ -9,69 +9,59 @@ module Core.Dispatcher
         , callMeta
         )
 
-import Core.Messages exposing (CoreMsg(MsgGame, MsgOS))
-import Game.Messages exposing (GameMsg(..))
-import OS.Messages exposing (OSMsg(..))
+import Core.Messages exposing (..)
+import Game.Messages as Game
+import OS.Messages as OS
 import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
-import Game.Servers.Messages as Server
+import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Models exposing (ServerID)
 
 
--- Would love to do something like below, but I can't =(
---
--- callGame =
---     { account = MsgGame (MsgAccount)
---     , network = MsgGame (MsgNetwork)
---     , server = MsgGame (MsgServers)
---     , meta = MsgGame (MsgMeta)
---     }
-
-
-callGame : GameMsg -> CoreMsg
+callGame : Game.Msg -> Msg
 callGame =
-    MsgGame
+    GameMsg
 
 
-callOS : OSMsg -> CoreMsg
+callOS : OS.Msg -> Msg
 callOS =
-    MsgOS
+    OSMsg
 
 
-callAccount : Account.AccountMsg -> CoreMsg
+callAccount : Account.Msg -> Msg
 callAccount msg =
-    callGame (MsgAccount msg)
+    callGame (Game.AccountMsg msg)
 
 
-callNetwork : Network.NetworkMsg -> CoreMsg
+callNetwork : Network.Msg -> Msg
 callNetwork msg =
-    callGame (MsgNetwork msg)
+    callGame (Game.NetworkMsg msg)
 
 
-callServer : Server.Msg -> CoreMsg
+callServer : Servers.Msg -> Msg
 callServer msg =
-    callGame (MsgServers msg)
+    callGame (Game.ServersMsg msg)
 
 
-callFilesystem : ServerID -> Filesystem.Msg -> CoreMsg
+callFilesystem : ServerID -> Filesystem.Msg -> Msg
 callFilesystem serverID msg =
-    callServer (Server.MsgFilesystem serverID msg)
+    callServer (Servers.FilesystemMsg serverID msg)
 
 
-callProcesses : ServerID -> Processes.Msg -> CoreMsg
+callProcesses : ServerID -> Processes.Msg -> Msg
 callProcesses serverID msg =
-    callServer (Server.MsgProcess serverID msg)
+    callServer (Servers.ProcessMsg serverID msg)
 
 
-callLogs : ServerID -> Logs.Msg -> CoreMsg
+callLogs : ServerID -> Logs.Msg -> Msg
 callLogs serverID msg =
-    callServer (Server.MsgLog serverID msg)
+    callServer (Servers.LogMsg serverID msg)
 
 
-callMeta : Meta.MetaMsg -> CoreMsg
+callMeta : Meta.Msg -> Msg
 callMeta msg =
-    callGame (MsgMeta msg)
+    callGame (Game.MetaMsg msg)

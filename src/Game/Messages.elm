@@ -1,16 +1,16 @@
-module Game.Messages exposing (GameMsg(..))
+module Game.Messages exposing (Msg(..))
 
-import Game.Account.Messages
-import Game.Servers.Messages
-import Game.Network.Messages
-import Game.Meta.Messages
+import Game.Account.Messages as Account
+import Game.Servers.Messages as Servers
+import Game.Network.Messages as Network
+import Game.Meta.Messages as Meta
 import Events.Events as Events
 
 
-type GameMsg
-    = MsgAccount Game.Account.Messages.AccountMsg
-    | MsgServers Game.Servers.Messages.Msg
-    | MsgNetwork Game.Network.Messages.NetworkMsg
-    | MsgMeta Game.Meta.Messages.MetaMsg
+type Msg
+    = AccountMsg Account.Msg
+    | ServersMsg Servers.Msg
+    | NetworkMsg Network.Msg
+    | MetaMsg Meta.Msg
     | Event Events.Response
     | NoOp

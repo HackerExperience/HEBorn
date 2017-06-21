@@ -14,7 +14,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         )
 import Apps.Browser.Models exposing (Model)
 import Apps.Browser.Messages as BrowserMsg
-import Apps.Browser.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.Browser.Menu.Messages exposing (Msg(..), ActionMsg(..))
 import Apps.Browser.Menu.Models exposing (Menu(..))
 
 

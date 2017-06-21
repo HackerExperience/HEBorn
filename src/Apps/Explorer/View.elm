@@ -5,7 +5,7 @@ import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Models exposing (Server, getServerByID)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
@@ -319,7 +319,7 @@ viewExplorerMain path server =
         ]
 
 
-view : GameModel -> Model -> Html Msg
+view : Game.Model -> Model -> Html Msg
 view game ({ app } as model) =
     let
         server =

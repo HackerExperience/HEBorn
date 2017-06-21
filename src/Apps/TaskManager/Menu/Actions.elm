@@ -1,19 +1,19 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatcher exposing (callProcesses)
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Models as Game
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)
-import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
+import Apps.TaskManager.Menu.Messages exposing (ActionMsg(..))
 
 
 actionHandler :
-    MenuAction
+    ActionMsg
     -> Model
-    -> GameModel
-    -> ( Model, Cmd TaskManager.Msg, List CoreMsg )
+    -> Game.Model
+    -> ( Model, Cmd TaskManager.Msg, List Core.Msg )
 actionHandler action ({ app } as model) game =
     case action of
         PauseProcess pID ->

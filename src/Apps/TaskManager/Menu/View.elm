@@ -10,7 +10,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
 import Game.Servers.Processes.Types.Shared exposing (ProcessID)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg
-import Apps.TaskManager.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.TaskManager.Menu.Messages exposing (Msg(..), ActionMsg(..))
 import Apps.TaskManager.Menu.Models exposing (Menu(..))
 
 

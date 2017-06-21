@@ -1,13 +1,13 @@
-module OS.Menu.Messages exposing (Msg(..), MenuAction(..))
+module OS.Menu.Messages exposing (Msg(..), ActionMsg(..))
 
 import ContextMenu exposing (ContextMenu)
 import OS.Menu.Models exposing (Menu)
 
 
-type MenuAction
-    = NoOp
-
-
 type Msg
     = MenuMsg (ContextMenu.Msg Menu)
-    | MenuClick MenuAction
+    | MenuClick ActionMsg
+
+
+type ActionMsg
+    = NoOp

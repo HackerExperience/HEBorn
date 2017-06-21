@@ -2,13 +2,13 @@ module OS.SessionManager.WindowManager.Subscriptions exposing (subscriptions)
 
 import Draggable
 import Dict
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import OS.SessionManager.WindowManager.Models exposing (..)
 import Apps.Subscriptions as Apps
 
 
-subscriptions : GameModel -> Model -> Sub Msg
+subscriptions : Game.Model -> Model -> Sub Msg
 subscriptions game model =
     Sub.batch
         [ Draggable.subscriptions DragMsg model.drag
@@ -16,7 +16,7 @@ subscriptions game model =
         ]
 
 
-appSubcriptions : GameModel -> Model -> Sub Msg
+appSubcriptions : Game.Model -> Model -> Sub Msg
 appSubcriptions game model =
     model.windows
         |> Dict.toList

@@ -7,7 +7,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import UI.Widgets exposing (progressBar, lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Models exposing (getServerByID, getProcesses)
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
@@ -251,7 +251,7 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
         ]
 
 
-view : GameModel -> Model -> Html Msg
+view : Game.Model -> Model -> Html Msg
 view game ({ app } as model) =
     let
         server =

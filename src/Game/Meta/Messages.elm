@@ -1,9 +1,9 @@
-module Game.Meta.Messages exposing (..)
+module Game.Meta.Messages exposing (Msg(..))
 
 import Events.Events as Events
 import Time exposing (Time)
 
 
-type MetaMsg
+type Msg
     = Event Events.Response
     | Tick Time

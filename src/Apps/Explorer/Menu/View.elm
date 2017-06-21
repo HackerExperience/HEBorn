@@ -20,7 +20,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         )
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages as ExplorerMsg
-import Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.Explorer.Menu.Messages exposing (Msg(..), ActionMsg(..))
 import Apps.Explorer.Menu.Models exposing (Menu(..))
 
 

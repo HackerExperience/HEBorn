@@ -1,16 +1,16 @@
-module Core.Messages exposing (CoreMsg(..))
+module Core.Messages exposing (Msg(..))
 
 import Navigation exposing (Location)
-import Game.Messages exposing (GameMsg(..))
-import OS.Messages exposing (OSMsg(..))
-import Landing.Messages exposing (LandMsg(..))
-import Driver.Websocket.Messages
+import Game.Messages as Game
+import OS.Messages as OS
+import Landing.Messages as Landing
+import Driver.Websocket.Messages as Websocket
 
 
-type CoreMsg
-    = MsgGame Game.Messages.GameMsg
-    | MsgOS OS.Messages.OSMsg
-    | MsgLand Landing.Messages.LandMsg
-    | MsgWebsocket Driver.Websocket.Messages.Msg
-    | OnLocationChange Location
+type Msg
+    = GameMsg Game.Msg
+    | OSMsg OS.Msg
+    | LandingMsg Landing.Msg
+    | WebsocketMsg Websocket.Msg
+    | LocationChangeMsg Location
     | NoOp

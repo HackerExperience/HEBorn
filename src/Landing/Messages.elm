@@ -1,10 +1,10 @@
-module Landing.Messages exposing (LandMsg(..))
+module Landing.Messages exposing (Msg(..))
 
-import Landing.SignUp.Messages
-import Landing.Login.Messages
+import Landing.SignUp.Messages as SignUp
+import Landing.Login.Messages as Login
 
 
-type LandMsg
-    = MsgSignUp Landing.SignUp.Messages.Msg
-    | MsgLogin Landing.Login.Messages.Msg
+type Msg
+    = SignUpMsg SignUp.Msg
+    | LoginMsg Login.Msg
     | NoOp

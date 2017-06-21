@@ -56,6 +56,7 @@ transition time propertyName easing =
 --TODO: Fork elm-css
 
 
+attrSelector : String -> String -> String -> String -> List Mixin -> Snippet
 attrSelector parent attrName op value =
     selector ("." ++ parent ++ "[" ++ attrName ++ op ++ value ++ "]")
 

@@ -12,7 +12,7 @@ import OS.SessionManager.Dock.Style as Css
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.View exposing (windowTitle)
 import Apps.Models as Apps
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 
 
 -- this module still needs a refactor to make its code more maintainable
@@ -22,7 +22,7 @@ import Game.Models exposing (GameModel)
     Html.CssHelpers.withNamespace "dock"
 
 
-view : GameModel -> SessionManager.Model -> Html Msg
+view : Game.Model -> SessionManager.Model -> Html Msg
 view game model =
     footer []
         [ dock game model
@@ -39,7 +39,7 @@ type alias Applications =
     Dict String ( Apps.App, List WindowRef )
 
 
-getApplications : GameModel -> SessionManager.Model -> Applications
+getApplications : Game.Model -> SessionManager.Model -> Applications
 getApplications game model =
     -- This function should create an app list from the current
     -- server "list of apps" and also from session windows
@@ -84,14 +84,14 @@ hasInstance list =
         "N"
 
 
-apps : GameModel -> Model -> List ( String, ( Apps.App, List WindowRef ) )
+apps : Game.Model -> Model -> List ( String, ( Apps.App, List WindowRef ) )
 apps game model =
     model
         |> getApplications game
         |> Dict.toList
 
 
-dock : GameModel -> Model -> Html Msg
+dock : Game.Model -> Model -> Html Msg
 dock game model =
     div [ id Css.DockContainer ]
         [ div
@@ -142,16 +142,16 @@ subMenu app refs model =
                 ++ [ hr [] [] ]
                 ++ (minimizedWindows app refs model)
                 ++ [ hr [] [] ]
-                ++ [ subMenuAction "New window" (OpenApp app)
-                   , subMenuAction "Minimize all" (MinimizeApps app)
-                   , subMenuAction "Close all" (CloseApps app)
+                ++ [ subActionMsg "New window" (OpenApp app)
+                   , subActionMsg "Minimize all" (MinimizeApps app)
+                   , subActionMsg "Close all" (CloseApps app)
                    ]
             )
         ]
 
 
-subMenuAction : String -> msg -> Html msg
-subMenuAction label event =
+subActionMsg : String -> msg -> Html msg
+subActionMsg label event =
     li
         [ class [ Css.ClickableWindow ], onClick event ]
         [ text label ]

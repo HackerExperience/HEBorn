@@ -16,7 +16,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
 import Game.Servers.Logs.Models exposing (..)
 import Apps.LogViewer.Models exposing (Model)
 import Apps.LogViewer.Messages as LogViewer
-import Apps.LogViewer.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.LogViewer.Menu.Messages exposing (Msg(..), ActionMsg(..))
 import Apps.LogViewer.Menu.Models exposing (Menu(..))
 
 

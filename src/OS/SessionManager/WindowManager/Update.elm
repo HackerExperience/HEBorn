@@ -2,8 +2,8 @@ module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Models as Game
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import OS.SessionManager.WindowManager.Models
@@ -31,7 +31,7 @@ import OS.SessionManager.WindowManager.Models
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 
-update : Msg -> GameModel -> Model -> ( Model, Cmd Msg, List CoreMsg )
+update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg game model =
     case msg of
         OnDragBy delta ->
@@ -108,11 +108,11 @@ update msg game model =
 
 
 updateApp :
-    GameModel
+    Game.Model
     -> WindowID
-    -> Apps.AppMsg
+    -> Apps.Msg
     -> Model
-    -> ( Model, Cmd Apps.AppMsg, List CoreMsg )
+    -> ( Model, Cmd Apps.Msg, List Core.Msg )
 updateApp game windowID msg model =
     case getWindow windowID model of
         Just window ->
@@ -129,7 +129,7 @@ updateApp game windowID msg model =
             ( model, Cmd.none, [] )
 
 
-wrapEmpty : Model -> ( Model, Cmd Msg, List CoreMsg )
+wrapEmpty : Model -> ( Model, Cmd Msg, List Core.Msg )
 wrapEmpty model =
     ( model, Cmd.none, [] )
 

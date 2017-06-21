@@ -1,19 +1,19 @@
 module Apps.Explorer.Menu.Actions exposing (actionHandler)
 
-import Core.Messages exposing (CoreMsg)
+import Core.Messages as Core
 import Core.Dispatcher exposing (callFilesystem)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Filesystem.Messages as Filesystem exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages as Explorer exposing (Msg)
-import Apps.Explorer.Menu.Messages exposing (MenuAction(..))
+import Apps.Explorer.Menu.Messages exposing (ActionMsg(..))
 
 
 actionHandler :
-    MenuAction
+    ActionMsg
     -> Model
-    -> GameModel
-    -> ( Model, Cmd Explorer.Msg, List CoreMsg )
+    -> Game.Model
+    -> ( Model, Cmd Explorer.Msg, List Core.Msg )
 actionHandler action model game =
     case action of
         DeleteFile fileID ->

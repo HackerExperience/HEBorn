@@ -1,7 +1,7 @@
 module Game.Account.Update exposing (..)
 
 import Maybe
-import Core.Messages exposing (CoreMsg(MsgWebsocket))
+import Core.Messages as Core
 import Driver.Websocket.Reports as Websocket
 import Driver.Websocket.Channels as Websocket
 import Events.Events as Events
@@ -10,14 +10,14 @@ import Game.Account.Models exposing (..)
 import Game.Account.Requests exposing (..)
 import Game.Account.Requests.Logout as Logout
 import Game.Account.Requests.ServerIndex as ServerIndex
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 
 
 update :
-    AccountMsg
-    -> AccountModel
-    -> GameModel
-    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+    Msg
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 update msg model game =
     case msg of
         Login token id ->
@@ -40,9 +40,9 @@ update msg model game =
 login :
     Token
     -> String
-    -> AccountModel
-    -> GameModel
-    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 login token id model game =
     let
         model1 =
@@ -55,9 +55,9 @@ login token id model game =
 
 
 logout :
-    AccountModel
-    -> GameModel
-    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+    Model
+    -> Game.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 logout model game =
     case getToken model of
         Just token ->
@@ -76,9 +76,9 @@ logout model game =
 
 response :
     Response
-    -> AccountModel
-    -> GameModel
-    -> ( AccountModel, Cmd msg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd msg, List Core.Msg )
 response response model game =
     case response of
         LogoutResponse Logout.OkResponse ->
@@ -90,9 +90,9 @@ response response model game =
 
 event :
     Events.Response
-    -> AccountModel
-    -> GameModel
-    -> ( AccountModel, Cmd AccountMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 event ev model game =
     case ev of
         Events.Report (Websocket.Joined Websocket.AccountChannel) ->

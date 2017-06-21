@@ -2,13 +2,13 @@ module Landing.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Core.Models exposing (CoreModel)
-import Landing.Messages exposing (LandMsg(MsgSignUp, MsgLogin))
+import Core.Models as Core
+import Landing.Messages exposing (..)
 import Landing.Login.View
 import Landing.SignUp.View
 
 
-view : CoreModel -> Html LandMsg
+view : Core.Model -> Html Msg
 view model =
     div [ id "view-landing" ]
         [ viewIntro
@@ -17,7 +17,7 @@ view model =
         ]
 
 
-viewIntro : Html LandMsg
+viewIntro : Html Msg
 viewIntro =
     div [ id "view-intro" ]
         [ text "Shh! Don't tell anyone, but this is the new HE1 website."
@@ -26,14 +26,14 @@ viewIntro =
         ]
 
 
-viewLogin : CoreModel -> Html LandMsg
+viewLogin : Core.Model -> Html Msg
 viewLogin model =
-    Html.map MsgLogin (Landing.Login.View.view model.landing.login model.game)
+    Html.map LoginMsg (Landing.Login.View.view model.landing.login model.game)
 
 
-viewSignUp : CoreModel -> Html LandMsg
+viewSignUp : Core.Model -> Html Msg
 viewSignUp model =
     if model.game.meta.config.version == "dev" then
-        Html.map MsgSignUp (Landing.SignUp.View.view model.landing.signUp model.game)
+        Html.map SignUpMsg (Landing.SignUp.View.view model.landing.signUp model.game)
     else
         div [] []

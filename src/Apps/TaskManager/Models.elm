@@ -3,12 +3,11 @@ module Apps.TaskManager.Models exposing (..)
 import Dict
 import Utils exposing (andThenWithDefault, filterMapList)
 import Apps.TaskManager.Menu.Models as Menu
-import Game.Servers.Models
+import Game.Servers.Models as Servers
     exposing
         ( ServerID
         , getProcesses
         , getServerByID
-        , Servers
         )
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
@@ -118,7 +117,7 @@ onlyLocalTasks tasks =
         localTasks
 
 
-updateTasks : Servers -> ResourceUsage -> TaskManager -> TaskManager
+updateTasks : Servers.Model -> ResourceUsage -> TaskManager -> TaskManager
 updateTasks servers limit old =
     let
         server =

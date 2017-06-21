@@ -1,8 +1,8 @@
-module Game.Network.Messages exposing (NetworkMsg(..))
+module Game.Network.Messages exposing (Msg(..))
 
 import Events.Events as Events
 
 
-type NetworkMsg
+type Msg
     = ToDo
     | Event Events.Response

@@ -2,17 +2,17 @@ module OS.Update exposing (update)
 
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
-import Game.Models exposing (GameModel)
-import Core.Messages exposing (CoreMsg)
+import Game.Models as Game
+import Core.Messages as Core
 import OS.Menu.Messages as Menu
 import OS.Menu.Update as Menu
-import OS.Menu.Actions as MenuActions
+import OS.Menu.Actions as ActionMsgs
 import OS.SessionManager.Update as SessionManager
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models as SessionManager
 
 
-update : OSMsg -> GameModel -> Model -> ( Model, Cmd OSMsg, List CoreMsg )
+update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg game model =
     case msg of
         SessionManagerMsg msg ->
@@ -20,43 +20,37 @@ update msg game model =
                 |> sessionManager msg game
                 |> map (\m -> { model | session = m }) SessionManagerMsg
 
-        ContextMenuMsg (Menu.MenuClick action) ->
-            MenuActions.actionHandler action model game
+        MenuMsg (Menu.MenuClick action) ->
+            ActionMsgs.actionHandler action model game
 
-        ContextMenuMsg subMsg ->
+        MenuMsg subMsg ->
             let
                 ( menu_, cmd, coreMsg ) =
                     Menu.update subMsg model.menu game
 
                 cmd_ =
-                    Cmd.map ContextMenuMsg cmd
+                    Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
 
 
--- Event _ ->
---     ( model, Cmd.none, [] )
--- Request _ ->
---     ( model, Cmd.none, [] )
--- Response _ _ ->
---     ( model, Cmd.none, [] )
 -- internals
 
 
 sessionManager :
     SessionManager.Msg
-    -> GameModel
+    -> Game.Model
     -> Model
-    -> ( SessionManager.Model, Cmd SessionManager.Msg, List CoreMsg )
+    -> ( SessionManager.Model, Cmd SessionManager.Msg, List Core.Msg )
 sessionManager msg game model =
     SessionManager.update msg game model.session
 
 
 map :
     (model -> Model)
-    -> (msg -> OSMsg)
-    -> ( model, Cmd msg, List CoreMsg )
-    -> ( Model, Cmd OSMsg, List CoreMsg )
+    -> (msg -> Msg)
+    -> ( model, Cmd msg, List Core.Msg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 map mapModel mapMsg ( model, msg, cmds ) =
     ( mapModel model, Cmd.map mapMsg msg, cmds )

@@ -1,8 +1,8 @@
 module Apps.LogViewer.Update exposing (update)
 
-import Core.Messages exposing (CoreMsg)
+import Core.Messages as Core
 import Core.Dispatcher exposing (callLogs, callProcesses)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
 import Apps.LogViewer.Models exposing (..)
@@ -12,7 +12,7 @@ import Apps.LogViewer.Menu.Update
 import Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 
-update : LogViewer.Msg -> GameModel -> Model -> ( Model, Cmd LogViewer.Msg, List CoreMsg )
+update : LogViewer.Msg -> Game.Model -> Model -> ( Model, Cmd LogViewer.Msg, List Core.Msg )
 update msg game ({ app } as model) =
     case msg of
         -- -- Context

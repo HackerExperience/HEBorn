@@ -4,13 +4,13 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 
 
 -- TODO: this needs to change to add pinned window support
 
 
-subscriptions : GameModel -> Model -> Sub Msg
+subscriptions : Game.Model -> Model -> Sub Msg
 subscriptions game model =
     let
         windowManagerSub =
@@ -26,7 +26,7 @@ subscriptions game model =
 -- internals
 
 
-windowManager : GameModel -> WindowManager.Model -> Sub Msg
+windowManager : Game.Model -> WindowManager.Model -> Sub Msg
 windowManager game model =
     model
         |> WindowManager.subscriptions game
