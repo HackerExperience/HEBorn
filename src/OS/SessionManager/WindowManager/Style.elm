@@ -30,7 +30,11 @@ wmBorderRadius =
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
-        [ class Window
+        [ selector "wmCanvas"
+            [ flex (int 1)
+            , flexContainerVert
+            ]
+        , class Window
             [ position (absolute)
             , displayFlex
             , borderRadius wmBorderRadius

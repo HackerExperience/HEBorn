@@ -29,11 +29,11 @@ css =
             , padding (px 8)
             , globalShadow
             ]
-        , main_
+        , selector "sess"
             [ flex (int 1)
             , flexContainerVert
             ]
-        , footer
+        , selector "dock"
             [ flexContainerHorz
             , justifyContent center
             , position absolute
