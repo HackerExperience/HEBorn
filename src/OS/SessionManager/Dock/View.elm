@@ -2,7 +2,7 @@ module OS.SessionManager.Dock.View exposing (view)
 
 import Utils exposing (andThenWithDefault)
 import Dict exposing (Dict)
-import Html exposing (Html, div, text, button, ul, li, hr, footer)
+import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
@@ -24,7 +24,8 @@ import Game.Models exposing (GameModel)
 
 view : GameModel -> SessionManager.Model -> Html Msg
 view game model =
-    footer []
+    node "dock"
+        []
         [ dock game model
         ]
 

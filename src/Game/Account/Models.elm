@@ -1,6 +1,7 @@
 module Game.Account.Models exposing (..)
 
 import Game.Shared exposing (..)
+import Game.Account.Database.Models as Database exposing (..)
 
 
 type alias AccountID =
@@ -20,6 +21,7 @@ type alias AccountModel =
     , username : Maybe String
     , email : Maybe String
     , auth : AuthData
+    , database : Database
     }
 
 
@@ -58,4 +60,5 @@ initialAccountModel =
     , username = Nothing
     , email = Nothing
     , auth = initialAuth
+    , database = Database.empty
     }

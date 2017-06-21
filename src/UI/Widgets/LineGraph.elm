@@ -1,44 +1,24 @@
-module UI.Widgets exposing (..)
+module UI.Widgets.LineGraph exposing (lineGraph)
 
-import Html exposing (..)
-import Html.Attributes as Html exposing (style)
-import Html.CssHelpers
-import Css exposing (asPairs, width, minHeight, fontSize, lineHeight, pct, px, int)
+import Html exposing (Html)
 import Svg exposing (svg, polyline, polygon)
-import Svg.Attributes as Svg exposing (..)
+import Svg.Attributes
+    exposing
+        ( width
+        , height
+        , viewBox
+        , fill
+        , fillOpacity
+        , stroke
+        , strokeOpacity
+        , strokeWidth
+        , points
+        )
 import UI.ToString exposing (pointToSvgAttr)
 
 
-{ id, class, classList } =
-    Html.CssHelpers.withNamespace "ui"
-
-
-styles : List Css.Mixin -> Attribute msg
-styles =
-    Css.asPairs >> Html.style
-
-
-progressBar : Float -> String -> Float -> Html msg
-progressBar percent floatText height =
-    node "progressbar"
-        [ styles [ Css.minHeight (px height) ] ]
-        [ node "fill"
-            [ styles
-                [ Css.width
-                    (pct
-                        (percent * 100)
-                    )
-                , Css.lineHeight (int 1)
-                , Css.fontSize (px height)
-                ]
-            ]
-            []
-        , node "label" [] [ text floatText ]
-        ]
-
-
 lineGraph : List ( Float, Float ) -> String -> Int -> Bool -> ( Float, Float ) -> Html msg
-lineGraph values color height fromRight (( aspect_w, aspect_h ) as aspect) =
+lineGraph values color height_ fromRight (( aspect_w, aspect_h ) as aspect) =
     let
         viewBoxValue =
             [ 0, 0, aspect_w, aspect_h ]
@@ -77,8 +57,8 @@ lineGraph values color height fromRight (( aspect_w, aspect_h ) as aspect) =
             List.map ((toAspect aspect) >> pointToSvgAttr) values
     in
         svg
-            [ Svg.width "100%"
-            , Svg.height (toString height)
+            [ width "100%"
+            , height (toString height_)
             , viewBox viewBoxStr
             ]
             [ polygon

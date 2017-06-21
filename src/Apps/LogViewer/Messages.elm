@@ -16,3 +16,4 @@ type Msg
     | StartUncrypting ID
     | StartHiding ID
     | StartDeleting ID
+    | DummyNoOp

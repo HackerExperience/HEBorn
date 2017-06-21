@@ -11,7 +11,8 @@ import OS.SessionManager.Dock.View as Dock
 
 view : GameModel -> Model -> Html Msg
 view game model =
-    div []
+    node "sess"
+        []
         [ viewWM game model
         , viewDock game model
         ]
@@ -30,7 +31,9 @@ viewDock game model =
 
 viewWM : GameModel -> Model -> Html Msg
 viewWM game model =
-    div [] (List.filterMap (maybeViewWindow game model) (windows model))
+    node "wmCanvas"
+        []
+        (List.filterMap (maybeViewWindow game model) (windows model))
 
 
 maybeViewWindow :

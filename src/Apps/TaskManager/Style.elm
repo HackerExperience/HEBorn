@@ -48,5 +48,7 @@ css =
             , marginBottom (px -4)
             ]
         , class TaskTable
-            [ flex (int 1) ]
+            [ flex (int 1)
+            , overflowY auto
+            ]
         ]
