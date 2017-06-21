@@ -5,14 +5,13 @@ import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
 import Driver.Websocket.Channels exposing (..)
-import Core.Messages as Core
 import Core.Models as Core
-import Core.Dispatcher exposing (callAccount)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Driver.Websocket.Messages as Ws
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
 update msg model core =
     case msg of
         SubmitLogin ->
@@ -23,19 +22,19 @@ update msg model core =
                         model.password
                         core.game.meta.config
             in
-                ( model, cmd, [] )
+                ( model, cmd, Dispatch.none )
 
         SetUsername username ->
-            ( { model | username = username }, Cmd.none, [] )
+            ( { model | username = username }, Cmd.none, Dispatch.none )
 
         ValidateUsername ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
         SetPassword password ->
-            ( { model | password = password }, Cmd.none, [] )
+            ( { model | password = password }, Cmd.none, Dispatch.none )
 
         ValidatePassword ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
         Request data ->
             response (receive data) model core
@@ -45,7 +44,7 @@ response :
     Response
     -> Model
     -> Core.Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 response response model core =
     case response of
         LoginResponse (Login.OkResponse token id) ->
@@ -58,14 +57,15 @@ response response model core =
                     }
 
                 msgs =
-                    [ callAccount (Account.Login token id)
-                    , Core.WebsocketMsg
-                        (Ws.UpdateSocket token)
-                    , Core.WebsocketMsg
-                        (Ws.JoinChannel AccountChannel (Just id))
-                    , Core.WebsocketMsg
-                        (Ws.JoinChannel RequestsChannel Nothing)
-                    ]
+                    Dispatch.batch
+                        [ Dispatch.account (Account.Login token id)
+                        , Dispatch.websocket
+                            (Ws.UpdateSocket token)
+                        , Dispatch.websocket
+                            (Ws.JoinChannel AccountChannel (Just id))
+                        , Dispatch.websocket
+                            (Ws.JoinChannel RequestsChannel Nothing)
+                        ]
             in
                 ( model_, Cmd.none, msgs )
 
@@ -74,7 +74,7 @@ response response model core =
                 model_ =
                     { model | loginFailed = True }
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         _ ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )

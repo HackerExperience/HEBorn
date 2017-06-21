@@ -1,7 +1,6 @@
 module Game.Servers.Processes.Update exposing (..)
 
 import Utils exposing (andThenWithDefault)
-import Core.Messages as Core
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
@@ -15,13 +14,14 @@ import Game.Servers.Processes.Models
         , addProcess
         )
 import Game.Servers.Processes.ResultHandler exposing (completeProcess)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
     Msg
     -> Processes
     -> Game.Model
-    -> ( Processes, Cmd Game.Msg, List Core.Msg )
+    -> ( Processes, Cmd Game.Msg, Dispatch )
 update msg model game =
     case msg of
         Pause pID ->
@@ -34,7 +34,7 @@ update msg model game =
                         model
                         (getProcessByID pID model)
             in
-                ( processes_, Cmd.none, [] )
+                ( processes_, Cmd.none, Dispatch.none )
 
         Resume pID ->
             let
@@ -46,7 +46,7 @@ update msg model game =
                         model
                         (getProcessByID pID model)
             in
-                ( processes_, Cmd.none, [] )
+                ( processes_, Cmd.none, Dispatch.none )
 
         Complete pID ->
             let
@@ -55,7 +55,7 @@ update msg model game =
                         (\process ->
                             completeProcess model process
                         )
-                        ( model, [] )
+                        ( model, Dispatch.none )
                         (getProcessByID pID model)
             in
                 ( processes_, Cmd.none, feedback )
@@ -70,7 +70,7 @@ update msg model game =
                         model
                         (getProcessByID pID model)
             in
-                ( processes_, Cmd.none, [] )
+                ( processes_, Cmd.none, Dispatch.none )
 
         Create process ->
             let
@@ -79,4 +79,4 @@ update msg model game =
                         process
                         model
             in
-                ( processes_, Cmd.none, [] )
+                ( processes_, Cmd.none, Dispatch.none )

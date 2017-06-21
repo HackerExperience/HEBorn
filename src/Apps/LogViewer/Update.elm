@@ -1,7 +1,6 @@
 module Apps.LogViewer.Update exposing (update)
 
-import Core.Messages as Core
-import Core.Dispatcher exposing (callLogs, callProcesses)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
@@ -12,7 +11,7 @@ import Apps.LogViewer.Menu.Update
 import Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 
-update : LogViewer.Msg -> Game.Model -> Model -> ( Model, Cmd LogViewer.Msg, List Core.Msg )
+update : LogViewer.Msg -> Game.Model -> Model -> ( Model, Cmd LogViewer.Msg, Dispatch )
 update msg game ({ app } as model) =
     case msg of
         -- -- Context
@@ -35,19 +34,19 @@ update msg game ({ app } as model) =
                 app_ =
                     toggleExpand app logId
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         UpdateTextFilter filter ->
             let
                 app_ =
                     updateTextFilter app game.servers filter
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         EnterEditing logId ->
             ( enterEditing game.servers model logId
             , Cmd.none
-            , []
+            , Dispatch.none
             )
 
         UpdateEditing logId input ->
@@ -55,14 +54,14 @@ update msg game ({ app } as model) =
                 app_ =
                     updateEditing app logId input
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         LeaveEditing logId ->
             let
                 app_ =
                     leaveEditing app logId
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         ApplyEditing logId ->
             let
@@ -75,13 +74,12 @@ update msg game ({ app } as model) =
                 gameMsg =
                     (case edited of
                         Just edited ->
-                            [ callLogs
+                            Dispatch.logs
                                 "localhost"
                                 (Logs.UpdateContent logId edited)
-                            ]
 
                         Nothing ->
-                            []
+                            Dispatch.none
                     )
             in
                 ( { model | app = app_ }, Cmd.none, gameMsg )
@@ -89,42 +87,38 @@ update msg game ({ app } as model) =
         StartCrypting logId ->
             let
                 gameMsg =
-                    [ callProcesses
+                    Dispatch.processes
                         "localhost"
                         (NewProcesses.localLogCrypt 1.0 logId game.meta.lastTick)
-                    ]
             in
                 ( model, Cmd.none, gameMsg )
 
         StartUncrypting logId ->
             let
                 gameMsg =
-                    [ callLogs
+                    Dispatch.logs
                         "localhost"
                         (Logs.Uncrypt logId "NOT IMPLEMENTED YET")
-                    ]
             in
                 ( model, Cmd.none, gameMsg )
 
         StartHiding logId ->
             let
                 gameMsg =
-                    [ callLogs
+                    Dispatch.logs
                         "localhost"
                         (Logs.Hide logId)
-                    ]
             in
                 ( model, Cmd.none, gameMsg )
 
         StartDeleting logId ->
             let
                 gameMsg =
-                    [ callLogs
+                    Dispatch.logs
                         "localhost"
                         (Logs.Delete logId)
-                    ]
             in
                 ( model, Cmd.none, gameMsg )
 
         DummyNoOp ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )

@@ -7,7 +7,6 @@ module OS.Menu.View
 import Html exposing (Html)
 import Html.Attributes
 import ContextMenu exposing (ContextMenu)
-import Core.Messages as Core
 import OS.SessionManager.WindowManager.MenuHandler.View
     exposing
         ( menuForCreator
@@ -19,22 +18,20 @@ import OS.Menu.Messages exposing (Msg(..), MenuAction(..))
 import OS.Menu.Models exposing (Menu(..))
 
 
-menuView : OS.Model -> Html Core.Msg
+menuView : OS.Model -> Html OS.Msg
 menuView model =
-    Html.map Core.OSMsg
-        (menuViewCreator
-            OS.MenuMsg
-            model
-            model.menu
-            MenuMsg
-            menu
-        )
+    (menuViewCreator
+        OS.MenuMsg
+        model
+        model.menu
+        MenuMsg
+        menu
+    )
 
 
-menuFor : Menu -> Html.Attribute Core.Msg
+menuFor : Menu -> Html.Attribute OS.Msg
 menuFor context =
-    Html.Attributes.map Core.OSMsg
-        (menuForCreator OS.MenuMsg MenuMsg context)
+    menuForCreator OS.MenuMsg MenuMsg context
 
 
 menu : OS.Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
@@ -44,6 +41,6 @@ menu model context =
             []
 
 
-menuEmpty : Html.Attribute Core.Msg
+menuEmpty : Html.Attribute OS.Msg
 menuEmpty =
     menuFor MenuEmpty

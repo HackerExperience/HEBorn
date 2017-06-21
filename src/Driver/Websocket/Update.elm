@@ -8,11 +8,11 @@ import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events
-import Core.Messages as Core
 import Core.Models as Core
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
 update msg model core =
     case msg of
         UpdateSocket token ->
@@ -23,7 +23,7 @@ update msg model core =
                 model_ =
                     { model | socket = socket }
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         JoinChannel channel topic ->
             if model.defer then
@@ -36,11 +36,11 @@ update msg model core =
                 response =
                     Events.handler event value
             in
-                ( model, Cmd.none, [] )
+                ( model, Cmd.none, Dispatch.none )
 
         Broadcast _ ->
             -- ignore broadcasts
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 
@@ -51,7 +51,7 @@ defer :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 defer channel topic model =
     let
         model_ =
@@ -60,14 +60,14 @@ defer channel topic model =
         cmd =
             Utils.delay 0.5 (JoinChannel channel topic)
     in
-        ( model_, cmd, [] )
+        ( model_, cmd, Dispatch.none )
 
 
 join :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 join channel topic model =
     let
         events =
@@ -86,7 +86,7 @@ join channel topic model =
         model_ =
             { model | channels = channels }
     in
-        ( model_, Cmd.none, [] )
+        ( model_, Cmd.none, Dispatch.none )
 
 
 reducer : ( String, Events.Event ) -> Channel.Channel Msg -> Channel.Channel Msg

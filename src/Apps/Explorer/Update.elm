@@ -1,6 +1,5 @@
 module Apps.Explorer.Update exposing (update)
 
-import Core.Messages as Core
 import Game.Models as Game
 import Game.Servers.Models exposing (getServerByID)
 import Apps.Explorer.Models exposing (Model, changePath)
@@ -8,9 +7,10 @@ import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as MsgMenu
 import Apps.Explorer.Menu.Update
 import Apps.Explorer.Menu.Actions exposing (actionHandler)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
 update msg game ({ app } as model) =
     case msg of
         -- Menu
@@ -39,4 +39,4 @@ update msg game ({ app } as model) =
                         app
                         server
             in
-                ( { model | app = newApp }, Cmd.none, [] )
+                ( { model | app = newApp }, Cmd.none, Dispatch.none )
