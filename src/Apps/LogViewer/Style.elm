@@ -8,13 +8,10 @@ import Css.Icons as Icon
 
 
 type Classes
-    = HeaderBar
-    | Entry
+    = Entry
     | EntryExpanded
     | ETop
-    | ETAct
     | ETActMini
-    | ETFilter
     | ETFBar
     | EData
     | EAct
@@ -59,32 +56,7 @@ ico =
 css : Stylesheet
 css =
     (stylesheet << namespace "logvw")
-        [ class HeaderBar
-            [ flexContainerHorz
-            , borderBottom3 (px 1) solid (hex "000")
-            , internalPadding
-            ]
-        , class ETAct
-            [ flex (int 1)
-            , fontSize (px 32)
-            ]
-        , class ETFilter
-            [ flex (int 0)
-            , flexContainerHorz
-            , lineHeight (px 32)
-            ]
-        , class ETFBar
-            [ children
-                [ input
-                    [ flex (int 1)
-                    , marginLeft (px 18)
-                    , padding (px 3)
-                    , borderRadius (px 12)
-                    , border3 (px 1) solid (hex "000")
-                    ]
-                ]
-            ]
-        , class ETop
+        [ class ETop
             [ flexContainerHorz ]
         , class EBottom
             [ flexContainerHorz ]

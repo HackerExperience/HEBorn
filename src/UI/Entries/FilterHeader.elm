@@ -3,15 +3,10 @@ module UI.Entries.FilterHeader exposing (filterHeader)
 import Html exposing (Html, Attribute, text, node, input)
 import Html.Attributes exposing (attribute, placeholder, value)
 import Html.Events exposing (onClick, onInput)
-import Html.CssHelpers exposing (withNamespace)
 
 
-{ id, class, classList } =
-    withNamespace "ui"
-
-
-type alias Flag class msg =
-    ( class, msg, Bool )
+type alias Flag msg =
+    ( Attribute msg, msg, Bool )
 
 
 type alias Option msg =
@@ -30,18 +25,17 @@ enabledClass enabled =
         attribute "data-enabled" value
 
 
-renderFlagFilter : Flag class msg -> Html msg
-renderFlagFilter ( iconClass, onClickMsg, enabled ) =
+renderFlagFilter : Flag msg -> Html msg
+renderFlagFilter ( iconClasses, onClickMsg, enabled ) =
     node "flagFilterToggle"
-        [ class
-            [ iconClass ]
+        [ iconClasses
         , enabledClass enabled
         , onClick onClickMsg
         ]
         []
 
 
-renderFlagsFilter : List (Flag class msg) -> Html msg
+renderFlagsFilter : List (Flag msg) -> Html msg
 renderFlagsFilter flags =
     let
         entries =
@@ -71,7 +65,7 @@ renderTextFilter value_ placeholder_ updateMsg =
         ]
 
 
-filterHeader : List (Flag class msg) -> List (Option msg) -> String -> String -> (String -> msg) -> Html msg
+filterHeader : List (Flag msg) -> List (Option msg) -> String -> String -> (String -> msg) -> Html msg
 filterHeader flags options filterValue filterPlaceholder filterUpdateMsg =
     node "filterHeader"
         []

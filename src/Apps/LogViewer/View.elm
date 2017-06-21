@@ -317,7 +317,10 @@ view game ({ app } as model) =
     div []
         ([ menuView model
          , filterHeader
-            [ ( BtnUser, DummyNoOp, False ), ( BtnEdit, DummyNoOp, False ), ( BtnHide, DummyNoOp, False ) ]
+            [ ( class [ BtnUser ], DummyNoOp, False )
+            , ( class [ BtnEdit ], DummyNoOp, False )
+            , ( class [ BtnHide ], DummyNoOp, False )
+            ]
             []
             app.filterText
             "Search..."
