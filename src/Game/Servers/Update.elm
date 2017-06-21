@@ -1,8 +1,8 @@
 module Game.Servers.Update exposing (..)
 
-import Core.Messages as Core
 import Game.Messages as Game
 import Game.Models as Game
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
@@ -18,7 +18,7 @@ update :
     Msg
     -> Model
     -> Game.Model
-    -> ( Model, Cmd Game.Msg, List Core.Msg )
+    -> ( Model, Cmd Game.Msg, Dispatch )
 update msg model game =
     case msg of
         FilesystemMsg id msg ->
@@ -34,7 +34,7 @@ update msg model game =
             response (receive data) model game
 
         _ ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 
@@ -45,11 +45,11 @@ response :
     Response
     -> Model
     -> Game.Model
-    -> ( Model, Cmd Game.Msg, List Core.Msg )
+    -> ( Model, Cmd Game.Msg, Dispatch )
 response response model game =
     case response of
         _ ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 filesystem :
@@ -57,7 +57,7 @@ filesystem :
     -> Filesystem.Msg
     -> Model
     -> Game.Model
-    -> ( Model, Cmd Game.Msg, List Core.Msg )
+    -> ( Model, Cmd Game.Msg, Dispatch )
 filesystem id msg model game =
     case (getServerByID model id) of
         StdServer server ->
@@ -74,7 +74,7 @@ filesystem id msg model game =
                 ( model_, cmd, msgs )
 
         NoServer ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 log :
@@ -82,7 +82,7 @@ log :
     -> Logs.Msg
     -> Model
     -> Game.Model
-    -> ( Model, Cmd Game.Msg, List Core.Msg )
+    -> ( Model, Cmd Game.Msg, Dispatch )
 log id msg model game =
     case (getServerByID model id) of
         StdServer server ->
@@ -99,7 +99,7 @@ log id msg model game =
                 ( model_, cmd, msgs )
 
         NoServer ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 process :
@@ -107,7 +107,7 @@ process :
     -> Processes.Msg
     -> Model
     -> Game.Model
-    -> ( Model, Cmd Game.Msg, List Core.Msg )
+    -> ( Model, Cmd Game.Msg, Dispatch )
 process id msg model game =
     case (getServerByID model id) of
         StdServer server ->
@@ -124,4 +124,4 @@ process id msg model game =
                 ( model_, cmd, msgs )
 
         NoServer ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )

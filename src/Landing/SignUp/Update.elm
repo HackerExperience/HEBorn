@@ -4,11 +4,11 @@ import Landing.SignUp.Models exposing (Model, FormError)
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Requests exposing (..)
 import Landing.SignUp.Requests.SignUp as SignUp
-import Core.Messages as Core
 import Core.Models as Core
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
 update msg model core =
     case msg of
         SubmitForm ->
@@ -20,10 +20,10 @@ update msg model core =
                         model.password
                         core.game.meta.config
             in
-                ( model, cmd, [] )
+                ( model, cmd, Dispatch.none )
 
         SetUsername username ->
-            ( { model | username = username, usernameTaken = False }, Cmd.none, [] )
+            ( { model | username = username, usernameTaken = False }, Cmd.none, Dispatch.none )
 
         ValidateUsername ->
             let
@@ -36,10 +36,10 @@ update msg model core =
                 newFormErrors =
                     { usernameErrors = newUsernameErrors, passwordErrors = passwordErrors, emailErrors = emailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, [] )
+                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
 
         SetPassword password ->
-            ( { model | password = password }, Cmd.none, [] )
+            ( { model | password = password }, Cmd.none, Dispatch.none )
 
         ValidatePassword ->
             let
@@ -52,10 +52,10 @@ update msg model core =
                 newFormErrors =
                     { usernameErrors = usernameErrors, passwordErrors = newPasswordErrors, emailErrors = emailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, [] )
+                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
 
         SetEmail email ->
-            ( { model | email = email }, Cmd.none, [] )
+            ( { model | email = email }, Cmd.none, Dispatch.none )
 
         ValidateEmail ->
             let
@@ -68,7 +68,7 @@ update msg model core =
                 newFormErrors =
                     { usernameErrors = usernameErrors, passwordErrors = passwordErrors, emailErrors = newEmailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, [] )
+                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
 
         Request data ->
             response (receive data) model core
@@ -82,15 +82,15 @@ response :
     Response
     -> Model
     -> Core.Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 response response model core =
     case response of
         -- TODO: add more types to match response status
         SignUpResponse (SignUp.OkResponse _ _ _) ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
         _ ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 getErrorsUsername : Model -> String

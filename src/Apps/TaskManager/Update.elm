@@ -2,9 +2,7 @@ module Apps.TaskManager.Update exposing (update)
 
 import Dict
 import Time exposing (Time)
-import Utils exposing (andThenWithDefault)
-import Core.Dispatcher exposing (callProcesses)
-import Core.Messages as Core
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Game.Servers.Models exposing (getServerByID, getProcesses)
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
@@ -22,27 +20,35 @@ import Apps.TaskManager.Menu.Update
 import Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 
-processComplete : Processes -> Time -> List Core.Msg
+processComplete : Processes -> Time -> Dispatch
 processComplete tasks now =
-    List.filterMap
-        (\process ->
-            case process.prop of
-                LocalProcess prop ->
-                    if
-                        (prop.state == StateRunning)
-                            && (andThenWithDefault (\eta -> now > (Debug.log "ETA: " eta)) False prop.eta)
-                    then
-                        Just (callProcesses "localhost" (Processes.Complete process.id))
-                    else
+    tasks
+        |> Dict.values
+        |> List.filterMap
+            (\process ->
+                case process.prop of
+                    LocalProcess prop ->
+                        let
+                            completed =
+                                prop.eta
+                                    |> Maybe.map ((>) now)
+                                    |> Maybe.withDefault False
+                        in
+                            if (prop.state == StateRunning) && completed then
+                                Just
+                                    (Dispatch.processes "localhost"
+                                        (Processes.Complete process.id)
+                                    )
+                            else
+                                Nothing
+
+                    _ ->
                         Nothing
-
-                _ ->
-                    Nothing
-        )
-        (Dict.values tasks)
+            )
+        |> Dispatch.batch
 
 
-update : TaskManager.Msg -> Game.Model -> Model -> ( Model, Cmd TaskManager.Msg, List Core.Msg )
+update : TaskManager.Msg -> Game.Model -> Model -> ( Model, Cmd TaskManager.Msg, Dispatch )
 update msg game ({ app } as model) =
     case msg of
         -- -- Context
@@ -81,6 +87,6 @@ update msg game ({ app } as model) =
                             processComplete tasks now
 
                         Nothing ->
-                            []
+                            Dispatch.none
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )

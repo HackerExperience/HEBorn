@@ -1,7 +1,6 @@
 module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
-import Core.Messages as Core
-import Core.Dispatcher exposing (callLogs)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
@@ -13,13 +12,13 @@ actionHandler :
     MenuAction
     -> Model
     -> Game.Model
-    -> ( Model, Cmd LogViewer.Msg, List Core.Msg )
+    -> ( Model, Cmd LogViewer.Msg, Dispatch )
 actionHandler action ({ app } as model) game =
     case action of
         NormalEntryEdit logId ->
             ( enterEditing game.servers model logId
             , Cmd.none
-            , []
+            , Dispatch.none
             )
 
         EdittingEntryApply logId ->
@@ -33,13 +32,12 @@ actionHandler action ({ app } as model) game =
                 gameMsg =
                     (case edited of
                         Just edited ->
-                            [ callLogs
+                            Dispatch.logs
                                 "localhost"
                                 (Logs.UpdateContent logId edited)
-                            ]
 
                         Nothing ->
-                            []
+                            Dispatch.none
                     )
             in
                 ( { model | app = app_ }, Cmd.none, gameMsg )
@@ -49,4 +47,4 @@ actionHandler action ({ app } as model) game =
                 app_ =
                     leaveEditing app logId
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )

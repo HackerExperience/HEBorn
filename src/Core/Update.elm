@@ -4,6 +4,7 @@ import Utils
 import Router.Router exposing (parseLocation)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.Update as OS
 import Game.Update as Game
 import Game.Messages as Game
@@ -115,23 +116,23 @@ sent =
     Debug.log "◀ Message"
 
 
-route : Model -> Cmd Msg -> List Msg -> ( Model, Cmd Msg )
-route model cmd msgs =
+route : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
+route model cmd dispatch =
+    -- TODO: check if reversing is really needed
     if isDev model then
         let
-            cmds =
-                msgs
-                    -- TODO: eval if reverse is really needed
+            cmdList =
+                dispatch
+                    |> Dispatch.toList
                     |> List.reverse
                     |> List.map (sent >> Utils.msgToCmd)
 
             cmd_ =
-                Cmd.batch (cmd :: cmds)
+                Cmd.batch (cmd :: cmdList)
         in
             ( model, cmd_ )
     else
-        -- TODO: eval if foldr is really needed
-        List.foldr reducer ( model, cmd ) msgs
+        Dispatch.foldr reducer ( model, cmd ) dispatch
 
 
 reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )

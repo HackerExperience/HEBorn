@@ -1,17 +1,17 @@
 module Game.Servers.Logs.Update exposing (..)
 
-import Core.Messages as Core
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Logs.Models exposing (..)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
     Msg
     -> Logs
     -> Game.Model
-    -> ( Logs, Cmd Game.Msg, List Core.Msg )
+    -> ( Logs, Cmd Game.Msg, Dispatch )
 update msg model game =
     case msg of
         UpdateContent logId value ->
@@ -19,36 +19,36 @@ update msg model game =
                 model_ =
                     updateContent model logId value
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         Crypt logId ->
             let
                 model_ =
                     crypt model logId
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         Uncrypt logId restauredContent ->
             let
                 model_ =
                     uncrypt model logId restauredContent
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         Hide logId ->
             let
                 model_ =
                     removeById logId model
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )
 
         Unhide log ->
             -- TODO
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
         Delete logId ->
             let
                 model_ =
                     removeById logId model
             in
-                ( model_, Cmd.none, [] )
+                ( model_, Cmd.none, Dispatch.none )

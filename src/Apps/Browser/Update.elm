@@ -1,6 +1,5 @@
 module Apps.Browser.Update exposing (update)
 
-import Core.Messages as Core
 import Game.Models as Game
 import Apps.Browser.Models
     exposing
@@ -14,10 +13,10 @@ import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Messages as MsgMenu
 import Apps.Browser.Menu.Update
 import Apps.Browser.Menu.Actions exposing (actionHandler)
-import Apps.Browser.Menu.Actions exposing (actionHandler)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
 update msg game ({ app } as model) =
     case msg of
         -- Menu
@@ -39,21 +38,21 @@ update msg game ({ app } as model) =
                 app_ =
                     { app | addressBar = newAddr }
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         AddressEnter ->
-            ( { model | app = enterAddress app }, Cmd.none, [] )
+            ( { model | app = enterAddress app }, Cmd.none, Dispatch.none )
 
         GoPrevious ->
             let
                 app_ =
                     gotoPreviousPage app
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         GoNext ->
             let
                 app_ =
                     gotoNextPage app
             in
-                ( { model | app = app_ }, Cmd.none, [] )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )

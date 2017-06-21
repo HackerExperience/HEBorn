@@ -1,6 +1,5 @@
 module Game.Update exposing (..)
 
-import Core.Messages as Core
 import Game.Models exposing (..)
 import Game.Messages exposing (..)
 import Game.Account.Update as Account
@@ -11,9 +10,10 @@ import Game.Network.Update as Network
 import Game.Network.Messages as Network
 import Game.Meta.Update as Meta
 import Game.Meta.Messages as Meta
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, List Core.Msg )
+update : Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update msg model =
     case msg of
         AccountMsg msg ->
@@ -36,7 +36,7 @@ update msg model =
                 |> andThen (meta (Meta.Event event))
 
         _ ->
-            ( model, Cmd.none, [] )
+            ( model, Cmd.none, Dispatch.none )
 
 
 
@@ -46,7 +46,7 @@ update msg model =
 account :
     Account.Msg
     -> Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 account msg model =
     let
         ( account, cmd, msgs ) =
@@ -64,7 +64,7 @@ account msg model =
 servers :
     Servers.Msg
     -> Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 servers msg model =
     let
         ( servers, cmd, msgs ) =
@@ -79,7 +79,7 @@ servers msg model =
 network :
     Network.Msg
     -> Model
-    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, Dispatch )
 network msg model =
     let
         ( network, cmd, msgs ) =
@@ -91,7 +91,7 @@ network msg model =
         ( model_, cmd, msgs )
 
 
-meta : Meta.Msg -> Model -> ( Model, Cmd Msg, List Core.Msg )
+meta : Meta.Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 meta msg model =
     let
         ( meta, cmd, msgs ) =
@@ -104,18 +104,18 @@ meta msg model =
 
 
 andThen :
-    (Model -> ( Model, Cmd Msg, List Core.Msg ))
-    -> ( Model, Cmd Msg, List Core.Msg )
-    -> ( Model, Cmd Msg, List Core.Msg )
-andThen func ( model, cmd, msgs ) =
+    (Model -> ( Model, Cmd Msg, Dispatch ))
+    -> ( Model, Cmd Msg, Dispatch )
+    -> ( Model, Cmd Msg, Dispatch )
+andThen func ( model, cmd, dispatch1 ) =
     let
-        ( model_, cmd1, msgs1 ) =
+        ( model_, cmd1, dispatch2 ) =
             func model
 
         cmd_ =
             Cmd.batch [ cmd, cmd1 ]
 
-        msgs_ =
-            msgs1 ++ msgs
+        dispatch_ =
+            Dispatch.batch [ dispatch1, dispatch2 ]
     in
-        ( model_, cmd_, msgs_ )
+        ( model_, cmd_, dispatch_ )

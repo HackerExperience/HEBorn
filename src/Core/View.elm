@@ -5,8 +5,8 @@ import Router.Router exposing (Route(..))
 import Game.Account.Models exposing (isAuthenticated)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import OS.View
-import Landing.View
+import OS.View as OS
+import Landing.View as Landing
 
 
 view : Model -> Html Msg
@@ -22,9 +22,9 @@ view model =
 page : Model -> Html Msg
 page model =
     if isAuthenticated model.game.account then
-        OS.View.view model
+        Html.map OSMsg (OS.view model)
     else
-        Html.map LandingMsg (Landing.View.view model)
+        Html.map LandingMsg (Landing.view model)
 
 
 notFoundView : Html msg

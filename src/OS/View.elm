@@ -6,21 +6,17 @@ import OS.Style as Css
 import Html exposing (..)
 import Html.CssHelpers
 import Core.Models as Core
-import Core.Messages as Core
 import Game.Models as Game
 import OS.Header.View as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 
 
--- this module should return OS.Msgs instead of Core.Msg, but let's deffer it
-
-
 { id, class, classList } =
     Html.CssHelpers.withNamespace "os"
 
 
-view : Core.Model -> Html Core.Msg
+view : Core.Model -> Html Msg
 view model =
     div
         [ id Css.Dashboard
@@ -33,21 +29,21 @@ view model =
         ]
 
 
-viewHeader : Game.Model -> Model -> Html Core.Msg
+viewHeader : Game.Model -> Model -> Html Msg
 viewHeader game model =
     header []
         [ (Header.view game model.header) ]
+        |> Html.map HeaderMsg
 
 
-viewMain : Game.Model -> Model -> Html Core.Msg
+viewMain : Game.Model -> Model -> Html Msg
 viewMain game model =
     model.session
         |> SessionManager.view game
         |> Html.map SessionManagerMsg
-        |> Html.map Core.OSMsg
 
 
-displayVersion : String -> Html Core.Msg
+displayVersion : String -> Html Msg
 displayVersion version =
     div [ id Css.DesktopVersion ]
         [ text version ]
