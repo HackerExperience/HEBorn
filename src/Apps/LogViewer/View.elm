@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css.Common exposing (elasticClass)
+import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import Game.Shared exposing (..)
 import Game.Models exposing (GameModel)
@@ -314,7 +315,7 @@ renderEntryList app =
 
 view : GameModel -> Model -> Html Msg
 view game ({ app } as model) =
-    div []
+    verticalList
         ([ menuView model
          , filterHeader
             [ ( class [ BtnUser ], DummyNoOp, False )
