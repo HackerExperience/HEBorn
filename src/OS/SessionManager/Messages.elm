@@ -1,4 +1,4 @@
-module OS.SessionManager.Messages exposing (..)
+module OS.SessionManager.Messages exposing (Msg(..))
 
 import OS.SessionManager.WindowManager.Messages as WindowManager
 import OS.SessionManager.Dock.Messages as Dock

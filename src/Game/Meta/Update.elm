@@ -1,13 +1,13 @@
 module Game.Meta.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
-import Game.Meta.Messages exposing (MetaMsg(..))
-import Game.Meta.Models exposing (MetaModel)
+import Core.Messages as Core
+import Game.Models as Game
+import Game.Messages as Game
+import Game.Meta.Messages exposing (..)
+import Game.Meta.Models exposing (..)
 
 
-update : MetaMsg -> MetaModel -> GameModel -> ( MetaModel, Cmd GameMsg, List CoreMsg )
+update : Msg -> Model -> Game.Model -> ( Model, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
         Tick time ->

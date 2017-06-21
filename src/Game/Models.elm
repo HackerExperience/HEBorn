@@ -1,23 +1,23 @@
-module Game.Models exposing (GameModel, initialModel)
+module Game.Models exposing (Model, initialModel)
 
-import Game.Account.Models exposing (..)
-import Game.Servers.Models exposing (..)
-import Game.Network.Models exposing (..)
-import Game.Meta.Models exposing (..)
+import Game.Account.Models as Account
+import Game.Servers.Models as Servers
+import Game.Network.Models as Network
+import Game.Meta.Models as Meta
 
 
-type alias GameModel =
-    { account : AccountModel
-    , servers : Servers
-    , network : NetworkModel
-    , meta : MetaModel
+type alias Model =
+    { account : Account.Model
+    , servers : Servers.Model
+    , network : Network.Model
+    , meta : Meta.Model
     }
 
 
-initialModel : String -> String -> String -> GameModel
+initialModel : String -> String -> String -> Model
 initialModel apiHttpUrl apiWsUrl version =
-    { account = initialAccountModel
-    , servers = initialServers
-    , network = initialNetworkModel
-    , meta = initialMetaModel apiHttpUrl apiWsUrl version
+    { account = Account.initialModel
+    , servers = Servers.initialModel
+    , network = Network.initialModel
+    , meta = Meta.initialModel apiHttpUrl apiWsUrl version
     }

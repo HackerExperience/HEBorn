@@ -1,8 +1,8 @@
 module Game.Servers.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Messages exposing (GameMsg(..))
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Messages as Game
+import Game.Models as Game
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
@@ -14,16 +14,20 @@ import Game.Servers.Processes.Update as Processes
 import Game.Servers.Requests exposing (..)
 
 
-update : Msg -> Servers -> GameModel -> ( Servers, Cmd GameMsg, List CoreMsg )
+update :
+    Msg
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
-        MsgFilesystem id msg ->
+        FilesystemMsg id msg ->
             filesystem id msg model game
 
-        MsgLog id msg ->
+        LogMsg id msg ->
             log id msg model game
 
-        MsgProcess id msg ->
+        ProcessMsg id msg ->
             process id msg model game
 
         Request data ->
@@ -39,9 +43,9 @@ update msg model game =
 
 response :
     Response
-    -> Servers
-    -> GameModel
-    -> ( Servers, Cmd GameMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Game.Msg, List Core.Msg )
 response response model game =
     case response of
         _ ->
@@ -51,9 +55,9 @@ response response model game =
 filesystem :
     ServerID
     -> Filesystem.Msg
-    -> Servers
-    -> GameModel
-    -> ( Servers, Cmd GameMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Game.Msg, List Core.Msg )
 filesystem id msg model game =
     case (getServerByID model id) of
         StdServer server ->
@@ -76,9 +80,9 @@ filesystem id msg model game =
 log :
     ServerID
     -> Logs.Msg
-    -> Servers
-    -> GameModel
-    -> ( Servers, Cmd GameMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Game.Msg, List Core.Msg )
 log id msg model game =
     case (getServerByID model id) of
         StdServer server ->
@@ -101,9 +105,9 @@ log id msg model game =
 process :
     ServerID
     -> Processes.Msg
-    -> Servers
-    -> GameModel
-    -> ( Servers, Cmd GameMsg, List CoreMsg )
+    -> Model
+    -> Game.Model
+    -> ( Model, Cmd Game.Msg, List Core.Msg )
 process id msg model game =
     case (getServerByID model id) of
         StdServer server ->

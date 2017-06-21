@@ -4,11 +4,11 @@ import Landing.SignUp.Models exposing (Model, FormError)
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Requests exposing (..)
 import Landing.SignUp.Requests.SignUp as SignUp
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
+import Core.Messages as Core
+import Core.Models as Core
 
 
-update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg model core =
     case msg of
         SubmitForm ->
@@ -81,8 +81,8 @@ update msg model core =
 response :
     Response
     -> Model
-    -> CoreModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> Core.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 response response model core =
     case response of
         -- TODO: add more types to match response status

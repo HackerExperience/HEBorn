@@ -1,14 +1,10 @@
-module Game.Account.Messages
-    exposing
-        ( AccountMsg(..)
-        , RequestMsg(..)
-        )
+module Game.Account.Messages exposing (Msg(..), RequestMsg(..))
 
 import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 
 
-type AccountMsg
+type Msg
     = Login String String
     | Logout
     | Request RequestMsg

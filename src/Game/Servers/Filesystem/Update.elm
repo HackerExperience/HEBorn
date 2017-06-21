@@ -1,8 +1,8 @@
 module Game.Servers.Filesystem.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
+import Core.Messages as Core
+import Game.Models as Game
+import Game.Messages as Game
 import Game.Servers.Filesystem.Messages exposing (Msg(..))
 import Game.Servers.Filesystem.Models exposing (Filesystem, getFileById, removeFile)
 
@@ -10,8 +10,8 @@ import Game.Servers.Filesystem.Models exposing (Filesystem, getFileById, removeF
 update :
     Msg
     -> Filesystem
-    -> GameModel
-    -> ( Filesystem, Cmd GameMsg, List CoreMsg )
+    -> Game.Model
+    -> ( Filesystem, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
         Delete id ->

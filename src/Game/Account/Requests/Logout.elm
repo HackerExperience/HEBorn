@@ -17,7 +17,7 @@ type Response
     = OkResponse
 
 
-request : String -> Config -> Cmd AccountMsg
+request : String -> Config -> Cmd Msg
 request token =
     let
         payload =

@@ -1,9 +1,9 @@
 module Game.Servers.Processes.Update exposing (..)
 
 import Utils exposing (andThenWithDefault)
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
+import Core.Messages as Core
+import Game.Models as Game
+import Game.Messages as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models
     exposing
@@ -20,8 +20,8 @@ import Game.Servers.Processes.ResultHandler exposing (completeProcess)
 update :
     Msg
     -> Processes
-    -> GameModel
-    -> ( Processes, Cmd GameMsg, List CoreMsg )
+    -> Game.Model
+    -> ( Processes, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
         Pause pID ->

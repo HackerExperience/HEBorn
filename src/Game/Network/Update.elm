@@ -1,13 +1,13 @@
 module Game.Network.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
-import Game.Network.Messages exposing (NetworkMsg(..))
-import Game.Network.Models exposing (NetworkModel)
+import Core.Messages as Core
+import Game.Models as Game
+import Game.Messages as Game
+import Game.Network.Messages exposing (Msg(..))
+import Game.Network.Models exposing (Model)
 
 
-update : NetworkMsg -> NetworkModel -> GameModel -> ( NetworkModel, Cmd GameMsg, List CoreMsg )
+update : Msg -> Model -> Game.Model -> ( Model, Cmd Game.Msg, List Core.Msg )
 update msg model game =
     case msg of
         _ ->

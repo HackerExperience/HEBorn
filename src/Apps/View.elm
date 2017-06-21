@@ -2,15 +2,15 @@ module Apps.View exposing (view)
 
 import Html exposing (Html)
 import Apps.Models exposing (..)
-import Apps.Messages exposing (AppMsg(..))
+import Apps.Messages exposing (..)
 import Apps.LogViewer.View as LogViewer
 import Apps.TaskManager.View as TaskManager
 import Apps.Browser.View as Browser
 import Apps.Explorer.View as Explorer
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 
 
-view : GameModel -> AppModel -> Html AppMsg
+view : Game.Model -> AppModel -> Html Msg
 view game model =
     case model of
         LogViewerModel model ->

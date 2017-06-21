@@ -9,9 +9,9 @@ import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = MsgFilesystem ServerID Filesystem.Msg
-    | MsgLog ServerID Logs.Msg
-    | MsgProcess ServerID Processes.Msg
+    = FilesystemMsg ServerID Filesystem.Msg
+    | LogMsg ServerID Logs.Msg
+    | ProcessMsg ServerID Processes.Msg
     | Request RequestMsg
     | Event Events.Response
 

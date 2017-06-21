@@ -1,12 +1,9 @@
-module OS.Messages exposing (OSMsg(..))
-
--- import Events.Models
--- import Requests.Models
+module OS.Messages exposing (Msg(..))
 
 import OS.SessionManager.Messages as SessionManager
 import OS.Menu.Messages as Menu
 
 
-type OSMsg
+type Msg
     = SessionManagerMsg SessionManager.Msg
-    | ContextMenuMsg Menu.Msg
+    | MenuMsg Menu.Msg

@@ -11,7 +11,7 @@ import Css.Common exposing (elasticClass)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import Game.Shared exposing (..)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
@@ -313,7 +313,7 @@ renderEntryList app =
     List.map (renderEntry app)
 
 
-view : GameModel -> Model -> Html Msg
+view : Game.Model -> Model -> Html Msg
 view game ({ app } as model) =
     verticalList
         ([ menuView model
