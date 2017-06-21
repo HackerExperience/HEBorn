@@ -1,23 +1,23 @@
 module Core.Models
     exposing
-        ( CoreModel
+        ( Model
         , Flags
         , initialModel
         )
 
-import Driver.Websocket.Models
+import Driver.Websocket.Models as Websocket
 import Router.Router exposing (Route)
-import Game.Models
-import OS.Models
-import Landing.Models
+import Game.Models as Game
+import OS.Models as OS
+import Landing.Models as Landing
 
 
-type alias CoreModel =
+type alias Model =
     { route : Route
-    , game : Game.Models.GameModel
-    , os : OS.Models.Model
-    , landing : Landing.Models.LandModel
-    , websocket : Driver.Websocket.Models.Model
+    , game : Game.Model
+    , os : OS.Model
+    , landing : Landing.Model
+    , websocket : Websocket.Model
     }
 
 
@@ -35,15 +35,15 @@ initialModel :
     -> String
     -> String
     -> String
-    -> CoreModel
+    -> Model
 initialModel route seedInt apiHttpUrl apiWsUrl version =
     let
         game =
-            Game.Models.initialModel apiHttpUrl apiWsUrl version
+            Game.initialModel apiHttpUrl apiWsUrl version
     in
         { route = route
         , game = game
-        , os = OS.Models.initialModel game
-        , landing = Landing.Models.initialModel
-        , websocket = Driver.Websocket.Models.initialModel apiWsUrl
+        , os = OS.initialModel game
+        , landing = Landing.initialModel
+        , websocket = Websocket.initialModel apiWsUrl
         }

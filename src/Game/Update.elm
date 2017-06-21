@@ -1,8 +1,8 @@
 module Game.Update exposing (..)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(..))
+import Core.Messages as Core
+import Game.Models exposing (..)
+import Game.Messages exposing (..)
 import Game.Account.Update as Account
 import Game.Account.Messages as Account
 import Game.Servers.Update as Servers
@@ -13,19 +13,19 @@ import Game.Meta.Update as Meta
 import Game.Meta.Messages as Meta
 
 
-update : GameMsg -> GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg )
+update : Msg -> Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg model =
     case msg of
-        MsgAccount msg ->
+        AccountMsg msg ->
             account msg model
 
-        MsgServers msg ->
+        ServersMsg msg ->
             servers msg model
 
-        MsgNetwork msg ->
+        NetworkMsg msg ->
             network msg model
 
-        MsgMeta msg ->
+        MetaMsg msg ->
             meta msg model
 
         Event event ->
@@ -44,9 +44,9 @@ update msg model =
 
 
 account :
-    Account.AccountMsg
-    -> GameModel
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+    Account.Msg
+    -> Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 account msg model =
     let
         ( account, cmd, msgs ) =
@@ -56,15 +56,15 @@ account msg model =
             { model | account = account }
 
         cmd_ =
-            Cmd.map MsgAccount cmd
+            Cmd.map AccountMsg cmd
     in
         ( model_, cmd_, msgs )
 
 
 servers :
     Servers.Msg
-    -> GameModel
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+    -> Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 servers msg model =
     let
         ( servers, cmd, msgs ) =
@@ -77,9 +77,9 @@ servers msg model =
 
 
 network :
-    Network.NetworkMsg
-    -> GameModel
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+    Network.Msg
+    -> Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 network msg model =
     let
         ( network, cmd, msgs ) =
@@ -91,7 +91,7 @@ network msg model =
         ( model_, cmd, msgs )
 
 
-meta : Meta.MetaMsg -> GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg )
+meta : Meta.Msg -> Model -> ( Model, Cmd Msg, List Core.Msg )
 meta msg model =
     let
         ( meta, cmd, msgs ) =
@@ -104,9 +104,9 @@ meta msg model =
 
 
 andThen :
-    (GameModel -> ( GameModel, Cmd GameMsg, List CoreMsg ))
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
-    -> ( GameModel, Cmd GameMsg, List CoreMsg )
+    (Model -> ( Model, Cmd Msg, List Core.Msg ))
+    -> ( Model, Cmd Msg, List Core.Msg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 andThen func ( model, cmd, msgs ) =
     let
         ( model_, cmd1, msgs1 ) =

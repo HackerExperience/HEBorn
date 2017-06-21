@@ -5,7 +5,6 @@ import Utils exposing (andThenWithDefault)
 import Game.Servers.Models as Servers
     exposing
         ( ServerID
-        , Servers
         , Server(..)
         , getServerByID
         , localhostServerID
@@ -131,7 +130,7 @@ applyFilter app logs =
             )
 
 
-getLogs : LogViewer -> Servers -> Logs
+getLogs : LogViewer -> Servers.Model -> Logs
 getLogs app servers =
     let
         server =
@@ -142,7 +141,7 @@ getLogs app servers =
             (Servers.getLogs server)
 
 
-enterEditing : Servers -> Model -> ID -> Model
+enterEditing : Servers.Model -> Model -> ID -> Model
 enterEditing servers ({ app } as model) logId =
     let
         logs =
@@ -213,7 +212,7 @@ logFilterMapFun filter log =
                 Nothing
 
 
-updateTextFilter : LogViewer -> Servers -> String -> LogViewer
+updateTextFilter : LogViewer -> Servers.Model -> String -> LogViewer
 updateTextFilter app servers newFilter =
     let
         newFilterCache =

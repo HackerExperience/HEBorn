@@ -2,17 +2,17 @@ module Main exposing (init, main)
 
 import Navigation exposing (Location)
 import Router.Router exposing (parseLocation)
-import Core.Subscriptions exposing (subscriptions)
-import Core.Messages exposing (CoreMsg(OnLocationChange))
-import Core.Models exposing (CoreModel, Flags, initialModel)
-import Core.Update exposing (update)
-import Core.View exposing (view)
+import Core.Subscriptions exposing (..)
+import Core.Messages exposing (..)
+import Core.Models exposing (..)
+import Core.Update exposing (..)
+import Core.View exposing (..)
 
 
 -- import TimeTravel.Navigation
 
 
-init : Flags -> Location -> ( CoreModel, Cmd CoreMsg )
+init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         currentRoute =
@@ -28,7 +28,7 @@ init flags location =
         )
 
 
-main : Program Flags CoreModel CoreMsg
+main : Program Flags Model Msg
 main =
     {- Toggle comment below to switch on/off TimeTravel debugger. It's a great
        option to debug changes on models (and quickly go back in time to apply
@@ -37,8 +37,8 @@ main =
        TimeTravel only when debugging specific models.
 
     -}
-    -- TimeTravel.Navigation.programWithFlags OnLocationChange
-    Navigation.programWithFlags OnLocationChange
+    -- TimeTravel.Navigation.programWithFlags LocationChangeMsg
+    Navigation.programWithFlags LocationChangeMsg
         { init = init
         , view = view
         , update = update

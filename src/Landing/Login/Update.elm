@@ -5,14 +5,14 @@ import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
 import Driver.Websocket.Channels exposing (..)
-import Core.Messages exposing (CoreMsg(MsgWebsocket))
-import Core.Models exposing (CoreModel)
+import Core.Messages as Core
+import Core.Models as Core
 import Core.Dispatcher exposing (callAccount)
-import Game.Account.Messages exposing (AccountMsg(Login))
+import Game.Account.Messages as Account
 import Driver.Websocket.Messages as Ws
 
 
-update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg model core =
     case msg of
         SubmitLogin ->
@@ -44,8 +44,8 @@ update msg model core =
 response :
     Response
     -> Model
-    -> CoreModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> Core.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 response response model core =
     case response of
         LoginResponse (Login.OkResponse token id) ->
@@ -58,12 +58,12 @@ response response model core =
                     }
 
                 msgs =
-                    [ callAccount (Login token id)
-                    , MsgWebsocket
+                    [ callAccount (Account.Login token id)
+                    , Core.WebsocketMsg
                         (Ws.UpdateSocket token)
-                    , MsgWebsocket
+                    , Core.WebsocketMsg
                         (Ws.JoinChannel AccountChannel (Just id))
-                    , MsgWebsocket
+                    , Core.WebsocketMsg
                         (Ws.JoinChannel RequestsChannel Nothing)
                     ]
             in

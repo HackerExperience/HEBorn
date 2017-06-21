@@ -1,13 +1,13 @@
 module OS.Menu.Actions exposing (actionHandler)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Models as Game
 import OS.Models exposing (Model)
-import OS.Messages exposing (OSMsg)
+import OS.Messages exposing (..)
 import OS.Menu.Messages exposing (MenuAction(..))
 
 
-actionHandler : MenuAction -> Model -> GameModel -> ( Model, Cmd OSMsg, List CoreMsg )
+actionHandler : MenuAction -> Model -> Game.Model -> ( Model, Cmd Msg, List Core.Msg )
 actionHandler action model game =
     case action of
         NoOp ->

@@ -33,7 +33,7 @@ type Server
     | NoServer
 
 
-type alias Servers =
+type alias Model =
     Dict.Dict ServerID ServerData
 
 
@@ -87,17 +87,17 @@ getServerSafe server =
     Maybe.withDefault invalidServer (getServer server)
 
 
-addServer : Servers -> ServerData -> Servers
+addServer : Model -> ServerData -> Model
 addServer servers server =
     Dict.insert server.id server servers
 
 
-existsServer : Servers -> ServerID -> Bool
+existsServer : Model -> ServerID -> Bool
 existsServer servers id =
     Dict.member id servers
 
 
-getServerByID : Servers -> ServerID -> Server
+getServerByID : Model -> ServerID -> Server
 getServerByID servers id =
     case Dict.get id servers of
         Just server ->
@@ -107,8 +107,8 @@ getServerByID servers id =
             NoServer
 
 
-initialServers : Servers
-initialServers =
+initialModel : Model
+initialModel =
     addServer
         -- DUMMY VALUE FOR PLAYING
         Dict.empty
@@ -185,7 +185,7 @@ updateProcesses server processes =
             NoServer
 
 
-updateServer : Servers -> Server -> Servers
+updateServer : Model -> Server -> Model
 updateServer servers server =
     case server of
         StdServer s ->

@@ -2,27 +2,27 @@ module Core.Update exposing (update)
 
 import Utils
 import Router.Router exposing (parseLocation)
-import Core.Messages exposing (CoreMsg(..))
-import Core.Models exposing (CoreModel)
+import Core.Messages exposing (..)
+import Core.Models exposing (..)
 import OS.Update as OS
-import Game.Update
+import Game.Update as Game
 import Game.Messages as Game
 import Landing.Update
 import Driver.Websocket.Update
 import Driver.Websocket.Messages as Websocket
 
 
-update : CoreMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        MsgGame msg ->
+        GameMsg msg ->
             updateGame msg model
 
-        MsgWebsocket (Websocket.Broadcast event) ->
+        WebsocketMsg (Websocket.Broadcast event) ->
             -- special trap to route broadcasts to Game
             updateGame (Game.Event event) model
 
-        MsgOS msg ->
+        OSMsg msg ->
             let
                 ( os, cmd, msgs ) =
                     OS.update msg model.game model.os
@@ -31,11 +31,11 @@ update msg model =
                     { model | os = os }
 
                 cmd_ =
-                    Cmd.map MsgOS cmd
+                    Cmd.map OSMsg cmd
             in
                 route model_ cmd_ msgs
 
-        MsgLand msg ->
+        LandingMsg msg ->
             let
                 ( landing, cmd, msgs ) =
                     Landing.Update.update msg model.landing model
@@ -44,11 +44,11 @@ update msg model =
                     { model | landing = landing }
 
                 cmd_ =
-                    Cmd.map MsgLand cmd
+                    Cmd.map LandingMsg cmd
             in
                 route model_ cmd_ msgs
 
-        MsgWebsocket subMsg ->
+        WebsocketMsg subMsg ->
             let
                 ( websocket_, cmd, msgs ) =
                     Driver.Websocket.Update.update subMsg model.websocket model
@@ -57,11 +57,11 @@ update msg model =
                     { model | websocket = websocket_ }
 
                 cmd_ =
-                    Cmd.map MsgWebsocket cmd
+                    Cmd.map WebsocketMsg cmd
             in
                 route model_ cmd_ msgs
 
-        OnLocationChange location ->
+        LocationChangeMsg location ->
             let
                 model_ =
                     { model | route = parseLocation location }
@@ -76,28 +76,28 @@ update msg model =
 -- internals
 
 
-updateGame : Game.GameMsg -> CoreModel -> ( CoreModel, Cmd CoreMsg )
+updateGame : Game.Msg -> Model -> ( Model, Cmd Msg )
 updateGame msg model =
     let
         ( game, cmd, msgs ) =
-            Game.Update.update msg model.game
+            Game.update msg model.game
 
         model_ =
             { model | game = game }
 
         cmd_ =
-            Cmd.map MsgGame cmd
+            Cmd.map GameMsg cmd
     in
         route model_ cmd_ msgs
 
 
-isDev : CoreModel -> Bool
+isDev : Model -> Bool
 isDev model =
     -- make this function return False to test the game on production mode
     model.game.meta.config.version == "dev"
 
 
-onDebug : CoreModel -> (a -> a) -> a -> a
+onDebug : Model -> (a -> a) -> a -> a
 onDebug model fun a =
     if isDev model then
         fun a
@@ -115,7 +115,7 @@ sent =
     Debug.log "◀ Message"
 
 
-route : CoreModel -> Cmd CoreMsg -> List CoreMsg -> ( CoreModel, Cmd CoreMsg )
+route : Model -> Cmd Msg -> List Msg -> ( Model, Cmd Msg )
 route model cmd msgs =
     if isDev model then
         let
@@ -134,7 +134,7 @@ route model cmd msgs =
         List.foldr reducer ( model, cmd ) msgs
 
 
-reducer : CoreMsg -> ( CoreModel, Cmd CoreMsg ) -> ( CoreModel, Cmd CoreMsg )
+reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 reducer msg ( model, cmd ) =
     let
         ( model_, cmd_ ) =

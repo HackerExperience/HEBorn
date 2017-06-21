@@ -4,8 +4,8 @@ import Dict
 import Time exposing (Time)
 import Utils exposing (andThenWithDefault)
 import Core.Dispatcher exposing (callProcesses)
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Models as Game
 import Game.Servers.Models exposing (getServerByID, getProcesses)
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
 import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
@@ -22,7 +22,7 @@ import Apps.TaskManager.Menu.Update
 import Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 
-processComplete : Processes -> Time -> List CoreMsg
+processComplete : Processes -> Time -> List Core.Msg
 processComplete tasks now =
     List.filterMap
         (\process ->
@@ -42,7 +42,7 @@ processComplete tasks now =
         (Dict.values tasks)
 
 
-update : TaskManager.Msg -> GameModel -> Model -> ( Model, Cmd TaskManager.Msg, List CoreMsg )
+update : TaskManager.Msg -> Game.Model -> Model -> ( Model, Cmd TaskManager.Msg, List Core.Msg )
 update msg game ({ app } as model) =
     case msg of
         -- -- Context

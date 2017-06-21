@@ -3,17 +3,17 @@ module OS.SessionManager.Update exposing (update)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Dock.Update as Dock
-import Core.Messages exposing (CoreMsg)
+import Core.Messages as Core
 import OS.SessionManager.WindowManager.Update as WindowManager
 import OS.SessionManager.WindowManager.Messages as WindowManager
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 
 
 update :
     Msg
-    -> GameModel
+    -> Game.Model
     -> Model
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 update msg game model =
     case msg of
         WindowManagerMsg msg ->
@@ -31,9 +31,9 @@ update msg game model =
 
 windowManager :
     WindowManager.Msg
-    -> GameModel
+    -> Game.Model
     -> Model
-    -> Maybe ( Model, Cmd Msg, List CoreMsg )
+    -> Maybe ( Model, Cmd Msg, List Core.Msg )
 windowManager msg game model =
     case (current model) of
         Just wm ->
@@ -57,7 +57,7 @@ defaultNone model =
 map :
     (model -> Model)
     -> (msg -> Msg)
-    -> ( model, Cmd msg, List CoreMsg )
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( model, Cmd msg, List Core.Msg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 map mapModel mapMsg ( model, msg, cmds ) =
     ( mapModel model, Cmd.map mapMsg msg, cmds )

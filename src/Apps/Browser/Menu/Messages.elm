@@ -4,11 +4,11 @@ import ContextMenu exposing (ContextMenu)
 import Apps.Browser.Menu.Models exposing (Menu)
 
 
-type MenuAction
-    = DoA
-    | DoB
-
-
 type Msg
     = MenuMsg (ContextMenu.Msg Menu)
     | MenuClick MenuAction
+
+
+type MenuAction
+    = DoA
+    | DoB

@@ -19,7 +19,7 @@ module OS.SessionManager.Models
 
 import Dict exposing (Dict)
 import Maybe exposing (Maybe(..))
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Random.Pcg as Random
 import OS.SessionManager.WindowManager.Models as WindowManager
     exposing
@@ -51,7 +51,7 @@ type alias Model =
     }
 
 
-initialModel : GameModel -> Model
+initialModel : Game.Model -> Model
 initialModel game =
     -- TODO: fetch this from game
     empty

@@ -1,12 +1,12 @@
 module Gen.Game exposing (..)
 
-import Gen.Servers
 import Fuzz exposing (Fuzzer)
 import Random.Pcg exposing (Generator, map)
-import Game.Account.Models exposing (..)
-import Game.Meta.Models exposing (..)
+import Game.Account.Models as Account
+import Game.Meta.Models as Meta
 import Game.Models exposing (..)
-import Game.Network.Models exposing (..)
+import Game.Network.Models as Network
+import Gen.Servers
 import Gen.Utils exposing (..)
 
 
@@ -15,7 +15,7 @@ import Gen.Utils exposing (..)
 --------------------------------------------------------------------------------
 
 
-model : Fuzzer GameModel
+model : Fuzzer Model
 model =
     fuzzer genModel
 
@@ -26,14 +26,14 @@ model =
 --------------------------------------------------------------------------------
 
 
-genModel : Generator GameModel
+genModel : Generator Model
 genModel =
     map
         (\servers ->
-            { account = initialAccountModel
+            { account = Account.initialModel
             , servers = servers
-            , network = initialNetworkModel
-            , meta = initialMetaModel "" "" ""
+            , network = Network.initialModel
+            , meta = Meta.initialModel "" "" ""
             }
         )
         Gen.Servers.genModel

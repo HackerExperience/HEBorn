@@ -4,7 +4,7 @@ import Gen.Filesystem
 import Gen.Game
 import Gen.Servers
 import Fuzz exposing (Fuzzer)
-import Game.Models exposing (GameModel)
+import Game.Models as Game
 import Game.Servers.Filesystem.Models exposing (File, addFile, getFileName)
 import Helper.Filesystem exposing (addFileRecursively)
 import Random.Pcg as Random exposing (Generator)
@@ -26,7 +26,7 @@ type alias InvalidState =
 
 
 type alias State =
-    { game : GameModel
+    { game : Game.Model
     , server : Server
     , valid : ValidState
     , invalid : InvalidState

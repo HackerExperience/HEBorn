@@ -41,7 +41,7 @@ type alias Connections =
     Dict.Dict ConnectionID ConnectionData
 
 
-type alias NetworkModel =
+type alias Model =
     { gateway : Gateway
     , connections : Connections
     }
@@ -52,17 +52,17 @@ createGateway current previous =
     { current = current, previous = previous }
 
 
-getCurrentGateway : NetworkModel -> Server
+getCurrentGateway : Model -> Server
 getCurrentGateway model =
     model.gateway.current
 
 
-getPreviousGateway : NetworkModel -> Server
+getPreviousGateway : Model -> Server
 getPreviousGateway model =
     model.gateway.previous
 
 
-setCurrentGateway : NetworkModel -> Server -> Gateway
+setCurrentGateway : Model -> Server -> Gateway
 setCurrentGateway model gateway =
     createGateway gateway model.gateway.current
 
@@ -79,8 +79,8 @@ initialConnections =
     Dict.empty
 
 
-initialNetworkModel : NetworkModel
-initialNetworkModel =
+initialModel : Model
+initialModel =
     { gateway = initialGateway
     , connections = initialConnections
     }
@@ -104,6 +104,6 @@ newConnection id type_ source_id source_ip target_id target_ip =
     }
 
 
-storeConnection : NetworkModel -> ConnectionData -> Connections
+storeConnection : Model -> ConnectionData -> Connections
 storeConnection model connection =
     Dict.insert connection.id connection model.connections

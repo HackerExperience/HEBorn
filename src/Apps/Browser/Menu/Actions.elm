@@ -1,7 +1,7 @@
 module Apps.Browser.Menu.Actions exposing (actionHandler)
 
-import Core.Messages exposing (CoreMsg)
-import Game.Models exposing (GameModel)
+import Core.Messages as Core
+import Game.Models as Game
 import Apps.Browser.Models exposing (Model)
 import Apps.Browser.Messages exposing (Msg)
 import Apps.Browser.Menu.Messages exposing (MenuAction(..))
@@ -10,8 +10,8 @@ import Apps.Browser.Menu.Messages exposing (MenuAction(..))
 actionHandler :
     MenuAction
     -> Model
-    -> GameModel
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> Game.Model
+    -> ( Model, Cmd Msg, List Core.Msg )
 actionHandler action model game =
     case action of
         DoA ->

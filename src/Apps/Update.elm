@@ -1,9 +1,9 @@
 module Apps.Update exposing (update)
 
-import Game.Models exposing (GameModel)
-import Core.Messages exposing (CoreMsg)
+import Game.Models as Game
+import Core.Messages as Core
 import Apps.Models exposing (..)
-import Apps.Messages exposing (AppMsg(..))
+import Apps.Messages exposing (..)
 import Apps.LogViewer.Update as LogViewer
 import Apps.TaskManager.Update as TaskManager
 import Apps.Browser.Update as Browser
@@ -11,10 +11,10 @@ import Apps.Explorer.Update as Explorer
 
 
 update :
-    AppMsg
-    -> GameModel
+    Msg
+    -> Game.Model
     -> AppModel
-    -> ( AppModel, Cmd AppMsg, List CoreMsg )
+    -> ( AppModel, Cmd Msg, List Core.Msg )
 update msg game model =
     case ( msg, model ) of
         ( LogViewerMsg msg, LogViewerModel model ) ->
@@ -35,8 +35,8 @@ update msg game model =
 
 map :
     (model -> AppModel)
-    -> (msg -> AppMsg)
-    -> ( model, Cmd msg, List CoreMsg )
-    -> ( AppModel, Cmd AppMsg, List CoreMsg )
+    -> (msg -> Msg)
+    -> ( model, Cmd msg, List Core.Msg )
+    -> ( AppModel, Cmd Msg, List Core.Msg )
 map wrapModel wrapMsg ( model, cmd, msgs ) =
     ( wrapModel model, Cmd.map wrapMsg cmd, msgs )

@@ -1,12 +1,12 @@
 module Game.Subscriptions exposing (subscriptions)
 
 import Time exposing (Time, every, second)
-import Core.Models exposing (CoreModel)
-import Game.Models exposing (GameModel)
-import Game.Messages exposing (GameMsg(MsgMeta))
-import Game.Meta.Messages exposing (MetaMsg(Tick))
+import Core.Models as Core
+import Game.Models exposing (..)
+import Game.Messages exposing (..)
+import Game.Meta.Messages as Meta
 
 
-subscriptions : GameModel -> CoreModel -> Sub GameMsg
+subscriptions : Model -> Core.Model -> Sub Msg
 subscriptions model core =
-    Sub.map MsgMeta (Time.every second Tick)
+    Sub.map MetaMsg (Time.every second Meta.Tick)

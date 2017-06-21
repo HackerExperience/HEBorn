@@ -109,7 +109,7 @@ type ServerType
     | Vps
 
 
-request : String -> Config -> Cmd AccountMsg
+request : String -> Config -> Cmd Msg
 request account =
     Requests.request AccountServerIndexTopic
         (ServerIndexRequest >> Request)

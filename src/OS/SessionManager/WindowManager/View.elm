@@ -3,45 +3,24 @@ module OS.SessionManager.WindowManager.View exposing (view, windowTitle)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Html exposing (..)
-import Game.Models exposing (..)
+import Game.Models as Game
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick, onMouseDown)
 import Html.CssHelpers
 import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
-
-
--- import Core.Messages exposing (CoreMsg(..))
--- import Core.Models exposing (CoreModel)
--- import OS.Messages exposing (OSMsg(..))
--- import OS.SessionManager.WindowManager.Models
---     exposing
---         ( Window
---         , WindowID
---         , foldlWindows
---         , filterOpenedWindows
---         , getAppModel
---         )
-
 import OS.SessionManager.WindowManager.Context as Context
-
-
--- import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
-
 import OS.SessionManager.WindowManager.Style as Css
 import Apps.Models as Apps
 import Apps.View as Apps
-
-
--- TODO: refactor most of this module to not rely on CoreMsg
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "wm"
 
 
-view : WindowID -> GameModel -> Model -> Html Msg
+view : WindowID -> Game.Model -> Model -> Html Msg
 view id game model =
     case getWindow id model of
         Just window ->

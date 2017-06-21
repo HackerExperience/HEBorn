@@ -8,11 +8,11 @@ import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events
-import Core.Messages exposing (CoreMsg)
-import Core.Models exposing (CoreModel)
+import Core.Messages as Core
+import Core.Models as Core
 
 
-update : Msg -> Model -> CoreModel -> ( Model, Cmd Msg, List CoreMsg )
+update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, List Core.Msg )
 update msg model core =
     case msg of
         UpdateSocket token ->
@@ -51,7 +51,7 @@ defer :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 defer channel topic model =
     let
         model_ =
@@ -67,7 +67,7 @@ join :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, List CoreMsg )
+    -> ( Model, Cmd Msg, List Core.Msg )
 join channel topic model =
     let
         events =
