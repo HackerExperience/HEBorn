@@ -42,11 +42,6 @@ invalidServerID =
     "invalidID"
 
 
-localhostServerID : ServerID
-localhostServerID =
-    "localhost"
-
-
 invalidServer : ServerData
 invalidServer =
     { id = invalidServerID
@@ -112,8 +107,8 @@ initialModel =
     addServer
         -- DUMMY VALUE FOR PLAYING
         Dict.empty
-        { id = localhostServerID
-        , ip = localhost
+        { id = "localhost"
+        , ip = "localhost"
         , filesystem = dummyFS
         , logs = dummyLogs
         , processes = dummyProcesses

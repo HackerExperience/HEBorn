@@ -78,35 +78,35 @@ css =
             , hover
                 [ children [ class DockAppContext [ display block ] ] ]
             ]
-        , attrSelector "dockItemIco"
+        , attrSelector ".dockItemIco"
             "data-icon"
             "="
             "explorer"
             [ before
                 [ Icon.explorer ]
             ]
-        , attrSelector "dockItemIco"
+        , attrSelector ".dockItemIco"
             "data-icon"
             "="
             "logvw"
             [ before
                 [ Icon.logvw ]
             ]
-        , attrSelector "dockItemIco"
+        , attrSelector ".dockItemIco"
             "data-icon"
             "="
             "browser"
             [ before
                 [ Icon.browser ]
             ]
-        , attrSelector "dockItemIco"
+        , attrSelector ".dockItemIco"
             "data-icon"
             "="
             "taskmngr"
             [ before
                 [ Icon.taskMngr ]
             ]
-        , attrSelector "dockItem"
+        , attrSelector ".dockItem"
             "data-hasinst"
             "="
             "Y"

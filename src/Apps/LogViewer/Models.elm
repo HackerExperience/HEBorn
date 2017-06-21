@@ -7,7 +7,6 @@ import Game.Servers.Models as Servers
         ( ServerID
         , Server(..)
         , getServerByID
-        , localhostServerID
         , getLogs
         )
 import Game.Servers.Logs.Models as Logs exposing (..)

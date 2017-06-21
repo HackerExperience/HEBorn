@@ -86,28 +86,28 @@ css =
                 , float left
                 ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "explorer"
             [ before
                 [ Icon.explorer ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "logvw"
             [ before
                 [ Icon.logvw ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "browser"
             [ before
                 [ Icon.browser ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "taskmngr"

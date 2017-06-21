@@ -19,11 +19,6 @@ isLocalHost addr =
     (addr == "localhost" || addr == "127.0.0.1" || addr == "::1")
 
 
-localhost : IP
-localhost =
-    "localhost"
-
-
-root : ServerUser
-root =
-    "root"
+isRoot : ServerUser -> Bool
+isRoot user =
+    (user == "root" || user == "0")
