@@ -2,7 +2,6 @@ module Apps.TaskManager.View exposing (view)
 
 import Dict
 import Time exposing (Time)
-import Utils exposing (andThenWithDefault)
 import Html exposing (..)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
@@ -90,7 +89,7 @@ viewState now entry =
             (case prop.state of
                 StateRunning ->
                     etaBar
-                        (andThenWithDefault (\end -> (end - now)) 0 prop.eta)
+                        (prop.eta |> Maybe.map ((-) now) |> Maybe.withDefault 0)
                         (Maybe.withDefault 0 prop.progress)
 
                 StateStandby ->
@@ -173,14 +172,10 @@ viewTaskRow now entry =
                 entry
 
         fileVer =
-            andThenWithDefault
-                toString
-                "N/V"
-                (fromLocal
-                    getVersion
-                    Nothing
-                    entry
-                )
+            entry
+                |> fromLocal getVersion Nothing
+                |> Maybe.andThen (toString >> Just)
+                |> Maybe.withDefault "N/V"
 
         usage =
             fromLocal

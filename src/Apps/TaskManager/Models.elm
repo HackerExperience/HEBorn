@@ -1,7 +1,6 @@
 module Apps.TaskManager.Models exposing (..)
 
 import Dict
-import Utils exposing (andThenWithDefault, filterMapList)
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Models as Servers
     exposing
@@ -97,24 +96,17 @@ taskUsageSum ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) ( cpu
 
 
 onlyLocalTasks : Processes -> List Local.ProcessProp
-onlyLocalTasks tasks =
-    let
-        tasksValues =
-            Dict.values tasks
+onlyLocalTasks =
+    Dict.values
+        >> List.filterMap
+            (\v ->
+                case v.prop of
+                    LocalProcess p ->
+                        Just p
 
-        localTasks =
-            filterMapList
-                (\v ->
-                    case v.prop of
-                        LocalProcess p ->
-                            Just p
-
-                        _ ->
-                            Nothing
-                )
-                tasksValues
-    in
-        localTasks
+                    _ ->
+                        Nothing
+            )
 
 
 updateTasks : Servers.Model -> ResourceUsage -> TaskManager -> TaskManager

@@ -81,24 +81,6 @@ filterMapDict fun dict =
         dict
 
 
-filterMapList :
-    (a -> Maybe b)
-    -> List a
-    -> List b
-filterMapList fun list =
-    List.foldl
-        (\a acc ->
-            case fun a of
-                Just a_ ->
-                    a_ :: acc
-
-                Nothing ->
-                    acc
-        )
-        []
-        list
-
-
 {-| Swaps the first argument of a 3-arity function with the last. Can be
 helpful with test chains like:
 
@@ -114,28 +96,13 @@ swap function =
     (\a b c -> function c b a)
 
 
-{-| Like Maybe.andThen, but always returns `Just something`.
+{-| OBSOLET
 -}
 andJust : (a -> b) -> Maybe a -> Maybe b
-andJust callback maybe =
-    case maybe of
-        Just value ->
-            Just (callback value)
-
-        Nothing ->
-            Nothing
+andJust =
+    Maybe.map
 
 
 onKeyDown : (Int -> msg) -> Attribute msg
 onKeyDown tagger =
     on "keydown" (Json.map tagger keyCode)
-
-
-andThenWithDefault : (a -> b) -> b -> Maybe a -> b
-andThenWithDefault callback default maybe =
-    case maybe of
-        Just value ->
-            callback value
-
-        Nothing ->
-            default
