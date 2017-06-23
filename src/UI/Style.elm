@@ -38,6 +38,7 @@ filterHeader =
         , borderBottom3 (px 1) solid (hex "000")
         , internalPadding
         , lineHeight (px 32)
+        , minHeight (px 33) --CHROME HACK
         ]
     , selector "flagsFilterPanel"
         [ flex (int 1)

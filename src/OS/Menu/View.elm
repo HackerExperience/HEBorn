@@ -5,7 +5,6 @@ module OS.Menu.View
         )
 
 import Html exposing (Html)
-import Html.Attributes
 import ContextMenu exposing (ContextMenu)
 import OS.SessionManager.WindowManager.MenuHandler.View
     exposing

@@ -11,7 +11,6 @@ import Css.Common exposing (elasticClass)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
-import Game.Shared exposing (..)
 import Game.Models as Game
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
