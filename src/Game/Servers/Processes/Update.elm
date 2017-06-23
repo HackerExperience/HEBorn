@@ -1,6 +1,5 @@
 module Game.Servers.Processes.Update exposing (..)
 
-import Utils exposing (andThenWithDefault)
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
@@ -27,48 +26,40 @@ update msg model game =
         Pause pID ->
             let
                 processes_ =
-                    andThenWithDefault
-                        (\process ->
-                            pauseProcess model process
-                        )
-                        model
-                        (getProcessByID pID model)
+                    pID
+                        |> (flip getProcessByID) model
+                        |> Maybe.map (pauseProcess model)
+                        |> Maybe.withDefault model
             in
                 ( processes_, Cmd.none, Dispatch.none )
 
         Resume pID ->
             let
                 processes_ =
-                    andThenWithDefault
-                        (\process ->
-                            resumeProcess model process
-                        )
-                        model
-                        (getProcessByID pID model)
+                    pID
+                        |> (flip getProcessByID) model
+                        |> Maybe.map (resumeProcess model)
+                        |> Maybe.withDefault model
             in
                 ( processes_, Cmd.none, Dispatch.none )
 
         Complete pID ->
             let
                 ( processes_, feedback ) =
-                    andThenWithDefault
-                        (\process ->
-                            completeProcess model process
-                        )
-                        ( model, Dispatch.none )
-                        (getProcessByID pID model)
+                    pID
+                        |> (flip getProcessByID) model
+                        |> Maybe.map (completeProcess model)
+                        |> Maybe.withDefault ( model, Dispatch.none )
             in
                 ( processes_, Cmd.none, feedback )
 
         Remove pID ->
             let
                 processes_ =
-                    andThenWithDefault
-                        (\process ->
-                            removeProcess model process
-                        )
-                        model
-                        (getProcessByID pID model)
+                    pID
+                        |> (flip getProcessByID) model
+                        |> Maybe.map (removeProcess model)
+                        |> Maybe.withDefault model
             in
                 ( processes_, Cmd.none, Dispatch.none )
 

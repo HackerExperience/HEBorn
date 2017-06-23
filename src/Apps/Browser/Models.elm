@@ -1,6 +1,5 @@
 module Apps.Browser.Models exposing (..)
 
-import Utils exposing (andThenWithDefault)
 import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(PgBlank), urlParse)
 
@@ -49,7 +48,9 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault ((++) name) name posfix
+        posfix
+            |> Maybe.map ((++) name)
+            |> Maybe.withDefault name
 
 
 icon : String
@@ -60,8 +61,6 @@ icon =
 initialBrowser : Browser
 initialBrowser =
     { addressBar = "about:blank"
-
-    -- FIXME: update the content
     , page = { url = "about:blank", title = "Blank", content = PgBlank }
     , previousPages = []
     , nextPages = []
