@@ -161,6 +161,11 @@ plusSquareO =
     "f196"
 
 
+database : UnicodeTag
+database =
+    "f1c0"
+
+
 fileArchiveO : UnicodeTag
 fileArchiveO =
     "f1c6"

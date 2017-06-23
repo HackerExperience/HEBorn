@@ -115,6 +115,13 @@ css =
             [ before
                 [ Icon.taskMngr ]
             ]
+        , attrSelector ".wmHeaderTitle"
+            "data-icon"
+            "="
+            "udb"
+            [ before
+                [ Icon.dbAdmin ]
+            ]
         , class HeaderButtons
             [ flex (int 0)
             , flexContainerHorz

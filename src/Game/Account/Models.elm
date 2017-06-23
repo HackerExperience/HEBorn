@@ -9,6 +9,7 @@ module Game.Account.Models
 
 import Game.Shared exposing (..)
 import Game.Account.Database.Models as Database exposing (..)
+import Game.Account.Database.Dummy as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 
 
@@ -46,7 +47,7 @@ initialModel token =
     , username = Nothing
     , email = Nothing
     , auth = initialAuth token
-    , database = Database.empty
+    , database = Database.dummy
     , dock = Dock.initialModel
     , logout = False
     }

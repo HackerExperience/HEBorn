@@ -1,5 +1,6 @@
 module Game.Account.Database.Models exposing (..)
 
+import Time exposing (Time)
 import Game.Shared exposing (ID, IP)
 
 
@@ -9,18 +10,13 @@ type ServerType
     | Player
 
 
-type alias RunningVirus =
-    { file : ID
-    , task : ID
-    }
-
-
 type alias HackedServer =
     { ip : IP
     , password : String
     , nick : String
     , notes : Maybe String
-    , virus : Maybe RunningVirus
+    , virusInstalled : List ( ID, String, Float )
+    , activeVirus : Maybe ( ID, Time )
     , type_ : ServerType
     , remoteConn : Maybe Never
     }

@@ -1,16 +1,17 @@
 module Apps.LogViewer.View exposing (view)
 
 import Dict
-import Date exposing (fromTime)
-import Date.Format as DateFormat exposing (format)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css.Common exposing (elasticClass)
+import UI.ToString exposing (timestampToFullData)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
+import UI.Entries.Toogable exposing (toogableEntry)
+import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (..)
@@ -34,50 +35,6 @@ isEntryEditing app log =
     Dict.member log.id app.editing
 
 
-renderButton : Logs.ID -> Classes -> List (Html Msg)
-renderButton logID btn =
-    [ text " "
-    , span
-        ([ class [ btn, BottomButton ] ]
-            ++ (case btn of
-                    BtnEdit ->
-                        [ onClick (EnterEditing logID) ]
-
-                    BtnApply ->
-                        [ onClick (ApplyEditing logID) ]
-
-                    BtnCancel ->
-                        [ onClick (LeaveEditing logID) ]
-
-                    BtnCrypt ->
-                        [ onClick (StartCrypting logID) ]
-
-                    BtnUncrypt ->
-                        [ onClick (StartUncrypting logID) ]
-
-                    BtnHide ->
-                        [ onClick (StartHiding logID) ]
-
-                    BtnDelete ->
-                        [ onClick (StartDeleting logID) ]
-
-                    _ ->
-                        []
-               )
-        )
-        []
-    ]
-
-
-renderButtons : Logs.ID -> List Classes -> List (Html Msg)
-renderButtons logID btns =
-    btns
-        |> List.map (renderButton logID)
-        |> List.concat
-        |> List.tail
-        |> Maybe.withDefault []
-
-
 renderFlag : Classes -> List (Html Msg)
 renderFlag flag =
     [ text " "
@@ -95,7 +52,7 @@ renderFlags =
 
 renderMsg : SmartContent -> Html Msg
 renderMsg msg =
-    div [ class [ EData ] ]
+    div []
         (case msg of
             LoginLocal addr user ->
                 [ Inlines.addr addr
@@ -144,7 +101,7 @@ renderMiniMsg : SmartContent -> Html Msg
 renderMiniMsg msg =
     (case msg of
         Connection actor src dest ->
-            div [ class [ EData ] ]
+            div []
                 [ Inlines.addr actor
                 , span [] [ text " bounced connection from " ]
                 , Inlines.addr src
@@ -159,7 +116,7 @@ renderMiniMsg msg =
 renderEditing : Logs.ID -> String -> Html Msg
 renderEditing logID src =
     input
-        [ class [ EData, BoxifyMe ]
+        [ class [ BoxifyMe ]
         , value src
         , onInput (UpdateEditing logID)
         ]
@@ -168,38 +125,51 @@ renderEditing logID src =
 
 renderTopActions : StdData -> Html Msg
 renderTopActions entry =
-    div [ class [ ETActMini ] ]
+    div []
         -- TODO: Catch the flags for real
         (renderFlags [ BtnUser, BtnEdit, BtnCrypt ])
 
 
+btnsEditing : Logs.ID -> List ( Attribute Msg, Msg )
+btnsEditing logID =
+    [ ( class [ BtnApply, BottomButton ], ApplyEditing logID )
+    , ( class [ BtnCancel, BottomButton ], LeaveEditing logID )
+    ]
+
+
+btnsNormal : Logs.ID -> List ( Attribute Msg, Msg )
+btnsNormal logID =
+    [ ( class [ BtnCrypt, BottomButton ], StartCrypting logID )
+    , ( class [ BtnHide, BottomButton ], StartHiding logID )
+    , ( class [ BtnEdit, BottomButton ], EnterEditing logID )
+    , ( class [ BtnDelete, BottomButton ], StartDeleting logID )
+    ]
+
+
+btnsCryptographed : Logs.ID -> List ( Attribute Msg, Msg )
+btnsCryptographed logID =
+    [ ( class [ BtnHide, BottomButton ], StartHiding logID )
+    , ( class [ BtnUncrypt, BottomButton ], StartUncrypting logID )
+    ]
+
+
 renderBottomActions : LogViewer -> StdData -> Html Msg
 renderBottomActions app entry =
-    div [ class [ EAct ] ]
-        (renderButtons
-            entry.id
-            (if (isEntryEditing app entry) then
-                [ BtnApply, BtnCancel ]
-             else if (isEntryExpanded app entry) then
+    let
+        btns =
+            if (isEntryEditing app entry) then
+                btnsEditing entry.id
+            else if (isEntryExpanded app entry) then
                 case entry.status of
                     StatusNormal ->
-                        [ BtnCrypt, BtnHide, BtnEdit, BtnDelete ]
+                        btnsNormal entry.id
 
                     Cryptographed ->
-                        [ BtnHide, BtnUncrypt ]
-             else
+                        btnsCryptographed entry.id
+            else
                 []
-            )
-        )
-
-
-renderEntryToggler : Logs.ID -> Html Msg
-renderEntryToggler logID =
-    div
-        [ class [ CasedBtnExpand, EToggler ]
-        , onClick (ToogleExpand logID)
-        ]
-        []
+    in
+        horizontalBtnPanel btns
 
 
 renderData : LogViewer -> StdData -> Html Msg
@@ -217,22 +187,18 @@ renderData app entry =
 
 renderBottom : LogViewer -> StdData -> Html Msg
 renderBottom app entry =
-    if (isEntryEditing app entry) then
+    let
+        data =
+            if (isEntryEditing app entry) then
+                [ renderBottomActions app entry ]
+            else if (isEntryExpanded app entry) then
+                [ renderBottomActions app entry ]
+            else
+                []
+    in
         div
             [ class [ EBottom ] ]
-            [ renderBottomActions app entry ]
-    else if (isEntryExpanded app entry) then
-        div
-            [ class [ EBottom, EntryExpanded ] ]
-            [ renderBottomActions app entry
-            , renderEntryToggler entry.id
-            ]
-    else
-        div
-            [ class [ EBottom ] ]
-            [ div [ class [ EAct ] ] []
-            , renderEntryToggler entry.id
-            ]
+            data
 
 
 menuInclude : LogViewer -> StdData -> List (Attribute Msg)
@@ -248,34 +214,33 @@ menuInclude app entry =
                 []
 
 
-getLogDateString : StdData -> String
-getLogDateString log =
-    DateFormat.format
-        "%d/%m/%Y - %H:%M:%S"
-        (Date.fromTime log.timestamp)
-
-
 renderEntry : LogViewer -> StdData -> Html Msg
 renderEntry app entry =
-    div
-        ([ class
-            (if (isEntryExpanded app entry) then
-                [ Entry, EntryExpanded ]
-             else
-                [ Entry ]
-            )
-         ]
-            ++ (menuInclude app entry)
-        )
-        ([ div [ class [ ETop ] ]
-            [ div [] [ entry |> getLogDateString |> text ]
+    let
+        expandedState =
+            isEntryExpanded app entry
+
+        editingState =
+            isEntryEditing app entry
+
+        etop =
+            [ div [] [ entry.timestamp |> timestampToFullData |> text ]
             , div [ elasticClass ] []
             , renderTopActions entry
             ]
-         , renderData app entry
-         , renderBottom app entry
-         ]
-        )
+
+        data =
+            [ div [ class [ ETop ] ] etop
+            , renderData app entry
+            , renderBottom app entry
+            ]
+    in
+        toogableEntry
+            (not editingState)
+            (menuInclude app entry)
+            (ToogleExpand entry.id)
+            expandedState
+            data
 
 
 renderEntryList : LogViewer -> List StdData -> List (Html Msg)

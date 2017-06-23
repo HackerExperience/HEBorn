@@ -7,6 +7,7 @@ import Apps.LogViewer.Subscriptions as LogViewer
 import Apps.TaskManager.Subscriptions as TaskManager
 import Apps.Browser.Subscriptions as Browser
 import Apps.Explorer.Subscriptions as Explorer
+import Apps.DBAdmin.Subscriptions as Database
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -27,3 +28,7 @@ subscriptions data model =
         ExplorerModel model ->
             Explorer.subscriptions data model
                 |> Sub.map ExplorerMsg
+
+        DatabaseModel model ->
+            Database.subscriptions data model
+                |> Sub.map DatabaseMsg

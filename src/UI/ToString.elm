@@ -1,6 +1,8 @@
 module UI.ToString exposing (..)
 
 import Time exposing (Time, inHours, inMinutes, inSeconds)
+import Date exposing (fromTime)
+import Date.Format as Date exposing (format)
 
 
 bytesToString : Float -> String
@@ -77,3 +79,11 @@ secondsToTimeNotation timeLeft =
                 ]
     in
         show
+
+
+timestampToFullData : Time -> String
+timestampToFullData timestamp =
+    timestamp
+        |> Date.fromTime
+        |> Date.format
+            "%d/%m/%Y - %H:%M:%S"

@@ -106,6 +106,13 @@ css =
             [ before
                 [ Icon.taskMngr ]
             ]
+        , attrSelector ".dockItemIco"
+            "data-icon"
+            "="
+            "udb"
+            [ before
+                [ Icon.dbAdmin ]
+            ]
         , attrSelector ".dockItem"
             "data-hasinst"
             "="
