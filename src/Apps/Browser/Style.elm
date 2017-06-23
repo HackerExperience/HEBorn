@@ -26,6 +26,7 @@ css =
         [ class Toolbar
             [ flexContainerHorz
             , lineHeight (int 2)
+            , minHeight (px 32) --CHROME HACK
             , children
                 [ everything
                     [ flex (int 0)
@@ -71,6 +72,7 @@ css =
             ]
         , class LoginPageHeader
             [ lineHeight (int 3)
+            , minHeight (px 48) -- CHROME HACK
             , flex (int 0)
             , textAlign center
             ]
@@ -84,6 +86,7 @@ css =
             ]
         , class LoginPageFooter
             [ lineHeight (int 2)
+            , minHeight (px 64) -- CHROME HACK
             , flex (int 0)
             , flexContainerHorz
             , justifyContent center

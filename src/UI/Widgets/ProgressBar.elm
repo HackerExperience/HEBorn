@@ -4,7 +4,6 @@ import Html exposing (Html, Attribute, text, node)
 import Html.Attributes as Html exposing (style)
 import Html.CssHelpers exposing (withNamespace)
 import Css exposing (Mixin, asPairs, width, minHeight, fontSize, lineHeight, pct, px, int)
-import UI.ToString exposing (pointToSvgAttr)
 
 
 { id, class, classList } =

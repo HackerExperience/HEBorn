@@ -2,7 +2,6 @@ module Apps.LogViewer.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (input, span)
 import Css.Common exposing (internalPadding, internalPaddingSz, flexContainerHorz)
 import Css.Icons as Icon
 

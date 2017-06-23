@@ -1,6 +1,5 @@
 module OS.SessionManager.Dock.View exposing (view)
 
-import Utils exposing (andThenWithDefault)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Events exposing (onClick)
@@ -204,10 +203,10 @@ windowLabel : Int -> WindowRef -> Model -> String
 windowLabel i refs model =
     (toString i)
         ++ ": "
-        ++ (andThenWithDefault
-                windowTitle
-                "404"
-                (getWindow refs model)
+        ++ (refs
+                |> (flip getWindow) model
+                |> Maybe.andThen (windowTitle >> Just)
+                |> Maybe.withDefault "404"
            )
 
 

@@ -59,6 +59,7 @@ css =
             , flexContainerHorz
             , paddingLeft internalPaddingSz
             , lineHeight (px 22)
+            , minHeight (px 24) -- CHROME HACK
             ]
         , class LocBar
             [ flex (int 1)
@@ -103,6 +104,7 @@ css =
                 , fontSize (px 14)
                 , position absolute
                 , lineHeight (int 1)
+                , minHeight (px 14) --CHROME HACK
                 , marginLeft (px -14)
                 , color (rgba 0 0 255 0.6)
                 ]

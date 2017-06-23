@@ -1,13 +1,11 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict
-import Utils exposing (andThenWithDefault)
 import Game.Servers.Models as Servers
     exposing
         ( ServerID
         , Server(..)
         , getServerByID
-        , localhostServerID
         , getLogs
         )
 import Game.Servers.Logs.Models as Logs exposing (..)
@@ -53,7 +51,9 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault ((++) name) name posfix
+        posfix
+            |> Maybe.map ((++) name)
+            |> Maybe.withDefault name
 
 
 icon : String
@@ -159,10 +159,9 @@ enterEditing servers ({ app } as model) logId =
                     Nothing
             )
     in
-        andThenWithDefault
-            (\v -> { model | app = v })
-            model
-            app_
+        app_
+            |> Maybe.andThen (\v -> Just { model | app = v })
+            |> Maybe.withDefault model
 
 
 updateEditing : LogViewer -> ID -> String -> LogViewer

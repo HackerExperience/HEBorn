@@ -10,7 +10,7 @@ import Html.CssHelpers
 import Css.Common exposing (elasticClass)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
-import Game.Shared exposing (..)
+import UI.Inlines.Networking as Inlines exposing (user, addr, file)
 import Game.Models as Game
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
@@ -31,39 +31,6 @@ isEntryExpanded app log =
 isEntryEditing : LogViewer -> StdData -> Bool
 isEntryEditing app log =
     Dict.member log.id app.editing
-
-
-renderAddr : IP -> List (Html Msg)
-renderAddr addr =
-    if (isLocalHost addr) then
-        [ span [ class [ IcoHome, ColorLocal ] ] []
-        , text " "
-        , span [ class [ IdLocal, ColorLocal ] ] [ text addr ]
-        ]
-    else
-        [ span [ class [ IcoCrosshair, ColorRemote ] ] []
-        , text " "
-        , span [ class [ IdMe, ColorRemote ] ] [ text addr ]
-        ]
-
-
-renderUser : ServerUser -> List (Html Msg)
-renderUser user =
-    if (user == root) then
-        [ span [ class [ IcoUser, ColorRoot ] ] []
-        , text " "
-        , span [ class [ IdRoot, ColorRoot ] ] [ text user ]
-        ]
-    else
-        [ span [ class [ IcoUser ] ] []
-        , text " "
-        , span [] [ text user ]
-        ]
-
-
-renderFile : FileName -> List (Html Msg)
-renderFile fileName =
-    [ span [] [ text fileName ] ]
 
 
 renderButton : Logs.ID -> Classes -> List (Html Msg)
@@ -130,32 +97,37 @@ renderMsg msg =
     div [ class [ EData ] ]
         (case msg of
             LoginLocal addr user ->
-                (renderAddr addr)
-                    ++ [ span [] [ text " logged in as " ] ]
-                    ++ (renderUser user)
+                [ Inlines.addr addr
+                , span [] [ text " logged in as " ]
+                , Inlines.user user
+                ]
 
             LoginRemote dest ->
-                [ span [] [ text "Logged into " ] ]
-                    ++ (renderAddr dest)
+                [ span [] [ text "Logged into " ]
+                , Inlines.addr dest
+                ]
 
             Connection actor src dest ->
-                (renderAddr actor)
-                    ++ [ span [] [ text " bounced connection from " ] ]
-                    ++ (renderAddr src)
-                    ++ [ span [] [ text " to " ] ]
-                    ++ (renderAddr dest)
+                [ Inlines.addr actor
+                , span [] [ text " bounced connection from " ]
+                , Inlines.addr src
+                , span [] [ text " to " ]
+                , Inlines.addr dest
+                ]
 
             DownloadBy fileName destIP ->
-                [ span [] [ text "File " ] ]
-                    ++ (renderFile fileName)
-                    ++ [ span [] [ text " downloaded by " ] ]
-                    ++ renderAddr destIP
+                [ span [] [ text "File " ]
+                , Inlines.file fileName
+                , span [] [ text " downloaded by " ]
+                , Inlines.addr destIP
+                ]
 
             DownloadFrom fileName srcIP ->
-                [ span [] [ text "File " ] ]
-                    ++ (renderFile fileName)
-                    ++ [ span [] [ text " downloaded from " ] ]
-                    ++ (renderAddr srcIP)
+                [ span [] [ text "File " ]
+                , Inlines.file fileName
+                , span [] [ text " downloaded from " ]
+                , Inlines.addr srcIP
+                ]
 
             Invalid msg ->
                 [ span [] [ text "Corrupted: " ]
@@ -172,14 +144,11 @@ renderMiniMsg msg =
     (case msg of
         Connection actor src dest ->
             div [ class [ EData ] ]
-                (renderAddr actor
-                    ++ [ span [] [ text " bounced connection from " ]
-                       , span [ class [ IcoCrosshair, ColorRemote ] ] []
-                       , text " "
-                       , span [ class [ IdMe, ColorRemote ] ] [ text src ]
-                       , span [] [ text " to ..." ]
-                       ]
-                )
+                [ Inlines.addr actor
+                , span [] [ text " bounced connection from " ]
+                , Inlines.addr src
+                , span [] [ text " to ..." ]
+                ]
 
         _ ->
             renderMsg msg

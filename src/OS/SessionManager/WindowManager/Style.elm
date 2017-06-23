@@ -73,6 +73,7 @@ css =
             , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
             , internalPadding
             , lineHeight (px 16)
+            , minHeight (px 16) --CHROME HACK
             , borderBottom3 (px 1) solid (rgb 0 140 255)
             , fontSize (px 12)
             ]
@@ -86,28 +87,28 @@ css =
                 , float left
                 ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "explorer"
             [ before
                 [ Icon.explorer ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "logvw"
             [ before
                 [ Icon.logvw ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "browser"
             [ before
                 [ Icon.browser ]
             ]
-        , attrSelector "wmHeaderTitle"
+        , attrSelector ".wmHeaderTitle"
             "data-icon"
             "="
             "taskmngr"

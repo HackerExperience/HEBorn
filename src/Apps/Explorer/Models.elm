@@ -1,6 +1,5 @@
 module Apps.Explorer.Models exposing (..)
 
-import Utils exposing (andThenWithDefault)
 import Game.Servers.Models
     exposing
         ( getFilesystem
@@ -52,7 +51,9 @@ title ({ app } as model) =
             else
                 Nothing
     in
-        andThenWithDefault ((++) name) name posfix
+        posfix
+            |> Maybe.map ((++) name)
+            |> Maybe.withDefault name
 
 
 icon : String
@@ -113,7 +114,6 @@ resolvePath server path =
         filesystem =
             getFilesystem server
     in
-        andThenWithDefault
-            (getFilesOnPath path)
-            []
-            filesystem
+        filesystem
+            |> Maybe.map (getFilesOnPath path)
+            |> Maybe.withDefault []
