@@ -31,7 +31,7 @@ import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Models exposing (ServerID)
-import Utils exposing (msgToCmd)
+import Utils.Cmd as CmdUtils
 
 
 -- opaque type to hide the dispatch magic
@@ -137,7 +137,7 @@ toCmd dispatch =
     dispatch
         |> toList
         |> List.reverse
-        |> List.map msgToCmd
+        |> List.map CmdUtils.fromMsg
         |> Cmd.batch
 
 

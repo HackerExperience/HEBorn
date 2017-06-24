@@ -5,7 +5,6 @@ import Gen.Logs as Gen
 import Maybe exposing (andThen, withDefault)
 import Test exposing (Test, describe)
 import Fuzz exposing (tuple, tuple3)
-import Utils exposing (andJust)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Game.Servers.Logs.Models exposing (..)
 
@@ -63,7 +62,7 @@ addLogGenericTests =
             in
                 log
                     |> getID
-                    |> andJust (model |> flip exists)
+                    |> Maybe.map (model |> flip exists)
                     |> Expect.equal expectations
     ]
 
@@ -112,7 +111,7 @@ updateLogGenericTests =
             in
                 log
                     |> getID
-                    |> andJust (model |> flip getByID)
+                    |> Maybe.map (model |> flip getByID)
                     |> andThen getRawContent
                     |> Expect.equal expectations
     ]
@@ -154,7 +153,7 @@ deleteLogGenericTests =
             in
                 log
                     |> getID
-                    |> andJust (model |> flip exists)
+                    |> Maybe.map (model |> flip exists)
                     |> Expect.equal expectations
     , fuzz
         (tuple ( Gen.model, Gen.log ))

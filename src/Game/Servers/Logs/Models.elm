@@ -1,7 +1,7 @@
 module Game.Servers.Logs.Models exposing (..)
 
-import Dict
-import Utils
+import Dict exposing (Dict)
+import Utils.Dict as DictUtils
 import Time exposing (Time)
 import Game.Shared as Game exposing (IP, ID, ServerUser)
 
@@ -30,7 +30,7 @@ type Log
 
 
 type alias Logs =
-    Dict.Dict ID Log
+    Dict ID Log
 
 
 type alias FileName =
@@ -147,7 +147,7 @@ update : Log -> Logs -> Logs
 update log logs =
     case log of
         StdLog entry ->
-            Utils.safeUpdateDict logs entry.id log
+            DictUtils.safeUpdate entry.id log logs
 
         NoLog ->
             logs

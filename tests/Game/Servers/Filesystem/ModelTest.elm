@@ -6,7 +6,6 @@ import Fuzz exposing (int, tuple, tuple3, tuple4)
 import Helper.Filesystem as Helper exposing (addFileRecursively)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
-import Utils exposing (andJust)
 import Game.Servers.Filesystem.Models exposing (..)
 
 
@@ -164,7 +163,7 @@ moveStdFileTests =
                     |> getFilesOnPath destination
                     |> List.filter (\x -> (getFileId x) == fileID)
                     |> List.head
-                    |> andJust getFileId
+                    |> Maybe.map getFileId
                     |> Expect.equal (Just fileID)
     , fuzz
         (tuple3 ( Gen.model, Gen.stdFile, Gen.folder ))
@@ -218,7 +217,7 @@ moveFolderTests =
                     |> getFilesOnPath destination
                     |> List.filter (\x -> (getFileId x) == fileID)
                     |> List.head
-                    |> andJust getFileId
+                    |> Maybe.map getFileId
                     |> Expect.equal (Just fileID)
 
     {- We moved /bar to /foo, so now we have /foo/bar. We need to ensure our
