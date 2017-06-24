@@ -1,6 +1,6 @@
 module Driver.Websocket.Update exposing (update)
 
-import Utils
+import Utils.Cmd as CmdUtils
 import Phoenix.Channel as Channel
 import Driver.Websocket.Models exposing (..)
 import Driver.Websocket.Messages exposing (..)
@@ -47,7 +47,7 @@ defer channel topic model =
             { model | defer = False }
 
         cmd =
-            Utils.delay 0.5 (JoinChannel channel topic)
+            CmdUtils.delay 0.5 (JoinChannel channel topic)
     in
         ( model_, cmd )
 

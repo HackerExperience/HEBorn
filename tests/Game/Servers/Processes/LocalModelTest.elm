@@ -3,10 +3,9 @@ module Game.Servers.Processes.LocalModelTest exposing (all)
 import Expect
 import Gen.Processes as Gen
 import Fuzz exposing (int, tuple)
-import Maybe exposing (andThen)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
-import Utils exposing (swap, andJust)
+import Utils.Core exposing (swap)
 import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local exposing (ProcessState(..))
 import Game.Servers.Processes.Models exposing (..)
@@ -102,7 +101,7 @@ pauseProcessGenericTests =
                 |> addProcess process
                 |> (flip pauseProcess) process
                 |> getProcessByID process.id
-                |> andThen getState
+                |> Maybe.andThen getState
                 |> Expect.equal (Just StatePaused)
     ]
 
@@ -137,9 +136,9 @@ resumeProcessGenericTests =
                 maybeState =
                     model
                         |> getProcessByID process.id
-                        |> andJust (resumeProcess model)
-                        |> andThen (getProcessByID process.id)
-                        |> andJust getStateForJust
+                        |> Maybe.map (resumeProcess model)
+                        |> Maybe.andThen (getProcessByID process.id)
+                        |> Maybe.map getStateForJust
             in
                 Expect.equal (Just StateRunning) maybeState
     , fuzz
@@ -155,9 +154,9 @@ resumeProcessGenericTests =
             in
                 model
                     |> getProcessByID process.id
-                    |> andJust (resumeProcess model)
-                    |> andThen (getProcessByID process.id)
-                    |> andJust getStateForJust
+                    |> Maybe.map (resumeProcess model)
+                    |> Maybe.andThen (getProcessByID process.id)
+                    |> Maybe.map getStateForJust
                     |> Expect.equal (Just StateRunning)
     ]
 
@@ -191,7 +190,7 @@ completeProcessGenericTests =
             in
                 model
                     |> getProcessByID (getProcessID process)
-                    |> andJust getStateForJust
+                    |> Maybe.map getStateForJust
                     |> Expect.equal (Just StateComplete)
     ]
 

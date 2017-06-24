@@ -1,7 +1,7 @@
 module Game.Servers.Processes.Models exposing (..)
 
 import Dict
-import Utils
+import Utils.Dict as DictUtils
 import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
@@ -65,7 +65,7 @@ doLocalProcess job processes process =
                 prop_ =
                     LocalProcess localProp_
             in
-                Utils.safeUpdateDict processes process.id { process | prop = prop_ }
+                DictUtils.safeUpdate process.id { process | prop = prop_ } processes
 
         _ ->
             processes
