@@ -1,31 +1,35 @@
 module Main exposing (init, main)
 
-import Navigation exposing (Location)
-import Router.Router exposing (parseLocation)
+import Html
 import Core.Subscriptions exposing (..)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Update exposing (..)
 import Core.View exposing (..)
+import Core.Config as Config exposing (Config)
 
 
 -- import TimeTravel.Navigation
 
 
-init : Flags -> Location -> ( Model, Cmd Msg )
-init flags location =
+type alias Flags =
+    { seed : Int
+    , apiHttpUrl : String
+    , apiWsUrl : String
+    , version : String
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init { seed, apiHttpUrl, apiWsUrl, version } =
     let
-        currentRoute =
-            parseLocation location
+        config =
+            Config.init apiHttpUrl apiWsUrl version
+
+        model =
+            initialModel seed config
     in
-        ( initialModel
-            currentRoute
-            flags.seed
-            flags.apiHttpUrl
-            flags.apiWsUrl
-            flags.version
-        , Cmd.none
-        )
+        ( model, Cmd.none )
 
 
 main : Program Flags Model Msg
@@ -37,8 +41,8 @@ main =
        TimeTravel only when debugging specific models.
 
     -}
-    -- TimeTravel.Navigation.programWithFlags LocationChangeMsg
-    Navigation.programWithFlags LocationChangeMsg
+    -- TimeTravel.programWithFlags
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

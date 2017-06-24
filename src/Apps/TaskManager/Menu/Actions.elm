@@ -9,11 +9,11 @@ import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
-    MenuAction
+    Game.Model
+    -> MenuAction
     -> Model
-    -> Game.Model
     -> ( Model, Cmd TaskManager.Msg, Dispatch )
-actionHandler action ({ app } as model) game =
+actionHandler game action ({ app } as model) =
     case action of
         PauseProcess pID ->
             let

@@ -7,6 +7,7 @@ module Core.Dispatch
         , foldr
         , fromList
         , toList
+        , toCmd
         , core
         , websocket
         , game
@@ -30,6 +31,7 @@ import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Models exposing (ServerID)
+import Utils exposing (msgToCmd)
 
 
 -- opaque type to hide the dispatch magic
@@ -127,6 +129,16 @@ toList dispatch =
 
         None ->
             []
+
+
+toCmd : Dispatch -> Cmd Msg
+toCmd dispatch =
+    -- TODO: check if reversing is really needed
+    dispatch
+        |> toList
+        |> List.reverse
+        |> List.map msgToCmd
+        |> Cmd.batch
 
 
 

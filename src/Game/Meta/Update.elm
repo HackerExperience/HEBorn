@@ -7,11 +7,15 @@ import Game.Meta.Messages exposing (..)
 import Game.Meta.Models exposing (..)
 
 
-update : Msg -> Model -> Game.Model -> ( Model, Cmd Game.Msg, Dispatch )
-update msg model game =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Game.Msg, Dispatch )
+update game msg model =
     case msg of
         Tick time ->
-            ( { model | lastTick = time }, Cmd.none, Dispatch.none )
+            let
+                model_ =
+                    { model | lastTick = time }
+            in
+                ( model_, Cmd.none, Dispatch.none )
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

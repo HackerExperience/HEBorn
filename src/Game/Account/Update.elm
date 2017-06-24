@@ -1,104 +1,90 @@
 module Game.Account.Update exposing (..)
 
 import Maybe
-import Driver.Websocket.Reports as Websocket
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Channels as Websocket
+import Driver.Websocket.Reports as Websocket
+import Driver.Websocket.Messages as Ws
 import Events.Events as Events
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
 import Game.Account.Requests exposing (..)
 import Game.Account.Requests.Logout as Logout
 import Game.Account.Requests.ServerIndex as ServerIndex
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 
 
 update :
-    Msg
+    Game.Model
+    -> Msg
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Msg, Dispatch )
-update msg model game =
+update game msg model =
     case msg of
-        Login token id ->
-            login token id model game
-
         Logout ->
-            logout model game
+            logout game model
 
         Request data ->
-            response (receive data) model game
+            response game (receive data) model
 
         Event data ->
-            event data model game
+            event game data model
 
 
 
 -- internals
 
 
-login :
-    Token
-    -> String
-    -> Model
-    -> Game.Model
-    -> ( Model, Cmd Msg, Dispatch )
-login token id model game =
-    let
-        model1 =
-            setToken model (Just token)
-
-        model_ =
-            { model1 | id = Just id }
-    in
-        ( model_, Cmd.none, Dispatch.none )
-
-
 logout :
-    Model
-    -> Game.Model
+    Game.Model
+    -> Model
     -> ( Model, Cmd Msg, Dispatch )
-logout model game =
-    case getToken model of
-        Just token ->
-            let
-                model_ =
-                    setToken model Nothing
+logout game model =
+    let
+        token =
+            getToken model
 
-                cmd =
-                    Logout.request token game.meta.config
-            in
-                ( model_, cmd, Dispatch.none )
-
-        _ ->
-            ( model, Cmd.none, Dispatch.none )
+        cmd =
+            Logout.request token game
+    in
+        ( model, cmd, Dispatch.none )
 
 
 response :
-    Response
+    Game.Model
+    -> Response
     -> Model
-    -> Game.Model
     -> ( Model, Cmd msg, Dispatch )
-response response model game =
+response game response model =
     case response of
-        LogoutResponse Logout.OkResponse ->
-            ( model, Cmd.none, Dispatch.none )
-
         _ ->
             ( model, Cmd.none, Dispatch.none )
 
 
 event :
-    Events.Response
+    Game.Model
+    -> Events.Response
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Msg, Dispatch )
-event ev model game =
+event game ev model =
     case ev of
+        Events.Report (Websocket.Connected _ id) ->
+            let
+                dispatch =
+                    Dispatch.batch
+                        [ Dispatch.websocket
+                            (Ws.JoinChannel AccountChannel (Just id))
+                        , Dispatch.websocket
+                            (Ws.JoinChannel RequestsChannel Nothing)
+                        ]
+            in
+                ( model, Cmd.none, dispatch )
+
         Events.Report (Websocket.Joined Websocket.AccountChannel) ->
             let
                 cmd =
-                    ServerIndex.request (Maybe.withDefault "" model.id) game.meta.config
+                    ServerIndex.request (Maybe.withDefault "" model.id) game
             in
                 ( model, Cmd.none, Dispatch.none )
 

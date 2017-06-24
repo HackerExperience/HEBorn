@@ -7,8 +7,8 @@ import Game.Account.Messages as Account
 import Game.Models as Game
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
-update msg game model =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update game msg model =
     case msg of
         Logout ->
             let

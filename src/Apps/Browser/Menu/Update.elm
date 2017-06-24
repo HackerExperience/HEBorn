@@ -7,8 +7,8 @@ import Apps.Browser.Menu.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> Game.Model -> ( Model, Cmd Msg, Dispatch )
-update msg model game =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update game msg model =
     case msg of
         MenuMsg msg ->
             let

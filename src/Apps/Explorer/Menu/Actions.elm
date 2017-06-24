@@ -9,11 +9,11 @@ import Apps.Explorer.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
-    MenuAction
+    Game.Model
+    -> MenuAction
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Explorer.Msg, Dispatch )
-actionHandler action model game =
+actionHandler game action model =
     case action of
         DeleteFile fileID ->
             let

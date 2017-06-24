@@ -12,25 +12,45 @@ import OS.Subscriptions as OS
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    let
-        osSub =
-            os model.game model.os
+    case model of
+        Home model ->
+            home model
 
-        websocketSub =
-            websocket model model.websocket
-
-        gameSub =
-            game model model.game
-    in
-        Sub.batch
-            [ osSub
-            , websocketSub
-            , gameSub
-            ]
+        Play model ->
+            play model
 
 
 
 -- internals
+
+
+home : HomeModel -> Sub Msg
+home model =
+    case model.websocket of
+        Just model ->
+            websocket model
+
+        Nothing ->
+            Sub.none
+
+
+play : PlayModel -> Sub Msg
+play model =
+    let
+        websocketSub =
+            websocket model.websocket
+
+        gameSub =
+            game model.game
+
+        osSub =
+            os model.game model.os
+    in
+        Sub.batch
+            [ websocketSub
+            , gameSub
+            , osSub
+            ]
 
 
 os : Game.Model -> OS.Model -> Sub Msg
@@ -40,15 +60,15 @@ os game model =
         |> Sub.map OSMsg
 
 
-websocket : Model -> Websocket.Model -> Sub Msg
-websocket core model =
-    core
-        |> Websocket.subscriptions model
+websocket : Websocket.Model -> Sub Msg
+websocket model =
+    model
+        |> Websocket.subscriptions
         |> Sub.map WebsocketMsg
 
 
-game : Model -> Game.Model -> Sub Msg
-game core game =
-    core
-        |> Game.subscriptions game
+game : Game.Model -> Sub Msg
+game game =
+    game
+        |> Game.subscriptions
         |> Sub.map GameMsg

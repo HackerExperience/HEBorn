@@ -1,18 +1,18 @@
 module Landing.Login.Update exposing (..)
 
-import Landing.Login.Models exposing (Model)
 import Landing.Login.Messages exposing (Msg(..))
+import Landing.Login.Models exposing (Model)
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
 import Driver.Websocket.Channels exposing (..)
+import Core.Messages as Core
 import Core.Models as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Account.Messages as Account
 import Driver.Websocket.Messages as Ws
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
-update msg model core =
+update : Core.HomeModel -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update core msg model =
     case msg of
         SubmitLogin ->
             let
@@ -20,7 +20,7 @@ update msg model core =
                     Login.request
                         model.username
                         model.password
-                        core.game.meta.config
+                        core
             in
                 ( model, cmd, Dispatch.none )
 
@@ -37,37 +37,26 @@ update msg model core =
             ( model, Cmd.none, Dispatch.none )
 
         Request data ->
-            response (receive data) model core
+            response core (receive data) model
 
 
 response :
-    Response
+    Core.HomeModel
+    -> Response
     -> Model
-    -> Core.Model
     -> ( Model, Cmd Msg, Dispatch )
-response response model core =
+response core response model =
     case response of
         LoginResponse (Login.OkResponse token id) ->
             let
                 model_ =
-                    { model
-                        | username = ""
-                        , password = ""
-                        , loginFailed = False
-                    }
+                    { model | loginFailed = False }
 
-                msgs =
+                dispatch =
                     Dispatch.batch
-                        [ Dispatch.account (Account.Login token id)
-                        , Dispatch.websocket
-                            (Ws.UpdateSocket token)
-                        , Dispatch.websocket
-                            (Ws.JoinChannel AccountChannel (Just id))
-                        , Dispatch.websocket
-                            (Ws.JoinChannel RequestsChannel Nothing)
-                        ]
+                        [ Dispatch.core (Core.Bootstrap token id) ]
             in
-                ( model_, Cmd.none, msgs )
+                ( model_, Cmd.none, dispatch )
 
         LoginResponse Login.ErrorResponse ->
             let

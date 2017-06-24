@@ -4,4 +4,6 @@ import Driver.Websocket.Channels exposing (..)
 
 
 type Report
-    = Joined Channel
+    = Connected String String
+    | Disconnected
+    | Joined Channel

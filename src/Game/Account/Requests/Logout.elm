@@ -1,23 +1,13 @@
-module Game.Account.Requests.Logout
-    exposing
-        ( Response(..)
-        , request
-        , receive
-        )
+module Game.Account.Requests.Logout exposing (request)
 
 import Json.Encode as Encode exposing (Value)
-import Core.Config exposing (Config)
 import Game.Account.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (ConfigSource, Code(..))
 
 
-type Response
-    = OkResponse
-
-
-request : String -> Config -> Cmd Msg
+request : String -> ConfigSource a -> Cmd Msg
 request token =
     let
         payload =
@@ -28,8 +18,3 @@ request token =
             (LogoutRequest >> Request)
             Nothing
             payload
-
-
-receive : Code -> Value -> Response
-receive _ _ =
-    OkResponse

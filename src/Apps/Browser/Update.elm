@@ -10,23 +10,23 @@ import Apps.Browser.Models
         , enterAddress
         )
 import Apps.Browser.Messages exposing (Msg(..))
-import Apps.Browser.Menu.Messages as MsgMenu
-import Apps.Browser.Menu.Update
-import Apps.Browser.Menu.Actions exposing (actionHandler)
+import Apps.Browser.Menu.Messages as Menu
+import Apps.Browser.Menu.Update as Menu
+import Apps.Browser.Menu.Actions as Menu
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
-update msg game ({ app } as model) =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update game msg ({ app } as model) =
     case msg of
         -- Menu
-        MenuMsg (MsgMenu.MenuClick action) ->
-            actionHandler action model game
+        MenuMsg (Menu.MenuClick action) ->
+            Menu.actionHandler game action model
 
-        MenuMsg subMsg ->
+        MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.Browser.Menu.Update.update subMsg model.menu game
+                    Menu.update game msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd

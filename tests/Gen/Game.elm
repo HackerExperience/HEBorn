@@ -30,10 +30,15 @@ genModel : Generator Model
 genModel =
     map
         (\servers ->
-            { account = Account.initialModel
+            { account = Account.initialModel ""
             , servers = servers
             , network = Network.initialModel
-            , meta = Meta.initialModel "" "" ""
+            , meta = Meta.initialModel
+            , config =
+                { apiHttpUrl = ""
+                , apiWsUrl = ""
+                , version = "test"
+                }
             }
         )
         Gen.Servers.genModel
