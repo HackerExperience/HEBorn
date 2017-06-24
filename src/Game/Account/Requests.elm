@@ -1,24 +1,20 @@
 module Game.Account.Requests exposing (Response(..), receive)
 
-import Game.Account.Requests.Logout as Logout
 import Game.Account.Requests.ServerIndex as ServerIndex
 import Game.Account.Messages exposing (..)
 
 
 type Response
-    = LogoutResponse Logout.Response
-    | ServerIndexResponse ServerIndex.Response
+    = ServerIndexResponse ServerIndex.Response
 
 
 receive : RequestMsg -> Response
 receive response =
     case response of
-        LogoutRequest ( code, data ) ->
-            data
-                |> Logout.receive code
-                |> LogoutResponse
-
         ServerIndexRequest ( code, data ) ->
             data
                 |> ServerIndex.receive code
                 |> ServerIndexResponse
+
+        LogoutRequest _ ->
+            Debug.crash "Logout has no response"

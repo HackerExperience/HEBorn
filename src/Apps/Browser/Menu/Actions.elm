@@ -8,11 +8,11 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 actionHandler :
-    MenuAction
+    Game.Model
+    -> MenuAction
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Msg, Dispatch )
-actionHandler action model game =
+actionHandler game action model =
     case action of
         DoA ->
             ( model, Cmd.none, Dispatch.none )

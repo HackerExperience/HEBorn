@@ -11,23 +11,23 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Msg
-    -> Game.Model
+    Game.Model
+    -> Msg
     -> AppModel
     -> ( AppModel, Cmd Msg, Dispatch )
-update msg game model =
+update game msg model =
     case ( msg, model ) of
         ( LogViewerMsg msg, LogViewerModel model ) ->
-            map LogViewerModel LogViewerMsg (LogViewer.update msg game model)
+            map LogViewerModel LogViewerMsg (LogViewer.update game msg model)
 
         ( TaskManagerMsg msg, TaskManagerModel model ) ->
-            map TaskManagerModel TaskManagerMsg (TaskManager.update msg game model)
+            map TaskManagerModel TaskManagerMsg (TaskManager.update game msg model)
 
         ( BrowserMsg msg, BrowserModel model ) ->
-            map BrowserModel BrowserMsg (Browser.update msg game model)
+            map BrowserModel BrowserMsg (Browser.update game msg model)
 
         ( ExplorerMsg msg, ExplorerModel model ) ->
-            map ExplorerModel ExplorerMsg (Explorer.update msg game model)
+            map ExplorerModel ExplorerMsg (Explorer.update game msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -38,5 +38,5 @@ map :
     -> (msg -> Msg)
     -> ( model, Cmd msg, Dispatch )
     -> ( AppModel, Cmd Msg, Dispatch )
-map wrapModel wrapMsg ( model, cmd, msgs ) =
-    ( wrapModel model, Cmd.map wrapMsg cmd, msgs )
+map wrapModel wrapMsg ( model, cmd, dispatch ) =
+    ( wrapModel model, Cmd.map wrapMsg cmd, dispatch )

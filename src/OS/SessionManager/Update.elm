@@ -10,15 +10,15 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Msg
-    -> Game.Model
+    Game.Model
+    -> Msg
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-update msg game model =
+update game msg model =
     case msg of
         WindowManagerMsg msg ->
             model
-                |> windowManager msg game
+                |> windowManager game msg
                 |> defaultNone model
 
         DockMsg msg ->
@@ -30,15 +30,15 @@ update msg game model =
 
 
 windowManager :
-    WindowManager.Msg
-    -> Game.Model
+    Game.Model
+    -> WindowManager.Msg
     -> Model
     -> Maybe ( Model, Cmd Msg, Dispatch )
-windowManager msg game model =
+windowManager game msg model =
     case (current model) of
         Just wm ->
             wm
-                |> WindowManager.update msg game
+                |> WindowManager.update game msg
                 |> map (flip refresh model) WindowManagerMsg
                 |> Just
 

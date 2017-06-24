@@ -17,11 +17,11 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Msg
+    Game.Model
+    -> Msg
     -> Processes
-    -> Game.Model
     -> ( Processes, Cmd Game.Msg, Dispatch )
-update msg model game =
+update game msg model =
     case msg of
         Pause pID ->
             let

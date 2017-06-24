@@ -1,6 +1,6 @@
 module Events.Events exposing (Event(..), Response(..), map, handler)
 
-import Driver.Websocket.Reports as Websocket
+import Driver.Websocket.Reports as Ws
 import Events.Account as Account
 import Json.Encode exposing (Value)
 
@@ -11,7 +11,7 @@ type Event
 
 type Response
     = AccountEventResponse Account.Response
-    | Report Websocket.Report
+    | Report Ws.Report
 
 
 map : (a -> b) -> List ( String, a ) -> List ( String, b )

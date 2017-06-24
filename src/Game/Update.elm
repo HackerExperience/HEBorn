@@ -49,8 +49,8 @@ account :
     -> ( Model, Cmd Msg, Dispatch )
 account msg model =
     let
-        ( account, cmd, msgs ) =
-            Account.update msg model.account model
+        ( account, cmd, dispatch ) =
+            Account.update model msg model.account
 
         model_ =
             { model | account = account }
@@ -58,7 +58,7 @@ account msg model =
         cmd_ =
             Cmd.map AccountMsg cmd
     in
-        ( model_, cmd_, msgs )
+        ( model_, cmd_, dispatch )
 
 
 servers :
@@ -67,13 +67,13 @@ servers :
     -> ( Model, Cmd Msg, Dispatch )
 servers msg model =
     let
-        ( servers, cmd, msgs ) =
-            Servers.update msg model.servers model
+        ( servers, cmd, dispatch ) =
+            Servers.update model msg model.servers
 
         model_ =
             { model | servers = servers }
     in
-        ( model_, cmd, msgs )
+        ( model_, cmd, dispatch )
 
 
 network :
@@ -82,25 +82,25 @@ network :
     -> ( Model, Cmd Msg, Dispatch )
 network msg model =
     let
-        ( network, cmd, msgs ) =
-            Network.update msg model.network model
+        ( network, cmd, dispatch ) =
+            Network.update model msg model.network
 
         model_ =
             { model | network = network }
     in
-        ( model_, cmd, msgs )
+        ( model_, cmd, dispatch )
 
 
 meta : Meta.Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 meta msg model =
     let
-        ( meta, cmd, msgs ) =
-            Meta.update msg model.meta model
+        ( meta, cmd, dispatch ) =
+            Meta.update model msg model.meta
 
         model_ =
             { model | meta = meta }
     in
-        ( model_, cmd, msgs )
+        ( model_, cmd, dispatch )
 
 
 andThen :

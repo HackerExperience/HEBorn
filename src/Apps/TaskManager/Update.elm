@@ -15,9 +15,9 @@ import Apps.TaskManager.Models
         , updateTasks
         )
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
-import Apps.TaskManager.Menu.Messages as MsgMenu
-import Apps.TaskManager.Menu.Update
-import Apps.TaskManager.Menu.Actions exposing (actionHandler)
+import Apps.TaskManager.Menu.Messages as Menu
+import Apps.TaskManager.Menu.Update as Menu
+import Apps.TaskManager.Menu.Actions as Menu
 
 
 processComplete : Processes -> Time -> Dispatch
@@ -48,17 +48,21 @@ processComplete tasks now =
         |> Dispatch.batch
 
 
-update : TaskManager.Msg -> Game.Model -> Model -> ( Model, Cmd TaskManager.Msg, Dispatch )
-update msg game ({ app } as model) =
+update :
+    Game.Model
+    -> TaskManager.Msg
+    -> Model
+    -> ( Model, Cmd TaskManager.Msg, Dispatch )
+update game msg ({ app } as model) =
     case msg of
         -- -- Context
-        MenuMsg (MsgMenu.MenuClick action) ->
-            actionHandler action model game
+        MenuMsg (Menu.MenuClick action) ->
+            Menu.actionHandler game action model
 
-        MenuMsg subMsg ->
+        MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.TaskManager.Menu.Update.update subMsg model.menu game
+                    Menu.update game msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd

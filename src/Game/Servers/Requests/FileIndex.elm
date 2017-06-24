@@ -36,11 +36,10 @@ import Json.Decode
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Result exposing (Result(..))
 import Date exposing (Date)
-import Core.Config exposing (Config)
 import Game.Servers.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..), emptyPayload)
+import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Utils.Json.Decode exposing (date)
 
 
@@ -140,7 +139,7 @@ type DecryptorModule
     | ProcessDecryptor
 
 
-request : Config -> Cmd Msg
+request : ConfigSource a -> Cmd Msg
 request =
     Requests.request ServerFileIndexTopic
         (FileIndexRequest >> Request)

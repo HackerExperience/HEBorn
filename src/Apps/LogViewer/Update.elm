@@ -6,22 +6,26 @@ import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
-import Apps.LogViewer.Menu.Messages as MsgMenu
-import Apps.LogViewer.Menu.Update
-import Apps.LogViewer.Menu.Actions exposing (actionHandler)
+import Apps.LogViewer.Menu.Messages as Menu
+import Apps.LogViewer.Menu.Update as Menu
+import Apps.LogViewer.Menu.Actions as Menu
 
 
-update : LogViewer.Msg -> Game.Model -> Model -> ( Model, Cmd LogViewer.Msg, Dispatch )
-update msg game ({ app } as model) =
+update :
+    Game.Model
+    -> LogViewer.Msg
+    -> Model
+    -> ( Model, Cmd LogViewer.Msg, Dispatch )
+update game msg ({ app } as model) =
     case msg of
         -- -- Context
-        MenuMsg (MsgMenu.MenuClick action) ->
-            actionHandler action model game
+        MenuMsg (Menu.MenuClick action) ->
+            Menu.actionHandler game action model
 
-        MenuMsg subMsg ->
+        MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Apps.LogViewer.Menu.Update.update subMsg model.menu game
+                    Menu.update game msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd

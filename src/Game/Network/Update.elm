@@ -7,8 +7,8 @@ import Game.Network.Messages exposing (Msg(..))
 import Game.Network.Models exposing (Model)
 
 
-update : Msg -> Model -> Game.Model -> ( Model, Cmd Game.Msg, Dispatch )
-update msg model game =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Game.Msg, Dispatch )
+update game msg model =
     case msg of
         _ ->
             ( model, Cmd.none, Dispatch.none )

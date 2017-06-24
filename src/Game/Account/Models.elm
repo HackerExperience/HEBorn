@@ -1,4 +1,11 @@
-module Game.Account.Models exposing (..)
+module Game.Account.Models
+    exposing
+        ( Model
+        , AccountID
+        , Token
+        , initialModel
+        , getToken
+        )
 
 import Game.Shared exposing (..)
 import Game.Account.Database.Models as Database exposing (..)
@@ -13,7 +20,7 @@ type alias Token =
 
 
 type alias AuthData =
-    { token : Maybe Token }
+    { token : Token }
 
 
 type alias Model =
@@ -25,40 +32,21 @@ type alias Model =
     }
 
 
-getToken : Model -> Maybe Token
-getToken model =
-    model.auth.token
+initialAuth : Token -> AuthData
+initialAuth token =
+    { token = token }
 
 
-setToken : Model -> Maybe Token -> Model
-setToken model token =
-    let
-        auth_ =
-            { token = token }
-    in
-        { model | auth = auth_ }
-
-
-isAuthenticated : Model -> Bool
-isAuthenticated model =
-    case getToken model of
-        Nothing ->
-            False
-
-        Just _ ->
-            True
-
-
-initialAuth : AuthData
-initialAuth =
-    { token = Nothing }
-
-
-initialModel : Model
-initialModel =
+initialModel : Token -> Model
+initialModel token =
     { id = Nothing
     , username = Nothing
     , email = Nothing
-    , auth = initialAuth
+    , auth = initialAuth token
     , database = Database.empty
     }
+
+
+getToken : Model -> Token
+getToken model =
+    model.auth.token

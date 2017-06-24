@@ -16,7 +16,7 @@ import OS.SessionManager.View as SessionManager
     Html.CssHelpers.withNamespace "os"
 
 
-view : Core.Model -> Html Msg
+view : Core.PlayModel -> Html Msg
 view model =
     div
         [ id Css.Dashboard
@@ -24,7 +24,7 @@ view model =
         ]
         [ viewHeader model.game model.os
         , viewMain model.game model.os
-        , displayVersion model.game.meta.config.version
+        , displayVersion model.game.config.version
         , menuView model.os
         ]
 

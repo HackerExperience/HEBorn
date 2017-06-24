@@ -8,8 +8,8 @@ import Core.Models as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
-update msg model core =
+update : Core.HomeModel -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update core msg model =
     case msg of
         SubmitForm ->
             let
@@ -18,7 +18,7 @@ update msg model core =
                         model.email
                         model.username
                         model.password
-                        core.game.meta.config
+                        core
             in
                 ( model, cmd, Dispatch.none )
 
@@ -71,7 +71,7 @@ update msg model core =
                 ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
 
         Request data ->
-            response (receive data) model core
+            response core (receive data) model
 
 
 
@@ -79,11 +79,11 @@ update msg model core =
 
 
 response :
-    Response
+    Core.HomeModel
+    -> Response
     -> Model
-    -> Core.Model
     -> ( Model, Cmd Msg, Dispatch )
-response response model core =
+response core response model =
     case response of
         -- TODO: add more types to match response status
         SignUpResponse (SignUp.OkResponse _ _ _) ->

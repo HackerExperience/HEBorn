@@ -8,11 +8,11 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Msg
+    Game.Model
+    -> Msg
     -> Filesystem
-    -> Game.Model
     -> ( Filesystem, Cmd Game.Msg, Dispatch )
-update msg model game =
+update game msg model =
     case msg of
         Delete id ->
             let

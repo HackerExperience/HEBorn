@@ -3,13 +3,12 @@ module Landing.Login.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
-import Game.Models as Game
 import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Models exposing (Model)
 
 
-view : Model -> Game.Model -> Html Msg
-view model core =
+view : Model -> Html Msg
+view model =
     Html.form
         [ id "login-form"
         , action "javascript:void(0);"
