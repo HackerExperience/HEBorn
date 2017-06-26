@@ -8,11 +8,10 @@ module Landing.Login.Requests.Login
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
-import Core.Config exposing (Config)
 import Landing.Login.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (ConfigSource, Code(..))
 
 
 type Response
@@ -21,7 +20,7 @@ type Response
     | NoOp
 
 
-request : String -> String -> Config -> Cmd Msg
+request : String -> String -> ConfigSource a -> Cmd Msg
 request username password =
     Requests.request AccountLoginTopic
         (LoginRequest >> Request)

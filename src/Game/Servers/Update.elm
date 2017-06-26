@@ -15,23 +15,23 @@ import Game.Servers.Requests exposing (..)
 
 
 update :
-    Msg
+    Game.Model
+    -> Msg
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Game.Msg, Dispatch )
-update msg model game =
+update game msg model =
     case msg of
         FilesystemMsg id msg ->
-            filesystem id msg model game
+            filesystem game id msg model
 
         LogMsg id msg ->
-            log id msg model game
+            log game id msg model
 
         ProcessMsg id msg ->
-            process id msg model game
+            process game id msg model
 
         Request data ->
-            response (receive data) model game
+            response game (receive data) model
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -42,28 +42,28 @@ update msg model game =
 
 
 response :
-    Response
+    Game.Model
+    -> Response
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Game.Msg, Dispatch )
-response response model game =
+response response game model =
     case response of
         _ ->
             ( model, Cmd.none, Dispatch.none )
 
 
 filesystem :
-    ServerID
+    Game.Model
+    -> ServerID
     -> Filesystem.Msg
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Game.Msg, Dispatch )
-filesystem id msg model game =
+filesystem game id msg model =
     case (getServerByID model id) of
         StdServer server ->
             let
-                ( filesystem_, cmd, msgs ) =
-                    Filesystem.update msg server.filesystem game
+                ( filesystem_, cmd, dispatch ) =
+                    Filesystem.update game msg server.filesystem
 
                 server_ =
                     StdServer { server | filesystem = filesystem_ }
@@ -71,24 +71,24 @@ filesystem id msg model game =
                 model_ =
                     updateServer model server_
             in
-                ( model_, cmd, msgs )
+                ( model_, cmd, dispatch )
 
         NoServer ->
             ( model, Cmd.none, Dispatch.none )
 
 
 log :
-    ServerID
+    Game.Model
+    -> ServerID
     -> Logs.Msg
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Game.Msg, Dispatch )
-log id msg model game =
+log game id msg model =
     case (getServerByID model id) of
         StdServer server ->
             let
-                ( logs_, cmd, msgs ) =
-                    Logs.update msg server.logs game
+                ( logs_, cmd, dispatch ) =
+                    Logs.update game msg server.logs
 
                 server_ =
                     StdServer { server | logs = logs_ }
@@ -96,24 +96,24 @@ log id msg model game =
                 model_ =
                     updateServer model server_
             in
-                ( model_, cmd, msgs )
+                ( model_, cmd, dispatch )
 
         NoServer ->
             ( model, Cmd.none, Dispatch.none )
 
 
 process :
-    ServerID
+    Game.Model
+    -> ServerID
     -> Processes.Msg
     -> Model
-    -> Game.Model
     -> ( Model, Cmd Game.Msg, Dispatch )
-process id msg model game =
+process game id msg model =
     case (getServerByID model id) of
         StdServer server ->
             let
-                ( processes_, cmd, msgs ) =
-                    Processes.update msg server.processes game
+                ( processes_, cmd, dispatch ) =
+                    Processes.update game msg server.processes
 
                 server_ =
                     StdServer { server | processes = processes_ }
@@ -121,7 +121,7 @@ process id msg model game =
                 model_ =
                     updateServer model server_
             in
-                ( model_, cmd, msgs )
+                ( model_, cmd, dispatch )
 
         NoServer ->
             ( model, Cmd.none, Dispatch.none )

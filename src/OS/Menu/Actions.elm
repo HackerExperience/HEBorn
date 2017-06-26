@@ -7,8 +7,8 @@ import OS.Messages exposing (..)
 import OS.Menu.Messages exposing (MenuAction(..))
 
 
-actionHandler : MenuAction -> Model -> Game.Model -> ( Model, Cmd Msg, Dispatch )
-actionHandler action model game =
+actionHandler : Game.Model -> MenuAction -> Model -> ( Model, Cmd Msg, Dispatch )
+actionHandler game action model =
     case action of
         NoOp ->
             ( model, Cmd.none, Dispatch.none )

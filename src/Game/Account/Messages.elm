@@ -5,8 +5,7 @@ import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = Login String String
-    | Logout
+    = Logout
     | Request RequestMsg
     | Event Events.Response
 

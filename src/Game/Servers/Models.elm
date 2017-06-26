@@ -1,7 +1,7 @@
 module Game.Servers.Models exposing (..)
 
 import Dict
-import Utils
+import Utils.Dict as DictUtils
 import Game.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
 import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
@@ -184,10 +184,10 @@ updateServer : Model -> Server -> Model
 updateServer servers server =
     case server of
         StdServer s ->
-            Utils.safeUpdateDict
-                servers
+            DictUtils.safeUpdate
                 (getServerIDSafe server)
                 (getServerSafe server)
+                servers
 
         NoServer ->
             servers

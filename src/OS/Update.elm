@@ -8,33 +8,33 @@ import OS.Models exposing (..)
 import Game.Models as Game
 import OS.Menu.Messages as Menu
 import OS.Menu.Update as Menu
-import OS.Menu.Actions as MenuActions
+import OS.Menu.Actions as Menu
 import OS.SessionManager.Update as SessionManager
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models as SessionManager
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
-update msg game model =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update game msg model =
     case msg of
         SessionManagerMsg msg ->
             model
-                |> sessionManager msg game
+                |> sessionManager game msg
                 |> map (\m -> { model | session = m }) SessionManagerMsg
 
         HeaderMsg msg ->
             model
-                |> header msg game
+                |> header game msg
                 |> map (\m -> { model | header = m }) HeaderMsg
 
         MenuMsg (Menu.MenuClick action) ->
-            MenuActions.actionHandler action model game
+            Menu.actionHandler game action model
 
-        MenuMsg subMsg ->
+        MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Menu.update subMsg model.menu game
+                    Menu.update game msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
@@ -47,21 +47,21 @@ update msg game model =
 
 
 sessionManager :
-    SessionManager.Msg
-    -> Game.Model
+    Game.Model
+    -> SessionManager.Msg
     -> Model
     -> ( SessionManager.Model, Cmd SessionManager.Msg, Dispatch )
-sessionManager msg game model =
-    SessionManager.update msg game model.session
+sessionManager game msg model =
+    SessionManager.update game msg model.session
 
 
 header :
-    Header.Msg
-    -> Game.Model
+    Game.Model
+    -> Header.Msg
     -> Model
     -> ( Header.Model, Cmd Header.Msg, Dispatch )
-header msg game model =
-    Header.update msg game model.header
+header game msg model =
+    Header.update game msg model.header
 
 
 map :

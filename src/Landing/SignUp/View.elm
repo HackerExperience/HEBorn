@@ -3,13 +3,12 @@ module Landing.SignUp.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
-import Game.Models as Game
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Models exposing (Model)
 
 
-view : Model -> Game.Model -> Html Msg
-view model core =
+view : Model -> Html Msg
+view model =
     div []
         [ Html.form
             [ id "signup-form"

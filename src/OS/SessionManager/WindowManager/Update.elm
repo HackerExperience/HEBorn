@@ -31,8 +31,8 @@ import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Game.Model -> Model -> ( Model, Cmd Msg, Dispatch )
-update msg game model =
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update game msg model =
     case msg of
         OnDragBy delta ->
             model
@@ -94,13 +94,13 @@ update msg game model =
 
         WindowMsg windowID msg ->
             let
-                ( model_, cmd, msgs ) =
+                ( model_, cmd, dispatch ) =
                     updateApp game windowID msg model
 
                 cmd_ =
                     Cmd.map (WindowMsg windowID) cmd
             in
-                ( model_, cmd_, msgs )
+                ( model_, cmd_, dispatch )
 
 
 
@@ -117,13 +117,13 @@ updateApp game windowID msg model =
     case getWindow windowID model of
         Just window ->
             let
-                ( appModel, cmd, msgs ) =
-                    Apps.update msg game (getAppModel window)
+                ( appModel, cmd, dispatch ) =
+                    Apps.update game msg (getAppModel window)
 
                 model_ =
                     (updateAppModel windowID appModel model)
             in
-                ( model_, cmd, msgs )
+                ( model_, cmd, dispatch )
 
         Nothing ->
             ( model, Cmd.none, Dispatch.none )

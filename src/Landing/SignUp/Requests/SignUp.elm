@@ -8,11 +8,10 @@ module Landing.SignUp.Requests.SignUp
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
-import Core.Config exposing (Config)
 import Landing.SignUp.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (ConfigSource, Code(..))
 
 
 type Response
@@ -20,7 +19,7 @@ type Response
     | ErrorResponse
 
 
-request : String -> String -> String -> Config -> Cmd Msg
+request : String -> String -> String -> ConfigSource a -> Cmd Msg
 request email username password =
     Requests.request AccountCreateTopic
         (SignUpRequest >> Request)

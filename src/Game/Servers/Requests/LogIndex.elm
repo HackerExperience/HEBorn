@@ -21,11 +21,10 @@ import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Json.Encode as Encode
 import Result exposing (Result(..))
 import Date exposing (Date)
-import Core.Config exposing (Config)
 import Game.Servers.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
-import Requests.Types exposing (Code(..))
+import Requests.Types exposing (ConfigSource, Code(..))
 import Utils.Json.Decode exposing (date)
 
 
@@ -49,7 +48,7 @@ type alias Log =
     }
 
 
-request : Config -> Cmd Msg
+request : ConfigSource a -> Cmd Msg
 request =
     Requests.request ServerLogIndexTopic
         (LogIndexRequest >> Request)

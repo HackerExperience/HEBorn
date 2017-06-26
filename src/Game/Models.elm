@@ -4,6 +4,7 @@ import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Network.Models as Network
 import Game.Meta.Models as Meta
+import Core.Config exposing (Config)
 
 
 type alias Model =
@@ -11,13 +12,15 @@ type alias Model =
     , servers : Servers.Model
     , network : Network.Model
     , meta : Meta.Model
+    , config : Config
     }
 
 
-initialModel : String -> String -> String -> Model
-initialModel apiHttpUrl apiWsUrl version =
-    { account = Account.initialModel
+initialModel : String -> Config -> Model
+initialModel token config =
+    { account = Account.initialModel token
     , servers = Servers.initialModel
     , network = Network.initialModel
-    , meta = Meta.initialModel apiHttpUrl apiWsUrl version
+    , meta = Meta.initialModel
+    , config = config
     }

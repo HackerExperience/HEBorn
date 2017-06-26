@@ -1,17 +1,17 @@
 module Landing.Models exposing (Model, initialModel)
 
-import Landing.Login.Models
-import Landing.SignUp.Models
+import Landing.Login.Models as Login
+import Landing.SignUp.Models as SignUp
 
 
 type alias Model =
-    { login : Landing.Login.Models.Model
-    , signUp : Landing.SignUp.Models.Model
+    { login : Login.Model
+    , signUp : SignUp.Model
     }
 
 
 initialModel : Model
 initialModel =
-    { login = Landing.Login.Models.initialModel
-    , signUp = Landing.SignUp.Models.initialModel
+    { login = Login.initialModel
+    , signUp = SignUp.initialModel
     }

@@ -9,11 +9,11 @@ import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
-    MenuAction
+    Game.Model
+    -> MenuAction
     -> Model
-    -> Game.Model
     -> ( Model, Cmd LogViewer.Msg, Dispatch )
-actionHandler action ({ app } as model) game =
+actionHandler game action ({ app } as model) =
     case action of
         NormalEntryEdit logId ->
             ( enterEditing game.servers model logId

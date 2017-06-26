@@ -4,17 +4,21 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Core.Models as Core
 import Landing.Messages exposing (..)
-import Landing.Login.View
-import Landing.SignUp.View
+import Landing.Login.View as Login
+import Landing.SignUp.View as SignUp
 
 
-view : Core.Model -> Html Msg
+view : Core.HomeModel -> Html Msg
 view model =
     div [ id "view-landing" ]
         [ viewIntro
         , viewLogin model
         , viewSignUp model
         ]
+
+
+
+-- internals
 
 
 viewIntro : Html Msg
@@ -26,14 +30,16 @@ viewIntro =
         ]
 
 
-viewLogin : Core.Model -> Html Msg
+viewLogin : Core.HomeModel -> Html Msg
 viewLogin model =
-    Html.map LoginMsg (Landing.Login.View.view model.landing.login model.game)
+    Html.map LoginMsg
+        (Login.view model.landing.login)
 
 
-viewSignUp : Core.Model -> Html Msg
+viewSignUp : Core.HomeModel -> Html Msg
 viewSignUp model =
-    if model.game.meta.config.version == "dev" then
-        Html.map SignUpMsg (Landing.SignUp.View.view model.landing.signUp model.game)
+    if model.config.version == "dev" then
+        Html.map SignUpMsg
+            (SignUp.view model.landing.signUp)
     else
         div [] []

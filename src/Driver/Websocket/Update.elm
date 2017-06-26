@@ -1,30 +1,17 @@
 module Driver.Websocket.Update exposing (update)
 
-import Utils
-import Phoenix.Socket as Socket
+import Utils.Cmd as CmdUtils
 import Phoenix.Channel as Channel
 import Driver.Websocket.Models exposing (..)
 import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events
-import Core.Models as Core
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Msg -> Model -> Core.Model -> ( Model, Cmd Msg, Dispatch )
-update msg model core =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
-        UpdateSocket token ->
-            let
-                socket =
-                    Socket.withParams [ ( "token", token ) ] model.socket
-
-                model_ =
-                    { model | socket = socket }
-            in
-                ( model_, Cmd.none, Dispatch.none )
-
         JoinChannel channel topic ->
             if model.defer then
                 defer channel topic model
@@ -36,11 +23,11 @@ update msg model core =
                 response =
                     Events.handler event value
             in
-                ( model, Cmd.none, Dispatch.none )
+                ( model, Cmd.none )
 
         Broadcast _ ->
             -- ignore broadcasts
-            ( model, Cmd.none, Dispatch.none )
+            ( model, Cmd.none )
 
 
 
@@ -51,23 +38,25 @@ defer :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
+    -> ( Model, Cmd Msg )
 defer channel topic model =
+    -- I think that defer is not going to be used anywhere
+    -- it's on the line for removal
     let
         model_ =
             { model | defer = False }
 
         cmd =
-            Utils.delay 0.5 (JoinChannel channel topic)
+            CmdUtils.delay 0.5 (JoinChannel channel topic)
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 join :
     Channel
     -> Maybe String
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
+    -> ( Model, Cmd Msg )
 join channel topic model =
     let
         events =
@@ -86,7 +75,7 @@ join channel topic model =
         model_ =
             { model | channels = channels }
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, Cmd.none )
 
 
 reducer : ( String, Events.Event ) -> Channel.Channel Msg -> Channel.Channel Msg

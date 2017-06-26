@@ -1,6 +1,5 @@
 module Requests.Requests exposing (request, report)
 
-import Core.Config exposing (Config)
 import Result as Result exposing (Result(..))
 import Http
 import Driver.Http.Http as HttpDriver
@@ -28,19 +27,19 @@ request :
     -> (ResponseType -> msg)
     -> Context
     -> Encode.Value
-    -> Config
+    -> ConfigSource a
     -> Cmd msg
-request topic msg context data config =
+request topic msg context data source =
     case getDriver topic of
         HttpDriver ->
-            requestHttp config.apiHttpUrl
+            requestHttp source.config.apiHttpUrl
                 topic
                 msg
                 context
                 data
 
         WebsocketDriver ->
-            requestWebsocket config.apiWsUrl
+            requestWebsocket source.config.apiWsUrl
                 topic
                 msg
                 context
