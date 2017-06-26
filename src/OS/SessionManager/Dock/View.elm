@@ -43,20 +43,16 @@ getApplications : Game.Model -> SessionManager.Model -> Applications
 getApplications game model =
     -- This function should create an app list from the current
     -- server "list of apps" and also from session windows
-    [ Apps.BrowserApp
-    , Apps.ExplorerApp
-    , Apps.LogViewerApp
-    , Apps.TaskManagerApp
-    ]
-        |> List.foldl
-            (\app dict ->
-                let
-                    refs =
-                        windows app model
-                in
-                    Dict.insert (Apps.name app) ( app, refs ) dict
-            )
-            Dict.empty
+    List.foldl
+        (\app dict ->
+            let
+                refs =
+                    windows app model
+            in
+                Dict.insert (Apps.name app) ( app, refs ) dict
+        )
+        Dict.empty
+        game.account.dock
 
 
 windows : Apps.App -> Model -> List WindowRef
