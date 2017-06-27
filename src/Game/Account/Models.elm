@@ -9,6 +9,7 @@ module Game.Account.Models
 
 import Game.Shared exposing (..)
 import Game.Account.Database.Models as Database exposing (..)
+import Game.Account.Dock.Models as Dock
 
 
 type alias AccountID =
@@ -29,6 +30,7 @@ type alias Model =
     , email : Maybe String
     , auth : AuthData
     , database : Database
+    , dock : Dock.Model
     }
 
 
@@ -44,6 +46,7 @@ initialModel token =
     , email = Nothing
     , auth = initialAuth token
     , database = Database.empty
+    , dock = Dock.initialModel
     }
 
 
