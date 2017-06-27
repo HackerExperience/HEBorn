@@ -1,6 +1,6 @@
 module Apps.Update exposing (update)
 
-import Game.Models as Game
+import Game.Data as Game
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.Update as LogViewer
@@ -11,23 +11,23 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Game.Model
+    Game.Data
     -> Msg
     -> AppModel
     -> ( AppModel, Cmd Msg, Dispatch )
-update game msg model =
+update data msg model =
     case ( msg, model ) of
         ( LogViewerMsg msg, LogViewerModel model ) ->
-            map LogViewerModel LogViewerMsg (LogViewer.update game msg model)
+            map LogViewerModel LogViewerMsg (LogViewer.update data msg model)
 
         ( TaskManagerMsg msg, TaskManagerModel model ) ->
-            map TaskManagerModel TaskManagerMsg (TaskManager.update game msg model)
+            map TaskManagerModel TaskManagerMsg (TaskManager.update data msg model)
 
         ( BrowserMsg msg, BrowserModel model ) ->
-            map BrowserModel BrowserMsg (Browser.update game msg model)
+            map BrowserModel BrowserMsg (Browser.update data msg model)
 
         ( ExplorerMsg msg, ExplorerModel model ) ->
-            map ExplorerModel ExplorerMsg (Explorer.update game msg model)
+            map ExplorerModel ExplorerMsg (Explorer.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

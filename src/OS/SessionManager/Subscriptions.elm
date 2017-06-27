@@ -5,6 +5,7 @@ import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
 import Game.Models as Game
+import Game.Data as Game
 
 
 -- TODO: this needs to change to add pinned window support
@@ -28,9 +29,14 @@ subscriptions game model =
 
 windowManager : Game.Model -> WindowManager.Model -> Sub Msg
 windowManager game model =
-    model
-        |> WindowManager.subscriptions game
-        |> Sub.map WindowManagerMsg
+    case Game.toContext game of
+        Just data ->
+            model
+                |> WindowManager.subscriptions data
+                |> Sub.map WindowManagerMsg
+
+        Nothing ->
+            Sub.none
 
 
 defaultNone : Maybe (Sub Msg) -> Sub Msg

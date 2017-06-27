@@ -1,5 +1,6 @@
 module Gen.Servers exposing (..)
 
+import Dict
 import Gen.Filesystem
 import Gen.Logs
 import Gen.Processes
@@ -11,6 +12,7 @@ import Random.Pcg
         , list
         , choices
         , map
+        , map2
         , andThen
         )
 import Random.Pcg.Extra exposing (andMap)
@@ -25,7 +27,7 @@ import Gen.Utils exposing (..)
 --------------------------------------------------------------------------------
 
 
-serverID : Fuzzer ServerID
+serverID : Fuzzer ID
 serverID =
     fuzzer genServerID
 
@@ -35,14 +37,14 @@ ip =
     fuzzer genIP
 
 
-serverData : Fuzzer ServerData
+serverData : Fuzzer Server
 serverData =
-    fuzzer genServerData
+    fuzzer genServer
 
 
-serverDataList : Fuzzer (List ServerData)
+serverDataList : Fuzzer (List Server)
 serverDataList =
-    fuzzer genServerDataList
+    fuzzer genServerList
 
 
 server : Fuzzer Server
@@ -76,7 +78,7 @@ model =
 --------------------------------------------------------------------------------
 
 
-genServerID : Generator ServerID
+genServerID : Generator ID
 genServerID =
     unique
 
@@ -88,34 +90,27 @@ genIP =
     unique
 
 
-genServerData : Generator ServerData
-genServerData =
+genServer : Generator Server
+genServer =
     let
-        buildServerDataRecord =
-            \id ip fs logs proc ->
-                { id = id
-                , ip = ip
+        buildServerRecord =
+            \ip fs logs proc ->
+                { ip = ip
                 , filesystem = fs
                 , logs = logs
                 , processes = proc
                 }
     in
-        genServerID
-            |> map buildServerDataRecord
-            |> andMap genIP
+        genIP
+            |> map buildServerRecord
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel
 
 
-genServerDataList : Generator (List ServerData)
-genServerDataList =
-    andThen (\num -> list num genServerData) (int 1 8)
-
-
-genServer : Generator Server
-genServer =
-    map StdServer genServerData
+genServerList : Generator (List Server)
+genServerList =
+    andThen (\num -> list num genServer) (int 1 8)
 
 
 genEmptyModel : Generator Model
@@ -125,13 +120,11 @@ genEmptyModel =
 
 genNonEmptyModel : Generator Model
 genNonEmptyModel =
-    let
-        reducer =
-            (List.foldl (flip addServer) initialModel) >> constant
-    in
-        andThen reducer genServerDataList
+    map2 (\id -> List.foldl (Dict.insert id) initialModel)
+        genServerID
+        genServerList
 
 
 genModel : Generator Model
 genModel =
-    map (addServer initialModel) genServerData
+    genNonEmptyModel

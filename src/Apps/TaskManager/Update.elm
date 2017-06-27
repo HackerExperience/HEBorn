@@ -3,8 +3,7 @@ module Apps.TaskManager.Update exposing (update)
 import Dict
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Models as Game
-import Game.Servers.Models exposing (getServerByID, getProcesses)
+import Game.Data as Game
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
 import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
@@ -49,20 +48,20 @@ processComplete tasks now =
 
 
 update :
-    Game.Model
+    Game.Data
     -> TaskManager.Msg
     -> Model
     -> ( Model, Cmd TaskManager.Msg, Dispatch )
-update game msg ({ app } as model) =
+update data msg ({ app } as model) =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler game action model
+            Menu.actionHandler data action model
 
         MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Menu.update game msg model.menu
+                    Menu.update data msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
@@ -74,23 +73,12 @@ update game msg ({ app } as model) =
             let
                 newApp =
                     updateTasks
-                        game.servers
+                        data.game.servers
                         --TODO: Recalculate limits
                         app.limits
                         app
 
-                server =
-                    getServerByID game.servers "localhost"
-
-                tasks =
-                    getProcesses server
-
                 completeMsgs =
-                    case tasks of
-                        Just tasks ->
-                            processComplete tasks now
-
-                        Nothing ->
-                            Dispatch.none
+                    processComplete data.server.processes now
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )

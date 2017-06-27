@@ -3,6 +3,7 @@ module OS.SessionManager.WindowManager.Update exposing (..)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Game.Models as Game
+import Game.Data as Game
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import OS.SessionManager.WindowManager.Models
@@ -31,8 +32,8 @@ import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update game msg model =
+update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update data msg model =
     case msg of
         OnDragBy delta ->
             model
@@ -95,7 +96,7 @@ update game msg model =
         WindowMsg windowID msg ->
             let
                 ( model_, cmd, dispatch ) =
-                    updateApp game windowID msg model
+                    updateApp data windowID msg model
 
                 cmd_ =
                     Cmd.map (WindowMsg windowID) cmd
@@ -108,17 +109,17 @@ update game msg model =
 
 
 updateApp :
-    Game.Model
+    Game.Data
     -> WindowID
     -> Apps.Msg
     -> Model
     -> ( Model, Cmd Apps.Msg, Dispatch )
-updateApp game windowID msg model =
+updateApp data windowID msg model =
     case getWindow windowID model of
         Just window ->
             let
                 ( appModel, cmd, dispatch ) =
-                    Apps.update game msg (getAppModel window)
+                    Apps.update data msg (getAppModel window)
 
                 model_ =
                     (updateAppModel windowID appModel model)

@@ -1,7 +1,7 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Models as Game
+import Game.Data as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
 import Apps.LogViewer.Models exposing (..)
@@ -12,20 +12,20 @@ import Apps.LogViewer.Menu.Actions as Menu
 
 
 update :
-    Game.Model
+    Game.Data
     -> LogViewer.Msg
     -> Model
     -> ( Model, Cmd LogViewer.Msg, Dispatch )
-update game msg ({ app } as model) =
+update data msg ({ app } as model) =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler game action model
+            Menu.actionHandler data action model
 
         MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Menu.update game msg model.menu
+                    Menu.update data msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
@@ -43,12 +43,12 @@ update game msg ({ app } as model) =
         UpdateTextFilter filter ->
             let
                 app_ =
-                    updateTextFilter app game.servers filter
+                    updateTextFilter data app filter
             in
                 ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         EnterEditing logId ->
-            ( enterEditing game.servers model logId
+            ( enterEditing data model logId
             , Cmd.none
             , Dispatch.none
             )
@@ -93,7 +93,7 @@ update game msg ({ app } as model) =
                 gameMsg =
                     Dispatch.processes
                         "localhost"
-                        (NewProcesses.localLogCrypt 1.0 logId game.meta.lastTick)
+                        (NewProcesses.localLogCrypt 1.0 logId data.game.meta.lastTick)
             in
                 ( model, Cmd.none, gameMsg )
 

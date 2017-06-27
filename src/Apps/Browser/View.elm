@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
-import Game.Models as Game
+import Game.Data as Game
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
@@ -22,8 +22,8 @@ styles =
     Css.asPairs >> style
 
 
-view : Game.Model -> Model -> Html Msg
-view game ({ app } as model) =
+view : Game.Data -> Model -> Html Msg
+view data ({ app } as model) =
     div
         [ menuContent
         , class [ Window, Content, Client ]

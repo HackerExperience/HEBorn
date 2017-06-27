@@ -2,22 +2,22 @@ module OS.SessionManager.WindowManager.Subscriptions exposing (subscriptions)
 
 import Draggable
 import Dict
-import Game.Models as Game
+import Game.Data as Game
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import OS.SessionManager.WindowManager.Models exposing (..)
 import Apps.Subscriptions as Apps
 
 
-subscriptions : Game.Model -> Model -> Sub Msg
-subscriptions game model =
+subscriptions : Game.Data -> Model -> Sub Msg
+subscriptions data model =
     Sub.batch
         [ Draggable.subscriptions DragMsg model.drag
-        , appSubcriptions game model
+        , appSubcriptions data model
         ]
 
 
-appSubcriptions : Game.Model -> Model -> Sub Msg
-appSubcriptions game model =
+appSubcriptions : Game.Data -> Model -> Sub Msg
+appSubcriptions data model =
     model.windows
         |> Dict.toList
         |> List.filter (\( _, window ) -> window.state == NormalState)
@@ -25,7 +25,7 @@ appSubcriptions game model =
             (\( windowID, window ) ->
                 window
                     |> getAppModel
-                    |> Apps.subscriptions game
+                    |> Apps.subscriptions data
                     |> Sub.map (WindowMsg windowID)
             )
         |> Sub.batch

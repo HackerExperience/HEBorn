@@ -1,13 +1,8 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict
-import Game.Servers.Models as Servers
-    exposing
-        ( ServerID
-        , Server(..)
-        , getServerByID
-        , getLogs
-        )
+import Game.Data as Game
+import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
 
@@ -130,22 +125,11 @@ applyFilter app logs =
             )
 
 
-getLogs : LogViewer -> Servers.Model -> Logs
-getLogs app servers =
-    let
-        server =
-            getServerByID servers "localhost"
-    in
-        Maybe.withDefault
-            initialLogs
-            (Servers.getLogs server)
-
-
-enterEditing : Servers.Model -> Model -> ID -> Model
-enterEditing servers ({ app } as model) logId =
+enterEditing : Game.Data -> Model -> ID -> Model
+enterEditing data ({ app } as model) logId =
     let
         logs =
-            getLogs app servers
+            data.server.logs
 
         log =
             Dict.get logId logs
@@ -211,11 +195,11 @@ logFilterMapFun filter log =
                 Nothing
 
 
-updateTextFilter : LogViewer -> Servers.Model -> String -> LogViewer
-updateTextFilter app servers newFilter =
+updateTextFilter : Game.Data -> LogViewer -> String -> LogViewer
+updateTextFilter data app newFilter =
     let
         newFilterCache =
-            getLogs app servers
+            data.server.logs
                 |> Dict.values
                 |> List.filterMap
                     (logFilterMapFun newFilter)

@@ -3,7 +3,7 @@ module OS.SessionManager.WindowManager.View exposing (view, windowTitle)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Html exposing (..)
-import Game.Models as Game
+import Game.Data as Game
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick, onMouseDown)
 import Html.CssHelpers
@@ -20,13 +20,13 @@ import Apps.View as Apps
     Html.CssHelpers.withNamespace "wm"
 
 
-view : WindowID -> Game.Model -> Model -> Html Msg
-view id game model =
+view : WindowID -> Game.Data -> Model -> Html Msg
+view id data model =
     case getWindow id model of
         Just window ->
             window
                 |> getAppModel
-                |> Apps.view game
+                |> Apps.view data
                 |> Html.map (WindowMsg id)
                 |> windowWrapper id window
 

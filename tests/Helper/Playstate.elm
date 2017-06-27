@@ -1,5 +1,6 @@
 module Helper.Playstate exposing (..)
 
+import Dict
 import Gen.Filesystem
 import Gen.Game
 import Gen.Servers
@@ -54,16 +55,15 @@ genOne : Generator State
 genOne =
     let
         generateStateRecord =
-            \game server file1 file2 folder1 folder2 ->
+            \game id server file1 file2 folder1 folder2 ->
                 let
                     servers =
                         server
-                            |> getFilesystemSafe
+                            |> .filesystem
                             |> addFileRecursively file1
                             |> addFileRecursively folder1
-                            |> updateFilesystem server
-                            |> getServerSafe
-                            |> addServer game.servers
+                            |> (flip setFilesystem) server
+                            |> flip (Dict.insert id) game.servers
 
                     game_ =
                         { game | servers = servers }
@@ -86,6 +86,7 @@ genOne =
     in
         Gen.Game.genModel
             |> Random.map generateStateRecord
+            |> andMap Gen.Servers.genServerID
             |> andMap Gen.Servers.genServer
             |> andMap Gen.Filesystem.genStdFile
             |> andMap Gen.Filesystem.genStdFile

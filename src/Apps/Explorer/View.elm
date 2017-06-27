@@ -5,8 +5,8 @@ import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
-import Game.Models as Game
-import Game.Servers.Models exposing (Server, getServerByID)
+import Game.Data as Game
+import Game.Servers.Models exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
@@ -319,17 +319,14 @@ viewExplorerMain path server =
         ]
 
 
-view : Game.Model -> Model -> Html Msg
-view game ({ app } as model) =
+view : Game.Data -> Model -> Html Msg
+view data ({ app } as model) =
     let
-        server =
-            getServerByID game.servers "localhost"
-
         nowPath =
             app.path |> pathInterpret
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn (Relative [ "%favorites" ]) server
-            , viewExplorerMain nowPath server
+            [ viewExplorerColumn (Relative [ "%favorites" ]) data.server
+            , viewExplorerMain nowPath data.server
             , menuView model
             ]

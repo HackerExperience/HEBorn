@@ -3,11 +3,6 @@ module Apps.TaskManager.Models exposing (..)
 import Dict
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Models as Servers
-    exposing
-        ( ServerID
-        , getProcesses
-        , getServerByID
-        )
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 
@@ -112,19 +107,17 @@ onlyLocalTasks =
 updateTasks : Servers.Model -> ResourceUsage -> TaskManager -> TaskManager
 updateTasks servers limit old =
     let
-        server =
-            getServerByID servers "localhost"
-
-        tasks_ =
-            Maybe.withDefault
-                initialProcesses
-                (getProcesses server)
+        tasks =
+            servers
+                |> Dict.get "localhost"
+                |> Maybe.map .processes
+                |> Maybe.withDefault initialProcesses
 
         ( cpu, mem, down, up ) =
             List.foldr
                 taskUsageSum
                 ( 0.0, 0.0, 0.0, 0.0 )
-                (onlyLocalTasks tasks_)
+                (onlyLocalTasks tasks)
 
         historyCPU =
             (increaseHistory cpu old.historyCPU)

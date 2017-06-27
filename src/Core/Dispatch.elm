@@ -30,7 +30,7 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Models exposing (ServerID)
+import Game.Servers.Models as Servers
 import Utils.Cmd as CmdUtils
 
 
@@ -180,19 +180,19 @@ meta msg =
     game (Game.MetaMsg msg)
 
 
-filesystem : ServerID -> Filesystem.Msg -> Dispatch
-filesystem serverID msg =
-    server (Servers.FilesystemMsg serverID msg)
+filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
+filesystem id msg =
+    server (Servers.FilesystemMsg id msg)
 
 
-processes : ServerID -> Processes.Msg -> Dispatch
-processes serverID msg =
-    server (Servers.ProcessMsg serverID msg)
+processes : Servers.ID -> Processes.Msg -> Dispatch
+processes id msg =
+    server (Servers.ProcessMsg id msg)
 
 
-logs : ServerID -> Logs.Msg -> Dispatch
-logs serverID msg =
-    server (Servers.LogMsg serverID msg)
+logs : Servers.ID -> Logs.Msg -> Dispatch
+logs id msg =
+    server (Servers.LogMsg id msg)
 
 
 
