@@ -65,10 +65,10 @@ filesystem game id msg model =
         Just server ->
             let
                 ( filesystem_, cmd, dispatch ) =
-                    Filesystem.update game msg server.filesystem
+                    Filesystem.update game msg (getFilesystem server)
 
                 server_ =
-                    { server | filesystem = filesystem_ }
+                    setFilesystem filesystem_ server
 
                 model_ =
                     DictUtils.safeUpdate id server_ model
@@ -90,10 +90,10 @@ log game id msg model =
         Just server ->
             let
                 ( logs_, cmd, dispatch ) =
-                    Logs.update game msg server.logs
+                    Logs.update game msg (getLogs server)
 
                 server_ =
-                    { server | logs = logs_ }
+                    setLogs logs_ server
 
                 model_ =
                     DictUtils.safeUpdate id server_ model
@@ -115,10 +115,10 @@ process game id msg model =
         Just server ->
             let
                 ( processes_, cmd, dispatch ) =
-                    Processes.update game msg server.processes
+                    Processes.update game msg (getProcesses server)
 
                 server_ =
-                    { server | processes = processes_ }
+                    setProcesses processes_ server
 
                 model_ =
                     DictUtils.safeUpdate id server_ model

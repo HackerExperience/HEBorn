@@ -9,6 +9,7 @@ import Fuzz exposing (tuple)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once)
 import Apps.Explorer.Models as Explorer exposing (..)
+import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 
 
@@ -45,14 +46,14 @@ pathMoveAroundTests =
                     valid
 
                 newServerWithFile =
-                    { server
-                        | filesystem =
-                            addFileRecursively folder server.filesystem
-                    }
+                    server
+                        |> Servers.getFilesystem
+                        |> addFileRecursively folder
+                        |> flip Servers.setFilesystem server
 
                 explorer =
                     changePath (getAbsolutePath folder)
-                        newServerWithFile.filesystem
+                        (Servers.getFilesystem newServerWithFile)
                         initialExplorer
             in
                 folder
@@ -66,7 +67,7 @@ pathMoveAroundTests =
             case Dict.get "localhost" game.servers of
                 Just server ->
                     initialExplorer
-                        |> changePath path server.filesystem
+                        |> changePath path (Servers.getFilesystem server)
                         |> Expect.equal initialExplorer
 
                 Nothing ->

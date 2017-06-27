@@ -8,6 +8,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
@@ -250,7 +251,7 @@ view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
         tasks =
-            data.server.processes
+            Servers.getProcesses data.server
     in
         div [ class [ MainLayout ] ]
             [ viewTasksTable (Dict.values tasks) data.game.meta.lastTick

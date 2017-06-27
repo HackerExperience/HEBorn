@@ -10,7 +10,7 @@ import Random.Pcg
         , constant
         , int
         , list
-        , choices
+        , choice
         , map
         , map2
         , andThen
@@ -90,19 +90,25 @@ genIP =
     unique
 
 
+genType : Generator Type
+genType =
+    choice Local Remote
+
+
 genServer : Generator Server
 genServer =
     let
-        buildServerRecord =
-            \ip fs logs proc ->
-                { ip = ip
-                , filesystem = fs
-                , logs = logs
-                , processes = proc
-                }
+        buildServerRecord ip type_ fs logs proc =
+            { ip = ip
+            , type_ = type_
+            , filesystem = fs
+            , logs = logs
+            , processes = proc
+            }
     in
         genIP
             |> map buildServerRecord
+            |> andMap genType
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel

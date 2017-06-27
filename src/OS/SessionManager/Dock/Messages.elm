@@ -1,6 +1,6 @@
 module OS.SessionManager.Dock.Messages exposing (Msg(..))
 
-import Apps.Models exposing (App)
+import Apps.Apps exposing (App)
 import OS.SessionManager.WindowManager.Models exposing (WindowID)
 
 

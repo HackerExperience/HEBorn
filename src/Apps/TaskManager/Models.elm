@@ -108,9 +108,7 @@ updateTasks : Servers.Server -> ResourceUsage -> TaskManager -> TaskManager
 updateTasks server limit old =
     let
         tasks =
-            server
-                |> Maybe.map .processes
-                |> Maybe.withDefault initialProcesses
+            Servers.getProcesses server
 
         ( cpu, mem, down, up ) =
             List.foldr

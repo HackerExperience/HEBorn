@@ -11,6 +11,7 @@ import OS.SessionManager.Dock.Style as Css
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.View exposing (windowTitle)
 import Apps.Models as Apps
+import Apps.Apps as Apps
 import Game.Models as Game
 
 

@@ -12,6 +12,7 @@ import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
@@ -296,7 +297,8 @@ view data ({ app } as model) =
             "Search..."
             UpdateTextFilter
          ]
-            ++ (data.server.logs
+            ++ (data.server
+                    |> Servers.getLogs
                     |> applyFilter app
                     |> renderEntryList app
                )

@@ -4,6 +4,7 @@ import Dict
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
 import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
@@ -79,6 +80,6 @@ update data msg ({ app } as model) =
                         app
 
                 completeMsgs =
-                    processComplete data.server.processes now
+                    processComplete (Servers.getProcesses data.server) now
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )

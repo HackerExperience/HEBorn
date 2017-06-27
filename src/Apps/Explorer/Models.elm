@@ -1,6 +1,6 @@
 module Apps.Explorer.Models exposing (..)
 
-import Game.Servers.Models exposing (Server)
+import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
 
@@ -87,4 +87,4 @@ changePath path filesystem explorer =
 
 resolvePath : Server -> Filesystem.FilePath -> List Filesystem.File
 resolvePath server path =
-    Filesystem.getFilesOnPath path server.filesystem
+    Filesystem.getFilesOnPath path (Servers.getFilesystem server)

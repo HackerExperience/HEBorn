@@ -1,6 +1,6 @@
 module Game.Account.Dock.Models exposing (Model, initialModel)
 
-import Apps.Models as Apps
+import Apps.Apps as Apps
 
 
 type alias Model =

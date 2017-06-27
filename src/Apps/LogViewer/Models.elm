@@ -129,7 +129,7 @@ enterEditing : Game.Data -> Model -> ID -> Model
 enterEditing data ({ app } as model) logId =
     let
         logs =
-            data.server.logs
+            Servers.getLogs data.server
 
         log =
             Dict.get logId logs
@@ -199,7 +199,8 @@ updateTextFilter : Game.Data -> LogViewer -> String -> LogViewer
 updateTextFilter data app newFilter =
     let
         newFilterCache =
-            data.server.logs
+            data.server
+                |> Servers.getLogs
                 |> Dict.values
                 |> List.filterMap
                     (logFilterMapFun newFilter)

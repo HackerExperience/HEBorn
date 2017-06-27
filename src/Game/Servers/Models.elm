@@ -1,12 +1,16 @@
 module Game.Servers.Models
     exposing
         ( Model
-        , ID
         , Server
+        , ID
+        , Type(..)
         , initialModel
         , setFilesystem
+        , getFilesystem
         , setLogs
+        , getLogs
         , setProcesses
+        , getProcesses
         )
 
 import Dict exposing (Dict)
@@ -27,8 +31,14 @@ type alias ID =
     String
 
 
+type Type
+    = Local
+    | Remote
+
+
 type alias Server =
     { ip : IP
+    , type_ : Type
     , filesystem : Filesystem
     , logs : Logs
     , processes : Processes
@@ -44,6 +54,7 @@ initialModel =
     Dict.insert "localhost"
         -- DUMMY VALUE FOR PLAYING
         { ip = "localhost"
+        , type_ = Local
         , filesystem = dummyFS
         , logs = dummyLogs
         , processes = dummyProcesses
@@ -51,28 +62,31 @@ initialModel =
         Dict.empty
 
 
-
--- setFilesystem :
---     filesystem
---     -> { any | filesystem : filesystem }
---     -> { any | filesystem : filesystem }
+getFilesystem : Server -> Filesystem
+getFilesystem =
+    .filesystem
 
 
+setFilesystem : Filesystem -> Server -> Server
 setFilesystem filesystem model =
     { model | filesystem = filesystem }
 
 
-setLogs :
-    logs
-    -> { any | logs : logs }
-    -> { any | logs : logs }
+getLogs : Server -> Logs
+getLogs =
+    .logs
+
+
+setLogs : Logs -> Server -> Server
 setLogs logs model =
     { model | logs = logs }
 
 
-setProcesses :
-    processes
-    -> { any | processes : processes }
-    -> { any | processes : processes }
+getProcesses : Server -> Processes
+getProcesses =
+    .processes
+
+
+setProcesses : Processes -> Server -> Server
 setProcesses processes model =
     { model | processes = processes }

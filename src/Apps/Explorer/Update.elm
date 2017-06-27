@@ -1,6 +1,7 @@
 module Apps.Explorer.Update exposing (update)
 
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Apps.Explorer.Models exposing (Model, changePath)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -32,7 +33,7 @@ update data msg ({ app } as model) =
                 newApp =
                     changePath
                         newPath
-                        data.server.filesystem
+                        (Servers.getFilesystem data.server)
                         app
             in
                 ( { model | app = newApp }, Cmd.none, Dispatch.none )
