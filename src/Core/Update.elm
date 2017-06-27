@@ -17,12 +17,22 @@ import OS.Update as OS
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        Bootstrap token id ->
+        Boot token id ->
             let
                 model_ =
                     connect token id model
             in
                 ( model_, Cmd.none )
+
+        Shutdown ->
+            let
+                ( model1, cmd ) =
+                    generic msg model
+
+                model_ =
+                    logout model
+            in
+                ( model_, cmd )
 
         WebsocketMsg (Ws.Broadcast (Report (Connected token _))) ->
             -- special trap to catch websocket connections
@@ -32,17 +42,6 @@ update msg model =
 
                 ( model_, cmd ) =
                     generic msg model1
-            in
-                ( model_, cmd )
-
-        WebsocketMsg (Ws.Broadcast (Report Disconnected)) ->
-            -- special trap to catch websocket disconnections
-            let
-                ( model1, cmd ) =
-                    generic msg model
-
-                model_ =
-                    logout model
             in
                 ( model_, cmd )
 

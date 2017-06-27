@@ -2,6 +2,7 @@ module Game.Account.Update exposing (..)
 
 import Maybe
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Messages as Core
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
@@ -42,13 +43,16 @@ logout :
     -> ( Model, Cmd Msg, Dispatch )
 logout game model =
     let
+        model_ =
+            { model | logout = True }
+
         token =
             getToken model
 
         cmd =
             Logout.request token game
     in
-        ( model, cmd, Dispatch.none )
+        ( model_, cmd, Dispatch.none )
 
 
 response :
@@ -78,6 +82,16 @@ event game ev model =
                         , Dispatch.websocket
                             (Ws.JoinChannel RequestsChannel Nothing)
                         ]
+            in
+                ( model, Cmd.none, dispatch )
+
+        Events.Report Ws.Disconnected ->
+            let
+                dispatch =
+                    if model.logout then
+                        Dispatch.core Core.Shutdown
+                    else
+                        Dispatch.none
             in
                 ( model, Cmd.none, dispatch )
 

@@ -7,7 +7,8 @@ import Driver.Websocket.Messages as Ws
 
 
 type Msg
-    = Bootstrap String String
+    = Boot String String
+    | Shutdown
     | LandingMsg Landing.Msg
     | GameMsg Game.Msg
     | OSMsg OS.Msg

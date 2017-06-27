@@ -31,6 +31,7 @@ type alias Model =
     , auth : AuthData
     , database : Database
     , dock : Dock.Model
+    , logout : Bool
     }
 
 
@@ -47,6 +48,7 @@ initialModel token =
     , auth = initialAuth token
     , database = Database.empty
     , dock = Dock.initialModel
+    , logout = False
     }
 
 
