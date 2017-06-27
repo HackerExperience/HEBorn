@@ -1,6 +1,6 @@
 module Apps.Browser.Update exposing (update)
 
-import Game.Models as Game
+import Game.Data as Game
 import Apps.Browser.Models
     exposing
         ( Model
@@ -16,17 +16,17 @@ import Apps.Browser.Menu.Actions as Menu
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update game msg ({ app } as model) =
+update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update data msg ({ app } as model) =
     case msg of
         -- Menu
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler game action model
+            Menu.actionHandler data action model
 
         MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Menu.update game msg model.menu
+                    Menu.update data msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd

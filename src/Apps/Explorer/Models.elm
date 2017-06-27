@@ -1,23 +1,12 @@
 module Apps.Explorer.Models exposing (..)
 
-import Game.Servers.Models
-    exposing
-        ( getFilesystem
-        , Server
-        )
-import Game.Servers.Filesystem.Models
-    exposing
-        ( FilePath
-        , rootPath
-        , pathExists
-        , File
-        , getFilesOnPath
-        )
+import Game.Servers.Models exposing (Server)
+import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
 
 
 type alias Explorer =
-    { path : FilePath }
+    { path : Filesystem.FilePath }
 
 
 type alias Model =
@@ -63,7 +52,7 @@ icon =
 
 initialExplorer : Explorer
 initialExplorer =
-    { path = rootPath
+    { path = Filesystem.rootPath
     }
 
 
@@ -74,46 +63,28 @@ initialModel =
     }
 
 
-getPath : Explorer -> FilePath
+getPath : Explorer -> Filesystem.FilePath
 getPath explorer =
     explorer.path
 
 
-setPath : Explorer -> FilePath -> Explorer
+setPath : Explorer -> Filesystem.FilePath -> Explorer
 setPath explorer path =
     { explorer | path = path }
 
 
 changePath :
-    FilePath
+    Filesystem.FilePath
+    -> Filesystem.Filesystem
     -> Explorer
-    -> Server
     -> Explorer
-changePath path explorer server =
-    let
-        filesystem =
-            getFilesystem server
-
-        explorer_ =
-            case filesystem of
-                Just fs ->
-                    if pathExists path fs then
-                        setPath explorer path
-                    else
-                        explorer
-
-                Nothing ->
-                    explorer
-    in
-        explorer_
+changePath path filesystem explorer =
+    if Filesystem.pathExists path filesystem then
+        setPath explorer path
+    else
+        explorer
 
 
-resolvePath : Server -> FilePath -> List File
+resolvePath : Server -> Filesystem.FilePath -> List Filesystem.File
 resolvePath server path =
-    let
-        filesystem =
-            getFilesystem server
-    in
-        filesystem
-            |> Maybe.map (getFilesOnPath path)
-            |> Maybe.withDefault []
+    Filesystem.getFilesOnPath path server.filesystem

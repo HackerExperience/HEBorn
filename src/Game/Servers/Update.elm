@@ -1,5 +1,7 @@
 module Game.Servers.Update exposing (..)
 
+import Dict
+import Utils.Dict as DictUtils
 import Game.Messages as Game
 import Game.Models as Game
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -54,74 +56,74 @@ response response game model =
 
 filesystem :
     Game.Model
-    -> ServerID
+    -> ID
     -> Filesystem.Msg
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 filesystem game id msg model =
-    case (getServerByID model id) of
-        StdServer server ->
+    case Dict.get id model of
+        Just server ->
             let
                 ( filesystem_, cmd, dispatch ) =
                     Filesystem.update game msg server.filesystem
 
                 server_ =
-                    StdServer { server | filesystem = filesystem_ }
+                    { server | filesystem = filesystem_ }
 
                 model_ =
-                    updateServer model server_
+                    DictUtils.safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 
-        NoServer ->
+        Nothing ->
             ( model, Cmd.none, Dispatch.none )
 
 
 log :
     Game.Model
-    -> ServerID
+    -> ID
     -> Logs.Msg
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 log game id msg model =
-    case (getServerByID model id) of
-        StdServer server ->
+    case (Dict.get id model) of
+        Just server ->
             let
                 ( logs_, cmd, dispatch ) =
                     Logs.update game msg server.logs
 
                 server_ =
-                    StdServer { server | logs = logs_ }
+                    { server | logs = logs_ }
 
                 model_ =
-                    updateServer model server_
+                    DictUtils.safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 
-        NoServer ->
+        Nothing ->
             ( model, Cmd.none, Dispatch.none )
 
 
 process :
     Game.Model
-    -> ServerID
+    -> ID
     -> Processes.Msg
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 process game id msg model =
-    case (getServerByID model id) of
-        StdServer server ->
+    case (Dict.get id model) of
+        Just server ->
             let
                 ( processes_, cmd, dispatch ) =
                     Processes.update game msg server.processes
 
                 server_ =
-                    StdServer { server | processes = processes_ }
+                    { server | processes = processes_ }
 
                 model_ =
-                    updateServer model server_
+                    DictUtils.safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 
-        NoServer ->
+        Nothing ->
             ( model, Cmd.none, Dispatch.none )
