@@ -1,5 +1,12 @@
-module Game.Models exposing (Model, initialModel)
+module Game.Models
+    exposing
+        ( Model
+        , initialModel
+        , getActiveServerID
+        , getActiveServer
+        )
 
+import Dict
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Network.Models as Network
@@ -24,3 +31,20 @@ initialModel token config =
     , meta = Meta.initialModel
     , config = config
     }
+
+
+getActiveServerID : Model -> String
+getActiveServerID ({ meta, network } as model) =
+    case meta.session of
+        Meta.Gateway ->
+            network.gateway
+
+        Meta.Endpoint ->
+            network.endpoint
+                |> Maybe.andThen (flip Network.getServerID network)
+                |> Maybe.withDefault network.gateway
+
+
+getActiveServer : Model -> Maybe Servers.ServerData
+getActiveServer ({ servers } as model) =
+    Dict.get (getActiveServerID model) servers
