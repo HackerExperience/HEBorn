@@ -1,4 +1,36 @@
-module Utils.List exposing (move, indexedFoldl, indexedFoldr)
+module Utils.List
+    exposing
+        ( find
+        , findWith
+        , move
+        , indexedFoldl
+        , indexedFoldr
+        , foldlWhile
+        , foldrWhile
+        )
+
+
+find : comparable -> List comparable -> Maybe Int
+find elm =
+    findWith ((==) elm)
+
+
+findWith : (a -> Bool) -> List a -> Maybe Int
+findWith check list =
+    let
+        reducer item acc =
+            if (check item) then
+                ( True, acc )
+            else
+                ( False, acc + 1 )
+
+        ( found, index ) =
+            foldlWhile reducer 0 list
+    in
+        if found then
+            Just index
+        else
+            Nothing
 
 
 move : Int -> Int -> List a -> List a
@@ -47,6 +79,31 @@ indexedFoldr func init xs =
     xs
         |> List.foldr (countDown func) ( init, (List.length xs) - 1 )
         |> Tuple.first
+
+
+foldlWhile : (a -> b -> ( Bool, b )) -> b -> List a -> ( Bool, b )
+foldlWhile func acc list =
+    case list of
+        [] ->
+            ( False, acc )
+
+        head :: tail ->
+            let
+                result =
+                    func head acc
+
+                ( halt, acc_ ) =
+                    result
+            in
+                if halt then
+                    result
+                else
+                    foldlWhile func acc_ tail
+
+
+foldrWhile : (a -> b -> ( Bool, b )) -> b -> List a -> ( Bool, b )
+foldrWhile func acc list =
+    foldlWhile func acc (List.reverse list)
 
 
 
