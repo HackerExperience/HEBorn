@@ -1,18 +1,39 @@
-module Game.Network.Models exposing (..)
+module Game.Network.Models
+    exposing
+        ( Model
+        , Connection
+        , ConnectionType(..)
+        , ID
+        , initialModel
+        , getServerID
+        , getEndpointID
+        )
 
-import Dict
-import Game.Shared exposing (..)
-import Game.Servers.Models as Servers exposing (Server)
+import Dict exposing (Dict)
 
 
-type alias ConnectionID =
-    ID
+-- TODO: replace with Server.ID after merging #134
 
 
-type alias Gateway =
-    { current : Maybe Server
-    , previous : Maybe Server
-    }
+type alias ServerID =
+    String
+
+
+type alias IP =
+    String
+
+
+type alias ID =
+    String
+
+
+type alias BounceID =
+    String
+
+
+
+-- REVIEW: too many connection prefixes,
+-- should this be moved to it's own module?
 
 
 type ConnectionType
@@ -22,88 +43,63 @@ type ConnectionType
     | UnknownConnectionType
 
 
-type alias ConnectionData =
-    { id : ConnectionID
-    , connection_type : ConnectionType
-    , source_id : Servers.ID
+type alias Connection =
+    { type_ : ConnectionType
+    , source_id : ServerID
     , source_ip : IP
-    , target_id : Servers.ID
+    , target_id : ServerID
     , target_ip : IP
     }
 
 
-type Connection
-    = StdConnection ConnectionData
-    | NoConnection
+
+-- REVIEW: chain field name may be changed
+
+
+type alias Bounce =
+    { name : String
+    , chain : List IP
+    }
+
+
+type alias Bounces =
+    Dict BounceID Bounce
+
+
+type alias ServerMap =
+    Dict IP ServerID
 
 
 type alias Connections =
-    Dict.Dict ConnectionID ConnectionData
+    Dict ID Connection
 
 
 type alias Model =
-    { gateway : Gateway
+    { gateway : ServerID
+    , endpoint : Maybe IP
+    , bounce : Maybe BounceID
+    , bounces : Bounces
+    , serverMap : ServerMap
     , connections : Connections
     }
 
 
-createGateway : Maybe Server -> Maybe Server -> Gateway
-createGateway current previous =
-    { current = current, previous = previous }
-
-
-getCurrentGateway : Model -> Maybe Server
-getCurrentGateway model =
-    model.gateway.current
-
-
-getPreviousGateway : Model -> Maybe Server
-getPreviousGateway model =
-    model.gateway.previous
-
-
-setCurrentGateway : Server -> Model -> Gateway
-setCurrentGateway gateway model =
-    createGateway (Just gateway) model.gateway.current
-
-
-initialGateway : Gateway
-initialGateway =
-    { current = Nothing
-    , previous = Nothing
-    }
-
-
-initialConnections : Connections
-initialConnections =
-    Dict.empty
-
-
 initialModel : Model
 initialModel =
-    { gateway = initialGateway
-    , connections = initialConnections
+    { gateway = "localhost"
+    , endpoint = Nothing
+    , bounce = Nothing
+    , bounces = Dict.empty
+    , serverMap = Dict.empty
+    , connections = Dict.empty
     }
 
 
-newConnection :
-    ConnectionID
-    -> ConnectionType
-    -> Servers.ID
-    -> IP
-    -> Servers.ID
-    -> IP
-    -> ConnectionData
-newConnection id type_ source_id source_ip target_id target_ip =
-    { id = id
-    , connection_type = type_
-    , source_id = source_id
-    , source_ip = source_ip
-    , target_id = target_id
-    , target_ip = target_ip
-    }
+getServerID : IP -> Model -> Maybe ServerID
+getServerID ip { serverMap } =
+    Dict.get ip serverMap
 
 
-storeConnection : Model -> ConnectionData -> Connections
-storeConnection model connection =
-    Dict.insert connection.id connection model.connections
+getEndpointID : Model -> Maybe ServerID
+getEndpointID ({ endpoint } as model) =
+    endpoint |> Maybe.andThen (flip getServerID model)
