@@ -31,8 +31,8 @@ view model =
 
 viewHeader : Game.Model -> Model -> Html Msg
 viewHeader game model =
-    header []
-        [ (Header.view game model.header) ]
+    model.header
+        |> Header.view game
         |> Html.map HeaderMsg
 
 
@@ -45,5 +45,6 @@ viewMain game model =
 
 displayVersion : String -> Html Msg
 displayVersion version =
-    div [ id Css.DesktopVersion ]
+    div
+        [ class [ Css.Version ] ]
         [ text version ]

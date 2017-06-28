@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
+import OS.Style as OsCss
 import OS.SessionManager.Models as SessionManager exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Style as Css
@@ -22,10 +23,15 @@ import Game.Models as Game
     Html.CssHelpers.withNamespace "dock"
 
 
+osClass : List class -> Attribute msg
+osClass =
+    .class <| Html.CssHelpers.withNamespace "os"
+
+
 view : Game.Model -> SessionManager.Model -> Html Msg
 view game model =
-    node "dock"
-        []
+    div
+        [ osClass [ OsCss.Dock ] ]
         [ dock game model
         ]
 

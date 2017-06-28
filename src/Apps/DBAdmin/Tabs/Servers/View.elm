@@ -5,12 +5,11 @@ import Html exposing (..)
 import Html.Attributes exposing (value, selected)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Css.Common exposing (elasticClass)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
-import Utils.Html exposing (onChange)
+import Utils.Html exposing (spacer, onChange)
 import Game.Account.Database.Models exposing (..)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
@@ -194,7 +193,7 @@ renderEntry app entry =
 
         etop =
             [ div [] []
-            , div [ elasticClass ] []
+            , spacer
             , renderTopFlags entry
             ]
 

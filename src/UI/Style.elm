@@ -78,7 +78,7 @@ toogable =
             ]
         ]
     , attrSelector "toogableEntry > btn"
-        "data-expanded"
+        "expanded"
         "="
         "\"1\""
         [ before [ Icon.divContract ] ]
@@ -108,7 +108,7 @@ linkAddr =
             ]
         ]
     , attrSelector "linkAddr"
-        "data-localhost"
+        "localhost"
         "="
         "\"1\""
         [ color Colors.localhost
@@ -134,7 +134,7 @@ linkAddr =
             ]
         ]
     , attrSelector "linkUser"
-        "data-root"
+        "root"
         "="
         "\"1\""
         [ color Colors.root
@@ -173,7 +173,7 @@ horizontalTabs =
                 , borderTopRightRadius (px 12)
                 ]
             , attrSelector "tab"
-                "data-selected"
+                "selected"
                 "="
                 "\"1\""
                 [ backgroundColor Colors.bgSelected

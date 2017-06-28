@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Css.Common exposing (elasticClass)
+import Utils.Html exposing (spacer)
 import UI.ToString exposing (timestampToFullData)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
@@ -226,7 +226,7 @@ renderEntry app entry =
 
         etop =
             [ div [] [ entry.timestamp |> timestampToFullData |> text ]
-            , div [ elasticClass ] []
+            , spacer
             , renderTopActions entry
             ]
 

@@ -16,3 +16,6 @@ update game msg model =
                     Dispatch.account Account.Logout
             in
                 ( model, Cmd.none, dispatch )
+
+        _ ->
+            ( model, Cmd.none, Dispatch.none )
