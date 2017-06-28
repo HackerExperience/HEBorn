@@ -6,6 +6,7 @@ import Game.Account.Messages exposing (..)
 
 type Response
     = ServerIndexResponse ServerIndex.Response
+    | NoOpResponse
 
 
 receive : RequestMsg -> Response
@@ -17,4 +18,4 @@ receive response =
                 |> ServerIndexResponse
 
         LogoutRequest _ ->
-            Debug.crash "Logout has no response"
+            NoOpResponse
