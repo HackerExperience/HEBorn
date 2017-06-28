@@ -3,7 +3,6 @@ module OS.SessionManager.Dock.Update exposing (update)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import Apps.Apps as Apps
-import Apps.Models as Apps
 import OS.SessionManager.WindowManager.Models as WM
 
 

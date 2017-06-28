@@ -12,7 +12,6 @@ import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import OS.SessionManager.WindowManager.Context as Context
 import OS.SessionManager.WindowManager.Style as Css
-import Apps.Apps as Apps
 import Apps.Models as Apps
 import Apps.View as Apps
 
