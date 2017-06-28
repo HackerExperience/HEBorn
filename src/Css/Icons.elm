@@ -182,3 +182,8 @@ browser =
 taskMngr : Icon
 taskMngr =
     faIcon FA.listAlt
+
+
+dbAdmin : Icon
+dbAdmin =
+    faIcon FA.database

@@ -4,6 +4,7 @@ import Apps.LogViewer.Messages as LogViewer
 import Apps.TaskManager.Messages as TaskManager
 import Apps.Browser.Messages as Browser
 import Apps.Explorer.Messages as Explorer
+import Apps.DBAdmin.Messages as Database
 
 
 type Msg
@@ -11,3 +12,4 @@ type Msg
     | TaskManagerMsg TaskManager.Msg
     | BrowserMsg Browser.Msg
     | ExplorerMsg Explorer.Msg
+    | DatabaseMsg Database.Msg

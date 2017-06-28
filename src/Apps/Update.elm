@@ -7,6 +7,7 @@ import Apps.LogViewer.Update as LogViewer
 import Apps.TaskManager.Update as TaskManager
 import Apps.Browser.Update as Browser
 import Apps.Explorer.Update as Explorer
+import Apps.DBAdmin.Update as Database
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -28,6 +29,9 @@ update data msg model =
 
         ( ExplorerMsg msg, ExplorerModel model ) ->
             map ExplorerModel ExplorerMsg (Explorer.update data msg model)
+
+        ( DatabaseMsg msg, DatabaseModel model ) ->
+            map DatabaseModel DatabaseMsg (Database.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

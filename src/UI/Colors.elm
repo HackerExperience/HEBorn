@@ -1,13 +1,28 @@
 module UI.Colors exposing (..)
 
-import Css exposing (Mixin, color, hex)
+import Css exposing (Color, hex)
 
 
-localhost : Mixin
+black : Color
+black =
+    hex "000"
+
+
+localhost : Color
 localhost =
-    color (hex "56822E")
+    hex "56822E"
 
 
-hyperlink : Mixin
+root : Color
+root =
+    hex "9B9E5B"
+
+
+hyperlink : Color
 hyperlink =
-    color (hex "00E")
+    hex "00E"
+
+
+bgSelected : Color
+bgSelected =
+    hex "DDD"

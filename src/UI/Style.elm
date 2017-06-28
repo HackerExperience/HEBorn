@@ -3,7 +3,7 @@ module UI.Style exposing (css)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (input, span)
-import Css.Common exposing (internalPadding, internalPaddingSz, flexContainerHorz)
+import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
 import Css.Utils exposing (attrSelector)
 import Css.Icons as Icon exposing (locationTarget)
 import UI.Colors as Colors exposing (hyperlink, localhost)
@@ -28,14 +28,14 @@ ico =
 
 entries : List Snippet
 entries =
-    filterHeader
+    filterHeader ++ toogable
 
 
 filterHeader : List Snippet
 filterHeader =
     [ selector "filterHeader"
         [ flexContainerHorz
-        , borderBottom3 (px 1) solid (hex "000")
+        , borderBottom3 (px 1) solid Colors.black
         , internalPadding
         , lineHeight (px 32)
         , minHeight (px 33) --CHROME HACK
@@ -51,10 +51,37 @@ filterHeader =
                 , marginLeft (px 18)
                 , padding (px 3)
                 , borderRadius (px 12)
-                , border3 (px 1) solid (hex "000")
+                , border3 (px 1) solid Colors.black
                 ]
             ]
         ]
+    ]
+
+
+toogable : List Snippet
+toogable =
+    [ selector "toogableEntry"
+        [ fontSize (px 12)
+        , borderBottom3 (px 1) solid Colors.black
+        , internalPadding
+        , display block
+        , children
+            [ selector "btn"
+                [ ico
+                , width (pct 100)
+                , display block
+                , textAlign center
+                , minHeight (px 16)
+                , before [ Icon.divExpand ]
+                , cursor pointer
+                ]
+            ]
+        ]
+    , attrSelector "toogableEntry > btn"
+        "data-expanded"
+        "="
+        "\"1\""
+        [ before [ Icon.divContract ] ]
     ]
 
 
@@ -70,7 +97,7 @@ inlines =
 linkAddr : List Snippet
 linkAddr =
     [ selector "linkAddr"
-        [ Colors.hyperlink
+        [ color Colors.hyperlink
         , children
             [ selector "ico"
                 [ ico
@@ -84,7 +111,7 @@ linkAddr =
         "data-localhost"
         "="
         "\"1\""
-        [ Colors.localhost
+        [ color Colors.localhost
         , fontWeight bold
         , children
             [ selector "ico"
@@ -92,6 +119,28 @@ linkAddr =
                 , before [ Icon.home ]
                 ]
             , selector "addr"
+                [ textDecoration none ]
+            ]
+        ]
+    , selector "linkUser"
+        [ color Colors.hyperlink
+        , children
+            [ selector "ico"
+                [ ico
+                , before [ Icon.person ]
+                ]
+            , selector "addr"
+                [ textDecoration underline ]
+            ]
+        ]
+    , attrSelector "linkUser"
+        "data-root"
+        "="
+        "\"1\""
+        [ color Colors.root
+        , fontWeight bold
+        , children
+            [ selector "addr"
                 [ textDecoration none ]
             ]
         ]
@@ -104,7 +153,7 @@ linkAddr =
 
 layouts : List Snippet
 layouts =
-    [ verticalList ]
+    [ verticalList ] ++ horizontalTabs
 
 
 verticalList : Snippet
@@ -115,13 +164,58 @@ verticalList =
         ]
 
 
+horizontalTabs : List Snippet
+horizontalTabs =
+    [ selector "horizontalTabs"
+        [ fontSize (px 12)
+        , flex (int 1)
+        , flexContainerVert
+        , children
+            [ selector "panel"
+                [ flex (int 0)
+                , borderBottom3 (px 1) solid Colors.black
+                , display block
+                , children
+                    [ selector "tab"
+                        [ display inlineBlock
+                        , padding3 (px 8) (px 16) (px 4)
+                        , borderTop3 (px 1) solid Colors.black
+                        , borderLeft3 (px 1) solid Colors.black
+                        , borderRight3 (px 1) solid Colors.black
+                        , borderTopLeftRadius (px 12)
+                        , borderTopRightRadius (px 12)
+                        ]
+                    , attrSelector "tab"
+                        "data-selected"
+                        "="
+                        "\"1\""
+                        [ backgroundColor Colors.bgSelected
+                        ]
+                    ]
+                ]
+            ]
+        , lastChild
+            [ flex (int 1) ]
+        ]
+    ]
+
+
 
 -- Widgets
 
 
 widgets : List Snippet
 widgets =
-    [ progressBar ]
+    [ progressBar, horizontalBtnPanel ]
+
+
+horizontalBtnPanel : Snippet
+horizontalBtnPanel =
+    selector "horizontalBtnPanel"
+        [ width (pct 100)
+        , fontSize (px 24)
+        , textAlign center
+        ]
 
 
 progressBar : Snippet
@@ -135,6 +229,7 @@ progressBar =
         , zIndex (int 0)
         , width (px 80)
         , textAlign center
+        , fontSize (px 12)
         , children
             [ selector "fill"
                 [ position absolute

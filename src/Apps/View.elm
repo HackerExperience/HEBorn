@@ -7,6 +7,7 @@ import Apps.LogViewer.View as LogViewer
 import Apps.TaskManager.View as TaskManager
 import Apps.Browser.View as Browser
 import Apps.Explorer.View as Explorer
+import Apps.DBAdmin.View as Database
 import Game.Data as Game
 
 
@@ -24,3 +25,6 @@ view data model =
 
         ExplorerModel model ->
             Html.map ExplorerMsg (Explorer.view data model)
+
+        DatabaseModel model ->
+            Html.map DatabaseMsg (Database.view data model)

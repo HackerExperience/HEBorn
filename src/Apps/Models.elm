@@ -13,6 +13,7 @@ import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
 import Apps.Explorer.Models as Explorer
+import Apps.DBAdmin.Models as Database
 import Apps.Apps exposing (..)
 
 
@@ -21,6 +22,7 @@ type AppModel
     | TaskManagerModel TaskManager.Model
     | BrowserModel Browser.Model
     | ExplorerModel Explorer.Model
+    | DatabaseModel Database.Model
 
 
 type Contexts
@@ -43,6 +45,9 @@ contexts app =
         ExplorerApp ->
             ContextualApp
 
+        DatabaseApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -58,6 +63,9 @@ name app =
 
         ExplorerApp ->
             Explorer.name
+
+        DatabaseApp ->
+            Database.name
 
 
 icon : App -> String
@@ -75,6 +83,9 @@ icon app =
         ExplorerApp ->
             Explorer.icon
 
+        DatabaseApp ->
+            Database.icon
+
 
 title : AppModel -> String
 title model =
@@ -91,6 +102,9 @@ title model =
         ExplorerModel model ->
             Explorer.title model
 
+        DatabaseModel model ->
+            Database.title model
+
 
 model : App -> AppModel
 model app =
@@ -106,3 +120,6 @@ model app =
 
         ExplorerApp ->
             ExplorerModel Explorer.initialModel
+
+        DatabaseApp ->
+            DatabaseModel Database.initialModel

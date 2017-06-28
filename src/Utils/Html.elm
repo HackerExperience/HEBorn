@@ -1,10 +1,15 @@
-module Utils.Html exposing (onKeyDown)
+module Utils.Html exposing (..)
 
-import Html
-import Html.Events exposing (on, keyCode)
+import Html exposing (Attribute)
+import Html.Events exposing (on, keyCode, targetValue)
 import Json.Decode as Json
 
 
-onKeyDown : (Int -> msg) -> Html.Attribute msg
-onKeyDown tagger =
-    on "keydown" (Json.map tagger keyCode)
+onKeyDown : (Int -> msg) -> Attribute msg
+onKeyDown handler =
+    on "keydown" <| Json.map handler keyCode
+
+
+onChange : (String -> msg) -> Attribute msg
+onChange handler =
+    on "change" <| Json.map handler targetValue

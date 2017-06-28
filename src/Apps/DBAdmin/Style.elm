@@ -1,4 +1,4 @@
-module Apps.LogViewer.Style exposing (..)
+module Apps.DBAdmin.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
@@ -9,18 +9,12 @@ import Css.Icons as Icon
 type Classes
     = ETop
     | EBottom
-    | BtnUser
     | BtnEdit
-    | BtnHide
     | BtnFilter
-    | BtnCrypt
     | BtnDelete
-    | BtnUncrypt
     | BtnApply
     | BtnCancel
     | BottomButton
-    | IcoCrosshair
-    | IcoDangerous
     | BoxifyMe
 
 
@@ -36,38 +30,22 @@ ico =
 
 css : Stylesheet
 css =
-    (stylesheet << namespace "logvw")
+    (stylesheet << namespace "udb")
         [ class ETop
             [ flexContainerHorz ]
         , class EBottom
             [ flexContainerHorz ]
-        , class BtnUser
-            [ ico
-            , before [ Icon.user ]
-            ]
         , class BtnEdit
             [ ico
             , before [ Icon.edit ]
-            ]
-        , class BtnHide
-            [ ico
-            , before [ Icon.view ]
             ]
         , class BtnFilter
             [ ico
             , before [ Icon.filter ]
             ]
-        , class BtnCrypt
-            [ ico
-            , before [ Icon.lock ]
-            ]
         , class BtnDelete
             [ ico
             , before [ Icon.trash ]
-            ]
-        , class BtnUncrypt
-            [ ico
-            , before [ Icon.unlock ]
             ]
         , class BtnApply
             [ ico
@@ -79,14 +57,6 @@ css =
             ]
         , class BottomButton
             [ cursor pointer ]
-        , class IcoCrosshair
-            [ ico
-            , before [ Icon.locationTarget ]
-            ]
-        , class IcoDangerous
-            [ ico
-            , before [ Icon.dangerous ]
-            ]
         , class BoxifyMe
             [ border3 (px 1) solid (hex "444")
             , padding (px 2)

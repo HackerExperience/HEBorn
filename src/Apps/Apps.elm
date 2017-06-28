@@ -6,3 +6,4 @@ type App
     | TaskManagerApp
     | BrowserApp
     | ExplorerApp
+    | DatabaseApp
