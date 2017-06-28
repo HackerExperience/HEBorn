@@ -153,7 +153,33 @@ linkAddr =
 
 layouts : List Snippet
 layouts =
-    [ verticalList ] ++ horizontalTabs
+    [ verticalList, horizontalTabs ]
+
+
+horizontalTabs : Snippet
+horizontalTabs =
+    selector "panel"
+        [ fontSize (px 12)
+        , borderBottom3 (px 1) solid Colors.black
+        , display block
+        , children
+            [ selector "tab"
+                [ display inlineBlock
+                , padding3 (px 8) (px 16) (px 4)
+                , borderTop3 (px 1) solid Colors.black
+                , borderLeft3 (px 1) solid Colors.black
+                , borderRight3 (px 1) solid Colors.black
+                , borderTopLeftRadius (px 12)
+                , borderTopRightRadius (px 12)
+                ]
+            , attrSelector "tab"
+                "data-selected"
+                "="
+                "\"1\""
+                [ backgroundColor Colors.bgSelected
+                ]
+            ]
+        ]
 
 
 verticalList : Snippet
@@ -164,40 +190,20 @@ verticalList =
         ]
 
 
-horizontalTabs : List Snippet
-horizontalTabs =
-    [ selector "horizontalTabs"
-        [ fontSize (px 12)
-        , flex (int 1)
+verticalSticked : Snippet
+verticalSticked =
+    selector "verticalSticked"
+        [ flex (int 1)
         , flexContainerVert
         , children
-            [ selector "panel"
-                [ flex (int 0)
-                , borderBottom3 (px 1) solid Colors.black
-                , display block
-                , children
-                    [ selector "tab"
-                        [ display inlineBlock
-                        , padding3 (px 8) (px 16) (px 4)
-                        , borderTop3 (px 1) solid Colors.black
-                        , borderLeft3 (px 1) solid Colors.black
-                        , borderRight3 (px 1) solid Colors.black
-                        , borderTopLeftRadius (px 12)
-                        , borderTopRightRadius (px 12)
-                        ]
-                    , attrSelector "tab"
-                        "data-selected"
-                        "="
-                        "\"1\""
-                        [ backgroundColor Colors.bgSelected
-                        ]
-                    ]
+            [ selector "headerStick, footerStick"
+                [ flex (int 0) ]
+            , selector "mainCont"
+                [ flex (int 1)
+                , flexContainerVert
                 ]
             ]
-        , lastChild
-            [ flex (int 1) ]
         ]
-    ]
 
 
 
