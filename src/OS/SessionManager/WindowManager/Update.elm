@@ -2,7 +2,6 @@ module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
-import Game.Models as Game
 import Game.Data as Game
 import Apps.Update as Apps
 import Apps.Messages as Apps
