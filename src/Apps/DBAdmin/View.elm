@@ -2,26 +2,41 @@ module Apps.DBAdmin.View exposing (view)
 
 import Html exposing (Html, div, text)
 import Game.Data as Game
-import UI.Layouts.HorizontalTabs exposing (horizontalTabs)
+import UI.Layouts.HorizontalTabs exposing (hzTabs)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
-import Apps.DBAdmin.Tabs exposing (toComparable)
 import Apps.DBAdmin.Tabs.Servers.View as Servers exposing (view)
 
 
-tabs : List ( Int, Html Msg )
+tabs : List MainTab
 tabs =
-    [ ( toComparable TabServers, text "Servers" )
-    , ( toComparable TabBankAccs, text "Bank Accounts" )
-    , ( toComparable TabWallets, text "BTC Wallets" )
+    [ TabServers
+    , TabBankAccs
+    , TabWallets
     ]
+
+
+compareTabs : MainTab -> MainTab -> Bool
+compareTabs a b =
+    (tabToString a) == (tabToString b)
+
+
+viewTabLabel : Bool -> MainTab -> List (Html Msg)
+viewTabLabel _ tab =
+    tab
+        |> tabToString
+        |> text
+        |> List.singleton
 
 
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
+        { selected } =
+            app
+
         viewData =
-            case app.selected of
+            case selected of
                 TabServers ->
                     (Servers.view data.game.account.database model app)
 
@@ -31,8 +46,4 @@ view data ({ app } as model) =
                 TabWallets ->
                     (div [] [])
     in
-        horizontalTabs
-            [ viewData ]
-            (toComparable app.selected)
-            tabs
-            GoTab
+        hzTabs (compareTabs selected) viewTabLabel GoTab tabs

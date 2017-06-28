@@ -7,7 +7,7 @@ import Apps.DBAdmin.Menu.Messages as Menu
 
 type Msg
     = MenuMsg Menu.Msg
-    | GoTab Int
+    | GoTab MainTab
     | ToogleExpand MainTab ID
     | UpdateTextFilter MainTab String
     | EnterEditing MainTab ID

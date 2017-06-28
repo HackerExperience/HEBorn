@@ -1,49 +1,110 @@
-module UI.Layouts.HorizontalTabs exposing (horizontalTabs)
+module UI.Layouts.HorizontalTabs
+    exposing
+        ( hzTabs
+        , hzCustomTabs
+        , hzPlainTabs
+        , panel
+        , tab
+        , panelSelector
+        , tabSelector
+        )
 
-import Html exposing (Html, node, text)
-import Html.Attributes exposing (attribute)
+import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick)
-import UI.Layouts.VerticalSticked exposing (verticalSticked)
+import Utils.Html.Attributes exposing (dataSelected)
 
 
-selectedAttr : Bool -> Html.Attribute msg
-selectedAttr enabled =
+type alias Renderer a msg =
+    Bool -> a -> List (Html msg)
+
+
+hzTabs :
+    (a -> Bool)
+    -> Renderer a msg
+    -> (a -> msg)
+    -> List a
+    -> Html msg
+hzTabs check render handler list =
     let
-        value =
-            if enabled then
-                "1"
-            else
-                "0"
+        mapper item =
+            renderItem (check item) render handler item
     in
-        attribute "data-selected" value
+        renderContainer mapper list
 
 
-tab : (comparable -> msg) -> ( comparable, Html msg, Bool ) -> Html msg
-tab callback ( key, content, selected ) =
-    node "tab"
-        [ selectedAttr selected
-        , onClick (callback key)
-        ]
-        [ content ]
+hzCustomTabs :
+    (a -> Bool)
+    -> (a -> msg)
+    -> List ( Renderer a msg, a )
+    -> Html msg
+hzCustomTabs check handler list =
+    let
+        mapper ( render, item ) =
+            renderItem (check item) render handler item
+    in
+        renderContainer mapper list
 
 
-tabPainel : (comparable -> msg) -> List ( comparable, Html msg, Bool ) -> Html msg
-tabPainel callback tabs =
-    node
-        "panel"
-        []
-        (List.map (tab callback) tabs)
+hzPlainTabs :
+    (String -> Bool)
+    -> Renderer String msg
+    -> (String -> msg)
+    -> List String
+    -> Html msg
+hzPlainTabs check render =
+    hzTabs check (\_ str -> [ text str ])
 
 
-markSelected : Int -> List ( comparable, Html msg ) -> List ( comparable, Html msg, Bool )
-markSelected active =
-    List.indexedMap
-        (\i ( k, v ) -> ( k, v, i == active ))
+
+-- elements and selectors
 
 
-horizontalTabs : List (Html msg) -> Int -> List ( comparable, Html msg ) -> (comparable -> msg) -> Html msg
-horizontalTabs entries active tabs callback =
-    verticalSticked
-        (Just [ tabs |> markSelected active |> tabPainel callback ])
-        entries
-        Nothing
+panel : List (Attribute msg) -> List (Html msg) -> Html msg
+panel =
+    node panelNode
+
+
+panelSelector : String
+panelSelector =
+    panelNode
+
+
+tab : List (Attribute msg) -> List (Html msg) -> Html msg
+tab =
+    node tabNode
+
+
+tabSelector : String
+tabSelector =
+    panelSelector ++ " > " ++ tabNode
+
+
+
+-- internals
+
+
+panelNode : String
+panelNode =
+    "panel"
+
+
+tabNode : String
+tabNode =
+    "tab"
+
+
+renderItem : Bool -> Renderer a msg -> (a -> msg) -> a -> Html msg
+renderItem active render handler item =
+    item
+        |> render active
+        |> tab
+            [ onClick (handler item)
+            , dataSelected active
+            ]
+
+
+renderContainer : (a -> Html msg) -> List a -> Html msg
+renderContainer mapper list =
+    list
+        |> List.map mapper
+        |> panel []

@@ -129,3 +129,16 @@ isEntryEditing app itemId =
 
         TabWallets ->
             Dict.member itemId app.walletsEditing
+
+
+tabToString : MainTab -> String
+tabToString tab =
+    case tab of
+        TabServers ->
+            "Tab Servers"
+
+        TabBankAccs ->
+            "Bank Accounts"
+
+        TabWallets ->
+            "BTC Wallets"
