@@ -4,11 +4,9 @@ import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Models exposing (Model)
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
-import Driver.Websocket.Channels exposing (..)
 import Core.Messages as Core
 import Core.Models as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Driver.Websocket.Messages as Ws
 
 
 update : Core.HomeModel -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
@@ -53,8 +51,7 @@ response core response model =
                     { model | loginFailed = False }
 
                 dispatch =
-                    Dispatch.batch
-                        [ Dispatch.core (Core.Bootstrap token id) ]
+                    Dispatch.core (Core.Boot token id)
             in
                 ( model_, Cmd.none, dispatch )
 
