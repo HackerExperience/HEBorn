@@ -8,6 +8,7 @@ import Html.CssHelpers
 import Css.Common exposing (elasticClass)
 import UI.ToString exposing (timestampToFullData)
 import UI.Layouts.VerticalList exposing (verticalList)
+import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
 import UI.Entries.Toogable exposing (toogableEntry)
@@ -250,21 +251,27 @@ renderEntryList app =
 
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
-    verticalList
-        ([ menuView model
-         , filterHeader
-            [ ( class [ BtnUser ], DummyNoOp, False )
-            , ( class [ BtnEdit ], DummyNoOp, False )
-            , ( class [ BtnHide ], DummyNoOp, False )
+    verticalSticked
+        (Just <|
+            [ verticalList
+                [ menuView model
+                , filterHeader
+                    [ ( class [ BtnUser ], DummyNoOp, False )
+                    , ( class [ BtnEdit ], DummyNoOp, False )
+                    , ( class [ BtnHide ], DummyNoOp, False )
+                    ]
+                    []
+                    app.filterText
+                    "Search..."
+                    UpdateTextFilter
+                ]
             ]
-            []
-            app.filterText
-            "Search..."
-            UpdateTextFilter
-         ]
-            ++ (data.server
-                    |> Servers.getLogs
-                    |> applyFilter app
-                    |> renderEntryList app
-               )
         )
+        [ verticalList
+            (data.server
+                |> Servers.getLogs
+                |> applyFilter app
+                |> renderEntryList app
+            )
+        ]
+        Nothing

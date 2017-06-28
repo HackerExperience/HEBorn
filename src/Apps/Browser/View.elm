@@ -34,6 +34,20 @@ view data ({ app } as model) =
         ]
 
 
+renderToolbarBtn : Bool -> String -> msg -> Html msg
+renderToolbarBtn active label callback =
+    div
+        [ class
+            (if active then
+                [ Btn ]
+             else
+                [ Btn, InactiveBtn ]
+            )
+        , onClick callback
+        ]
+        [ text label ]
+
+
 viewToolbar : Browser -> Html Msg
 viewToolbar browser =
     div [ class [ Toolbar ] ]
