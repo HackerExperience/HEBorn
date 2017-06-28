@@ -1,6 +1,6 @@
 module Game.Servers.Messages exposing (Msg(..), RequestMsg(..))
 
-import Game.Servers.Models exposing (ServerID)
+import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
@@ -9,9 +9,9 @@ import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = FilesystemMsg ServerID Filesystem.Msg
-    | LogMsg ServerID Logs.Msg
-    | ProcessMsg ServerID Processes.Msg
+    = FilesystemMsg Servers.ID Filesystem.Msg
+    | LogMsg Servers.ID Logs.Msg
+    | ProcessMsg Servers.ID Processes.Msg
     | Request RequestMsg
     | Event Events.Response
 

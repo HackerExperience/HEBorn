@@ -11,7 +11,8 @@ import Css.Common exposing (elasticClass)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
-import Game.Models as Game
+import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
@@ -282,8 +283,8 @@ renderEntryList app =
     List.map (renderEntry app)
 
 
-view : Game.Model -> Model -> Html Msg
-view game ({ app } as model) =
+view : Game.Data -> Model -> Html Msg
+view data ({ app } as model) =
     verticalList
         ([ menuView model
          , filterHeader
@@ -296,7 +297,8 @@ view game ({ app } as model) =
             "Search..."
             UpdateTextFilter
          ]
-            ++ (getLogs app game.servers
+            ++ (data.server
+                    |> Servers.getLogs
                     |> applyFilter app
                     |> renderEntryList app
                )

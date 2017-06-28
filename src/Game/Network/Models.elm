@@ -2,7 +2,7 @@ module Game.Network.Models exposing (..)
 
 import Dict
 import Game.Shared exposing (..)
-import Game.Servers.Models exposing (Server(..), ServerID)
+import Game.Servers.Models as Servers exposing (Server)
 
 
 type alias ConnectionID =
@@ -10,8 +10,8 @@ type alias ConnectionID =
 
 
 type alias Gateway =
-    { current : Server
-    , previous : Server
+    { current : Maybe Server
+    , previous : Maybe Server
     }
 
 
@@ -25,9 +25,9 @@ type ConnectionType
 type alias ConnectionData =
     { id : ConnectionID
     , connection_type : ConnectionType
-    , source_id : ServerID
+    , source_id : Servers.ID
     , source_ip : IP
-    , target_id : ServerID
+    , target_id : Servers.ID
     , target_ip : IP
     }
 
@@ -47,30 +47,30 @@ type alias Model =
     }
 
 
-createGateway : Server -> Server -> Gateway
+createGateway : Maybe Server -> Maybe Server -> Gateway
 createGateway current previous =
     { current = current, previous = previous }
 
 
-getCurrentGateway : Model -> Server
+getCurrentGateway : Model -> Maybe Server
 getCurrentGateway model =
     model.gateway.current
 
 
-getPreviousGateway : Model -> Server
+getPreviousGateway : Model -> Maybe Server
 getPreviousGateway model =
     model.gateway.previous
 
 
-setCurrentGateway : Model -> Server -> Gateway
-setCurrentGateway model gateway =
-    createGateway gateway model.gateway.current
+setCurrentGateway : Server -> Model -> Gateway
+setCurrentGateway gateway model =
+    createGateway (Just gateway) model.gateway.current
 
 
 initialGateway : Gateway
 initialGateway =
-    { current = NoServer
-    , previous = NoServer
+    { current = Nothing
+    , previous = Nothing
     }
 
 
@@ -89,9 +89,9 @@ initialModel =
 newConnection :
     ConnectionID
     -> ConnectionType
-    -> ServerID
+    -> Servers.ID
     -> IP
-    -> ServerID
+    -> Servers.ID
     -> IP
     -> ConnectionData
 newConnection id type_ source_id source_ip target_id target_ip =

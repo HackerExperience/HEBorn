@@ -4,6 +4,7 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import Html exposing (..)
 import Game.Models as Game
+import Game.Data as Game
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.Dock.View as Dock
@@ -31,17 +32,23 @@ viewDock game model =
 
 viewWM : Game.Model -> Model -> Html Msg
 viewWM game model =
-    node "wmCanvas"
-        []
-        (List.filterMap (maybeViewWindow game model) (windows model))
+    case (Game.toContext game) of
+        Just data ->
+            model
+                |> windows
+                |> List.filterMap (maybeViewWindow data model)
+                |> node "wmCanvas" []
+
+        Nothing ->
+            Html.div [] []
 
 
 maybeViewWindow :
-    Game.Model
+    Game.Data
     -> Model
     -> WindowRef
     -> Maybe (Html Msg)
-maybeViewWindow game model ( wmID, id ) =
+maybeViewWindow data model ( wmID, id ) =
     case getWindowManager wmID model of
         Just wm ->
             model
@@ -51,7 +58,7 @@ maybeViewWindow game model ( wmID, id ) =
                         case window.state of
                             WindowManager.NormalState ->
                                 wm
-                                    |> WindowManager.view id game
+                                    |> WindowManager.view id data
                                     |> Html.map WindowManagerMsg
                                     |> Just
 

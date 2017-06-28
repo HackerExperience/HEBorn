@@ -1,7 +1,6 @@
 module Apps.Models
     exposing
         ( AppModel(..)
-        , App(..)
         , Contexts(..)
         , contexts
         , name
@@ -14,13 +13,7 @@ import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
 import Apps.Explorer.Models as Explorer
-
-
-type App
-    = LogViewerApp
-    | TaskManagerApp
-    | BrowserApp
-    | ExplorerApp
+import Apps.Apps exposing (..)
 
 
 type AppModel

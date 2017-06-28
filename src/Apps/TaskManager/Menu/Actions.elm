@@ -1,7 +1,7 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Models as Game
+import Game.Data as Game
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)
@@ -9,11 +9,11 @@ import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
-    Game.Model
+    Game.Data
     -> MenuAction
     -> Model
     -> ( Model, Cmd TaskManager.Msg, Dispatch )
-actionHandler game action ({ app } as model) =
+actionHandler data action ({ app } as model) =
     case action of
         PauseProcess pID ->
             let

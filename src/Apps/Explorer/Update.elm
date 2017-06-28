@@ -1,7 +1,7 @@
 module Apps.Explorer.Update exposing (update)
 
-import Game.Models as Game
-import Game.Servers.Models exposing (getServerByID)
+import Game.Data as Game
+import Game.Servers.Models as Servers
 import Apps.Explorer.Models exposing (Model, changePath)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -10,17 +10,17 @@ import Apps.Explorer.Menu.Actions exposing (actionHandler)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update game msg ({ app } as model) =
+update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update data msg ({ app } as model) =
     case msg of
         -- Menu
         MenuMsg (Menu.MenuClick action) ->
-            actionHandler game action model
+            actionHandler data action model
 
         MenuMsg msg ->
             let
                 ( menu_, cmd, coreMsg ) =
-                    Menu.update game msg model.menu
+                    Menu.update data msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
@@ -30,13 +30,10 @@ update game msg ({ app } as model) =
         -- General Acts
         GoPath newPath ->
             let
-                server =
-                    getServerByID game.servers "localhost"
-
                 newApp =
                     changePath
                         newPath
+                        (Servers.getFilesystem data.server)
                         app
-                        server
             in
                 ( { model | app = newApp }, Cmd.none, Dispatch.none )

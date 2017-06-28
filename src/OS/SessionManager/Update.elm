@@ -5,6 +5,7 @@ import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Dock.Update as Dock
 import OS.SessionManager.WindowManager.Update as WindowManager
 import OS.SessionManager.WindowManager.Messages as WindowManager
+import Game.Data as Game
 import Game.Models as Game
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
@@ -35,14 +36,14 @@ windowManager :
     -> Model
     -> Maybe ( Model, Cmd Msg, Dispatch )
 windowManager game msg model =
-    case (current model) of
-        Just wm ->
+    case ( current model, Game.toContext game ) of
+        ( Just wm, Just game ) ->
             wm
                 |> WindowManager.update game msg
                 |> map (flip refresh model) WindowManagerMsg
                 |> Just
 
-        Nothing ->
+        _ ->
             Nothing
 
 

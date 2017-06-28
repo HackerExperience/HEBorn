@@ -7,20 +7,20 @@ import Apps.LogViewer.View as LogViewer
 import Apps.TaskManager.View as TaskManager
 import Apps.Browser.View as Browser
 import Apps.Explorer.View as Explorer
-import Game.Models as Game
+import Game.Data as Game
 
 
-view : Game.Model -> AppModel -> Html Msg
-view game model =
+view : Game.Data -> AppModel -> Html Msg
+view data model =
     case model of
         LogViewerModel model ->
-            Html.map LogViewerMsg (LogViewer.view game model)
+            Html.map LogViewerMsg (LogViewer.view data model)
 
         TaskManagerModel model ->
-            Html.map TaskManagerMsg (TaskManager.view game model)
+            Html.map TaskManagerMsg (TaskManager.view data model)
 
         BrowserModel model ->
-            Html.map BrowserMsg (Browser.view game model)
+            Html.map BrowserMsg (Browser.view data model)
 
         ExplorerModel model ->
-            Html.map ExplorerMsg (Explorer.view game model)
+            Html.map ExplorerMsg (Explorer.view data model)

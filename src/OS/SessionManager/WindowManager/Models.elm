@@ -40,6 +40,7 @@ module OS.SessionManager.WindowManager.Models
 import Uuid
 import Draggable
 import Maybe exposing (Maybe)
+import Apps.Apps as Apps
 import Apps.Models as Apps
 import Dict exposing (Dict)
 import Random.Pcg exposing (Seed, step, initialSeed)

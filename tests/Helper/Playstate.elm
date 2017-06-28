@@ -1,5 +1,6 @@
 module Helper.Playstate exposing (..)
 
+import Dict
 import Gen.Filesystem
 import Gen.Game
 import Gen.Servers
@@ -53,39 +54,38 @@ one =
 genOne : Generator State
 genOne =
     let
-        generateStateRecord =
-            \game server file1 file2 folder1 folder2 ->
-                let
-                    servers =
-                        server
-                            |> getFilesystemSafe
-                            |> addFileRecursively file1
-                            |> addFileRecursively folder1
-                            |> updateFilesystem server
-                            |> getServerSafe
-                            |> addServer game.servers
+        generateStateRecord game id server file1 file2 folder1 folder2 =
+            let
+                servers =
+                    server
+                        |> getFilesystem
+                        |> addFileRecursively file1
+                        |> addFileRecursively folder1
+                        |> flip setFilesystem server
+                        |> flip (Dict.insert id) game.servers
 
-                    game_ =
-                        { game | servers = servers }
+                game_ =
+                    { game | servers = servers }
 
-                    valid =
-                        ValidState
-                            file1
-                            folder1
+                valid =
+                    ValidState
+                        file1
+                        folder1
 
-                    invalid =
-                        InvalidState
-                            file2
-                            folder2
-                in
-                    { game = game_
-                    , server = server
-                    , valid = valid
-                    , invalid = invalid
-                    }
+                invalid =
+                    InvalidState
+                        file2
+                        folder2
+            in
+                { game = game_
+                , server = server
+                , valid = valid
+                , invalid = invalid
+                }
     in
         Gen.Game.genModel
             |> Random.map generateStateRecord
+            |> andMap Gen.Servers.genServerID
             |> andMap Gen.Servers.genServer
             |> andMap Gen.Filesystem.genStdFile
             |> andMap Gen.Filesystem.genStdFile

@@ -7,8 +7,8 @@ import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
-import Game.Models as Game
-import Game.Servers.Models exposing (getServerByID, getProcesses)
+import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
@@ -247,19 +247,14 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
         ]
 
 
-view : Game.Model -> Model -> Html Msg
-view game ({ app } as model) =
+view : Game.Data -> Model -> Html Msg
+view data ({ app } as model) =
     let
-        server =
-            getServerByID game.servers "localhost"
-
         tasks =
-            Maybe.withDefault
-                initialProcesses
-                (getProcesses server)
+            Servers.getProcesses data.server
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable (Dict.values tasks) game.meta.lastTick
+            [ viewTasksTable (Dict.values tasks) data.game.meta.lastTick
             , viewTotalResources app
             , menuView model
             ]

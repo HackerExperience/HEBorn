@@ -1,5 +1,6 @@
 module Apps.Explorer.ModelTest exposing (all)
 
+import Dict
 import Expect
 import Gen.Filesystem
 import Helper.Playstate as Playstate
@@ -7,10 +8,9 @@ import Helper.Filesystem as Helper exposing (addFileRecursively)
 import Fuzz exposing (tuple)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once)
-import Utils.Core exposing (swap)
 import Apps.Explorer.Models as Explorer exposing (..)
+import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
-import Game.Servers.Models as Server exposing (..)
 
 
 all : Test
@@ -46,20 +46,15 @@ pathMoveAroundTests =
                     valid
 
                 newServerWithFile =
-                    case server of
-                        StdServer server ->
-                            StdServer
-                                { server
-                                    | filesystem =
-                                        addFileRecursively folder server.filesystem
-                                }
-
-                        NoServer ->
-                            NoServer
+                    server
+                        |> Servers.getFilesystem
+                        |> addFileRecursively folder
+                        |> flip Servers.setFilesystem server
 
                 explorer =
-                    initialExplorer
-                        |> (\app -> changePath (getAbsolutePath folder) app newServerWithFile)
+                    changePath (getAbsolutePath folder)
+                        (Servers.getFilesystem newServerWithFile)
+                        initialExplorer
             in
                 folder
                     |> getAbsolutePath
@@ -69,11 +64,13 @@ pathMoveAroundTests =
         "can't move to a non-existing folder"
       <|
         \( { game }, path ) ->
-            let
-                server =
-                    getServerByID game.servers "localhost"
-            in
-                initialExplorer
-                    |> (\app -> changePath path app server)
-                    |> Expect.equal initialExplorer
+            case Dict.get "localhost" game.servers of
+                Just server ->
+                    initialExplorer
+                        |> changePath path (Servers.getFilesystem server)
+                        |> Expect.equal initialExplorer
+
+                Nothing ->
+                    -- FIXME: game state should provide Game.Data
+                    Expect.equal initialExplorer initialExplorer
     ]
