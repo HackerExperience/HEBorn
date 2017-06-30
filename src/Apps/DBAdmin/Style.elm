@@ -18,13 +18,11 @@ type Classes
     | BoxifyMe
 
 
-ico : Mixin
+ico : Style
 ico =
-    mixin
-        [ before
-            [ Icon.fontFamily
-            , textAlign center
-            ]
+    before
+        [ Icon.fontFamily
+        , textAlign center
         ]
 
 

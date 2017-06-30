@@ -12,28 +12,28 @@ coreClass =
     (Html.CssHelpers.withNamespace Core.prefix).class
 
 
-flexContainerVert : Mixin
+flexContainerVert : Style
 flexContainerVert =
-    mixin
+    batch
         [ displayFlex
         , flexDirection column
         ]
 
 
-flexContainerHorz : Mixin
+flexContainerHorz : Style
 flexContainerHorz =
-    mixin
+    batch
         [ displayFlex
         , flexDirection row
         ]
 
 
-globalShadow : Mixin
+globalShadow : Style
 globalShadow =
     boxShadow5 (px 0) (px 0) (px 8) (px 1) (rgba 0 0 0 0.2)
 
 
-emptyContent : Mixin
+emptyContent : Style
 emptyContent =
     pseudoContent "''"
 
@@ -43,6 +43,6 @@ internalPaddingSz =
     (px 8)
 
 
-internalPadding : Mixin
+internalPadding : Style
 internalPadding =
     padding internalPaddingSz

@@ -34,7 +34,7 @@ view id data model =
             div [] []
 
 
-styles : List Css.Mixin -> Attribute Msg
+styles : List Css.Style -> Attribute Msg
 styles =
     Css.asPairs >> style
 

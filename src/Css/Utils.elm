@@ -3,7 +3,7 @@ module Css.Utils exposing (..)
 import Css exposing (..)
 
 
-pseudoContent : String -> Mixin
+pseudoContent : String -> Style
 pseudoContent v =
     property "content" v
 
@@ -39,7 +39,7 @@ easingToString bool =
             "cubic-bezier(" ++ (toString a) ++ "," ++ (toString b) ++ "," ++ (toString c) ++ "," ++ (toString d) ++ ")"
 
 
-transition : Float -> String -> Easing -> Mixin
+transition : Float -> String -> Easing -> Style
 transition time propertyName easing =
     property "transition" ((toString time) ++ "s " ++ (propertyName) ++ " " ++ (easingToString easing))
 
@@ -56,14 +56,14 @@ transition time propertyName easing =
 --TODO: Fork elm-css
 
 
-attrSelector : String -> String -> String -> String -> List Mixin -> Snippet
+attrSelector : String -> String -> String -> String -> List Style -> Snippet
 attrSelector parent attrName op value =
     selector (parent ++ "[" ++ attrName ++ op ++ value ++ "]")
 
 
-selectableText : Mixin
+selectableText : Style
 selectableText =
-    mixin
+    batch
         [ property "-moz-user-select" "text"
         , property "-webkit-user-select" "text"
         , property "-ms-user-select" "text"
@@ -71,9 +71,9 @@ selectableText =
         ]
 
 
-unselectable : Mixin
+unselectable : Style
 unselectable =
-    mixin
+    batch
         [ property "-moz-user-select" "none"
         , property "-webkit-user-select" "none"
         , property "-ms-user-select" "none"

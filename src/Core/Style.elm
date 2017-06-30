@@ -24,8 +24,8 @@ css =
             , margin (px 0)
             , backgroundColor (rgb 57 109 166)
             , fontFamily sansSerif
-            , unselectable
             , cursor default
+            , unselectable
             ]
         , id "app"
             [ width (pct 100)

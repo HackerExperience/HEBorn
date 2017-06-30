@@ -1,15 +1,15 @@
 module Css.Icons exposing (..)
 
-import Css exposing (Mixin)
+import Css exposing (Style)
 import Css.FontAwesome.Icons as FA
 import Css.FontAwesome.Helper exposing (faIcon, fontAwesome)
 
 
 type alias Icon =
-    Mixin
+    Style
 
 
-fontFamily : Mixin
+fontFamily : Style
 fontFamily =
     fontAwesome
 

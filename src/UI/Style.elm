@@ -12,13 +12,11 @@ import UI.Colors as Colors exposing (hyperlink, localhost)
 -- Utils
 
 
-ico : Mixin
+ico : Style
 ico =
-    mixin
-        [ before
-            [ Icon.fontFamily
-            , textAlign center
-            ]
+    before
+        [ Icon.fontFamily
+        , textAlign center
         ]
 
 
@@ -173,7 +171,7 @@ horizontalTabs =
                 , borderTopRightRadius (px 12)
                 ]
             , attrSelector "tab"
-                "selected"
+                "data-selected"
                 "="
                 "\"1\""
                 [ backgroundColor Colors.bgSelected
