@@ -212,7 +212,19 @@ verticalSticked =
 
 widgets : List Snippet
 widgets =
-    [ progressBar, horizontalBtnPanel ]
+    [ progressBar, horizontalBtnPanel ] ++ customSelect
+
+
+customSelect : List Snippet
+customSelect =
+    [ selector "customSelect"
+        [ children [ selector "selector" [ display none ] ] ]
+    , attrSelector "customSelect"
+        "data-open"
+        "="
+        "open"
+        [ children [ selector "selector" [ display block ] ] ]
+    ]
 
 
 horizontalBtnPanel : Snippet

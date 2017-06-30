@@ -8,6 +8,11 @@ black =
     hex "000"
 
 
+white : Color
+white =
+    hex "FFF"
+
+
 localhost : Color
 localhost =
     hex "56822E"

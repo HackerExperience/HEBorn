@@ -17,5 +17,42 @@ update game msg model =
             in
                 ( model, Cmd.none, dispatch )
 
+        ToggleMenus next ->
+            let
+                openMenu_ =
+                    if (model.openMenu /= NothingOpen && model.openMenu == next) then
+                        NothingOpen
+                    else
+                        next
+
+                model_ =
+                    { model | openMenu = openMenu_ }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        MouseEnterItem ->
+            let
+                model_ =
+                    { model | mouseSomewhereInside = True }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        MouseLeaveItem ->
+            let
+                model_ =
+                    { model | mouseSomewhereInside = False }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        CheckMenus ->
+            let
+                model_ =
+                    if not model.mouseSomewhereInside then
+                        { model | openMenu = NothingOpen }
+                    else
+                        model
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
         _ ->
             ( model, Cmd.none, Dispatch.none )

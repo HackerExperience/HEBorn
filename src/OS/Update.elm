@@ -33,13 +33,19 @@ update game msg model =
 
         MenuMsg msg ->
             let
-                ( menu_, cmd, coreMsg ) =
+                ( menu_, menu_cmd, dispatch_ ) =
                     Menu.update game msg model.menu
 
+                ( header_, _, _ ) =
+                    header game Header.CheckMenus model
+
                 cmd_ =
-                    Cmd.map MenuMsg cmd
+                    Cmd.map MenuMsg menu_cmd
+
+                model_ =
+                    { model | menu = menu_, header = header_ }
             in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+                ( model_, cmd_, dispatch_ )
 
 
 
