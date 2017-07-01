@@ -1,13 +1,13 @@
 module OS.Menu.Update exposing (update)
 
 import ContextMenu exposing (ContextMenu)
-import Game.Models as Game
+import Game.Data as GameData
 import OS.Menu.Models exposing (Model)
 import OS.Menu.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         MenuMsg msg ->

@@ -3,14 +3,13 @@ module OS.SessionManager.View exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import Html exposing (..)
-import Game.Models as Game
 import Game.Data as GameData
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.Dock.View as Dock
 
 
-view : Game.Model -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view game model =
     node "sess"
         []
@@ -23,24 +22,19 @@ view game model =
 -- internals
 
 
-viewDock : Game.Model -> Model -> Html Msg
+viewDock : GameData.Data -> Model -> Html Msg
 viewDock game model =
     model
         |> Dock.view game
         |> Html.map DockMsg
 
 
-viewWM : Game.Model -> Model -> Html Msg
-viewWM game model =
-    case (GameData.fromGame game) of
-        Just data ->
-            model
-                |> windows
-                |> List.filterMap (maybeViewWindow data model)
-                |> node "wmCanvas" []
-
-        Nothing ->
-            Html.div [] []
+viewWM : GameData.Data -> Model -> Html Msg
+viewWM data model =
+    model
+        |> windows data.id
+        |> List.filterMap (maybeViewWindow data model)
+        |> node "wmCanvas" []
 
 
 maybeViewWindow :
@@ -49,7 +43,7 @@ maybeViewWindow :
     -> WindowRef
     -> Maybe (Html Msg)
 maybeViewWindow data model ( wmID, id ) =
-    case getWindowManager wmID model of
+    case get wmID model of
         Just wm ->
             model
                 |> getWindow ( wmID, id )
