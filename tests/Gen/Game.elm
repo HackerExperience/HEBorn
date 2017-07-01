@@ -4,6 +4,7 @@ import Fuzz exposing (Fuzzer)
 import Random.Pcg exposing (Generator, map)
 import Game.Account.Models as Account
 import Game.Meta.Models as Meta
+import Game.Web.Models as Web
 import Game.Models exposing (..)
 import Game.Network.Models as Network
 import Gen.Servers
@@ -34,6 +35,7 @@ genModel =
             , servers = servers
             , network = Network.initialModel
             , meta = Meta.initialModel
+            , web = Web.initialModel
             , config =
                 { apiHttpUrl = ""
                 , apiWsUrl = ""

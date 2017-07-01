@@ -6,7 +6,6 @@ import OS.SessionManager.Dock.Update as Dock
 import OS.SessionManager.WindowManager.Update as WindowManager
 import OS.SessionManager.WindowManager.Messages as WindowManager
 import Game.Data as GameData
-import Game.Data as GameData
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 

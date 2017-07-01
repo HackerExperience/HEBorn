@@ -10,6 +10,8 @@ import Game.Network.Update as Network
 import Game.Network.Messages as Network
 import Game.Meta.Update as Meta
 import Game.Meta.Messages as Meta
+import Game.Web.Update as Web
+import Game.Web.Messages as Web
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -27,6 +29,9 @@ update msg model =
 
         MetaMsg msg ->
             meta msg model
+
+        WebMsg msg ->
+            web msg model
 
         Event event ->
             model
@@ -101,6 +106,21 @@ meta msg model =
             { model | meta = meta }
     in
         ( model_, cmd, dispatch )
+
+
+web : Web.Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+web msg model =
+    let
+        ( web, cmd, dispatch ) =
+            Web.update model msg model.web
+
+        model_ =
+            { model | web = web }
+
+        cmd_ =
+            Cmd.map WebMsg cmd
+    in
+        ( model_, cmd_, dispatch )
 
 
 andThen :

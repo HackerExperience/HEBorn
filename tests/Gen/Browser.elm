@@ -9,11 +9,13 @@ import Random.Pcg
         , int
         , list
         , choices
+        , map
         , map3
         , andThen
         )
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(..))
+import Apps.Browser.Pages.Models as Pages
+import Game.Web.Types as Web
 
 
 --------------------------------------------------------------------------------
@@ -21,32 +23,17 @@ import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(..))
 --------------------------------------------------------------------------------
 
 
-pageURL : Fuzzer PageURL
-pageURL =
-    fuzzer genPageURL
-
-
-title : Fuzzer PageTitle
-title =
-    fuzzer genTitle
-
-
-content : Fuzzer PageContent
-content =
-    fuzzer genContent
-
-
-page : Fuzzer BrowserPage
+page : Fuzzer Pages.Model
 page =
     fuzzer genPage
 
 
-emptyPage : Fuzzer BrowserPage
+emptyPage : Fuzzer Pages.Model
 emptyPage =
     fuzzer genEmptyPage
 
 
-pageList : Fuzzer (List BrowserPage)
+pageList : Fuzzer (List Pages.Model)
 pageList =
     fuzzer genPageList
 
@@ -97,38 +84,38 @@ emptyModel =
 --------------------------------------------------------------------------------
 
 
-genPageURL : Generator PageURL
-genPageURL =
-    -- TODO: add url generator
-    unique
-
-
-genTitle : Generator PageTitle
-genTitle =
-    -- TODO: add title generator
-    unique
-
-
-genContent : Generator PageContent
-genContent =
-    -- TODO: add random html content generator
-    constant PgBlank
-
-
-genPage : Generator BrowserPage
+genPage : Generator Pages.Model
 genPage =
-    map3 BrowserPage
-        genPageURL
-        genContent
-        genTitle
+    -- TODO: generate other site tpes
+    let
+        generate str =
+            let
+                site =
+                    { type_ = Web.Default
+                    , url = str
+                    , meta =
+                        str
+                            |> Web.DefaultMetadata
+                            |> Web.DefaultMeta
+                            |> Just
+                    }
+            in
+                Pages.initialModel site
+    in
+        map generate unique
 
 
-genEmptyPage : Generator BrowserPage
+genEmptyPage : Generator Pages.Model
 genEmptyPage =
-    constant (BrowserPage "about:blank" PgBlank "Blank")
+    constant <|
+        Pages.initialModel
+            { type_ = Web.Blank
+            , url = "about:blank"
+            , meta = Nothing
+            }
 
 
-genPageList : Generator (List BrowserPage)
+genPageList : Generator (List Pages.Model)
 genPageList =
     andThen ((flip list) genPage) (int 2 10)
 
@@ -159,7 +146,7 @@ genNonEmptyBrowser =
         mapper =
             \past future current ->
                 Browser
-                    (getPageTitle current)
+                    (Pages.getTitle current)
                     current
                     past
                     future

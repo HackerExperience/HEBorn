@@ -5,11 +5,12 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
-import Game.Data as Game
+import Game.Data as GameData
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
-import Apps.Browser.Pages exposing (PageContent(..))
+import Apps.Browser.Pages.Models as Pages
+import Apps.Browser.Pages.View as Pages
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 
 
@@ -22,14 +23,14 @@ styles =
     Css.asPairs >> style
 
 
-view : Game.Data -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view data ({ app } as model) =
     div
         [ menuContent
         , class [ Window, Content, Client ]
         ]
         [ viewToolbar app
-        , viewPg app.page.content
+        , viewPg data app.page
         , menuView model
         ]
 
@@ -95,29 +96,15 @@ viewToolbar browser =
         ]
 
 
-viewPg : PageContent -> Html Msg
-viewPg pg =
-    div [ class [ PageContent ] ] (contentPg pg)
+viewPg : GameData.Data -> Pages.Model -> Html Msg
+viewPg data pg =
+    div
+        [ class [ PageContent ] ]
+        [ (Html.map (always PageMsg) (Pages.view data pg)) ]
 
 
 
 -- PAGES
-
-
-contentPg : PageContent -> List (Html Msg)
-contentPg pg =
-    case pg of
-        PgBlank ->
-            []
-
-        PgWelcome addr ->
-            pgWelcomeHost addr
-
-        PgCustom realContent ->
-            realContent
-
-        PgError404 ->
-            [ text "404" ]
 
 
 pgWelcomeHost : String -> List (Html Msg)

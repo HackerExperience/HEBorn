@@ -18,12 +18,14 @@ module Core.Dispatch
         , processes
         , logs
         , meta
+        , web
         )
 
 import Core.Messages exposing (..)
 import Driver.Websocket.Messages as Ws
 import Game.Messages as Game
 import Game.Meta.Messages as Meta
+import Game.Web.Messages as Web
 import Game.Account.Messages as Account
 import Game.Network.Messages as Network
 import Game.Servers.Messages as Servers
@@ -193,6 +195,11 @@ processes id msg =
 logs : Servers.ID -> Logs.Msg -> Dispatch
 logs id msg =
     server (Servers.LogMsg id msg)
+
+
+web : Web.Msg -> Dispatch
+web msg =
+    game (Game.WebMsg msg)
 
 
 
