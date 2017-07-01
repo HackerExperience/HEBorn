@@ -9,7 +9,7 @@ import OS.Style as Css
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import Game.Models as Game
-import Game.Meta.Models exposing (ActiveSession(..))
+import Game.Meta.Models exposing (Context(..))
 import UI.Widgets.CustomSelect exposing (customSelect)
 
 
@@ -32,7 +32,7 @@ view game model =
                 ]
             )
             (model.openMenu == OpenGateway)
-        , contextToggler (game.meta.session == Gateway) (ContextTo Gateway)
+        , contextToggler (game.meta.context == Gateway) (ContextTo Gateway)
         , spacer
         , div []
             [ text "Bounce: "
@@ -50,7 +50,7 @@ view game model =
                 (model.openMenu == OpenBounce)
             ]
         , spacer
-        , contextToggler (game.meta.session == Endpoint) (ContextTo Endpoint)
+        , contextToggler (game.meta.context == Endpoint) (ContextTo Endpoint)
         , customSelect
             ( MouseEnterItem, MouseLeaveItem )
             (ToggleMenus OpenEndpoint)

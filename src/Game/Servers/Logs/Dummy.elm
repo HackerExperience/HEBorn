@@ -1,11 +1,11 @@
-module Game.Servers.Logs.Dummy exposing (..)
+module Game.Servers.Logs.Dummy exposing (dummy)
 
 import Dict
 import Game.Servers.Logs.Models as Logs exposing (..)
 
 
-dummyLogs : Logs
-dummyLogs =
+dummy : Logs
+dummy =
     Dict.fromList
         -- DUMMY VALUE FOR PLAYING
         (List.map (\( id, raw ) -> ( id, StdLog (StdData id StatusNormal 0 raw (interpretRawContent raw) NoEvent) ))

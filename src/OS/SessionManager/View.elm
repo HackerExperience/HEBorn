@@ -3,7 +3,7 @@ module OS.SessionManager.View exposing (..)
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Models as Game
-import Game.Data as Game
+import Game.Data as GameData
 import OS.Style as OsCss
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
@@ -45,7 +45,7 @@ viewDock game model =
 
 viewWM : Game.Model -> Model -> Html Msg
 viewWM game model =
-    case (Game.toContext game) of
+    case (GameData.fromGame game) of
         Just data ->
             model
                 |> windows
@@ -57,7 +57,7 @@ viewWM game model =
 
 
 maybeViewWindow :
-    Game.Data
+    GameData.Data
     -> Model
     -> WindowRef
     -> Maybe (Html Msg)

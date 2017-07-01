@@ -1,7 +1,5 @@
 module Game.Servers.Update exposing (..)
 
-import Dict
-import Utils.Dict as DictUtils
 import Game.Messages as Game
 import Game.Models as Game
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -11,6 +9,7 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Logs.Update as Logs
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
+import Game.Servers.Shared exposing (..)
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Update as Processes
 import Game.Servers.Requests exposing (..)
@@ -61,7 +60,7 @@ filesystem :
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 filesystem game id msg model =
-    case Dict.get id model of
+    case get id model of
         Just server ->
             let
                 ( filesystem_, cmd, dispatch ) =
@@ -71,7 +70,7 @@ filesystem game id msg model =
                     setFilesystem filesystem_ server
 
                 model_ =
-                    DictUtils.safeUpdate id server_ model
+                    safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 
@@ -86,7 +85,7 @@ log :
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 log game id msg model =
-    case (Dict.get id model) of
+    case get id model of
         Just server ->
             let
                 ( logs_, cmd, dispatch ) =
@@ -96,7 +95,7 @@ log game id msg model =
                     setLogs logs_ server
 
                 model_ =
-                    DictUtils.safeUpdate id server_ model
+                    safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 
@@ -111,7 +110,7 @@ process :
     -> Model
     -> ( Model, Cmd Game.Msg, Dispatch )
 process game id msg model =
-    case (Dict.get id model) of
+    case get id model of
         Just server ->
             let
                 ( processes_, cmd, dispatch ) =
@@ -121,7 +120,7 @@ process game id msg model =
                     setProcesses processes_ server
 
                 model_ =
-                    DictUtils.safeUpdate id server_ model
+                    safeUpdate id server_ model
             in
                 ( model_, cmd, dispatch )
 

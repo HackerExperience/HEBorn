@@ -1,4 +1,4 @@
-module Game.Servers.Filesystem.Dummy exposing (dummyFS)
+module Game.Servers.Filesystem.Dummy exposing (dummy)
 
 import Dict
 import Game.Servers.Filesystem.Models
@@ -15,8 +15,8 @@ import Game.Servers.Filesystem.Models
         )
 
 
-dummyFS : Filesystem
-dummyFS =
+dummy : Filesystem
+dummy =
     let
         unhackedFS =
             initialFilesystem

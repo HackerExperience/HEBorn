@@ -30,7 +30,7 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import Utils.Cmd as CmdUtils
 
 
