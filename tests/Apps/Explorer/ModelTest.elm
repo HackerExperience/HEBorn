@@ -1,6 +1,5 @@
 module Apps.Explorer.ModelTest exposing (all)
 
-import Dict
 import Expect
 import Gen.Filesystem
 import Helper.Playstate as Playstate
@@ -64,7 +63,7 @@ pathMoveAroundTests =
         "can't move to a non-existing folder"
       <|
         \( { game }, path ) ->
-            case Dict.get "localhost" game.servers of
+            case Servers.get "localhost" game.servers of
                 Just server ->
                     initialExplorer
                         |> changePath path (Servers.getFilesystem server)

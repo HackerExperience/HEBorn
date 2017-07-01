@@ -29,6 +29,6 @@ type alias Database =
     }
 
 
-empty : Database
-empty =
+initialModel : Database
+initialModel =
     Database [] [] []

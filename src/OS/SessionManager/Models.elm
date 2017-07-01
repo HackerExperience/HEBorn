@@ -53,9 +53,9 @@ type alias Model =
 
 initialModel : Game.Model -> Model
 initialModel game =
-    -- TODO: fetch this from game
+    -- TODO: fetch this from game and stop keeping the active one
     empty
-        |> insert "localhost"
+        |> insert "gateway0"
 
 
 insert : ServerID -> Model -> Model
