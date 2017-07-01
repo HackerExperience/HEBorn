@@ -1,6 +1,7 @@
 module Utils.List
     exposing
-        ( find
+        ( last
+        , find
         , findWith
         , move
         , indexedFoldl
@@ -31,6 +32,11 @@ findWith check list =
             Just index
         else
             Nothing
+
+
+last : List a -> Maybe a
+last =
+    List.foldl (Just >> always) Nothing
 
 
 move : Int -> Int -> List a -> List a
