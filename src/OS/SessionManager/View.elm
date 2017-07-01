@@ -4,7 +4,7 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import Html exposing (..)
 import Game.Models as Game
-import Game.Data as Game
+import Game.Data as GameData
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.Dock.View as Dock
@@ -32,7 +32,7 @@ viewDock game model =
 
 viewWM : Game.Model -> Model -> Html Msg
 viewWM game model =
-    case (Game.toContext game) of
+    case (GameData.fromGame game) of
         Just data ->
             model
                 |> windows
@@ -44,7 +44,7 @@ viewWM game model =
 
 
 maybeViewWindow :
-    Game.Data
+    GameData.Data
     -> Model
     -> WindowRef
     -> Maybe (Html Msg)

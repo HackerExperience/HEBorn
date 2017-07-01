@@ -8,8 +8,8 @@ module Game.Account.Models
         )
 
 import Game.Shared exposing (..)
+import Game.Servers.Shared as Servers
 import Game.Account.Database.Models as Database exposing (..)
-import Game.Account.Database.Dummy as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 
 
@@ -33,6 +33,7 @@ type alias Model =
     , database : Database
     , dock : Dock.Model
     , logout : Bool
+    , servers : List Servers.ID
     }
 
 
@@ -47,9 +48,10 @@ initialModel token =
     , username = Nothing
     , email = Nothing
     , auth = initialAuth token
-    , database = Database.dummy
+    , database = Database.initialModel
     , dock = Dock.initialModel
     , logout = False
+    , servers = []
     }
 
 

@@ -1,6 +1,5 @@
 module Helper.Playstate exposing (..)
 
-import Dict
 import Gen.Filesystem
 import Gen.Game
 import Gen.Servers
@@ -10,7 +9,7 @@ import Game.Servers.Filesystem.Models exposing (File, addFile, getFileName)
 import Helper.Filesystem exposing (addFileRecursively)
 import Random.Pcg as Random exposing (Generator)
 import Random.Pcg.Extra as RandomExtra exposing (andMap)
-import Game.Servers.Models exposing (..)
+import Game.Servers.Models as Servers exposing (..)
 import Gen.Utils exposing (..)
 
 
@@ -62,7 +61,7 @@ genOne =
                         |> addFileRecursively file1
                         |> addFileRecursively folder1
                         |> flip setFilesystem server
-                        |> flip (Dict.insert id) game.servers
+                        |> flip (Servers.insert id) game.servers
 
                 game_ =
                     { game | servers = servers }
