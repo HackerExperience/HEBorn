@@ -1,4 +1,15 @@
-module Utils.List exposing (move, indexedFoldl, indexedFoldr)
+module Utils.List
+    exposing
+        ( last
+        , move
+        , indexedFoldl
+        , indexedFoldr
+        )
+
+
+last : List a -> Maybe a
+last =
+    List.foldl (Just >> always) Nothing
 
 
 move : Int -> Int -> List a -> List a
