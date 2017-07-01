@@ -6,7 +6,7 @@ import OS.Style as Css
 import Html exposing (..)
 import Html.CssHelpers
 import Core.Models as Core
-import Game.Models as Game
+import Game.Data as GameData
 import OS.Header.View as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
@@ -16,27 +16,27 @@ import OS.SessionManager.View as SessionManager
     Html.CssHelpers.withNamespace "os"
 
 
-view : Core.PlayModel -> Html Msg
-view model =
+view : GameData.Data -> Core.PlayModel -> Html Msg
+view data model =
     div
         [ id Css.Dashboard
         , menuEmpty
         ]
-        [ viewHeader model.game model.os
-        , viewMain model.game model.os
+        [ viewHeader data model.os
+        , viewMain data model.os
         , displayVersion model.game.config.version
         , menuView model.os
         ]
 
 
-viewHeader : Game.Model -> Model -> Html Msg
+viewHeader : GameData.Data -> Model -> Html Msg
 viewHeader game model =
     model.header
         |> Header.view game
         |> Html.map HeaderMsg
 
 
-viewMain : Game.Model -> Model -> Html Msg
+viewMain : GameData.Data -> Model -> Html Msg
 viewMain game model =
     model.session
         |> SessionManager.view game

@@ -4,22 +4,18 @@ module OS.SessionManager.Models
         , SessionManagers
         , WindowRef
         , initialModel
+        , get
         , insert
-        , current
-        , switch
         , refresh
         , remove
         , getWindow
         , setWindow
         , getWindowID
-        , getWindowManager
         , windows
-        , unsafeGetActive
         )
 
 import Dict exposing (Dict)
 import Maybe exposing (Maybe(..))
-import Game.Models as Game
 import Random.Pcg as Random
 import OS.SessionManager.WindowManager.Models as WindowManager
     exposing
@@ -45,17 +41,22 @@ type alias SessionManagers =
 
 
 type alias Model =
-    { active : Maybe ServerID
-    , sessions : SessionManagers
+    { sessions : SessionManagers
     , seed : Random.Seed
     }
 
 
-initialModel : Game.Model -> Model
-initialModel game =
+initialModel : Model
+initialModel =
     -- TODO: fetch this from game and stop keeping the active one
-    empty
-        |> insert "gateway0"
+    { sessions = Dict.empty
+    , seed = initialSeed
+    }
+
+
+get : ServerID -> Model -> Maybe WindowManager.Model
+get session { sessions } =
+    Dict.get session sessions
 
 
 insert : ServerID -> Model -> Model
@@ -71,34 +72,15 @@ insert id ({ sessions, seed } as model) =
             seed_ =
                 newSeed (Dict.size sessions_)
         in
-            autoActivate id
-                { model | sessions = sessions_, seed = seed_ }
-    else
-        autoActivate id model
-
-
-current : Model -> Maybe WindowManager.Model
-current { active, sessions } =
-    case active of
-        Just id ->
-            Dict.get id sessions
-
-        Nothing ->
-            Nothing
-
-
-switch : ServerID -> Model -> Model
-switch id ({ sessions } as model) =
-    if Dict.member id sessions then
-        { model | active = Just id }
+            { model | sessions = sessions_, seed = seed_ }
     else
         model
 
 
-refresh : WindowManager.Model -> Model -> Model
-refresh wm ({ sessions, active } as model) =
-    case active of
-        Just id ->
+refresh : ServerID -> WindowManager.Model -> Model -> Model
+refresh id wm ({ sessions } as model) =
+    case Dict.get id sessions of
+        Just _ ->
             let
                 sessions_ =
                     Dict.insert id wm sessions
@@ -110,44 +92,17 @@ refresh wm ({ sessions, active } as model) =
 
 
 remove : ServerID -> Model -> Model
-remove id ({ sessions, active } as model) =
+remove id ({ sessions } as model) =
     let
-        activeID =
-            case active of
-                Just id ->
-                    id
-
-                Nothing ->
-                    ""
-
         sessions_ =
             Dict.remove id sessions
-
-        active_ =
-            if id == activeID then
-                sessions_
-                    |> Dict.keys
-                    |> List.head
-            else
-                active
     in
-        case active_ of
-            Just _ ->
-                { model | sessions = sessions_, active = active_ }
-
-            Nothing ->
-                -- never remove the last server
-                model
+        { model | sessions = sessions_ }
 
 
 getWindowID : WindowRef -> WindowID
 getWindowID ( _, id ) =
     id
-
-
-getWindowManager : ServerID -> Model -> Maybe WindowManager.Model
-getWindowManager session { sessions } =
-    Dict.get session sessions
 
 
 getWindow : WindowRef -> Model -> Maybe Window
@@ -181,44 +136,21 @@ setWindow ( session, id ) window ({ sessions } as model) =
 -- TODO: evaluate if this is needed
 
 
-windows : Model -> List ( ServerID, WindowID )
-windows ({ active } as model) =
+windows : String -> Model -> List ( ServerID, WindowID )
+windows id model =
     -- TODO: update this function to support pinning windows
-    case ( active, current model ) of
-        ( Just wmID, Just wm ) ->
+    case get id model of
+        Just wm ->
             wm.windows
                 |> Dict.keys
-                |> List.map (\windowID -> ( wmID, windowID ))
+                |> List.map (\windowID -> ( id, windowID ))
 
         _ ->
             []
 
 
-unsafeGetActive : Model -> String
-unsafeGetActive { active } =
-    case active of
-        Just id ->
-            id
-
-        Nothing ->
-            ""
-
-
 
 -- internals
-
-
-empty : Model
-empty =
-    { active = Nothing
-    , sessions = emptySessionManagers
-    , seed = initialSeed
-    }
-
-
-emptySessionManagers : SessionManagers
-emptySessionManagers =
-    Dict.empty
 
 
 seed : Int
@@ -235,13 +167,3 @@ newSeed a =
 initialSeed : Random.Seed
 initialSeed =
     newSeed 0
-
-
-autoActivate : ServerID -> Model -> Model
-autoActivate id ({ active } as model) =
-    case active of
-        Nothing ->
-            { model | active = Just id }
-
-        Just _ ->
-            model

@@ -2,7 +2,7 @@ module OS.SessionManager.Dock.Update exposing (update)
 
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
-import Apps.Apps as Apps
+import Game.Data as GameData
 import OS.SessionManager.WindowManager.Models as WM
 
 
@@ -11,80 +11,46 @@ import OS.SessionManager.WindowManager.Models as WM
 
 
 update :
-    Msg
+    GameData.Data
+    -> Msg
     -> Model
     -> Model
-update msg model =
-    Maybe.withDefault model (maybeUpdate msg model)
+update data msg model =
+    case get data.id model of
+        Just wm ->
+            refresh data.id (updateModel msg wm) model
+
+        Nothing ->
+            model
 
 
 
 -- internals
 
 
-maybeUpdate : Msg -> Model -> Maybe Model
-maybeUpdate msg model =
+updateModel : Msg -> WM.Model -> WM.Model
+updateModel msg wm =
     case msg of
         OpenApp app ->
-            Maybe.map (openApp app model) (current model)
+            WM.openWindow app wm
 
         CloseApps app ->
-            Maybe.map (closeApps app model) (current model)
+            WM.closeAppWindows app wm
 
         RestoreApps app ->
-            Maybe.map (restoreApps app model) (current model)
+            WM.restoreAppWindows app wm
 
         MinimizeApps app ->
-            Maybe.map (minimizeApps app model) (current model)
+            WM.minimizeAppWindows app wm
 
-        CloseWindow ref ->
-            Maybe.map (closeWindow ref model) (current model)
+        CloseWindow ( _, id ) ->
+            WM.closeWindow id wm
 
-        RestoreWindow ref ->
-            Maybe.map (restoreWindow ref model) (current model)
+        RestoreWindow ( _, id ) ->
+            WM.restoreWindow id wm
 
-        MinimizeWindow ref ->
-            Maybe.map (minimizeWindow ref model) (current model)
+        MinimizeWindow ( _, id ) ->
+            WM.minimizeWindow id wm
 
-        FocusWindow ref ->
-            Maybe.map (focusWindow ref model) (current model)
-
-
-openApp : Apps.App -> Model -> WM.Model -> Model
-openApp app model wm =
-    refresh (WM.openWindow app wm) model
-
-
-closeApps : Apps.App -> Model -> WM.Model -> Model
-closeApps app model wm =
-    refresh (WM.closeAppWindows app wm) model
-
-
-restoreApps : Apps.App -> Model -> WM.Model -> Model
-restoreApps app model wm =
-    refresh (WM.restoreAppWindows app wm) model
-
-
-minimizeApps : Apps.App -> Model -> WM.Model -> Model
-minimizeApps app model wm =
-    refresh (WM.minimizeAppWindows app wm) model
-
-
-closeWindow : WindowRef -> Model -> WM.Model -> Model
-closeWindow ( _, id ) model wm =
-    refresh (WM.closeWindow id wm) model
-
-
-restoreWindow : WindowRef -> Model -> WM.Model -> Model
-restoreWindow ( _, id ) model wm =
-    refresh (WM.restoreWindow id wm) model
-
-
-minimizeWindow : WindowRef -> Model -> WM.Model -> Model
-minimizeWindow ( _, id ) model wm =
-    refresh (WM.minimizeWindow id wm) model
-
-
-focusWindow : WindowRef -> Model -> WM.Model -> Model
-focusWindow ( _, id ) model wm =
-    refresh (WM.focusWindow id wm) model
+        FocusWindow ( _, id ) ->
+            WM.focusWindow id wm

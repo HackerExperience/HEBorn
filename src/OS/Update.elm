@@ -5,7 +5,7 @@ import OS.Header.Models as Header
 import OS.Header.Update as Header
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
-import Game.Models as Game
+import Game.Data as GameData
 import OS.Menu.Messages as Menu
 import OS.Menu.Update as Menu
 import OS.Menu.Actions as Menu
@@ -15,7 +15,7 @@ import OS.SessionManager.Models as SessionManager
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         SessionManagerMsg msg ->
@@ -53,16 +53,16 @@ update game msg model =
 
 
 sessionManager :
-    Game.Model
+    GameData.Data
     -> SessionManager.Msg
     -> Model
     -> ( SessionManager.Model, Cmd SessionManager.Msg, Dispatch )
-sessionManager game msg model =
-    SessionManager.update game msg model.session
+sessionManager data msg model =
+    SessionManager.update data msg model.session
 
 
 header :
-    Game.Model
+    GameData.Data
     -> Header.Msg
     -> Model
     -> ( Header.Model, Cmd Header.Msg, Dispatch )

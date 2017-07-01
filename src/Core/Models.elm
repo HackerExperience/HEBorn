@@ -79,7 +79,7 @@ login token model =
                     in
                         Play
                             { game = game
-                            , os = OS.initialModel game
+                            , os = OS.initialModel
                             , websocket = websocket
                             , config = config
                             , seed = seed

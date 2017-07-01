@@ -20,10 +20,10 @@ osClass =
 
 wmClass : List class -> Attribute msg
 wmClass =
-    .class <| Html.CssHelpers.withNamespace "os"
+    .class <| Html.CssHelpers.withNamespace "wm"
 
 
-view : Game.Model -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view game model =
     div
         [ osClass [ OsCss.Session ] ]
@@ -36,24 +36,20 @@ view game model =
 -- internals
 
 
-viewDock : Game.Model -> Model -> Html Msg
+viewDock : GameData.Data -> Model -> Html Msg
 viewDock game model =
     model
         |> Dock.view game
         |> Html.map DockMsg
 
 
-viewWM : Game.Model -> Model -> Html Msg
-viewWM game model =
-    case (GameData.fromGame game) of
-        Just data ->
-            model
-                |> windows
-                |> List.filterMap (maybeViewWindow data model)
-                |> div [ wmClass [ WmCss.Canvas ] ]
+viewWM : GameData.Data -> Model -> Html Msg
+viewWM data model =
+    model
+        |> windows data.id
+        |> List.filterMap (maybeViewWindow data model)
+        |> div [ wmClass [ WmCss.Canvas ] ]
 
-        Nothing ->
-            Html.div [] []
 
 
 maybeViewWindow :
@@ -62,7 +58,7 @@ maybeViewWindow :
     -> WindowRef
     -> Maybe (Html Msg)
 maybeViewWindow data model ( wmID, id ) =
-    case getWindowManager wmID model of
+    case get wmID model of
         Just wm ->
             model
                 |> getWindow ( wmID, id )

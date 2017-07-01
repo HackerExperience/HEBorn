@@ -4,10 +4,10 @@ import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
-import Game.Models as Game
+import Game.Data as GameData
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         Logout ->
