@@ -4,10 +4,10 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import Game.Models as Game
+import Game.Data as GameData
 
 
-view : Game.Model -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view game model =
     div []
         [ button

@@ -12,7 +12,7 @@ import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.View exposing (windowTitle)
 import Apps.Models as Apps
 import Apps.Apps as Apps
-import Game.Models as Game
+import Game.Data as GameData
 
 
 -- this module still needs a refactor to make its code more maintainable
@@ -22,7 +22,7 @@ import Game.Models as Game
     Html.CssHelpers.withNamespace "dock"
 
 
-view : Game.Model -> SessionManager.Model -> Html Msg
+view : GameData.Data -> SessionManager.Model -> Html Msg
 view game model =
     node "dock"
         []
@@ -40,34 +40,30 @@ type alias Applications =
     Dict String ( Apps.App, List WindowRef )
 
 
-getApplications : Game.Model -> SessionManager.Model -> Applications
-getApplications game model =
+getApplications : GameData.Data -> SessionManager.Model -> Applications
+getApplications data model =
     -- This function should create an app list from the current
     -- server "list of apps" and also from session windows
     List.foldl
         (\app dict ->
             let
                 refs =
-                    windows app model
+                    windows data app model
             in
                 Dict.insert (Apps.name app) ( app, refs ) dict
         )
         Dict.empty
-        game.account.dock
+        data.game.account.dock
 
 
-windows : Apps.App -> Model -> List WindowRef
-windows app model =
-    case (current model) of
+windows : GameData.Data -> Apps.App -> Model -> List WindowRef
+windows data app model =
+    case get data.id model of
         Just wm ->
-            let
-                active =
-                    unsafeGetActive model
-            in
-                wm.windows
-                    |> WindowManager.filterAppWindows app
-                    |> Dict.toList
-                    |> List.map (\( id, win ) -> ( active, id ))
+            wm.windows
+                |> WindowManager.filterAppWindows app
+                |> Dict.toList
+                |> List.map (\( id, win ) -> ( data.id, id ))
 
         Nothing ->
             []
@@ -81,14 +77,14 @@ hasInstance list =
         "N"
 
 
-apps : Game.Model -> Model -> List ( String, ( Apps.App, List WindowRef ) )
+apps : GameData.Data -> Model -> List ( String, ( Apps.App, List WindowRef ) )
 apps game model =
     model
         |> getApplications game
         |> Dict.toList
 
 
-dock : Game.Model -> Model -> Html Msg
+dock : GameData.Data -> Model -> Html Msg
 dock game model =
     div [ id Css.DockContainer ]
         [ div
