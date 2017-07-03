@@ -52,7 +52,7 @@ parallel(
         sh 'chmod +x node_modules/.bin/*'
 
         // Reuse existing compiled files
-        sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
+        // sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
 
         withEnv([
           'HEBORN_API_HTTP_URL=https://api.hackerexperience.com/v1',
@@ -65,7 +65,7 @@ parallel(
 
         // Backup compiled files for later reuse
         // TODO: It's being saved but it's not actually working, not sure why
-        sh 'rm -rf ~/.elm/elm-stuff/* && cp -r elm-stuff/* ~/.elm/elm-stuff'
+        // sh 'rm -rf ~/.elm/elm-stuff/* && cp -r elm-stuff/* ~/.elm/elm-stuff'
 
         stash 'release'
       }
