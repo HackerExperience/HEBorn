@@ -90,7 +90,11 @@ update data msg ({ app } as model) =
                 ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         GoTab tab ->
-            ( { model | app = { app | selected = (fromComparable tab) } }, Cmd.none, Dispatch.none )
+            let
+                model_ =
+                    { model | app = { app | selected = tab } }
+            in
+                ( model_, Cmd.none, Dispatch.none )
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

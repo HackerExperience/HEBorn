@@ -5,32 +5,6 @@ import Game.Account.Database.Models exposing (Database)
 import Apps.DBAdmin.Tabs.Servers.Helpers as Servers exposing (..)
 
 
-toComparable : MainTab -> Int
-toComparable tab =
-    case tab of
-        TabServers ->
-            0
-
-        TabBankAccs ->
-            1
-
-        TabWallets ->
-            2
-
-
-fromComparable : Int -> MainTab
-fromComparable v =
-    case v of
-        1 ->
-            TabBankAccs
-
-        2 ->
-            TabWallets
-
-        _ ->
-            TabServers
-
-
 toggleExpand : String -> MainTab -> DBAdmin -> DBAdmin
 toggleExpand itemId tab app =
     case tab of
