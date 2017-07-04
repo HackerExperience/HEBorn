@@ -2,7 +2,7 @@ module OS.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (transition, easingToString, Easing(..), attrSelector)
+import Css.Utils exposing (transition, easingToString, Easing(..))
 import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import UI.Colors as Colors
 

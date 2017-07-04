@@ -4,7 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (typeSelector, input, span)
 import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
-import Css.Utils exposing (attrSelector)
+import Css.Utils as Css exposing (withAttribute)
 import Css.Icons as Icon exposing (locationTarget)
 import UI.Colors as Colors exposing (hyperlink, localhost)
 
@@ -26,7 +26,7 @@ ico =
 
 entries : List Snippet
 entries =
-    filterHeader ++ toogable
+    filterHeader ++ [ toogable ]
 
 
 filterHeader : List Snippet
@@ -56,9 +56,9 @@ filterHeader =
     ]
 
 
-toogable : List Snippet
+toogable : Snippet
 toogable =
-    [ typeSelector "toogableEntry"
+    typeSelector "toogableEntry"
         [ fontSize (px 12)
         , borderBottom3 (px 1) solid Colors.black
         , internalPadding
@@ -72,15 +72,11 @@ toogable =
                 , minHeight (px 16)
                 , before [ Icon.divExpand ]
                 , cursor pointer
+                , withAttribute (Css.EQ "expanded" "\"1\"")
+                    [ before [ Icon.divContract ] ]
                 ]
             ]
         ]
-    , attrSelector "toogableEntry > btn"
-        "expanded"
-        "="
-        "\"1\""
-        [ before [ Icon.divContract ] ]
-    ]
 
 
 
@@ -104,20 +100,17 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        ]
-    , attrSelector "linkAddr"
-        "localhost"
-        "="
-        "\"1\""
-        [ color Colors.localhost
-        , fontWeight bold
-        , children
-            [ typeSelector "ico"
-                [ ico
-                , before [ Icon.home ]
+        , withAttribute (Css.EQ "localhost" "\"1\"")
+            [ color Colors.localhost
+            , fontWeight bold
+            , children
+                [ typeSelector "ico"
+                    [ ico
+                    , before [ Icon.home ]
+                    ]
+                , typeSelector "addr"
+                    [ textDecoration none ]
                 ]
-            , typeSelector "addr"
-                [ textDecoration none ]
             ]
         ]
     , typeSelector "linkUser"
@@ -130,16 +123,13 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        ]
-    , attrSelector "linkUser"
-        "root"
-        "="
-        "\"1\""
-        [ color Colors.root
-        , fontWeight bold
-        , children
-            [ typeSelector "addr"
-                [ textDecoration none ]
+        , withAttribute (Css.EQ "root" "\"1\"")
+            [ color Colors.root
+            , fontWeight bold
+            , children
+                [ typeSelector "addr"
+                    [ textDecoration none ]
+                ]
             ]
         ]
     ]
@@ -151,33 +141,7 @@ linkAddr =
 
 layouts : List Snippet
 layouts =
-    [ verticalList, horizontalTabs ]
-
-
-horizontalTabs : Snippet
-horizontalTabs =
-    typeSelector "panel"
-        [ fontSize (px 12)
-        , borderBottom3 (px 1) solid Colors.black
-        , display block
-        , children
-            [ typeSelector "tab"
-                [ display inlineBlock
-                , padding3 (px 8) (px 16) (px 4)
-                , borderTop3 (px 1) solid Colors.black
-                , borderLeft3 (px 1) solid Colors.black
-                , borderRight3 (px 1) solid Colors.black
-                , borderTopLeftRadius (px 12)
-                , borderTopRightRadius (px 12)
-                ]
-            , attrSelector "tab"
-                "data-selected"
-                "="
-                "\"1\""
-                [ backgroundColor Colors.bgSelected
-                ]
-            ]
-        ]
+    [ verticalList ]
 
 
 verticalList : Snippet
@@ -210,18 +174,16 @@ verticalSticked =
 
 widgets : List Snippet
 widgets =
-    [ progressBar, horizontalBtnPanel ] ++ customSelect
+    [ progressBar, horizontalBtnPanel, horizontalTabs ] ++ customSelect
 
 
 customSelect : List Snippet
 customSelect =
     [ typeSelector "customSelect"
-        [ children [ typeSelector "selector" [ display none ] ] ]
-    , attrSelector "customSelect"
-        "data-open"
-        "="
-        "open"
-        [ children [ typeSelector "selector" [ display block ] ] ]
+        [ children [ typeSelector "selector" [ display none ] ]
+        , withAttribute (Css.EQ "data-open" "open")
+            [ children [ typeSelector "selector" [ display block ] ] ]
+        ]
     ]
 
 
@@ -231,6 +193,29 @@ horizontalBtnPanel =
         [ width (pct 100)
         , fontSize (px 24)
         , textAlign center
+        ]
+
+
+horizontalTabs : Snippet
+horizontalTabs =
+    typeSelector "panel"
+        [ fontSize (px 12)
+        , borderBottom3 (px 1) solid Colors.black
+        , display block
+        , children
+            [ typeSelector "tab"
+                [ display inlineBlock
+                , padding3 (px 8) (px 16) (px 4)
+                , borderTop3 (px 1) solid Colors.black
+                , borderLeft3 (px 1) solid Colors.black
+                , borderRight3 (px 1) solid Colors.black
+                , borderTopLeftRadius (px 12)
+                , borderTopRightRadius (px 12)
+                , withAttribute (Css.EQ "data-selected" "\"1\"")
+                    [ backgroundColor Colors.bgSelected
+                    ]
+                ]
+            ]
         ]
 
 
