@@ -20,12 +20,12 @@ import Game.Data as GameData
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "dock"
+    Html.CssHelpers.withNamespace Css.prefix
 
 
 osClass : List class -> Attribute msg
 osClass =
-    .class <| Html.CssHelpers.withNamespace "os"
+    .class <| Html.CssHelpers.withNamespace OsCss.prefix
 
 
 view : GameData.Data -> SessionManager.Model -> Html Msg

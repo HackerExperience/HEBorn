@@ -15,12 +15,12 @@ import Game.Account.Database.Models exposing (..)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
-import Apps.DBAdmin.Style exposing (Classes(..))
+import Apps.DBAdmin.Style exposing (Classes(..), prefix)
 import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "udb"
+    Html.CssHelpers.withNamespace prefix
 
 
 isEntryExpanded : DBAdmin -> HackedServer -> Bool

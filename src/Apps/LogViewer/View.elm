@@ -19,11 +19,11 @@ import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
-import Apps.LogViewer.Style exposing (Classes(..))
+import Apps.LogViewer.Style exposing (Classes(..), prefix)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "logvw"
+    Html.CssHelpers.withNamespace prefix
 
 
 isEntryExpanded : LogViewer -> StdData -> Bool
@@ -251,11 +251,10 @@ renderEntryList app =
 
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
-    verticalSticked
-        (Just <|
-            [ verticalList
-                [ menuView model
-                , filterHeader
+    let
+        filterHeaderLayout =
+            verticalList
+                [ filterHeader
                     [ ( class [ BtnUser ], DummyNoOp, False )
                     , ( class [ BtnEdit ], DummyNoOp, False )
                     , ( class [ BtnHide ], DummyNoOp, False )
@@ -265,13 +264,18 @@ view data ({ app } as model) =
                     "Search..."
                     UpdateTextFilter
                 ]
+
+        mainEntries =
+            verticalList
+                (data.server
+                    |> Servers.getLogs
+                    |> applyFilter app
+                    |> renderEntryList app
+                )
+    in
+        verticalSticked
+            (Just [ filterHeaderLayout ])
+            [ mainEntries
+            , menuView model
             ]
-        )
-        [ verticalList
-            (data.server
-                |> Servers.getLogs
-                |> applyFilter app
-                |> renderEntryList app
-            )
-        ]
-        Nothing
+            Nothing

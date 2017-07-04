@@ -10,11 +10,11 @@ import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (Model, Browser)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
 import Apps.Browser.Pages exposing (PageContent(..))
-import Apps.Browser.Style exposing (Classes(..))
+import Apps.Browser.Style exposing (Classes(..), prefix)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "browser"
+    Html.CssHelpers.withNamespace prefix
 
 
 styles : List Css.Style -> Attribute Msg

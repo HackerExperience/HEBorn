@@ -20,9 +20,14 @@ type Classes
     | InactiveBtn
 
 
+prefix : String
+prefix =
+    "browser"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "browser")
+    (stylesheet << namespace prefix)
         [ class Toolbar
             [ flexContainerHorz
             , lineHeight (int 2)

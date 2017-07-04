@@ -42,10 +42,10 @@ view data ({ app } as model) =
                     (Servers.view data.game.account.database model app)
 
                 TabBankAccs ->
-                    (div [] [])
+                    (div [] [ text "SOON" ])
 
                 TabWallets ->
-                    (div [] [])
+                    (div [] [ text "SOON" ])
 
         viewTabs =
             hzTabs (compareTabs selected) viewTabLabel GoTab tabs

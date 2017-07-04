@@ -36,9 +36,14 @@ addIco cond style =
         ]
 
 
+prefix : String
+prefix =
+    "wm"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "wm")
+    (stylesheet << namespace prefix)
         [ class Canvas
             [ flex (int 1)
             , flexContainerVert
@@ -101,6 +106,7 @@ css =
             , addIco "taskmngr" Icon.taskMngr
             , addIco "udb" Icon.dbAdmin
             , addIco "connmngr" Icon.connMngr
+            , addIco "bouncemngr" Icon.bounceMngr
             ]
         , class HeaderButtons
             [ flex (int 0)

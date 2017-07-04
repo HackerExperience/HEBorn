@@ -22,11 +22,11 @@ import Apps.Explorer.Menu.View
         , menuActiveAction
         , menuPassiveAction
         )
-import Apps.Explorer.Style exposing (Classes(..))
+import Apps.Explorer.Style exposing (Classes(..), prefix)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "explorer"
+    Html.CssHelpers.withNamespace prefix
 
 
 

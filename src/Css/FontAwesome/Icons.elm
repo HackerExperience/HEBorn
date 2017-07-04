@@ -31,6 +31,11 @@ fileO =
     "f016"
 
 
+download : UnicodeTag
+download =
+    "f019"
+
+
 arrowCircleOUp : UnicodeTag
 arrowCircleOUp =
     "f01b"
@@ -111,6 +116,11 @@ thumbTack =
     "f08d"
 
 
+upload : UnicodeTag
+upload =
+    "f093"
+
+
 globe : UnicodeTag
 globe =
     "f0ac"
@@ -119,6 +129,11 @@ globe =
 filter : UnicodeTag
 filter =
     "f0b0"
+
+
+exchange : UnicodeTag
+exchange =
+    "f0ec"
 
 
 plusSquare : UnicodeTag

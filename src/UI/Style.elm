@@ -255,5 +255,5 @@ progressBar =
 
 css : Stylesheet
 css =
-    (stylesheet << namespace "ui")
+    stylesheet
         (entries ++ inlines ++ layouts ++ widgets)

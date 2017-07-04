@@ -15,4 +15,5 @@ initialModel =
     , Apps.TaskManagerApp
     , Apps.DatabaseApp
     , Apps.ConnManagerApp
+    , Apps.BounceManagerApp
     ]

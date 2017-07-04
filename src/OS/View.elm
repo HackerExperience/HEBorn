@@ -13,7 +13,7 @@ import OS.SessionManager.View as SessionManager
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "os"
+    Html.CssHelpers.withNamespace Css.prefix
 
 
 view : GameData.Data -> Core.PlayModel -> Html Msg

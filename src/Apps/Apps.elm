@@ -8,3 +8,4 @@ type App
     | ExplorerApp
     | DatabaseApp
     | ConnManagerApp
+    | BounceManagerApp

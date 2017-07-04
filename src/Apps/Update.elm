@@ -9,6 +9,7 @@ import Apps.Browser.Update as Browser
 import Apps.Explorer.Update as Explorer
 import Apps.DBAdmin.Update as Database
 import Apps.ConnManager.Update as ConnManager
+import Apps.BounceManager.Update as BounceManager
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -36,6 +37,9 @@ update data msg model =
 
         ( ConnManagerMsg msg, ConnManagerModel model ) ->
             map ConnManagerModel ConnManagerMsg (ConnManager.update data msg model)
+
+        ( BounceManagerMsg msg, BounceManagerModel model ) ->
+            map BounceManagerModel BounceManagerMsg (BounceManager.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

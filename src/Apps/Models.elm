@@ -15,6 +15,7 @@ import Apps.Browser.Models as Browser
 import Apps.Explorer.Models as Explorer
 import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
+import Apps.BounceManager.Models as BounceManager
 import Apps.Apps exposing (..)
 
 
@@ -25,6 +26,7 @@ type AppModel
     | ExplorerModel Explorer.Model
     | DatabaseModel Database.Model
     | ConnManagerModel ConnManager.Model
+    | BounceManagerModel BounceManager.Model
 
 
 type Contexts
@@ -53,6 +55,9 @@ contexts app =
         ConnManagerApp ->
             ContextlessApp
 
+        BounceManagerApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -74,6 +79,9 @@ name app =
 
         ConnManagerApp ->
             ConnManager.name
+
+        BounceManagerApp ->
+            BounceManager.name
 
 
 icon : App -> String
@@ -97,6 +105,9 @@ icon app =
         ConnManagerApp ->
             ConnManager.icon
 
+        BounceManagerApp ->
+            BounceManager.icon
+
 
 title : AppModel -> String
 title model =
@@ -119,6 +130,9 @@ title model =
         ConnManagerModel model ->
             ConnManager.title model
 
+        BounceManagerModel model ->
+            BounceManager.title model
+
 
 model : App -> AppModel
 model app =
@@ -140,3 +154,6 @@ model app =
 
         ConnManagerApp ->
             ConnManagerModel ConnManager.initialModel
+
+        BounceManagerApp ->
+            BounceManagerModel BounceManager.initialModel
