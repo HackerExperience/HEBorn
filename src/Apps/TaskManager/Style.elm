@@ -13,9 +13,14 @@ type Classes
     | Graph
 
 
+prefix : String
+prefix =
+    "taskmngr"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "taskmngr")
+    (stylesheet << namespace prefix)
         [ class EntryDivision
             [ flexContainerHorz
             , children

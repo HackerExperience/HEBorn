@@ -17,6 +17,10 @@ type Easing
     | CubicBezier Int Int Int Int
 
 
+type Condition
+    = EQ String String
+
+
 easingToString : Easing -> String
 easingToString bool =
     case bool of
@@ -44,21 +48,17 @@ transition time propertyName easing =
     property "transition" ((toString time) ++ "s " ++ (propertyName) ++ " " ++ (easingToString easing))
 
 
-
-{- withAttrSelector attrName op value =
-   Css.Preprocess.ExtendSelector
-       ( Css.Structure.AttributeSelector
-           ( Css.Helpers.toCssIdentifier attrName )
-           op
-           ( Css.Helpers.toCssIdentifier value )
-       )
--}
---TODO: Fork elm-css
+conditionToString : Condition -> String
+conditionToString cond =
+    case cond of
+        EQ a b ->
+            a ++ "=" ++ b
 
 
-attrSelector : String -> String -> String -> String -> List Style -> Snippet
-attrSelector parent attrName op value =
-    selector (parent ++ "[" ++ attrName ++ op ++ value ++ "]")
+withAttribute : Condition -> List Style -> Style
+withAttribute cond =
+    pseudoClass
+        ("not(foo)[" ++ (conditionToString cond) ++ "]")
 
 
 selectableText : Style

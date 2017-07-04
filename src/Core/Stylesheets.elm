@@ -11,6 +11,8 @@ import Apps.LogViewer.Style
 import Apps.Browser.Style
 import Apps.TaskManager.Style
 import Apps.DBAdmin.Style
+import Apps.ConnManager.Style
+import Apps.BounceManager.Style
 
 
 port files : CssFileStructure -> Cmd msg
@@ -31,6 +33,8 @@ fileStructure =
                 , Apps.Browser.Style.css
                 , Apps.TaskManager.Style.css
                 , Apps.DBAdmin.Style.css
+                , Apps.ConnManager.Style.css
+                , Apps.BounceManager.Style.css
                 ]
           )
         ]

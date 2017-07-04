@@ -3,7 +3,7 @@ module OS.SessionManager.Dock.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (ul, li)
-import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Icons as Icon
 
@@ -21,9 +21,23 @@ type Class
     | ItemIco
 
 
+addIco : String -> Style -> Style
+addIco cond style =
+    withAttribute
+        (Css.EQ "data-icon" cond)
+        [ before
+            [ style ]
+        ]
+
+
+prefix : String
+prefix =
+    "dock"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "dock")
+    (stylesheet << namespace prefix)
         [ id DockMain
             [ width auto
             , flexContainerHorz
@@ -31,7 +45,14 @@ css =
             , after
                 [ height (px 16)
                 , width (pct 100)
-                , property "background" "linear-gradient(to bottom, #e2e2e2 0%,#dbdbdb 50%,#d1d1d1 51%,#fefefe 100%)"
+                , backgroundImage <|
+                    linearGradient2
+                        toBottom
+                        (stop2 (hex "e2e2e2") (pct 0))
+                        (stop2 (hex "dbdbdb") (pct 50))
+                        [ (stop2 (hex "d1d1d1") (pct 51))
+                        , (stop <| hex "fefefe")
+                        ]
                 , display block
                 , zIndex (int 1)
                 , position absolute
@@ -50,7 +71,14 @@ css =
         , class ItemIco
             [ borderRadius (pct 100)
             , padding (px 8)
-            , property "background" "linear-gradient(to bottom, #f3c5bd 0%,#e86c57 50%,#ea2803 51%,#ff6600 75%,#c72200 100%)"
+            , backgroundImage <|
+                linearGradient2
+                    toBottom
+                    (stop2 (hex "f3c5bd") (pct 0))
+                    (stop2 (hex "e86c57") (pct 50))
+                    [ (stop2 (hex "ff6600") (pct 51))
+                    , (stop <| hex "c72200")
+                    ]
             , globalShadow
             , before
                 [ Icon.fontFamily
@@ -60,6 +88,13 @@ css =
                 , textAlign center
                 , display inlineBlock
                 ]
+            , addIco "explorer" Icon.explorer
+            , addIco "logvw" Icon.logvw
+            , addIco "browser" Icon.browser
+            , addIco "taskmngr" Icon.taskMngr
+            , addIco "udb" Icon.dbAdmin
+            , addIco "connmngr" Icon.connMngr
+            , addIco "bouncemngr" Icon.bounceMngr
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)
@@ -77,50 +112,12 @@ css =
                 ]
             , hover
                 [ children [ class DockAppContext [ display block ] ] ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "explorer"
-            [ before
-                [ Icon.explorer ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "logvw"
-            [ before
-                [ Icon.logvw ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "browser"
-            [ before
-                [ Icon.browser ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "taskmngr"
-            [ before
-                [ Icon.taskMngr ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "udb"
-            [ before
-                [ Icon.dbAdmin ]
-            ]
-        , attrSelector ".dockItem"
-            "data-hasinst"
-            "="
-            "Y"
-            [ after
-                [ padding (px 2)
-                , backgroundColor (hex "FFF")
-                , globalShadow
+            , withAttribute (Css.EQ "data-hasinst" "Y")
+                [ after
+                    [ padding (px 2)
+                    , backgroundColor (hex "FFF")
+                    , globalShadow
+                    ]
                 ]
             ]
         , class DockAppContext

@@ -8,6 +8,8 @@ import Apps.TaskManager.View as TaskManager
 import Apps.Browser.View as Browser
 import Apps.Explorer.View as Explorer
 import Apps.DBAdmin.View as Database
+import Apps.ConnManager.View as ConnManager
+import Apps.BounceManager.View as BounceManager
 import Game.Data as Game
 
 
@@ -28,3 +30,9 @@ view data model =
 
         DatabaseModel model ->
             Html.map DatabaseMsg (Database.view data model)
+
+        ConnManagerModel model ->
+            Html.map ConnManagerMsg (ConnManager.view data model)
+
+        BounceManagerModel model ->
+            Html.map BounceManagerMsg (BounceManager.view data model)

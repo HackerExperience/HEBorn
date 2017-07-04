@@ -32,9 +32,14 @@ ico =
         ]
 
 
+prefix : String
+prefix =
+    "logvw"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "logvw")
+    (stylesheet << namespace prefix)
         [ class ETop
             [ flexContainerHorz ]
         , class EBottom

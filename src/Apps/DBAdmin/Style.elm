@@ -26,9 +26,14 @@ ico =
         ]
 
 
+prefix : String
+prefix =
+    "udb"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "udb")
+    (stylesheet << namespace prefix)
         [ class ETop
             [ flexContainerHorz ]
         , class EBottom

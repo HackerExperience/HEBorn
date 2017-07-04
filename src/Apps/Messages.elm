@@ -5,6 +5,8 @@ import Apps.TaskManager.Messages as TaskManager
 import Apps.Browser.Messages as Browser
 import Apps.Explorer.Messages as Explorer
 import Apps.DBAdmin.Messages as Database
+import Apps.ConnManager.Messages as ConnManager
+import Apps.BounceManager.Messages as BounceManager
 
 
 type Msg
@@ -13,3 +15,5 @@ type Msg
     | BrowserMsg Browser.Msg
     | ExplorerMsg Explorer.Msg
     | DatabaseMsg Database.Msg
+    | ConnManagerMsg ConnManager.Msg
+    | BounceManagerMsg BounceManager.Msg

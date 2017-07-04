@@ -7,3 +7,5 @@ type App
     | BrowserApp
     | ExplorerApp
     | DatabaseApp
+    | ConnManagerApp
+    | BounceManagerApp

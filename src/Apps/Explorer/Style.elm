@@ -42,9 +42,14 @@ type Classes
     | EntryChilds
 
 
+prefix : String
+prefix =
+    "explorer"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "explorer")
+    (stylesheet << namespace prefix)
         [ class Window
             [ flexContainerHorz
             , height (pct 100)

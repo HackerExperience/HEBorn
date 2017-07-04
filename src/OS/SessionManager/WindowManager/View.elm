@@ -17,7 +17,7 @@ import Apps.View as Apps
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "wm"
+    Html.CssHelpers.withNamespace Css.prefix
 
 
 view : WindowID -> Game.Data -> Model -> Html Msg

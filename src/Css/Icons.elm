@@ -187,3 +187,23 @@ taskMngr =
 dbAdmin : Icon
 dbAdmin =
     faIcon FA.database
+
+
+connMngr : Icon
+connMngr =
+    faIcon FA.wifi
+
+
+bounceMngr : Icon
+bounceMngr =
+    faIcon FA.exchange
+
+
+upload : Icon
+upload =
+    faIcon FA.upload
+
+
+download : Icon
+download =
+    faIcon FA.download

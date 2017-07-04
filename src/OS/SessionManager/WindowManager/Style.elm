@@ -2,7 +2,7 @@ module OS.SessionManager.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
 import Css.Icons as Icon
 
@@ -28,9 +28,22 @@ wmBorderRadius =
     (px 4)
 
 
+addIco : String -> Style -> Style
+addIco cond style =
+    withAttribute (Css.EQ "data-icon" cond)
+        [ before
+            [ style ]
+        ]
+
+
+prefix : String
+prefix =
+    "wm"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "wm")
+    (stylesheet << namespace prefix)
         [ class Canvas
             [ flex (int 1)
             , flexContainerVert
@@ -43,10 +56,10 @@ css =
             , globalShadow
             , flex (int 0)
             , withClass Maximizeme
-                [ property "top" "auto !important"
-                , property "left" "auto !important"
-                , property "width" "100% !important"
-                , property "height" "auto !important"
+                [ top auto |> important
+                , left auto |> important
+                , width (pct 100) |> important
+                , height auto |> important
                 , position relative
                 , flex (int 1)
                 , borderRadius (px 0)
@@ -68,7 +81,7 @@ css =
         , class WindowHeader
             [ displayFlex
             , flexFlow2 row wrap
-            , property "background" "linear-gradient(to bottom, #6c6c6c 0%,#4c4c4c 100%)"
+            , backgroundImage <| linearGradient2 toBottom (stop2 (hex "6c6c6c") (pct 0)) (stop <| hex "4c4c4c") []
             , color (hex "FFF")
             , flex (int 0)
             , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
@@ -87,41 +100,13 @@ css =
                 , textAlign center
                 , float left
                 ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "explorer"
-            [ before
-                [ Icon.explorer ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "logvw"
-            [ before
-                [ Icon.logvw ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "browser"
-            [ before
-                [ Icon.browser ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "taskmngr"
-            [ before
-                [ Icon.taskMngr ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "udb"
-            [ before
-                [ Icon.dbAdmin ]
+            , addIco "explorer" Icon.explorer
+            , addIco "logvw" Icon.logvw
+            , addIco "browser" Icon.browser
+            , addIco "taskmngr" Icon.taskMngr
+            , addIco "udb" Icon.dbAdmin
+            , addIco "connmngr" Icon.connMngr
+            , addIco "bouncemngr" Icon.bounceMngr
             ]
         , class HeaderButtons
             [ flex (int 0)

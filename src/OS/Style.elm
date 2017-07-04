@@ -1,8 +1,9 @@
 module OS.Style exposing (..)
 
 import Css exposing (..)
+import Css.Elements exposing (typeSelector)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (transition, easingToString, Easing(..), attrSelector)
+import Css.Utils exposing (transition, easingToString, Easing(..))
 import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import UI.Colors as Colors
 
@@ -19,9 +20,14 @@ type Id
     | DesktopVersion
 
 
+prefix : String
+prefix =
+    "os"
+
+
 css : Stylesheet
 css =
-    (stylesheet << namespace "os")
+    (stylesheet << namespace prefix)
         [ id Dashboard
             [ width (pct 100)
             , minHeight (pct 100)
@@ -35,7 +41,7 @@ css =
                     , padding (px 8)
                     , globalShadow
                     , children
-                        [ selector "customSelect"
+                        [ typeSelector "customSelect"
                             [ height (pct 100)
                             , margin (px -8)
                             , padding (px 7)
@@ -52,13 +58,13 @@ css =
                             , backgroundColor (hex "FFF")
                             , border3 (px 1) solid Colors.black
                             , children
-                                [ selector "selector"
+                                [ typeSelector "selector"
                                     [ position absolute
                                     , minWidth (px 120)
                                     , backgroundColor Colors.black
                                     , color Colors.white
                                     , children
-                                        [ selector "customOption"
+                                        [ typeSelector "customOption"
                                             [ display block
                                             , hover [ backgroundColor Colors.hyperlink ]
                                             ]
