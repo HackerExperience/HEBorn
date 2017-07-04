@@ -31,7 +31,14 @@ css =
             , after
                 [ height (px 16)
                 , width (pct 100)
-                , property "background" "linear-gradient(to bottom, #e2e2e2 0%,#dbdbdb 50%,#d1d1d1 51%,#fefefe 100%)"
+                , backgroundImage <|
+                    linearGradient2
+                        toBottom
+                        (stop2 (hex "e2e2e2") (pct 0))
+                        (stop2 (hex "dbdbdb") (pct 50))
+                        [ (stop2 (hex "d1d1d1") (pct 51))
+                        , (stop <| hex "fefefe")
+                        ]
                 , display block
                 , zIndex (int 1)
                 , position absolute
@@ -50,7 +57,14 @@ css =
         , class ItemIco
             [ borderRadius (pct 100)
             , padding (px 8)
-            , property "background" "linear-gradient(to bottom, #f3c5bd 0%,#e86c57 50%,#ea2803 51%,#ff6600 75%,#c72200 100%)"
+            , backgroundImage <|
+                linearGradient2
+                    toBottom
+                    (stop2 (hex "f3c5bd") (pct 0))
+                    (stop2 (hex "e86c57") (pct 50))
+                    [ (stop2 (hex "ff6600") (pct 51))
+                    , (stop <| hex "c72200")
+                    ]
             , globalShadow
             , before
                 [ Icon.fontFamily
