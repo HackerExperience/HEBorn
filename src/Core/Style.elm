@@ -6,10 +6,6 @@ import Css.Namespace exposing (namespace)
 import Css.Utils exposing (unselectable)
 
 
-type Classes
-    = Elastic
-
-
 prefix : String
 prefix =
     "c"
@@ -28,13 +24,13 @@ css =
             , margin (px 0)
             , backgroundColor (rgb 57 109 166)
             , fontFamily sansSerif
-            , unselectable
             , cursor default
+            , unselectable
             ]
         , id "app"
             [ width (pct 100)
             , minHeight (pct 100)
             ]
-        , class Elastic
+        , selector "elastic"
             [ flex (int 1) ]
         ]

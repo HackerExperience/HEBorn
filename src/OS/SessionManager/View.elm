@@ -1,19 +1,32 @@
 module OS.SessionManager.View exposing (..)
 
-import OS.SessionManager.Models exposing (..)
-import OS.SessionManager.Messages exposing (..)
 import Html exposing (..)
+import Html.CssHelpers
 import Game.Models as Game
 import Game.Data as Game
+import OS.Style as OsCss
+import OS.SessionManager.Models exposing (..)
+import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
+import OS.SessionManager.WindowManager.Style as WmCss
 import OS.SessionManager.Dock.View as Dock
+
+
+osClass : List class -> Attribute msg
+osClass =
+    .class <| Html.CssHelpers.withNamespace "os"
+
+
+wmClass : List class -> Attribute msg
+wmClass =
+    .class <| Html.CssHelpers.withNamespace "os"
 
 
 view : Game.Model -> Model -> Html Msg
 view game model =
-    node "sess"
-        []
+    div
+        [ osClass [ OsCss.Session ] ]
         [ viewWM game model
         , viewDock game model
         ]
@@ -37,7 +50,7 @@ viewWM game model =
             model
                 |> windows
                 |> List.filterMap (maybeViewWindow data model)
-                |> node "wmCanvas" []
+                |> div [ wmClass [ WmCss.Canvas ] ]
 
         Nothing ->
             Html.div [] []

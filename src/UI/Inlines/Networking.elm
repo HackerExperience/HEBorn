@@ -5,18 +5,18 @@ import Html.Attributes exposing (attribute)
 import Game.Shared exposing (IP, ServerUser, isRoot, isLocalHost)
 
 
-renderAddrAttrs : IP -> List (Attribute msg)
-renderAddrAttrs addr =
+addrAttrs : IP -> List (Attribute msg)
+addrAttrs addr =
     if (isLocalHost addr) then
-        [ attribute "data-localhost" "1" ]
+        [ attribute "localhost" "1" ]
     else
         []
 
 
-renderUserAttrs : ServerUser -> List (Attribute msg)
-renderUserAttrs user =
+userAttrs : ServerUser -> List (Attribute msg)
+userAttrs user =
     if (isRoot user) then
-        [ attribute "data-root" "1" ]
+        [ attribute "root" "1" ]
     else
         []
 
@@ -24,7 +24,7 @@ renderUserAttrs user =
 addr : IP -> Html msg
 addr addr =
     node "linkAddr"
-        (renderAddrAttrs addr)
+        (addrAttrs addr)
         [ node "ico" [] []
         , text " "
         , node "label" [] [ text addr ]
@@ -34,7 +34,7 @@ addr addr =
 user : ServerUser -> Html msg
 user user =
     node "linkUser"
-        (renderUserAttrs user)
+        (userAttrs user)
         [ node "ico" [] []
         , text " "
         , node "label" [] [ text user ]

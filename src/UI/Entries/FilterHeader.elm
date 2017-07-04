@@ -22,11 +22,11 @@ enabledClass enabled =
             else
                 "0"
     in
-        attribute "data-enabled" value
+        attribute "enabled" value
 
 
-renderFlagFilter : Flag msg -> Html msg
-renderFlagFilter ( iconClasses, onClickMsg, enabled ) =
+flagFilter : Flag msg -> Html msg
+flagFilter ( iconClasses, onClickMsg, enabled ) =
     node "flagFilterToggle"
         [ iconClasses
         , enabledClass enabled
@@ -35,25 +35,25 @@ renderFlagFilter ( iconClasses, onClickMsg, enabled ) =
         []
 
 
-renderFlagsFilter : List (Flag msg) -> Html msg
-renderFlagsFilter flags =
+flagsFilter : List (Flag msg) -> Html msg
+flagsFilter flags =
     let
         entries =
             flags
-                |> List.map renderFlagFilter
+                |> List.map flagFilter
                 |> List.intersperse (text " ")
     in
         node "flagsFilterPanel" [] entries
 
 
-renderOrderOptions : List (Option msg) -> Html msg
-renderOrderOptions options =
+orderOptions : List (Option msg) -> Html msg
+orderOptions options =
     -- TODO
     node "orderBtn" [] []
 
 
-renderTextFilter : String -> String -> (String -> msg) -> Html msg
-renderTextFilter value_ placeholder_ updateMsg =
+textFilter : String -> String -> (String -> msg) -> Html msg
+textFilter value_ placeholder_ updateMsg =
     node "filterText"
         []
         [ input
@@ -69,8 +69,8 @@ filterHeader : List (Flag msg) -> List (Option msg) -> String -> String -> (Stri
 filterHeader flags options filterValue filterPlaceholder filterUpdateMsg =
     node "filterHeader"
         []
-        [ renderFlagsFilter flags
+        [ flagsFilter flags
         , node "hSpacer" [] []
-        , renderOrderOptions options
-        , renderTextFilter filterValue filterPlaceholder filterUpdateMsg
+        , orderOptions options
+        , textFilter filterValue filterPlaceholder filterUpdateMsg
         ]

@@ -12,13 +12,11 @@ import UI.Colors as Colors exposing (hyperlink, localhost)
 -- Utils
 
 
-ico : Mixin
+ico : Style
 ico =
-    mixin
-        [ before
-            [ Icon.fontFamily
-            , textAlign center
-            ]
+    before
+        [ Icon.fontFamily
+        , textAlign center
         ]
 
 
@@ -78,7 +76,7 @@ toogable =
             ]
         ]
     , attrSelector "toogableEntry > btn"
-        "data-expanded"
+        "expanded"
         "="
         "\"1\""
         [ before [ Icon.divContract ] ]
@@ -108,7 +106,7 @@ linkAddr =
             ]
         ]
     , attrSelector "linkAddr"
-        "data-localhost"
+        "localhost"
         "="
         "\"1\""
         [ color Colors.localhost
@@ -134,7 +132,7 @@ linkAddr =
             ]
         ]
     , attrSelector "linkUser"
-        "data-root"
+        "root"
         "="
         "\"1\""
         [ color Colors.root
@@ -212,7 +210,19 @@ verticalSticked =
 
 widgets : List Snippet
 widgets =
-    [ progressBar, horizontalBtnPanel ]
+    [ progressBar, horizontalBtnPanel ] ++ customSelect
+
+
+customSelect : List Snippet
+customSelect =
+    [ selector "customSelect"
+        [ children [ selector "selector" [ display none ] ] ]
+    , attrSelector "customSelect"
+        "data-open"
+        "="
+        "open"
+        [ children [ selector "selector" [ display block ] ] ]
+    ]
 
 
 horizontalBtnPanel : Snippet

@@ -17,7 +17,7 @@ import Apps.Browser.Style exposing (Classes(..))
     Html.CssHelpers.withNamespace "browser"
 
 
-styles : List Css.Mixin -> Attribute Msg
+styles : List Css.Style -> Attribute Msg
 styles =
     Css.asPairs >> style
 

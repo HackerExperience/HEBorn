@@ -1,10 +1,10 @@
 module Css.FontAwesome.Helper exposing (..)
 
-import Css exposing (Mixin, fontFamilies)
+import Css exposing (Style, fontFamilies)
 import Css.Utils exposing (pseudoContent)
 
 
-fontAwesome : Mixin
+fontAwesome : Style
 fontAwesome =
     fontFamilies [ "FontAwesome" ]
 
@@ -18,6 +18,6 @@ contentStrWrap unicode_tag =
     "\"\\" ++ (unicode_tag) ++ "\""
 
 
-faIcon : UnicodeTag -> Mixin
+faIcon : UnicodeTag -> Style
 faIcon icon =
     pseudoContent (contentStrWrap icon)

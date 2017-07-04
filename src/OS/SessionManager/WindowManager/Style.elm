@@ -20,6 +20,7 @@ type Class
     | HeaderBtnMaximize
     | HeaderBtnMinimize
     | HeaderContextSw
+    | Canvas
 
 
 wmBorderRadius : Px
@@ -30,7 +31,7 @@ wmBorderRadius =
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
-        [ selector "wmCanvas"
+        [ class Canvas
             [ flex (int 1)
             , flexContainerVert
             ]

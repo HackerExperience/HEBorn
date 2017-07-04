@@ -14,7 +14,7 @@ expandedClass enabled =
             else
                 "0"
     in
-        attribute "data-expanded" value
+        attribute "expanded" value
 
 
 toogleBtn : msg -> Bool -> Html msg

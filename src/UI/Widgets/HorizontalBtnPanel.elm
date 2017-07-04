@@ -4,8 +4,8 @@ import Html exposing (Html, Attribute, node, span, text)
 import Html.Events exposing (onClick)
 
 
-renderButton : ( Attribute msg, msg ) -> Html msg
-renderButton ( classes, clickCallback ) =
+btn : ( Attribute msg, msg ) -> Html msg
+btn ( classes, clickCallback ) =
     span [ classes, onClick clickCallback ] []
 
 
@@ -14,7 +14,7 @@ horizontalBtnPanel btns =
     let
         data =
             btns
-                |> List.map renderButton
+                |> List.map btn
                 |> List.intersperse
                     (text " ")
     in
