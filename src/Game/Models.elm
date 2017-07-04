@@ -10,10 +10,13 @@ module Game.Models
         , setAccount
         , setServers
         , setMeta
+        , getServerIP
+        , getServerID
         )
 
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import Game.Network.Models as Network
 import Game.Meta.Models as Meta
 import Core.Config exposing (Config)
@@ -36,6 +39,36 @@ initialModel token config =
     , meta = Meta.initialModel
     , config = config
     }
+
+
+getServerIP : Model -> Maybe Network.IP
+getServerIP model =
+    model
+        |> getServerID
+        |> Maybe.andThen (flip Servers.get (getServers model))
+        |> Maybe.map .ip
+
+
+getServerID : Model -> Maybe Servers.ID
+getServerID model =
+    let
+        meta =
+            getMeta model
+
+        network =
+            getNetwork model
+
+        servers =
+            getServers model
+    in
+        case Meta.getContext meta of
+            Meta.Gateway ->
+                Meta.getGateway meta
+
+            Meta.Endpoint ->
+                network
+                    |> Network.getEndpoint
+                    |> Maybe.andThen (flip Servers.mapNetwork servers)
 
 
 getAccount : Model -> Account.Model

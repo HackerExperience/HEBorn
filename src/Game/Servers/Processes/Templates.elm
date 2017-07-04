@@ -22,8 +22,8 @@ localLogCrypt forgeVersion logId lastTick =
                     (Just (lastTick + 4000))
                     (Just 0)
                     Nothing
-                    "localhost"
-                    "localhost"
+                    "gateway0"
+                    "gateway0"
                     Nothing
                     Nothing
                     100000

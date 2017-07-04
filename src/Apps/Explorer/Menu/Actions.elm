@@ -19,7 +19,7 @@ actionHandler data action model =
             let
                 gameMsg =
                     Dispatch.filesystem
-                        "localhost"
+                        data.id
                         (Filesystem.Delete fileID)
             in
                 ( model, Cmd.none, gameMsg )

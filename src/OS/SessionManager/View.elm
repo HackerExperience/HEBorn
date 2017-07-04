@@ -51,7 +51,6 @@ viewWM data model =
         |> div [ wmClass [ WmCss.Canvas ] ]
 
 
-
 maybeViewWindow :
     GameData.Data
     -> Model

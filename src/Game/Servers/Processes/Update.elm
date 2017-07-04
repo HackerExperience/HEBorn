@@ -45,10 +45,15 @@ update game msg model =
 
         Complete pID ->
             let
+                serverId =
+                    game
+                        |> Game.getServerID
+                        |> Maybe.withDefault ""
+
                 ( processes_, feedback ) =
                     pID
                         |> (flip getProcessByID) model
-                        |> Maybe.map (completeProcess model)
+                        |> Maybe.map (completeProcess serverId model)
                         |> Maybe.withDefault ( model, Dispatch.none )
             in
                 ( processes_, Cmd.none, feedback )

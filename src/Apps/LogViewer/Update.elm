@@ -79,7 +79,7 @@ update data msg ({ app } as model) =
                     (case edited of
                         Just edited ->
                             Dispatch.logs
-                                "localhost"
+                                data.id
                                 (Logs.UpdateContent logId edited)
 
                         Nothing ->
@@ -92,7 +92,7 @@ update data msg ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.processes
-                        "localhost"
+                        data.id
                         (NewProcesses.localLogCrypt 1.0 logId data.game.meta.lastTick)
             in
                 ( model, Cmd.none, gameMsg )
@@ -101,7 +101,7 @@ update data msg ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.logs
-                        "localhost"
+                        data.id
                         (Logs.Uncrypt logId "NOT IMPLEMENTED YET")
             in
                 ( model, Cmd.none, gameMsg )
@@ -110,7 +110,7 @@ update data msg ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.logs
-                        "localhost"
+                        data.id
                         (Logs.Hide logId)
             in
                 ( model, Cmd.none, gameMsg )
@@ -119,7 +119,7 @@ update data msg ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.logs
-                        "localhost"
+                        data.id
                         (Logs.Delete logId)
             in
                 ( model, Cmd.none, gameMsg )

@@ -5,6 +5,7 @@ import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
 import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
@@ -20,8 +21,8 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-processComplete : Processes -> Time -> Dispatch
-processComplete tasks now =
+processComplete : Servers.ID -> Processes -> Time -> Dispatch
+processComplete serverID tasks now =
     tasks
         |> Dict.values
         |> List.filterMap
@@ -36,7 +37,7 @@ processComplete tasks now =
                         in
                             if (prop.state == StateRunning) && completed then
                                 Just
-                                    (Dispatch.processes "localhost"
+                                    (Dispatch.processes serverID
                                         (Processes.Complete process.id)
                                     )
                             else
@@ -80,6 +81,6 @@ update data msg ({ app } as model) =
                         app
 
                 completeMsgs =
-                    processComplete (Servers.getProcesses data.server) now
+                    processComplete data.id (Servers.getProcesses data.server) now
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )
