@@ -5,6 +5,7 @@ type Classes
     = IcoUp
     | IcoDown
     | GroupedTunnel
+    | Entry
 
 
 prefix : String
