@@ -8,6 +8,7 @@ import Apps.TaskManager.Subscriptions as TaskManager
 import Apps.Browser.Subscriptions as Browser
 import Apps.Explorer.Subscriptions as Explorer
 import Apps.DBAdmin.Subscriptions as Database
+import Apps.ConnManager.Subscriptions as ConnManager
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -32,3 +33,7 @@ subscriptions data model =
         DatabaseModel model ->
             Database.subscriptions data model
                 |> Sub.map DatabaseMsg
+
+        ConnManagerModel model ->
+            ConnManager.subscriptions data model
+                |> Sub.map ConnManagerMsg

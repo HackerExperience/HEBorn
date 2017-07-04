@@ -14,4 +14,5 @@ initialModel =
     , Apps.LogViewerApp
     , Apps.TaskManagerApp
     , Apps.DatabaseApp
+    , Apps.ConnManagerApp
     ]

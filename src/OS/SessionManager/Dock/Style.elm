@@ -21,6 +21,17 @@ type Class
     | ItemIco
 
 
+addIco : String -> Style -> Snippet
+addIco cond style =
+    attrSelector ".dockItemIco"
+        "data-icon"
+        "="
+        cond
+        [ before
+            [ style ]
+        ]
+
+
 css : Stylesheet
 css =
     (stylesheet << namespace "dock")
@@ -92,41 +103,12 @@ css =
             , hover
                 [ children [ class DockAppContext [ display block ] ] ]
             ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "explorer"
-            [ before
-                [ Icon.explorer ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "logvw"
-            [ before
-                [ Icon.logvw ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "browser"
-            [ before
-                [ Icon.browser ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "taskmngr"
-            [ before
-                [ Icon.taskMngr ]
-            ]
-        , attrSelector ".dockItemIco"
-            "data-icon"
-            "="
-            "udb"
-            [ before
-                [ Icon.dbAdmin ]
-            ]
+        , addIco "explorer" Icon.explorer
+        , addIco "logvw" Icon.logvw
+        , addIco "browser" Icon.browser
+        , addIco "taskmngr" Icon.taskMngr
+        , addIco "udb" Icon.dbAdmin
+        , addIco "connmngr" Icon.connMngr
         , attrSelector ".dockItem"
             "data-hasinst"
             "="

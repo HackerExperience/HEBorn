@@ -176,6 +176,11 @@ bomb =
     "f1e2"
 
 
+wifi : UnicodeTag
+wifi =
+    "f1eb"
+
+
 trash : UnicodeTag
 trash =
     "f1f8"
