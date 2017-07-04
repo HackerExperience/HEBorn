@@ -34,21 +34,19 @@ view data model =
             (model.openMenu == OpenGateway)
         , contextToggler (data.game.meta.context == Gateway) (ContextTo Gateway)
         , spacer
-        , div []
-            [ text "Bounce: "
-            , customSelect
-                ( MouseEnterItem, MouseLeaveItem )
-                (ToggleMenus OpenBounce)
-                SelectBounce
-                0
-                (Dict.fromList
-                    [ ( 0, text "TODO 1" )
-                    , ( 1, text "TODO 2" )
-                    , ( 2, text "TODO 3" )
-                    ]
-                )
-                (model.openMenu == OpenBounce)
-            ]
+        , text "Bounce: "
+        , customSelect
+            ( MouseEnterItem, MouseLeaveItem )
+            (ToggleMenus OpenBounce)
+            SelectBounce
+            0
+            (Dict.fromList
+                [ ( 0, text "PINE" )
+                , ( 1, text "WOOD" )
+                , ( 2, text "STICK" )
+                ]
+            )
+            (model.openMenu == OpenBounce)
         , spacer
         , contextToggler (data.game.meta.context == Endpoint) (ContextTo Endpoint)
         , customSelect
