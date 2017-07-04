@@ -2,7 +2,6 @@ module OS.SessionManager.View exposing (..)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Models as Game
 import Game.Data as GameData
 import OS.Style as OsCss
 import OS.SessionManager.Models exposing (..)

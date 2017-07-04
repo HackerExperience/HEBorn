@@ -8,6 +8,7 @@ import Apps.TaskManager.Update as TaskManager
 import Apps.Browser.Update as Browser
 import Apps.Explorer.Update as Explorer
 import Apps.DBAdmin.Update as Database
+import Apps.ConnManager.Update as ConnManager
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -32,6 +33,9 @@ update data msg model =
 
         ( DatabaseMsg msg, DatabaseModel model ) ->
             map DatabaseModel DatabaseMsg (Database.update data msg model)
+
+        ( ConnManagerMsg msg, ConnManagerModel model ) ->
+            map ConnManagerModel ConnManagerMsg (ConnManager.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

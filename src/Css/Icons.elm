@@ -187,3 +187,8 @@ taskMngr =
 dbAdmin : Icon
 dbAdmin =
     faIcon FA.database
+
+
+connMngr : Icon
+connMngr =
+    faIcon FA.wifi

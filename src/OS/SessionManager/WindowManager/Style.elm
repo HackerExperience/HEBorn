@@ -28,6 +28,17 @@ wmBorderRadius =
     (px 4)
 
 
+addIco : String -> Style -> Snippet
+addIco cond style =
+    attrSelector ".wmHeaderTitle"
+        "data-icon"
+        "="
+        cond
+        [ before
+            [ style ]
+        ]
+
+
 css : Stylesheet
 css =
     (stylesheet << namespace "wm")
@@ -88,41 +99,12 @@ css =
                 , float left
                 ]
             ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "explorer"
-            [ before
-                [ Icon.explorer ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "logvw"
-            [ before
-                [ Icon.logvw ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "browser"
-            [ before
-                [ Icon.browser ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "taskmngr"
-            [ before
-                [ Icon.taskMngr ]
-            ]
-        , attrSelector ".wmHeaderTitle"
-            "data-icon"
-            "="
-            "udb"
-            [ before
-                [ Icon.dbAdmin ]
-            ]
+        , addIco "explorer" Icon.explorer
+        , addIco "logvw" Icon.logvw
+        , addIco "browser" Icon.browser
+        , addIco "taskmngr" Icon.taskMngr
+        , addIco "udb" Icon.dbAdmin
+        , addIco "connmngr" Icon.connMngr
         , class HeaderButtons
             [ flex (int 0)
             , flexContainerHorz
