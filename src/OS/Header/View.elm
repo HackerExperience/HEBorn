@@ -8,8 +8,8 @@ import Utils.Html exposing (spacer)
 import OS.Style as Css
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import Game.Models as Game
-import Game.Meta.Models exposing (ActiveSession(..))
+import Game.Data as GameData
+import Game.Meta.Models exposing (Context(..))
 import UI.Widgets.CustomSelect exposing (customSelect)
 
 
@@ -17,8 +17,8 @@ import UI.Widgets.CustomSelect exposing (customSelect)
     Html.CssHelpers.withNamespace "os"
 
 
-view : Game.Model -> Model -> Html Msg
-view game model =
+view : GameData.Data -> Model -> Html Msg
+view data model =
     div [ class [ Css.Header ] ]
         [ customSelect
             ( MouseEnterItem, MouseLeaveItem )
@@ -32,7 +32,7 @@ view game model =
                 ]
             )
             (model.openMenu == OpenGateway)
-        , contextToggler (game.meta.session == Gateway) (ContextTo Gateway)
+        , contextToggler (data.game.meta.context == Gateway) (ContextTo Gateway)
         , spacer
         , div []
             [ text "Bounce: "
@@ -50,7 +50,7 @@ view game model =
                 (model.openMenu == OpenBounce)
             ]
         , spacer
-        , contextToggler (game.meta.session == Endpoint) (ContextTo Endpoint)
+        , contextToggler (data.game.meta.context == Endpoint) (ContextTo Endpoint)
         , customSelect
             ( MouseEnterItem, MouseLeaveItem )
             (ToggleMenus OpenEndpoint)

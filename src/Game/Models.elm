@@ -2,13 +2,21 @@ module Game.Models
     exposing
         ( Model
         , initialModel
-        , getActiveServerID
-        , getActiveServer
+        , getAccount
+        , getServers
+        , getNetwork
+        , getMeta
+        , getConfig
+        , setAccount
+        , setServers
+        , setMeta
+        , getServerIP
+        , getServerID
         )
 
-import Dict
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import Game.Network.Models as Network
 import Game.Meta.Models as Meta
 import Core.Config exposing (Config)
@@ -33,18 +41,76 @@ initialModel token config =
     }
 
 
-getActiveServerID : Model -> String
-getActiveServerID ({ meta, network } as model) =
-    case meta.session of
-        Meta.Gateway ->
-            network.gateway
-
-        Meta.Endpoint ->
-            network.endpoint
-                |> Maybe.andThen (flip Network.getServerID network)
-                |> Maybe.withDefault network.gateway
+getServerIP : Model -> Maybe Network.IP
+getServerIP model =
+    model
+        |> getServerID
+        |> Maybe.andThen (flip Servers.get (getServers model))
+        |> Maybe.map .ip
 
 
-getActiveServer : Model -> Maybe Servers.Server
-getActiveServer ({ servers } as model) =
-    Dict.get (getActiveServerID model) servers
+getServerID : Model -> Maybe Servers.ID
+getServerID model =
+    let
+        meta =
+            getMeta model
+
+        network =
+            getNetwork model
+
+        servers =
+            getServers model
+    in
+        case Meta.getContext meta of
+            Meta.Gateway ->
+                Meta.getGateway meta
+
+            Meta.Endpoint ->
+                network
+                    |> Network.getEndpoint
+                    |> Maybe.andThen (flip Servers.mapNetwork servers)
+
+
+getAccount : Model -> Account.Model
+getAccount =
+    .account
+
+
+setAccount : Account.Model -> Model -> Model
+setAccount account model =
+    { model | account = account }
+
+
+getServers : Model -> Servers.Model
+getServers =
+    .servers
+
+
+setServers : Servers.Model -> Model -> Model
+setServers servers model =
+    { model | servers = servers }
+
+
+getNetwork : Model -> Network.Model
+getNetwork =
+    .network
+
+
+setNetwork : Network.Model -> Model -> Model
+setNetwork network model =
+    { model | network = network }
+
+
+getMeta : Model -> Meta.Model
+getMeta =
+    .meta
+
+
+setMeta : Meta.Model -> Model -> Model
+setMeta meta model =
+    { model | meta = meta }
+
+
+getConfig : Model -> Config
+getConfig =
+    .config

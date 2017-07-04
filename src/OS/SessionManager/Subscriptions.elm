@@ -4,20 +4,20 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
-import Game.Models as Game
-import Game.Data as Game
+import Game.Data as GameData
+import Game.Data as GameData
 
 
 -- TODO: this needs to change to add pinned window support
 
 
-subscriptions : Game.Model -> Model -> Sub Msg
-subscriptions game model =
+subscriptions : GameData.Data -> Model -> Sub Msg
+subscriptions data model =
     let
         windowManagerSub =
             model
-                |> current
-                |> Maybe.map (windowManager game)
+                |> get data.id
+                |> Maybe.map (windowManager data)
                 |> defaultNone
     in
         Sub.batch [ windowManagerSub ]
@@ -27,16 +27,11 @@ subscriptions game model =
 -- internals
 
 
-windowManager : Game.Model -> WindowManager.Model -> Sub Msg
-windowManager game model =
-    case Game.toContext game of
-        Just data ->
-            model
-                |> WindowManager.subscriptions data
-                |> Sub.map WindowManagerMsg
-
-        Nothing ->
-            Sub.none
+windowManager : GameData.Data -> WindowManager.Model -> Sub Msg
+windowManager data model =
+    model
+        |> WindowManager.subscriptions data
+        |> Sub.map WindowManagerMsg
 
 
 defaultNone : Maybe (Sub Msg) -> Sub Msg

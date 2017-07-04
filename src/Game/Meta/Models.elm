@@ -1,14 +1,17 @@
 module Game.Meta.Models
     exposing
         ( Model
-        , ActiveSession(..)
+        , Context(..)
         , initialModel
+        , getGateway
+        , getContext
         )
 
+import Game.Servers.Shared as Servers
 import Time exposing (Time)
 
 
-type ActiveSession
+type Context
     = Gateway
     | Endpoint
 
@@ -16,7 +19,8 @@ type ActiveSession
 type alias Model =
     { online : Int
     , lastTick : Time
-    , session : ActiveSession
+    , context : Context
+    , gateway : Maybe Servers.ID
     }
 
 
@@ -24,5 +28,16 @@ initialModel : Model
 initialModel =
     { online = 0
     , lastTick = 0
-    , session = Gateway
+    , context = Gateway
+    , gateway = Just "server1"
     }
+
+
+getGateway : Model -> Maybe Servers.ID
+getGateway =
+    .gateway
+
+
+getContext : Model -> Context
+getContext =
+    .context

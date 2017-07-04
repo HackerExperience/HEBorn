@@ -33,7 +33,7 @@ actionHandler data action ({ app } as model) =
                     (case edited of
                         Just edited ->
                             Dispatch.logs
-                                "localhost"
+                                data.id
                                 (Logs.UpdateContent logId edited)
 
                         Nothing ->

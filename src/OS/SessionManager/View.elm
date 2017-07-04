@@ -3,7 +3,7 @@ module OS.SessionManager.View exposing (..)
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Models as Game
-import Game.Data as Game
+import Game.Data as GameData
 import OS.Style as OsCss
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
@@ -20,10 +20,10 @@ osClass =
 
 wmClass : List class -> Attribute msg
 wmClass =
-    .class <| Html.CssHelpers.withNamespace "os"
+    .class <| Html.CssHelpers.withNamespace "wm"
 
 
-view : Game.Model -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view game model =
     div
         [ osClass [ OsCss.Session ] ]
@@ -36,33 +36,28 @@ view game model =
 -- internals
 
 
-viewDock : Game.Model -> Model -> Html Msg
+viewDock : GameData.Data -> Model -> Html Msg
 viewDock game model =
     model
         |> Dock.view game
         |> Html.map DockMsg
 
 
-viewWM : Game.Model -> Model -> Html Msg
-viewWM game model =
-    case (Game.toContext game) of
-        Just data ->
-            model
-                |> windows
-                |> List.filterMap (maybeViewWindow data model)
-                |> div [ wmClass [ WmCss.Canvas ] ]
-
-        Nothing ->
-            Html.div [] []
+viewWM : GameData.Data -> Model -> Html Msg
+viewWM data model =
+    model
+        |> windows data.id
+        |> List.filterMap (maybeViewWindow data model)
+        |> div [ wmClass [ WmCss.Canvas ] ]
 
 
 maybeViewWindow :
-    Game.Data
+    GameData.Data
     -> Model
     -> WindowRef
     -> Maybe (Html Msg)
 maybeViewWindow data model ( wmID, id ) =
-    case getWindowManager wmID model of
+    case get wmID model of
         Just wm ->
             model
                 |> getWindow ( wmID, id )

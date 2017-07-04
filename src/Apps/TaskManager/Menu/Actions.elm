@@ -19,7 +19,7 @@ actionHandler data action ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.processes
-                        "localhost"
+                        data.id
                         (Processes.Pause pID)
             in
                 ( model, Cmd.none, gameMsg )
@@ -28,7 +28,7 @@ actionHandler data action ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.processes
-                        "localhost"
+                        data.id
                         (Processes.Resume pID)
             in
                 ( model, Cmd.none, gameMsg )
@@ -37,7 +37,7 @@ actionHandler data action ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.processes
-                        "localhost"
+                        data.id
                         (Processes.Remove pID)
             in
                 ( model, Cmd.none, gameMsg )

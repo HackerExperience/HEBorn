@@ -19,6 +19,7 @@ import Random.Pcg.Extra exposing (andMap)
 import Fuzz exposing (Fuzzer)
 import Game.Shared exposing (IP)
 import Game.Servers.Models exposing (..)
+import Game.Servers.Shared exposing (..)
 import Gen.Utils exposing (..)
 
 
@@ -92,7 +93,7 @@ genIP =
 
 genType : Generator Type
 genType =
-    choice Local Remote
+    choice LocalServer RemoteServer
 
 
 genServer : Generator Server
@@ -126,7 +127,7 @@ genEmptyModel =
 
 genNonEmptyModel : Generator Model
 genNonEmptyModel =
-    map2 (\id -> List.foldl (Dict.insert id) initialModel)
+    map2 (\id -> List.foldl (insert id) initialModel)
         genServerID
         genServerList
 

@@ -12,6 +12,7 @@ module Core.Models
 
 import Driver.Websocket.Models as Ws
 import Game.Models as Game
+import Game.Dummy as Game
 import OS.Models as OS
 import Landing.Models as Landing
 import Core.Config as Config exposing (Config)
@@ -70,12 +71,15 @@ login token model =
             case websocket of
                 Just websocket ->
                     let
+                        -- Replace this line with Game.initialModel
+                        -- when starting to integrate game with the
+                        -- server
                         game =
-                            Game.initialModel token config
+                            Game.dummy token config
                     in
                         Play
                             { game = game
-                            , os = OS.initialModel game
+                            , os = OS.initialModel
                             , websocket = websocket
                             , config = config
                             , seed = seed

@@ -8,23 +8,21 @@ import Game.Servers.Processes.Types.Local as Local exposing (..)
 import Game.Servers.Processes.Types.Remote as Remote exposing (..)
 
 
-handleLogForge : TargetLogID -> LogForgeAction -> Dispatch
-handleLogForge logId logAction =
+handleLogForge : String -> TargetLogID -> LogForgeAction -> Dispatch
+handleLogForge serverID logId logAction =
     case logAction of
         LogCrypt ->
-            Dispatch.logs
-                "localhost"
-                (Logs.Crypt logId)
+            Dispatch.logs serverID (Logs.Crypt logId)
 
         _ ->
             Dispatch.none
 
 
-handleLocal : Local.ProcessProp -> Dispatch
-handleLocal prop =
+handleLocal : String -> Local.ProcessProp -> Dispatch
+handleLocal serverID prop =
     case prop.processType of
         Local.LogForge forgeVer logId logAction ->
-            handleLogForge logId logAction
+            handleLogForge serverID logId logAction
 
         _ ->
             Dispatch.none
@@ -35,23 +33,23 @@ handleRemote _ =
     Dispatch.none
 
 
-handle : Process -> Dispatch
-handle proc =
+handle : String -> Process -> Dispatch
+handle serverID proc =
     case proc.prop of
         Processes.LocalProcess prop ->
-            handleLocal prop
+            handleLocal serverID prop
 
         Processes.RemoteProcess prop ->
             handleRemote prop
 
 
-completeProcess : Processes -> Process -> ( Processes, Dispatch )
-completeProcess processes process =
+completeProcess : String -> Processes -> Process -> ( Processes, Dispatch )
+completeProcess serverID processes process =
     let
         processes_ =
             Processes.completeProcess processes process
 
         callback =
-            handle process
+            handle serverID process
     in
         ( processes_, callback )

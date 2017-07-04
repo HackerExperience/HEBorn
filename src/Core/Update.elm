@@ -9,6 +9,7 @@ import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events exposing (..)
 import Game.Messages as Game
 import Game.Update as Game
+import Game.Data as GameData
 import Landing.Update as Landing
 import OS.Messages as OS
 import OS.Update as OS
@@ -143,17 +144,22 @@ game msg model =
 
 os : OS.Msg -> PlayModel -> ( Model, Cmd Msg )
 os msg model =
-    let
-        ( os, cmd, dispatch ) =
-            OS.update model.game msg model.os
+    case GameData.fromGame model.game of
+        Just data ->
+            let
+                ( os, cmd, dispatch ) =
+                    OS.update data msg model.os
 
-        model_ =
-            Play { model | os = os }
+                model_ =
+                    Play { model | os = os }
 
-        cmd_ =
-            Cmd.map OSMsg cmd
-    in
-        dispatcher model_ cmd_ dispatch
+                cmd_ =
+                    Cmd.map OSMsg cmd
+            in
+                dispatcher model_ cmd_ dispatch
+
+        Nothing ->
+            ( Play model, Cmd.none )
 
 
 
