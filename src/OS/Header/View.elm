@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Utils.Html exposing (spacer)
-import OS.Style as Css
+import OS.Resources as Res
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import Game.Data as GameData
@@ -19,7 +19,7 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 
 view : GameData.Data -> Model -> Html Msg
 view data model =
-    div [ class [ Css.Header ] ]
+    div [ class [ Res.Header ] ]
         [ customSelect
             ( MouseEnterItem, MouseLeaveItem )
             (ToggleMenus OpenGateway)

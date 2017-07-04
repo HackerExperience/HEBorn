@@ -250,10 +250,25 @@ progressBar =
 
 
 
+-- Utils
+
+
+utils : List Snippet
+utils =
+    [ spacer ]
+
+
+spacer : Snippet
+spacer =
+    typeSelector "elastic"
+        [ flex (int 1) ]
+
+
+
 -- MAIN CSS
 
 
 css : Stylesheet
 css =
     stylesheet
-        (entries ++ inlines ++ layouts ++ widgets)
+        (entries ++ inlines ++ layouts ++ widgets ++ utils)

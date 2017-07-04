@@ -3,17 +3,7 @@ module Apps.ConnManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Icons as Icon
-
-
-type Classes
-    = IcoUp
-    | IcoDown
-    | GroupedTunnel
-
-
-prefix : String
-prefix =
-    "connmngr"
+import Apps.ConnManager.Resources exposing (Classes(..), prefix)
 
 
 ico : Style

@@ -19,7 +19,7 @@ import Game.Servers.Logs.Models as Logs exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
-import Apps.LogViewer.Style exposing (Classes(..), prefix)
+import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 
 { id, class, classList } =

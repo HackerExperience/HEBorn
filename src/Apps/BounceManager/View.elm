@@ -5,7 +5,7 @@ import Html.CssHelpers
 import Game.Data as Game
 import Apps.BounceManager.Messages exposing (Msg(..))
 import Apps.BounceManager.Models exposing (..)
-import Apps.BounceManager.Style exposing (Classes(..), prefix)
+import Apps.BounceManager.Resources exposing (Classes(..), prefix)
 import Apps.BounceManager.Menu.View exposing (..)
 
 

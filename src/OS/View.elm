@@ -2,7 +2,7 @@ module OS.View exposing (view)
 
 import OS.Models exposing (..)
 import OS.Messages exposing (..)
-import OS.Style as Css
+import OS.Resources as Res
 import Html exposing (..)
 import Html.CssHelpers
 import Core.Models as Core
@@ -13,13 +13,13 @@ import OS.SessionManager.View as SessionManager
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Css.prefix
+    Html.CssHelpers.withNamespace Res.prefix
 
 
 view : GameData.Data -> Core.PlayModel -> Html Msg
 view data model =
     div
-        [ id Css.Dashboard
+        [ id Res.Dashboard
         , menuEmpty
         ]
         [ viewHeader data model.os
@@ -46,5 +46,5 @@ viewMain game model =
 displayVersion : String -> Html Msg
 displayVersion version =
     div
-        [ class [ Css.Version ] ]
+        [ class [ Res.Version ] ]
         [ text version ]

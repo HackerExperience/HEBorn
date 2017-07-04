@@ -4,12 +4,6 @@ import Html
 import Html.CssHelpers
 import Css exposing (..)
 import Css.Utils exposing (pseudoContent)
-import Core.Style as Core exposing (prefix)
-
-
-coreClass : List class -> Html.Attribute msg
-coreClass =
-    (Html.CssHelpers.withNamespace Core.prefix).class
 
 
 flexContainerVert : Style

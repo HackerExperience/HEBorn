@@ -2,15 +2,7 @@ module Apps.BounceManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-
-
-type Classes
-    = Dummy
-
-
-prefix : String
-prefix =
-    "bouncemngr"
+import Apps.BounceManager.Resources exposing (Classes(..), prefix)
 
 
 css : Stylesheet

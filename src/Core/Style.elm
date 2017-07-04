@@ -4,11 +4,7 @@ import Css exposing (..)
 import Css.Elements exposing (typeSelector, body, li, main_, header, footer, nav)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (unselectable)
-
-
-prefix : String
-prefix =
-    "c"
+import Core.Resources exposing (prefix, appId)
 
 
 css : Stylesheet
@@ -23,16 +19,14 @@ css =
             , overflow hidden
             , margin (px 0)
             , backgroundColor (rgb 57 109 166)
-            , backgroundImage <| url "https://phabricator.kde.org/file/data/mxrdg7a4rkgyksktoixa/PHID-FILE-ruyhxb5yqo5xteeprgoh/2560x1600.png"
+            , backgroundImage <| url "https://blog.newegg.com/blog/wp-content/uploads/windows_xp_bliss-wide.jpg"
             , backgroundSize cover
             , fontFamily sansSerif
             , cursor default
             , unselectable
             ]
-        , id "app"
+        , id appId
             [ width (pct 100)
             , minHeight (pct 100)
             ]
-        , typeSelector "elastic"
-            [ flex (int 1) ]
         ]

@@ -8,7 +8,7 @@ import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)
-import Apps.ConnManager.Style exposing (Classes(..), prefix)
+import Apps.ConnManager.Resources exposing (Classes(..), prefix)
 import Apps.ConnManager.Menu.View exposing (..)
 
 

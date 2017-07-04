@@ -4,25 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (input, form)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
-
-
-type Classes
-    = Window
-    | Content
-    | Toolbar
-    | AddressBar
-    | Client
-    | PageContent
-    | LoginPageHeader
-    | LoginPageForm
-    | LoginPageFooter
-    | Btn
-    | InactiveBtn
-
-
-prefix : String
-prefix =
-    "browser"
+import Apps.Browser.Resources exposing (Classes(..), prefix)
 
 
 css : Stylesheet

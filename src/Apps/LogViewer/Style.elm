@@ -4,24 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Common exposing (flexContainerHorz)
 import Css.Icons as Icon
-
-
-type Classes
-    = ETop
-    | EBottom
-    | BtnUser
-    | BtnEdit
-    | BtnHide
-    | BtnFilter
-    | BtnCrypt
-    | BtnDelete
-    | BtnUncrypt
-    | BtnApply
-    | BtnCancel
-    | BottomButton
-    | IcoCrosshair
-    | IcoDangerous
-    | BoxifyMe
+import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
@@ -30,11 +13,6 @@ ico =
         [ Icon.fontFamily
         , textAlign center
         ]
-
-
-prefix : String
-prefix =
-    "logvw"
 
 
 css : Stylesheet

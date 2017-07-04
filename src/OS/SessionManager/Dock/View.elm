@@ -5,10 +5,10 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers
-import OS.Style as OsCss
+import OS.Resources as OsRes
 import OS.SessionManager.Models as SessionManager exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
-import OS.SessionManager.Dock.Style as Css
+import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.View exposing (windowTitle)
 import Apps.Models as Apps
@@ -20,18 +20,18 @@ import Game.Data as GameData
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Css.prefix
+    Html.CssHelpers.withNamespace Res.prefix
 
 
 osClass : List class -> Attribute msg
 osClass =
-    .class <| Html.CssHelpers.withNamespace OsCss.prefix
+    .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
 view : GameData.Data -> SessionManager.Model -> Html Msg
 view game model =
     div
-        [ osClass [ OsCss.Dock ] ]
+        [ osClass [ OsRes.Dock ] ]
         [ dock game model
         ]
 
@@ -92,9 +92,9 @@ apps game model =
 
 dock : GameData.Data -> Model -> Html Msg
 dock game model =
-    div [ id Css.DockContainer ]
+    div [ class [ Res.Container ] ]
         [ div
-            [ id Css.DockMain ]
+            [ class [ Res.Main ] ]
             (model |> apps game |> List.map (format >> icon model))
         ]
 
@@ -107,11 +107,11 @@ format ( name, ( app, list ) ) =
 icon : Model -> ( a, Apps.App, List WindowRef ) -> Html Msg
 icon model ( name, app, list ) =
     div
-        [ class [ Css.Item ]
+        [ class [ Res.Item ]
         , attribute "data-hasinst" (hasInstance list)
         ]
         ([ div
-            [ class [ Css.ItemIco ]
+            [ class [ Res.ItemIco ]
             , onClick (openOrRestore app list)
             , attribute "data-icon" (Apps.icon app)
             ]
@@ -134,7 +134,7 @@ openOrRestore app list =
 subMenu : Apps.App -> List WindowRef -> Model -> Html Msg
 subMenu app refs model =
     div
-        [ class [ Css.DockAppContext ]
+        [ class [ Res.AppContext ]
         ]
         [ ul []
             ((openedWindows app refs model)
@@ -152,7 +152,7 @@ subMenu app refs model =
 subMenuAction : String -> msg -> Html msg
 subMenuAction label event =
     li
-        [ class [ Css.ClickableWindow ], onClick event ]
+        [ class [ Res.ClickableWindow ], onClick event ]
         [ text label ]
 
 
@@ -214,7 +214,7 @@ windowList model event =
     List.indexedMap
         (\i (( sID, id ) as refs) ->
             li
-                [ class [ Css.ClickableWindow ]
+                [ class [ Res.ClickableWindow ]
                 , attribute "data-id" id
                 , onClick (event refs)
                 ]
