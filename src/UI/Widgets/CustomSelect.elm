@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, node, text)
 import Html.Attributes exposing (attribute, hidden)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
-import Utils.Html exposing (onClickMe)
+import Utils.Html.Events exposing (onClickMe)
 
 
 option : (comparable -> msg) -> comparable -> ( comparable, Html msg ) -> Html msg

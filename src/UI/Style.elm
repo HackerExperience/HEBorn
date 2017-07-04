@@ -2,7 +2,7 @@ module UI.Style exposing (css)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (input, span)
+import Css.Elements exposing (typeSelector, input, span)
 import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
 import Css.Utils exposing (attrSelector)
 import Css.Icons as Icon exposing (locationTarget)
@@ -31,18 +31,18 @@ entries =
 
 filterHeader : List Snippet
 filterHeader =
-    [ selector "filterHeader"
+    [ typeSelector "filterHeader"
         [ flexContainerHorz
         , borderBottom3 (px 1) solid Colors.black
         , internalPadding
         , lineHeight (px 32)
         , minHeight (px 33) --CHROME HACK
         ]
-    , selector "flagsFilterPanel"
+    , typeSelector "flagsFilterPanel"
         [ flex (int 1)
         , fontSize (px 32)
         ]
-    , selector "filterText"
+    , typeSelector "filterText"
         [ children
             [ input
                 [ flex (int 1)
@@ -58,13 +58,13 @@ filterHeader =
 
 toogable : List Snippet
 toogable =
-    [ selector "toogableEntry"
+    [ typeSelector "toogableEntry"
         [ fontSize (px 12)
         , borderBottom3 (px 1) solid Colors.black
         , internalPadding
         , display block
         , children
-            [ selector "btn"
+            [ typeSelector "btn"
                 [ ico
                 , width (pct 100)
                 , display block
@@ -94,14 +94,14 @@ inlines =
 
 linkAddr : List Snippet
 linkAddr =
-    [ selector "linkAddr"
+    [ typeSelector "linkAddr"
         [ color Colors.hyperlink
         , children
-            [ selector "ico"
+            [ typeSelector "ico"
                 [ ico
                 , before [ Icon.locationTarget ]
                 ]
-            , selector "addr"
+            , typeSelector "addr"
                 [ textDecoration underline ]
             ]
         ]
@@ -112,22 +112,22 @@ linkAddr =
         [ color Colors.localhost
         , fontWeight bold
         , children
-            [ selector "ico"
+            [ typeSelector "ico"
                 [ ico
                 , before [ Icon.home ]
                 ]
-            , selector "addr"
+            , typeSelector "addr"
                 [ textDecoration none ]
             ]
         ]
-    , selector "linkUser"
+    , typeSelector "linkUser"
         [ color Colors.hyperlink
         , children
-            [ selector "ico"
+            [ typeSelector "ico"
                 [ ico
                 , before [ Icon.person ]
                 ]
-            , selector "addr"
+            , typeSelector "addr"
                 [ textDecoration underline ]
             ]
         ]
@@ -138,7 +138,7 @@ linkAddr =
         [ color Colors.root
         , fontWeight bold
         , children
-            [ selector "addr"
+            [ typeSelector "addr"
                 [ textDecoration none ]
             ]
         ]
@@ -156,12 +156,12 @@ layouts =
 
 horizontalTabs : Snippet
 horizontalTabs =
-    selector "panel"
+    typeSelector "panel"
         [ fontSize (px 12)
         , borderBottom3 (px 1) solid Colors.black
         , display block
         , children
-            [ selector "tab"
+            [ typeSelector "tab"
                 [ display inlineBlock
                 , padding3 (px 8) (px 16) (px 4)
                 , borderTop3 (px 1) solid Colors.black
@@ -182,7 +182,7 @@ horizontalTabs =
 
 verticalList : Snippet
 verticalList =
-    selector "verticallist"
+    typeSelector "verticallist"
         [ overflowY scroll
         , flex (int 1)
         ]
@@ -190,13 +190,13 @@ verticalList =
 
 verticalSticked : Snippet
 verticalSticked =
-    selector "verticalSticked"
+    typeSelector "verticalSticked"
         [ flex (int 1)
         , flexContainerVert
         , children
-            [ selector "headerStick, footerStick"
+            [ typeSelector "headerStick, footerStick"
                 [ flex (int 0) ]
-            , selector "mainCont"
+            , typeSelector "mainCont"
                 [ flex (int 1)
                 , flexContainerVert
                 ]
@@ -215,19 +215,19 @@ widgets =
 
 customSelect : List Snippet
 customSelect =
-    [ selector "customSelect"
-        [ children [ selector "selector" [ display none ] ] ]
+    [ typeSelector "customSelect"
+        [ children [ typeSelector "selector" [ display none ] ] ]
     , attrSelector "customSelect"
         "data-open"
         "="
         "open"
-        [ children [ selector "selector" [ display block ] ] ]
+        [ children [ typeSelector "selector" [ display block ] ] ]
     ]
 
 
 horizontalBtnPanel : Snippet
 horizontalBtnPanel =
-    selector "horizontalBtnPanel"
+    typeSelector "horizontalBtnPanel"
         [ width (pct 100)
         , fontSize (px 24)
         , textAlign center
@@ -236,7 +236,7 @@ horizontalBtnPanel =
 
 progressBar : Snippet
 progressBar =
-    selector "progressBar"
+    typeSelector "progressBar"
         [ display inlineBlock
         , borderRadius (vw 100)
         , overflow hidden
@@ -247,14 +247,14 @@ progressBar =
         , textAlign center
         , fontSize (px 12)
         , children
-            [ selector "fill"
+            [ typeSelector "fill"
                 [ position absolute
                 , display block
                 , zIndex (int 0)
                 , backgroundColor (hex "11B")
                 , height (pct 100)
                 ]
-            , selector "label"
+            , typeSelector "label"
                 [ position relative
                 , margin2 (px 0) auto
                 , zIndex (int 1)
