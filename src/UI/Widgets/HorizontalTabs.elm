@@ -1,4 +1,4 @@
-module UI.Layouts.HorizontalTabs
+module UI.Widgets.HorizontalTabs
     exposing
         ( hzTabs
         , hzCustomTabs

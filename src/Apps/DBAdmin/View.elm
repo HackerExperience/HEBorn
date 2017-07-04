@@ -2,7 +2,8 @@ module Apps.DBAdmin.View exposing (view)
 
 import Html exposing (Html, div, text)
 import Game.Data as Game
-import UI.Layouts.HorizontalTabs exposing (hzTabs)
+import UI.Layouts.VerticalSticked exposing (verticalSticked)
+import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Tabs.Servers.View as Servers exposing (view)
@@ -45,5 +46,11 @@ view data ({ app } as model) =
 
                 TabWallets ->
                     (div [] [])
+
+        viewTabs =
+            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
     in
-        hzTabs (compareTabs selected) viewTabLabel GoTab tabs
+        verticalSticked
+            (Just [ viewTabs ])
+            [ viewData ]
+            Maybe.Nothing

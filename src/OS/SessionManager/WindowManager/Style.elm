@@ -2,7 +2,7 @@ module OS.SessionManager.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
 import Css.Icons as Icon
 
@@ -28,12 +28,9 @@ wmBorderRadius =
     (px 4)
 
 
-addIco : String -> Style -> Snippet
+addIco : String -> Style -> Style
 addIco cond style =
-    attrSelector ".wmHeaderTitle"
-        "data-icon"
-        "="
-        cond
+    withAttribute (Css.EQ "data-icon" cond)
         [ before
             [ style ]
         ]
@@ -98,13 +95,13 @@ css =
                 , textAlign center
                 , float left
                 ]
+            , addIco "explorer" Icon.explorer
+            , addIco "logvw" Icon.logvw
+            , addIco "browser" Icon.browser
+            , addIco "taskmngr" Icon.taskMngr
+            , addIco "udb" Icon.dbAdmin
+            , addIco "connmngr" Icon.connMngr
             ]
-        , addIco "explorer" Icon.explorer
-        , addIco "logvw" Icon.logvw
-        , addIco "browser" Icon.browser
-        , addIco "taskmngr" Icon.taskMngr
-        , addIco "udb" Icon.dbAdmin
-        , addIco "connmngr" Icon.connMngr
         , class HeaderButtons
             [ flex (int 0)
             , flexContainerHorz

@@ -3,7 +3,7 @@ module OS.SessionManager.Dock.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (ul, li)
-import Css.Utils exposing (pseudoContent, attrSelector)
+import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Icons as Icon
 
@@ -21,12 +21,10 @@ type Class
     | ItemIco
 
 
-addIco : String -> Style -> Snippet
+addIco : String -> Style -> Style
 addIco cond style =
-    attrSelector ".dockItemIco"
-        "data-icon"
-        "="
-        cond
+    withAttribute
+        (Css.EQ "data-icon" cond)
         [ before
             [ style ]
         ]
@@ -85,6 +83,12 @@ css =
                 , textAlign center
                 , display inlineBlock
                 ]
+            , addIco "explorer" Icon.explorer
+            , addIco "logvw" Icon.logvw
+            , addIco "browser" Icon.browser
+            , addIco "taskmngr" Icon.taskMngr
+            , addIco "udb" Icon.dbAdmin
+            , addIco "connmngr" Icon.connMngr
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)
@@ -102,21 +106,12 @@ css =
                 ]
             , hover
                 [ children [ class DockAppContext [ display block ] ] ]
-            ]
-        , addIco "explorer" Icon.explorer
-        , addIco "logvw" Icon.logvw
-        , addIco "browser" Icon.browser
-        , addIco "taskmngr" Icon.taskMngr
-        , addIco "udb" Icon.dbAdmin
-        , addIco "connmngr" Icon.connMngr
-        , attrSelector ".dockItem"
-            "data-hasinst"
-            "="
-            "Y"
-            [ after
-                [ padding (px 2)
-                , backgroundColor (hex "FFF")
-                , globalShadow
+            , withAttribute (Css.EQ "data-hasinst" "Y")
+                [ after
+                    [ padding (px 2)
+                    , backgroundColor (hex "FFF")
+                    , globalShadow
+                    ]
                 ]
             ]
         , class DockAppContext
