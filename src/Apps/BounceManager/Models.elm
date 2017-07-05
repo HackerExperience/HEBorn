@@ -3,8 +3,13 @@ module Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Menu.Models as Menu
 
 
+type MainTab
+    = TabManage
+    | TabCreate
+
+
 type alias BounceManager =
-    {}
+    { selected : MainTab }
 
 
 type alias Model =
@@ -37,4 +42,14 @@ initialModel =
 
 initialBounceManager : BounceManager
 initialBounceManager =
-    {}
+    { selected = TabManage }
+
+
+tabToString : MainTab -> String
+tabToString tab =
+    case tab of
+        TabManage ->
+            "Manage"
+
+        TabCreate ->
+            "Create"

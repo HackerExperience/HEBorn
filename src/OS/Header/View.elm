@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Utils.Html exposing (spacer)
-import OS.Style as Css
+import OS.Resources as Res
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import Game.Data as GameData
@@ -19,7 +19,7 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 
 view : GameData.Data -> Model -> Html Msg
 view data model =
-    div [ class [ Css.Header ] ]
+    div [ class [ Res.Header ] ]
         [ customSelect
             ( MouseEnterItem, MouseLeaveItem )
             (ToggleMenus OpenGateway)
@@ -34,21 +34,19 @@ view data model =
             (model.openMenu == OpenGateway)
         , contextToggler (data.game.meta.context == Gateway) (ContextTo Gateway)
         , spacer
-        , div []
-            [ text "Bounce: "
-            , customSelect
-                ( MouseEnterItem, MouseLeaveItem )
-                (ToggleMenus OpenBounce)
-                SelectBounce
-                0
-                (Dict.fromList
-                    [ ( 0, text "TODO 1" )
-                    , ( 1, text "TODO 2" )
-                    , ( 2, text "TODO 3" )
-                    ]
-                )
-                (model.openMenu == OpenBounce)
-            ]
+        , text "Bounce: "
+        , customSelect
+            ( MouseEnterItem, MouseLeaveItem )
+            (ToggleMenus OpenBounce)
+            SelectBounce
+            0
+            (Dict.fromList
+                [ ( 0, text "PINE" )
+                , ( 1, text "WOOD" )
+                , ( 2, text "STICK" )
+                ]
+            )
+            (model.openMenu == OpenBounce)
         , spacer
         , contextToggler (data.game.meta.context == Endpoint) (ContextTo Endpoint)
         , customSelect

@@ -3,19 +3,7 @@ module Apps.TaskManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding)
-
-
-type Classes
-    = EntryDivision
-    | MainLayout
-    | TaskTable
-    | BottomGraphsRow
-    | Graph
-
-
-prefix : String
-prefix =
-    "taskmngr"
+import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 
 
 css : Stylesheet

@@ -22,7 +22,7 @@ import Apps.Explorer.Menu.View
         , menuActiveAction
         , menuPassiveAction
         )
-import Apps.Explorer.Style exposing (Classes(..), prefix)
+import Apps.Explorer.Resources exposing (Classes(..), prefix)
 
 
 { id, class, classList } =

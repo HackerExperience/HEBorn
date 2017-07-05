@@ -7,6 +7,7 @@ import Apps.Explorer.Messages as Explorer
 import Apps.DBAdmin.Messages as Database
 import Apps.ConnManager.Messages as ConnManager
 import Apps.BounceManager.Messages as BounceManager
+import Apps.Finance.Messages as Finance
 
 
 type Msg
@@ -17,3 +18,4 @@ type Msg
     | DatabaseMsg Database.Msg
     | ConnManagerMsg ConnManager.Msg
     | BounceManagerMsg BounceManager.Msg
+    | FinanceMsg Finance.Msg

@@ -141,7 +141,15 @@ linkAddr =
 
 layouts : List Snippet
 layouts =
-    [ verticalList ]
+    [ verticalList, flexCols, verticalSticked ]
+
+
+flexCols : Snippet
+flexCols =
+    typeSelector "flexCols"
+        [ flexContainerHorz
+        , children [ everything [ flex (int 1) ] ]
+        ]
 
 
 verticalList : Snippet
@@ -201,10 +209,12 @@ horizontalTabs =
     typeSelector "panel"
         [ fontSize (px 12)
         , borderBottom3 (px 1) solid Colors.black
-        , display block
+        , flexContainerHorz
         , children
             [ typeSelector "tab"
                 [ display inlineBlock
+                , flex (int 1)
+                , textAlign center
                 , padding3 (px 8) (px 16) (px 4)
                 , borderTop3 (px 1) solid Colors.black
                 , borderLeft3 (px 1) solid Colors.black
@@ -250,10 +260,25 @@ progressBar =
 
 
 
+-- Utils
+
+
+utils : List Snippet
+utils =
+    [ spacer ]
+
+
+spacer : Snippet
+spacer =
+    typeSelector "elastic"
+        [ flex (int 1) ]
+
+
+
 -- MAIN CSS
 
 
 css : Stylesheet
 css =
     stylesheet
-        (entries ++ inlines ++ layouts ++ widgets)
+        (entries ++ inlines ++ layouts ++ widgets ++ utils)

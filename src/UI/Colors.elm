@@ -28,6 +28,11 @@ hyperlink =
     hex "00E"
 
 
+bgWindow : Color
+bgWindow =
+    hex "EEE"
+
+
 bgSelected : Color
 bgSelected =
     hex "DDD"

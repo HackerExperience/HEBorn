@@ -11,13 +11,13 @@ import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import OS.SessionManager.WindowManager.Context as Context
-import OS.SessionManager.WindowManager.Style as Css
+import OS.SessionManager.WindowManager.Resources as Res
 import Apps.Models as Apps
 import Apps.View as Apps
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Css.prefix
+    Html.CssHelpers.withNamespace Res.prefix
 
 
 view : WindowID -> Game.Data -> Model -> Html Msg
@@ -43,11 +43,11 @@ windowClasses : Window -> Attribute Msg
 windowClasses window =
     if (window.maximized) then
         class
-            [ Css.Window
-            , Css.Maximizeme
+            [ Res.Window
+            , Res.Maximizeme
             ]
     else
-        class [ Css.Window ]
+        class [ Res.Window ]
 
 
 windowWrapper : WindowID -> Window -> Html Msg -> Html Msg
@@ -59,7 +59,7 @@ windowWrapper id window view =
         ]
         [ header id window
         , div
-            [ class [ Css.WindowBody ] ]
+            [ class [ Res.WindowBody ] ]
             [ view ]
         ]
 
@@ -76,7 +76,7 @@ header id window =
     div
         [ Draggable.mouseTrigger id DragMsg ]
         [ div
-            [ class [ Css.WindowHeader ]
+            [ class [ Res.WindowHeader ]
             , onMouseDown (UpdateFocusTo (Just id))
             ]
             [ headerTitle (windowTitle window) (Apps.icon window.app)
@@ -90,7 +90,7 @@ headerContext : WindowID -> Context.Context -> Html Msg
 headerContext id context =
     div []
         [ span
-            [ class [ Css.HeaderContextSw ]
+            [ class [ Res.HeaderContextSw ]
             , onClick (SwitchContext id)
             ]
             [ text (Context.toString context)
@@ -101,7 +101,7 @@ headerContext id context =
 headerTitle : String -> String -> Html Msg
 headerTitle title icon =
     div
-        [ class [ Css.HeaderTitle ]
+        [ class [ Res.HeaderTitle ]
         , attribute "data-icon" icon
         ]
         [ text title ]
@@ -109,19 +109,19 @@ headerTitle title icon =
 
 headerButtons : WindowID -> Html Msg
 headerButtons id =
-    div [ class [ Css.HeaderButtons ] ]
+    div [ class [ Res.HeaderButtons ] ]
         [ span
-            [ class [ Css.HeaderButton, Css.HeaderBtnMinimize ]
+            [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
             , onClick (Minimize id)
             ]
             []
         , span
-            [ class [ Css.HeaderButton, Css.HeaderBtnMaximize ]
+            [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
             , onClick (ToggleMaximize id)
             ]
             []
         , span
-            [ class [ Css.HeaderButton, Css.HeaderBtnClose ]
+            [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
             , onClick (Close id)
             ]
             []

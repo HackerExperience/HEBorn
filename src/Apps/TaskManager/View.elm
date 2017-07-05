@@ -14,7 +14,7 @@ import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, Proces
 import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
-import Apps.TaskManager.Style exposing (Classes(..), prefix)
+import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 

@@ -3,17 +3,8 @@ module Apps.ConnManager.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Icons as Icon
-
-
-type Classes
-    = IcoUp
-    | IcoDown
-    | GroupedTunnel
-
-
-prefix : String
-prefix =
-    "connmngr"
+import UI.Colors as Colors
+import Apps.ConnManager.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
@@ -34,5 +25,8 @@ css =
         , class IcoDown
             [ ico
             , before [ Icon.download ]
+            ]
+        , class GroupedTunnel
+            [ borderBottom3 (px 1) solid Colors.black
             ]
         ]

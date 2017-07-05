@@ -135,7 +135,7 @@ tabToString : MainTab -> String
 tabToString tab =
     case tab of
         TabServers ->
-            "Tab Servers"
+            "Servers"
 
         TabBankAccs ->
             "Bank Accounts"

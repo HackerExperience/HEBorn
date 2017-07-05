@@ -3,12 +3,12 @@ module OS.SessionManager.View exposing (..)
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as GameData
-import OS.Style as OsCss
+import OS.Resources as OsRes
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.View as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
-import OS.SessionManager.WindowManager.Style as WmCss
+import OS.SessionManager.WindowManager.Resources as WmRes
 import OS.SessionManager.Dock.View as Dock
 
 
@@ -25,7 +25,7 @@ wmClass =
 view : GameData.Data -> Model -> Html Msg
 view game model =
     div
-        [ osClass [ OsCss.Session ] ]
+        [ osClass [ OsRes.Session ] ]
         [ viewWM game model
         , viewDock game model
         ]
@@ -47,7 +47,7 @@ viewWM data model =
     model
         |> windows data.id
         |> List.filterMap (maybeViewWindow data model)
-        |> div [ wmClass [ WmCss.Canvas ] ]
+        |> div [ wmClass [ WmRes.Canvas ] ]
 
 
 maybeViewWindow :

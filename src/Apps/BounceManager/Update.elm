@@ -29,3 +29,10 @@ update data msg ({ app } as model) =
                     Cmd.map MenuMsg cmd
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
+
+        GoTab tab ->
+            let
+                model_ =
+                    { model | app = { app | selected = tab } }
+            in
+                ( model_, Cmd.none, Dispatch.none )

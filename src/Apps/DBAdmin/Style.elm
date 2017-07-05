@@ -4,18 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Common exposing (flexContainerHorz)
 import Css.Icons as Icon
-
-
-type Classes
-    = ETop
-    | EBottom
-    | BtnEdit
-    | BtnFilter
-    | BtnDelete
-    | BtnApply
-    | BtnCancel
-    | BottomButton
-    | BoxifyMe
+import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
@@ -24,11 +13,6 @@ ico =
         [ Icon.fontFamily
         , textAlign center
         ]
-
-
-prefix : String
-prefix =
-    "udb"
 
 
 css : Stylesheet

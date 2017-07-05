@@ -10,6 +10,7 @@ import Apps.Explorer.Update as Explorer
 import Apps.DBAdmin.Update as Database
 import Apps.ConnManager.Update as ConnManager
 import Apps.BounceManager.Update as BounceManager
+import Apps.Finance.Update as Finance
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -40,6 +41,9 @@ update data msg model =
 
         ( BounceManagerMsg msg, BounceManagerModel model ) ->
             map BounceManagerModel BounceManagerMsg (BounceManager.update data msg model)
+
+        ( FinanceMsg msg, FinanceModel model ) ->
+            map FinanceModel FinanceMsg (Finance.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

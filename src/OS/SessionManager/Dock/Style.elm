@@ -6,19 +6,7 @@ import Css.Elements exposing (ul, li)
 import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Icons as Icon
-
-
-type Id
-    = DockMain
-    | DockContainer
-    | DockAppContext
-    | Visible
-    | ClickableWindow
-
-
-type Class
-    = Item
-    | ItemIco
+import OS.SessionManager.Dock.Resources exposing (Classes(..), prefix)
 
 
 addIco : String -> Style -> Style
@@ -30,15 +18,10 @@ addIco cond style =
         ]
 
 
-prefix : String
-prefix =
-    "dock"
-
-
 css : Stylesheet
 css =
     (stylesheet << namespace prefix)
-        [ id DockMain
+        [ class Main
             [ width auto
             , flexContainerHorz
             , justifyContent center
@@ -63,7 +46,7 @@ css =
                 , globalShadow
                 ]
             ]
-        , id DockContainer
+        , class Container
             [ position relative
             , zIndex (int 0)
             , cursor pointer
@@ -95,6 +78,7 @@ css =
             , addIco "udb" Icon.dbAdmin
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
+            , addIco "moneymngr" Icon.finance
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)
@@ -111,7 +95,7 @@ css =
                 , marginLeft (px 21)
                 ]
             , hover
-                [ children [ class DockAppContext [ display block ] ] ]
+                [ children [ class AppContext [ display block ] ] ]
             , withAttribute (Css.EQ "data-hasinst" "Y")
                 [ after
                     [ padding (px 2)
@@ -120,7 +104,7 @@ css =
                     ]
                 ]
             ]
-        , class DockAppContext
+        , class AppContext
             [ display none
             , position absolute
             , bottom (px 0)

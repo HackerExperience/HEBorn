@@ -10,6 +10,7 @@ import Apps.Explorer.View as Explorer
 import Apps.DBAdmin.View as Database
 import Apps.ConnManager.View as ConnManager
 import Apps.BounceManager.View as BounceManager
+import Apps.Finance.View as Finance
 import Game.Data as Game
 
 
@@ -36,3 +37,6 @@ view data model =
 
         BounceManagerModel model ->
             Html.map BounceManagerMsg (BounceManager.view data model)
+
+        FinanceModel model ->
+            Html.map FinanceMsg (Finance.view data model)

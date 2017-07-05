@@ -25,6 +25,40 @@ prefix =
     "os"
 
 
+headerChildren : Style
+headerChildren =
+    children
+        [ typeSelector "customSelect"
+            [ height (pct 100)
+            , marginTop (px -8)
+            , marginBottom (px -8)
+            , padding (px 7)
+            , display block
+            , flex (int 0)
+            , textAlign center
+            , lineHeight (px 29)
+            , firstOfType
+                [ marginLeft (px -8) ]
+            , backgroundColor Colors.white
+            , border3 (px 1) solid Colors.black
+            , children
+                [ typeSelector "selector"
+                    [ position absolute
+                    , minWidth (px 120)
+                    , backgroundColor Colors.black
+                    , color Colors.white
+                    , children
+                        [ typeSelector "customOption"
+                            [ display block
+                            , hover [ backgroundColor Colors.hyperlink ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
 css : Stylesheet
 css =
     (stylesheet << namespace prefix)
@@ -36,43 +70,11 @@ css =
             , zIndex (int 0)
             , children
                 [ class Header
-                    [ backgroundColor (hex "EEE")
+                    [ backgroundColor Colors.bgWindow
                     , flexContainerHorz
                     , padding (px 8)
                     , globalShadow
-                    , children
-                        [ typeSelector "customSelect"
-                            [ height (pct 100)
-                            , margin (px -8)
-                            , padding (px 7)
-                            , display block
-                            , flex (int 0)
-                            , textAlign center
-                            , lineHeight (px 29)
-                            , firstOfType
-                                [ marginRight (px 8) ]
-                            , lastOfType
-                                [ marginLeft (px 8)
-                                , marginRight (px 8)
-                                ]
-                            , backgroundColor (hex "FFF")
-                            , border3 (px 1) solid Colors.black
-                            , children
-                                [ typeSelector "selector"
-                                    [ position absolute
-                                    , minWidth (px 120)
-                                    , backgroundColor Colors.black
-                                    , color Colors.white
-                                    , children
-                                        [ typeSelector "customOption"
-                                            [ display block
-                                            , hover [ backgroundColor Colors.hyperlink ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
+                    , headerChildren
                     ]
                 , class Session
                     [ flex (int 1)
@@ -100,7 +102,7 @@ css =
                     [ position absolute
                     , left (px 0)
                     , bottom (px 0)
-                    , color (hex "DDD")
+                    , color Colors.white
                     ]
                 ]
             ]

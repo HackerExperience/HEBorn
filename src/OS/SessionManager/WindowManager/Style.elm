@@ -5,22 +5,8 @@ import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
 import Css.Icons as Icon
-
-
-type Class
-    = Window
-    | WindowHeader
-    | WindowBody
-    | Maximizeme
-    | HeaderTitle
-    | HeaderVoid
-    | HeaderButtons
-    | HeaderButton
-    | HeaderBtnClose
-    | HeaderBtnMaximize
-    | HeaderBtnMinimize
-    | HeaderContextSw
-    | Canvas
+import UI.Colors as Colors
+import OS.SessionManager.WindowManager.Resources exposing (Classes(..), prefix)
 
 
 wmBorderRadius : Px
@@ -34,11 +20,6 @@ addIco cond style =
         [ before
             [ style ]
         ]
-
-
-prefix : String
-prefix =
-    "wm"
 
 
 css : Stylesheet
@@ -73,7 +54,7 @@ css =
             ]
         , class WindowBody
             [ borderRadius4 (px 0) (px 0) wmBorderRadius wmBorderRadius
-            , backgroundColor (hex "EEE")
+            , backgroundColor Colors.bgWindow
             , flex (int 1)
             , overflowY hidden
             , flexContainerVert
@@ -82,7 +63,7 @@ css =
             [ displayFlex
             , flexFlow2 row wrap
             , backgroundImage <| linearGradient2 toBottom (stop2 (hex "6c6c6c") (pct 0)) (stop <| hex "4c4c4c") []
-            , color (hex "FFF")
+            , color Colors.white
             , flex (int 0)
             , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
             , internalPadding
@@ -107,6 +88,7 @@ css =
             , addIco "udb" Icon.dbAdmin
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
+            , addIco "moneymngr" Icon.finance
             ]
         , class HeaderButtons
             [ flex (int 0)
@@ -121,7 +103,7 @@ css =
             , textAlign center
             , fontSize (px 16)
             , marginBottom (px -2)
-            , color (hex "FFF")
+            , color Colors.white
             , before
                 [ Icon.fontFamily
                 , textAlign center

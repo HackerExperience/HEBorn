@@ -18,8 +18,8 @@ tabs =
 
 
 compareTabs : MainTab -> MainTab -> Bool
-compareTabs a b =
-    (tabToString a) == (tabToString b)
+compareTabs =
+    (==)
 
 
 viewTabLabel : Bool -> MainTab -> List (Html Msg)
