@@ -9,3 +9,4 @@ type App
     | DatabaseApp
     | ConnManagerApp
     | BounceManagerApp
+    | FinanceApp

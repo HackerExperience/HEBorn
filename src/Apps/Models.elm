@@ -16,6 +16,7 @@ import Apps.Explorer.Models as Explorer
 import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
 import Apps.BounceManager.Models as BounceManager
+import Apps.Finance.Models as Finance
 import Apps.Apps exposing (..)
 
 
@@ -27,6 +28,7 @@ type AppModel
     | DatabaseModel Database.Model
     | ConnManagerModel ConnManager.Model
     | BounceManagerModel BounceManager.Model
+    | FinanceModel Finance.Model
 
 
 type Contexts
@@ -58,6 +60,9 @@ contexts app =
         BounceManagerApp ->
             ContextlessApp
 
+        FinanceApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -82,6 +87,9 @@ name app =
 
         BounceManagerApp ->
             BounceManager.name
+
+        FinanceApp ->
+            Finance.name
 
 
 icon : App -> String
@@ -108,6 +116,9 @@ icon app =
         BounceManagerApp ->
             BounceManager.icon
 
+        FinanceApp ->
+            Finance.icon
+
 
 title : AppModel -> String
 title model =
@@ -133,6 +144,9 @@ title model =
         BounceManagerModel model ->
             BounceManager.title model
 
+        FinanceModel model ->
+            Finance.title model
+
 
 model : App -> AppModel
 model app =
@@ -157,3 +171,6 @@ model app =
 
         BounceManagerApp ->
             BounceManagerModel BounceManager.initialModel
+
+        FinanceApp ->
+            FinanceModel Finance.initialModel

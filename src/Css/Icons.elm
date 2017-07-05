@@ -91,7 +91,7 @@ modeActive =
 
 modePassive : Icon
 modePassive =
-    faIcon FA.wpExplorer
+    faIcon FA.wpexplorer
 
 
 logvw : Icon
@@ -207,3 +207,8 @@ upload =
 download : Icon
 download =
     faIcon FA.download
+
+
+finance : Icon
+finance =
+    faIcon FA.money

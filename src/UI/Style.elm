@@ -141,7 +141,15 @@ linkAddr =
 
 layouts : List Snippet
 layouts =
-    [ verticalList ]
+    [ verticalList, flexCols, verticalSticked ]
+
+
+flexCols : Snippet
+flexCols =
+    typeSelector "flexCols"
+        [ flexContainerHorz
+        , children [ everything [ flex (int 1) ] ]
+        ]
 
 
 verticalList : Snippet

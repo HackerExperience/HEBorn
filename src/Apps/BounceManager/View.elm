@@ -5,9 +5,11 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
 import UI.Inlines.Networking as Inlines
+import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import Game.Account.Database.Models exposing (HackedServer)
 import Game.Network.Models exposing (Bounces, BounceID, Bounce, IP)
 import Apps.BounceManager.Messages exposing (Msg(..))
 import Apps.BounceManager.Models exposing (..)
@@ -69,6 +71,24 @@ viewTabManage src =
         |> verticalList
 
 
+viewSelectServer : HackedServer -> Html Msg
+viewSelectServer srv =
+    text srv.ip
+
+
+viewTabCreate : List HackedServer -> Html Msg
+viewTabCreate servers =
+    let
+        available =
+            servers
+                |> List.map viewSelectServer
+    in
+        flexCols
+            [ div [] available
+            , div [] [ text "SOON" ]
+            ]
+
+
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
@@ -78,13 +98,16 @@ view data ({ app } as model) =
         contentStc =
             data.game.network.bounces
 
+        hckdServers =
+            data.game.account.database.servers
+
         viewData =
             case selected of
                 TabManage ->
                     (viewTabManage contentStc)
 
                 TabCreate ->
-                    (div [] [ text "SOON" ])
+                    (viewTabCreate hckdServers)
 
         viewTabs =
             hzTabs (compareTabs selected) viewTabLabel GoTab tabs

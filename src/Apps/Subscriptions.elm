@@ -10,6 +10,7 @@ import Apps.Explorer.Subscriptions as Explorer
 import Apps.DBAdmin.Subscriptions as Database
 import Apps.ConnManager.Subscriptions as ConnManager
 import Apps.BounceManager.Subscriptions as BounceManager
+import Apps.Finance.Subscriptions as Finance
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -42,3 +43,7 @@ subscriptions data model =
         BounceManagerModel model ->
             BounceManager.subscriptions data model
                 |> Sub.map BounceManagerMsg
+
+        FinanceModel model ->
+            Finance.subscriptions data model
+                |> Sub.map FinanceMsg

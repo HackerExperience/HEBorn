@@ -78,6 +78,7 @@ css =
             , addIco "udb" Icon.dbAdmin
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
+            , addIco "moneymngr" Icon.finance
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)

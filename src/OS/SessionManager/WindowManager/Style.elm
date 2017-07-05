@@ -88,6 +88,7 @@ css =
             , addIco "udb" Icon.dbAdmin
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
+            , addIco "moneymngr" Icon.finance
             ]
         , class HeaderButtons
             [ flex (int 0)
