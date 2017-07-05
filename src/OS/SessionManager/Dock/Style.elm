@@ -5,6 +5,7 @@ import Css.Namespace exposing (namespace)
 import Css.Elements exposing (ul, li)
 import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
+import Css.Gradients as Gradients
 import Css.Icons as Icon
 import OS.SessionManager.Dock.Resources exposing (Classes(..), prefix)
 
@@ -16,6 +17,13 @@ addIco cond style =
         [ before
             [ style ]
         ]
+
+
+addGrad : String -> Style -> Style
+addGrad cond style =
+    withAttribute
+        (Css.EQ "data-icon" cond)
+        [ style ]
 
 
 css : Stylesheet
@@ -79,6 +87,14 @@ css =
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
             , addIco "moneymngr" Icon.finance
+            , addGrad "explorer" Gradients.mangoPulp
+            , addGrad "logvw" Gradients.stellar
+            , addGrad "browser" Gradients.pinotNoir
+            , addGrad "taskmngr" Gradients.blurryBeach
+            , addGrad "udb" Gradients.calmDarya
+            , addGrad "connmngr" Gradients.influenza
+            , addGrad "bouncemngr" Gradients.bourbon
+            , addGrad "moneymngr" Gradients.army
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)
