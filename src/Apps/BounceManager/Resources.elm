@@ -2,7 +2,7 @@ module Apps.BounceManager.Resources exposing (..)
 
 
 type Classes
-    = Dummy
+    = BounceEntry
 
 
 prefix : String
