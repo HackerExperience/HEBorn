@@ -121,6 +121,7 @@ css =
                 [ marginLeft (px 5)
                 , textShadow4 (px 0) (px 0) (px 6) (hex "00ff0f")
                 , color (hex "20ff17")
+                , property "content" "\"stereo\""
                 ]
             ]
         , class Bar
