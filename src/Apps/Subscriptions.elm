@@ -11,6 +11,7 @@ import Apps.DBAdmin.Subscriptions as Database
 import Apps.ConnManager.Subscriptions as ConnManager
 import Apps.BounceManager.Subscriptions as BounceManager
 import Apps.Finance.Subscriptions as Finance
+import Apps.Hebamp.Subscriptions as Hebamp
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -47,3 +48,7 @@ subscriptions data model =
         FinanceModel model ->
             Finance.subscriptions data model
                 |> Sub.map FinanceMsg
+
+        MusicModel model ->
+            Hebamp.subscriptions data model
+                |> Sub.map MusicMsg

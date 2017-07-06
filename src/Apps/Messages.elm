@@ -8,6 +8,7 @@ import Apps.DBAdmin.Messages as Database
 import Apps.ConnManager.Messages as ConnManager
 import Apps.BounceManager.Messages as BounceManager
 import Apps.Finance.Messages as Finance
+import Apps.Hebamp.Messages as Hebamp
 
 
 type Msg
@@ -19,3 +20,4 @@ type Msg
     | ConnManagerMsg ConnManager.Msg
     | BounceManagerMsg BounceManager.Msg
     | FinanceMsg Finance.Msg
+    | MusicMsg Hebamp.Msg

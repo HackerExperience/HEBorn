@@ -17,4 +17,5 @@ initialModel =
     , Apps.ConnManagerApp
     , Apps.BounceManagerApp
     , Apps.FinanceApp
+    , Apps.MusicApp
     ]

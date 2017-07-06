@@ -55,6 +55,7 @@ windowWrapper id window view =
     div
         [ windowClasses window
         , windowStyle window
+        , attribute "data-decorated" (isDecorated window)
         , onMouseDown (UpdateFocusTo (Just id))
         ]
         [ header id window
@@ -69,6 +70,20 @@ windowTitle window =
     window
         |> getAppModel
         |> Apps.title
+
+
+isDecorated : Window -> String
+isDecorated window =
+    let
+        bool =
+            window
+                |> .app
+                |> Apps.isDecorated
+    in
+        if bool then
+            "decorated"
+        else
+            "none"
 
 
 header : WindowID -> Window -> Html Msg
@@ -130,10 +145,24 @@ headerButtons id =
 
 windowStyle : Window -> Html.Attribute Msg
 windowStyle window =
-    styles
-        [ left (px window.position.x)
-        , top (px window.position.y)
-        , width (px window.size.width)
-        , height (px window.size.height)
-        , zIndex (int window.position.z)
-        ]
+    let
+        isDecorated =
+            window
+                |> .app
+                |> Apps.isDecorated
+
+        attrs =
+            if isDecorated then
+                [ left (px window.position.x)
+                , top (px window.position.y)
+                , width (px window.size.width)
+                , height (px window.size.height)
+                , zIndex (int window.position.z)
+                ]
+            else
+                [ left (px window.position.x)
+                , top (px window.position.y)
+                , zIndex (int window.position.z)
+                ]
+    in
+        styles attrs

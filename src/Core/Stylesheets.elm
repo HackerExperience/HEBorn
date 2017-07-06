@@ -13,6 +13,7 @@ import Apps.TaskManager.Style
 import Apps.DBAdmin.Style
 import Apps.ConnManager.Style
 import Apps.BounceManager.Style
+import Apps.Hebamp.Style
 
 
 port files : CssFileStructure -> Cmd msg
@@ -35,6 +36,7 @@ fileStructure =
                 , Apps.DBAdmin.Style.css
                 , Apps.ConnManager.Style.css
                 , Apps.BounceManager.Style.css
+                , Apps.Hebamp.Style.css
                 ]
           )
         ]

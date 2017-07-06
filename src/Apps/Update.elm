@@ -11,6 +11,7 @@ import Apps.DBAdmin.Update as Database
 import Apps.ConnManager.Update as ConnManager
 import Apps.BounceManager.Update as BounceManager
 import Apps.Finance.Update as Finance
+import Apps.Hebamp.Update as Hebamp
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -44,6 +45,9 @@ update data msg model =
 
         ( FinanceMsg msg, FinanceModel model ) ->
             map FinanceModel FinanceMsg (Finance.update data msg model)
+
+        ( MusicMsg msg, MusicModel model ) ->
+            map MusicModel MusicMsg (Hebamp.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
