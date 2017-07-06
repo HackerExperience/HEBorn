@@ -51,6 +51,21 @@ css =
                         [ borderRadius (px 0) ]
                     ]
                 ]
+            , withAttribute (Css.EQ "data-decorated" "none")
+                [ children
+                    [ div
+                        [ children
+                            [ class WindowHeader
+                                [ height (px 16)
+                                , marginBottom (px -16)
+                                , display block
+                                , zIndex (int 1)
+                                , position relative
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
             , withAttribute (Css.EQ "data-decorated" "decorated")
                 [ globalShadow
                 , children
