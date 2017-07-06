@@ -35,7 +35,6 @@ css =
             , displayFlex
             , borderRadius wmBorderRadius
             , flexDirection column
-            , globalShadow
             , flex (int 0)
             , withClass Maximizeme
                 [ top auto |> important
@@ -53,7 +52,8 @@ css =
                     ]
                 ]
             , withAttribute (Css.EQ "data-decorated" "decorated")
-                [ children
+                [ globalShadow
+                , children
                     [ class WindowBody
                         [ borderRadius4 (px 0) (px 0) wmBorderRadius wmBorderRadius
                         , backgroundColor Colors.bgWindow

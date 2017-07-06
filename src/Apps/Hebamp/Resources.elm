@@ -16,7 +16,8 @@ type Classes
     | Btn
     | Ext
     | Left
-    | Sidebar
+    | Slidebar
+    | Pointer
     | PlayerB
     | First
     | Icon

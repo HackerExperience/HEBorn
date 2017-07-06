@@ -2,7 +2,7 @@ module Apps.Hebamp.View exposing (view)
 
 import Json.Decode as Json
 import Html exposing (..)
-import Html.Attributes exposing (src, type_, controls)
+import Html.Attributes exposing (src, type_, controls, style)
 import Html.CssHelpers
 import Html.Events exposing (on, onClick)
 import Game.Data as Game
@@ -47,7 +47,14 @@ view data ({ app } as model) =
             , div [ class [ Bar, Balanced ] ] []
             , div [ class [ Btn, Ext, Left ] ] [ text "EQ" ]
             , div [ class [ Btn, Ext ] ] [ text "PL" ]
-            , div [ class [ Sidebar ] ] []
+            , div [ class [ Slidebar ] ]
+                [ span
+                    [ class [ Pointer ]
+                    , style
+                        [ ( "margin-left", (toString <| ceiling <| 220 * app.audioData.currentTime / app.audioData.duration) ++ "px" ) ]
+                    ]
+                    []
+                ]
             , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconStepBackward ] ] [] ]
             , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPlay ], onClick Play ] [] ]
             , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPause ], onClick Pause ] [] ]

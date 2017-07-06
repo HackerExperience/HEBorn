@@ -20,7 +20,7 @@ name =
 
 title : Model -> String
 title model =
-    "..."
+    ""
 
 
 icon : String
@@ -46,6 +46,7 @@ type alias AudioData =
     , mediaType : String
     , label : String
     , currentTime : Float
+    , duration : Float
     }
 
 
@@ -55,4 +56,5 @@ initialAudioData =
     , mediaType = "audio/mp3"
     , label = "MADONNA - HUNG UP"
     , currentTime = 0.0
+    , duration = 332
     }

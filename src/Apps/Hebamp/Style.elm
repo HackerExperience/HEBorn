@@ -182,30 +182,32 @@ css =
             ]
         , class Left
             [ marginLeft (px 9) ]
-        , class Sidebar
+        , class Slidebar
             [ border3 (px 2) inset (hex "7E7E7E")
             , float left
             , height (px 8)
             , width (px 252)
             , margin (px 5)
             , marginTop (px 5)
-            , before
-                [ backgroundImage <|
-                    linearGradient2 toTop
-                        (stop2 (hex "fffcdf") (pct 0))
-                        (stop2 (hex "fffcdf") (pct 29))
-                        [ stop2 (hex "736c50") (pct 32)
-                        , stop2 (hex "736c50") (pct 66)
-                        , stop2 (hex "d5ceb1") (pct 69)
-                        , stop2 (hex "d5ceb1") (pct 100)
-                        ]
-                , width (px 25)
-                , height (px 4)
-                , display block
-                , property "content" "\"\""
-                , position absolute
-                , marginTop (px -2)
-                , border3 (px 4) ridge (hex "FCFFBD")
+            , children
+                [ class Pointer
+                    [ backgroundImage <|
+                        linearGradient2 toTop
+                            (stop2 (hex "fffcdf") (pct 0))
+                            (stop2 (hex "fffcdf") (pct 29))
+                            [ stop2 (hex "736c50") (pct 32)
+                            , stop2 (hex "736c50") (pct 66)
+                            , stop2 (hex "d5ceb1") (pct 69)
+                            , stop2 (hex "d5ceb1") (pct 100)
+                            ]
+                    , width (px 25)
+                    , height (px 4)
+                    , display block
+                    , property "content" "\"\""
+                    , position absolute
+                    , marginTop (px -2)
+                    , border3 (px 4) ridge (hex "FCFFBD")
+                    ]
                 ]
             ]
         , class PlayerB
