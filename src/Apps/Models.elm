@@ -18,6 +18,7 @@ import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
 import Apps.BounceManager.Models as BounceManager
 import Apps.Finance.Models as Finance
+import Apps.Hebamp.Models as Hebamp
 import Apps.Apps exposing (..)
 
 
@@ -30,6 +31,7 @@ type AppModel
     | ConnManagerModel ConnManager.Model
     | BounceManagerModel BounceManager.Model
     | FinanceModel Finance.Model
+    | MusicModel Hebamp.Model
 
 
 type Contexts
@@ -64,6 +66,9 @@ contexts app =
         FinanceApp ->
             ContextlessApp
 
+        MusicApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -91,6 +96,9 @@ name app =
 
         FinanceApp ->
             Finance.name
+
+        MusicApp ->
+            Hebamp.name
 
 
 icon : App -> String
@@ -120,6 +128,9 @@ icon app =
         FinanceApp ->
             Finance.icon
 
+        MusicApp ->
+            Hebamp.icon
+
 
 title : AppModel -> String
 title model =
@@ -147,6 +158,9 @@ title model =
 
         FinanceModel model ->
             Finance.title model
+
+        MusicModel model ->
+            Hebamp.title model
 
 
 model : App -> AppModel
@@ -176,9 +190,15 @@ model app =
         FinanceApp ->
             FinanceModel Finance.initialModel
 
+        MusicApp ->
+            MusicModel Hebamp.initialModel
+
 
 isDecorated : App -> Bool
 isDecorated app =
     case app of
+        MusicApp ->
+            False
+
         _ ->
             True

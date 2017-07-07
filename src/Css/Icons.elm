@@ -212,3 +212,8 @@ download =
 finance : Icon
 finance =
     faIcon FA.money
+
+
+hebamp : Icon
+hebamp =
+    faIcon FA.bolt
