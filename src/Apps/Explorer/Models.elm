@@ -1,12 +1,15 @@
 module Apps.Explorer.Models exposing (..)
 
+import Dict exposing (Dict)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
 
 
 type alias Explorer =
-    { path : Filesystem.FilePath }
+    { path : Filesystem.FilePath
+    , renaming : Dict Filesystem.FileID String
+    }
 
 
 type alias Model =
@@ -53,6 +56,7 @@ icon =
 initialExplorer : Explorer
 initialExplorer =
     { path = Filesystem.rootPath
+    , renaming = Dict.empty
     }
 
 
@@ -70,7 +74,7 @@ getPath explorer =
 
 setPath : Explorer -> Filesystem.FilePath -> Explorer
 setPath explorer path =
-    { explorer | path = path }
+    { explorer | path = path, renaming = Dict.empty }
 
 
 changePath :

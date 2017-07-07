@@ -86,9 +86,11 @@ css =
             ]
         , class BreadcrumbItem
             [ before
-                [ pseudoContent "\"/ \"" ]
-            , after
-                [ pseudoContent "\" \"" ]
+                [ pseudoContent "\" / \""
+                , cursor default
+                ]
+            , firstOfType [ before [ pseudoContent "\"\"" ] ]
+            , cursor pointer
             ]
         , class ActBtns
             [ children
