@@ -5,7 +5,7 @@ import Game.Data as Game
 import Game.Servers.Filesystem.Messages as Filesystem exposing (Msg(..))
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages as Explorer exposing (Msg)
-import Apps.Explorer.Menu.Messages exposing (MenuAction(..))
+import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)
 
 
 actionHandler :
@@ -15,7 +15,7 @@ actionHandler :
     -> ( Model, Cmd Explorer.Msg, Dispatch )
 actionHandler data action model =
     case action of
-        DeleteFile fileID ->
+        Menu.Delete fileID ->
             let
                 gameMsg =
                     Dispatch.filesystem
@@ -24,5 +24,5 @@ actionHandler data action model =
             in
                 ( model, Cmd.none, gameMsg )
 
-        Dummy ->
+        _ ->
             ( model, Cmd.none, Dispatch.none )

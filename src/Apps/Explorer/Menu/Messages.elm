@@ -1,13 +1,21 @@
 module Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
-import Game.Servers.Filesystem.Models exposing (FileID)
+import Game.Servers.Filesystem.Models as Filesystem
+import Apps.Explorer.Models exposing (EditingStatus)
 import Apps.Explorer.Menu.Models exposing (Menu)
 
 
 type MenuAction
     = Dummy
-    | DeleteFile FileID
+    | GoPath Filesystem.FileID
+    | UpdateEditing EditingStatus
+    | EnterRename Filesystem.FileID
+    | Delete Filesystem.FileID
+    | Run Filesystem.FileID
+    | Research Filesystem.FileID
+    | Start Filesystem.FileID
+    | Stop Filesystem.FileID
 
 
 type Msg

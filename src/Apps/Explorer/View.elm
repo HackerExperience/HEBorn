@@ -9,7 +9,7 @@ import Game.Data as Game
 import Game.Servers.Models exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
+import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Lib exposing (..)
 import Apps.Explorer.Menu.View
     exposing
@@ -320,21 +320,22 @@ explorerMain path server =
                     ]
                     []
                 , span
-                    [ class [ DocBtn, NewBtn ] ]
+                    [ class [ DocBtn, NewBtn ]
+                    , CreatingFile "" |> UpdateEditing |> onClick
+                    ]
                     []
                 , span
-                    [ class [ DirBtn, NewBtn ] ]
+                    [ class [ DirBtn, NewBtn ]
+                    , CreatingPath "" |> UpdateEditing |> onClick
+                    ]
                     []
                 ]
             ]
-        , div
-            [ class [ ContentList ] ]
-            (detailedEntryList
-                (resolvePath
-                    server
-                    (path |> pathToString)
-                )
-            )
+        , path
+            |> pathToString
+            |> resolvePath server
+            |> detailedEntryList
+            |> div [ class [ ContentList ] ]
         ]
 
 

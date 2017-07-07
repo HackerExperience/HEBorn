@@ -18,7 +18,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
-import Apps.Explorer.Models exposing (Model)
+import Apps.Explorer.Models exposing (Model, EditingStatus(..))
 import Apps.Explorer.Messages as ExplorerMsg
 import Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
 import Apps.Explorer.Menu.Models exposing (Menu(..))
@@ -43,50 +43,50 @@ menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
         MenuMainDir fileID ->
-            [ [ ( ContextMenu.item "Enter", MenuClick Dummy )
-              , ( ContextMenu.item "Rename", MenuClick Dummy )
-              , ( ContextMenu.item "Move", MenuClick Dummy )
-              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+            [ [ ( ContextMenu.item "Enter", fileID |> GoPath |> MenuClick )
+              , ( ContextMenu.item "Rename", fileID |> EnterRename |> MenuClick )
+              , ( ContextMenu.item "Move", fileID |> Moving |> UpdateEditing |> MenuClick )
+              , ( ContextMenu.item "Delete", fileID |> Delete |> MenuClick )
               ]
             ]
 
         MenuTreeDir fileID ->
             [ [ ( ContextMenu.item "Toogle expansion", MenuClick Dummy )
-              , ( ContextMenu.item "Rename", MenuClick Dummy )
+              , ( ContextMenu.item "Rename", fileID |> EnterRename |> MenuClick )
               , ( ContextMenu.item "Delete Link", MenuClick Dummy )
               ]
             ]
 
         MenuMainArchive fileID ->
-            [ [ ( ContextMenu.item "Rename", MenuClick Dummy )
-              , ( ContextMenu.item "Move", MenuClick Dummy )
-              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+            [ [ ( ContextMenu.item "Rename", fileID |> EnterRename |> MenuClick )
+              , ( ContextMenu.item "Move", fileID |> Moving |> UpdateEditing |> MenuClick )
+              , ( ContextMenu.item "Delete", fileID |> Delete |> MenuClick )
               ]
             ]
 
         MenuTreeArchive fileID ->
-            [ [ ( ContextMenu.item "Rename", MenuClick Dummy )
-              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+            [ [ ( ContextMenu.item "Rename", fileID |> EnterRename |> MenuClick )
+              , ( ContextMenu.item "Delete", fileID |> Delete |> MenuClick )
               ]
             ]
 
         MenuExecutable fileID ->
-            [ [ ( ContextMenu.item "Run", MenuClick Dummy )
-              , ( ContextMenu.item "Research", MenuClick Dummy )
-              , ( ContextMenu.item "Rename", MenuClick Dummy )
-              , ( ContextMenu.item "Move", MenuClick Dummy )
-              , ( ContextMenu.item "Delete", MenuClick (DeleteFile fileID) )
+            [ [ ( ContextMenu.item "Run", fileID |> Run |> MenuClick )
+              , ( ContextMenu.item "Research", fileID |> Research |> MenuClick )
+              , ( ContextMenu.item "Rename", fileID |> EnterRename |> MenuClick )
+              , ( ContextMenu.item "Move", fileID |> Moving |> UpdateEditing |> MenuClick )
+              , ( ContextMenu.item "Delete", fileID |> Delete |> MenuClick )
               ]
             ]
 
         MenuActiveAction fileID ->
-            [ [ ( ContextMenu.item "Run", MenuClick Dummy )
+            [ [ ( ContextMenu.item "Run", fileID |> Run |> MenuClick )
               ]
             ]
 
         MenuPassiveAction fileID ->
-            [ [ ( ContextMenu.item "Start", MenuClick Dummy )
-              , ( ContextMenu.item "Stop", MenuClick Dummy )
+            [ [ ( ContextMenu.item "Start", fileID |> Start |> MenuClick )
+              , ( ContextMenu.item "Stop", fileID |> Stop |> MenuClick )
               ]
             ]
 

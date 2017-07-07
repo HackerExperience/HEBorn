@@ -1,14 +1,21 @@
 module Apps.Explorer.Models exposing (..)
 
-import Dict exposing (Dict)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
 
 
+type EditingStatus
+    = NotEditing
+    | CreatingFile String
+    | CreatingPath String
+    | Moving Filesystem.FileID
+    | Renaming Filesystem.FileID String
+
+
 type alias Explorer =
     { path : Filesystem.FilePath
-    , renaming : Dict Filesystem.FileID String
+    , editing : EditingStatus
     }
 
 
@@ -56,7 +63,7 @@ icon =
 initialExplorer : Explorer
 initialExplorer =
     { path = Filesystem.rootPath
-    , renaming = Dict.empty
+    , editing = NotEditing
     }
 
 
@@ -74,7 +81,7 @@ getPath explorer =
 
 setPath : Explorer -> Filesystem.FilePath -> Explorer
 setPath explorer path =
-    { explorer | path = path, renaming = Dict.empty }
+    { explorer | path = path, editing = NotEditing }
 
 
 changePath :
@@ -92,3 +99,8 @@ changePath path filesystem explorer =
 resolvePath : Server -> Filesystem.FilePath -> List Filesystem.File
 resolvePath server path =
     Filesystem.getFilesOnPath path (Servers.getFilesystem server)
+
+
+setEditing : EditingStatus -> Explorer -> Explorer
+setEditing val src =
+    { src | editing = val }

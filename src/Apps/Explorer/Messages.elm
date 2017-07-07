@@ -1,9 +1,12 @@
 module Apps.Explorer.Messages exposing (Msg(..))
 
-import Game.Servers.Filesystem.Models exposing (FilePath)
+import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Messages as Menu
+import Apps.Explorer.Models exposing (..)
 
 
 type Msg
     = MenuMsg Menu.Msg
-    | GoPath FilePath
+    | GoPath Filesystem.FilePath
+    | UpdateEditing EditingStatus
+    | EnterRename Filesystem.FileID
