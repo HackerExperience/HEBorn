@@ -55,6 +55,7 @@ windowWrapper id window view =
     div
         [ windowClasses window
         , windowStyle window
+        , attribute "data-decorated" (decoratedAttributeValue window)
         , onMouseDown (UpdateFocusTo (Just id))
         ]
         [ header id window
@@ -71,6 +72,21 @@ windowTitle window =
         |> Apps.title
 
 
+isDecorated : Window -> Bool
+isDecorated window =
+    window
+        |> .app
+        |> Apps.isDecorated
+
+
+decoratedAttributeValue : Window -> String
+decoratedAttributeValue window =
+    if isDecorated window then
+        "decorated"
+    else
+        "none"
+
+
 header : WindowID -> Window -> Html Msg
 header id window =
     div
@@ -79,10 +95,14 @@ header id window =
             [ class [ Res.WindowHeader ]
             , onMouseDown (UpdateFocusTo (Just id))
             ]
-            [ headerTitle (windowTitle window) (Apps.icon window.app)
-            , headerContext id window.context
-            , headerButtons id
-            ]
+          <|
+            if (isDecorated window) then
+                [ headerTitle (windowTitle window) (Apps.icon window.app)
+                , headerContext id window.context
+                , headerButtons id
+                ]
+            else
+                []
         ]
 
 
@@ -130,10 +150,22 @@ headerButtons id =
 
 windowStyle : Window -> Html.Attribute Msg
 windowStyle window =
-    styles
-        [ left (px window.position.x)
-        , top (px window.position.y)
-        , width (px window.size.width)
-        , height (px window.size.height)
-        , zIndex (int window.position.z)
-        ]
+    let
+        position =
+            [ left (px window.position.x)
+            , top (px window.position.y)
+            , zIndex (int window.position.z)
+            ]
+
+        size =
+            [ width (px window.size.width)
+            , height (px window.size.height)
+            ]
+
+        attrs =
+            if isDecorated window then
+                position ++ size
+            else
+                position
+    in
+        styles attrs
