@@ -11,6 +11,7 @@ import Apps.DBAdmin.View as Database
 import Apps.ConnManager.View as ConnManager
 import Apps.BounceManager.View as BounceManager
 import Apps.Finance.View as Finance
+import Apps.Hebamp.View as Hebamp
 import Game.Data as Game
 
 
@@ -40,3 +41,6 @@ view data model =
 
         FinanceModel model ->
             Html.map FinanceMsg (Finance.view data model)
+
+        MusicModel model ->
+            Html.map MusicMsg (Hebamp.view data model)

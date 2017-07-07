@@ -87,6 +87,7 @@ css =
             , addIco "connmngr" Icon.connMngr
             , addIco "bouncemngr" Icon.bounceMngr
             , addIco "moneymngr" Icon.finance
+            , addIco "hebamp" Icon.hebamp
             , addGrad "explorer" Gradients.mangoPulp
             , addGrad "logvw" Gradients.stellar
             , addGrad "browser" Gradients.pinotNoir
@@ -95,6 +96,7 @@ css =
             , addGrad "connmngr" Gradients.influenza
             , addGrad "bouncemngr" Gradients.bourbon
             , addGrad "moneymngr" Gradients.army
+            , addGrad "hebamp" Gradients.veryBlue
             ]
         , class Item
             [ margin3 (px 8) (px 4) (px 0)

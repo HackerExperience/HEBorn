@@ -10,3 +10,4 @@ type App
     | ConnManagerApp
     | BounceManagerApp
     | FinanceApp
+    | MusicApp
