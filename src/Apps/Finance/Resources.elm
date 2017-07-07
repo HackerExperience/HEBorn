@@ -2,7 +2,9 @@ module Apps.Finance.Resources exposing (..)
 
 
 type Classes
-    = Dummy
+    = FinanceEntry
+    | Bitcoin
+    | RealMoney
 
 
 prefix : String
