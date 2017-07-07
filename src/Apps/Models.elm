@@ -7,6 +7,7 @@ module Apps.Models
         , title
         , icon
         , model
+        , isDecorated
         )
 
 import Apps.LogViewer.Models as LogViewer
@@ -174,3 +175,10 @@ model app =
 
         FinanceApp ->
             FinanceModel Finance.initialModel
+
+
+isDecorated : App -> Bool
+isDecorated app =
+    case app of
+        _ ->
+            True
