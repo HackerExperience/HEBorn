@@ -1,6 +1,5 @@
 module Apps.Finance.View exposing (view)
 
-import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
@@ -15,12 +14,48 @@ import Apps.Finance.Menu.View exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
+type MoneySrc
+    = BTCWallet String
+    | BankAccount Int
+
+
+type MoneyCoin
+    = BTC Float
+    | USD Float
+
+
+entryView : ( MoneySrc, MoneyCoin ) -> Html Msg
+entryView ( src, val ) =
+    let
+        ( srcText, entryClass ) =
+            case src of
+                BTCWallet token ->
+                    ( "WALLET " ++ token, Bitcoin )
+
+                BankAccount id ->
+                    ( "ACCOUNT " ++ (toString id), RealMoney )
+
+        valText =
+            case val of
+                BTC val ->
+                    "BTC " ++ (toString val)
+
+                USD val ->
+                    "USD " ++ (toString val)
+    in
+        div
+            [ class [ FinanceEntry, entryClass ] ]
+            [ span [] [ text valText ], div [] [ text srcText ] ]
+
+
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
-    verticalList
-        [ div [] [ text "BTC", text "8,351", text "ACCOUNT 8153" ]
-        , div [] [ text "R$", text "89,00", text "ACCOUNT 8153" ]
-        , div [] [ text "R$", text "12,85", text "ACCOUNT 8153" ]
-        , div [] [ text "BTC", text "50,1", text "ACCOUNT 8153" ]
-        , div [] [ text "BTC", text "7,657", text "ACCOUNT 8153" ]
-        ]
+    [ ( BTCWallet "deadbeef", BTC 8.351 )
+    , ( BankAccount 1337, USD 89 )
+    , ( BankAccount 1337, USD 12.85 )
+    , ( BTCWallet "deadbeef", BTC 50.1 )
+    , ( BTCWallet "deadbeef", BTC 7.657 )
+    ]
+        |> List.map entryView
+        |> (::) (menuView model)
+        |> verticalList
