@@ -9,3 +9,4 @@ type Msg
     | AddressEnter
     | GoPrevious
     | GoNext
+    | PageMsg

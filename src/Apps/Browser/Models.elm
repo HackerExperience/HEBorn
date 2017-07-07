@@ -1,23 +1,17 @@
 module Apps.Browser.Models exposing (..)
 
+import Game.Web.Types as Web
 import Apps.Browser.Menu.Models as Menu
-import Apps.Browser.Pages exposing (PageURL, PageTitle, PageContent(PgBlank), urlParse)
-
-
-type alias BrowserPage =
-    { url : PageURL
-    , content : PageContent
-    , title : PageTitle
-    }
+import Apps.Browser.Pages.Models as Pages
 
 
 type alias BrowserHistory =
-    List BrowserPage
+    List Pages.Model
 
 
 type alias Browser =
-    { addressBar : PageURL
-    , page : BrowserPage
+    { addressBar : String
+    , page : Pages.Model
     , previousPages : BrowserHistory
     , nextPages : BrowserHistory
     }
@@ -38,7 +32,7 @@ title : Model -> String
 title ({ app } as model) =
     let
         pgTitle =
-            app.page.title
+            Pages.getTitle (getPage app)
 
         posfix =
             if (String.length pgTitle) > 12 then
@@ -61,7 +55,7 @@ icon =
 initialBrowser : Browser
 initialBrowser =
     { addressBar = "about:blank"
-    , page = { url = "about:blank", title = "Blank", content = PgBlank }
+    , page = Pages.BlankModel
     , previousPages = []
     , nextPages = []
     }
@@ -74,24 +68,9 @@ initialModel =
     }
 
 
-getPage : Browser -> BrowserPage
+getPage : Browser -> Pages.Model
 getPage browser =
     browser.page
-
-
-getPageURL : BrowserPage -> PageURL
-getPageURL page =
-    page.url
-
-
-getPageTitle : BrowserPage -> PageTitle
-getPageTitle page =
-    page.title
-
-
-getPageContent : BrowserPage -> PageContent
-getPageContent page =
-    page.content
 
 
 getPreviousPages : Browser -> BrowserHistory
@@ -104,7 +83,7 @@ getNextPages browser =
     browser.nextPages
 
 
-gotoPage : BrowserPage -> Browser -> Browser
+gotoPage : Pages.Model -> Browser -> Browser
 gotoPage page browser =
     if page /= getPage browser then
         let
@@ -112,7 +91,7 @@ gotoPage page browser =
                 browser.page :: (getPreviousPages browser)
         in
             { browser
-                | addressBar = getPageURL page
+                | addressBar = Pages.getUrl page
                 , page = page
                 , previousPages = previousPages
                 , nextPages = []
@@ -133,7 +112,7 @@ gotoPreviousPage browser =
                     | page = page
                     , previousPages = prev
                     , nextPages = next
-                    , addressBar = (getPageURL page)
+                    , addressBar = (Pages.getUrl page)
                 }
 
             Nothing ->
@@ -152,7 +131,7 @@ gotoNextPage browser =
                     | page = page
                     , previousPages = prev
                     , nextPages = next
-                    , addressBar = (getPageURL page)
+                    , addressBar = (Pages.getUrl page)
                 }
 
             Nothing ->
@@ -163,7 +142,7 @@ reorderHistory :
     (Browser -> BrowserHistory)
     -> (Browser -> BrowserHistory)
     -> Browser
-    -> Maybe ( BrowserPage, BrowserHistory, BrowserHistory )
+    -> Maybe ( Pages.Model, BrowserHistory, BrowserHistory )
 reorderHistory getFromList getToList browser =
     let
         from =
@@ -190,12 +169,3 @@ reorderHistory getFromList getToList browser =
 
             Nothing ->
                 Nothing
-
-
-enterAddress : Browser -> Browser
-enterAddress app =
-    let
-        url_ =
-            app.addressBar
-    in
-        gotoPage { url = url_, content = urlParse url_, title = "" } app

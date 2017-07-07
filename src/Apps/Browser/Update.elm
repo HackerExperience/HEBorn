@@ -1,14 +1,16 @@
 module Apps.Browser.Update exposing (update)
 
-import Game.Data as Game
+import Game.Data as GameData
 import Apps.Browser.Models
     exposing
         ( Model
         , gotoPage
         , gotoPreviousPage
         , gotoNextPage
-        , enterAddress
         )
+import Apps.Browser.Pages.Models as Pages
+import Game.Web.Models as Web
+import Game.Web.Types as Web
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
@@ -16,7 +18,7 @@ import Apps.Browser.Menu.Actions as Menu
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update data msg ({ app } as model) =
     case msg of
         -- Menu
@@ -41,7 +43,28 @@ update data msg ({ app } as model) =
                 ( { model | app = app_ }, Cmd.none, Dispatch.none )
 
         AddressEnter ->
-            ( { model | app = enterAddress app }, Cmd.none, Dispatch.none )
+            let
+                site =
+                    Web.get app.addressBar data.game.web
+
+                dispatch =
+                    case site.type_ of
+                        Web.Unknown ->
+                            -- uncomment this line after adding DNS support
+                            -- to the back end:
+                            -- Dispatch.web (Web.Load app.addressBar)
+                            Dispatch.none
+
+                        _ ->
+                            Dispatch.none
+
+                app_ =
+                    gotoPage (Pages.initialModel site) app
+
+                model_ =
+                    { model | app = app_ }
+            in
+                ( model_, Cmd.none, dispatch )
 
         GoPrevious ->
             let
@@ -56,3 +79,6 @@ update data msg ({ app } as model) =
                     gotoNextPage app
             in
                 ( { model | app = app_ }, Cmd.none, Dispatch.none )
+
+        PageMsg ->
+            ( model, Cmd.none, Dispatch.none )

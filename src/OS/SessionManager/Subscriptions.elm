@@ -5,7 +5,6 @@ import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
 import Game.Data as GameData
-import Game.Data as GameData
 
 
 -- TODO: this needs to change to add pinned window support

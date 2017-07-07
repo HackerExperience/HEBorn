@@ -19,6 +19,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Network.Models as Network
 import Game.Meta.Models as Meta
+import Game.Web.Models as Web
 import Core.Config exposing (Config)
 
 
@@ -27,6 +28,7 @@ type alias Model =
     , servers : Servers.Model
     , network : Network.Model
     , meta : Meta.Model
+    , web : Web.Model
     , config : Config
     }
 
@@ -37,6 +39,7 @@ initialModel token config =
     , servers = Servers.initialModel
     , network = Network.initialModel
     , meta = Meta.initialModel
+    , web = Web.initialModel
     , config = config
     }
 
