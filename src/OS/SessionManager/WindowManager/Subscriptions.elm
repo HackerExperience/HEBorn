@@ -17,15 +17,20 @@ subscriptions data model =
 
 
 appSubcriptions : Game.Data -> Model -> Sub Msg
-appSubcriptions data model =
-    model.windows
-        |> Dict.toList
-        |> List.filter (\( _, window ) -> window.state == NormalState)
-        |> List.map
-            (\( windowID, window ) ->
-                window
-                    |> getAppModel
-                    |> Apps.subscriptions data
-                    |> Sub.map (WindowMsg windowID)
-            )
-        |> Sub.batch
+appSubcriptions data ({ visible, windows } as model) =
+    let
+        mapper id =
+            case Dict.get id windows of
+                Just window ->
+                    window
+                        |> getAppModelFromWindow
+                        |> Apps.subscriptions data
+                        |> Sub.map (WindowMsg id)
+                        |> Just
+
+                Nothing ->
+                    Nothing
+    in
+        visible
+            |> List.filterMap mapper
+            |> Sub.batch

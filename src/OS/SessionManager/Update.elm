@@ -3,8 +3,9 @@ module OS.SessionManager.Update exposing (update)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Dock.Update as Dock
-import OS.SessionManager.WindowManager.Update as WindowManager
-import OS.SessionManager.WindowManager.Messages as WindowManager
+import OS.SessionManager.WindowManager.Update as WM
+import OS.SessionManager.WindowManager.Models as WM
+import OS.SessionManager.WindowManager.Messages as WM
 import Game.Data as GameData
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
@@ -21,9 +22,7 @@ update data msg model =
     in
         case msg of
             WindowManagerMsg msg ->
-                model_
-                    |> windowManager data msg
-                    |> defaultNone model
+                windowManager data msg model_
 
             DockMsg msg ->
                 ( Dock.update data msg model_, Cmd.none, Dispatch.none )
@@ -35,20 +34,26 @@ update data msg model =
 
 windowManager :
     GameData.Data
-    -> WindowManager.Msg
+    -> WM.Msg
     -> Model
-    -> Maybe ( Model, Cmd Msg, Dispatch )
+    -> ( Model, Cmd Msg, Dispatch )
 windowManager data msg model =
-    case get data.id model of
-        Just wm ->
-            wm
-                |> WindowManager.update data msg
-                |> map (flip (refresh data.id) model)
-                    WindowManagerMsg
-                |> Just
+    let
+        wm =
+            model
+                |> get data.id
+                |> Maybe.withDefault WM.initialModel
 
-        _ ->
-            Nothing
+        ( wm_, cmd, dispatch ) =
+            WM.update data msg wm
+
+        model_ =
+            refresh data.id wm_ model
+
+        cmd_ =
+            Cmd.map WindowManagerMsg cmd
+    in
+        ( model_, cmd_, dispatch )
 
 
 ensureSession : GameData.Data -> Model -> Model
@@ -59,20 +64,3 @@ ensureSession data model =
 
         Nothing ->
             insert data.id model
-
-
-defaultNone :
-    Model
-    -> Maybe ( Model, Cmd msg, Dispatch )
-    -> ( Model, Cmd msg, Dispatch )
-defaultNone model =
-    Maybe.withDefault ( model, Cmd.none, Dispatch.none )
-
-
-map :
-    (model -> Model)
-    -> (msg -> Msg)
-    -> ( model, Cmd msg, Dispatch )
-    -> ( Model, Cmd Msg, Dispatch )
-map mapModel mapMsg ( model, msg, cmds ) =
-    ( mapModel model, Cmd.map mapMsg msg, cmds )

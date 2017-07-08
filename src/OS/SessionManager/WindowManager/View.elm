@@ -1,4 +1,4 @@
-module OS.SessionManager.WindowManager.View exposing (view, windowTitle)
+module OS.SessionManager.WindowManager.View exposing (view)
 
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
@@ -10,6 +10,7 @@ import Html.CssHelpers
 import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
+import Dict
 import OS.SessionManager.WindowManager.Context as Context
 import OS.SessionManager.WindowManager.Resources as Res
 import Apps.Models as Apps
@@ -20,18 +21,23 @@ import Apps.View as Apps
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : WindowID -> Game.Data -> Model -> Html Msg
-view id data model =
-    case getWindow id model of
-        Just window ->
-            window
-                |> getAppModel
-                |> Apps.view data
-                |> Html.map (WindowMsg id)
-                |> windowWrapper id window
+view : Game.Data -> Model -> Html Msg
+view data ({ windows, visible } as model) =
+    let
+        mapper id =
+            case Dict.get id windows of
+                Just window ->
+                    window
+                        |> getAppModelFromWindow
+                        |> Apps.view data
+                        |> Html.map (WindowMsg id)
+                        |> windowWrapper id window
+                        |> Just
 
-        Nothing ->
-            div [] []
+                Nothing ->
+                    Nothing
+    in
+        div [] (List.filterMap mapper visible)
 
 
 styles : List Css.Style -> Attribute Msg
@@ -50,7 +56,7 @@ windowClasses window =
         class [ Res.Window ]
 
 
-windowWrapper : WindowID -> Window -> Html Msg -> Html Msg
+windowWrapper : ID -> Window -> Html Msg -> Html Msg
 windowWrapper id window view =
     div
         [ windowClasses window
@@ -64,14 +70,7 @@ windowWrapper id window view =
         ]
 
 
-windowTitle : Window -> String
-windowTitle window =
-    window
-        |> getAppModel
-        |> Apps.title
-
-
-header : WindowID -> Window -> Html Msg
+header : ID -> Window -> Html Msg
 header id window =
     div
         [ Draggable.mouseTrigger id DragMsg ]
@@ -79,14 +78,14 @@ header id window =
             [ class [ Res.WindowHeader ]
             , onMouseDown (UpdateFocusTo (Just id))
             ]
-            [ headerTitle (windowTitle window) (Apps.icon window.app)
+            [ headerTitle (title window) (Apps.icon window.app)
             , headerContext id window.context
             , headerButtons id
             ]
         ]
 
 
-headerContext : WindowID -> Context.Context -> Html Msg
+headerContext : ID -> Context.Context -> Html Msg
 headerContext id context =
     div []
         [ span
@@ -107,7 +106,7 @@ headerTitle title icon =
         [ text title ]
 
 
-headerButtons : WindowID -> Html Msg
+headerButtons : ID -> Html Msg
 headerButtons id =
     div [ class [ Res.HeaderButtons ] ]
         [ span
@@ -135,5 +134,4 @@ windowStyle window =
         , top (px window.position.y)
         , width (px window.size.width)
         , height (px window.size.height)
-        , zIndex (int window.position.z)
         ]

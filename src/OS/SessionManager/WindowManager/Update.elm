@@ -5,39 +5,24 @@ import Draggable.Events exposing (onDragBy, onDragStart)
 import Game.Data as Game
 import Apps.Update as Apps
 import Apps.Messages as Apps
-import OS.SessionManager.WindowManager.Models
-    exposing
-        ( Model
-        , WindowID
-        , openWindow
-        , openOrRestoreWindow
-        , closeWindow
-        , closeAppWindows
-        , restoreWindow
-        , minimizeWindow
-        , minimizeAppWindows
-        , toggleWindowMaximization
-        , unfocusWindow
-        , focusWindow
-        , updateWindowPosition
-        , getAppModel
-        , getWindow
-        , updateAppModel
-        , toggleWindowContext
-        , startDragging
-        , stopDragging
-        )
+import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Dict
 
 
 update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update data msg model =
     case msg of
-        OnDragBy delta ->
-            model
-                |> updateWindowPosition delta
-                |> wrapEmpty
+        OnDragBy ( x, y ) ->
+            case model.focusing of
+                Just id ->
+                    model
+                        |> move id x y
+                        |> wrapEmpty
+
+                Nothing ->
+                    wrapEmpty model
 
         DragMsg dragMsg ->
             let
@@ -46,9 +31,9 @@ update data msg model =
             in
                 ( model_, cmd, Dispatch.none )
 
-        StartDragging windowID ->
+        StartDragging id ->
             model
-                |> startDragging windowID
+                |> startDragging id
                 |> wrapEmpty
 
         StopDragging ->
@@ -56,49 +41,49 @@ update data msg model =
                 |> stopDragging
                 |> wrapEmpty
 
-        UpdateFocusTo maybeWindowID ->
-            case maybeWindowID of
-                Just windowID ->
+        UpdateFocusTo maybeID ->
+            case maybeID of
+                Just id ->
                     model
-                        |> focusWindow windowID
+                        |> focus id
                         |> wrapEmpty
 
                 Nothing ->
                     model
-                        |> unfocusWindow
+                        |> unfocus
                         |> wrapEmpty
 
-        Close windowID ->
+        Close id ->
             model
-                |> closeWindow windowID
-                |> unfocusWindow
+                |> remove id
+                |> unfocus
                 |> wrapEmpty
 
-        ToggleMaximize windowID ->
+        ToggleMaximize id ->
             model
-                |> toggleWindowMaximization windowID
-                |> unfocusWindow
-                |> focusWindow windowID
+                |> toggleMaximize id
+                |> unfocus
+                |> focus id
                 |> wrapEmpty
 
-        Minimize windowID ->
+        Minimize id ->
             model
-                |> minimizeWindow windowID
-                |> unfocusWindow
+                |> minimize id
+                |> unfocus
                 |> wrapEmpty
 
-        SwitchContext windowID ->
+        SwitchContext id ->
             model
-                |> toggleWindowContext windowID
+                |> toggleContext id
                 |> wrapEmpty
 
-        WindowMsg windowID msg ->
+        WindowMsg id msg ->
             let
                 ( model_, cmd, dispatch ) =
-                    updateApp data windowID msg model
+                    updateApp data id msg model
 
                 cmd_ =
-                    Cmd.map (WindowMsg windowID) cmd
+                    Cmd.map (WindowMsg id) cmd
             in
                 ( model_, cmd_, dispatch )
 
@@ -109,19 +94,22 @@ update data msg model =
 
 updateApp :
     Game.Data
-    -> WindowID
+    -> ID
     -> Apps.Msg
     -> Model
     -> ( Model, Cmd Apps.Msg, Dispatch )
-updateApp data windowID msg model =
-    case getWindow windowID model of
+updateApp data id msg model =
+    case Dict.get id model.windows of
         Just window ->
             let
-                ( appModel, cmd, dispatch ) =
-                    Apps.update data msg (getAppModel window)
+                appModel =
+                    getAppModelFromWindow window
+
+                ( appModel_, cmd, dispatch ) =
+                    Apps.update data msg appModel
 
                 model_ =
-                    (updateAppModel windowID appModel model)
+                    setAppModel id appModel_ model
             in
                 ( model_, cmd, dispatch )
 
@@ -134,7 +122,7 @@ wrapEmpty model =
     ( model, Cmd.none, Dispatch.none )
 
 
-dragConfig : Draggable.Config WindowID Msg
+dragConfig : Draggable.Config ID Msg
 dragConfig =
     Draggable.customConfig
         [ onDragBy OnDragBy

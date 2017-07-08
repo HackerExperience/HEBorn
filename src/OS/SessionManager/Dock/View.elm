@@ -3,14 +3,13 @@ module OS.SessionManager.Dock.View exposing (view)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (attribute)
+import Utils.Html.Attributes exposing (..)
 import Html.CssHelpers
 import OS.Resources as OsRes
 import OS.SessionManager.Models as SessionManager exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Resources as Res
-import OS.SessionManager.WindowManager.Models as WindowManager
-import OS.SessionManager.WindowManager.View exposing (windowTitle)
+import OS.SessionManager.WindowManager.Models as WM
 import Apps.Models as Apps
 import Apps.Apps as Apps
 import Game.Data as GameData
@@ -30,123 +29,145 @@ osClass =
 
 view : GameData.Data -> SessionManager.Model -> Html Msg
 view game model =
-    div
-        [ osClass [ OsRes.Dock ] ]
-        [ dock game model
-        ]
+    div [ osClass [ OsRes.Dock ] ]
+        [ dock game model ]
 
 
 
 -- internals
 
 
-{-| this is messy until elm compiler issue 1008 gets fixed
--}
-type alias Applications =
-    Dict String ( Apps.App, List WindowRef )
-
-
-getApplications : GameData.Data -> SessionManager.Model -> Applications
-getApplications data model =
-    -- This function should create an app list from the current
-    -- server "list of apps" and also from session windows
-    List.foldl
-        (\app dict ->
-            let
-                refs =
-                    windows data app model
-            in
-                Dict.insert (Apps.name app) ( app, refs ) dict
-        )
-        Dict.empty
-        data.game.account.dock
-
-
-windows : GameData.Data -> Apps.App -> Model -> List WindowRef
-windows data app model =
-    case get data.id model of
-        Just wm ->
-            wm.windows
-                |> WindowManager.filterAppWindows app
-                |> Dict.toList
-                |> List.map (\( id, win ) -> ( data.id, id ))
-
-        Nothing ->
-            []
-
-
-hasInstance : List a -> String
-hasInstance list =
-    if ((List.length list) > 0) then
-        "Y"
-    else
-        "N"
-
-
-apps : GameData.Data -> Model -> List ( String, ( Apps.App, List WindowRef ) )
-apps game model =
-    model
-        |> getApplications game
-        |> Dict.toList
-
-
 dock : GameData.Data -> Model -> Html Msg
-dock game model =
-    div [ class [ Res.Container ] ]
-        [ div
-            [ class [ Res.Main ] ]
-            (model |> apps game |> List.map (format >> icon model))
-        ]
+dock data ({ sessions } as model) =
+    let
+        wm =
+            sessions
+                |> Dict.get data.id
+                |> Maybe.withDefault WM.initialModel
+
+        content =
+            icons data.game.account.dock wm
+    in
+        div [ class [ Res.Container ] ]
+            [ div [ class [ Res.Main ] ] [ content ] ]
 
 
-format : ( a, ( b, c ) ) -> ( a, b, c )
-format ( name, ( app, list ) ) =
-    ( name, app, list )
+icons : List Apps.App -> WM.Model -> Html Msg
+icons apps wm =
+    let
+        group =
+            WM.group wm
+
+        reducer app acc =
+            let
+                isNotEmpty =
+                    hasAppOpened app group
+
+                item =
+                    icon app group wm
+
+                content =
+                    if isNotEmpty then
+                        let
+                            menu =
+                                options app group
+                        in
+                            [ item, menu ]
+                    else
+                        [ item ]
+
+                result =
+                    div
+                        [ class [ Res.Item ]
+                        , hasInstance isNotEmpty
+                        ]
+                        content
+            in
+                result :: acc
+
+        content =
+            apps
+                |> List.foldl reducer []
+                |> List.reverse
+    in
+        div [ class [ Res.Main ] ] content
 
 
-icon : Model -> ( a, Apps.App, List WindowRef ) -> Html Msg
-icon model ( name, app, list ) =
+icon : Apps.App -> WM.GroupedWindows -> WM.Model -> Html Msg
+icon app group wm =
     div
-        [ class [ Res.Item ]
-        , attribute "data-hasinst" (hasInstance list)
+        [ class [ Res.ItemIco ]
+        , onClick (OpenApp app)
+        , iconAttr (Apps.icon app)
         ]
-        ([ div
-            [ class [ Res.ItemIco ]
-            , onClick (openOrRestore app list)
-            , attribute "data-icon" (Apps.icon app)
+        []
+
+
+options : Apps.App -> WM.GroupedWindows -> Html Msg
+options app { visible, hidden } =
+    let
+        appName =
+            Apps.name app
+
+        separator =
+            hr [] []
+
+        defaultToEmptyList =
+            Maybe.withDefault []
+
+        visible_ =
+            visible
+                |> Dict.get appName
+                |> defaultToEmptyList
+                |> windowList FocusWindow "OPEN WINDOWS"
+
+        hidden_ =
+            hidden
+                |> Dict.get appName
+                |> defaultToEmptyList
+                |> windowList RestoreWindow "HIDDEN LINUXES"
+
+        batchActions =
+            [ subMenuAction "New window" (OpenApp app)
+            , subMenuAction "Minimize all" (MinimizeApps app)
+            , subMenuAction "Close all" (CloseApps app)
             ]
-            []
-         ]
-            ++ (if not (List.isEmpty list) then
-                    [ subMenu app list model ]
-                else
-                    []
-               )
-        )
+
+        menu_ =
+            batchActions
+                |> (++) hidden_
+                |> (::) separator
+                |> (++) visible_
+    in
+        div [ class [ Res.AppContext ] ]
+            [ ul [] menu_ ]
 
 
-openOrRestore : Apps.App -> a -> Msg
-openOrRestore app list =
-    -- FIXME pls
-    OpenApp app
+hasAppOpened : Apps.App -> WM.GroupedWindows -> Bool
+hasAppOpened app { hidden, visible } =
+    let
+        name =
+            Apps.name app
 
+        notEmpty =
+            List.isEmpty >> (not)
 
-subMenu : Apps.App -> List WindowRef -> Model -> Html Msg
-subMenu app refs model =
-    div
-        [ class [ Res.AppContext ]
-        ]
-        [ ul []
-            ((openedWindows app refs model)
-                ++ [ hr [] [] ]
-                ++ (minimizedWindows app refs model)
-                ++ [ hr [] [] ]
-                ++ [ subMenuAction "New window" (OpenApp app)
-                   , subMenuAction "Minimize all" (MinimizeApps app)
-                   , subMenuAction "Close all" (CloseApps app)
-                   ]
-            )
-        ]
+        hidden_ =
+            hidden
+                |> Dict.get name
+                |> Maybe.map notEmpty
+                |> Maybe.withDefault False
+
+        visible_ =
+            visible
+                |> Dict.get name
+                |> Maybe.map notEmpty
+                |> Maybe.withDefault False
+
+        result =
+            hidden_ || visible_
+    in
+        result
 
 
 subMenuAction : String -> msg -> Html msg
@@ -156,85 +177,36 @@ subMenuAction label event =
         [ text label ]
 
 
-openedWindows : a -> List WindowRef -> Model -> List (Html Msg)
-openedWindows app refs model =
+windowList :
+    (String -> Msg)
+    -> String
+    -> List ( String, WM.Window )
+    -> List (Html Msg)
+windowList event label list =
+    list
+        |> List.indexedMap (listItem event)
+        |> (::) (hr [] [])
+        |> (::) (li [] [ text label ])
+
+
+listItem : (String -> Msg) -> Int -> ( String, WM.Window ) -> Html Msg
+listItem event index ( id, window ) =
+    li
+        [ class [ Res.ClickableWindow ]
+        , idAttr (toString index)
+        , onClick (event id)
+        ]
+        [ (windowLabel index window) ]
+
+
+windowLabel : Int -> WM.Window -> Html Msg
+windowLabel index window =
     let
-        -- this function only exists because unions are'nt composable
-        filter =
-            \state ->
-                case state of
-                    WindowManager.NormalState ->
-                        True
-
-                    _ ->
-                        False
-
-        wins =
-            refs
-                |> filterWinState filter app model
-                |> windowList model FocusWindow
+        andThen =
+            flip (++)
     in
-        (li [] [ text "OPEN WINDOWS" ]) :: wins
-
-
-minimizedWindows : a -> List WindowRef -> Model -> List (Html Msg)
-minimizedWindows app refs model =
-    let
-        -- this function only exists because unions are'nt composable
-        filter =
-            \state ->
-                case state of
-                    WindowManager.MinimizedState ->
-                        True
-
-                    _ ->
-                        False
-
-        wins =
-            refs
-                |> filterWinState filter app model
-                |> windowList model RestoreWindow
-    in
-        (li [] [ text "MINIMIZED LINUXES" ]) :: wins
-
-
-windowLabel : Int -> WindowRef -> Model -> String
-windowLabel i refs model =
-    (toString i)
-        ++ ": "
-        ++ (refs
-                |> (flip getWindow) model
-                |> Maybe.andThen (windowTitle >> Just)
-                |> Maybe.withDefault "404"
-           )
-
-
-windowList : Model -> (WindowRef -> msg) -> List WindowRef -> List (Html msg)
-windowList model event =
-    List.indexedMap
-        (\i (( sID, id ) as refs) ->
-            li
-                [ class [ Res.ClickableWindow ]
-                , attribute "data-id" id
-                , onClick (event refs)
-                ]
-                [ text (windowLabel i refs model) ]
-        )
-
-
-filterWinState :
-    (WindowManager.WindowState -> Bool)
-    -> a
-    -> Model
-    -> List WindowRef
-    -> List ( String, String )
-filterWinState filter app model =
-    List.filter
-        (\ref ->
-            case getWindow ref model of
-                Just win ->
-                    filter win.state
-
-                Nothing ->
-                    False
-        )
+        index
+            |> toString
+            |> andThen ": "
+            |> andThen (WM.title window)
+            |> text

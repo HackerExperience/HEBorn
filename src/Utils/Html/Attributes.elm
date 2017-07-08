@@ -16,6 +16,33 @@ boolAttr attr boolean =
         attribute attr value
 
 
+boolAttrYN : String -> Bool -> Attribute msg
+boolAttrYN attr boolean =
+    let
+        value =
+            if boolean then
+                "Y"
+            else
+                "N"
+    in
+        attribute attr value
+
+
 dataSelected : Bool -> Attribute msg
 dataSelected =
     boolAttr "data-selected"
+
+
+hasInstance : Bool -> Attribute msg
+hasInstance =
+    boolAttrYN "data-hasinst"
+
+
+iconAttr : String -> Attribute msg
+iconAttr =
+    attribute "data-icon"
+
+
+idAttr : String -> Attribute msg
+idAttr =
+    attribute "data-id"
