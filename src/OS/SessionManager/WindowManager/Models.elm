@@ -2,55 +2,83 @@ module OS.SessionManager.WindowManager.Models
     exposing
         ( Model
         , Windows
+        , Index
+        , ID
         , Window
         , Position
         , Size
-        , WindowState(..)
-        , WindowInstance(..)
-        , WindowID
+        , Instance(..)
+        , GroupedWindows
         , initialModel
-        , openWindow
-        , closeWindow
-        , closeAppWindows
-        , restoreWindow
-        , restoreAppWindows
-        , minimizeWindow
-        , minimizeAppWindows
-        , toggleWindowMaximization
-        , unfocusWindow
-        , focusWindow
-        , openOrRestoreWindow
-        , filterMinimizedAppWindows
-        , filterOpenedWindows
-        , filterAppWindows
-        , foldlWindows
-        , toggleWindowContext
-        , updateWindow
-        , updateWindowPosition
-        , updateWindowSize
-        , updateAppModel
-        , getWindow
-        , setWindow
-        , getContext
-        , getAppModel
+        , resert
+        , insert
+        , insertLocked
+        , remove
+        , removeAll
+        , focus
+        , unfocus
+        , restore
+        , minimize
+        , minimizeAll
+        , context
+        , move
+        , resize
+        , toggleMaximize
+        , toggleLock
+        , toggleContext
         , startDragging
         , stopDragging
+        , getAppModel
+        , setAppModel
+        , getAppModelFromWindow
+        , group
+        , title
         )
 
-import Uuid
 import Draggable
 import Maybe exposing (Maybe)
 import Apps.Apps as Apps
 import Apps.Models as Apps
 import Dict exposing (Dict)
-import Random.Pcg exposing (Seed, step, initialSeed)
 import OS.SessionManager.WindowManager.Context exposing (..)
+
+
+type alias Model =
+    { windows : Windows
+    , hidden : Index
+    , visible : Index
+    , drag : Draggable.State ID
+    , dragging : Maybe ID
+    , focusing : Maybe ID
+    }
+
+
+type alias Windows =
+    Dict ID Window
+
+
+type alias Index =
+    List ID
+
+
+type alias ID =
+    String
+
+
+type alias Window =
+    { position : Position
+    , size : Size
+    , maximized : Bool
+    , app : Apps.App
+    , context : Context
+    , instance : Instance
+    , locked : Bool
+    }
 
 
 type alias Position =
     { x : Float
     , y : Float
-    , z : Int
     }
 
 
@@ -60,81 +88,56 @@ type alias Size =
     }
 
 
-type WindowState
-    = NormalState
-    | MinimizedState
+type Instance
+    = DoubleContext Apps.AppModel Apps.AppModel
+    | SingleContext Apps.AppModel
 
 
-type WindowInstance
-    = TogglableInstance Apps.AppModel Apps.AppModel
-    | FixedInstance Apps.AppModel
-
-
-type alias Window =
-    { position : Position
-    , size : Size
-    , state : WindowState
-    , maximized : Bool
-    , app : Apps.App
-    , context : Context
-    , instance : WindowInstance
+type alias GroupedWindows =
+    { visible : Dict String (List ( String, Window ))
+    , hidden : Dict String (List ( String, Window ))
     }
 
 
-type alias WindowID =
-    String
-
-
-type alias Windows =
-    Dict WindowID Window
-
-
-type alias Model =
-    { windows : Windows
-    , seed : Seed
-    , drag : Draggable.State WindowID
-    , dragging : Maybe WindowID
-    , focus : Maybe WindowID
-    , highestZ : Int
-    }
-
-
-defaultSize : Size
-defaultSize =
-    Size 600 400
-
-
-initialPosition : Int -> Position
-initialPosition off =
-    Position (toFloat (32 * off)) (44 + (toFloat (32 * off))) off
-
-
-initialWindows : Windows
-initialWindows =
-    Dict.empty
-
-
-initialModel : Seed -> Model
-initialModel seed =
-    { windows = initialWindows
-    , seed = seed
+initialModel : Model
+initialModel =
+    { windows = Dict.empty
+    , hidden = []
+    , visible = []
     , drag = Draggable.init
     , dragging = Nothing
-    , focus = Nothing
-    , highestZ = 1
+    , focusing = Nothing
     }
 
 
-openWindow : Apps.App -> Model -> Model
-openWindow app ({ seed, windows } as model) =
+resert : String -> Apps.App -> Model -> Model
+resert id app ({ visible, hidden, windows } as model) =
+    -- either restores every app or open a new one
     let
-        ( uuid, seed_ ) =
-            step Uuid.uuidGenerator seed
+        maybeID =
+            hidden
+                |> List.filter (filterApp app windows)
+                |> List.head
+    in
+        case maybeID of
+            Just id ->
+                minimizeAll app model
 
-        windowID =
-            Uuid.toString uuid
+            Nothing ->
+                let
+                    hidden_ =
+                        List.filter (filterApp app windows) hidden
+                in
+                    if List.isEmpty hidden_ then
+                        insert id app model
+                    else
+                        List.foldl restore model hidden_
 
-        context =
+
+insert : ID -> Apps.App -> Model -> Model
+insert id app ({ windows, visible } as model) =
+    let
+        contexts =
             case Apps.contexts app of
                 Apps.ContextualApp ->
                     GatewayContext
@@ -145,226 +148,309 @@ openWindow app ({ seed, windows } as model) =
         instance =
             case Apps.contexts app of
                 Apps.ContextualApp ->
-                    TogglableInstance (Apps.model app) (Apps.model app)
+                    DoubleContext (Apps.model app) (Apps.model app)
 
                 Apps.ContextlessApp ->
-                    FixedInstance (Apps.model app)
+                    SingleContext (Apps.model app)
 
         window =
             Window
-                (initialPosition (Dict.size model.windows))
-                defaultSize
-                NormalState
+                (initialPosition model)
+                (Size 600 400)
                 False
                 app
-                context
+                contexts
                 instance
+                False
 
         windows_ =
-            Dict.insert windowID window windows
-    in
-        focusWindow windowID { model | windows = windows_, seed = seed_ }
+            Dict.insert id window windows
 
-
-closeWindow : WindowID -> Model -> Model
-closeWindow windowID ({ windows } as model) =
-    let
-        windows_ =
-            Dict.remove windowID windows
-    in
-        { model | windows = windows_ }
-
-
-closeAppWindows : Apps.App -> Model -> Model
-closeAppWindows app ({ windows } as model) =
-    let
-        windows_ =
-            Dict.filter (\id win -> app /= win.app) windows
-    in
-        { model | windows = windows_ }
-
-
-restoreWindow : WindowID -> Model -> Model
-restoreWindow windowID ({ windows } as model) =
-    lift restore windowID model
-
-
-restoreAppWindows : Apps.App -> Model -> Model
-restoreAppWindows app ({ windows } as model) =
-    { model | windows = map (mapApp restore app) windows }
-
-
-minimizeWindow : WindowID -> Model -> Model
-minimizeWindow windowID ({ windows } as model) =
-    lift minimize windowID model
-
-
-minimizeAppWindows : Apps.App -> Model -> Model
-minimizeAppWindows app ({ windows } as model) =
-    { model | windows = map (mapApp minimize app) windows }
-
-
-toggleWindowMaximization : WindowID -> Model -> Model
-toggleWindowMaximization windowID ({ windows } as model) =
-    lift toggleMaximize windowID model
-
-
-unfocusWindow : Model -> Model
-unfocusWindow model =
-    { model | focus = Nothing, dragging = Nothing }
-
-
-focusWindow : WindowID -> Model -> Model
-focusWindow windowID ({ windows, highestZ } as model) =
-    let
-        highestZ_ =
-            highestZ + 1
+        visible_ =
+            moveTail id visible
 
         model_ =
-            lift
-                (\window ->
-                    move
-                        window.position.x
-                        window.position.y
-                        highestZ_
-                        window
-                )
-                windowID
-                model
+            { model
+                | windows = windows_
+                , visible = visible_
+                , focusing = Just id
+            }
     in
-        { model_ | highestZ = highestZ_ }
+        model_
 
 
-openOrRestoreWindow : Apps.App -> Model -> Model
-openOrRestoreWindow app model =
-    -- this could be better optimized
+insertLocked : ID -> Window -> Model -> Model
+insertLocked id window ({ windows, visible } as model) =
     let
-        minimizedCount =
-            Dict.size (filterMinimizedAppWindows app model)
+        window_ =
+            { window | locked = True }
+
+        windows_ =
+            Dict.insert id window_ windows
+
+        visible_ =
+            moveTail id visible
+
+        model_ =
+            { model | windows = windows_, visible = visible_ }
     in
-        if (minimizedCount == 0) then
-            openWindow app model
-        else
-            restoreAppWindows app model
+        model_
 
 
-{-| we really need a filterMinimized |> groupByApp
--}
-filterMinimizedAppWindows : Apps.App -> Model -> Windows
-filterMinimizedAppWindows app { windows } =
-    filter
-        (\window -> window.state == MinimizedState && window.app == app)
-        windows
+remove : ID -> Model -> Model
+remove id ({ hidden, visible, windows } as model) =
+    let
+        hidden_ =
+            dropElement id hidden
+
+        visible_ =
+            dropElement id visible
+
+        windows_ =
+            Dict.remove id windows
+
+        model_ =
+            { model
+                | windows = windows_
+                , hidden = hidden_
+                , visible = visible_
+                , focusing = Nothing
+            }
+    in
+        model_
 
 
-filterOpenedWindows : Model -> Windows
-filterOpenedWindows { windows } =
-    filter (\window -> window.state == NormalState) windows
+removeAll : Apps.App -> Model -> Model
+removeAll app ({ visible, hidden, windows } as model) =
+    -- either restores every app or open a new one
+    let
+        filter =
+            filterApp app windows
+
+        model1 =
+            visible
+                |> List.filter filter
+                |> List.foldl remove model
+
+        model_ =
+            hidden
+                |> List.filter filter
+                |> List.foldl remove model1
+    in
+        model_
 
 
-{-| we really need a groupByApp
--}
-filterAppWindows : Apps.App -> Windows -> Windows
-filterAppWindows app windows =
-    filter (\window -> window.app == app) windows
+focus : ID -> Model -> Model
+focus id ({ visible } as model) =
+    let
+        visible_ =
+            moveTail id visible
+
+        model_ =
+            { model | visible = visible_, focusing = Just id }
+    in
+        model_
 
 
-foldlWindows : (WindowID -> Window -> a -> a) -> a -> Windows -> a
-foldlWindows fold init windows =
-    Dict.foldl fold init windows
+unfocus : Model -> Model
+unfocus model =
+    let
+        model_ =
+            { model | focusing = Nothing }
+    in
+        model_
 
 
-toggleWindowContext : WindowID -> Model -> Model
-toggleWindowContext windowID model =
-    lift (toggleContext) windowID model
+restore : ID -> Model -> Model
+restore id ({ hidden, visible } as model) =
+    let
+        hidden_ =
+            dropElement id hidden
+
+        visible_ =
+            moveTail id visible
+
+        model_ =
+            { model
+                | hidden = hidden_
+                , visible = visible_
+                , focusing = Just id
+            }
+    in
+        model_
 
 
-updateWindow : WindowID -> Window -> Model -> Model
-updateWindow windowID window model =
-    lift (always window) windowID model
+minimize : ID -> Model -> Model
+minimize id ({ hidden, visible } as model) =
+    let
+        hidden_ =
+            moveTail id hidden
+
+        visible_ =
+            dropElement id visible
+
+        model_ =
+            { model
+                | hidden = hidden_
+                , visible = visible_
+                , focusing = Nothing
+            }
+    in
+        model_
 
 
-updateWindowPosition : ( Float, Float ) -> Model -> Model
-updateWindowPosition ( dx, dy ) model =
-    case model.dragging of
+minimizeAll : Apps.App -> Model -> Model
+minimizeAll app ({ visible, windows } as model) =
+    -- either restores every app or open a new one
+    let
+        model_ =
+            visible
+                |> List.filter (filterApp app windows)
+                |> List.foldl minimize model
+    in
+        model_
+
+
+context : ID -> Model -> Maybe Context
+context id model =
+    case Dict.get id model.windows of
+        Just window ->
+            Just window.context
+
         Nothing ->
-            model
-
-        Just windowID ->
-            lift
-                (\window ->
-                    move
-                        (window.position.x + dx)
-                        (window.position.y + dy)
-                        window.position.z
-                        window
-                )
-                windowID
-                model
+            Nothing
 
 
-updateWindowSize : Float -> Float -> Int -> WindowID -> Model -> Model
-updateWindowSize x y z windowID model =
-    lift (move x y z) windowID model
-
-
-updateAppModel : WindowID -> Apps.AppModel -> Model -> Model
-updateAppModel windowID appModel ({ windows } as model) =
-    case Dict.get windowID windows of
-        Just ({ instance } as window) ->
+move : String -> Float -> Float -> Model -> Model
+move id x y ({ windows } as model) =
+    case Dict.get id windows of
+        Just ({ position } as window) ->
             let
-                instance_ =
-                    case window.instance of
-                        TogglableInstance _ model ->
-                            TogglableInstance appModel model
-
-                        FixedInstance _ ->
-                            FixedInstance appModel
+                position_ =
+                    Position
+                        (position.x + x)
+                        (position.y + y)
 
                 window_ =
-                    { window | instance = instance_ }
+                    { window | position = position_ }
 
                 windows_ =
-                    Dict.insert windowID window_ windows
+                    Dict.insert id window_ windows
+
+                model_ =
+                    { model | windows = windows_ }
             in
-                { model | windows = windows_ }
+                model_
 
         Nothing ->
             model
 
 
-getWindow : WindowID -> Model -> Maybe Window
-getWindow windowId { windows } =
-    Dict.get windowId windows
+resize : String -> Float -> Float -> Model -> Model
+resize id width height ({ windows } as model) =
+    case Dict.get id windows of
+        Just window ->
+            let
+                window_ =
+                    { window | size = Size width height }
 
+                windows_ =
+                    Dict.insert id window_ windows
 
-setWindow : WindowID -> Window -> Model -> Model
-setWindow windowId window ({ windows } as model) =
-    let
-        windows_ =
-            Dict.insert windowId window windows
-    in
-        { model | windows = windows_ }
+                model_ =
+                    { model | windows = windows_ }
+            in
+                model_
 
-
-getContext : Window -> Context
-getContext window =
-    window.context
-
-
-getAppModel : Window -> Apps.AppModel
-getAppModel window =
-    case window.instance of
-        TogglableInstance model _ ->
-            model
-
-        FixedInstance model ->
+        Nothing ->
             model
 
 
-startDragging : WindowID -> Model -> Model
+toggleMaximize : ID -> Model -> Model
+toggleMaximize id ({ windows } as model) =
+    case Dict.get id windows of
+        Just ({ maximized } as window) ->
+            let
+                window_ =
+                    { window | maximized = (not maximized) }
+
+                windows_ =
+                    Dict.insert id window_ windows
+
+                model_ =
+                    { model | windows = windows_ }
+            in
+                model_
+
+        Nothing ->
+            model
+
+
+toggleLock : ID -> Model -> Model
+toggleLock id ({ windows } as model) =
+    case Dict.get id windows of
+        Just ({ locked } as window) ->
+            let
+                window_ =
+                    { window | locked = (not locked) }
+
+                windows_ =
+                    Dict.insert id window_ windows
+
+                model_ =
+                    { model | windows = windows_ }
+            in
+                model_
+
+        Nothing ->
+            model
+
+
+toggleContext : ID -> Model -> Model
+toggleContext id ({ windows } as model) =
+    case Dict.get id windows of
+        Just ({ context, instance } as window) ->
+            case instance of
+                DoubleContext a b ->
+                    let
+                        instance_ =
+                            DoubleContext b a
+
+                        context_ =
+                            case context of
+                                GatewayContext ->
+                                    EndpointContext
+
+                                EndpointContext ->
+                                    GatewayContext
+
+                                NoContext ->
+                                    NoContext
+
+                        window_ =
+                            { window
+                                | instance = instance_
+                                , context = context_
+                            }
+
+                        windows_ =
+                            Dict.insert id window_ windows
+
+                        model_ =
+                            { model | windows = windows_ }
+                    in
+                        model_
+
+                SingleContext _ ->
+                    model
+
+        Nothing ->
+            model
+
+
+startDragging : ID -> Model -> Model
 startDragging id model =
-    { model | dragging = Just id }
+    { model | dragging = Just id, focusing = Just id }
 
 
 stopDragging : Model -> Model
@@ -372,100 +458,171 @@ stopDragging model =
     { model | dragging = Nothing }
 
 
+getAppModel : ID -> Model -> Maybe Apps.AppModel
+getAppModel id model =
+    case Dict.get id model.windows of
+        Just window ->
+            Just (getAppModelFromWindow window)
+
+        Nothing ->
+            Nothing
+
+
+setAppModel : ID -> Apps.AppModel -> Model -> Model
+setAppModel id app ({ windows } as model) =
+    case Dict.get id model.windows of
+        Just window ->
+            case window.instance of
+                DoubleContext left right ->
+                    let
+                        window_ =
+                            { window | instance = DoubleContext app right }
+
+                        windows_ =
+                            Dict.insert id window_ windows
+
+                        model_ =
+                            { model | windows = windows_ }
+                    in
+                        model_
+
+                SingleContext _ ->
+                    let
+                        window_ =
+                            { window | instance = SingleContext app }
+
+                        windows_ =
+                            Dict.insert id window_ windows
+
+                        model_ =
+                            { model | windows = windows_ }
+                    in
+                        model_
+
+        Nothing ->
+            model
+
+
+getAppModelFromWindow : Window -> Apps.AppModel
+getAppModelFromWindow window =
+    case window.instance of
+        DoubleContext app _ ->
+            app
+
+        SingleContext app ->
+            app
+
+
+group : Model -> GroupedWindows
+group { visible, hidden, windows } =
+    let
+        reducer id dict =
+            case Dict.get id windows of
+                Just win ->
+                    let
+                        key =
+                            Apps.name win.app
+                    in
+                        dict
+                            |> Dict.get key
+                            |> Maybe.withDefault []
+                            |> (::) ( id, win )
+                            |> flip (Dict.insert key) dict
+
+                Nothing ->
+                    dict
+
+        visible_ =
+            List.foldl reducer Dict.empty visible
+
+        hidden_ =
+            List.foldl reducer Dict.empty hidden
+
+        result =
+            { visible = visible_
+            , hidden = hidden_
+            }
+    in
+        result
+
+
+title : Window -> String
+title window =
+    window
+        |> getAppModelFromWindow
+        |> Apps.title
+
+
 
 -- internals
 
 
-lift : (Window -> Window) -> WindowID -> Model -> Model
-lift fun windowID ({ windows } as model) =
+initialPosition : Model -> Position
+initialPosition model =
     let
-        windows_ =
-            windows
-                |> Dict.get windowID
-                |> Maybe.map
-                    (\instance ->
-                        Dict.insert windowID (fun instance) windows
-                    )
-                |> Maybe.withDefault windows
+        maybeWindow =
+            Maybe.andThen (flip Dict.get model.windows) model.focusing
     in
-        { model | windows = windows_ }
+        case maybeWindow of
+            Just win ->
+                Position
+                    (win.position.x + 32)
+                    (win.position.y + 32)
+
+            Nothing ->
+                Position
+                    32
+                    (44 + 32)
 
 
-map : (Window -> Window) -> Windows -> Windows
-map func =
-    Dict.map (\id window -> func window)
+filterApp : Apps.App -> Windows -> ID -> Bool
+filterApp app windows id =
+    case Dict.get id windows of
+        Just win ->
+            if win.app == app then
+                True
+            else
+                False
+
+        Nothing ->
+            False
 
 
-filter : (Window -> Bool) -> Windows -> Windows
-filter func =
-    Dict.filter (\id window -> func window)
-
-
-move : Float -> Float -> Int -> Window -> Window
-move x y z ({ position } as window) =
+moveTail : a -> List a -> List a
+moveTail target list =
+    -- why move tail? because focusing the head would require us to reverse
+    --  the list for each view call
     let
-        position_ =
-            { position | x = x, y = y, z = z }
+        reducer init list =
+            case list of
+                [] ->
+                    init
+
+                head :: tail ->
+                    if target == head then
+                        List.foldl (::) init tail
+                    else
+                        reducer (head :: init) tail
     in
-        { window | position = position_ }
+        list
+            |> List.reverse
+            |> reducer [ target ]
 
 
-resize : Float -> Float -> Window -> Window
-resize width height ({ size } as window) =
+dropElement : a -> List a -> List a
+dropElement target list =
     let
-        size_ =
-            { size | width = width, height = height }
+        reducer init list =
+            case list of
+                [] ->
+                    init
+
+                head :: tail ->
+                    if target == head then
+                        List.foldl (::) init tail
+                    else
+                        reducer (head :: init) tail
     in
-        { window | size = size_ }
-
-
-restore : Window -> Window
-restore window =
-    { window | state = NormalState }
-
-
-minimize : Window -> Window
-minimize window =
-    { window | state = MinimizedState }
-
-
-toggleMaximize : Window -> Window
-toggleMaximize ({ maximized } as window) =
-    { window | maximized = (not maximized) }
-
-
-toggleContext : Window -> Window
-toggleContext ({ context, instance } as window) =
-    case instance of
-        TogglableInstance modelA modelB ->
-            let
-                instance_ =
-                    TogglableInstance modelB modelA
-
-                context_ =
-                    case context of
-                        GatewayContext ->
-                            EndpointContext
-
-                        EndpointContext ->
-                            GatewayContext
-
-                        NoContext ->
-                            NoContext
-            in
-                { window | instance = instance_, context = context_ }
-
-        FixedInstance model ->
-            window
-
-
-
--- this could also be replaced when starting to use groupBy
-
-
-mapApp : (Window -> Window) -> Apps.App -> Window -> Window
-mapApp fun app win =
-    if win.app == app then
-        fun win
-    else
-        win
+        list
+            |> reducer []
+            |> List.reverse

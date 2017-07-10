@@ -1,49 +1,41 @@
 module OS.SessionManager.Models
     exposing
         ( Model
-        , SessionManagers
+        , Sessions
+        , ID
         , WindowRef
         , initialModel
         , get
         , insert
+        , openApp
         , refresh
         , remove
-        , getWindow
-        , setWindow
-        , getWindowID
-        , windows
         )
 
+import Uuid
 import Dict exposing (Dict)
 import Maybe exposing (Maybe(..))
 import Random.Pcg as Random
+import Apps.Apps as Apps
 import OS.SessionManager.WindowManager.Models as WindowManager
-    exposing
-        ( WindowID
-        , Window
-        )
 
 
--- NOTE: some changes are needed to allow pinned windows, mostly with how
--- the windows list is built; we may or not need a type that looks like this:
+type alias Model =
+    { sessions : Sessions
+    , seed : Random.Seed
+    }
 
 
-type alias ServerID =
+type alias Sessions =
+    Dict ID WindowManager.Model
+
+
+type alias ID =
     String
 
 
 type alias WindowRef =
-    ( ServerID, WindowID )
-
-
-type alias SessionManagers =
-    Dict ServerID WindowManager.Model
-
-
-type alias Model =
-    { sessions : SessionManagers
-    , seed : Random.Seed
-    }
+    ( ID, WindowManager.ID )
 
 
 initialModel : Model
@@ -54,30 +46,68 @@ initialModel =
     }
 
 
-get : ServerID -> Model -> Maybe WindowManager.Model
+get : ID -> Model -> Maybe WindowManager.Model
 get session { sessions } =
     Dict.get session sessions
 
 
-insert : ServerID -> Model -> Model
+insert : ID -> Model -> Model
 insert id ({ sessions, seed } as model) =
     if not (Dict.member id sessions) then
         let
             sessions_ =
                 Dict.insert
                     id
-                    (WindowManager.initialModel seed)
+                    WindowManager.initialModel
                     sessions
 
             seed_ =
                 newSeed (Dict.size sessions_)
         in
-            { model | sessions = sessions_, seed = seed_ }
+            { model | sessions = sessions_ }
     else
         model
 
 
-refresh : ServerID -> WindowManager.Model -> Model -> Model
+openApp : ID -> Apps.App -> Model -> Model
+openApp id app ({ sessions } as model0) =
+    case Dict.get id sessions of
+        Just wm ->
+            let
+                ( uuid, model ) =
+                    getUID model0
+
+                wm_ =
+                    WindowManager.insert uuid app wm
+
+                sessions_ =
+                    Dict.insert id wm_ sessions
+
+                model_ =
+                    { model | sessions = sessions_ }
+            in
+                model_
+
+        Nothing ->
+            model0
+
+
+getUID : Model -> ( String, Model )
+getUID ({ sessions, seed } as model) =
+    let
+        ( uuid, seed_ ) =
+            Random.step Uuid.uuidGenerator seed
+
+        model_ =
+            { model | seed = seed_ }
+
+        uuid_ =
+            Uuid.toString uuid
+    in
+        ( uuid_, model_ )
+
+
+refresh : ID -> WindowManager.Model -> Model -> Model
 refresh id wm ({ sessions } as model) =
     case Dict.get id sessions of
         Just _ ->
@@ -91,7 +121,7 @@ refresh id wm ({ sessions } as model) =
             model
 
 
-remove : ServerID -> Model -> Model
+remove : ID -> Model -> Model
 remove id ({ sessions } as model) =
     let
         sessions_ =
@@ -100,53 +130,9 @@ remove id ({ sessions } as model) =
         { model | sessions = sessions_ }
 
 
-getWindowID : WindowRef -> WindowID
+getWindowID : WindowRef -> WindowManager.ID
 getWindowID ( _, id ) =
     id
-
-
-getWindow : WindowRef -> Model -> Maybe Window
-getWindow ( session, id ) { sessions } =
-    case Dict.get session sessions of
-        Just wm ->
-            WindowManager.getWindow id wm
-
-        Nothing ->
-            Nothing
-
-
-setWindow : WindowRef -> Window -> Model -> Model
-setWindow ( session, id ) window ({ sessions } as model) =
-    case Dict.get session sessions of
-        Just wm ->
-            let
-                wm_ =
-                    WindowManager.setWindow id window wm
-
-                sessions_ =
-                    Dict.insert session wm_ sessions
-            in
-                { model | sessions = sessions_ }
-
-        Nothing ->
-            model
-
-
-
--- TODO: evaluate if this is needed
-
-
-windows : String -> Model -> List ( ServerID, WindowID )
-windows id model =
-    -- TODO: update this function to support pinning windows
-    case get id model of
-        Just wm ->
-            wm.windows
-                |> Dict.keys
-                |> List.map (\windowID -> ( id, windowID ))
-
-        _ ->
-            []
 
 
 

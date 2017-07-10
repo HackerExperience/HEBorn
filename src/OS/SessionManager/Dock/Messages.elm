@@ -1,7 +1,7 @@
 module OS.SessionManager.Dock.Messages exposing (Msg(..))
 
 import Apps.Apps exposing (App)
-import OS.SessionManager.WindowManager.Models exposing (WindowID)
+import OS.SessionManager.WindowManager.Models as WM
 
 
 type Msg
@@ -9,7 +9,7 @@ type Msg
     | MinimizeApps App
     | RestoreApps App
     | CloseApps App
-    | MinimizeWindow ( String, WindowID )
-    | FocusWindow ( String, WindowID )
-    | RestoreWindow ( String, WindowID )
-    | CloseWindow ( String, WindowID )
+    | MinimizeWindow WM.ID
+    | FocusWindow WM.ID
+    | RestoreWindow WM.ID
+    | CloseWindow WM.ID
