@@ -20,6 +20,7 @@ import Fuzz exposing (Fuzzer)
 import Game.Shared exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
+import Game.Servers.Tunnels.Models as Tunnels
 import Gen.Utils exposing (..)
 
 
@@ -105,6 +106,7 @@ genServer =
             , filesystem = fs
             , logs = logs
             , processes = proc
+            , tunnels = Tunnels.initialModel
             }
     in
         genIP

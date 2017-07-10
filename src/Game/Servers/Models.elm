@@ -21,10 +21,10 @@ module Game.Servers.Models
 
 import Dict exposing (Dict)
 import Game.Servers.Shared exposing (..)
-import Game.Network.Models as Network
 import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
 import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
 import Game.Servers.Processes.Models as Processes exposing (Processes, initialProcesses)
+import Game.Servers.Tunnels.Models as Tunnels exposing (initialModel)
 
 
 type alias Model =
@@ -33,16 +33,21 @@ type alias Model =
     }
 
 
+type alias IP =
+    String
+
+
 type alias Servers =
     Dict ID Server
 
 
 type alias Server =
     { type_ : Type
-    , ip : Network.IP
+    , ip : IP
     , filesystem : Filesystem
     , logs : Logs
     , processes : Processes
+    , tunnels : Tunnels.Model
     }
 
 
@@ -52,7 +57,7 @@ type Type
 
 
 type alias NetworkMap =
-    Dict Network.IP ID
+    Dict IP ID
 
 
 initialModel : Model
@@ -101,7 +106,7 @@ get id { servers } =
     Dict.get id servers
 
 
-getIP : Server -> Network.IP
+getIP : Server -> IP
 getIP { ip } =
     ip
 
@@ -130,7 +135,7 @@ safeUpdate id server model =
             model
 
 
-mapNetwork : Network.IP -> Model -> Maybe ID
+mapNetwork : IP -> Model -> Maybe ID
 mapNetwork ip { network } =
     Dict.get ip network
 

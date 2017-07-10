@@ -4,6 +4,7 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Tunnels.Messages as Tunnels
 import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 
@@ -12,6 +13,7 @@ type Msg
     = FilesystemMsg ID Filesystem.Msg
     | LogMsg ID Logs.Msg
     | ProcessMsg ID Processes.Msg
+    | TunnelsMsg Tunnels.Msg
     | Request RequestMsg
     | Event Events.Response
 

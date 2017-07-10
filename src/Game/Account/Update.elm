@@ -13,6 +13,7 @@ import Game.Account.Models exposing (..)
 import Game.Account.Requests exposing (..)
 import Game.Account.Requests.Logout as Logout
 import Game.Account.Requests.ServerIndex as ServerIndex
+import Game.Account.Bounces.Update as Bounces
 import Game.Models as Game
 
 
@@ -25,6 +26,19 @@ update game msg model =
     case msg of
         Logout ->
             logout game model
+
+        BouncesMsg msg ->
+            let
+                ( bounces, cmd, dispatch ) =
+                    Bounces.update game msg model.bounces
+
+                cmd_ =
+                    Cmd.map BouncesMsg cmd
+
+                model_ =
+                    { model | bounces = bounces }
+            in
+                ( model_, cmd_, dispatch )
 
         Request data ->
             response game (receive data) model
