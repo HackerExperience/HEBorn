@@ -30,6 +30,7 @@ module Game.Servers.Filesystem.Models
         )
 
 import Dict
+import Utils.Dict as Dict
 import Game.Shared exposing (ID)
 
 
@@ -242,7 +243,7 @@ removeFile file filesystem =
                     Dict.insert path
                         (filesystem
                             |> getFilesIdOnPath path
-                            |> List.filter (\x -> x /= id)
+                            |> List.filter ((/=) id)
                         )
                         filesystem.pathIndex
                 }
@@ -255,7 +256,16 @@ removeFile file filesystem =
                     -- just like rmdir, it can't remove non-empty folders
                     if List.isEmpty (getFilesIdOnPath absPath filesystem) then
                         { entries = Dict.remove id filesystem.entries
-                        , pathIndex = Dict.remove absPath filesystem.pathIndex
+                        , pathIndex =
+                            -- Issue: This SUCKS A LOT
+                            Dict.filterMap
+                                (\k v ->
+                                    if (k == absPath) then
+                                        Nothing
+                                    else
+                                        Just <| List.filter ((/=) id) v
+                                )
+                                filesystem.pathIndex
                         }
                     else
                         filesystem
