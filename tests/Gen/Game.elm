@@ -6,7 +6,6 @@ import Game.Account.Models as Account
 import Game.Meta.Models as Meta
 import Game.Web.Models as Web
 import Game.Models exposing (..)
-import Game.Network.Models as Network
 import Gen.Servers
 import Gen.Utils exposing (..)
 
@@ -33,7 +32,6 @@ genModel =
         (\servers ->
             { account = Account.initialModel ""
             , servers = servers
-            , network = Network.initialModel
             , meta = Meta.initialModel
             , web = Web.initialModel
             , config =

@@ -6,8 +6,6 @@ import Game.Account.Update as Account
 import Game.Account.Messages as Account
 import Game.Servers.Update as Servers
 import Game.Servers.Messages as Servers
-import Game.Network.Update as Network
-import Game.Network.Messages as Network
 import Game.Meta.Update as Meta
 import Game.Meta.Messages as Meta
 import Game.Web.Update as Web
@@ -24,9 +22,6 @@ update msg model =
         ServersMsg msg ->
             servers msg model
 
-        NetworkMsg msg ->
-            network msg model
-
         MetaMsg msg ->
             meta msg model
 
@@ -37,7 +32,6 @@ update msg model =
             model
                 |> account (Account.Event event)
                 |> andThen (servers (Servers.Event event))
-                |> andThen (network (Network.Event event))
                 |> andThen (meta (Meta.Event event))
 
         _ ->
@@ -77,21 +71,6 @@ servers msg model =
 
         model_ =
             { model | servers = servers }
-    in
-        ( model_, cmd, dispatch )
-
-
-network :
-    Network.Msg
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-network msg model =
-    let
-        ( network, cmd, dispatch ) =
-            Network.update model msg model.network
-
-        model_ =
-            { model | network = network }
     in
         ( model_, cmd, dispatch )
 
