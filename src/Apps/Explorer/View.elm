@@ -303,34 +303,60 @@ breadcrumb path =
         |> div [ class [ LocBar ] ]
 
 
-explorerMain : SmartPath -> Server -> Html Msg
-explorerMain path server =
+explorerMainHeader : SmartPath -> Html Msg
+explorerMainHeader path =
+    div
+        [ class [ ContentHeader ] ]
+        [ breadcrumb path
+        , div
+            [ class [ ActBtns ] ]
+            [ span
+                [ class [ GoUpBtn ]
+                , path |> pathGoUp |> pathToString |> GoPath |> onClick
+                ]
+                []
+            , span
+                [ class [ DocBtn, NewBtn ]
+                , CreatingFile "" |> UpdateEditing |> onClick
+                ]
+                []
+            , span
+                [ class [ DirBtn, NewBtn ]
+                , CreatingPath "" |> UpdateEditing |> onClick
+                ]
+                []
+            ]
+        ]
+
+
+explorerMainDinamycContent : EditingStatus -> Html Msg
+explorerMainDinamycContent editing =
+    div [] <|
+        case editing of
+            NotEditing ->
+                [ text "Not Editing " ]
+
+            CreatingFile nowName ->
+                [ text "Creating File: ", text nowName ]
+
+            CreatingPath nowName ->
+                [ text "Creating Path: ", text nowName ]
+
+            Moving fileID ->
+                [ text "Moving ", text fileID, text "." ]
+
+            Renaming fileID newName ->
+                [ text "Renaming ", text fileID, text " to ", text newName, text "." ]
+
+
+explorerMain : EditingStatus -> SmartPath -> Server -> Html Msg
+explorerMain editing path server =
     div
         [ class
             [ Content ]
         ]
-        [ div
-            [ class [ ContentHeader ] ]
-            [ breadcrumb path
-            , div
-                [ class [ ActBtns ] ]
-                [ span
-                    [ class [ GoUpBtn ]
-                    , path |> pathGoUp |> pathToString |> GoPath |> onClick
-                    ]
-                    []
-                , span
-                    [ class [ DocBtn, NewBtn ]
-                    , CreatingFile "" |> UpdateEditing |> onClick
-                    ]
-                    []
-                , span
-                    [ class [ DirBtn, NewBtn ]
-                    , CreatingPath "" |> UpdateEditing |> onClick
-                    ]
-                    []
-                ]
-            ]
+        [ explorerMainHeader path
+        , explorerMainDinamycContent editing
         , path
             |> pathToString
             |> resolvePath server
@@ -347,6 +373,6 @@ view data ({ app } as model) =
     in
         div [ class [ Window ] ]
             [ explorerColumn (Relative [ "%favorites" ]) data.server
-            , explorerMain nowPath data.server
+            , explorerMain app.editing nowPath data.server
             , menuView model
             ]
