@@ -12,7 +12,6 @@ module Core.Dispatch
         , websocket
         , game
         , account
-        , network
         , server
         , filesystem
         , processes
@@ -27,7 +26,6 @@ import Game.Messages as Game
 import Game.Meta.Messages as Meta
 import Game.Web.Messages as Web
 import Game.Account.Messages as Account
-import Game.Network.Messages as Network
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
@@ -165,11 +163,6 @@ game msg =
 account : Account.Msg -> Dispatch
 account msg =
     game (Game.AccountMsg msg)
-
-
-network : Network.Msg -> Dispatch
-network msg =
-    game (Game.NetworkMsg msg)
 
 
 server : Servers.Msg -> Dispatch

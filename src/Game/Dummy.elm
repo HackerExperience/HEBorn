@@ -4,7 +4,6 @@ import Core.Config exposing (Config)
 import Game.Models exposing (..)
 import Game.Account.Dummy as Account
 import Game.Servers.Dummy as Servers
-import Game.Network.Dummy as Network
 import Game.Meta.Dummy as Meta
 
 
@@ -20,15 +19,11 @@ dummy token config =
         servers =
             Servers.dummy
 
-        network =
-            Network.dummy
-
         meta =
             Meta.dummy
     in
         { model
             | account = account
             , servers = servers
-            , network = network
             , meta = meta
         }

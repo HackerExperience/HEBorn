@@ -11,6 +11,7 @@ import Game.Shared exposing (..)
 import Game.Servers.Shared as Servers
 import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
+import Game.Account.Bounces.Models as Bounces
 
 
 type alias AccountID =
@@ -34,6 +35,7 @@ type alias Model =
     , dock : Dock.Model
     , logout : Bool
     , servers : List Servers.ID
+    , bounces : Bounces.Model
     }
 
 
@@ -52,6 +54,7 @@ initialModel token =
     , dock = Dock.initialModel
     , logout = False
     , servers = []
+    , bounces = Bounces.initialModel
     }
 
 

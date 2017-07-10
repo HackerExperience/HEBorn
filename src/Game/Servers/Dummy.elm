@@ -4,6 +4,7 @@ import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Dummy as Filesystem
 import Game.Servers.Logs.Dummy as Logs
 import Game.Servers.Processes.Dummy as Processes
+import Game.Servers.Tunnels.Dummy as Tunnels
 
 
 dummy : Model
@@ -26,4 +27,5 @@ dummyServer ip =
     , filesystem = Filesystem.dummy
     , logs = Logs.dummy
     , processes = Processes.dummy
+    , tunnels = Tunnels.dummy
     }

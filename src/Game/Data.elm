@@ -12,7 +12,7 @@ import Game.Models exposing (..)
 import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Network.Models as Network
+import Game.Servers.Tunnels.Models as Tunnels
 
 
 type alias Data =
@@ -27,14 +27,14 @@ getServer =
     .server
 
 
+getIP : Data -> Tunnels.IP
+getIP =
+    getServer >> Servers.getIP
+
+
 getID : Data -> Servers.ID
 getID =
     .id
-
-
-getIP : Data -> Network.IP
-getIP =
-    getServer >> Servers.getIP
 
 
 getContext : Data -> Meta.Context
@@ -53,42 +53,22 @@ fromGame model =
         meta =
             getMeta model
 
-        network =
-            getNetwork model
-
         servers =
             getServers model
 
-        maybeID =
-            case Meta.getContext meta of
-                Meta.Gateway ->
-                    Meta.getGateway meta
-
-                Meta.Endpoint ->
-                    network
-                        |> Network.getEndpoint
-                        |> Maybe.andThen (flip Servers.mapNetwork servers)
+        maybeServerID =
+            getServerID model
 
         maybeServer =
-            case maybeID of
-                Just id ->
-                    case Servers.get id servers of
-                        Just server ->
-                            Just ( server, id )
-
-                        Nothing ->
-                            Nothing
-
-                Nothing ->
-                    Nothing
+            Maybe.andThen (flip Servers.get servers) maybeServerID
     in
-        case maybeServer of
-            Just ( server, id ) ->
+        case ( maybeServer, maybeServerID ) of
+            ( Just server, Just id ) ->
                 Just
                     { id = id
                     , server = server
                     , game = model
                     }
 
-            Nothing ->
+            _ ->
                 Nothing

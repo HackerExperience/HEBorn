@@ -7,7 +7,13 @@ import Game.Data as Game
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
-import Game.Network.Models as Network exposing (Tunnel, Connection, ConnectionType(..))
+import Game.Servers.Tunnels.Models as Tunnels
+    exposing
+        ( Tunnels
+        , Tunnel
+        , Connection
+        , ConnectionType(..)
+        )
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)
 import Apps.ConnManager.Resources exposing (Classes(..), prefix)
@@ -26,11 +32,11 @@ connView conn =
         ]
 
 
-tunnelView : Tunnel -> Html Msg
-tunnelView tnl =
+tunnelView : String -> Tunnel -> Html Msg
+tunnelView gateway tnl =
     div [ class [ GroupedTunnel ] ]
         [ text "Gateway: "
-        , text tnl.gateway
+        , text gateway
         , br [] []
         , text "Endpoint: "
         , text tnl.endpoint
@@ -75,9 +81,9 @@ view data ({ app } as model) =
                 ]
 
         mainEntries =
-            data.game.network.tunnels
+            data.server.tunnels.tunnels
                 |> Dict.values
-                |> List.map tunnelView
+                |> List.map (tunnelView data.server.ip)
                 |> verticalList
     in
         verticalSticked
