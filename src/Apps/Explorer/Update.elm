@@ -35,8 +35,11 @@ update data msg ({ app } as model) =
                         newPath
                         (Servers.getFilesystem data.server)
                         app
+
+                model_ =
+                    { model | app = newApp }
             in
-                ( { model | app = newApp }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
         -- General Acts
         UpdateEditing newState ->
@@ -45,8 +48,11 @@ update data msg ({ app } as model) =
                     setEditing
                         newState
                         app
+
+                model_ =
+                    { model | app = newApp }
             in
-                ( { model | app = newApp }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
         -- General Acts
         EnterRename fileId ->
@@ -55,5 +61,8 @@ update data msg ({ app } as model) =
                     setEditing
                         (Renaming fileId "TODO")
                         app
+
+                model_ =
+                    { model | app = newApp }
             in
-                ( { model | app = newApp }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )

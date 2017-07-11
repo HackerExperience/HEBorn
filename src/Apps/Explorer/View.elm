@@ -1,6 +1,7 @@
 module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (value)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
@@ -241,11 +242,16 @@ usage min max =
 
         maxStr =
             bytesToString max
+
+        usageStr =
+            (usage * 100)
+                |> floor
+                |> toString
     in
         div [ class [ NavData ] ]
             [ text "Data usage"
             , br [] []
-            , usage * 100 |> floor |> toString |> (flip (++)) "%" |> text
+            , text (usageStr ++ "%")
             , br [] []
             , progressBar usage "" 12
             , br [] []
@@ -270,7 +276,7 @@ breadcrumbItem : FilePath -> String -> Html Msg
 breadcrumbItem path label =
     span
         [ class [ BreadcrumbItem ]
-        , path |> GoPath |> onClick
+        , onClick <| GoPath path
         ]
         [ text label ]
 
@@ -334,19 +340,19 @@ explorerMainDinamycContent editing =
     div [] <|
         case editing of
             NotEditing ->
-                [ text "Not Editing " ]
+                []
 
             CreatingFile nowName ->
-                [ text "Creating File: ", text nowName ]
+                [ input [ value nowName ] [], button [] [ text "CREATE FILE" ] ]
 
             CreatingPath nowName ->
-                [ text "Creating Path: ", text nowName ]
+                [ input [ value nowName ] [], button [] [ text "CREATE PATH" ] ]
 
             Moving fileID ->
-                [ text "Moving ", text fileID, text "." ]
+                [ text "Moving ", text fileID, text ".", button [] [ text "MOVE HERE" ] ]
 
             Renaming fileID newName ->
-                [ text "Renaming ", text fileID, text " to ", text newName, text "." ]
+                [ input [ value newName ] [], button [] [ text "RENAME" ] ]
 
 
 explorerMain : EditingStatus -> SmartPath -> Server -> Html Msg

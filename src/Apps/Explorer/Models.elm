@@ -81,7 +81,16 @@ getPath explorer =
 
 setPath : Explorer -> Filesystem.FilePath -> Explorer
 setPath explorer path =
-    { explorer | path = path, editing = NotEditing }
+    { explorer
+        | path = path
+        , editing =
+            case explorer.editing of
+                Moving _ ->
+                    explorer.editing
+
+                _ ->
+                    NotEditing
+    }
 
 
 changePath :
