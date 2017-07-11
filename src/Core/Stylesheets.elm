@@ -12,6 +12,7 @@ import Apps.Browser.Style
 import Apps.TaskManager.Style
 import Apps.DBAdmin.Style
 import Apps.ConnManager.Style
+import Apps.Finance.Style
 import Apps.BounceManager.Style
 
 
@@ -34,6 +35,7 @@ fileStructure =
                 , Apps.TaskManager.Style.css
                 , Apps.DBAdmin.Style.css
                 , Apps.ConnManager.Style.css
+                , Apps.Finance.Style.css
                 , Apps.BounceManager.Style.css
                 ]
           )

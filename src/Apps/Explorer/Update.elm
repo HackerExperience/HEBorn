@@ -2,7 +2,7 @@ module Apps.Explorer.Update exposing (update)
 
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Apps.Explorer.Models exposing (Model, changePath)
+import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
 import Apps.Explorer.Menu.Update as Menu
@@ -35,5 +35,34 @@ update data msg ({ app } as model) =
                         newPath
                         (Servers.getFilesystem data.server)
                         app
+
+                model_ =
+                    { model | app = newApp }
             in
-                ( { model | app = newApp }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
+
+        -- General Acts
+        UpdateEditing newState ->
+            let
+                newApp =
+                    setEditing
+                        newState
+                        app
+
+                model_ =
+                    { model | app = newApp }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        -- General Acts
+        EnterRename fileId ->
+            let
+                newApp =
+                    setEditing
+                        (Renaming fileId "TODO")
+                        app
+
+                model_ =
+                    { model | app = newApp }
+            in
+                ( model_, Cmd.none, Dispatch.none )

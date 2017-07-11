@@ -46,3 +46,8 @@ iconAttr =
 idAttr : String -> Attribute msg
 idAttr =
     attribute "data-id"
+
+
+dataDecorated : Bool -> Attribute msg
+dataDecorated =
+    boolAttrYN "data-decorated"

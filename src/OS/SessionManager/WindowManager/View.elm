@@ -11,6 +11,7 @@ import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Dict
+import Utils.Html.Attributes exposing (dataDecorated, iconAttr)
 import OS.SessionManager.WindowManager.Context as Context
 import OS.SessionManager.WindowManager.Resources as Res
 import Apps.Models as Apps
@@ -61,6 +62,7 @@ windowWrapper id window view =
     div
         [ windowClasses window
         , windowStyle window
+        , dataDecorated <| isDecorated window
         , onMouseDown (UpdateFocusTo (Just id))
         ]
         [ header id window
@@ -68,6 +70,13 @@ windowWrapper id window view =
             [ class [ Res.WindowBody ] ]
             [ view ]
         ]
+
+
+isDecorated : Window -> Bool
+isDecorated window =
+    window
+        |> .app
+        |> Apps.isDecorated
 
 
 header : ID -> Window -> Html Msg
@@ -78,10 +87,14 @@ header id window =
             [ class [ Res.WindowHeader ]
             , onMouseDown (UpdateFocusTo (Just id))
             ]
-            [ headerTitle (title window) (Apps.icon window.app)
-            , headerContext id window.context
-            , headerButtons id
-            ]
+          <|
+            if (isDecorated window) then
+                [ headerTitle (title window) (Apps.icon window.app)
+                , headerContext id window.context
+                , headerButtons id
+                ]
+            else
+                []
         ]
 
 
@@ -101,7 +114,7 @@ headerTitle : String -> String -> Html Msg
 headerTitle title icon =
     div
         [ class [ Res.HeaderTitle ]
-        , attribute "data-icon" icon
+        , iconAttr icon
         ]
         [ text title ]
 
@@ -129,9 +142,21 @@ headerButtons id =
 
 windowStyle : Window -> Html.Attribute Msg
 windowStyle window =
-    styles
-        [ left (px window.position.x)
-        , top (px window.position.y)
-        , width (px window.size.width)
-        , height (px window.size.height)
-        ]
+    let
+        position =
+            [ left (px window.position.x)
+            , top (px window.position.y)
+            ]
+
+        size =
+            [ width (px window.size.width)
+            , height (px window.size.height)
+            ]
+
+        attrs =
+            if isDecorated window then
+                position ++ size
+            else
+                position
+    in
+        styles attrs

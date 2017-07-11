@@ -1,6 +1,7 @@
 module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (value)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
@@ -9,7 +10,7 @@ import Game.Data as Game
 import Game.Servers.Models exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Models exposing (Model, Explorer, resolvePath)
+import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Lib exposing (..)
 import Apps.Explorer.Menu.View
     exposing
@@ -73,35 +74,35 @@ moduleMenu fileID modType =
 
 fileVerToText : FileVersion -> Html Msg
 fileVerToText ver =
-    text
-        (case ver of
+    text <|
+        case ver of
             FileVersionNumber pure ->
                 toString pure
 
             NoVersion ->
                 "N/V"
-        )
 
 
 moduleVerToText : ModuleVersion -> Html Msg
 moduleVerToText ver =
-    text (toString ver)
+    ver
+        |> toString
+        |> text
 
 
 sizeToText : FileSize -> Html Msg
 sizeToText size =
-    text
-        (case size of
+    text <|
+        case size of
             FileSizeNumber pure ->
                 bytesToString (toFloat pure)
 
             NoSize ->
                 "N/S"
-        )
 
 
-renderModule : FileID -> FileModule -> Html Msg
-renderModule fileID act =
+module_ : FileID -> FileModule -> Html Msg
+module_ fileID act =
     let
         target =
             moduleInterpret act.name
@@ -114,9 +115,9 @@ renderModule fileID act =
             ]
 
 
-renderModuleList : FileID -> List FileModule -> List (Html Msg)
-renderModuleList fileID acts =
-    List.map (renderModule fileID) acts
+moduleList : FileID -> List FileModule -> List (Html Msg)
+moduleList fileID acts =
+    List.map (module_ fileID) acts
 
 
 indvidualEntryName : File -> String
@@ -129,28 +130,28 @@ indvidualEntryName file =
             data.name
 
 
-renderTreeEntry : Server -> File -> Html Msg
-renderTreeEntry server file =
+treeEntry : Server -> File -> Html Msg
+treeEntry server file =
     let
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
 
         label =
-            span [] [ text (indvidualEntryName file) ]
+            span [] [ text <| indvidualEntryName file ]
     in
         case file of
             Folder data ->
                 div
                     [ class [ NavEntry, EntryDir, EntryExpanded ]
                     , menuTreeDir data.id
-                    , onClick (GoPath (getAbsolutePath file))
+                    , file |> getAbsolutePath |> GoPath |> onClick
                     ]
                     [ div
                         [ class [ EntryView ] ]
                         [ icon, label ]
                     , div
                         [ class [ EntryChilds ] ]
-                        (renderTreeEntryPath server (pathInterpret (getAbsolutePath file)))
+                        (file |> getAbsolutePath |> pathInterpret |> treeEntryPath server)
                     ]
 
             StdFile prop ->
@@ -161,25 +162,22 @@ renderTreeEntry server file =
                     [ icon, label ]
 
 
-renderTreeEntryPath : Server -> SmartPath -> List (Html Msg)
-renderTreeEntryPath server path =
-    let
-        entries =
-            resolvePath
-                server
-                (path |> pathToString)
-    in
-        List.map (renderTreeEntry server) entries
+treeEntryPath : Server -> SmartPath -> List (Html Msg)
+treeEntryPath server path =
+    path
+        |> pathToString
+        |> resolvePath server
+        |> List.map (treeEntry server)
 
 
-renderDetailedEntry : File -> Html Msg
-renderDetailedEntry file =
+detailedEntry : File -> Html Msg
+detailedEntry file =
     case file of
         Folder data ->
             div
                 [ class [ CntListEntry, EntryDir ]
                 , menuMainDir data.id
-                , onClick (GoPath (getAbsolutePath file))
+                , file |> getAbsolutePath |> GoPath |> onClick
                 ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text data.name ]
@@ -193,7 +191,7 @@ renderDetailedEntry file =
                         , menuMainArchive prop.id
                         ]
                         [ span [ class [ entryIcon file ] ] []
-                        , span [] [ text (indvidualEntryName file) ]
+                        , span [] [ text <| indvidualEntryName file ]
                         , span [] [ fileVerToText prop.version ]
                         , span [] [ sizeToText prop.size ]
                         ]
@@ -206,7 +204,7 @@ renderDetailedEntry file =
                                 , menuExecutable prop.id
                                 ]
                                 [ span [ class [ entryIcon file ] ] []
-                                , span [] [ text (indvidualEntryName file) ]
+                                , span [] [ text <| indvidualEntryName file ]
                                 , span [] [ fileVerToText prop.version ]
                                 , span [] [ sizeToText prop.size ]
                                 ]
@@ -214,18 +212,18 @@ renderDetailedEntry file =
                         if (List.length prop.modules > 0) then
                             div [ class [ CntListContainer ] ]
                                 [ baseEntry
-                                , div [ class [ CntListChilds ] ]
-                                    (renderModuleList prop.id prop.modules)
+                                , div [ class [ CntListChilds ] ] <|
+                                    moduleList prop.id prop.modules
                                 ]
                         else
                             baseEntry
             )
 
 
-renderDetailedEntryList : List File -> List (Html Msg)
-renderDetailedEntryList list =
+detailedEntryList : List File -> List (Html Msg)
+detailedEntryList list =
     List.map
-        renderDetailedEntry
+        detailedEntry
         list
 
 
@@ -233,8 +231,8 @@ renderDetailedEntryList list =
 -- END OF THAT
 
 
-viewUsage : Float -> Float -> Html Msg
-viewUsage min max =
+usage : Float -> Float -> Html Msg
+usage min max =
     let
         usage =
             min / max
@@ -244,78 +242,132 @@ viewUsage min max =
 
         maxStr =
             bytesToString max
+
+        usageStr =
+            (usage * 100)
+                |> floor
+                |> toString
     in
         div [ class [ NavData ] ]
             [ text "Data usage"
             , br [] []
-            , text (toString (floor (usage * 100)) ++ "%")
+            , text (usageStr ++ "%")
             , br [] []
             , progressBar usage "" 12
             , br [] []
-            , text (minStr ++ " / " ++ maxStr)
+            , text <| minStr ++ " / " ++ maxStr
             ]
 
 
-viewExplorerColumn : SmartPath -> Server -> Html Msg
-viewExplorerColumn path server =
+explorerColumn : SmartPath -> Server -> Html Msg
+explorerColumn path server =
     div
         [ class [ Nav ]
         ]
-        [ div [ class [ NavTree ] ]
-            (renderTreeEntryPath
+        [ div [ class [ NavTree ] ] <|
+            treeEntryPath
                 server
                 path
-            )
-        , (viewUsage 256000000 1024000000)
+        , usage 256000000 1024000000
         ]
 
 
-viewLocBar : SmartPath -> Html Msg
-viewLocBar path =
+breadcrumbItem : FilePath -> String -> Html Msg
+breadcrumbItem path label =
+    span
+        [ class [ BreadcrumbItem ]
+        , onClick <| GoPath path
+        ]
+        [ text label ]
+
+
+breadcrumbFold : String -> ( List (Html Msg), String ) -> ( List (Html Msg), String )
+breadcrumbFold item ( htmlElems, pathAcu ) =
+    if (String.length item) < 1 then
+        ( htmlElems, pathAcu )
+    else
+        let
+            fullPath =
+                pathAcu ++ "/" ++ item
+
+            newElems =
+                item
+                    |> breadcrumbItem fullPath
+                    |> (flip (::)) htmlElems
+        in
+            ( newElems, fullPath )
+
+
+breadcrumb : SmartPath -> Html Msg
+breadcrumb path =
+    path
+        |> pathFuckStart
+        |> List.foldl breadcrumbFold ( [], "" )
+        |> Tuple.first
+        |> List.reverse
+        |> (::) (breadcrumbItem "/" "DISK")
+        |> div [ class [ LocBar ] ]
+
+
+explorerMainHeader : SmartPath -> Html Msg
+explorerMainHeader path =
     div
-        [ class [ LocBar ] ]
-        (List.map
-            (\o ->
-                span
-                    [ class [ BreadcrumbItem ] ]
-                    [ text o ]
-            )
-            (path |> pathFuckStart)
-        )
+        [ class [ ContentHeader ] ]
+        [ breadcrumb path
+        , div
+            [ class [ ActBtns ] ]
+            [ span
+                [ class [ GoUpBtn ]
+                , path |> pathGoUp |> pathToString |> GoPath |> onClick
+                ]
+                []
+            , span
+                [ class [ DocBtn, NewBtn ]
+                , CreatingFile "" |> UpdateEditing |> onClick
+                ]
+                []
+            , span
+                [ class [ DirBtn, NewBtn ]
+                , CreatingPath "" |> UpdateEditing |> onClick
+                ]
+                []
+            ]
+        ]
 
 
-viewExplorerMain : SmartPath -> Server -> Html Msg
-viewExplorerMain path server =
+explorerMainDinamycContent : EditingStatus -> Html Msg
+explorerMainDinamycContent editing =
+    div [] <|
+        case editing of
+            NotEditing ->
+                []
+
+            CreatingFile nowName ->
+                [ input [ value nowName ] [], button [] [ text "CREATE FILE" ] ]
+
+            CreatingPath nowName ->
+                [ input [ value nowName ] [], button [] [ text "CREATE PATH" ] ]
+
+            Moving fileID ->
+                [ text "Moving ", text fileID, text ".", button [] [ text "MOVE HERE" ] ]
+
+            Renaming fileID newName ->
+                [ input [ value newName ] [], button [] [ text "RENAME" ] ]
+
+
+explorerMain : EditingStatus -> SmartPath -> Server -> Html Msg
+explorerMain editing path server =
     div
         [ class
             [ Content ]
         ]
-        [ div
-            [ class [ ContentHeader ] ]
-            [ viewLocBar path
-            , div
-                [ class [ ActBtns ] ]
-                [ span
-                    [ class [ GoUpBtn ]
-                    , onClick (GoPath ((pathGoUp path) |> pathToString))
-                    ]
-                    []
-                , span
-                    [ class [ DocBtn, NewBtn ] ]
-                    []
-                , span
-                    [ class [ DirBtn, NewBtn ] ]
-                    []
-                ]
-            ]
-        , div
-            [ class [ ContentList ] ]
-            (renderDetailedEntryList
-                (resolvePath
-                    server
-                    (path |> pathToString)
-                )
-            )
+        [ explorerMainHeader path
+        , explorerMainDinamycContent editing
+        , path
+            |> pathToString
+            |> resolvePath server
+            |> detailedEntryList
+            |> div [ class [ ContentList ] ]
         ]
 
 
@@ -326,7 +378,7 @@ view data ({ app } as model) =
             app.path |> pathInterpret
     in
         div [ class [ Window ] ]
-            [ viewExplorerColumn (Relative [ "%favorites" ]) data.server
-            , viewExplorerMain nowPath data.server
+            [ explorerColumn (Relative [ "%favorites" ]) data.server
+            , explorerMain app.editing nowPath data.server
             , menuView model
             ]

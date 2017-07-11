@@ -5,8 +5,18 @@ import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
 
 
+type EditingStatus
+    = NotEditing
+    | CreatingFile String
+    | CreatingPath String
+    | Moving Filesystem.FileID
+    | Renaming Filesystem.FileID String
+
+
 type alias Explorer =
-    { path : Filesystem.FilePath }
+    { path : Filesystem.FilePath
+    , editing : EditingStatus
+    }
 
 
 type alias Model =
@@ -53,6 +63,7 @@ icon =
 initialExplorer : Explorer
 initialExplorer =
     { path = Filesystem.rootPath
+    , editing = NotEditing
     }
 
 
@@ -70,7 +81,16 @@ getPath explorer =
 
 setPath : Explorer -> Filesystem.FilePath -> Explorer
 setPath explorer path =
-    { explorer | path = path }
+    { explorer
+        | path = path
+        , editing =
+            case explorer.editing of
+                Moving _ ->
+                    explorer.editing
+
+                _ ->
+                    NotEditing
+    }
 
 
 changePath :
@@ -88,3 +108,8 @@ changePath path filesystem explorer =
 resolvePath : Server -> Filesystem.FilePath -> List Filesystem.File
 resolvePath server path =
     Filesystem.getFilesOnPath path (Servers.getFilesystem server)
+
+
+setEditing : EditingStatus -> Explorer -> Explorer
+setEditing val src =
+    { src | editing = val }
