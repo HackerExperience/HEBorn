@@ -18,10 +18,11 @@ css =
             , maxHeight (vh 100)
             , overflow hidden
             , margin (px 0)
-            , backgroundColor (rgb 57 109 166)
-            , backgroundImage <| url "https://blog.newegg.com/blog/wp-content/uploads/windows_xp_bliss-wide.jpg"
+            , backgroundImage <| url "https://static.pexels.com/photos/176851/pexels-photo-176851.jpeg"
             , backgroundSize cover
             , fontFamily sansSerif
+            , fontFamilies [ "Open Sans" ]
+            , Css.fontWeight (int 300)
             , cursor default
             , unselectable
             ]

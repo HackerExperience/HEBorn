@@ -30,7 +30,7 @@ hyperlink =
 
 bgWindow : Color
 bgWindow =
-    hex "EEE"
+    hex "eee8ea"
 
 
 bgSelected : Color

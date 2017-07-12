@@ -24,7 +24,7 @@ flexContainerHorz =
 
 globalShadow : Style
 globalShadow =
-    boxShadow5 (px 0) (px 0) (px 8) (px 1) (rgba 0 0 0 0.2)
+    boxShadow4 (px 0) (px 3) (px 15) (rgba 0 0 0 0.2)
 
 
 emptyContent : Style
