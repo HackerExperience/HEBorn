@@ -2,7 +2,7 @@ module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (value)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
@@ -144,14 +144,14 @@ treeEntry server file =
                 div
                     [ class [ NavEntry, EntryDir, EntryExpanded ]
                     , menuTreeDir data.id
-                    , file |> getAbsolutePath |> GoPath |> onClick
+                    , onClick <| GoPath <| getAbsolutePath file
                     ]
                     [ div
                         [ class [ EntryView ] ]
                         [ icon, label ]
                     , div
                         [ class [ EntryChilds ] ]
-                        (file |> getAbsolutePath |> pathInterpret |> treeEntryPath server)
+                        (treeEntryPath server <| pathInterpret <| getAbsolutePath file)
                     ]
 
             StdFile prop ->
@@ -177,7 +177,7 @@ detailedEntry file =
             div
                 [ class [ CntListEntry, EntryDir ]
                 , menuMainDir data.id
-                , file |> getAbsolutePath |> GoPath |> onClick
+                , onClick <| GoPath <| getAbsolutePath file
                 ]
                 [ span [ class [ DirIcon ] ] []
                 , span [] [ text data.name ]
@@ -318,17 +318,17 @@ explorerMainHeader path =
             [ class [ ActBtns ] ]
             [ span
                 [ class [ GoUpBtn ]
-                , path |> pathGoUp |> pathToString |> GoPath |> onClick
+                , onClick <| GoPath <| pathToString <| pathGoUp path
                 ]
                 []
             , span
                 [ class [ DocBtn, NewBtn ]
-                , CreatingFile "" |> UpdateEditing |> onClick
+                , onClick <| UpdateEditing <| CreatingFile ""
                 ]
                 []
             , span
                 [ class [ DirBtn, NewBtn ]
-                , CreatingPath "" |> UpdateEditing |> onClick
+                , onClick <| UpdateEditing <| CreatingPath ""
                 ]
                 []
             ]
@@ -343,16 +343,35 @@ explorerMainDinamycContent editing =
                 []
 
             CreatingFile nowName ->
-                [ input [ value nowName ] [], button [] [ text "CREATE FILE" ] ]
+                [ input
+                    [ value nowName
+                    , onInput <| CreatingFile >> UpdateEditing
+                    ]
+                    []
+                , button [ onClick ApplyEdit ] [ text "CREATE FILE" ]
+                ]
 
             CreatingPath nowName ->
-                [ input [ value nowName ] [], button [] [ text "CREATE PATH" ] ]
+                [ input
+                    [ value nowName
+                    , onInput <| CreatingPath >> UpdateEditing
+                    ]
+                    []
+                , button [ onClick ApplyEdit ] [ text "CREATE PATH" ]
+                ]
 
             Moving fileID ->
-                [ text "Moving ", text fileID, text ".", button [] [ text "MOVE HERE" ] ]
+                [ button [ onClick ApplyEdit ] [ text "MOVE HERE" ]
+                ]
 
             Renaming fileID newName ->
-                [ input [ value newName ] [], button [] [ text "RENAME" ] ]
+                [ input
+                    [ value newName
+                    , onInput <| (Renaming fileID) >> UpdateEditing
+                    ]
+                    []
+                , button [ onClick ApplyEdit ] [ text "RENAME" ]
+                ]
 
 
 explorerMain : EditingStatus -> SmartPath -> Server -> Html Msg

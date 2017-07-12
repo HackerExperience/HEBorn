@@ -10,3 +10,4 @@ type Msg
     | GoPath Filesystem.FilePath
     | UpdateEditing EditingStatus
     | EnterRename Filesystem.FileID
+    | ApplyEdit
