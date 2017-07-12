@@ -4,7 +4,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Filesystem.Messages as Filesystem exposing (Msg(..))
+import Game.Servers.Filesystem.Messages as Filesystem
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages as Explorer exposing (Msg)
 import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)
@@ -31,19 +31,20 @@ actionHandler data action ({ app } as model) =
                 fs =
                     Servers.getFilesystem data.server
 
-                newPath =
+                model_ =
                     newPathId
                         |> Filesystem.getFileById fs
-                        |> Filesystem.getAbsolutePath
-
-                newApp =
-                    changePath
-                        newPath
-                        fs
-                        app
-
-                model_ =
-                    { model | app = newApp }
+                        |> Maybe.map
+                            (Filesystem.getAbsolutePath
+                                >> (\newPath ->
+                                        changePath
+                                            newPath
+                                            fs
+                                            app
+                                   )
+                                >> (\newApp -> { model | app = newApp })
+                            )
+                        |> Maybe.withDefault model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
@@ -64,18 +65,16 @@ actionHandler data action ({ app } as model) =
                 fs =
                     Servers.getFilesystem data.server
 
-                nowName =
+                model_ =
                     fileId
                         |> Filesystem.getFileById fs
-                        |> Filesystem.getFileName
-
-                newApp =
-                    setEditing
-                        (Renaming fileId nowName)
-                        app
-
-                model_ =
-                    { model | app = newApp }
+                        |> Maybe.map
+                            (Filesystem.getFileName
+                                >> Renaming fileId
+                                >> ((flip setEditing) app)
+                                >> (\newApp -> { model | app = newApp })
+                            )
+                        |> Maybe.withDefault model
             in
                 ( model_, Cmd.none, Dispatch.none )
 

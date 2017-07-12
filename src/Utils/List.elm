@@ -2,7 +2,8 @@ module Utils.List
     exposing
         ( last
         , find
-        , findWith
+        , memberIndex
+        , findIndex
         , move
         , indexedFoldl
         , indexedFoldr
@@ -11,13 +12,28 @@ module Utils.List
         )
 
 
-find : comparable -> List comparable -> Maybe Int
-find elm =
-    findWith ((==) elm)
+find : (a -> Bool) -> List a -> Maybe a
+find check list =
+    let
+        reducer item acc =
+            if (check item) then
+                ( True, Just item )
+            else
+                ( False, Nothing )
+
+        ( _, value ) =
+            foldlWhile reducer Nothing list
+    in
+        value
 
 
-findWith : (a -> Bool) -> List a -> Maybe Int
-findWith check list =
+memberIndex : comparable -> List comparable -> Maybe Int
+memberIndex elm =
+    findIndex ((==) elm)
+
+
+findIndex : (a -> Bool) -> List a -> Maybe Int
+findIndex check list =
     let
         reducer item acc =
             if (check item) then

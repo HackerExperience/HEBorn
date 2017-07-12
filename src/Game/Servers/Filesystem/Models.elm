@@ -24,13 +24,18 @@ module Game.Servers.Filesystem.Models
         , rootPath
         , getFileById
         , moveFile
-        , setFilePath
+        , renameFile
         , pathSeparator
         , getAbsolutePath
+        , pathSplit
+        , isValidFilename
+        , setFilePath
+        , setFileName
         )
 
 import Dict
 import Utils.Dict as Dict
+import Utils.List as List
 import Game.Shared exposing (ID)
 
 
@@ -141,12 +146,24 @@ getFileLocation file =
 
 setFilePath : FilePath -> File -> File
 setFilePath path file =
+    -- ATTENTION: This doesn't update path index
     case file of
         StdFile file ->
             StdFile { file | path = path }
 
         Folder folder ->
             Folder { folder | path = path }
+
+
+setFileName : String -> File -> File
+setFileName name file =
+    -- ATTENTION: This doesn't update path index
+    case file of
+        StdFile file ->
+            StdFile { file | name = name }
+
+        Folder folder ->
+            Folder { folder | name = name }
 
 
 getFileName : File -> String
@@ -161,6 +178,7 @@ getFileName file =
 
 addFile : File -> Filesystem -> Filesystem
 addFile file filesystem =
+    -- TODO: Do nothing when overwriting
     let
         path =
             getFileLocation file
@@ -207,7 +225,7 @@ getFilesIdOnPath path filesystem =
 
 getFilesOnPath : FilePath -> Filesystem -> List File
 getFilesOnPath path filesystem =
-    List.map
+    List.filterMap
         (getFileById filesystem)
         (getFilesIdOnPath path filesystem)
 
@@ -217,14 +235,85 @@ pathExists path filesystem =
     Dict.member path filesystem.pathIndex
 
 
+folderMovementIsValid : FilePath -> File -> Filesystem -> Bool
+folderMovementIsValid path file filesystem =
+    case file of
+        StdFile _ ->
+            True
+
+        Folder _ ->
+            let
+                absPath =
+                    getAbsolutePath file
+
+                pathPattrn =
+                    absPath ++ pathSeparator
+
+                entries =
+                    getFilesOnPath absPath filesystem
+            in
+                (not <| String.startsWith pathPattrn path)
+                    && (List.length entries == 0)
+
+
 moveFile : FilePath -> File -> Filesystem -> Filesystem
 moveFile path file filesystem =
-    if (pathExists path filesystem) then
+    if
+        (getFileLocation file /= path)
+            && (pathExists path filesystem)
+            && (folderMovementIsValid path file filesystem)
+    then
         filesystem
             |> removeFile file
             |> addFile (setFilePath path file)
     else
         filesystem
+
+
+renameFile : String -> File -> Filesystem -> Filesystem
+renameFile name file filesystem =
+    case file of
+        StdFile _ ->
+            if (getFileNameWithExtension file /= name) then
+                { filesystem
+                    | entries =
+                        Dict.insert
+                            (getFileId file)
+                            (setFileName name file)
+                            filesystem.entries
+                }
+            else
+                filesystem
+
+        Folder _ ->
+            let
+                absPath =
+                    getAbsolutePath file
+
+                file_ =
+                    setFileName name file
+
+                entries =
+                    getFilesOnPath absPath filesystem
+            in
+                if
+                    (getFileName file /= name)
+                        && (List.length entries == 0)
+                then
+                    { filesystem
+                        | entries =
+                            Dict.insert
+                                (getFileId file)
+                                file_
+                                filesystem.entries
+                        , pathIndex =
+                            Dict.insert
+                                (getAbsolutePath file_)
+                                []
+                                (Dict.remove absPath filesystem.pathIndex)
+                    }
+                else
+                    filesystem
 
 
 removeFile : File -> Filesystem -> Filesystem
@@ -271,21 +360,16 @@ removeFile file filesystem =
                         filesystem
 
 
-getFileById : Filesystem -> FileID -> File
+getFileById : Filesystem -> FileID -> Maybe File
 getFileById filesystem fileID =
-    case (Dict.get fileID filesystem.entries) of
-        Just x ->
-            x
-
-        Nothing ->
-            Folder (FolderData "invalid" "%invalid" "%")
+    Dict.get fileID filesystem.entries
 
 
 initialFilesystem : Filesystem
 initialFilesystem =
     Filesystem
-        (Dict.fromList [ ( "root", Folder (FolderData "root" "/" ".") ) ])
-        (Dict.fromList [ ( "/", [] ) ])
+        (Dict.fromList [ ( "root", Folder (FolderData "root" rootPath ".") ) ])
+        (Dict.fromList [ ( rootPath, [] ) ])
 
 
 rootPath : FilePath
@@ -323,7 +407,53 @@ getAbsolutePath file =
         path =
             getFileLocation file
     in
-        if (path == "/") then
+        if (path == pathSeparator) then
             path ++ name
         else
             path ++ pathSeparator ++ name
+
+
+pathSplit : FilePath -> ( FilePath, Maybe String )
+pathSplit src =
+    let
+        splitten =
+            String.split pathSeparator src
+
+        dropLast =
+            List.reverse
+                >> List.drop 1
+                >> List.reverse
+                >> String.join pathSeparator
+    in
+        case ( splitten, List.last splitten ) of
+            ( _, Nothing ) ->
+                -- IMPOSSIBLE CASE FOR SPLITED STRING
+                ( "", Nothing )
+
+            ( [ "" ], Just "" ) ->
+                ( rootPath, Nothing )
+
+            ( a, Just "" ) ->
+                ( dropLast a, Nothing )
+
+            ( [ "", a ], Just b ) ->
+                ( rootPath, Just b )
+
+            ( [ a ], Just b ) ->
+                ( rootPath, Just b )
+
+            ( a, Just b ) ->
+                ( dropLast a
+                , Just b
+                )
+
+
+isValidFilename : String -> Bool
+isValidFilename fName =
+    -- TODO: Add special characters & entire name validation
+    if String.length fName > 0 then
+        False
+    else if String.length fName < 255 then
+        False
+    else
+        True

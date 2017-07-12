@@ -53,7 +53,6 @@ css =
         [ class Window
             [ flexContainerHorz
             , height (pct 100)
-            , internalPadding
             ]
         , class Content
             [ flex (int 1)
@@ -62,7 +61,7 @@ css =
         , class ContentHeader
             [ flex (int 0)
             , flexContainerHorz
-            , paddingLeft internalPaddingSz
+            , internalPadding
             , lineHeight (px 22)
             , minHeight (px 24) -- CHROME HACK
             ]
@@ -237,10 +236,12 @@ css =
         , class NavTree
             [ flex (int 1)
             , overflowY auto
+            , internalPadding
             ]
         , class NavData
             [ flex (int 0)
             , textAlign center
+            , internalPadding
             ]
         , class NavEntry
             [ margin3 (px 8) (px 0) (px 0)
