@@ -72,11 +72,12 @@ css =
                 ]
             , withAttribute (Css.EQ "data-decorated" "Y")
                 [ globalShadow
+                , backgroundColor Colors.bgWindow
+                , borderRadius wmBorderRadius
+                , color Colors.black
                 , children
                     [ class WindowBody
-                        [ borderRadius4 (px 0) (px 0) wmBorderRadius wmBorderRadius
-                        , backgroundColor Colors.bgWindow
-                        , flex (int 1)
+                        [ flex (int 1)
                         , overflowY hidden
                         , flexContainerVert
                         ]
@@ -85,14 +86,10 @@ css =
                             [ class WindowHeader
                                 [ displayFlex
                                 , flexFlow2 row wrap
-                                , backgroundImage <| linearGradient2 toBottom (stop2 (hex "6c6c6c") (pct 0)) (stop <| hex "4c4c4c") []
-                                , color Colors.white
                                 , flex (int 0)
-                                , borderRadius4 wmBorderRadius wmBorderRadius (px 0) (px 0)
                                 , internalPadding
                                 , lineHeight (px 16)
                                 , minHeight (px 16) --CHROME HACK
-                                , borderBottom3 (px 1) solid (rgb 0 140 255)
                                 , fontSize (px 12)
                                 , children
                                     [ class HeaderTitle
@@ -136,14 +133,17 @@ css =
                                             , class HeaderBtnClose
                                                 [ before
                                                     [ Icon.windowClose ]
+                                                , color (hex "f25156")
                                                 ]
                                             , class HeaderBtnMaximize
                                                 [ before
                                                     [ Icon.windowMaximize ]
+                                                , color (hex "0ed439")
                                                 ]
                                             , class HeaderBtnMinimize
                                                 [ before
                                                     [ Icon.windowMinimize ]
+                                                , color (hex "ffc109")
                                                 ]
                                             ]
                                         ]
