@@ -1,15 +1,14 @@
 module Requests.Requests exposing (request, report)
 
-import Result as Result exposing (Result(..))
 import Http
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required, optional)
+import Json.Encode as Encode
 import Driver.Http.Http as HttpDriver
 import Driver.Websocket.Channels as WebsocketDriver
 import Driver.Websocket.Websocket as WebsocketDriver
-import Requests.Types exposing (..)
 import Requests.Topics exposing (..)
-import Json.Encode as Encode
-import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Requests.Types exposing (..)
 
 
 report : Result String a -> a
