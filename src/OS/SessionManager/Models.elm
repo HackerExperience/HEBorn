@@ -15,16 +15,14 @@ module OS.SessionManager.Models
 import Dict exposing (Dict)
 import Maybe exposing (Maybe(..))
 import Random.Pcg as Random
-import Uuid
+import Utils.Model.RandomUuid as RandomUuid
 import Apps.Apps as Apps
 import Game.Network.Types exposing (IP)
 import OS.SessionManager.WindowManager.Models as WindowManager
 
 
 type alias Model =
-    { sessions : Sessions
-    , seed : Random.Seed
-    }
+    RandomUuid.Model { sessions : Sessions }
 
 
 type alias Sessions =
@@ -42,8 +40,8 @@ type alias WindowRef =
 initialModel : Model
 initialModel =
     -- TODO: fetch this from game and stop keeping the active one
-    { sessions = Dict.empty
-    , seed = initialSeed
+    { randomUuidSeed = Random.initialSeed 844121764423
+    , sessions = Dict.empty
     }
 
 
@@ -53,7 +51,7 @@ get session { sessions } =
 
 
 insert : ID -> Model -> Model
-insert id ({ sessions, seed } as model) =
+insert id ({ sessions } as model) =
     if not (Dict.member id sessions) then
         let
             sessions_ =
@@ -61,9 +59,6 @@ insert id ({ sessions, seed } as model) =
                     id
                     WindowManager.initialModel
                     sessions
-
-            seed_ =
-                newSeed (Dict.size sessions_)
         in
             { model | sessions = sessions_ }
     else
@@ -75,7 +70,7 @@ openApp id ip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
-                ( uuid, model ) =
+                ( model, uuid ) =
                     getUID model0
 
                 wm_ =
@@ -98,7 +93,7 @@ openOrRestoreApp id ip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
-                ( uuid, model ) =
+                ( model, uuid ) =
                     getUID model0
 
                 wm_ =
@@ -116,19 +111,9 @@ openOrRestoreApp id ip app ({ sessions } as model0) =
             model0
 
 
-getUID : Model -> ( String, Model )
-getUID ({ sessions, seed } as model) =
-    let
-        ( uuid, seed_ ) =
-            Random.step Uuid.uuidGenerator seed
-
-        model_ =
-            { model | seed = seed_ }
-
-        uuid_ =
-            Uuid.toString uuid
-    in
-        ( uuid_, model_ )
+getUID : Model -> ( Model, String )
+getUID =
+    RandomUuid.newUuid
 
 
 refresh : ID -> WindowManager.Model -> Model -> Model
@@ -157,23 +142,3 @@ remove id ({ sessions } as model) =
 getWindowID : WindowRef -> WindowManager.ID
 getWindowID ( _, id ) =
     id
-
-
-
--- internals
-
-
-seed : Int
-seed =
-    -- a magic number from some other game
-    844121764423
-
-
-newSeed : Int -> Random.Seed
-newSeed a =
-    Random.initialSeed (seed + a)
-
-
-initialSeed : Random.Seed
-initialSeed =
-    newSeed 0
