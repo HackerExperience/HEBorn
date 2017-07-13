@@ -114,26 +114,28 @@ initialModel =
 
 resert : String -> Maybe IP -> Apps.App -> Model -> Model
 resert id ip app ({ visible, hidden, windows } as model) =
-    -- either restores every app or open a new one
     let
-        maybeID =
+        noVisible =
+            visible
+                |> List.filter (filterApp app windows)
+                |> List.isEmpty
+
+        noHidden =
             hidden
                 |> List.filter (filterApp app windows)
-                |> List.head
-    in
-        case maybeID of
-            Just id ->
-                minimizeAll app model
+                |> List.isEmpty
 
-            Nothing ->
-                let
-                    hidden_ =
-                        List.filter (filterApp app windows) hidden
-                in
-                    if List.isEmpty hidden_ then
-                        insert id ip app model
-                    else
-                        List.foldl restore model hidden_
+        noOpened =
+            noVisible && noHidden
+    in
+        if noOpened then
+            insert id ip app model
+        else if noVisible then
+            hidden
+                |> List.filter (filterApp app windows)
+                |> List.foldl restore model
+        else
+            insert id ip app model
 
 
 insert : ID -> Maybe IP -> Apps.App -> Model -> Model

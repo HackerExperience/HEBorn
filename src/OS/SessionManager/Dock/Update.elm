@@ -13,7 +13,7 @@ update :
     -> Msg
     -> Model
     -> Model
-update data msg model =
+update data msg ({ sessions } as model) =
     case msg of
         OpenApp app ->
             let
@@ -27,33 +27,39 @@ update data msg model =
             in
                 model_
 
-        RestoreApps app ->
-            -- WM.restoreAll app wm
-            model
+        AppButton app ->
+            let
+                ip =
+                    data
+                        |> Game.getServer
+                        |> Servers.getEndpoint
+
+                model_ =
+                    openOrRestoreApp data.id ip app model
+            in
+                model_
 
         _ ->
-            mapWM (wmUpdate msg) data model
+            case Dict.get data.id sessions of
+                Just wm ->
+                    let
+                        sessions_ =
+                            Dict.insert
+                                data.id
+                                (wmUpdate msg wm)
+                                sessions
+
+                        model_ =
+                            { model | sessions = sessions_ }
+                    in
+                        model_
+
+                Nothing ->
+                    model
 
 
 
 -- internals
-
-
-mapWM : (WM.Model -> WM.Model) -> Game.Data -> Model -> Model
-mapWM func data ({ sessions } as model) =
-    case Dict.get data.id sessions of
-        Just wm ->
-            let
-                sessions_ =
-                    Dict.insert data.id (func wm) model.sessions
-
-                model_ =
-                    { model | sessions = sessions_ }
-            in
-                model_
-
-        Nothing ->
-            model
 
 
 wmUpdate : Msg -> WM.Model -> WM.Model
