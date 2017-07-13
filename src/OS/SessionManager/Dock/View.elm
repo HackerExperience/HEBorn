@@ -97,7 +97,7 @@ icon : Apps.App -> WM.GroupedWindows -> WM.Model -> Html Msg
 icon app group wm =
     div
         [ class [ Res.ItemIco ]
-        , onClick (OpenApp app)
+        , onClick (AppButton app)
         , iconAttr (Apps.icon app)
         ]
         []
@@ -183,10 +183,15 @@ windowList :
     -> List ( String, WM.Window )
     -> List (Html Msg)
 windowList event label list =
-    list
-        |> List.indexedMap (listItem event)
-        |> (::) (hr [] [])
-        |> (::) (li [] [ text label ])
+    let
+        titleAndID ( id, window ) =
+            (WM.title window) ++ id
+    in
+        list
+            |> List.sortBy titleAndID
+            |> List.indexedMap (listItem event)
+            |> (::) (hr [] [])
+            |> (::) (li [] [ text label ])
 
 
 listItem : (String -> Msg) -> Int -> ( String, WM.Window ) -> Html Msg

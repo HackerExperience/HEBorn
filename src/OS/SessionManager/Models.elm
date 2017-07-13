@@ -8,6 +8,7 @@ module OS.SessionManager.Models
         , get
         , insert
         , openApp
+        , openOrRestoreApp
         , refresh
         , remove
         )
@@ -102,7 +103,7 @@ openOrRestoreApp id ip app ({ sessions } as model0) =
                     getUID model0
 
                 wm_ =
-                    WindowManager.insert uuid ip app wm
+                    WindowManager.resert uuid ip app wm
 
                 sessions_ =
                     Dict.insert id wm_ sessions
