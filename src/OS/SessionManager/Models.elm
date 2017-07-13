@@ -12,11 +12,12 @@ module OS.SessionManager.Models
         , remove
         )
 
-import Uuid
 import Dict exposing (Dict)
 import Maybe exposing (Maybe(..))
 import Random.Pcg as Random
+import Uuid
 import Apps.Apps as Apps
+import Game.Network.Types exposing (IP)
 import OS.SessionManager.WindowManager.Models as WindowManager
 
 
@@ -69,8 +70,8 @@ insert id ({ sessions, seed } as model) =
         model
 
 
-openApp : ID -> Apps.App -> Model -> Model
-openApp id app ({ sessions } as model0) =
+openApp : ID -> Maybe IP -> Apps.App -> Model -> Model
+openApp id ip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
@@ -78,7 +79,30 @@ openApp id app ({ sessions } as model0) =
                     getUID model0
 
                 wm_ =
-                    WindowManager.insert uuid app wm
+                    WindowManager.insert uuid ip app wm
+
+                sessions_ =
+                    Dict.insert id wm_ sessions
+
+                model_ =
+                    { model | sessions = sessions_ }
+            in
+                model_
+
+        Nothing ->
+            model0
+
+
+openOrRestoreApp : ID -> Maybe IP -> Apps.App -> Model -> Model
+openOrRestoreApp id ip app ({ sessions } as model0) =
+    case Dict.get id sessions of
+        Just wm ->
+            let
+                ( uuid, model ) =
+                    getUID model0
+
+                wm_ =
+                    WindowManager.insert uuid ip app wm
 
                 sessions_ =
                     Dict.insert id wm_ sessions

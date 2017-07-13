@@ -3,20 +3,20 @@ module Game.Models
         ( Model
         , initialModel
         , getAccount
-        , getServers
-        , getMeta
-        , getConfig
         , setAccount
+        , getServers
         , setServers
+        , getMeta
         , setMeta
-        , getServerIP
-        , getServerID
+        , getConfig
+        , getActiveServer
+        , setActiveServer
+        , getActiveServerID
         )
 
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Servers.Tunnels.Models as Tunnels
 import Game.Meta.Models as Meta
 import Game.Web.Models as Web
 import Core.Config exposing (Config)
@@ -39,46 +39,6 @@ initialModel token config =
     , web = Web.initialModel
     , config = config
     }
-
-
-getServerIP : Model -> Maybe Tunnels.IP
-getServerIP model =
-    let
-        servers =
-            getServers model
-    in
-        model
-            |> getServerID
-            |> Maybe.andThen (flip Servers.get servers)
-            |> Maybe.map .ip
-
-
-getServerID : Model -> Maybe Servers.ID
-getServerID model =
-    let
-        meta =
-            getMeta model
-
-        servers =
-            getServers model
-
-        maybeGatewayID =
-            Meta.getGateway meta
-
-        maybeServerID =
-            case Meta.getContext meta of
-                Meta.Gateway ->
-                    maybeGatewayID
-
-                Meta.Endpoint ->
-                    maybeGatewayID
-                        |> Maybe.andThen (flip Servers.get servers)
-                        |> Maybe.map .tunnels
-                        |> Maybe.andThen Tunnels.getEndpoint
-                        |> Maybe.andThen
-                            (flip Servers.mapNetwork servers)
-    in
-        maybeServerID
 
 
 getAccount : Model -> Account.Model
@@ -114,3 +74,57 @@ setMeta meta model =
 getConfig : Model -> Config
 getConfig =
     .config
+
+
+getActiveServer : Model -> Maybe Servers.Server
+getActiveServer model =
+    model
+        |> getActiveServerID
+        |> Maybe.andThen (flip Servers.get (getServers model))
+
+
+setActiveServer : Servers.Server -> Model -> Model
+setActiveServer server model =
+    case getActiveServerID model of
+        Just id ->
+            let
+                servers =
+                    getServers model
+
+                servers_ =
+                    Servers.insert id server servers
+
+                model_ =
+                    setServers servers_ model
+            in
+                model_
+
+        Nothing ->
+            model
+
+
+getActiveServerID : Model -> Maybe Servers.ID
+getActiveServerID model =
+    let
+        meta =
+            getMeta model
+
+        servers =
+            getServers model
+
+        maybeGatewayID =
+            Meta.getGateway meta
+
+        maybeServerID =
+            case Meta.getContext meta of
+                Meta.Gateway ->
+                    maybeGatewayID
+
+                Meta.Endpoint ->
+                    maybeGatewayID
+                        |> Maybe.andThen (flip Servers.get servers)
+                        |> Maybe.andThen .endpoint
+                        |> Maybe.andThen
+                            (flip Servers.mapNetwork servers)
+    in
+        maybeServerID

@@ -17,7 +17,7 @@ import Random.Pcg
         )
 import Random.Pcg.Extra exposing (andMap)
 import Fuzz exposing (Fuzzer)
-import Game.Shared exposing (IP)
+import Game.Network.Types exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
@@ -101,12 +101,15 @@ genServer : Generator Server
 genServer =
     let
         buildServerRecord ip type_ fs logs proc =
-            { ip = ip
+            { name = "Dummy"
+            , ip = ip
             , type_ = type_
             , filesystem = fs
             , logs = logs
             , processes = proc
             , tunnels = Tunnels.initialModel
+            , bounce = Nothing
+            , endpoint = Nothing
             }
     in
         genIP

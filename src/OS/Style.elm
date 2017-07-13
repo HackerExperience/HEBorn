@@ -1,10 +1,10 @@
 module OS.Style exposing (..)
 
 import Css exposing (..)
+import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import Css.Elements exposing (typeSelector)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (transition, easingToString, Easing(..))
-import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import UI.Colors as Colors
 
 
@@ -41,6 +41,10 @@ headerChildren =
                 [ marginLeft (px -8) ]
             , backgroundColor Colors.white
             , border3 (px 1) solid Colors.black
+            , minWidth (px 120)
+            , overflow hidden
+            , whiteSpace noWrap
+            , textOverflow ellipsis
             , children
                 [ typeSelector "selector"
                     [ position absolute

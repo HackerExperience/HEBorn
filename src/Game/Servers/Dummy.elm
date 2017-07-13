@@ -10,22 +10,25 @@ import Game.Servers.Tunnels.Dummy as Tunnels
 dummy : Model
 dummy =
     initialModel
-        |> insert "gateway0" (dummyServer "192.168.0.16")
-        |> insert "gateway1" (dummyServer "192.168.0.18")
-        |> insert "remote0" (dummyServer "153.249.31.179")
-        |> insert "remote1" (dummyServer "143.239.31.169")
+        |> insert "gateway0" (dummyServer "Main" "192.168.0.16" LocalServer)
+        |> insert "gateway1" (dummyServer "Secondary" "192.168.0.18" LocalServer)
+        |> insert "remote0" (dummyServer "Pwned" "153.249.31.179" RemoteServer)
+        |> insert "remote1" (dummyServer "Rekt" "143.239.31.169" RemoteServer)
 
 
 
 -- internals
 
 
-dummyServer : String -> Server
-dummyServer ip =
-    { type_ = LocalServer
+dummyServer : String -> String -> Type -> Server
+dummyServer name ip type_ =
+    { name = name
+    , type_ = type_
     , ip = ip
     , filesystem = Filesystem.dummy
     , logs = Logs.dummy
     , processes = Processes.dummy
     , tunnels = Tunnels.dummy
+    , bounce = Nothing
+    , endpoint = Nothing
     }

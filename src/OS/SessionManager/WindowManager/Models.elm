@@ -12,6 +12,7 @@ module OS.SessionManager.WindowManager.Models
         , initialModel
         , resert
         , insert
+        , refresh
         , insertLocked
         , remove
         , removeAll
@@ -35,11 +36,11 @@ module OS.SessionManager.WindowManager.Models
         , title
         )
 
+import Dict exposing (Dict)
 import Draggable
-import Maybe exposing (Maybe)
 import Apps.Apps as Apps
 import Apps.Models as Apps
-import Dict exposing (Dict)
+import Game.Network.Types exposing (IP)
 import OS.SessionManager.WindowManager.Context exposing (..)
 
 
@@ -73,6 +74,7 @@ type alias Window =
     , context : Context
     , instance : Instance
     , locked : Bool
+    , endpoint : Maybe IP
     }
 
 
@@ -110,8 +112,8 @@ initialModel =
     }
 
 
-resert : String -> Apps.App -> Model -> Model
-resert id app ({ visible, hidden, windows } as model) =
+resert : String -> Maybe IP -> Apps.App -> Model -> Model
+resert id ip app ({ visible, hidden, windows } as model) =
     -- either restores every app or open a new one
     let
         maybeID =
@@ -129,13 +131,13 @@ resert id app ({ visible, hidden, windows } as model) =
                         List.filter (filterApp app windows) hidden
                 in
                     if List.isEmpty hidden_ then
-                        insert id app model
+                        insert id ip app model
                     else
                         List.foldl restore model hidden_
 
 
-insert : ID -> Apps.App -> Model -> Model
-insert id app ({ windows, visible } as model) =
+insert : ID -> Maybe IP -> Apps.App -> Model -> Model
+insert id ip app ({ windows, visible } as model) =
     let
         contexts =
             case Apps.contexts app of
@@ -162,6 +164,7 @@ insert id app ({ windows, visible } as model) =
                 contexts
                 instance
                 False
+                ip
 
         windows_ =
             Dict.insert id window windows
@@ -177,6 +180,20 @@ insert id app ({ windows, visible } as model) =
             }
     in
         model_
+
+
+refresh : ID -> Window -> Model -> Model
+refresh id window ({ windows } as model) =
+    case Dict.get id windows of
+        Just _ ->
+            let
+                windows_ =
+                    Dict.insert id window windows
+            in
+                { model | windows = windows_ }
+
+        Nothing ->
+            model
 
 
 insertLocked : ID -> Window -> Model -> Model

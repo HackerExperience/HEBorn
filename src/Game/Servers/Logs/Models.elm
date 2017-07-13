@@ -1,9 +1,10 @@
 module Game.Servers.Logs.Models exposing (..)
 
 import Dict exposing (Dict)
-import Utils.Dict as DictUtils
 import Time exposing (Time)
-import Game.Shared as Game exposing (IP, ID, ServerUser)
+import Utils.Dict as DictUtils
+import Game.Network.Types exposing (IP)
+import Game.Shared as Game exposing (ID, ServerUser)
 
 
 type alias ID =

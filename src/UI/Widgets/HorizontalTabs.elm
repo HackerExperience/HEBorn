@@ -11,7 +11,7 @@ module UI.Widgets.HorizontalTabs
 
 import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick)
-import Utils.Html.Attributes exposing (dataSelected)
+import Utils.Html.Attributes exposing (selectedAttr)
 
 
 type alias Renderer a msg =
@@ -99,7 +99,7 @@ renderItem active render handler item =
         |> render active
         |> tab
             [ onClick (handler item)
-            , dataSelected active
+            , selectedAttr active
             ]
 
 

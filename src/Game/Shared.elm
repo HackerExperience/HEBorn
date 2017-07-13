@@ -1,9 +1,6 @@
 module Game.Shared exposing (..)
 
-
-type alias IP =
-    -- REVIEW: Wouldn't it be better to call it ServerAddr or NetAddr or HostAddr?
-    String
+import Game.Network.Types exposing (IP)
 
 
 type alias ID =

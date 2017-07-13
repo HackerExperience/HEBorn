@@ -1,11 +1,12 @@
 module OS.SessionManager.WindowManager.Subscriptions exposing (subscriptions)
 
-import Draggable
 import Dict
+import Draggable
 import Game.Data as Game
+import Apps.Subscriptions as Apps
+import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import OS.SessionManager.WindowManager.Models exposing (..)
-import Apps.Subscriptions as Apps
 
 
 subscriptions : Game.Data -> Model -> Sub Msg
@@ -24,7 +25,7 @@ appSubcriptions data ({ visible, windows } as model) =
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.subscriptions data
+                        |> Apps.subscriptions (windowData data id window model)
                         |> Sub.map (WindowMsg id)
                         |> Just
 

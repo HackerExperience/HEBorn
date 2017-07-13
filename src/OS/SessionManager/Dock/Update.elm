@@ -1,15 +1,15 @@
 module OS.SessionManager.Dock.Update exposing (update)
 
 import Dict
-import OS.SessionManager.Models exposing (..)
+import Game.Data as Game
+import Game.Servers.Models as Servers
 import OS.SessionManager.Dock.Messages exposing (..)
-import Game.Data as GameData
-import OS.SessionManager.Models as SM
+import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Models as WM
 
 
 update :
-    GameData.Data
+    Game.Data
     -> Msg
     -> Model
     -> Model
@@ -17,8 +17,13 @@ update data msg model =
     case msg of
         OpenApp app ->
             let
+                ip =
+                    data
+                        |> Game.getServer
+                        |> Servers.getEndpoint
+
                 model_ =
-                    SM.openApp data.id app model
+                    openApp data.id ip app model
             in
                 model_
 
@@ -34,7 +39,7 @@ update data msg model =
 -- internals
 
 
-mapWM : (WM.Model -> WM.Model) -> GameData.Data -> Model -> Model
+mapWM : (WM.Model -> WM.Model) -> Game.Data -> Model -> Model
 mapWM func data ({ sessions } as model) =
     case Dict.get data.id sessions of
         Just wm ->

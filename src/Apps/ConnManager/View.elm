@@ -4,16 +4,11 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Servers.Models as Servers
+import Game.Servers.Tunnels.Models as Tunnels
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
-import Game.Servers.Tunnels.Models as Tunnels
-    exposing
-        ( Tunnels
-        , Tunnel
-        , Connection
-        , ConnectionType(..)
-        )
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)
 import Apps.ConnManager.Resources exposing (Classes(..), prefix)
@@ -24,7 +19,7 @@ import Apps.ConnManager.Menu.View exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-connView : Connection -> Html Msg
+connView : Tunnels.Connection -> Html Msg
 connView conn =
     div []
         [ text " * Conn with type: "
@@ -32,33 +27,34 @@ connView conn =
         ]
 
 
-tunnelView : String -> Tunnel -> Html Msg
-tunnelView gateway tnl =
+tunnelView : String -> ( Tunnels.ID, Tunnels.Tunnel ) -> Html Msg
+tunnelView gateway ( id, tunnel ) =
     div [ class [ GroupedTunnel ] ]
         [ text "Gateway: "
         , text gateway
         , br [] []
         , text "Endpoint: "
-        , text tnl.endpoint
+        , text <| Tuple.second id
         , br [] []
         , text "Connections: "
-        , tnl.connections
+        , tunnel
+            |> Tunnels.getConnections
             |> Dict.values
             |> List.map connView
             |> div []
         ]
 
 
-connTypeToString : ConnectionType -> String
+connTypeToString : Tunnels.ConnectionType -> String
 connTypeToString src =
     case src of
-        ConnectionFTP ->
+        Tunnels.ConnectionFTP ->
             "FTP"
 
-        ConnectionSSH ->
+        Tunnels.ConnectionSSH ->
             "SSH"
 
-        ConnectionX11 ->
+        Tunnels.ConnectionX11 ->
             "X11"
 
         _ ->
@@ -80,10 +76,17 @@ view data ({ app } as model) =
                     UpdateTextFilter
                 ]
 
+        ip =
+            data
+                |> Game.getServer
+                |> Servers.getIP
+
         mainEntries =
-            data.server.tunnels.tunnels
-                |> Dict.values
-                |> List.map (tunnelView data.server.ip)
+            data
+                |> Game.getServer
+                |> Servers.getTunnels
+                |> Dict.toList
+                |> List.map (tunnelView ip)
                 |> verticalList
     in
         verticalSticked
