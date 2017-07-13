@@ -33,11 +33,10 @@ import Json.Decode
         )
 import Json.Decode.Extra exposing (dict2)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
-import Result exposing (Result(..))
-import Game.Account.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Game.Account.Messages exposing (..)
 
 
 type Response

@@ -14,7 +14,6 @@ module OS.SessionManager.Models
         )
 
 import Dict exposing (Dict)
-import Maybe exposing (Maybe(..))
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import Apps.Apps as Apps

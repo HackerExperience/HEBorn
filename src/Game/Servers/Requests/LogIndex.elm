@@ -17,15 +17,14 @@ import Json.Decode
         , list
         , string
         )
+import Date exposing (Date)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Json.Encode as Encode
-import Result exposing (Result(..))
-import Date exposing (Date)
-import Game.Servers.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..))
 import Utils.Json.Decode exposing (date)
+import Game.Servers.Messages exposing (..)
 
 
 type Response
