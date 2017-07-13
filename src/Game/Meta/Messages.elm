@@ -1,9 +1,11 @@
 module Game.Meta.Messages exposing (Msg(..))
 
-import Events.Events as Events
 import Time exposing (Time)
+import Events.Events as Events
+import Game.Servers.Shared as Servers
 
 
 type Msg
-    = Event Events.Response
+    = SetGateway Servers.ID
+    | Event Events.Response
     | Tick Time

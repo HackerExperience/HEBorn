@@ -1,11 +1,11 @@
 module OS.SessionManager.WindowManager.Style exposing (..)
 
 import Css exposing (..)
-import Css.Namespace exposing (namespace)
-import Css.Elements exposing (div)
-import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
+import Css.Elements exposing (div)
 import Css.Icons as Icon
+import Css.Namespace exposing (namespace)
+import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import UI.Colors as Colors
 import OS.SessionManager.WindowManager.Resources exposing (Classes(..), prefix)
 
@@ -27,6 +27,10 @@ css : Stylesheet
 css =
     (stylesheet << namespace prefix)
         [ class Canvas
+            [ flex (int 1)
+            , flexContainerVert
+            ]
+        , class Super
             [ flex (int 1)
             , flexContainerVert
             ]

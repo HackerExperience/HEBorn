@@ -3,7 +3,7 @@ module Core.Subscriptions exposing (subscriptions)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Models as Game
-import Game.Data as GameData
+import Game.Data as Game
 import Game.Subscriptions as Game
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Subscriptions as Ws
@@ -56,7 +56,7 @@ play model =
 
 os : Game.Model -> OS.Model -> Sub Msg
 os game model =
-    case GameData.fromGame game of
+    case Game.fromGateway game of
         Just data ->
             model
                 |> OS.subscriptions data

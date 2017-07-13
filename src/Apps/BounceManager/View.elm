@@ -3,14 +3,15 @@ module Apps.BounceManager.View exposing (view)
 import Dict
 import Html exposing (..)
 import Html.CssHelpers
+import Game.Account.Database.Models exposing (HackedServer)
+import Game.Account.Bounces.Models as Bounces exposing (Bounce)
 import Game.Data as Game
+import Game.Network.Types as Network
 import UI.Inlines.Networking as Inlines
 import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
-import Game.Account.Database.Models exposing (HackedServer)
-import Game.Account.Bounces.Models as Bounces exposing (Bounce, IP)
 import Apps.BounceManager.Messages exposing (Msg(..))
 import Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Resources exposing (Classes(..), prefix)
@@ -41,10 +42,10 @@ viewTabLabel _ tab =
         |> List.singleton
 
 
-viewBouncePath : List IP -> Html Msg
+viewBouncePath : List Network.Data -> Html Msg
 viewBouncePath ips =
     ips
-        |> List.map Inlines.addr
+        |> List.map (.ip >> Inlines.addr)
         |> List.intersperse (text " > ")
         |> span []
 
@@ -59,7 +60,7 @@ viewBounce ( id, val ) =
         , text val.name
         , br [] []
         , text "Path: "
-        , viewBouncePath <| val.path
+        , viewBouncePath val.path
         ]
 
 

@@ -1,7 +1,8 @@
 module Game.Account.Database.Models exposing (..)
 
 import Time exposing (Time)
-import Game.Shared exposing (ID, IP)
+import Game.Network.Types exposing (IP)
+import Game.Shared exposing (ID)
 
 
 type ServerType

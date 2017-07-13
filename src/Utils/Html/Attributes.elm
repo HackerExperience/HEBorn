@@ -28,8 +28,8 @@ boolAttrYN attr boolean =
         attribute attr value
 
 
-dataSelected : Bool -> Attribute msg
-dataSelected =
+selectedAttr : Bool -> Attribute msg
+selectedAttr =
     boolAttr "data-selected"
 
 
@@ -51,3 +51,12 @@ idAttr =
 dataDecorated : Bool -> Attribute msg
 dataDecorated =
     boolAttrYN "data-decorated"
+
+
+openAttr : Bool -> Attribute msg
+openAttr open =
+    attribute "data-open" <|
+        if open then
+            "open"
+        else
+            "0"

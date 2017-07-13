@@ -2,65 +2,168 @@ module OS.Header.View exposing (view)
 
 import Dict
 import Html exposing (..)
-import Html.Events exposing (..)
 import Html.CssHelpers
+import Html.Events exposing (..)
+import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
-import OS.Resources as Res
+import Game.Data as Game
+import Game.Models as Game
+import Game.Meta.Models exposing (Context(..))
+import Game.Servers.Models as Servers
+import Game.Account.Bounces.Models as Bounces
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import Game.Data as GameData
-import Game.Meta.Models exposing (Context(..))
-import UI.Widgets.CustomSelect exposing (customSelect)
+import OS.Resources as Res
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace "os"
 
 
-view : GameData.Data -> Model -> Html Msg
-view data model =
-    div [ class [ Res.Header ] ]
-        [ customSelect
-            ( MouseEnterItem, MouseLeaveItem )
-            (ToggleMenus OpenGateway)
-            SelectGateway
-            1
-            (Dict.fromList
-                [ ( 0, text "::1" )
-                , ( 1, text "::2" )
-                , ( 2, text "::3" )
+selector :
+    OpenMenu
+    -> OpenMenu
+    -> (String -> Maybe (Html Msg))
+    -> String
+    -> List String
+    -> Html Msg
+selector kind open render active list =
+    let
+        wrapper =
+            if kind == OpenGateway then
+                SelectGateway
+            else if kind == OpenBounce then
+                SelectBounce
+            else
+                SelectEndpoint
+    in
+        customSelect CustomSelect
+            wrapper
+            (ToggleMenus kind)
+            (\_ str -> render str)
+            (open == kind)
+            active
+            list
+
+
+renderGateway : Game.Data -> String -> Maybe (Html Msg)
+renderGateway data id =
+    case Servers.get id data.game.servers of
+        Just { name, ip } ->
+            Just (text <| name ++ " (" ++ ip ++ ")")
+
+        Nothing ->
+            Nothing
+
+
+renderBounce : Game.Data -> String -> Maybe (Html Msg)
+renderBounce data id =
+    case Bounces.get id data.game.account.bounces of
+        Just { name } ->
+            Just <| text name
+
+        Nothing ->
+            Nothing
+
+
+renderEndpoint : Game.Data -> String -> Maybe (Html Msg)
+renderEndpoint data ip =
+    if ip == "" then
+        Just <| text "None"
+    else
+        let
+            servers =
+                data
+                    |> Game.getGame
+                    |> Game.getServers
+
+            server =
+                servers
+                    |> Servers.mapNetwork ip
+                    |> Maybe.andThen (flip Servers.get servers)
+        in
+            case server of
+                Just { name } ->
+                    Just <| text (name ++ " (" ++ ip ++ ")")
+
+                Nothing ->
+                    Just <| text ip
+
+
+view : Game.Data -> Model -> Html Msg
+view data ({ openMenu } as model) =
+    let
+        servers =
+            data
+                |> Game.getGame
+                |> Game.getServers
+
+        gateway =
+            Game.getID data
+
+        gateways =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> (.servers)
+
+        bounce =
+            data
+                |> Game.getServer
+                |> Servers.getBounce
+                |> Maybe.withDefault ""
+
+        bounces =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> (.bounces)
+                |> Dict.keys
+                |> (::) ""
+
+        endpoint =
+            data
+                |> Game.getServer
+                |> Servers.getEndpoint
+                |> Maybe.withDefault ""
+
+        endpoints =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> (.database)
+                |> (.servers)
+                |> List.map .ip
+                |> (::) ""
+    in
+        div [ class [ Res.Header ] ]
+            [ selector OpenGateway
+                openMenu
+                (renderGateway data)
+                gateway
+                gateways
+            , contextToggler (data.game.meta.context == Gateway)
+                (ContextTo Gateway)
+            , spacer
+            , text "Bounce: "
+            , selector OpenBounce
+                openMenu
+                (renderBounce data)
+                bounce
+                bounces
+            , spacer
+            , contextToggler (data.game.meta.context == Endpoint)
+                (ContextTo Endpoint)
+            , selector OpenEndpoint
+                openMenu
+                (renderEndpoint data)
+                endpoint
+                endpoints
+            , button
+                [ onClick Logout
                 ]
-            )
-            (model.openMenu == OpenGateway)
-        , contextToggler (data.game.meta.context == Gateway) (ContextTo Gateway)
-        , spacer
-        , text "Bounce: "
-        , customSelect
-            ( MouseEnterItem, MouseLeaveItem )
-            (ToggleMenus OpenBounce)
-            SelectBounce
-            0
-            (Dict.fromList
-                [ ( 0, text "PINE" )
-                , ( 1, text "WOOD" )
-                , ( 2, text "STICK" )
-                ]
-            )
-            (model.openMenu == OpenBounce)
-        , spacer
-        , contextToggler (data.game.meta.context == Endpoint) (ContextTo Endpoint)
-        , customSelect
-            ( MouseEnterItem, MouseLeaveItem )
-            (ToggleMenus OpenEndpoint)
-            SelectEndpoint
-            0
-            Dict.empty
-            (model.openMenu == OpenEndpoint)
-        , button
-            [ onClick Logout
+                [ text "logout" ]
             ]
-            [ text "logout" ]
-        ]
 
 
 contextToggler : Bool -> Msg -> Html Msg

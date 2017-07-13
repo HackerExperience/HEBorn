@@ -1,61 +1,79 @@
-module UI.Widgets.CustomSelect exposing (customSelect)
+module UI.Widgets.CustomSelect exposing (Msg(..), customSelect)
 
-import Dict exposing (Dict)
 import Html exposing (Html, node, text)
-import Html.Attributes exposing (attribute, hidden)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import Utils.Html.Attributes exposing (selectedAttr, openAttr)
 import Utils.Html.Events exposing (onClickMe)
 
 
-option : (comparable -> msg) -> comparable -> ( comparable, Html msg ) -> Html msg
-option callback active ( selector, value ) =
-    let
-        selected =
-            if selector == active then
-                "1"
-            else
-                "0"
-    in
-        node "customOption"
-            [ attribute "selected" selected
-            , onClickMe (callback selector)
-            ]
-            [ value ]
+type Msg
+    = MouseEnter
+    | MouseLeave
 
 
 customSelect :
-    ( msg, msg )
+    (Msg -> msg)
+    -> (a -> msg)
     -> msg
-    -> (comparable -> msg)
-    -> comparable
-    -> Dict comparable (Html msg)
+    -> (Bool -> a -> Maybe (Html msg))
     -> Bool
+    -> a
+    -> List a
     -> Html msg
-customSelect ( mouseEnter, mouseLeave ) menuAction callback activeKey itens open =
+customSelect wrap msg open render opened active list =
     let
+        mapper item =
+            customOption msg render (item == active) item
+
         options =
-            itens
-                |> Dict.toList
-                |> (List.map <| option callback activeKey)
+            List.filterMap mapper list
 
-        active =
-            itens
-                |> Dict.get activeKey
-                |> Maybe.withDefault (text "None")
-
-        openAttr =
-            attribute "data-open" <|
-                if open then
-                    "open"
-                else
-                    "0"
+        customNode =
+            node selectorNode
+                [ onMouseEnter <| wrap MouseEnter
+                , onMouseLeave <| wrap MouseLeave
+                , onClickMe open
+                , openAttr opened
+                ]
     in
-        node "customSelect"
-            [ onClickMe menuAction
-            , onMouseEnter mouseEnter
-            , onMouseLeave mouseLeave
-            , openAttr
-            ]
-            [ active
-            , node "selector" [] options
-            ]
+        case render True active of
+            Just activeNode ->
+                customNode [ activeNode, selector options ]
+
+            Nothing ->
+                customNode [ selector options ]
+
+
+customOption :
+    (a -> msg)
+    -> (Bool -> a -> Maybe (Html msg))
+    -> Bool
+    -> a
+    -> Maybe (Html msg)
+customOption onClick render active item =
+    case render active item of
+        Just html ->
+            Just <|
+                node optionNode
+                    [ selectedAttr active
+                    , onClickMe (onClick item)
+                    ]
+                    [ html ]
+
+        Nothing ->
+            Nothing
+
+
+selector : List (Html msg) -> Html msg
+selector =
+    node "selector" []
+
+
+optionNode : String
+optionNode =
+    "customOption"
+
+
+selectorNode : String
+selectorNode =
+    "customSelect"

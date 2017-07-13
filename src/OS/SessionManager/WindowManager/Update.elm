@@ -1,14 +1,16 @@
 module OS.SessionManager.WindowManager.Update exposing (..)
 
+import Dict
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
-import Game.Data as Game
 import Apps.Update as Apps
 import Apps.Messages as Apps
+import Game.Data as Game
+import Game.Servers.Models as Servers
 import OS.SessionManager.WindowManager.Models exposing (..)
+import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Dict
 
 
 update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
@@ -98,15 +100,32 @@ updateApp :
     -> Apps.Msg
     -> Model
     -> ( Model, Cmd Apps.Msg, Dispatch )
-updateApp data id msg model =
-    case Dict.get id model.windows of
-        Just window ->
+updateApp data id msg ({ windows } as model0) =
+    case Dict.get id windows of
+        Just window0 ->
             let
+                window =
+                    case window0.endpoint of
+                        Nothing ->
+                            let
+                                ip =
+                                    data
+                                        |> Game.getServer
+                                        |> Servers.getEndpoint
+                            in
+                                { window0 | endpoint = ip }
+
+                        Just _ ->
+                            window0
+
+                model =
+                    refresh id window model0
+
                 appModel =
                     getAppModelFromWindow window
 
                 ( appModel_, cmd, dispatch ) =
-                    Apps.update data msg appModel
+                    Apps.update (windowData data id window model) msg appModel
 
                 model_ =
                     setAppModel id appModel_ model
@@ -114,7 +133,7 @@ updateApp data id msg model =
                 ( model_, cmd, dispatch )
 
         Nothing ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model0, Cmd.none, Dispatch.none )
 
 
 wrapEmpty : Model -> ( Model, Cmd Msg, Dispatch )

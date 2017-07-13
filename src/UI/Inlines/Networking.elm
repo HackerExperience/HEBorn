@@ -2,7 +2,8 @@ module UI.Inlines.Networking exposing (user, addr, file)
 
 import Html exposing (Html, Attribute, text, node)
 import Html.Attributes exposing (attribute)
-import Game.Shared exposing (IP, ServerUser, isRoot, isLocalHost)
+import Game.Network.Types exposing (IP)
+import Game.Shared exposing (ServerUser, isRoot, isLocalHost)
 
 
 addrAttrs : IP -> List (Attribute msg)

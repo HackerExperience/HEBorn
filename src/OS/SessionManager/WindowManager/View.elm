@@ -1,21 +1,24 @@
 module OS.SessionManager.WindowManager.View exposing (view)
 
-import OS.SessionManager.WindowManager.Models exposing (..)
-import OS.SessionManager.WindowManager.Messages exposing (..)
+import Dict
 import Html exposing (..)
-import Game.Data as Game
-import Html.Attributes exposing (class, id, style)
-import Html.Events exposing (onClick, onMouseDown)
+import Html.Attributes exposing (style)
+import Html.Events exposing (onMouseDown)
 import Html.CssHelpers
 import Html.Attributes exposing (attribute)
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
-import Dict
 import Utils.Html.Attributes exposing (dataDecorated, iconAttr)
-import OS.SessionManager.WindowManager.Context as Context
-import OS.SessionManager.WindowManager.Resources as Res
+import Utils.Html.Events exposing (onClickMe)
 import Apps.Models as Apps
 import Apps.View as Apps
+import Game.Data as Game
+import OS.SessionManager.WindowManager.Context as Context
+import OS.SessionManager.WindowManager.Context exposing (..)
+import OS.SessionManager.WindowManager.Helpers exposing (..)
+import OS.SessionManager.WindowManager.Messages exposing (..)
+import OS.SessionManager.WindowManager.Models exposing (..)
+import OS.SessionManager.WindowManager.Resources as Res
 
 
 { id, class, classList } =
@@ -30,7 +33,7 @@ view data ({ windows, visible } as model) =
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.view data
+                        |> Apps.view (windowData data id window model)
                         |> Html.map (WindowMsg id)
                         |> windowWrapper id window
                         |> Just
@@ -38,7 +41,7 @@ view data ({ windows, visible } as model) =
                 Nothing ->
                     Nothing
     in
-        div [] (List.filterMap mapper visible)
+        div [ class [ Res.Super ] ] (List.filterMap mapper visible)
 
 
 styles : List Css.Style -> Attribute Msg
@@ -103,7 +106,7 @@ headerContext id context =
     div []
         [ span
             [ class [ Res.HeaderContextSw ]
-            , onClick (SwitchContext id)
+            , onClickMe (SwitchContext id)
             ]
             [ text (Context.toString context)
             ]
@@ -124,17 +127,17 @@ headerButtons id =
     div [ class [ Res.HeaderButtons ] ]
         [ span
             [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
-            , onClick (Minimize id)
+            , onClickMe (Minimize id)
             ]
             []
         , span
             [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
-            , onClick (ToggleMaximize id)
+            , onClickMe (ToggleMaximize id)
             ]
             []
         , span
             [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
-            , onClick (Close id)
+            , onClickMe (Close id)
             ]
             []
         ]

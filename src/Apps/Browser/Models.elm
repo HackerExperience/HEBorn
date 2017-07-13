@@ -1,6 +1,5 @@
 module Apps.Browser.Models exposing (..)
 
-import Game.Web.Types as Web
 import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages.Models as Pages
 

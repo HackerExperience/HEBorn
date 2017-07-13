@@ -1,7 +1,8 @@
 module Game.Servers.Processes.Update exposing (..)
 
-import Game.Models as Game
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Messages as Game
+import Game.Models as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models
     exposing
@@ -13,7 +14,6 @@ import Game.Servers.Processes.Models
         , addProcess
         )
 import Game.Servers.Processes.ResultHandler exposing (completeProcess)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
@@ -47,7 +47,7 @@ update game msg model =
             let
                 serverId =
                     game
-                        |> Game.getServerID
+                        |> Game.getActiveServerID
                         |> Maybe.withDefault ""
 
                 ( processes_, feedback ) =

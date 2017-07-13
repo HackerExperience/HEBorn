@@ -15,6 +15,7 @@ type Classes
     | HeaderBtnMinimize
     | HeaderContextSw
     | Canvas
+    | Super
 
 
 prefix : String

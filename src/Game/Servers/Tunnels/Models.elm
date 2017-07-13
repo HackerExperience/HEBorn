@@ -1,22 +1,16 @@
 module Game.Servers.Tunnels.Models
     exposing
         ( Model
-        , Tunnels
         , ID
-        , IP
         , Tunnel
         , Connections
         , ConnectionID
         , Connection
         , ConnectionType(..)
         , initialModel
-        , new
-        , select
         , get
         , insert
         , remove
-        , getEndpoint
-        , setEndpoint
         , getConnections
         , setConnections
         , insertConnection
@@ -25,29 +19,19 @@ module Game.Servers.Tunnels.Models
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
+import Game.Network.Types exposing (IP)
 
 
 type alias Model =
-    { tunnels : Tunnels
-    , active : Maybe ID
-    }
-
-
-type alias Tunnels =
     Dict ID Tunnel
 
 
 type alias ID =
-    String
-
-
-type alias IP =
-    String
+    ( Bounces.ID, IP )
 
 
 type alias Tunnel =
-    { endpoint : IP
-    , bounce : Maybe Bounces.ID
+    { active : Bool
     , connections : Connections
     }
 
@@ -74,168 +58,109 @@ type ConnectionType
 
 initialModel : Model
 initialModel =
-    { tunnels = Dict.empty
-    , active = Nothing
-    }
+    Dict.empty
 
 
-new : IP -> IP -> Model -> Tunnel
-new gateway endpoint model =
-    case get model of
-        Just tunnel ->
-            { endpoint = endpoint
-            , bounce = tunnel.bounce
-            , connections = Dict.empty
-            }
 
-        Nothing ->
-            { endpoint = endpoint
-            , bounce = Nothing
-            , connections = Dict.empty
-            }
+-- tunnel crud
 
 
-select : Maybe ID -> Model -> Model
-select id model =
-    { model | active = id }
+get : Maybe Bounces.ID -> IP -> Model -> Tunnel
+get bounce endpoint model =
+    model
+        |> Dict.get (toTunnelID bounce endpoint)
+        |> Maybe.withDefault { active = True, connections = Dict.empty }
 
 
-get : Model -> Maybe Tunnel
-get ({ active } as model) =
-    case active of
-        Just id ->
-            Dict.get id model.tunnels
-
-        Nothing ->
-            Nothing
+insert : Maybe Bounces.ID -> IP -> Tunnel -> Model -> Model
+insert bounce endpoint tunnel model =
+    Dict.insert (toTunnelID bounce endpoint) tunnel model
 
 
-insert : ID -> Tunnel -> Model -> Model
-insert id tunnel model =
-    { model | tunnels = Dict.insert id tunnel model.tunnels }
+remove : Maybe Bounces.ID -> IP -> Model -> Model
+remove bounce endpoint model =
+    Dict.remove (toTunnelID bounce endpoint) model
 
 
-remove : ID -> Model -> Model
-remove id model =
-    { model | tunnels = Dict.remove id model.tunnels }
+
+-- tunnel getters/setters
 
 
-getEndpoint : Model -> Maybe IP
-getEndpoint ({ active, tunnels } as model) =
-    active
-        |> Maybe.andThen (flip Dict.get tunnels)
-        |> Maybe.map .endpoint
+getConnections : Tunnel -> Connections
+getConnections =
+    .connections
 
 
-setEndpoint : IP -> Model -> Model
-setEndpoint ip ({ active, tunnels } as model) =
-    case active of
-        Just aID ->
-            case Dict.get aID tunnels of
-                Just tunnel ->
-                    let
-                        tunnel_ =
-                            { tunnel | endpoint = ip }
-
-                        tunnels_ =
-                            Dict.insert aID tunnel_ tunnels
-
-                        model_ =
-                            { model | tunnels = tunnels_ }
-                    in
-                        model_
-
-                Nothing ->
-                    model
-
-        Nothing ->
-            model
+setConnections : Connections -> Tunnel -> Tunnel
+setConnections connections tunnel =
+    { tunnel | connections = connections }
 
 
-getConnections : Model -> Connections
-getConnections ({ active, tunnels } as model) =
-    active
-        |> Maybe.andThen (flip Dict.get tunnels)
-        |> Maybe.map .connections
-        |> Maybe.withDefault Dict.empty
+
+-- connection crud
 
 
-setConnections : Connections -> Model -> Model
-setConnections connections ({ active, tunnels } as model) =
-    case active of
-        Just aID ->
-            case Dict.get aID tunnels of
-                Just tunnel ->
-                    let
-                        tunnel_ =
-                            { tunnel | connections = connections }
+insertConnection :
+    Maybe Bounces.ID
+    -> IP
+    -> ConnectionID
+    -> Connection
+    -> Model
+    -> Model
+insertConnection bounce endpoint id connection model =
+    let
+        tunnel =
+            get bounce endpoint model
 
-                        tunnels_ =
-                            Dict.insert aID tunnel_ tunnels
+        { connections } =
+            tunnel
 
-                        model_ =
-                            { model | tunnels = tunnels_ }
-                    in
-                        model_
+        connections_ =
+            Dict.insert id connection connections
 
-                Nothing ->
-                    model
+        tunnel_ =
+            { tunnel | connections = connections_ }
 
-        Nothing ->
-            model
-
-
-insertConnection : ConnectionID -> Connection -> Model -> Model
-insertConnection id connection ({ active, tunnels } as model) =
-    case active of
-        Just aID ->
-            case Dict.get aID tunnels of
-                Just ({ connections } as tunnel) ->
-                    let
-                        connections_ =
-                            Dict.insert id connection connections
-
-                        tunnel_ =
-                            { tunnel | connections = connections_ }
-
-                        tunnels_ =
-                            Dict.insert aID tunnel_ tunnels
-
-                        model_ =
-                            { model | tunnels = tunnels_ }
-                    in
-                        model_
-
-                Nothing ->
-                    model
-
-        Nothing ->
-            model
+        model_ =
+            Dict.insert (toTunnelID bounce endpoint) tunnel_ model
+    in
+        model_
 
 
-removeConnection : ConnectionID -> Model -> Model
-removeConnection id ({ active, tunnels } as model) =
-    case active of
-        Just aID ->
-            case Dict.get aID tunnels of
-                Just ({ connections } as tunnel) ->
-                    let
-                        connections_ =
-                            Dict.remove id connections
+removeConnection :
+    Maybe Bounces.ID
+    -> IP
+    -> ConnectionID
+    -> Model
+    -> Model
+removeConnection bounce endpoint id model =
+    let
+        tunnel =
+            get bounce endpoint model
 
-                        tunnel_ =
-                            { tunnel | connections = connections_ }
+        { connections } =
+            tunnel
 
-                        tunnels_ =
-                            Dict.insert aID tunnel_ tunnels
+        connections_ =
+            Dict.remove id connections
 
-                        model_ =
-                            { model | tunnels = tunnels_ }
-                    in
-                        model_
+        tunnel_ =
+            { tunnel | connections = connections_ }
 
-                Nothing ->
-                    model
+        model_ =
+            Dict.insert (toTunnelID bounce endpoint) tunnel_ model
+    in
+        model_
 
-        Nothing ->
-            model
+
+
+-- internals
+
+
+toTunnelID : Maybe Bounces.ID -> IP -> ID
+toTunnelID bounce endpoint =
+    let
+        bounce_ =
+            Maybe.withDefault "" bounce
+    in
+        ( bounce_, endpoint )

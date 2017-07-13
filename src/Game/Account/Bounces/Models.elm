@@ -4,9 +4,9 @@ module Game.Account.Bounces.Models
         , ID
         , Bounce
         , Path
-        , IP
         , initialModel
         , get
+        , emptyBounce
         , insert
         , remove
         , getName
@@ -14,6 +14,7 @@ module Game.Account.Bounces.Models
         )
 
 import Dict exposing (Dict)
+import Game.Network.Types as Network
 
 
 type alias Model =
@@ -31,11 +32,7 @@ type alias Bounce =
 
 
 type alias Path =
-    List IP
-
-
-type alias IP =
-    String
+    List Network.Data
 
 
 initialModel : Model
@@ -44,8 +41,18 @@ initialModel =
 
 
 get : ID -> Model -> Maybe Bounce
-get =
-    Dict.get
+get id model =
+    if id == "" then
+        Just emptyBounce
+    else
+        Dict.get id model
+
+
+emptyBounce : Bounce
+emptyBounce =
+    { name = "None"
+    , path = []
+    }
 
 
 insert : ID -> Bounce -> Model -> Model

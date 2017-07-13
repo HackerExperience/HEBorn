@@ -1,18 +1,19 @@
 module Game.Data
     exposing
         ( Data
-        , getIP
         , getID
-        , getContext
+        , getServer
         , getGame
-        , fromGame
+        , fromGateway
+        , fromEndpoint
+        , fromServerID
+        , fromServerIP
         )
 
 import Game.Models exposing (..)
-import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Servers.Tunnels.Models as Tunnels
+import Game.Network.Types exposing (IP)
 
 
 type alias Data =
@@ -22,24 +23,14 @@ type alias Data =
     }
 
 
-getServer : Data -> Servers.Server
-getServer =
-    .server
-
-
-getIP : Data -> Tunnels.IP
-getIP =
-    getServer >> Servers.getIP
-
-
 getID : Data -> Servers.ID
 getID =
     .id
 
 
-getContext : Data -> Meta.Context
-getContext =
-    getGame >> getMeta >> Meta.getContext
+getServer : Data -> Servers.Server
+getServer =
+    .server
 
 
 getGame : Data -> Model
@@ -47,28 +38,47 @@ getGame =
     .game
 
 
-fromGame : Model -> Maybe Data
-fromGame model =
-    let
-        meta =
-            getMeta model
+fromGateway : Model -> Maybe Data
+fromGateway model =
+    model
+        |> getActiveServerID
+        |> Maybe.andThen (flip fromServerID model)
 
+
+fromEndpoint : Model -> Maybe Data
+fromEndpoint model =
+    let
         servers =
             getServers model
 
-        maybeServerID =
-            getServerID model
-
-        maybeServer =
-            Maybe.andThen (flip Servers.get servers) maybeServerID
+        maybeGateway =
+            getActiveServer model
     in
-        case ( maybeServer, maybeServerID ) of
-            ( Just server, Just id ) ->
-                Just
-                    { id = id
-                    , server = server
-                    , game = model
-                    }
+        maybeGateway
+            |> Maybe.andThen Servers.getEndpoint
+            |> Maybe.andThen (flip Servers.mapNetwork servers)
+            |> Maybe.andThen (flip fromServerID model)
 
-            _ ->
-                Nothing
+
+fromServerID : Servers.ID -> Model -> Maybe Data
+fromServerID id model =
+    case Servers.get id (getServers model) of
+        Just server ->
+            Just
+                { id = id
+                , server = server
+                , game = model
+                }
+
+        _ ->
+            Nothing
+
+
+fromServerIP : IP -> Model -> Maybe Data
+fromServerIP ip model =
+    case Servers.mapNetwork ip (getServers model) of
+        Just id ->
+            fromServerID id model
+
+        Nothing ->
+            Nothing
