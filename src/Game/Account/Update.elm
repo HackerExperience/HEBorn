@@ -1,6 +1,5 @@
 module Game.Account.Update exposing (..)
 
-import Maybe
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
 import Driver.Websocket.Channels exposing (..)
@@ -8,12 +7,12 @@ import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events
+import Game.Account.Bounces.Update as Bounces
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
 import Game.Account.Requests exposing (..)
 import Game.Account.Requests.Logout as Logout
 import Game.Account.Requests.ServerIndex as ServerIndex
-import Game.Account.Bounces.Update as Bounces
 import Game.Models as Game
 
 

@@ -2,7 +2,6 @@ module Game.Servers.Logs.ModelTest exposing (all)
 
 import Expect
 import Gen.Logs as Gen
-import Maybe exposing (andThen, withDefault)
 import Test exposing (Test, describe)
 import Fuzz exposing (tuple, tuple3)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
@@ -112,7 +111,7 @@ updateLogGenericTests =
                 log
                     |> getID
                     |> Maybe.map (model |> flip getByID)
-                    |> andThen getRawContent
+                    |> Maybe.andThen getRawContent
                     |> Expect.equal expectations
     ]
 

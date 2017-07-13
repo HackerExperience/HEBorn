@@ -13,11 +13,10 @@ module OS.SessionManager.Models
         )
 
 import Dict exposing (Dict)
-import Maybe exposing (Maybe(..))
 import Random.Pcg as Random
-import Uuid
 import Apps.Apps as Apps
 import Game.Network.Types exposing (IP)
+import Uuid
 import OS.SessionManager.WindowManager.Models as WindowManager
 
 

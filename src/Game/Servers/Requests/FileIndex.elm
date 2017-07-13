@@ -18,6 +18,7 @@ module Game.Servers.Requests.FileIndex
         , DecryptorModule(..)
         )
 
+import Date exposing (Date)
 import Dict exposing (Dict)
 import Json.Decode
     exposing
@@ -34,13 +35,11 @@ import Json.Decode
         , int
         )
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
-import Result exposing (Result(..))
-import Date exposing (Date)
-import Game.Servers.Messages exposing (..)
+import Utils.Json.Decode exposing (date)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
-import Utils.Json.Decode exposing (date)
+import Game.Servers.Messages exposing (..)
 
 
 type Response
