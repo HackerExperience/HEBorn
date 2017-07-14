@@ -2,6 +2,7 @@ port module Stylesheets exposing (..)
 
 import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Core.Style as Core
+import Landing.Style as Landing
 import UI.Style as UI
 import OS.Style as OS
 import OS.SessionManager.WindowManager.Style as WindowManager
@@ -26,6 +27,7 @@ fileStructure =
         [ ( "index.css"
           , Css.File.compile
                 [ Core.css
+                , Landing.css
                 , OS.css
                 , UI.css
                 , WindowManager.css
