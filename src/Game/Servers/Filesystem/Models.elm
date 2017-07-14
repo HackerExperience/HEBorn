@@ -1,211 +1,94 @@
 module Game.Servers.Filesystem.Models
     exposing
-        ( Filesystem
-        , initialFilesystem
-        , File(..)
-        , FileID
-        , FilePath
-        , FileSize(..)
-        , FileVersion(..)
-        , FileModules
-        , FileModule
-        , ModuleName
-        , ModuleVersion
-        , StdFileData
-        , FolderData
-        , addFile
-        , removeFile
-        , getFileLocation
-        , getFileName
-        , getFileId
-        , getFilesIdOnPath
-        , getFilesOnPath
-        , pathExists
-        , rootPath
-        , getFileById
-        , moveFile
+        ( initialFilesystem
+        , getEntryId
+        , getEntryLocation
+        , getEntryBasename
+        , getEntryName
+        , getEntryLink
+        , getEntry
+        , findEntry
+        , addEntry
+        , deleteEntry
+        , moveEntry
         , renameFile
-        , pathSeparator
-        , getAbsolutePath
-        , pathSplit
-        , isValidFilename
-        , setFilePath
-        , setFileName
+        , isDirectory
+        , findChildrenIds
+        , findChildren
+        , isValidFileName
         )
 
 import Dict
 import Utils.Dict as Dict
 import Utils.List as List
-import Game.Shared exposing (ID)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
-type alias FileID =
-    ID
+getEntryId : Entry -> FileID
+getEntryId entry =
+    case entry of
+        FileEntry file ->
+            file.id
 
-
-{-| todo: how about FilePath as a List String?
--}
-type alias FilePath =
-    String
-
-
-type FileVersion
-    = FileVersionNumber Int
-    | NoVersion
-
-
-type FileSize
-    = FileSizeNumber Int
-    | NoSize
-
-
-type alias StdFileData =
-    { id : FileID
-    , name : String
-    , extension : String
-    , version : FileVersion
-    , size : FileSize
-    , path : FilePath
-    , modules : FileModules
-    }
-
-
-type alias FileModules =
-    List FileModule
-
-
-type alias FileModule =
-    { name : ModuleName
-    , version : ModuleVersion
-    }
-
-
-type alias ModuleName =
-    String
-
-
-type alias ModuleVersion =
-    Int
-
-
-type alias FolderData =
-    { id : FileID
-    , name : String
-    , path : FilePath
-    }
-
-
-type File
-    = StdFile StdFileData
-    | Folder FolderData
-
-
-type alias Entries =
-    Dict.Dict FileID File
-
-
-type alias PathIndex =
-    Dict.Dict FilePath (List FileID)
-
-
-type alias Filesystem =
-    { entries : Entries
-    , pathIndex : PathIndex
-    }
-
-
-getFileModules : File -> FileModules
-getFileModules file =
-    case file of
-        StdFile file_ ->
-            file_.modules
-
-        Folder folder ->
-            []
-
-
-getFileId : File -> FileID
-getFileId file =
-    case file of
-        StdFile file_ ->
-            file_.id
-
-        Folder folder ->
+        FolderEntry folder ->
             folder.id
 
 
-getFileLocation : File -> FilePath
-getFileLocation file =
-    case file of
-        StdFile file_ ->
-            file_.path
+getEntryLocation : Entry -> FilePath
+getEntryLocation entry =
+    let
+        last =
+            getEntryName entry
 
-        Folder folder ->
-            folder.path
-
-
-setFilePath : FilePath -> File -> File
-setFilePath path file =
-    -- ATTENTION: This doesn't update path index
-    case file of
-        StdFile file ->
-            StdFile { file | path = path }
-
-        Folder folder ->
-            Folder { folder | path = path }
+        upList =
+            getAncestorsList entry.parent
+                |> List.reverse
+                |> List.map (getEntryName)
+    in
+        ( upList, last )
 
 
-setFileName : String -> File -> File
-setFileName name file =
-    -- ATTENTION: This doesn't update path index
-    case file of
-        StdFile file ->
-            StdFile { file | name = name }
+getEntryBasename : Entry -> String
+getEntryBasename entry =
+    case entry of
+        FileEntry file ->
+            file.name
 
-        Folder folder ->
-            Folder { folder | name = name }
-
-
-getFileName : File -> String
-getFileName file =
-    case file of
-        StdFile file_ ->
-            file_.name
-
-        Folder folder ->
+        FolderEntry folder ->
             folder.name
 
+pathTreeUpdate
 
-addFile : File -> Filesystem -> Filesystem
-addFile file filesystem =
+addEntry : Entry -> Filesystem -> Filesystem
+addEntry entry filesystem =
     -- TODO: Do nothing when overwriting
     let
-        path =
-            getFileLocation file
+        location =
+            getEntryLocation entry
 
         id =
-            getFileId file
+            getEntryId entry
 
-        files =
-            (getFilesIdOnPath path filesystem) ++ [ id ]
+        brotherhood =
+            (findChildrenIds location filesystem) ++ [ id ]
     in
-        case file of
-            StdFile _ ->
-                if pathExists path filesystem then
-                    { entries = Dict.insert id file filesystem.entries
-                    , pathIndex = Dict.insert path files filesystem.pathIndex
+        case entry of
+            FileEntry _ ->
+                if isDirectory location filesystem then
+                    { entries = Dict.insert id entry filesystem.entries
+                    , root = pathTreeUpdate id.parent brotherhood [] filesystem
                     }
                 else
                     filesystem
 
             -- when adding a new folder we also need to insert a new
             -- path to hold it's files
-            Folder _ ->
+            FolderEntry _ ->
                 let
                     pathIndex =
                         filesystem.pathIndex
-                            |> Dict.insert path files
-                            |> Dict.insert (getAbsolutePath file) []
+                            |> Dict.insert location brotherhood
+                            |> Dict.insert (getEntryLink file) []
 
                     entries =
                         Dict.insert id file filesystem.entries
@@ -213,8 +96,8 @@ addFile file filesystem =
                     Filesystem entries pathIndex
 
 
-getFilesIdOnPath : FilePath -> Filesystem -> List FileID
-getFilesIdOnPath path filesystem =
+findChildrenIds : FilePath -> Filesystem -> List FileID
+findChildrenIds path filesystem =
     case Dict.get path filesystem.pathIndex of
         Just files ->
             files
@@ -370,21 +253,6 @@ initialFilesystem =
     Filesystem
         (Dict.fromList [ ( "root", Folder (FolderData "root" rootPath ".") ) ])
         (Dict.fromList [ ( rootPath, [] ) ])
-
-
-rootPath : FilePath
-rootPath =
-    "/"
-
-
-pathSeparator : String
-pathSeparator =
-    "/"
-
-
-extensionSeparator : String
-extensionSeparator =
-    "."
 
 
 getFileNameWithExtension : File -> String
