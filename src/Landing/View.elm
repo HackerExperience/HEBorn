@@ -6,11 +6,12 @@ import Core.Models as Core
 import Landing.Messages exposing (..)
 import Landing.Login.View as Login
 import Landing.SignUp.View as SignUp
+import Landing.Resources exposing (..)
 
 
 view : Core.HomeModel -> Html Msg
 view model =
-    div [ id "view-landing" ]
+    div [ id viewId ]
         [ viewIntro
         , viewLogin model
         , viewSignUp model
@@ -23,7 +24,7 @@ view model =
 
 viewIntro : Html Msg
 viewIntro =
-    div [ id "view-intro" ]
+    div [ id introId ]
         [ text "Shh! Don't tell anyone, but this is the new HE1 website."
         , br [] []
         , text "We are under active development, and soon we'll release the new HE1 to public."
