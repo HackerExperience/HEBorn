@@ -134,11 +134,11 @@ update data msg ({ openMenu } as model) =
                         |> Servers.getEndpoint
 
                 dispatch =
-                    case endpoint of
-                        Just _ ->
-                            Dispatch.meta <| Meta.ContextTo context
-
-                        Nothing ->
+                    case ( endpoint, context ) of
+                        ( Nothing, Meta.Endpoint ) ->
                             Dispatch.none
+
+                        _ ->
+                            Dispatch.meta <| Meta.ContextTo context
             in
                 ( model, Cmd.none, dispatch )
