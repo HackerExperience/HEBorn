@@ -1,7 +1,7 @@
 module OS.Header.Messages exposing (Msg(..))
 
 import UI.Widgets.CustomSelect as CustomSelect
-import Game.Meta.Models exposing (Context)
+import Game.Meta.Messages exposing (Context)
 import OS.Header.Models exposing (OpenMenu(..))
 
 

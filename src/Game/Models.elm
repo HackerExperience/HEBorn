@@ -9,14 +9,18 @@ module Game.Models
         , getMeta
         , setMeta
         , getConfig
+        , getGateway
+        , setGateway
+        , getEndpoint
+        , setEndpoint
         , getActiveServer
         , setActiveServer
-        , getActiveServerID
         )
 
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
+import Game.Meta.Messages as Meta
 import Game.Meta.Models as Meta
 import Game.Web.Models as Web
 import Core.Config exposing (Config)
@@ -76,35 +80,8 @@ getConfig =
     .config
 
 
-getActiveServer : Model -> Maybe Servers.Server
-getActiveServer model =
-    model
-        |> getActiveServerID
-        |> Maybe.andThen (flip Servers.get (getServers model))
-
-
-setActiveServer : Servers.Server -> Model -> Model
-setActiveServer server model =
-    case getActiveServerID model of
-        Just id ->
-            let
-                servers =
-                    getServers model
-
-                servers_ =
-                    Servers.insert id server servers
-
-                model_ =
-                    setServers servers_ model
-            in
-                model_
-
-        Nothing ->
-            model
-
-
-getActiveServerID : Model -> Maybe Servers.ID
-getActiveServerID model =
+getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
+getGateway model =
     let
         meta =
             getMeta model
@@ -115,16 +92,112 @@ getActiveServerID model =
         maybeGatewayID =
             Meta.getGateway meta
 
-        maybeServerID =
-            case Meta.getContext meta of
-                Meta.Gateway ->
-                    maybeGatewayID
-
-                Meta.Endpoint ->
-                    maybeGatewayID
-                        |> Maybe.andThen (flip Servers.get servers)
-                        |> Maybe.andThen .endpoint
-                        |> Maybe.andThen
-                            (flip Servers.mapNetwork servers)
+        maybeGateway =
+            Maybe.andThen (flip Servers.get servers) maybeGatewayID
     in
-        maybeServerID
+        case ( maybeGatewayID, maybeGateway ) of
+            ( Just id, Just gateway ) ->
+                Just ( id, gateway )
+
+            _ ->
+                Nothing
+
+
+setGateway : Servers.Server -> Model -> Model
+setGateway server model =
+    case getGateway model of
+        Just ( id, _ ) ->
+            setServer id server model
+
+        Nothing ->
+            model
+
+
+getEndpoint : Model -> Maybe ( Servers.ID, Servers.Server )
+getEndpoint model =
+    let
+        meta =
+            getMeta model
+
+        servers =
+            getServers model
+
+        maybeGateway =
+            meta
+                |> Meta.getGateway
+                |> Maybe.andThen (flip Servers.get servers)
+
+        maybeEndpointID =
+            maybeGateway
+                |> Maybe.andThen .endpoint
+                |> Maybe.andThen (flip Servers.mapNetwork servers)
+
+        maybeEndpoint =
+            Maybe.andThen (flip Servers.get servers) maybeEndpointID
+    in
+        case ( maybeEndpointID, maybeEndpoint ) of
+            ( Just id, Just endpoint ) ->
+                Just ( id, endpoint )
+
+            _ ->
+                Nothing
+
+
+setEndpoint : Servers.Server -> Model -> Model
+setEndpoint server model =
+    case getEndpoint model of
+        Just ( id, _ ) ->
+            setServer id server model
+
+        Nothing ->
+            model
+
+
+getActiveServer : Model -> Maybe ( Servers.ID, Servers.Server )
+getActiveServer model =
+    let
+        meta =
+            getMeta model
+    in
+        case Meta.getContext meta of
+            Meta.Gateway ->
+                getGateway model
+
+            Meta.Endpoint ->
+                getEndpoint model
+
+
+setActiveServer : Servers.Server -> Model -> Model
+setActiveServer server model =
+    let
+        meta =
+            getMeta model
+    in
+        case Meta.getContext meta of
+            Meta.Gateway ->
+                setGateway server model
+
+            Meta.Endpoint ->
+                setEndpoint server model
+
+
+
+-- internals
+
+
+setServer : Servers.ID -> Servers.Server -> Model -> Model
+setServer id server model =
+    let
+        meta =
+            getMeta model
+
+        servers =
+            getServers model
+
+        servers_ =
+            Servers.insert id server servers
+
+        model_ =
+            setServers servers_ model
+    in
+        model_

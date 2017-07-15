@@ -4,8 +4,10 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import UI.Widgets.CustomSelect as CustomSelect
 import Game.Account.Messages as Account
 import Game.Data as Game
+import Game.Models as Game
 import Game.Meta.Messages as Meta
 import Game.Servers.Messages as Servers
+import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
@@ -76,20 +78,43 @@ update data msg ({ openMenu } as model) =
 
         SelectEndpoint ip ->
             let
+                context =
+                    data
+                        |> Game.getGame
+                        |> Game.getMeta
+                        |> (.context)
+
+                id =
+                    data
+                        |> Game.getGame
+                        |> Game.fromGateway
+                        |> Maybe.withDefault data
+                        |> Game.getID
+
                 ip_ =
-                    -- this could be done in a better way
                     if ip == "" then
                         Nothing
                     else
                         Just ip
 
                 dispatch =
-                    Dispatch.servers <| Servers.SetEndpoint data.id ip_
+                    Dispatch.servers <| Servers.SetEndpoint id ip_
+
+                dispatch_ =
+                    case ( context, ip_ ) of
+                        ( Meta.Endpoint, Nothing ) ->
+                            Dispatch.batch
+                                [ Dispatch.meta <| Meta.ContextTo Meta.Gateway
+                                , dispatch
+                                ]
+
+                        _ ->
+                            dispatch
 
                 model_ =
                     { model | openMenu = NothingOpen }
             in
-                ( model_, Cmd.none, dispatch )
+                ( model_, Cmd.none, dispatch_ )
 
         CheckMenus ->
             let
@@ -101,5 +126,19 @@ update data msg ({ openMenu } as model) =
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        _ ->
-            ( model, Cmd.none, Dispatch.none )
+        ContextTo context ->
+            let
+                endpoint =
+                    data
+                        |> Game.getServer
+                        |> Servers.getEndpoint
+
+                dispatch =
+                    case endpoint of
+                        Just _ ->
+                            Dispatch.meta <| Meta.ContextTo context
+
+                        Nothing ->
+                            Dispatch.none
+            in
+                ( model, Cmd.none, dispatch )

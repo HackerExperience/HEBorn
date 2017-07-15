@@ -6,14 +6,13 @@ module Game.Data
         , getGame
         , fromGateway
         , fromEndpoint
+        , fromActiveServer
         , fromServerID
-        , fromServerIP
         )
 
 import Game.Models exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Network.Types exposing (IP)
 
 
 type alias Data =
@@ -41,44 +40,45 @@ getGame =
 fromGateway : Model -> Maybe Data
 fromGateway model =
     model
-        |> getActiveServerID
-        |> Maybe.andThen (flip fromServerID model)
+        |> getGateway
+        |> Maybe.map (fromServer model)
 
 
 fromEndpoint : Model -> Maybe Data
 fromEndpoint model =
-    let
-        servers =
-            getServers model
+    model
+        |> getEndpoint
+        |> Maybe.map (fromServer model)
 
-        maybeGateway =
-            getActiveServer model
-    in
-        maybeGateway
-            |> Maybe.andThen Servers.getEndpoint
-            |> Maybe.andThen (flip Servers.mapNetwork servers)
-            |> Maybe.andThen (flip fromServerID model)
+
+fromActiveServer : Model -> Maybe Data
+fromActiveServer model =
+    model
+        |> getActiveServer
+        |> Maybe.map (fromServer model)
 
 
 fromServerID : Servers.ID -> Model -> Maybe Data
 fromServerID id model =
-    case Servers.get id (getServers model) of
-        Just server ->
-            Just
-                { id = id
-                , server = server
-                , game = model
-                }
+    let
+        servers =
+            getServers model
+    in
+        case Servers.get id servers of
+            Just server ->
+                Just <| fromServer model ( id, server )
 
-        _ ->
-            Nothing
+            Nothing ->
+                Nothing
 
 
-fromServerIP : IP -> Model -> Maybe Data
-fromServerIP ip model =
-    case Servers.mapNetwork ip (getServers model) of
-        Just id ->
-            fromServerID id model
 
-        Nothing ->
-            Nothing
+-- internals
+
+
+fromServer : Model -> ( Servers.ID, Servers.Server ) -> Data
+fromServer model ( id, server ) =
+    { id = id
+    , server = server
+    , game = model
+    }

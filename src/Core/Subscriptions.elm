@@ -56,7 +56,7 @@ play model =
 
 os : Game.Model -> OS.Model -> Sub Msg
 os game model =
-    case Game.fromGateway game of
+    case Game.fromActiveServer game of
         Just data ->
             model
                 |> OS.subscriptions data
