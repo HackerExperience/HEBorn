@@ -31,22 +31,22 @@ type alias FileVersion =
     Maybe Int
 
 
-type alias FileModuleName =
+type alias ModuleName =
     String
 
 
-type alias FileModuleVersion =
+type alias ModuleVersion =
     Int
 
 
-type alias FileModule =
-    { name : FileModuleName
-    , version : FileModuleVersion
+type alias Module =
+    { name : ModuleName
+    , version : ModuleVersion
     }
 
 
-type alias FileModules =
-    List FileModule
+type alias Modules =
+    List Module
 
 
 type ParentReference
@@ -74,16 +74,13 @@ type alias EntryHeader ext =
 type alias FileData =
     { size : FileSize
     , version : FileVersion
-    , modules : List FileModule
+    , modules : List Module
+    , extension : String
     }
 
 
-type FolderChildren
-    = List FileID
-
-
 type alias FolderData =
-    { children : FolderChildren }
+    {}
 
 
 type alias FileBox =
@@ -96,7 +93,7 @@ type alias FolderBox =
 
 type PathNode
     = Leaf FileID
-    | Node PathTree
+    | Node FileID PathTree
 
 
 type alias PathTree =
@@ -105,8 +102,18 @@ type alias PathTree =
 
 type alias Filesystem =
     { entries : Entries
-    , root : PathTree
+    , rootTree : PathTree
     }
+
+
+type IOErr
+    = MissingParent
+    | ParentIsFile
+    | NotEmptyDir
+
+
+type alias IOResult a =
+    Result IOErr a
 
 
 rootSymbol : String

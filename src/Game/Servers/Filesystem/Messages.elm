@@ -1,11 +1,11 @@
 module Game.Servers.Filesystem.Messages exposing (Msg(..))
 
-import Game.Servers.Filesystem.Models exposing (FileID, FilePath)
+import Game.Servers.Filesystem.Shared exposing (FileID, FilePath, Location)
 
 
 type Msg
     = Delete FileID
-    | CreateTextFile FilePath String
-    | CreateEmptyDir FilePath String
-    | Move FileID FilePath
+    | CreateTextFile FilePath
+    | CreateEmptyDir FilePath
+    | Move FileID Location
     | Rename FileID String

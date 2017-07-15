@@ -3,6 +3,7 @@ module Game.Servers.Filesystem.Update exposing (..)
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Servers.Filesystem.Messages exposing (Msg(..))
+import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
@@ -17,76 +18,96 @@ update game msg model =
         Delete fID ->
             let
                 file =
-                    getFileById model fID
+                    getEntry fID model
 
                 model_ =
                     case file of
                         Just file ->
-                            removeFile file model
+                            deleteEntry file model
 
                         Nothing ->
                             model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        CreateTextFile fPath fName ->
+        CreateTextFile ( fLoc, fBaseName ) ->
             let
-                file =
-                    (StdFile
-                        (StdFileData
-                            ("tempID"
-                                ++ "_TXT_"
-                                ++ (fPath ++ "/" ++ fName ++ "_")
-                                ++ (toString game.meta.lastTick)
+                model_ =
+                    model
+                        |> locationToParentRef fLoc
+                        |> Maybe.map
+                            (\path ->
+                                FileEntry
+                                    { id =
+                                        "tempID"
+                                            ++ "_TXT_"
+                                            ++ (fBaseName ++ "_")
+                                            ++ (toString game.meta.lastTick)
+                                    , name = fBaseName
+                                    , extension = "txt"
+                                    , version = Nothing
+                                    , size = Just 0
+                                    , parent = path
+                                    , modules = []
+                                    }
                             )
-                            fName
-                            "txt"
-                            (FileVersionNumber 1)
-                            (FileSizeNumber 0)
-                            fPath
-                            []
-                        )
-                    )
-
-                model_ =
-                    addFile file model
-            in
-                ( model_, Cmd.none, Dispatch.none )
-
-        CreateEmptyDir fPath fName ->
-            let
-                file =
-                    (Folder
-                        (FolderData
-                            ("tempID"
-                                ++ "_DIR_"
-                                ++ (fPath ++ "/" ++ fName ++ "_")
-                                ++ (toString game.meta.lastTick)
-                            )
-                            fName
-                            fPath
-                        )
-                    )
-
-                model_ =
-                    addFile file model
-            in
-                ( model_, Cmd.none, Dispatch.none )
-
-        Move fID fPath ->
-            let
-                model_ =
-                    getFileById model fID
-                        |> Maybe.map (\file -> moveFile fPath file model)
+                        |> Maybe.map (\e -> addEntry e model)
                         |> Maybe.withDefault model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        Rename fID fName ->
+        CreateEmptyDir ( fLoc, fName ) ->
             let
                 model_ =
-                    getFileById model fID
-                        |> Maybe.map (\file -> renameFile fName file model)
+                    model
+                        |> locationToParentRef fLoc
+                        |> Maybe.map
+                            (\path ->
+                                FolderEntry
+                                    { id =
+                                        "tempID"
+                                            ++ "_DIR_"
+                                            ++ (fName ++ "_")
+                                            ++ (toString game.meta.lastTick)
+                                    , name = fName
+                                    , parent = path
+                                    }
+                            )
+                        |> Maybe.map (\e -> addEntry e model)
+                        |> Maybe.withDefault model
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        Move fID fLoc ->
+            let
+                model_ =
+                    model
+                        |> getEntry fID
+                        |> Maybe.map
+                            (\e ->
+                                moveEntry
+                                    ( fLoc, getEntryBasename e )
+                                    e
+                                    model
+                            )
+                        |> Maybe.withDefault model
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
+        Rename fID fBaseName ->
+            let
+                model_ =
+                    model
+                        |> getEntry fID
+                        |> Maybe.map
+                            (\e ->
+                                moveEntry
+                                    ( getEntryLocation e model
+                                    , fBaseName
+                                    )
+                                    e
+                                    model
+                            )
                         |> Maybe.withDefault model
             in
                 ( model_, Cmd.none, Dispatch.none )

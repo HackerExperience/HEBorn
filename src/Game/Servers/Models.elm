@@ -33,11 +33,11 @@ module Game.Servers.Models
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
-import Game.Servers.Filesystem.Models exposing (Filesystem, initialFilesystem)
-import Game.Servers.Logs.Models as Log exposing (Logs, initialLogs)
-import Game.Servers.Processes.Models as Processes exposing (Processes, initialProcesses)
+import Game.Servers.Filesystem.Shared exposing (Filesystem)
+import Game.Servers.Logs.Models as Log exposing (Logs)
+import Game.Servers.Processes.Models as Processes exposing (Processes)
 import Game.Servers.Shared exposing (..)
-import Game.Servers.Tunnels.Models as Tunnels exposing (initialModel)
+import Game.Servers.Tunnels.Models as Tunnels
 import Game.Network.Types exposing (IP)
 
 
