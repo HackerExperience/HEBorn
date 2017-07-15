@@ -1,7 +1,7 @@
 module Game.Servers.Processes.Types.Shared exposing (..)
 
 import Game.Shared exposing (ID)
-import Game.Servers.Filesystem.Models as Filesystem exposing (FileID)
+import Game.Servers.Filesystem.Shared as Filesystem exposing (FileID)
 
 
 type alias FileID =

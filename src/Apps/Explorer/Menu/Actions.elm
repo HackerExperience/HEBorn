@@ -31,14 +31,20 @@ actionHandler data action ({ app } as model) =
                 fs =
                     Servers.getFilesystem data.server
 
+                getEntry =
+                    (flip Filesystem.getEntry) fs
+
+                getEntryLink =
+                    (flip Filesystem.getEntryLink) fs
+
                 model_ =
                     newPathId
-                        |> Filesystem.getFileById fs
+                        |> getEntry
                         |> Maybe.map
-                            (Filesystem.getAbsolutePath
-                                >> (\newPath ->
+                            (getEntryLink
+                                >> (\( loc, last ) ->
                                         changePath
-                                            newPath
+                                            (loc ++ [ last ])
                                             fs
                                             app
                                    )
@@ -65,11 +71,14 @@ actionHandler data action ({ app } as model) =
                 fs =
                     Servers.getFilesystem data.server
 
+                getEntry =
+                    (flip Filesystem.getEntry) fs
+
                 model_ =
                     fileId
-                        |> Filesystem.getFileById fs
+                        |> getEntry
                         |> Maybe.map
-                            (Filesystem.getFileName
+                            (Filesystem.getEntryBasename
                                 >> Renaming fileId
                                 >> ((flip setEditing) app)
                                 >> (\newApp -> { model | app = newApp })

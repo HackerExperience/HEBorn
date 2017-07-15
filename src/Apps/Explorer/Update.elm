@@ -84,14 +84,14 @@ update data msg ({ app } as model) =
                                 Dispatch.none
                             else
                                 gameMsg <|
-                                    Filesystem.CreateTextFile app.path fName
+                                    Filesystem.CreateTextFile ( app.path, fName )
 
                         CreatingPath fName ->
                             if Filesystem.isValidFilename fName then
                                 Dispatch.none
                             else
                                 gameMsg <|
-                                    Filesystem.CreateEmptyDir app.path fName
+                                    Filesystem.CreateEmptyDir ( app.path, fName )
 
                         Moving fID ->
                             gameMsg <| Filesystem.Move fID app.path

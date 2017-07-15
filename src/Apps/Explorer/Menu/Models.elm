@@ -1,6 +1,6 @@
 module Apps.Explorer.Menu.Models exposing (..)
 
-import Game.Servers.Filesystem.Models exposing (FileID)
+import Game.Servers.Filesystem.Shared exposing (FileID)
 import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 
 

@@ -1,56 +1,18 @@
 module Apps.Explorer.Lib exposing (..)
 
-import Game.Servers.Filesystem.Models as Filesystem exposing (FilePath, FileSize(..), ModuleName, rootPath, pathSeparator)
+import Game.Servers.Filesystem.Shared as Filesystem exposing (Location, FileSize, ModuleName, rootSymbol, pathSeparator)
 
 
 -- PATH
 
 
-type SmartPath
-    = Absolute (List String)
-    | Relative (List String)
-
-
-pathInterpret : FilePath -> SmartPath
-pathInterpret path =
-    let
-        stripRight =
-            if (String.endsWith pathSeparator path) then
-                (String.dropRight (String.length pathSeparator) path)
-            else
-                path
-
-        splitPath =
-            String.split pathSeparator
-    in
-        if (String.startsWith rootPath path) then
-            Absolute (splitPath (String.dropLeft (String.length rootPath) stripRight))
-        else
-            Relative (splitPath stripRight)
-
-
-pathToString : SmartPath -> FilePath
-pathToString path =
+locationToString : Location -> String
+locationToString loc =
     let
         join =
-            String.join "/"
+            String.join pathSeparator
     in
-        case path of
-            Absolute entries ->
-                "/" ++ (join entries)
-
-            Relative entries ->
-                join entries
-
-
-pathFuckStart : SmartPath -> List String
-pathFuckStart path =
-    case path of
-        Absolute entries ->
-            entries
-
-        Relative entries ->
-            entries
+        rootSymbol ++ (join loc)
 
 
 dropRight : Int -> List a -> List a
@@ -58,14 +20,9 @@ dropRight num list =
     (List.take ((List.length list) - num) list)
 
 
-pathGoUp : SmartPath -> SmartPath
-pathGoUp path =
-    case path of
-        Absolute entries ->
-            Absolute (dropRight 1 entries)
-
-        Relative entries ->
-            Relative (dropRight 1 entries)
+locationGoUp : Location -> Location
+locationGoUp loc =
+    dropRight 1 loc
 
 
 
@@ -108,9 +65,6 @@ moduleInterpret name =
 
 fileSizeToFloat : FileSize -> Float
 fileSizeToFloat fsize =
-    case fsize of
-        FileSizeNumber fsizeInt ->
-            toFloat fsizeInt
-
-        NoSize ->
-            0
+    fsize
+        |> Maybe.map toFloat
+        |> Maybe.withDefault 0

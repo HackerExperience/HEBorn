@@ -7,8 +7,9 @@ import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Data as Game
-import Game.Servers.Models exposing (Server)
-import Game.Servers.Filesystem.Models as Filesystem exposing (..)
+import Game.Servers.Models as Servers exposing (Server)
+import Game.Servers.Filesystem.Shared exposing (..)
+import Game.Servers.Filesystem.Models exposing (getEntryName, getEntryLink)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Lib exposing (..)
@@ -34,13 +35,13 @@ import Apps.Explorer.Resources exposing (Classes(..), prefix)
 -- VIEW WRAPPER
 
 
-entryIcon : File -> Classes
+entryIcon : Entry -> Classes
 entryIcon file =
     case file of
-        Folder _ ->
+        FolderEntry _ ->
             CasedDirIcon
 
-        StdFile prop ->
+        FileEntry prop ->
             case (extensionInterpret prop.extension) of
                 Virus ->
                     VirusIcon
@@ -74,13 +75,10 @@ moduleMenu fileID modType =
 
 fileVerToText : FileVersion -> Html Msg
 fileVerToText ver =
-    text <|
-        case ver of
-            FileVersionNumber pure ->
-                toString pure
-
-            NoVersion ->
-                "N/V"
+    ver
+        |> Maybe.map toString
+        |> Maybe.withDefault "N/V"
+        |> text
 
 
 moduleVerToText : ModuleVersion -> Html Msg
@@ -92,16 +90,13 @@ moduleVerToText ver =
 
 sizeToText : FileSize -> Html Msg
 sizeToText size =
-    text <|
-        case size of
-            FileSizeNumber pure ->
-                bytesToString (toFloat pure)
-
-            NoSize ->
-                "N/S"
+    size
+        |> Maybe.map (toFloat >> bytesToString)
+        |> Maybe.withDefault "N/S"
+        |> text
 
 
-module_ : FileID -> FileModule -> Html Msg
+module_ : FileID -> Module -> Html Msg
 module_ fileID act =
     let
         target =
@@ -115,46 +110,47 @@ module_ fileID act =
             ]
 
 
-moduleList : FileID -> List FileModule -> List (Html Msg)
+moduleList : FileID -> List Module -> List (Html Msg)
 moduleList fileID acts =
     List.map (module_ fileID) acts
 
 
-indvidualEntryName : File -> String
-indvidualEntryName file =
-    case file of
-        StdFile _ ->
-            getFileName file
-
-        Folder data ->
-            data.name
-
-
-treeEntry : Server -> File -> Html Msg
+treeEntry : Server -> Entry -> Html Msg
 treeEntry server file =
     let
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
 
         label =
-            span [] [ text <| indvidualEntryName file ]
+            span [] [ text <| getEntryName file ]
     in
         case file of
-            Folder data ->
-                div
-                    [ class [ NavEntry, EntryDir, EntryExpanded ]
-                    , menuTreeDir data.id
-                    , onClick <| GoPath <| getAbsolutePath file
-                    ]
-                    [ div
-                        [ class [ EntryView ] ]
-                        [ icon, label ]
-                    , div
-                        [ class [ EntryChilds ] ]
-                        (treeEntryPath server <| pathInterpret <| getAbsolutePath file)
-                    ]
+            FolderEntry data ->
+                let
+                    fs =
+                        Servers.getFilesystem server
 
-            StdFile prop ->
+                    ( goLoc, goFolder ) =
+                        getEntryLink file fs
+
+                    meAsLoc =
+                        goLoc ++ [ goFolder ]
+                in
+                    div
+                        [ class [ NavEntry, EntryDir, EntryExpanded ]
+                        , menuTreeDir data.id
+                        , onClick <| GoPath meAsLoc
+                        ]
+                        [ div
+                            [ class [ EntryView ] ]
+                            [ icon, label ]
+                        , div
+                            [ class [ EntryChilds ] ]
+                          <|
+                            treeEntryPath server meAsLoc
+                        ]
+
+            FileEntry prop ->
                 div
                     [ class [ NavEntry, EntryArchive ]
                     , menuTreeArchive prop.id
@@ -162,28 +158,37 @@ treeEntry server file =
                     [ icon, label ]
 
 
-treeEntryPath : Server -> SmartPath -> List (Html Msg)
+treeEntryPath : Server -> Location -> List (Html Msg)
 treeEntryPath server path =
     path
-        |> pathToString
         |> resolvePath server
         |> List.map (treeEntry server)
 
 
-detailedEntry : File -> Html Msg
-detailedEntry file =
+detailedEntry : Server -> Entry -> Html Msg
+detailedEntry server file =
     case file of
-        Folder data ->
-            div
-                [ class [ CntListEntry, EntryDir ]
-                , menuMainDir data.id
-                , onClick <| GoPath <| getAbsolutePath file
-                ]
-                [ span [ class [ DirIcon ] ] []
-                , span [] [ text data.name ]
-                ]
+        FolderEntry data ->
+            let
+                fs =
+                    Servers.getFilesystem server
 
-        StdFile prop ->
+                ( goLoc, goFolder ) =
+                    getEntryLink file fs
+
+                meAsLoc =
+                    goLoc ++ [ goFolder ]
+            in
+                div
+                    [ class [ CntListEntry, EntryDir ]
+                    , menuMainDir data.id
+                    , onClick <| GoPath meAsLoc
+                    ]
+                    [ span [ class [ DirIcon ] ] []
+                    , span [] [ text data.name ]
+                    ]
+
+        FileEntry prop ->
             (case (extensionInterpret prop.extension) of
                 GenericArchive ->
                     div
@@ -191,7 +196,7 @@ detailedEntry file =
                         , menuMainArchive prop.id
                         ]
                         [ span [ class [ entryIcon file ] ] []
-                        , span [] [ text <| indvidualEntryName file ]
+                        , span [] [ text <| getEntryName file ]
                         , span [] [ fileVerToText prop.version ]
                         , span [] [ sizeToText prop.size ]
                         ]
@@ -204,7 +209,7 @@ detailedEntry file =
                                 , menuExecutable prop.id
                                 ]
                                 [ span [ class [ entryIcon file ] ] []
-                                , span [] [ text <| indvidualEntryName file ]
+                                , span [] [ text <| getEntryName file ]
                                 , span [] [ fileVerToText prop.version ]
                                 , span [] [ sizeToText prop.size ]
                                 ]
@@ -220,10 +225,10 @@ detailedEntry file =
             )
 
 
-detailedEntryList : List File -> List (Html Msg)
-detailedEntryList list =
+detailedEntryList : Server -> List Entry -> List (Html Msg)
+detailedEntryList server list =
     List.map
-        detailedEntry
+        (detailedEntry server)
         list
 
 
@@ -259,7 +264,7 @@ usage min max =
             ]
 
 
-explorerColumn : SmartPath -> Server -> Html Msg
+explorerColumn : Location -> Server -> Html Msg
 explorerColumn path server =
     div
         [ class [ Nav ]
@@ -272,7 +277,7 @@ explorerColumn path server =
         ]
 
 
-breadcrumbItem : FilePath -> String -> Html Msg
+breadcrumbItem : Location -> String -> Html Msg
 breadcrumbItem path label =
     span
         [ class [ BreadcrumbItem ]
@@ -281,14 +286,14 @@ breadcrumbItem path label =
         [ text label ]
 
 
-breadcrumbFold : String -> ( List (Html Msg), String ) -> ( List (Html Msg), String )
+breadcrumbFold : String -> ( List (Html Msg), Location ) -> ( List (Html Msg), Location )
 breadcrumbFold item ( htmlElems, pathAcu ) =
     if (String.length item) < 1 then
         ( htmlElems, pathAcu )
     else
         let
             fullPath =
-                pathAcu ++ "/" ++ item
+                pathAcu ++ [ item ]
 
             newElems =
                 item
@@ -298,18 +303,17 @@ breadcrumbFold item ( htmlElems, pathAcu ) =
             ( newElems, fullPath )
 
 
-breadcrumb : SmartPath -> Html Msg
+breadcrumb : Location -> Html Msg
 breadcrumb path =
     path
-        |> pathFuckStart
-        |> List.foldl breadcrumbFold ( [], "" )
+        |> List.foldl breadcrumbFold ( [], [] )
         |> Tuple.first
         |> List.reverse
-        |> (::) (breadcrumbItem "/" "DISK")
+        |> (::) (breadcrumbItem [] "DISK")
         |> div [ class [ LocBar ] ]
 
 
-explorerMainHeader : SmartPath -> Html Msg
+explorerMainHeader : Location -> Html Msg
 explorerMainHeader path =
     div
         [ class [ ContentHeader ] ]
@@ -318,7 +322,7 @@ explorerMainHeader path =
             [ class [ ActBtns ] ]
             [ span
                 [ class [ GoUpBtn ]
-                , onClick <| GoPath <| pathToString <| pathGoUp path
+                , onClick <| GoPath <| locationGoUp path
                 ]
                 []
             , span
@@ -374,7 +378,7 @@ explorerMainDinamycContent editing =
                 ]
 
 
-explorerMain : EditingStatus -> SmartPath -> Server -> Html Msg
+explorerMain : EditingStatus -> Location -> Server -> Html Msg
 explorerMain editing path server =
     div
         [ class
@@ -383,9 +387,8 @@ explorerMain editing path server =
         [ explorerMainHeader path
         , explorerMainDinamycContent editing
         , path
-            |> pathToString
             |> resolvePath server
-            |> detailedEntryList
+            |> detailedEntryList server
             |> div [ class [ ContentList ] ]
         ]
 
@@ -394,10 +397,10 @@ view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
         nowPath =
-            app.path |> pathInterpret
+            app.path
     in
         div [ class [ Window ] ]
-            [ explorerColumn (Relative [ "%favorites" ]) data.server
+            [ explorerColumn [] data.server
             , explorerMain app.editing nowPath data.server
             , menuView model
             ]
