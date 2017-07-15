@@ -20,6 +20,13 @@ update game msg model =
             else
                 ( model, Cmd.none, Dispatch.none )
 
+        ContextTo context ->
+            let
+                model_ =
+                    { model | context = context }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
         Tick time ->
             let
                 model_ =

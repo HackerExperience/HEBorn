@@ -8,7 +8,7 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Game.Data as Game
 import Game.Models as Game
-import Game.Meta.Models exposing (Context(..))
+import Game.Meta.Messages exposing (Context(..))
 import Game.Servers.Models as Servers
 import Game.Account.Bounces.Models as Bounces
 import OS.Header.Messages exposing (..)
@@ -93,13 +93,17 @@ renderEndpoint data ip =
 view : Game.Data -> Model -> Html Msg
 view data ({ openMenu } as model) =
     let
+        game =
+            Game.getGame data
+
         servers =
-            data
-                |> Game.getGame
-                |> Game.getServers
+            Game.getServers game
 
         gateway =
-            Game.getID data
+            game
+                |> Game.fromGateway
+                |> Maybe.map Game.getID
+                |> Maybe.withDefault ""
 
         gateways =
             data
@@ -114,17 +118,16 @@ view data ({ openMenu } as model) =
                 |> Maybe.withDefault ""
 
         bounces =
-            data
-                |> Game.getGame
+            game
                 |> Game.getAccount
                 |> (.bounces)
                 |> Dict.keys
                 |> (::) ""
 
         endpoint =
-            data
-                |> Game.getServer
-                |> Servers.getEndpoint
+            game
+                |> Game.fromEndpoint
+                |> Maybe.map (Game.getServer >> Servers.getIP)
                 |> Maybe.withDefault ""
 
         endpoints =

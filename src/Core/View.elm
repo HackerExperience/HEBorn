@@ -15,7 +15,7 @@ view model =
             Html.map LandingMsg (Landing.view model)
 
         Play model ->
-            case Game.fromGateway model.game of
+            case Game.fromActiveServer model.game of
                 Just data ->
                     Html.map OSMsg (OS.view data model)
 

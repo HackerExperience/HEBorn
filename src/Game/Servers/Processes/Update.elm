@@ -47,10 +47,12 @@ update game msg model =
             let
                 serverId =
                     game
-                        |> Game.getActiveServerID
+                        |> Game.getActiveServer
+                        |> Maybe.map Tuple.first
                         |> Maybe.withDefault ""
 
                 ( processes_, feedback ) =
+                    -- TODO: use a better method to cast the feedback
                     pID
                         |> (flip getProcessByID) model
                         |> Maybe.map (completeProcess serverId model)
