@@ -1,4 +1,4 @@
-module Requests.Requests exposing (request, report)
+module Requests.Requests exposing (request, report, fake)
 
 import Http
 import Json.Decode as Decode
@@ -7,6 +7,7 @@ import Json.Encode as Encode
 import Driver.Http.Http as HttpDriver
 import Driver.Websocket.Channels as WebsocketDriver
 import Driver.Websocket.Websocket as WebsocketDriver
+import Utils.Cmd as Cmd
 import Requests.Topics exposing (..)
 import Requests.Types exposing (..)
 
@@ -43,6 +44,18 @@ request topic msg context data source =
                 msg
                 context
                 data
+
+
+fake :
+    Topic
+    -> (ResponseType -> msg)
+    -> Context
+    -> Encode.Value
+    -> ResponseType
+    -> ConfigSource a
+    -> Cmd msg
+fake _ msg _ _ response _ =
+    Cmd.fromMsg (msg response)
 
 
 
