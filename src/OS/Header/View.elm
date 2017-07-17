@@ -6,11 +6,12 @@ import Html.CssHelpers
 import Html.Events exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
-import Game.Data as Game
-import Game.Models as Game
-import Game.Meta.Messages exposing (Context(..))
-import Game.Servers.Models as Servers
 import Game.Account.Bounces.Models as Bounces
+import Game.Data as Game
+import Game.Meta.Messages as Meta
+import Game.Meta.Models as Meta
+import Game.Models as Game
+import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Resources as Res
@@ -96,14 +97,14 @@ view data ({ openMenu } as model) =
         game =
             Game.getGame data
 
+        meta =
+            Game.getMeta game
+
         servers =
             Game.getServers game
 
         gateway =
-            game
-                |> Game.fromGateway
-                |> Maybe.map Game.getID
-                |> Maybe.withDefault ""
+            Game.getID data
 
         gateways =
             data
@@ -116,13 +117,6 @@ view data ({ openMenu } as model) =
                 |> Game.getServer
                 |> Servers.getBounce
                 |> Maybe.withDefault ""
-
-        bounces =
-            game
-                |> Game.getAccount
-                |> (.bounces)
-                |> Dict.keys
-                |> (::) ""
 
         endpoint =
             game
@@ -138,6 +132,19 @@ view data ({ openMenu } as model) =
                 |> (.servers)
                 |> List.map .ip
                 |> (::) ""
+
+        bounces =
+            if endpoint == "" then
+                game
+                    |> Game.getAccount
+                    |> (.bounces)
+                    |> Dict.keys
+                    |> (::) ""
+            else
+                []
+
+        onGateway =
+            Meta.Gateway == Meta.getContext meta
     in
         div [ class [ Res.Header ] ]
             [ selector OpenGateway
@@ -145,8 +152,7 @@ view data ({ openMenu } as model) =
                 (renderGateway data)
                 gateway
                 gateways
-            , contextToggler (data.game.meta.context == Gateway)
-                (ContextTo Gateway)
+            , contextToggler onGateway (ContextTo Meta.Gateway)
             , spacer
             , text "Bounce: "
             , selector OpenBounce
@@ -155,8 +161,7 @@ view data ({ openMenu } as model) =
                 bounce
                 bounces
             , spacer
-            , contextToggler (data.game.meta.context == Endpoint)
-                (ContextTo Endpoint)
+            , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
             , selector OpenEndpoint
                 openMenu
                 (renderEndpoint data)

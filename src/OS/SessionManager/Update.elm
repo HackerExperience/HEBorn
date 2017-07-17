@@ -2,6 +2,7 @@ module OS.SessionManager.Update exposing (update)
 
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
+import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Dock.Update as Dock
 import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
@@ -17,12 +18,15 @@ update :
     -> ( Model, Cmd Msg, Dispatch )
 update data msg model =
     let
+        id =
+            toSessionID data
+
         model_ =
-            ensureSession data model
+            ensureSession id model
     in
         case msg of
             WindowManagerMsg msg ->
-                windowManager data msg model_
+                windowManager data id msg model_
 
             DockMsg msg ->
                 ( Dock.update data msg model_, Cmd.none, Dispatch.none )
@@ -34,21 +38,22 @@ update data msg model =
 
 windowManager :
     GameData.Data
+    -> ID
     -> WM.Msg
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-windowManager data msg model =
+windowManager data id msg model =
     let
         wm =
             model
-                |> get data.id
+                |> get id
                 |> Maybe.withDefault WM.initialModel
 
         ( wm_, cmd, dispatch ) =
             WM.update data msg wm
 
         model_ =
-            refresh data.id wm_ model
+            refresh id wm_ model
 
         cmd_ =
             Cmd.map WindowManagerMsg cmd
@@ -56,11 +61,11 @@ windowManager data msg model =
         ( model_, cmd_, dispatch )
 
 
-ensureSession : GameData.Data -> Model -> Model
-ensureSession data model =
-    case get data.id model of
+ensureSession : ID -> Model -> Model
+ensureSession id model =
+    case get id model of
         Just _ ->
             model
 
         Nothing ->
-            insert data.id model
+            insert id model

@@ -6,7 +6,6 @@ module Game.Data
         , getGame
         , fromGateway
         , fromEndpoint
-        , fromActiveServer
         , fromServerID
         )
 
@@ -48,13 +47,6 @@ fromEndpoint : Model -> Maybe Data
 fromEndpoint model =
     model
         |> getEndpoint
-        |> Maybe.map (fromServer model)
-
-
-fromActiveServer : Model -> Maybe Data
-fromActiveServer model =
-    model
-        |> getActiveServer
         |> Maybe.map (fromServer model)
 
 

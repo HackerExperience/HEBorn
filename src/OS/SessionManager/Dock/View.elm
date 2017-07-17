@@ -6,7 +6,8 @@ import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (..)
 import Html.CssHelpers
 import OS.Resources as OsRes
-import OS.SessionManager.Models as SessionManager exposing (..)
+import OS.SessionManager.Models exposing (..)
+import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
@@ -27,7 +28,7 @@ osClass =
     .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
-view : GameData.Data -> SessionManager.Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view game model =
     div [ osClass [ OsRes.Dock ] ]
         [ dock game model ]
@@ -40,9 +41,12 @@ view game model =
 dock : GameData.Data -> Model -> Html Msg
 dock data ({ sessions } as model) =
     let
+        id =
+            toSessionID data
+
         wm =
             sessions
-                |> Dict.get data.id
+                |> Dict.get id
                 |> Maybe.withDefault WM.initialModel
 
         content =

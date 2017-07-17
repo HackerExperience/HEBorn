@@ -7,6 +7,7 @@ import Dict
 import OS.Resources as OsRes
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
+import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.View as WM
 import OS.SessionManager.WindowManager.Resources as WmRes
 import OS.SessionManager.Dock.View as Dock
@@ -44,11 +45,15 @@ viewDock game model =
 
 viewWM : GameData.Data -> Model -> Html Msg
 viewWM data model =
-    case Dict.get data.id model.sessions of
-        Just wm ->
-            wm
-                |> WM.view data
-                |> Html.map WindowManagerMsg
+    let
+        id =
+            toSessionID data
+    in
+        case Dict.get id model.sessions of
+            Just wm ->
+                wm
+                    |> WM.view data
+                    |> Html.map WindowManagerMsg
 
-        Nothing ->
-            div [ wmClass [ WmRes.Canvas ] ] []
+            Nothing ->
+                div [ wmClass [ WmRes.Canvas ] ] []

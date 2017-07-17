@@ -144,7 +144,7 @@ game msg model =
 
 os : OS.Msg -> PlayModel -> ( Model, Cmd Msg )
 os msg model =
-    case Game.fromActiveServer model.game of
+    case Game.fromGateway model.game of
         Just data ->
             let
                 ( os, cmd, dispatch ) =

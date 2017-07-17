@@ -78,19 +78,6 @@ update data msg ({ openMenu } as model) =
 
         SelectEndpoint ip ->
             let
-                context =
-                    data
-                        |> Game.getGame
-                        |> Game.getMeta
-                        |> (.context)
-
-                id =
-                    data
-                        |> Game.getGame
-                        |> Game.fromGateway
-                        |> Maybe.withDefault data
-                        |> Game.getID
-
                 ip_ =
                     if ip == "" then
                         Nothing
@@ -98,23 +85,12 @@ update data msg ({ openMenu } as model) =
                         Just ip
 
                 dispatch =
-                    Dispatch.servers <| Servers.SetEndpoint id ip_
-
-                dispatch_ =
-                    case ( context, ip_ ) of
-                        ( Meta.Endpoint, Nothing ) ->
-                            Dispatch.batch
-                                [ Dispatch.meta <| Meta.ContextTo Meta.Gateway
-                                , dispatch
-                                ]
-
-                        _ ->
-                            dispatch
+                    Dispatch.meta <| Meta.SetEndpoint ip_
 
                 model_ =
                     { model | openMenu = NothingOpen }
             in
-                ( model_, Cmd.none, dispatch_ )
+                ( model_, Cmd.none, dispatch )
 
         CheckMenus ->
             let
@@ -128,17 +104,7 @@ update data msg ({ openMenu } as model) =
 
         ContextTo context ->
             let
-                endpoint =
-                    data
-                        |> Game.getServer
-                        |> Servers.getEndpoint
-
                 dispatch =
-                    case ( endpoint, context ) of
-                        ( Nothing, Meta.Endpoint ) ->
-                            Dispatch.none
-
-                        _ ->
-                            Dispatch.meta <| Meta.ContextTo context
+                    Dispatch.meta <| Meta.ContextTo context
             in
                 ( model, Cmd.none, dispatch )
