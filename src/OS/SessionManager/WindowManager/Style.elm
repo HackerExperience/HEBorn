@@ -50,7 +50,8 @@ css =
                 , borderRadius (px 0)
                 , children
                     [ class WindowBody
-                        [ borderRadius (px 0) ]
+                        [ borderRadius (px 0)
+                        ]
                     , class WindowHeader
                         [ borderRadius (px 0) ]
                     ]
@@ -77,7 +78,8 @@ css =
                 , color Colors.black
                 , children
                     [ class WindowBody
-                        [ flex (int 1)
+                        [ position relative
+                        , flex (int 1)
                         , overflowY hidden
                         , flexContainerVert
                         ]
