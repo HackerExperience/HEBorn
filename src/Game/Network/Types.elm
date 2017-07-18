@@ -9,7 +9,5 @@ type alias ID =
     String
 
 
-type alias Data =
-    { ip : IP
-    , id : ID
-    }
+type alias NIP =
+    ( ID, IP )

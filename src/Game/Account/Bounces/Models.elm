@@ -32,7 +32,7 @@ type alias Bounce =
 
 
 type alias Path =
-    List Network.Data
+    List Network.NIP
 
 
 initialModel : Model

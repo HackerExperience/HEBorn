@@ -42,10 +42,10 @@ viewTabLabel _ tab =
         |> List.singleton
 
 
-viewBouncePath : List Network.Data -> Html Msg
+viewBouncePath : List Network.NIP -> Html Msg
 viewBouncePath ips =
     ips
-        |> List.map (.ip >> Inlines.addr)
+        |> List.map (Tuple.second >> Inlines.addr)
         |> List.intersperse (text " > ")
         |> span []
 
