@@ -95,6 +95,8 @@ css =
                                         , addIco "bouncemngr" Icon.bounceMngr
                                         , addIco "moneymngr" Icon.finance
                                         , addIco "hebamp" Icon.hebamp
+                                        , addIco "cpanel" Icon.cpanel
+                                        , addIco "srvgr" Icon.srvgr
                                         ]
                                     , class HeaderButtons
                                         [ flex (int 0)

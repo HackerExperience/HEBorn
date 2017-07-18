@@ -11,3 +11,5 @@ type App
     | BounceManagerApp
     | FinanceApp
     | MusicApp
+    | CtrlPanelApp
+    | ServersGearsApp

@@ -112,6 +112,8 @@ css =
                     , addIco "bouncemngr" Icon.bounceMngr
                     , addIco "moneymngr" Icon.finance
                     , addIco "hebamp" Icon.hebamp
+                    , addIco "cpanel" Icon.cpanel
+                    , addIco "srvgr" Icon.srvgr
                     , addGrad "explorer" Gradients.mangoPulp
                     , addGrad "logvw" Gradients.stellar
                     , addGrad "browser" Gradients.pinotNoir
@@ -121,6 +123,8 @@ css =
                     , addGrad "bouncemngr" Gradients.bourbon
                     , addGrad "moneymngr" Gradients.army
                     , addGrad "hebamp" Gradients.veryBlue
+                    , addGrad "cpanel" Gradients.emeraldWater
+                    , addGrad "srvgr" Gradients.purplepine
                     ]
                 , class AppContext
                     [ display none

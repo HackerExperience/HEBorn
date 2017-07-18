@@ -18,4 +18,6 @@ initialModel =
     , Apps.BounceManagerApp
     , Apps.FinanceApp
     , Apps.MusicApp
+    , Apps.CtrlPanelApp
+    , Apps.ServersGearsApp
     ]

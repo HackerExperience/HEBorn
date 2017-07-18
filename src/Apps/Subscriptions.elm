@@ -12,6 +12,8 @@ import Apps.ConnManager.Subscriptions as ConnManager
 import Apps.BounceManager.Subscriptions as BounceManager
 import Apps.Finance.Subscriptions as Finance
 import Apps.Hebamp.Subscriptions as Hebamp
+import Apps.CtrlPanel.Subscriptions as CtrlPanel
+import Apps.ServersGears.Subscriptions as ServersGears
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -52,3 +54,11 @@ subscriptions data model =
         MusicModel model ->
             Hebamp.subscriptions data model
                 |> Sub.map MusicMsg
+
+        CtrlPanelModel model ->
+            CtrlPanel.subscriptions data model
+                |> Sub.map CtrlPanelMsg
+
+        ServersGearsModel model ->
+            ServersGears.subscriptions data model
+                |> Sub.map ServersGearsMsg

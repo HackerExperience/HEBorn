@@ -19,6 +19,8 @@ import Apps.ConnManager.Models as ConnManager
 import Apps.BounceManager.Models as BounceManager
 import Apps.Finance.Models as Finance
 import Apps.Hebamp.Models as Hebamp
+import Apps.CtrlPanel.Models as CtrlPanel
+import Apps.ServersGears.Models as ServersGears
 import Apps.Apps exposing (..)
 
 
@@ -32,6 +34,8 @@ type AppModel
     | BounceManagerModel BounceManager.Model
     | FinanceModel Finance.Model
     | MusicModel Hebamp.Model
+    | CtrlPanelModel CtrlPanel.Model
+    | ServersGearsModel ServersGears.Model
 
 
 type Contexts
@@ -69,6 +73,12 @@ contexts app =
         MusicApp ->
             ContextlessApp
 
+        CtrlPanelApp ->
+            ContextlessApp
+
+        ServersGearsApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -99,6 +109,12 @@ name app =
 
         MusicApp ->
             Hebamp.name
+
+        CtrlPanelApp ->
+            CtrlPanel.name
+
+        ServersGearsApp ->
+            ServersGears.name
 
 
 icon : App -> String
@@ -131,6 +147,12 @@ icon app =
         MusicApp ->
             Hebamp.icon
 
+        CtrlPanelApp ->
+            CtrlPanel.icon
+
+        ServersGearsApp ->
+            ServersGears.icon
+
 
 title : AppModel -> String
 title model =
@@ -162,6 +184,12 @@ title model =
         MusicModel model ->
             Hebamp.title model
 
+        CtrlPanelModel model ->
+            CtrlPanel.title model
+
+        ServersGearsModel model ->
+            ServersGears.title model
+
 
 model : App -> AppModel
 model app =
@@ -192,6 +220,12 @@ model app =
 
         MusicApp ->
             MusicModel Hebamp.initialModel
+
+        CtrlPanelApp ->
+            CtrlPanelModel CtrlPanel.initialModel
+
+        ServersGearsApp ->
+            ServersGearsModel ServersGears.initialModel
 
 
 isDecorated : App -> Bool

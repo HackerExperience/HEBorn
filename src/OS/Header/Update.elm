@@ -4,10 +4,8 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import UI.Widgets.CustomSelect as CustomSelect
 import Game.Account.Messages as Account
 import Game.Data as Game
-import Game.Models as Game
 import Game.Meta.Messages as Meta
 import Game.Servers.Messages as Servers
-import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 

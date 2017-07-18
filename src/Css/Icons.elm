@@ -222,3 +222,13 @@ finance =
 hebamp : Icon
 hebamp =
     faIcon FA.bolt
+
+
+cpanel : Icon
+cpanel =
+    faIcon FA.sliders
+
+
+srvgr : Icon
+srvgr =
+    faIcon FA.wrench

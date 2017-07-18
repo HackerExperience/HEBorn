@@ -3,6 +3,7 @@ module OS.SessionManager.Dock.View exposing (view)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import Html.Attributes exposing (title)
 import Utils.Html.Attributes exposing (..)
 import Html.CssHelpers
 import OS.Resources as OsRes
@@ -103,6 +104,7 @@ icon app group wm =
         [ class [ Res.ItemIco ]
         , onClick (AppButton app)
         , iconAttr (Apps.icon app)
+        , title (Apps.name app)
         ]
         []
 

@@ -12,6 +12,8 @@ import Apps.ConnManager.View as ConnManager
 import Apps.BounceManager.View as BounceManager
 import Apps.Finance.View as Finance
 import Apps.Hebamp.View as Hebamp
+import Apps.CtrlPanel.View as CtrlPanel
+import Apps.ServersGears.View as ServersGears
 import Game.Data as Game
 
 
@@ -44,3 +46,9 @@ view data model =
 
         MusicModel model ->
             Html.map MusicMsg (Hebamp.view data model)
+
+        CtrlPanelModel model ->
+            Html.map CtrlPanelMsg (CtrlPanel.view data model)
+
+        ServersGearsModel model ->
+            Html.map ServersGearsMsg (ServersGears.view data model)

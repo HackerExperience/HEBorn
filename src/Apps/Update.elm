@@ -12,6 +12,8 @@ import Apps.ConnManager.Update as ConnManager
 import Apps.BounceManager.Update as BounceManager
 import Apps.Finance.Update as Finance
 import Apps.Hebamp.Update as Hebamp
+import Apps.CtrlPanel.Update as CtrlPanel
+import Apps.ServersGears.Update as ServersGears
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -48,6 +50,12 @@ update data msg model =
 
         ( MusicMsg msg, MusicModel model ) ->
             map MusicModel MusicMsg (Hebamp.update data msg model)
+
+        ( CtrlPanelMsg msg, CtrlPanelModel model ) ->
+            map CtrlPanelModel CtrlPanelMsg (CtrlPanel.update data msg model)
+
+        ( ServersGearsMsg msg, ServersGearsModel model ) ->
+            map ServersGearsModel ServersGearsMsg (ServersGears.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

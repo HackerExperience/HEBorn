@@ -9,6 +9,8 @@ import Apps.ConnManager.Messages as ConnManager
 import Apps.BounceManager.Messages as BounceManager
 import Apps.Finance.Messages as Finance
 import Apps.Hebamp.Messages as Hebamp
+import Apps.CtrlPanel.Messages as CtrlPanel
+import Apps.ServersGears.Messages as ServersGears
 
 
 type Msg
@@ -21,3 +23,5 @@ type Msg
     | BounceManagerMsg BounceManager.Msg
     | FinanceMsg Finance.Msg
     | MusicMsg Hebamp.Msg
+    | CtrlPanelMsg CtrlPanel.Msg
+    | ServersGearsMsg ServersGears.Msg
