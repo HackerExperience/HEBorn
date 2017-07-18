@@ -97,46 +97,59 @@ findEntry link filesystem =
         |> Maybe.andThen ((flip getEntry) filesystem)
 
 
+isParentValid : Entry -> Filesystem -> Bool
+isParentValid entry filesystem =
+    case getEntryParent entry of
+        RootRef ->
+            True
+
+        NodeRef id ->
+            Dict.member id filesystem.entries
+
+
 addEntry : Entry -> Filesystem -> Filesystem
 addEntry entry filesystem =
-    let
-        location =
-            getEntryLocation entry
+    if (isParentValid entry filesystem) then
+        let
+            location =
+                getEntryLocation entry
 
-        id =
-            getEntryId entry
+            id =
+                getEntryId entry
 
-        link =
-            getEntryLink entry filesystem
+            link =
+                getEntryLink entry filesystem
 
-        newElem =
-            case entry of
-                FileEntry _ ->
-                    Leaf id
+            newElem =
+                case entry of
+                    FileEntry _ ->
+                        Leaf id
 
-                FolderEntry _ ->
-                    Node id Dict.empty
+                    FolderEntry _ ->
+                        Node id Dict.empty
 
-        rootTree =
-            addPathNode
-                newElem
-                link
-                filesystem.rootTree
-    in
-        case rootTree of
-            Ok rootTree ->
-                let
-                    entries =
-                        Dict.insert
-                            id
-                            entry
-                            filesystem.entries
-                in
-                    { entries = entries, rootTree = rootTree }
+            rootTree =
+                addPathNode
+                    newElem
+                    link
+                    filesystem.rootTree
+        in
+            case rootTree of
+                Ok rootTree ->
+                    let
+                        entries =
+                            Dict.insert
+                                id
+                                entry
+                                filesystem.entries
+                    in
+                        { entries = entries, rootTree = rootTree }
 
-            Err _ ->
-                -- It's possible to return THE ERROR
-                filesystem
+                Err _ ->
+                    -- It's possible to return THE ERROR
+                    filesystem
+    else
+        filesystem
 
 
 deleteEntry : Entry -> Filesystem -> Filesystem
@@ -207,6 +220,16 @@ moveEntry (( newLoc, newName ) as newLink) entry filesystem =
 
             _ ->
                 filesystem
+
+
+nodeExists : FilePath -> Filesystem -> Bool
+nodeExists link filesystem =
+    case findPathNode link filesystem.rootTree of
+        Ok _ ->
+            True
+
+        _ ->
+            False
 
 
 isEntryDirectory : FilePath -> Filesystem -> Bool

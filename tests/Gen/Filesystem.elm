@@ -1,8 +1,6 @@
 module Gen.Filesystem exposing (..)
 
 import Fuzz exposing (Fuzzer)
-import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
-import Helper.Filesystem exposing (addFileRecursively)
 import Random.Pcg
     exposing
         ( Generator
@@ -14,7 +12,10 @@ import Random.Pcg
         , andThen
         )
 import Random.Pcg.Extra exposing (andMap)
+import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
+import Helper.Filesystem exposing (..)
 
 
 --------------------------------------------------------------------------------
@@ -32,9 +33,9 @@ name =
     fuzzer genName
 
 
-path : Fuzzer String
-path =
-    fuzzer genPath
+location : Fuzzer Location
+location =
+    fuzzer genLocation
 
 
 extension : Fuzzer String
@@ -72,24 +73,24 @@ fileVersion =
     fuzzer genFileVersion
 
 
-folder : Fuzzer File
+folder : Fuzzer Entry
 folder =
     fuzzer genFolder
 
 
-stdFile : Fuzzer File
-stdFile =
-    fuzzer genStdFile
-
-
-file : Fuzzer File
+file : Fuzzer Entry
 file =
     fuzzer genFile
 
 
-fileList : Fuzzer (List File)
-fileList =
-    fuzzer genFileList
+entry : Fuzzer Entry
+entry =
+    fuzzer genEntry
+
+
+entryList : Fuzzer (List Entry)
+entryList =
+    fuzzer genEntryList
 
 
 emptyFilesystem : Fuzzer Filesystem
@@ -128,11 +129,10 @@ genName =
     stringRange 1 24
 
 
-genPath : Generator String
-genPath =
+genLocation : Generator Location
+genLocation =
     stringRange 3 16
         |> listRange 1 10
-        |> map (\paths -> "/" ++ (String.join "/" paths))
 
 
 genExtension : Generator String
@@ -142,12 +142,12 @@ genExtension =
 
 genNoSize : Generator FileSize
 genNoSize =
-    constant NoSize
+    constant Nothing
 
 
 genFileSizeNumber : Generator FileSize
 genFileSizeNumber =
-    map FileSizeNumber (int 1 32768)
+    map Just (int 1 32768)
 
 
 genFileSize : Generator FileSize
@@ -157,12 +157,12 @@ genFileSize =
 
 genNoVersion : Generator FileVersion
 genNoVersion =
-    constant NoVersion
+    constant Nothing
 
 
 genFileVersionNumber : Generator FileVersion
 genFileVersionNumber =
-    map FileVersionNumber (int 1 999)
+    map Just (int 1 999)
 
 
 genFileVersion : Generator FileVersion
@@ -170,32 +170,31 @@ genFileVersion =
     choices [ genNoVersion, genFileVersionNumber ]
 
 
-genFolder : Generator File
+genFolder : Generator Entry
 genFolder =
     let
         buildFolderRecord =
-            \id name path ->
-                Folder
+            \id name ->
+                FolderEntry
                     { id = id
                     , name = name
-                    , path = path
+                    , parent = RootRef
                     }
     in
         genFileID
             |> map buildFolderRecord
             |> andMap genName
-            |> andMap genPath
 
 
-genStdFile : Generator File
-genStdFile =
+genFile : Generator Entry
+genFile =
     let
         buildStdFileRecord =
-            \id name path extension version size ->
-                StdFile
+            \id name extension version size ->
+                FileEntry
                     { id = id
                     , name = name
-                    , path = path
+                    , parent = RootRef
                     , extension = extension
                     , version = version
                     , size = size
@@ -205,20 +204,19 @@ genStdFile =
         genFileID
             |> map buildStdFileRecord
             |> andMap genName
-            |> andMap genPath
             |> andMap genExtension
             |> andMap genFileVersion
             |> andMap genFileSize
 
 
-genFile : Generator File
-genFile =
-    choices [ genFolder, genStdFile ]
+genEntry : Generator Entry
+genEntry =
+    choices [ genFolder, genFile ]
 
 
-genFileList : Generator (List File)
-genFileList =
-    andThen ((flip list) genFile) (int 1 32)
+genEntryList : Generator (List Entry)
+genEntryList =
+    andThen ((flip list) (genEntry)) (int 1 32)
 
 
 genEmptyFilesystem : Generator Filesystem
@@ -228,11 +226,22 @@ genEmptyFilesystem =
 
 genNonEmptyFilesystem : Generator Filesystem
 genNonEmptyFilesystem =
-    List.foldl
-        addFileRecursively
-        initialFilesystem
-        >> constant
-        |> (flip andThen) genFileList
+    genFileID
+        |> map
+            (\fileID location entryList ->
+                List.foldl
+                    (\f fs ->
+                        fs
+                            |> addEntry f
+                            |> moveEntry ( location, getEntryBasename f ) f
+                    )
+                    (initialFilesystem
+                        |> createLocation fileID location
+                    )
+                    entryList
+            )
+        |> andMap genLocation
+        |> andMap genEntryList
 
 
 genFilesystem : Generator Filesystem

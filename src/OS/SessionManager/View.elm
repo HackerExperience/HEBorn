@@ -15,12 +15,12 @@ import OS.SessionManager.Dock.View as Dock
 
 osClass : List class -> Attribute msg
 osClass =
-    .class <| Html.CssHelpers.withNamespace "os"
+    .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
 wmClass : List class -> Attribute msg
 wmClass =
-    .class <| Html.CssHelpers.withNamespace "wm"
+    .class <| Html.CssHelpers.withNamespace WmRes.prefix
 
 
 view : GameData.Data -> Model -> Html Msg

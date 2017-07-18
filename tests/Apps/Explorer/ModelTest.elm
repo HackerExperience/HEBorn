@@ -3,7 +3,6 @@ module Apps.Explorer.ModelTest exposing (all)
 import Expect
 import Gen.Filesystem
 import Helper.Playstate as Playstate
-import Helper.Filesystem as Helper exposing (addFileRecursively)
 import Fuzz exposing (tuple)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once)
@@ -44,22 +43,28 @@ pathMoveAroundTests =
                 { folder } =
                     valid
 
-                newServerWithFile =
+                filesystem =
                     server
                         |> Servers.getFilesystem
-                        |> addFileRecursively folder
-                        |> flip Servers.setFilesystem server
+                        |> addEntry folder
+
+                newServerWithFile =
+                    Servers.setFilesystem filesystem server
+
+                ( destGrandpa, destParent ) =
+                    getEntryLink folder filesystem
+
+                destination =
+                    destGrandpa ++ [ destParent ]
 
                 explorer =
-                    changePath (getAbsolutePath folder)
+                    changePath destination
                         (Servers.getFilesystem newServerWithFile)
                         initialExplorer
             in
-                folder
-                    |> getAbsolutePath
-                    |> Expect.equal (getPath explorer)
+                Expect.equal destination <| getPath explorer
     , fuzz
-        (tuple ( Playstate.one, Gen.Filesystem.path ))
+        (tuple ( Playstate.one, Gen.Filesystem.location ))
         "can't move to a non-existing folder"
       <|
         \( { game }, path ) ->
