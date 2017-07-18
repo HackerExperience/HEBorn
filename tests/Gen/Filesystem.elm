@@ -1,5 +1,8 @@
 module Gen.Filesystem exposing (..)
 
+-- !important
+-- TODO: Update this to generate files and folders outside of Root
+
 import Fuzz exposing (Fuzzer)
 import Random.Pcg
     exposing
