@@ -18,10 +18,10 @@ import OS.Update as OS
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        Boot token id ->
+        Boot id username token ->
             let
                 model_ =
-                    connect token id model
+                    connect id username token model
             in
                 ( model_, Cmd.none )
 
@@ -35,11 +35,11 @@ update msg model =
             in
                 ( model_, cmd )
 
-        WebsocketMsg (Ws.Broadcast (Report (Connected token _))) ->
+        WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
             -- special trap to catch websocket connections
             let
                 model1 =
-                    login token model
+                    login model
 
                 ( model_, cmd ) =
                     generic msg model1

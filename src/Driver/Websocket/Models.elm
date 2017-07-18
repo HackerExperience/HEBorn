@@ -26,12 +26,12 @@ type alias Model =
     }
 
 
-initialSocket : String -> String -> String -> Socket.Socket Msg
-initialSocket apiWsUrl token meta =
+initialSocket : String -> String -> Socket.Socket Msg
+initialSocket apiWsUrl token =
     apiWsUrl
         |> Socket.init
         |> Socket.withParams [ ( "token", token ) ]
-        |> Socket.onOpen (Connected token meta |> Events.Report |> Broadcast)
+        |> Socket.onOpen (Connected token |> Events.Report |> Broadcast)
         |> Socket.onClose (\_ -> Disconnected |> Events.Report |> Broadcast)
 
 
@@ -46,9 +46,9 @@ initialEvents =
     }
 
 
-initialModel : String -> String -> String -> Model
-initialModel apiWsUrl token meta =
-    { socket = initialSocket apiWsUrl token meta
+initialModel : String -> String -> Model
+initialModel apiWsUrl token =
+    { socket = initialSocket apiWsUrl token
     , channels = initialChannels
     , defer = True
     , events = initialEvents

@@ -86,12 +86,12 @@ event :
     -> ( Model, Cmd Msg, Dispatch )
 event game ev model =
     case ev of
-        Events.Report (Ws.Connected _ id) ->
+        Events.Report (Ws.Connected _) ->
             let
                 dispatch =
                     Dispatch.batch
                         [ Dispatch.websocket
-                            (Ws.JoinChannel AccountChannel (Just id))
+                            (Ws.JoinChannel AccountChannel (Just model.id))
                         , Dispatch.websocket
                             (Ws.JoinChannel RequestsChannel Nothing)
                         ]
@@ -111,7 +111,7 @@ event game ev model =
         Events.Report (Ws.Joined Ws.AccountChannel) ->
             let
                 cmd =
-                    ServerIndex.request (Maybe.withDefault "" model.id) game
+                    ServerIndex.request model.id game
             in
                 ( model, Cmd.none, Dispatch.none )
 

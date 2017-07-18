@@ -5,11 +5,11 @@ import Game.Account.Bounces.Dummy as Bounces
 import Game.Account.Models exposing (..)
 
 
-dummy : String -> Model
-dummy token =
+dummy : ID -> Username -> Token -> Model
+dummy id username token =
     let
         model =
-            initialModel token
+            initialModel id username token
 
         database =
             Database.dummy

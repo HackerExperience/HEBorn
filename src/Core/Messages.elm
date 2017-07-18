@@ -1,13 +1,14 @@
 module Core.Messages exposing (Msg(..))
 
 import Game.Messages as Game
+import Game.Account.Models as Account
 import OS.Messages as OS
 import Landing.Messages as Landing
 import Driver.Websocket.Messages as Ws
 
 
 type Msg
-    = Boot String String
+    = Boot Account.ID Account.Username Account.Token
     | Shutdown
     | LandingMsg Landing.Msg
     | GameMsg Game.Msg
