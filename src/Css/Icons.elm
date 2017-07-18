@@ -29,6 +29,11 @@ windowMaximize =
     faIcon FA.expand
 
 
+windowUnmaximize : Icon
+windowUnmaximize =
+    faIcon FA.compress
+
+
 windowClose : Icon
 windowClose =
     faIcon FA.timesCircle

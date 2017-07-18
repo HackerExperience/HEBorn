@@ -40,21 +40,6 @@ css =
             , borderRadius wmBorderRadius
             , flexDirection column
             , flex (int 0)
-            , withClass Maximizeme
-                [ top auto |> important
-                , left auto |> important
-                , width (pct 100) |> important
-                , height auto |> important
-                , position relative
-                , flex (int 1)
-                , borderRadius (px 0)
-                , children
-                    [ class WindowBody
-                        [ borderRadius (px 0) ]
-                    , class WindowHeader
-                        [ borderRadius (px 0) ]
-                    ]
-                ]
             , withAttribute (Css.EQ "data-decorated" "N")
                 [ children
                     [ div
@@ -151,6 +136,39 @@ css =
                                         [ children
                                             [ class HeaderContextSw
                                                 [ margin2 (px 0) (px 8) ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            , withClass Maximizeme
+                [ top auto |> important
+                , left auto |> important
+                , width (pct 100) |> important
+                , height auto |> important
+                , position relative
+                , flex (int 1)
+                , borderRadius (px 0)
+                , children
+                    [ class WindowBody
+                        [ borderRadius (px 0) ]
+                    , class WindowHeader
+                        [ borderRadius (px 0) ]
+                    ]
+                , withAttribute (Css.EQ "data-decorated" "Y")
+                    [ children
+                        [ div
+                            [ children
+                                [ class WindowHeader
+                                    [ children
+                                        [ class HeaderButtons
+                                            [ children
+                                                [ class HeaderBtnMaximize
+                                                    [ before [ Icon.windowUnmaximize ] ]
+                                                ]
                                             ]
                                         ]
                                     ]
