@@ -51,6 +51,7 @@ headerChildren =
                     , minWidth (px 120)
                     , backgroundColor Colors.black
                     , color Colors.white
+                    , zIndex (int 2)
                     , children
                         [ typeSelector "customOption"
                             [ display block
@@ -79,6 +80,7 @@ css =
                     , padding (px 8)
                     , globalShadow
                     , headerChildren
+                    , children [ typeSelector "popup" [ zIndex (int 3) ] ]
                     ]
                 , class Session
                     [ flex (int 1)
@@ -90,7 +92,7 @@ css =
                             , position absolute
                             , width (vw 100)
                             , bottom zero
-                            , zIndex (int 1699999)
+                            , zIndex (int 1)
                             , minHeight (px 60)
                             , paddingTop (px 29)
                             , transition 0.15 "margin" EaseOut

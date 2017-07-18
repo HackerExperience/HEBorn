@@ -2,7 +2,7 @@ module UI.Style exposing (css)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (typeSelector, input, span)
+import Css.Elements exposing (typeSelector, input, span, button)
 import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
 import Css.Utils as Css exposing (withAttribute)
 import Css.Icons as Icon exposing (locationTarget)
@@ -186,7 +186,7 @@ widgets =
     , horizontalBtnPanel
     , horizontalTabs
     , customSelect
-    , popup
+    , modal
     ]
 
 
@@ -263,19 +263,20 @@ progressBar =
         ]
 
 
-popup : Snippet
-popup =
-    typeSelector "popup"
+modal : Snippet
+modal =
+    typeSelector "modal"
         [ position absolute
         , left (px 0)
         , right (px 0)
         , top (px 0)
-        , bottom (px 0)
-        , width (pct 100)
         , height (pct 100)
+        , zIndex (int 0)
+        , flexContainerVert
+        , justifyContent center
         , children
             [ typeSelector "overlay"
-                [ backgroundColor (rgba 0 0 0 0.1)
+                [ backgroundColor (rgba 0 0 0 0.5)
                 , position absolute
                 , left (px 0)
                 , right (px 0)
@@ -283,6 +284,26 @@ popup =
                 , bottom (px 0)
                 , width (pct 100)
                 , height (pct 100)
+                , zIndex (int -1)
+                ]
+            , typeSelector "content"
+                [ backgroundColor Colors.bgModal
+                , color Colors.white
+                , internalPadding
+                , children
+                    [ typeSelector "btns"
+                        [ textAlign right
+                        , display block
+                        , children
+                            [ button
+                                [ marginLeft (px 8)
+                                , border3 (px 2) solid Colors.white
+                                , color Colors.white
+                                , backgroundColor Colors.bgModal
+                                ]
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ]

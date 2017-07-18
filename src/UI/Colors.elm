@@ -1,6 +1,6 @@
 module UI.Colors exposing (..)
 
-import Css exposing (Color, hex)
+import Css exposing (Color, hex, rgb)
 
 
 black : Color
@@ -36,3 +36,8 @@ bgWindow =
 bgSelected : Color
 bgSelected =
     hex "DDD"
+
+
+bgModal : Color
+bgModal =
+    hex "0078D7"
