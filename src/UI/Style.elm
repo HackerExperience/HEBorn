@@ -182,17 +182,21 @@ verticalSticked =
 
 widgets : List Snippet
 widgets =
-    [ progressBar, horizontalBtnPanel, horizontalTabs ] ++ customSelect
+    [ progressBar
+    , horizontalBtnPanel
+    , horizontalTabs
+    , customSelect
+    , popup
+    ]
 
 
-customSelect : List Snippet
+customSelect : Snippet
 customSelect =
-    [ typeSelector "customSelect"
+    typeSelector "customSelect"
         [ children [ typeSelector "selector" [ display none ] ]
         , withAttribute (Css.EQ "data-open" "open")
             [ children [ typeSelector "selector" [ display block ] ] ]
         ]
-    ]
 
 
 horizontalBtnPanel : Snippet
@@ -254,6 +258,31 @@ progressBar =
                 , margin2 (px 0) auto
                 , zIndex (int 1)
                 , color (hex "EEE")
+                ]
+            ]
+        ]
+
+
+popup : Snippet
+popup =
+    typeSelector "popup"
+        [ position absolute
+        , left (px 0)
+        , right (px 0)
+        , top (px 0)
+        , bottom (px 0)
+        , width (pct 100)
+        , height (pct 100)
+        , children
+            [ typeSelector "overlay"
+                [ backgroundColor (rgba 0 0 0 0.1)
+                , position absolute
+                , left (px 0)
+                , right (px 0)
+                , top (px 0)
+                , bottom (px 0)
+                , width (pct 100)
+                , height (pct 100)
                 ]
             ]
         ]
