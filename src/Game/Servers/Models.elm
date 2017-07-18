@@ -3,7 +3,10 @@ module Game.Servers.Models
         ( Model
         , Servers
         , Server
-        , Type(..)
+        , ServerMeta(..)
+        , GatewayMetadata
+        , EndpointMetadata
+        , AnalyzedMetadata
         , initialModel
         , get
         , insert
@@ -12,7 +15,6 @@ module Game.Servers.Models
         , mapNetwork
         , getName
         , setName
-        , getType
         , getIP
         , setIP
         , getFilesystem
@@ -53,20 +55,38 @@ type alias Servers =
 
 type alias Server =
     { name : String
-    , type_ : Type
     , ip : IP
     , filesystem : Filesystem
     , logs : Logs
     , processes : Processes
     , tunnels : Tunnels.Model
-    , bounce : Maybe Bounces.ID
+    , coordinates : Coordinates
+    , meta : ServerMeta
+    }
+
+
+type ServerMeta
+    = GatewayMeta GatewayMetadata
+    | EndpointMeta EndpointMetadata
+    | AnalyzedMeta AnalyzedMetadata
+
+
+type alias GatewayMetadata =
+    { bounce : Maybe Bounces.ID
     , endpoint : Maybe IP
     }
 
 
-type Type
-    = LocalServer
-    | RemoteServer
+type alias EndpointMetadata =
+    {}
+
+
+type alias AnalyzedMetadata =
+    {}
+
+
+type alias Coordinates =
+    Float
 
 
 type alias NetworkMap =
@@ -155,11 +175,6 @@ setName name server =
     { server | name = name }
 
 
-getType : Server -> Type
-getType =
-    .type_
-
-
 getIP : Server -> IP
 getIP =
     .ip
@@ -211,46 +226,84 @@ setTunnels tunnels model =
 
 
 getEndpoint : Server -> Maybe IP
-getEndpoint =
-    .endpoint
+getEndpoint server =
+    case server.meta of
+        GatewayMeta meta ->
+            meta.endpoint
+
+        _ ->
+            Nothing
 
 
 setEndpoint : Maybe IP -> Server -> Server
 setEndpoint ip server =
-    { server | endpoint = ip }
+    case server.meta of
+        GatewayMeta meta ->
+            let
+                meta_ =
+                    GatewayMeta { meta | endpoint = ip }
+            in
+                { server | meta = meta_ }
+
+        _ ->
+            server
 
 
 getBounce : Server -> Maybe Bounces.ID
-getBounce =
-    .bounce
+getBounce server =
+    case server.meta of
+        GatewayMeta meta ->
+            meta.bounce
+
+        _ ->
+            Nothing
 
 
 setBounce : Maybe Bounces.ID -> Server -> Server
 setBounce id server =
-    { server | bounce = id }
+    case server.meta of
+        GatewayMeta meta ->
+            let
+                meta_ =
+                    GatewayMeta { meta | bounce = id }
+            in
+                { server | meta = meta_ }
+
+        _ ->
+            server
 
 
 getTunnel : Server -> Maybe Tunnels.Tunnel
-getTunnel { bounce, endpoint, tunnels } =
-    case endpoint of
-        Just id ->
-            Just <| Tunnels.get bounce id tunnels
+getTunnel ({ tunnels } as server) =
+    case server.meta of
+        GatewayMeta { bounce, endpoint } ->
+            case endpoint of
+                Just id ->
+                    Just <| Tunnels.get bounce id tunnels
 
-        Nothing ->
+                Nothing ->
+                    Nothing
+
+        _ ->
             Nothing
 
 
 setTunnel : Tunnels.Tunnel -> Server -> Server
-setTunnel tunnel ({ bounce, endpoint, tunnels } as server) =
-    case endpoint of
-        Just id ->
-            let
-                tunnels_ =
-                    Tunnels.insert bounce id tunnel tunnels
-            in
-                setTunnels tunnels_ server
+setTunnel tunnel ({ tunnels } as server) =
+    case server.meta of
+        GatewayMeta ({ bounce, endpoint } as meta) ->
+            case endpoint of
+                Just id ->
+                    let
+                        tunnels_ =
+                            Tunnels.insert bounce id tunnel tunnels
+                    in
+                        setTunnels tunnels_ server
 
-        Nothing ->
+                Nothing ->
+                    server
+
+        _ ->
             server
 
 

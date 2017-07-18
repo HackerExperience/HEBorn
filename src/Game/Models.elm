@@ -129,7 +129,7 @@ getEndpoint model =
 
         maybeEndpointID =
             maybeGateway
-                |> Maybe.andThen .endpoint
+                |> Maybe.andThen Servers.getEndpoint
                 |> Maybe.andThen (flip Servers.mapNetwork servers)
 
         maybeEndpoint =

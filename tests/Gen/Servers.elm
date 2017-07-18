@@ -1,6 +1,5 @@
 module Gen.Servers exposing (..)
 
-import Dict
 import Gen.Filesystem
 import Gen.Logs
 import Gen.Processes
@@ -92,29 +91,30 @@ genIP =
     unique
 
 
-genType : Generator Type
-genType =
-    choice LocalServer RemoteServer
+genMeta : Generator ServerMeta
+genMeta =
+    choice
+        (GatewayMeta (GatewayMetadata Nothing Nothing))
+        (EndpointMeta {})
 
 
 genServer : Generator Server
 genServer =
     let
-        buildServerRecord ip type_ fs logs proc =
+        buildServerRecord ip meta fs logs proc =
             { name = "Dummy"
             , ip = ip
-            , type_ = type_
             , filesystem = fs
             , logs = logs
             , processes = proc
             , tunnels = Tunnels.initialModel
-            , bounce = Nothing
-            , endpoint = Nothing
+            , meta = meta
+            , coordinates = 0
             }
     in
         genIP
             |> map buildServerRecord
-            |> andMap genType
+            |> andMap genMeta
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel
