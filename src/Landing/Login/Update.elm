@@ -51,7 +51,7 @@ response core response model =
                     { model | loginFailed = False }
 
                 dispatch =
-                    Dispatch.core (Core.Boot token id)
+                    Dispatch.core (Core.Boot id model.username token)
             in
                 ( model_, Cmd.none, dispatch )
 

@@ -30,7 +30,7 @@ genModel : Generator Model
 genModel =
     map
         (\servers ->
-            { account = Account.initialModel ""
+            { account = Account.initialModel "" "" ""
             , servers = servers
             , meta = Meta.initialModel
             , web = Web.initialModel

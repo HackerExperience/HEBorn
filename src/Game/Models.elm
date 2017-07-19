@@ -35,9 +35,14 @@ type alias Model =
     }
 
 
-initialModel : String -> Config -> Model
-initialModel token config =
-    { account = Account.initialModel token
+initialModel :
+    Account.ID
+    -> Account.Username
+    -> Account.Token
+    -> Config
+    -> Model
+initialModel id username token config =
+    { account = Account.initialModel id username token
     , servers = Servers.initialModel
     , meta = Meta.initialModel
     , web = Web.initialModel

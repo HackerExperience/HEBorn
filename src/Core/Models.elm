@@ -12,6 +12,7 @@ module Core.Models
 
 import Driver.Websocket.Models as Ws
 import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Dummy as Game
 import OS.Models as OS
 import Landing.Models as Landing
@@ -28,6 +29,14 @@ type alias HomeModel =
     , websocket : Maybe Ws.Model
     , config : Config
     , seed : Int
+    , connection : Maybe ProbableConnection
+    }
+
+
+type alias ProbableConnection =
+    { id : Account.ID
+    , username : Account.Username
+    , token : Account.Token
     }
 
 
@@ -47,35 +56,54 @@ initialModel seed config =
         , websocket = Nothing
         , config = config
         , seed = seed
+        , connection = Nothing
         }
 
 
-connect : String -> String -> Model -> Model
-connect token id model =
+connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model
+connect id username token model =
     case model of
         Home model ->
             let
                 websocket =
-                    Just (Ws.initialModel model.config.apiWsUrl token id)
+                    Just (Ws.initialModel model.config.apiWsUrl token)
             in
-                Home { model | websocket = websocket }
+                Home
+                    { model
+                        | websocket = websocket
+                        , connection =
+                            Just (ProbableConnection id username token)
+                    }
 
         _ ->
             model
 
 
-login : String -> Model -> Model
-login token model =
+login : Model -> Model
+login model =
     case model of
         Home { websocket, seed, config } ->
             case websocket of
                 Just websocket ->
                     let
+                        connection =
+                            case getProbableConection model of
+                                Just connection ->
+                                    connection
+
+                                Nothing ->
+                                    Debug.crash
+                                        "Trying to connect with invalid model."
+
                         -- Replace this line with Game.initialModel
                         -- when starting to integrate game with the
                         -- server
                         game =
-                            Game.dummy token config
+                            Game.dummy
+                                connection.id
+                                connection.username
+                                connection.token
+                                config
                     in
                         Play
                             { game = game
@@ -110,3 +138,22 @@ getConfig model =
 
         Play m ->
             m.config
+
+
+
+-- internals
+
+
+getProbableConection : Model -> Maybe ProbableConnection
+getProbableConection model =
+    case model of
+        Home model ->
+            case model.connection of
+                Just connection ->
+                    Just connection
+
+                Nothing ->
+                    Nothing
+
+        _ ->
+            Nothing
