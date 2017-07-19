@@ -40,7 +40,7 @@ import Dict exposing (Dict)
 import Draggable
 import Apps.Apps as Apps
 import Apps.Models as Apps
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 import OS.SessionManager.WindowManager.Context exposing (..)
 
 
@@ -74,7 +74,7 @@ type alias Window =
     , context : Context
     , instance : Instance
     , locked : Bool
-    , endpoint : Maybe IP
+    , endpoint : Maybe NIP
     }
 
 
@@ -112,8 +112,8 @@ initialModel =
     }
 
 
-resert : String -> Maybe IP -> Apps.App -> Model -> Model
-resert id ip app ({ visible, hidden, windows } as model) =
+resert : String -> Maybe NIP -> Apps.App -> Model -> Model
+resert id nip app ({ visible, hidden, windows } as model) =
     let
         noVisible =
             visible
@@ -129,17 +129,17 @@ resert id ip app ({ visible, hidden, windows } as model) =
             noVisible && noHidden
     in
         if noOpened then
-            insert id ip app model
+            insert id nip app model
         else if noVisible then
             hidden
                 |> List.filter (filterApp app windows)
                 |> List.foldl restore model
         else
-            insert id ip app model
+            insert id nip app model
 
 
-insert : ID -> Maybe IP -> Apps.App -> Model -> Model
-insert id ip app ({ windows, visible } as model) =
+insert : ID -> Maybe NIP -> Apps.App -> Model -> Model
+insert id nip app ({ windows, visible } as model) =
     let
         contexts =
             case Apps.contexts app of
@@ -166,7 +166,7 @@ insert id ip app ({ windows, visible } as model) =
                 contexts
                 instance
                 False
-                ip
+                nip
 
         windows_ =
             Dict.insert id window windows

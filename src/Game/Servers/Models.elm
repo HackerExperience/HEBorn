@@ -15,8 +15,10 @@ module Game.Servers.Models
         , mapNetwork
         , getName
         , setName
-        , getIP
-        , setIP
+        , getNIP
+        , setNIP
+        , getNIPs
+        , setNIPs
         , getFilesystem
         , setFilesystem
         , getLogs
@@ -40,7 +42,7 @@ import Game.Servers.Logs.Models as Log exposing (Logs)
 import Game.Servers.Processes.Models as Processes exposing (Processes)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 
 
 type alias Model =
@@ -55,7 +57,8 @@ type alias Servers =
 
 type alias Server =
     { name : String
-    , ip : IP
+    , nip : NIP
+    , nips : List NIP
     , filesystem : Filesystem
     , logs : Logs
     , processes : Processes
@@ -73,7 +76,7 @@ type ServerMeta
 
 type alias GatewayMetadata =
     { bounce : Maybe Bounces.ID
-    , endpoint : Maybe IP
+    , endpoint : Maybe NIP
     }
 
 
@@ -90,7 +93,7 @@ type alias Coordinates =
 
 
 type alias NetworkMap =
-    Dict IP ID
+    Dict NIP ID
 
 
 initialModel : Model
@@ -116,7 +119,10 @@ insert id server ({ servers, network } as model) =
             Dict.insert id server servers
 
         network_ =
-            Dict.insert server.ip id network
+            List.foldl
+                (flip Dict.insert id)
+                network
+                (server.nip :: server.nips)
     in
         model
             |> setServers servers_
@@ -126,17 +132,17 @@ insert id server ({ servers, network } as model) =
 remove : ID -> Model -> Model
 remove id ({ servers, network } as model) =
     let
-        ip =
+        nips =
             servers
                 |> Dict.get id
-                |> Maybe.map .ip
-                |> Maybe.withDefault ""
+                |> Maybe.map (\server -> server.nip :: server.nips)
+                |> Maybe.withDefault []
 
         servers_ =
             Dict.remove id servers
 
         network_ =
-            Dict.remove ip network
+            List.foldl Dict.remove network nips
 
         model_ =
             model
@@ -156,9 +162,9 @@ safeUpdate id server model =
             model
 
 
-mapNetwork : IP -> Model -> Maybe ID
-mapNetwork ip { network } =
-    Dict.get ip network
+mapNetwork : NIP -> Model -> Maybe ID
+mapNetwork nip { network } =
+    Dict.get nip network
 
 
 
@@ -175,14 +181,24 @@ setName name server =
     { server | name = name }
 
 
-getIP : Server -> IP
-getIP =
-    .ip
+getNIP : Server -> NIP
+getNIP =
+    .nip
 
 
-setIP : IP -> Server -> Server
-setIP ip server =
-    { server | ip = ip }
+setNIP : NIP -> Server -> Server
+setNIP nip server =
+    { server | nip = nip }
+
+
+getNIPs : Server -> List NIP
+getNIPs server =
+    server.nips
+
+
+setNIPs : List NIP -> Server -> Server
+setNIPs nips server =
+    { server | nips = nips }
 
 
 getFilesystem : Server -> Filesystem
@@ -225,7 +241,7 @@ setTunnels tunnels model =
     { model | tunnels = tunnels }
 
 
-getEndpoint : Server -> Maybe IP
+getEndpoint : Server -> Maybe NIP
 getEndpoint server =
     case server.meta of
         GatewayMeta meta ->
@@ -235,7 +251,7 @@ getEndpoint server =
             Nothing
 
 
-setEndpoint : Maybe IP -> Server -> Server
+setEndpoint : Maybe NIP -> Server -> Server
 setEndpoint ip server =
     case server.meta of
         GatewayMeta meta ->

@@ -12,6 +12,7 @@ import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Utils.Html exposing (spacer)
 import Utils.Html.Events exposing (onChange)
 import Game.Account.Database.Models exposing (..)
+import Game.Network.Types as Network
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
@@ -25,12 +26,12 @@ import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
 isEntryExpanded : DBAdmin -> HackedServer -> Bool
 isEntryExpanded app item =
-    List.member item.ip app.servers.expanded
+    List.member (Network.toString item.nip) app.servers.expanded
 
 
 isEntryEditing : DBAdmin -> HackedServer -> Bool
 isEntryEditing app item =
-    Dict.member item.ip app.serversEditing
+    Dict.member (Network.toString item.nip) app.serversEditing
 
 
 renderFlag : Classes -> List (Html Msg)
@@ -52,14 +53,15 @@ renderData : HackedServer -> Html Msg
 renderData item =
     div []
         [ text "ip: "
-        , text item.ip
+        , text <| Tuple.second item.nip
         , text " psw: "
         , text item.password
         , text " nick: "
         , text item.nick
         , text " notes: "
         , item.notes |> Maybe.withDefault "S/N" |> text
-        , span [ onClick <| EnterSelectingVirus item.ip ] [ text " !!!!VIRUS!!!!" ]
+        , span [ onClick <| EnterSelectingVirus (Network.toString item.nip) ]
+            [ text " !!!!VIRUS!!!!" ]
         ]
 
 
@@ -67,7 +69,7 @@ renderMiniData : HackedServer -> Html Msg
 renderMiniData item =
     div []
         [ text "ip: "
-        , text item.ip
+        , text <| Tuple.second item.nip
         , text " psw: "
         , text item.password
         , text " nick: "
@@ -91,13 +93,15 @@ renderEditing item src =
                 , input
                     [ class []
                     , value nick
-                    , onInput (UpdateServersEditingNick item.ip)
+                    , onInput
+                        (UpdateServersEditingNick (Network.toString item.nip))
                     ]
                     []
                 , input
                     [ class [ BoxifyMe ]
                     , value notes
-                    , onInput (UpdateServersEditingNotes item.ip)
+                    , onInput
+                        (UpdateServersEditingNotes (Network.toString item.nip))
                     ]
                     []
                 ]
@@ -105,7 +109,8 @@ renderEditing item src =
         SelectingVirus activeId ->
             select
                 [ class [ BoxifyMe ]
-                , onChange (UpdateServersSelectVirus item.ip)
+                , onChange
+                    (UpdateServersSelectVirus (Network.toString item.nip))
                 ]
                 (List.map
                     (renderVirusOption <| Maybe.withDefault "" activeId)
@@ -139,9 +144,9 @@ renderBottomActions app entry =
     let
         btns =
             if (isEntryEditing app entry) then
-                btnsEditing entry.ip
+                btnsEditing <| Network.toString entry.nip
             else if (isEntryExpanded app entry) then
-                btnsNormal entry.ip
+                btnsNormal <| Network.toString entry.nip
             else
                 []
     in
@@ -150,7 +155,7 @@ renderBottomActions app entry =
 
 renderAnyData : DBAdmin -> HackedServer -> Html Msg
 renderAnyData app entry =
-    case (Dict.get entry.ip app.serversEditing) of
+    case (Dict.get (Network.toString entry.nip) app.serversEditing) of
         Just x ->
             renderEditing entry x
 
@@ -178,9 +183,9 @@ renderBottom app entry =
 menuInclude : DBAdmin -> HackedServer -> List (Attribute Msg)
 menuInclude app entry =
     if (isEntryEditing app entry) then
-        [ menuEditingEntry entry.ip ]
+        [ menuEditingEntry <| Network.toString entry.nip ]
     else
-        [ menuNormalEntry entry.ip ]
+        [ menuNormalEntry <| Network.toString entry.nip ]
 
 
 renderEntry : DBAdmin -> HackedServer -> Html Msg
@@ -207,7 +212,7 @@ renderEntry app entry =
         toogableEntry
             (not editingState)
             (menuInclude app entry)
-            (ToogleExpand TabServers entry.ip)
+            (ToogleExpand TabServers <| Network.toString entry.nip)
             expandedState
             data
 

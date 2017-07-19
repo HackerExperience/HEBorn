@@ -6,7 +6,7 @@ import Game.Account.Database.Models exposing (..)
 dummy : Database
 dummy =
     Database
-        [ { ip = "153.249.31.179"
+        [ { nip = ( "::", "153.249.31.179" )
           , password = "WhenYouWereHereBefore"
           , nick = "Creep"
           , notes = Just "Weirdo"
@@ -18,7 +18,7 @@ dummy =
           , type_ = Player
           , remoteConn = Nothing
           }
-        , { ip = "143.239.31.169"
+        , { nip = ( "::", "143.239.31.169" )
           , password = "WhenYouWereHereBefore"
           , nick = "Creep"
           , notes = Just "Weirdo"

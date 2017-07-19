@@ -2,12 +2,13 @@ module Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Database.Models exposing (..)
+import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Models exposing (..)
 
 
 catchDataWhenFiltering : List String -> HackedServer -> Maybe HackedServer
 catchDataWhenFiltering filterCache item =
-    if (List.member item.ip filterCache) then
+    if (List.member (Network.toString item.nip) filterCache) then
         Just item
     else
         Nothing
@@ -49,7 +50,7 @@ enterEditing itemId database app =
 
         item =
             items
-                |> List.filter ((.ip) >> ((==) itemId))
+                |> List.filter ((.nip) >> Tuple.second >> ((==) itemId))
                 |> List.head
 
         app_ =
@@ -60,7 +61,7 @@ enterEditing itemId database app =
                             edit_ =
                                 EditingTexts ( item.nick, Maybe.withDefault "" item.notes )
                         in
-                            updateEditing item.ip edit_ app
+                            updateEditing (Network.toString item.nip) edit_ app
                     )
     in
         Maybe.withDefault app app_
@@ -74,7 +75,7 @@ enterSelectingVirus itemId database app =
 
         item =
             items
-                |> List.filter ((.ip) >> ((==) itemId))
+                |> List.filter ((.nip) >> Tuple.second >> ((==) itemId))
                 |> List.head
 
         app_ =
@@ -87,7 +88,7 @@ enterSelectingVirus itemId database app =
                                     |> Maybe.map Tuple.first
                                     |> SelectingVirus
                         in
-                            updateEditing item.ip edit_ app
+                            updateEditing (Network.toString item.nip) edit_ app
                     )
     in
         Maybe.withDefault app app_
@@ -126,7 +127,7 @@ updateTextFilter newFilter database app =
         filterMapFunc item =
             let
                 has =
-                    [ item.ip
+                    [ Tuple.second item.nip
                     , item.password
                     , item.nick
                     , Maybe.withDefault "" item.notes
@@ -136,7 +137,7 @@ updateTextFilter newFilter database app =
                         |> not
             in
                 if has then
-                    Just item.ip
+                    Just (Network.toString item.nip)
                 else
                     Nothing
 

@@ -19,7 +19,7 @@ module Game.Servers.Tunnels.Models
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 
 
 type alias Model =
@@ -27,7 +27,7 @@ type alias Model =
 
 
 type alias ID =
-    ( Bounces.ID, IP )
+    ( Bounces.ID, NIP )
 
 
 type alias Tunnel =
@@ -65,19 +65,19 @@ initialModel =
 -- tunnel crud
 
 
-get : Maybe Bounces.ID -> IP -> Model -> Tunnel
+get : Maybe Bounces.ID -> NIP -> Model -> Tunnel
 get bounce endpoint model =
     model
         |> Dict.get (toTunnelID bounce endpoint)
         |> Maybe.withDefault { active = True, connections = Dict.empty }
 
 
-insert : Maybe Bounces.ID -> IP -> Tunnel -> Model -> Model
+insert : Maybe Bounces.ID -> NIP -> Tunnel -> Model -> Model
 insert bounce endpoint tunnel model =
     Dict.insert (toTunnelID bounce endpoint) tunnel model
 
 
-remove : Maybe Bounces.ID -> IP -> Model -> Model
+remove : Maybe Bounces.ID -> NIP -> Model -> Model
 remove bounce endpoint model =
     Dict.remove (toTunnelID bounce endpoint) model
 
@@ -102,7 +102,7 @@ setConnections connections tunnel =
 
 insertConnection :
     Maybe Bounces.ID
-    -> IP
+    -> NIP
     -> ConnectionID
     -> Connection
     -> Model
@@ -129,7 +129,7 @@ insertConnection bounce endpoint id connection model =
 
 removeConnection :
     Maybe Bounces.ID
-    -> IP
+    -> NIP
     -> ConnectionID
     -> Model
     -> Model
@@ -157,7 +157,7 @@ removeConnection bounce endpoint id model =
 -- internals
 
 
-toTunnelID : Maybe Bounces.ID -> IP -> ID
+toTunnelID : Maybe Bounces.ID -> NIP -> ID
 toTunnelID bounce endpoint =
     let
         bounce_ =

@@ -50,7 +50,12 @@ update data msg ({ openMenu } as model) =
         SelectGateway id ->
             let
                 dispatch =
-                    Dispatch.meta <| Meta.SetGateway id
+                    case id of
+                        Just id ->
+                            Dispatch.meta <| Meta.SetGateway id
+
+                        Nothing ->
+                            Dispatch.none
 
                 model_ =
                     { model | openMenu = NothingOpen }
@@ -59,15 +64,8 @@ update data msg ({ openMenu } as model) =
 
         SelectBounce id ->
             let
-                id_ =
-                    -- this could be done in a better way
-                    if id == "" then
-                        Nothing
-                    else
-                        Just id
-
                 dispatch =
-                    Dispatch.servers <| Servers.SetBounce data.id id_
+                    Dispatch.servers <| Servers.SetBounce data.id id
 
                 model_ =
                     { model | openMenu = NothingOpen }
@@ -76,14 +74,8 @@ update data msg ({ openMenu } as model) =
 
         SelectEndpoint ip ->
             let
-                ip_ =
-                    if ip == "" then
-                        Nothing
-                    else
-                        Just ip
-
                 dispatch =
-                    Dispatch.meta <| Meta.SetEndpoint ip_
+                    Dispatch.meta <| Meta.SetEndpoint ip
 
                 model_ =
                     { model | openMenu = NothingOpen }

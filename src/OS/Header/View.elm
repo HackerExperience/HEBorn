@@ -11,6 +11,7 @@ import Game.Data as Game
 import Game.Meta.Messages as Meta
 import Game.Meta.Models as Meta
 import Game.Models as Game
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
@@ -22,73 +23,108 @@ import OS.Resources as Res
 
 
 selector :
-    OpenMenu
+    (Maybe a -> Msg)
     -> OpenMenu
-    -> (String -> Maybe (Html Msg))
-    -> String
-    -> List String
+    -> (a -> Maybe (Html Msg))
+    -> OpenMenu
+    -> Maybe a
+    -> List (Maybe a)
     -> Html Msg
-selector kind open render active list =
+selector wrapper kind render open active list =
     let
-        wrapper =
-            if kind == OpenGateway then
-                SelectGateway
-            else if kind == OpenBounce then
-                SelectBounce
-            else
-                SelectEndpoint
+        render_ _ item =
+            case item of
+                Just item ->
+                    render item
+
+                Nothing ->
+                    Just (text "None")
     in
         customSelect CustomSelect
             wrapper
             (ToggleMenus kind)
-            (\_ str -> render str)
+            render_
             (open == kind)
             active
             list
 
 
-renderGateway : Game.Data -> String -> Maybe (Html Msg)
-renderGateway data id =
-    case Servers.get id data.game.servers of
-        Just { name, ip } ->
-            Just (text <| name ++ " (" ++ ip ++ ")")
-
-        Nothing ->
-            Nothing
-
-
-renderBounce : Game.Data -> String -> Maybe (Html Msg)
-renderBounce data id =
-    case Bounces.get id data.game.account.bounces of
-        Just { name } ->
-            Just <| text name
-
-        Nothing ->
-            Nothing
-
-
-renderEndpoint : Game.Data -> String -> Maybe (Html Msg)
-renderEndpoint data ip =
-    if ip == "" then
-        Just <| text "None"
-    else
-        let
-            servers =
-                data
-                    |> Game.getGame
-                    |> Game.getServers
-
-            server =
-                servers
-                    |> Servers.mapNetwork ip
-                    |> Maybe.andThen (flip Servers.get servers)
-        in
-            case server of
-                Just { name } ->
-                    Just <| text (name ++ " (" ++ ip ++ ")")
+gatewaySelector :
+    Game.Data
+    -> OpenMenu
+    -> Maybe String
+    -> List (Maybe String)
+    -> Html Msg
+gatewaySelector data =
+    let
+        renderGateway id =
+            case Servers.get id data.game.servers of
+                Just { name, nip } ->
+                    let
+                        ip =
+                            Tuple.second nip
+                    in
+                        Just (text <| name ++ " (" ++ ip ++ ")")
 
                 Nothing ->
-                    Just <| text ip
+                    Nothing
+    in
+        selector SelectGateway OpenGateway renderGateway
+
+
+bounceSelector :
+    Game.Data
+    -> OpenMenu
+    -> Maybe String
+    -> List (Maybe String)
+    -> Html Msg
+bounceSelector data =
+    let
+        renderBounce id =
+            case Bounces.get id data.game.account.bounces of
+                Just { name } ->
+                    Just <| text name
+
+                Nothing ->
+                    Nothing
+    in
+        selector SelectBounce OpenBounce renderBounce
+
+
+endpointSelector :
+    Game.Data
+    -> OpenMenu
+    -> Maybe NIP
+    -> List (Maybe NIP)
+    -> Html Msg
+endpointSelector data =
+    let
+        renderEndpoint nip =
+            if nip == ( "", "" ) then
+                Just <| text "None"
+            else
+                let
+                    ip =
+                        Tuple.second nip
+
+                    servers =
+                        data
+                            |> Game.getGame
+                            |> Game.getServers
+
+                    server =
+                        servers
+                            |> Servers.mapNetwork nip
+                            |> Maybe.andThen (flip Servers.get servers)
+                in
+                    case server of
+                        Just { name } ->
+                            Just <| text (name ++ " (" ++ ip ++ ")")
+
+                        Nothing ->
+                            Just <| text ip
+    in
+        selector SelectEndpoint OpenEndpoint renderEndpoint
 
 
 view : Game.Data -> Model -> Html Msg
@@ -104,69 +140,61 @@ view data ({ openMenu } as model) =
             Game.getServers game
 
         gateway =
-            Game.getID data
+            Just <| Game.getID data
 
         gateways =
             data
                 |> Game.getGame
                 |> Game.getAccount
                 |> (.servers)
+                |> List.map Just
 
         bounce =
             data
                 |> Game.getServer
                 |> Servers.getBounce
-                |> Maybe.withDefault ""
 
         endpoint =
             game
                 |> Game.fromEndpoint
-                |> Maybe.map (Game.getServer >> Servers.getIP)
-                |> Maybe.withDefault ""
+                |> Maybe.map (Game.getServer >> Servers.getNIP >> Just)
+                |> Maybe.withDefault Nothing
 
         endpoints =
+            -- TODO: add getters for database and servers
             data
                 |> Game.getGame
                 |> Game.getAccount
                 |> (.database)
                 |> (.servers)
-                |> List.map .ip
-                |> (::) ""
+                |> List.map (\server -> Just server.nip)
+                |> (::) Nothing
 
         bounces =
-            if endpoint == "" then
-                game
-                    |> Game.getAccount
-                    |> (.bounces)
-                    |> Dict.keys
-                    |> (::) ""
-            else
-                []
+            case endpoint of
+                Just _ ->
+                    []
+
+                Nothing ->
+                    game
+                        |> Game.getAccount
+                        |> (.bounces)
+                        |> Dict.keys
+                        |> List.map Just
+                        |> (::) Nothing
 
         onGateway =
             Meta.Gateway == Meta.getContext meta
     in
         div [ class [ Res.Header ] ]
-            [ selector OpenGateway
-                openMenu
-                (renderGateway data)
-                gateway
-                gateways
+            [ gatewaySelector data openMenu gateway gateways
             , contextToggler onGateway (ContextTo Meta.Gateway)
             , spacer
             , text "Bounce: "
-            , selector OpenBounce
-                openMenu
-                (renderBounce data)
-                bounce
-                bounces
+            , bounceSelector data openMenu bounce bounces
             , spacer
             , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
-            , selector OpenEndpoint
-                openMenu
-                (renderEndpoint data)
-                endpoint
-                endpoints
+            , endpointSelector data openMenu endpoint endpoints
             , button
                 [ onClick Logout
                 ]

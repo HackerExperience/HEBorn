@@ -6,6 +6,7 @@ import Html.CssHelpers
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Tunnels.Models as Tunnels
+import Game.Network.Types exposing (NIP)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
@@ -27,14 +28,14 @@ connView conn =
         ]
 
 
-tunnelView : String -> ( Tunnels.ID, Tunnels.Tunnel ) -> Html Msg
+tunnelView : NIP -> ( Tunnels.ID, Tunnels.Tunnel ) -> Html Msg
 tunnelView gateway ( id, tunnel ) =
     div [ class [ GroupedTunnel ] ]
         [ text "Gateway: "
-        , text gateway
+        , text <| Tuple.second gateway
         , br [] []
         , text "Endpoint: "
-        , text <| Tuple.second id
+        , text <| (id |> Tuple.second |> Tuple.second)
         , br [] []
         , text "Connections: "
         , tunnel
@@ -76,17 +77,17 @@ view data ({ app } as model) =
                     UpdateTextFilter
                 ]
 
-        ip =
+        nip =
             data
                 |> Game.getServer
-                |> Servers.getIP
+                |> Servers.getNIP
 
         mainEntries =
             data
                 |> Game.getServer
                 |> Servers.getTunnels
                 |> Dict.toList
-                |> List.map (tunnelView ip)
+                |> List.map (tunnelView nip)
                 |> verticalList
     in
         verticalSticked

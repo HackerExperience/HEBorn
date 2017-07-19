@@ -74,7 +74,7 @@ viewTabManage src =
 
 viewSelectServer : HackedServer -> Html Msg
 viewSelectServer srv =
-    text srv.ip
+    text <| Tuple.second srv.nip
 
 
 viewTabCreate : List HackedServer -> Html Msg

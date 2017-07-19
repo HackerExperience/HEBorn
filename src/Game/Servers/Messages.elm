@@ -8,12 +8,12 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 
 
 type Msg
     = SetBounce ID (Maybe Bounces.ID)
-    | SetEndpoint ID (Maybe IP)
+    | SetEndpoint ID (Maybe NIP)
     | FilesystemMsg ID Filesystem.Msg
     | LogMsg ID Logs.Msg
     | ProcessMsg ID Processes.Msg

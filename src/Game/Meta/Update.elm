@@ -25,10 +25,10 @@ update game msg model =
             else
                 ( model, Cmd.none, Dispatch.none )
 
-        SetEndpoint ip ->
+        SetEndpoint nip ->
             let
                 setEndpoint id =
-                    Dispatch.servers <| Servers.SetEndpoint id ip
+                    Dispatch.servers <| Servers.SetEndpoint id nip
 
                 dispatch =
                     model
@@ -37,7 +37,7 @@ update game msg model =
                         |> Maybe.withDefault Dispatch.none
 
                 model_ =
-                    if ip == Nothing then
+                    if nip == Nothing then
                         ensureValidContext game { model | context = Gateway }
                     else
                         ensureValidContext game model

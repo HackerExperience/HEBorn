@@ -9,8 +9,8 @@ type Msg
     = Logout
     | ToggleMenus OpenMenu
     | CustomSelect CustomSelect.Msg
-    | SelectGateway String
-    | SelectBounce String
-    | SelectEndpoint String
+    | SelectGateway (Maybe String)
+    | SelectBounce (Maybe String)
+    | SelectEndpoint (Maybe ( String, String ))
     | CheckMenus
     | ContextTo Context

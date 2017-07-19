@@ -103,7 +103,8 @@ genServer =
     let
         buildServerRecord ip meta fs logs proc =
             { name = "Dummy"
-            , ip = ip
+            , nip = ("::", ip)
+            , nips = [("::", ip)]
             , filesystem = fs
             , logs = logs
             , processes = proc

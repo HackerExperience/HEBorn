@@ -17,7 +17,7 @@ import Dict exposing (Dict)
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import Apps.Apps as Apps
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 import OS.SessionManager.WindowManager.Models as WindowManager
 
 
@@ -65,8 +65,8 @@ insert id ({ sessions } as model) =
         model
 
 
-openApp : ID -> Maybe IP -> Apps.App -> Model -> Model
-openApp id ip app ({ sessions } as model0) =
+openApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
+openApp id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
@@ -74,7 +74,7 @@ openApp id ip app ({ sessions } as model0) =
                     getUID model0
 
                 wm_ =
-                    WindowManager.insert uuid ip app wm
+                    WindowManager.insert uuid nip app wm
 
                 sessions_ =
                     Dict.insert id wm_ sessions
@@ -88,8 +88,8 @@ openApp id ip app ({ sessions } as model0) =
             model0
 
 
-openOrRestoreApp : ID -> Maybe IP -> Apps.App -> Model -> Model
-openOrRestoreApp id ip app ({ sessions } as model0) =
+openOrRestoreApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
+openOrRestoreApp id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
@@ -97,7 +97,7 @@ openOrRestoreApp id ip app ({ sessions } as model0) =
                     getUID model0
 
                 wm_ =
-                    WindowManager.resert uuid ip app wm
+                    WindowManager.resert uuid nip app wm
 
                 sessions_ =
                     Dict.insert id wm_ sessions
