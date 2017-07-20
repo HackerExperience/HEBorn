@@ -17,6 +17,7 @@ import Game.Servers.Shared as Servers
 type alias Data =
     { id : Servers.ID
     , server : Servers.Server
+    , online : Bool
     , game : Model
     }
 
@@ -40,14 +41,14 @@ fromGateway : Model -> Maybe Data
 fromGateway model =
     model
         |> getGateway
-        |> Maybe.map (fromServer model)
+        |> Maybe.map (fromServer True model)
 
 
 fromEndpoint : Model -> Maybe Data
 fromEndpoint model =
     model
         |> getEndpoint
-        |> Maybe.map (fromServer model)
+        |> Maybe.map (fromServer True model)
 
 
 fromServerID : Servers.ID -> Model -> Maybe Data
@@ -55,10 +56,27 @@ fromServerID id model =
     let
         servers =
             getServers model
+
+        ( gatewayID, gateway ) =
+            model
+                |> getGateway
+                |> Maybe.map (\( left, right ) -> ( Just left, Just right ))
+                |> Maybe.withDefault ( Nothing, Nothing )
+
+        endpointID =
+            gateway
+                |> Maybe.andThen Servers.getEndpoint
+                |> Maybe.andThen (flip Servers.mapNetwork servers)
+
+        maybeID =
+            Just id
+
+        online =
+            maybeID == gatewayID || maybeID == endpointID
     in
         case Servers.get id servers of
             Just server ->
-                Just <| fromServer model ( id, server )
+                Just <| fromServer online model ( id, server )
 
             Nothing ->
                 Nothing
@@ -68,9 +86,10 @@ fromServerID id model =
 -- internals
 
 
-fromServer : Model -> ( Servers.ID, Servers.Server ) -> Data
-fromServer model ( id, server ) =
+fromServer : Bool -> Model -> ( Servers.ID, Servers.Server ) -> Data
+fromServer online model ( id, server ) =
     { id = id
     , server = server
+    , online = online
     , game = model
     }
