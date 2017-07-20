@@ -212,7 +212,6 @@ horizontalTabs : Snippet
 horizontalTabs =
     typeSelector "panel"
         [ fontSize (px 12)
-        , borderBottom3 (px 1) solid Colors.black
         , flexContainerHorz
         , children
             [ typeSelector "tab"
@@ -220,9 +219,7 @@ horizontalTabs =
                 , flex (int 1)
                 , textAlign center
                 , padding3 (px 8) (px 16) (px 4)
-                , borderTop3 (px 1) solid Colors.black
-                , borderLeft3 (px 1) solid Colors.black
-                , borderRight3 (px 1) solid Colors.black
+                , borderTop3 (px 1) solid Colors.separator
                 , borderTopLeftRadius (px 12)
                 , borderTopRightRadius (px 12)
                 , withAttribute (Css.EQ "data-selected" "\"1\"")

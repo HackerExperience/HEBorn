@@ -10,5 +10,8 @@ type Msg
 
 
 type MenuAction
-    = DoA
-    | DoB
+    = GoPrevious
+    | GoNext
+    | GoHome
+    | NewTab
+    | DeleteTab Int

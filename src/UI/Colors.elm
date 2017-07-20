@@ -23,6 +23,11 @@ root =
     hex "9B9E5B"
 
 
+separator : Color
+separator =
+    hex "CCC"
+
+
 hyperlink : Color
 hyperlink =
     hex "00E"

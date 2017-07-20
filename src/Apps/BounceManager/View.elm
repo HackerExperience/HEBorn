@@ -34,12 +34,13 @@ compareTabs =
     (==)
 
 
-viewTabLabel : Bool -> MainTab -> List (Html Msg)
+viewTabLabel : Bool -> MainTab -> ( List (Attribute Msg), List (Html Msg) )
 viewTabLabel _ tab =
     tab
         |> tabToString
         |> text
         |> List.singleton
+        |> (,) []
 
 
 viewBouncePath : List Network.NIP -> Html Msg

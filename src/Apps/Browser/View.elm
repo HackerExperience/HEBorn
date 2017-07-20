@@ -7,11 +7,12 @@ import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Data as GameData
 import Apps.Browser.Messages exposing (Msg(..))
-import Apps.Browser.Models exposing (Model, Browser)
-import Apps.Browser.Menu.View exposing (menuView, menuNav, menuContent)
+import Apps.Browser.Models exposing (..)
+import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
 import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Pages.View as Pages
 import Apps.Browser.Resources exposing (Classes(..), prefix)
+import UI.Widgets.HorizontalTabs exposing (hzTabs)
 
 
 { id, class, classList } =
@@ -24,15 +25,19 @@ styles =
 
 
 view : GameData.Data -> Model -> Html Msg
-view data ({ app } as model) =
-    div
-        [ menuContent
-        , class [ Window, Content, Client ]
-        ]
-        [ viewToolbar app
-        , viewPg data app.page
-        , menuView model
-        ]
+view data model =
+    let
+        app =
+            getApp model
+    in
+        div
+            [ class [ Window, Content, Client ]
+            ]
+            [ viewTabs model
+            , viewToolbar app
+            , viewPg data app.page
+            , menuView model
+            ]
 
 
 renderToolbarBtn : Bool -> String -> msg -> Html msg
@@ -51,7 +56,10 @@ renderToolbarBtn active label callback =
 
 viewToolbar : Browser -> Html Msg
 viewToolbar browser =
-    div [ class [ Toolbar ] ]
+    div
+        [ menuNav
+        , class [ Toolbar ]
+        ]
         [ div
             -- TODO: Add classes
             [ class
@@ -94,6 +102,25 @@ viewToolbar browser =
                 ]
             ]
         ]
+
+
+viewTabLabel : Tabs -> Bool -> Int -> ( List (Attribute Msg), List (Html Msg) )
+viewTabLabel src _ tab =
+    getTab tab src
+        |> getPage
+        |> Pages.getTitle
+        |> text
+        |> List.singleton
+        |> (,) [ menuTab tab ]
+
+
+viewTabs : Model -> Html Msg
+viewTabs b =
+    hzTabs
+        ((==) b.nowTab)
+        (viewTabLabel b.tabs)
+        TabGo
+        (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
 viewPg : GameData.Data -> Pages.Model -> Html Msg

@@ -5,7 +5,7 @@ import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 
 type Menu
     = MenuNav
-    | MenuContent
+    | MenuTab Int
 
 
 type alias Model =

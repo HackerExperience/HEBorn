@@ -15,7 +15,7 @@ import Utils.Html.Attributes exposing (selectedAttr)
 
 
 type alias Renderer a msg =
-    Bool -> a -> List (Html msg)
+    Bool -> a -> ( List (Attribute msg), List (Html msg) )
 
 
 hzTabs :
@@ -52,7 +52,7 @@ hzPlainTabs :
     -> List String
     -> Html msg
 hzPlainTabs check render =
-    hzTabs check (\_ str -> [ text str ])
+    hzTabs check (\_ str -> ( [], [ text str ] ))
 
 
 
@@ -95,12 +95,17 @@ tabNode =
 
 renderItem : Bool -> Renderer a msg -> (a -> msg) -> a -> Html msg
 renderItem active render handler item =
-    item
-        |> render active
-        |> tab
-            [ onClick (handler item)
-            , selectedAttr active
-            ]
+    let
+        ( attrs, childs ) =
+            render active item
+    in
+        childs
+            |> (tab <|
+                    [ onClick (handler item)
+                    , selectedAttr active
+                    ]
+                        ++ attrs
+               )
 
 
 renderContainer : (a -> Html msg) -> List a -> Html msg
