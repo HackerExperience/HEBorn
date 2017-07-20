@@ -2,7 +2,7 @@ module Apps.Browser.Menu.View
     exposing
         ( menuView
         , menuNav
-        , menuContent
+        , menuTab
         )
 
 import Html exposing (Html)
@@ -37,14 +37,15 @@ menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
         MenuNav ->
-            [ [ ( ContextMenu.item "A", MenuClick DoA )
-              , ( ContextMenu.item "B", MenuClick DoB )
+            [ [ ( ContextMenu.item "Previous", MenuClick GoPrevious )
+              , ( ContextMenu.item "Next", MenuClick GoNext )
+              , ( ContextMenu.item "Home", MenuClick GoHome )
               ]
             ]
 
-        MenuContent ->
-            [ [ ( ContextMenu.item "c", MenuClick DoB )
-              , ( ContextMenu.item "d", MenuClick DoA )
+        MenuTab t ->
+            [ [ ( ContextMenu.item "Add", MenuClick NewTab )
+              , ( ContextMenu.item "Close", MenuClick <| DeleteTab t )
               ]
             ]
 
@@ -54,6 +55,6 @@ menuNav =
     menuFor MenuNav
 
 
-menuContent : Html.Attribute BrowserMsg.Msg
-menuContent =
-    menuFor MenuContent
+menuTab : Int -> Html.Attribute BrowserMsg.Msg
+menuTab t =
+    menuFor <| MenuTab t

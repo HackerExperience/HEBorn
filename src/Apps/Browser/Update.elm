@@ -1,13 +1,7 @@
 module Apps.Browser.Update exposing (update)
 
 import Game.Data as GameData
-import Apps.Browser.Models
-    exposing
-        ( Model
-        , gotoPage
-        , gotoPreviousPage
-        , gotoNextPage
-        )
+import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Models as Pages
 import Game.Web.Models as Web
 import Game.Web.Types as Web
@@ -19,7 +13,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- Menu
         MenuMsg (Menu.MenuClick action) ->
@@ -35,15 +29,25 @@ update data msg ({ app } as model) =
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
+        -- App
         UpdateAddress newAddr ->
             let
+                app =
+                    getApp model
+
                 app_ =
                     { app | addressBar = newAddr }
+
+                model_ =
+                    setApp app_ model
             in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
         AddressEnter ->
             let
+                app =
+                    getApp model
+
                 site =
                     Web.get app.addressBar data.game.web
 
@@ -62,23 +66,36 @@ update data msg ({ app } as model) =
                     gotoPage (Pages.initialModel site) app
 
                 model_ =
-                    { model | app = app_ }
+                    setApp app_ model
             in
                 ( model_, Cmd.none, dispatch )
 
         GoPrevious ->
             let
                 app_ =
-                    gotoPreviousPage app
+                    gotoPreviousPage <| getApp model
+
+                model_ =
+                    setApp app_ model
             in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
         GoNext ->
             let
                 app_ =
-                    gotoNextPage app
+                    gotoNextPage <| getApp model
+
+                model_ =
+                    setApp app_ model
             in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
         PageMsg ->
             ( model, Cmd.none, Dispatch.none )
+
+        TabGo n ->
+            let
+                model_ =
+                    goTab n model
+            in
+                ( model_, Cmd.none, Dispatch.none )

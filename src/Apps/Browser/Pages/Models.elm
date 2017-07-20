@@ -68,7 +68,7 @@ getTitle model =
             "Loading..."
 
         _ ->
-            ""
+            "New Tab"
 
 
 getUrl : Model -> String
@@ -88,7 +88,7 @@ getSite model =
 
         BlankModel ->
             { type_ = Web.Blank
-            , url = ""
+            , url = "about:blank"
             , meta = Nothing
             }
 

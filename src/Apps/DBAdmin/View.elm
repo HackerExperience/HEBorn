@@ -1,6 +1,6 @@
 module Apps.DBAdmin.View exposing (view)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, Attribute, div, text)
 import Game.Data as Game
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
@@ -22,12 +22,13 @@ compareTabs =
     (==)
 
 
-viewTabLabel : Bool -> MainTab -> List (Html Msg)
+viewTabLabel : Bool -> MainTab -> ( List (Attribute Msg), List (Html Msg) )
 viewTabLabel _ tab =
     tab
         |> tabToString
         |> text
         |> List.singleton
+        |> (,) []
 
 
 view : Game.Data -> Model -> Html Msg

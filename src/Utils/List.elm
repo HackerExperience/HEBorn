@@ -1,10 +1,11 @@
 module Utils.List
     exposing
-        ( last
-        , find
+        ( find
         , memberIndex
         , findIndex
         , move
+        , last
+        , splitOut
         , indexedFoldl
         , indexedFoldr
         , foldlWhile
@@ -53,6 +54,11 @@ findIndex check list =
 last : List a -> Maybe a
 last =
     List.foldl (Just >> always) Nothing
+
+
+splitOut : Int -> List a -> ( List a, List a )
+splitOut n xs =
+    ( List.take n xs, List.drop (n + 1) xs )
 
 
 move : Int -> Int -> List a -> List a

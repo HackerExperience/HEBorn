@@ -10,3 +10,4 @@ type Msg
     | GoPrevious
     | GoNext
     | PageMsg
+    | TabGo Int
