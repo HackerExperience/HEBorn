@@ -13,6 +13,7 @@ import Game.Servers.Shared as Servers
 import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
+import Game.Account.Inventory.Models as Inventory
 
 
 type alias ID =
@@ -45,6 +46,7 @@ type alias Model =
     , logout : Bool
     , servers : List Servers.ID
     , bounces : Bounces.Model
+    , inventory : Inventory.Model
     }
 
 
@@ -64,6 +66,7 @@ initialModel id username token =
     , logout = False
     , servers = []
     , bounces = Bounces.initialModel
+    , inventory = Inventory.initialModel
     }
 
 
