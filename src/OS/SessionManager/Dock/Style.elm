@@ -114,6 +114,7 @@ css =
                     , addIco "hebamp" Icon.hebamp
                     , addIco "cpanel" Icon.cpanel
                     , addIco "srvgr" Icon.srvgr
+                    , addIco "locpk" Icon.locpk
                     , addGrad "explorer" Gradients.mangoPulp
                     , addGrad "logvw" Gradients.stellar
                     , addGrad "browser" Gradients.pinotNoir
@@ -125,6 +126,7 @@ css =
                     , addGrad "hebamp" Gradients.veryBlue
                     , addGrad "cpanel" Gradients.emeraldWater
                     , addGrad "srvgr" Gradients.purplepine
+                    , addGrad "locpk" Gradients.loveAndLiberty
                     ]
                 , class AppContext
                     [ display none

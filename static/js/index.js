@@ -1,7 +1,8 @@
 require('../css/index.css');
 require('../css/fonts.css');
 
-//require("leaflet_css");
+require("leaflet_css");
+require("leaflet_js");
 
 var Elm = require('../../src/Main');
 var node = document.getElementById('app');

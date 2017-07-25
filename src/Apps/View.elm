@@ -14,6 +14,7 @@ import Apps.Finance.View as Finance
 import Apps.Hebamp.View as Hebamp
 import Apps.CtrlPanel.View as CtrlPanel
 import Apps.ServersGears.View as ServersGears
+import Apps.LocationPicker.View as LocationPicker
 import Game.Data as Game
 
 
@@ -52,3 +53,6 @@ view data model =
 
         ServersGearsModel model ->
             Html.map ServersGearsMsg (ServersGears.view data model)
+
+        LocationPickerModel model ->
+            Html.map LocationPickerMsg (LocationPicker.view data model)

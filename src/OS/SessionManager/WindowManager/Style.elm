@@ -98,6 +98,7 @@ css =
                                         , addIco "hebamp" Icon.hebamp
                                         , addIco "cpanel" Icon.cpanel
                                         , addIco "srvgr" Icon.srvgr
+                                        , addIco "locpk" Icon.locpk
                                         ]
                                     , class HeaderButtons
                                         [ flex (int 0)
