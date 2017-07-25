@@ -23,3 +23,8 @@ onClickMe handler =
         }
     <|
         Json.succeed handler
+
+
+onLoad : msg -> Attribute msg
+onLoad handler =
+    on "load" <| Json.succeed handler

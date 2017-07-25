@@ -232,3 +232,8 @@ cpanel =
 srvgr : Icon
 srvgr =
     faIcon FA.wrench
+
+
+locpk : Icon
+locpk =
+    faIcon FA.streetView

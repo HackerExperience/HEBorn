@@ -21,6 +21,7 @@ import Apps.Finance.Models as Finance
 import Apps.Hebamp.Models as Hebamp
 import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
+import Apps.LocationPicker.Models as LocationPicker
 import Apps.Apps exposing (..)
 
 
@@ -36,6 +37,7 @@ type AppModel
     | MusicModel Hebamp.Model
     | CtrlPanelModel CtrlPanel.Model
     | ServersGearsModel ServersGears.Model
+    | LocationPickerModel LocationPicker.Model
 
 
 type Contexts
@@ -79,6 +81,9 @@ contexts app =
         ServersGearsApp ->
             ContextlessApp
 
+        LocationPickerApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -115,6 +120,9 @@ name app =
 
         ServersGearsApp ->
             ServersGears.name
+
+        LocationPickerApp ->
+            LocationPicker.name
 
 
 icon : App -> String
@@ -153,6 +161,9 @@ icon app =
         ServersGearsApp ->
             ServersGears.icon
 
+        LocationPickerApp ->
+            LocationPicker.icon
+
 
 title : AppModel -> String
 title model =
@@ -190,6 +201,9 @@ title model =
         ServersGearsModel model ->
             ServersGears.title model
 
+        LocationPickerModel model ->
+            LocationPicker.title model
+
 
 model : App -> AppModel
 model app =
@@ -226,6 +240,9 @@ model app =
 
         ServersGearsApp ->
             ServersGearsModel ServersGears.initialModel
+
+        LocationPickerApp ->
+            LocationPickerModel LocationPicker.initialModel
 
 
 isDecorated : App -> Bool

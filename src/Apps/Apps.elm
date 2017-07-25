@@ -13,3 +13,4 @@ type App
     | MusicApp
     | CtrlPanelApp
     | ServersGearsApp
+    | LocationPickerApp

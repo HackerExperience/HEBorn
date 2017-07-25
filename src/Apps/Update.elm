@@ -14,6 +14,7 @@ import Apps.Finance.Update as Finance
 import Apps.Hebamp.Update as Hebamp
 import Apps.CtrlPanel.Update as CtrlPanel
 import Apps.ServersGears.Update as ServersGears
+import Apps.LocationPicker.Update as LocationPicker
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -56,6 +57,9 @@ update data msg model =
 
         ( ServersGearsMsg msg, ServersGearsModel model ) ->
             map ServersGearsModel ServersGearsMsg (ServersGears.update data msg model)
+
+        ( LocationPickerMsg msg, LocationPickerModel model ) ->
+            map LocationPickerModel LocationPickerMsg (LocationPicker.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

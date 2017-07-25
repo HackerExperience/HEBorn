@@ -11,6 +11,7 @@ import Apps.Finance.Messages as Finance
 import Apps.Hebamp.Messages as Hebamp
 import Apps.CtrlPanel.Messages as CtrlPanel
 import Apps.ServersGears.Messages as ServersGears
+import Apps.LocationPicker.Messages as LocationPicker
 
 
 type Msg
@@ -25,3 +26,4 @@ type Msg
     | MusicMsg Hebamp.Msg
     | CtrlPanelMsg CtrlPanel.Msg
     | ServersGearsMsg ServersGears.Msg
+    | LocationPickerMsg LocationPicker.Msg

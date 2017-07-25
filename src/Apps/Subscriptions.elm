@@ -14,6 +14,7 @@ import Apps.Finance.Subscriptions as Finance
 import Apps.Hebamp.Subscriptions as Hebamp
 import Apps.CtrlPanel.Subscriptions as CtrlPanel
 import Apps.ServersGears.Subscriptions as ServersGears
+import Apps.LocationPicker.Subscriptions as LocationPicker
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -62,3 +63,7 @@ subscriptions data model =
         ServersGearsModel model ->
             ServersGears.subscriptions data model
                 |> Sub.map ServersGearsMsg
+
+        LocationPickerModel model ->
+            LocationPicker.subscriptions data model
+                |> Sub.map LocationPickerMsg
