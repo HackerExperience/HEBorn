@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "elm-test": "0.18.2",
+    "leaflet": "^1.1.0",
     "npm-watch": "^0.1.8",
     "webpack-dev-server": "^1.16.3"
   }

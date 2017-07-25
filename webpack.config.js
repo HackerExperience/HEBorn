@@ -28,7 +28,13 @@ var commonConfig = {
   },
 
   resolve: {
-    extensions: ['', '.js', '.elm']
+    extensions: ['', '.js', '.elm', '.css', '.png', '.jpg'],
+    alias: {
+        leaflet_css: __dirname + "/node_modules/leaflet/dist/leaflet.css",
+        leaflet_marker: __dirname + "/node_modules/leaflet/dist/images/marker-icon.png",
+        leaflet_marker_2x: __dirname + "/node_modules/leaflet/dist/images/marker-icon-2x.png",
+        leaflet_marker_shadow: __dirname + "/node_modules/leaflet/dist/images/marker-shadow.png"
+    }
   },
   module: {
     noParse: /\.elm$/,
@@ -52,6 +58,10 @@ var commonConfig = {
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         loader: "url-loader?limit=10000&mimetype=image/svg+xml&publicPath=../&name=files/[name].[ext]"
+      },
+      {
+        test: /\.(png|jpg)$/,
+        loader: "file-loader?name=images/[name].[ext]"
       },
       {
         test: /\.(css|scss)$/,
