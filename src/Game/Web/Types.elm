@@ -25,6 +25,7 @@ type Type
     | FBI
     | News
     | Bithub
+    | MissionCenter
 
 
 type Meta
@@ -41,6 +42,7 @@ type Meta
     | FBIMeta FBIMetadata
     | NewsMeta NewsMetadata
     | BithubMeta BithubMetadata
+    | MissionCenterMeta MissionCenterMetadata
 
 
 type alias HomeMetadata =
@@ -92,6 +94,10 @@ type alias NewsMetadata =
 
 
 type alias BithubMetadata =
+    {}
+
+
+type alias MissionCenterMetadata =
     {}
 
 

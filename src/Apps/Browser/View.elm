@@ -9,6 +9,7 @@ import Game.Data as GameData
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
+import Apps.Browser.Pages.Messages as Pages
 import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Pages.View as Pages
 import Apps.Browser.Resources exposing (Classes(..), prefix)
@@ -93,7 +94,7 @@ viewToolbar browser =
         , div
             [ class [ AddressBar ] ]
             [ Html.form
-                [ onSubmit AddressEnter ]
+                [ onSubmit <| GoAddress browser.addressBar ]
                 [ input
                     [ value browser.addressBar
                     , onInput UpdateAddress
@@ -123,11 +124,24 @@ viewTabs b =
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
+pageMsgIntersept : Pages.Msg -> Msg
+pageMsgIntersept msg =
+    case msg of
+        Pages.BrowserGoAddress url ->
+            GoAddress url
+
+        Pages.BrowserTabAddress url ->
+            NewTabInAddress url
+
+        _ ->
+            PageMsg
+
+
 viewPg : GameData.Data -> Pages.Model -> Html Msg
 viewPg data pg =
     div
         [ class [ PageContent ] ]
-        [ (Html.map (always PageMsg) (Pages.view data pg)) ]
+        [ (Html.map pageMsgIntersept (Pages.view data pg)) ]
 
 
 

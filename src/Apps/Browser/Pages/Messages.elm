@@ -16,5 +16,8 @@ type Msg
     | FBIMsg
     | NewsMsg
     | BithubMsg
+    | MissionCenterMsg
     | NotFoundMsg
     | UnknownMsg
+    | BrowserGoAddress String
+    | BrowserTabAddress String

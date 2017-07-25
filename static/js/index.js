@@ -1,5 +1,8 @@
 require('../css/index.css');
 require('../css/fonts.css');
+
+//require("leaflet_css");
+
 var Elm = require('../../src/Main');
 var node = document.getElementById('app');
 var app = Elm.Main.embed(node, {
@@ -8,15 +11,8 @@ var app = Elm.Main.embed(node, {
   'apiWsUrl': process.env.HEBORN_API_WEBSOCKET_URL || "wss://localhost:4000/websocket",
   'version': process.env.HEBORN_VERSION || "dev"
 });
-app.ports.setCurrentTime.subscribe(function(id, time) {
-    var audio = document.getElementById(id);
-    audio.currentTime = time;
-});
-app.ports.play.subscribe(function(id) {
-    var audio = document.getElementById(id);
-    audio.play();
-});
-app.ports.pause.subscribe(function(id) {
-    var audio = document.getElementById(id);
-    audio.pause();
-});
+exports.app = app;
+
+// HACK: TODO: Merge through webpack
+require('./audio.js');
+require('./map.js');

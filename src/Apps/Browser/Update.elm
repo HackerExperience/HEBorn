@@ -43,33 +43,6 @@ update data msg model =
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        AddressEnter ->
-            let
-                app =
-                    getApp model
-
-                site =
-                    Web.get app.addressBar data.game.web
-
-                dispatch =
-                    case site.type_ of
-                        Web.Unknown ->
-                            -- uncomment this line after adding DNS support
-                            -- to the back end:
-                            -- Dispatch.web (Web.Load app.addressBar)
-                            Dispatch.none
-
-                        _ ->
-                            Dispatch.none
-
-                app_ =
-                    gotoPage (Pages.initialModel site) app
-
-                model_ =
-                    setApp app_ model
-            in
-                ( model_, Cmd.none, dispatch )
-
         GoPrevious ->
             let
                 app_ =
@@ -99,3 +72,55 @@ update data msg model =
                     goTab n model
             in
                 ( model_, Cmd.none, Dispatch.none )
+
+        GoAddress url ->
+            let
+                ( app_, dispatch ) =
+                    goPage url data <| getApp model
+
+                model_ =
+                    setApp app_ model
+            in
+                ( model_, Cmd.none, dispatch )
+
+        NewTabInAddress url ->
+            let
+                createTabModel =
+                    addTab model
+
+                goTabModel =
+                    -- DIRTY
+                    goTab
+                        createTabModel.lastTab
+                        createTabModel
+
+                ( app_, dispatch ) =
+                    goPage url data <| getApp goTabModel
+
+                model_ =
+                    setApp app_ goTabModel
+            in
+                ( model_, Cmd.none, dispatch )
+
+
+goPage : String -> GameData.Data -> Browser -> ( Browser, Dispatch )
+goPage url data app =
+    let
+        site =
+            Web.get url data.game.web
+
+        dispatch =
+            case site.type_ of
+                Web.Unknown ->
+                    -- uncomment this line after adding DNS support
+                    -- to the back end:
+                    -- Dispatch.web (Web.Load app.addressBar)
+                    Dispatch.none
+
+                _ ->
+                    Dispatch.none
+
+        app_ =
+            gotoPage url (Pages.initialModel site) app
+    in
+        ( app_, dispatch )

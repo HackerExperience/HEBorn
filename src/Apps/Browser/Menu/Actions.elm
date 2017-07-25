@@ -55,7 +55,7 @@ actionHandler data action model =
                     getApp model
 
                 app_ =
-                    gotoPage Pages.BlankModel app
+                    gotoPage "about:blank" Pages.BlankModel app
 
                 model_ =
                     setApp app_ model

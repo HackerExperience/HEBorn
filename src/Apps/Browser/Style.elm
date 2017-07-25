@@ -4,6 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (input, form)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
+import UI.Colors as Colors
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 
 
@@ -55,6 +56,7 @@ css =
         , class PageContent
             [ flexContainerVert
             , overflowY auto
+            , Css.backgroundColor Colors.white
             ]
         , class LoginPageHeader
             [ lineHeight (int 3)

@@ -6,12 +6,17 @@ import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages.Models as Pages
 
 
+type alias URL =
+    String
+
+
 type alias BrowserHistory =
-    List Pages.Model
+    List ( URL, Pages.Model )
 
 
 type alias Browser =
-    { addressBar : String
+    { addressBar : URL
+    , lastURL : URL
     , page : Pages.Model
     , previousPages : BrowserHistory
     , nextPages : BrowserHistory
@@ -66,8 +71,9 @@ icon =
 
 initialBrowser : Browser
 initialBrowser =
-    { addressBar = "about:blank"
-    , page = Pages.BlankModel
+    { addressBar = "about:home"
+    , lastURL = "about:home"
+    , page = Pages.HomeModel
     , previousPages = []
     , nextPages = []
     }
@@ -91,6 +97,11 @@ getPage browser =
     browser.page
 
 
+getURL : Browser -> URL
+getURL browser =
+    browser.lastURL
+
+
 getPreviousPages : Browser -> BrowserHistory
 getPreviousPages browser =
     browser.previousPages
@@ -101,15 +112,17 @@ getNextPages browser =
     browser.nextPages
 
 
-gotoPage : Pages.Model -> Browser -> Browser
-gotoPage page browser =
+gotoPage : String -> Pages.Model -> Browser -> Browser
+gotoPage url page browser =
     if page /= getPage browser then
         let
             previousPages =
-                browser.page :: (getPreviousPages browser)
+                ( browser.lastURL, browser.page )
+                    :: (getPreviousPages browser)
         in
             { browser
-                | addressBar = Pages.getUrl page
+                | addressBar = url
+                , lastURL = url
                 , page = page
                 , previousPages = previousPages
                 , nextPages = []
@@ -125,12 +138,13 @@ gotoPreviousPage browser =
             reorderHistory getPreviousPages getNextPages browser
     in
         case maybeReorderedHistory of
-            Just ( page, prev, next ) ->
+            Just ( ( url, page ), prev, next ) ->
                 { browser
                     | page = page
                     , previousPages = prev
                     , nextPages = next
-                    , addressBar = (Pages.getUrl page)
+                    , lastURL = url
+                    , addressBar = url
                 }
 
             Nothing ->
@@ -144,12 +158,13 @@ gotoNextPage browser =
             reorderHistory getNextPages getPreviousPages browser
     in
         case maybeReorderedHistory of
-            Just ( page, next, prev ) ->
+            Just ( ( url, page ), next, prev ) ->
                 { browser
                     | page = page
                     , previousPages = prev
                     , nextPages = next
-                    , addressBar = (Pages.getUrl page)
+                    , lastURL = url
+                    , addressBar = url
                 }
 
             Nothing ->
@@ -160,7 +175,7 @@ reorderHistory :
     (Browser -> BrowserHistory)
     -> (Browser -> BrowserHistory)
     -> Browser
-    -> Maybe ( Pages.Model, BrowserHistory, BrowserHistory )
+    -> Maybe ( ( URL, Pages.Model ), BrowserHistory, BrowserHistory )
 reorderHistory getFromList getToList browser =
     let
         from =
@@ -171,6 +186,9 @@ reorderHistory getFromList getToList browser =
 
         oldPage =
             getPage browser
+
+        oldURL =
+            getURL browser
     in
         case List.head from of
             Just newPage ->
@@ -181,7 +199,7 @@ reorderHistory getFromList getToList browser =
                             |> Maybe.withDefault ([])
 
                     to_ =
-                        oldPage :: to
+                        ( oldURL, oldPage ) :: to
                 in
                     Just ( newPage, from_, to_ )
 

@@ -187,6 +187,16 @@ moveEntry (( newLoc, newName ) as newLink) entry filesystem =
 
         newParent =
             locationToParentRef newLoc filesystem
+
+        fullLink =
+            case entry of
+                FileEntry prop ->
+                    ( newLoc
+                    , newName ++ extensionSeparator ++ prop.extension
+                    )
+
+                FolderEntry _ ->
+                    newLink
     in
         case ( pathNode, newParent ) of
             ( Ok pathNode, Just newParent ) ->
@@ -194,7 +204,7 @@ moveEntry (( newLoc, newName ) as newLink) entry filesystem =
                     rootTreeRes =
                         filesystem.rootTree
                             |> deletePathNode True originalLink
-                            |> Result.andThen (addPathNode pathNode newLink)
+                            |> Result.andThen (addPathNode pathNode fullLink)
                 in
                     case rootTreeRes of
                         Ok rootTree_ ->

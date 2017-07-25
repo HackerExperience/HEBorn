@@ -1,6 +1,6 @@
 module Apps.Hebamp.Update exposing (update)
 
-import Audio exposing (..)
+import Utils.Ports.Audio exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Apps.Hebamp.Models exposing (Model)

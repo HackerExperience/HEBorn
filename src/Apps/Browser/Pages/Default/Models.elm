@@ -31,6 +31,6 @@ getTitle { title } =
     title
 
 
-getSite : Model -> Web.Site
+getSite : Model -> ( Web.Type, Maybe Web.Meta )
 getSite { site } =
-    site
+    ( Web.Default, Nothing )
