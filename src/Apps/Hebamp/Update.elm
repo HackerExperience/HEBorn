@@ -1,4 +1,4 @@
-module Apps.Hebamp.Update exposing (update)
+module Apps.Hebamp.Update exposing (update, loaded)
 
 import Utils.Ports.Audio exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -43,10 +43,44 @@ update data msg ({ app } as model) =
                 ( model_, Cmd.none, Dispatch.none )
 
         Play ->
-            ( model, play app.playerId, Dispatch.none )
+            let
+                cmd_ =
+                    app.playerId
+                        |> Maybe.map play
+                        |> Maybe.withDefault Cmd.none
+            in
+                ( model, cmd_, Dispatch.none )
 
         Pause ->
-            ( model, pause app.playerId, Dispatch.none )
+            let
+                cmd_ =
+                    app.playerId
+                        |> Maybe.map pause
+                        |> Maybe.withDefault Cmd.none
+            in
+                ( model, cmd_, Dispatch.none )
 
         SetCurrentTime time ->
-            ( model, setCurrentTime ( app.playerId, time ), Dispatch.none )
+            let
+                cmd_ =
+                    app.playerId
+                        |> Maybe.map ((flip (,)) time >> setCurrentTime)
+                        |> Maybe.withDefault Cmd.none
+            in
+                ( model, cmd_, Dispatch.none )
+
+
+loaded :
+    String
+    -> Game.Data
+    -> Model
+    -> ( Model, Cmd Hebamp.Msg, Dispatch )
+loaded wId data ({ app } as model) =
+    let
+        app_ =
+            { app | playerId = Just <| "hebamp-" ++ wId }
+
+        model_ =
+            { model | app = app_ }
+    in
+        ( model_, Cmd.none, Dispatch.none )

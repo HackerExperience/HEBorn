@@ -78,6 +78,9 @@ appLoaded wId data model =
         LocationPickerModel model ->
             map LocationPickerModel LocationPickerMsg (LocationPicker.loaded wId data model)
 
+        MusicModel model ->
+            map MusicModel MusicMsg (Hebamp.loaded wId data model)
+
         _ ->
             ( model, Cmd.none, Dispatch.none )
 

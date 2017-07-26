@@ -4,7 +4,7 @@ import Apps.Hebamp.Menu.Models as Menu
 
 
 type alias Hebamp =
-    { playerId : String
+    { playerId : Maybe String
     , now : Maybe AudioData
     , prev : List AudioData
     , next : List AudioData
@@ -58,7 +58,7 @@ initialModel =
 
 initialHebamp : Hebamp
 initialHebamp =
-    { playerId = "player-id"
+    { playerId = Nothing
     , now =
         Just
             { mediaUrl = "https://upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"
