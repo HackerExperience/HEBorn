@@ -6,6 +6,7 @@ import Fuzz exposing (int, tuple, tuple3, tuple4)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Browser as Gen
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Pages.Models as Pages
 
 
 all : Test
@@ -49,6 +50,7 @@ walkBackwardHistoryTests =
                     model
                         |> getPreviousPages
                         |> List.head
+                        |> Maybe.map Tuple.second
             in
                 model
                     |> gotoPreviousPage
@@ -61,16 +63,16 @@ walkBackwardHistoryTests =
                 |> gotoPreviousPage
                 |> Expect.equal model
     , fuzz
-        (tuple4 ( Gen.emptyModel, Gen.page, Gen.page, Gen.emptyPage ))
+        (tuple3 ( Gen.emptyModel, Gen.page, Gen.page ))
         "browsing moves current page to past history"
       <|
-        \( model, page1, page2, emptyPage ) ->
+        \( model, page1, page2 ) ->
             model
-                |> gotoPage page1
-                |> gotoPage page2
-                |> gotoPage page1
+                |> gotoPage "pg1" page1
+                |> gotoPage "pg2" page2
+                |> gotoPage "pg1" page1
                 |> getPreviousPages
-                |> Expect.equal [ page2, page1, emptyPage ]
+                |> Expect.equal [ ( "pg2", page2 ), ( "pg1", page1 ), ( "about:home", Pages.HomeModel ) ]
     ]
 
 
@@ -89,6 +91,7 @@ walkForwardHistoryTests =
                     model
                         |> getNextPages
                         |> List.head
+                        |> Maybe.map Tuple.second
             in
                 model
                     |> gotoNextPage
@@ -106,14 +109,14 @@ walkForwardHistoryTests =
       <|
         \( model, page1, page2 ) ->
             model
-                |> gotoPage page1
-                |> gotoPage page2
-                |> gotoPage page1
+                |> gotoPage "pg1" page1
+                |> gotoPage "pg2" page2
+                |> gotoPage "pg1" page1
                 |> gotoPreviousPage
                 |> gotoPreviousPage
                 |> gotoPreviousPage
                 |> getNextPages
-                |> Expect.equal [ page1, page2, page1 ]
+                |> Expect.equal [ ( "pg1", page1 ), ( "pg2", page2 ), ( "pg1", page1 ) ]
     ]
 
 
@@ -128,7 +131,7 @@ gotoPageTests =
     [ fuzz Gen.model "browsing the current page doesn't change the history" <|
         \model ->
             model
-                |> gotoPage (getPage model)
+                |> gotoPage "pg" (getPage model)
                 |> Expect.equal model
     , fuzz
         (tuple ( Gen.model, Gen.emptyPage ))
@@ -136,7 +139,7 @@ gotoPageTests =
       <|
         \( model, page ) ->
             model
-                |> gotoPage page
+                |> gotoPage "pg" page
                 |> getNextPages
                 |> List.isEmpty
                 |> Expect.equal True
