@@ -65,7 +65,7 @@ insert id ({ sessions } as model) =
         model
 
 
-openApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
+openApp : ID -> Maybe NIP -> Apps.App -> Model -> ( Model, Maybe String )
 openApp id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
@@ -73,7 +73,7 @@ openApp id nip app ({ sessions } as model0) =
                 ( model, uuid ) =
                     getUID model0
 
-                wm_ =
+                ( wm_, wId ) =
                     WindowManager.insert uuid nip app wm
 
                 sessions_ =
@@ -82,13 +82,13 @@ openApp id nip app ({ sessions } as model0) =
                 model_ =
                     { model | sessions = sessions_ }
             in
-                model_
+                ( model_, wId )
 
         Nothing ->
-            model0
+            ( model0, Nothing )
 
 
-openOrRestoreApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
+openOrRestoreApp : ID -> Maybe NIP -> Apps.App -> Model -> ( Model, Maybe String )
 openOrRestoreApp id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
@@ -96,7 +96,7 @@ openOrRestoreApp id nip app ({ sessions } as model0) =
                 ( model, uuid ) =
                     getUID model0
 
-                wm_ =
+                ( wm_, wId ) =
                     WindowManager.resert uuid nip app wm
 
                 sessions_ =
@@ -105,10 +105,10 @@ openOrRestoreApp id nip app ({ sessions } as model0) =
                 model_ =
                     { model | sessions = sessions_ }
             in
-                model_
+                ( model_, wId )
 
         Nothing ->
-            model0
+            ( model0, Nothing )
 
 
 getUID : Model -> ( Model, String )

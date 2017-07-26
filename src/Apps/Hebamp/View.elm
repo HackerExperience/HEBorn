@@ -87,26 +87,31 @@ sliderStyle audioData currentTime =
         styles |> Css.asPairs |> style
 
 
-nativeAudio : String -> Maybe AudioData -> Html Msg
+nativeAudio : Maybe String -> Maybe AudioData -> Html Msg
 nativeAudio playerId audioData =
-    let
-        staticAttr =
-            [ id playerId
-            , controls False
-            ]
-
-        dynamicAttr =
-            case audioData of
-                Just audioData ->
-                    [ src audioData.mediaUrl
-                    , type_ audioData.mediaType
-                    , onTimeUpdate TimeUpdate
+    case playerId of
+        Just playerId ->
+            let
+                staticAttr =
+                    [ id playerId
+                    , controls False
                     ]
 
-                Nothing ->
-                    []
-    in
-        audio (staticAttr ++ dynamicAttr) []
+                dynamicAttr =
+                    case audioData of
+                        Just audioData ->
+                            [ src audioData.mediaUrl
+                            , type_ audioData.mediaType
+                            , onTimeUpdate TimeUpdate
+                            ]
+
+                        Nothing ->
+                            []
+            in
+                audio (staticAttr ++ dynamicAttr) []
+
+        Nothing ->
+            div [] []
 
 
 view : Game.Data -> Model -> Html Msg

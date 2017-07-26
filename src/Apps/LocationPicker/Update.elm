@@ -1,4 +1,4 @@
-module Apps.LocationPicker.Update exposing (update)
+module Apps.LocationPicker.Update exposing (update, loaded)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
@@ -30,15 +30,18 @@ update data msg ({ app } as model) =
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
-        Loaded id ->
-            if app.mapEId == Maybe.Nothing then
-                let
-                    app_ =
-                        { app | mapEId = Just <| toString id }
 
-                    model_ =
-                        { model | app = app_ }
-                in
-                    ( model_, Cmd.none, Dispatch.none )
-            else
-                ( model, Cmd.none, Dispatch.none )
+loaded :
+    String
+    -> Game.Data
+    -> Model
+    -> ( Model, Cmd LocationPicker.Msg, Dispatch )
+loaded wId data ({ app } as model) =
+    let
+        app_ =
+            { app | mapEId = Just <| toString wId }
+
+        model_ =
+            { model | app = app_ }
+    in
+        ( model_, Cmd.none, Dispatch.none )

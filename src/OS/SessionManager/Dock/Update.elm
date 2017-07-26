@@ -1,8 +1,10 @@
 module OS.SessionManager.Dock.Update exposing (update)
 
 import Dict
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Game.Servers.Models as Servers
+import Apps.Messages as Apps
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Helpers exposing (..)
@@ -13,7 +15,7 @@ update :
     Game.Data
     -> Msg
     -> Model
-    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
 update data msg ({ sessions } as model) =
     let
         id =
@@ -27,10 +29,18 @@ update data msg ({ sessions } as model) =
                             |> Game.getServer
                             |> Servers.getEndpoint
 
-                    model_ =
+                    ( model_, wId ) =
                         openApp id ip app model
+
+                    loadedDispatch =
+                        case wId of
+                            Just wId ->
+                                Dispatch.window wId <| Apps.Loaded wId
+
+                            Nothing ->
+                                Dispatch.none
                 in
-                    model_
+                    ( model_, Cmd.none, loadedDispatch )
 
             AppButton app ->
                 let
@@ -39,10 +49,18 @@ update data msg ({ sessions } as model) =
                             |> Game.getServer
                             |> Servers.getEndpoint
 
-                    model_ =
+                    ( model_, wId ) =
                         openOrRestoreApp id ip app model
+
+                    loadedDispatch =
+                        case wId of
+                            Just wId ->
+                                Dispatch.window wId <| Apps.Loaded wId
+
+                            Nothing ->
+                                Dispatch.none
                 in
-                    model_
+                    ( model_, Cmd.none, loadedDispatch )
 
             _ ->
                 case Dict.get id sessions of
@@ -57,10 +75,10 @@ update data msg ({ sessions } as model) =
                             model_ =
                                 { model | sessions = sessions_ }
                         in
-                            model_
+                            ( model_, Cmd.none, Dispatch.none )
 
                     Nothing ->
-                        model
+                        ( model, Cmd.none, Dispatch.none )
 
 
 

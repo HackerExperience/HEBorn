@@ -40,6 +40,7 @@ import Dict exposing (Dict)
 import Draggable
 import Apps.Apps as Apps
 import Apps.Models as Apps
+import Apps.Messages as Apps
 import Game.Network.Types exposing (NIP)
 import OS.SessionManager.WindowManager.Context exposing (..)
 
@@ -112,7 +113,7 @@ initialModel =
     }
 
 
-resert : String -> Maybe NIP -> Apps.App -> Model -> Model
+resert : String -> Maybe NIP -> Apps.App -> Model -> ( Model, Maybe String )
 resert id nip app ({ visible, hidden, windows } as model) =
     let
         noVisible =
@@ -131,14 +132,16 @@ resert id nip app ({ visible, hidden, windows } as model) =
         if noOpened then
             insert id nip app model
         else if noVisible then
-            hidden
+            ( hidden
                 |> List.filter (filterApp app windows)
                 |> List.foldl restore model
+            , Nothing
+            )
         else
             insert id nip app model
 
 
-insert : ID -> Maybe NIP -> Apps.App -> Model -> Model
+insert : ID -> Maybe NIP -> Apps.App -> Model -> ( Model, Maybe String )
 insert id nip app ({ windows, visible } as model) =
     let
         contexts =
@@ -181,7 +184,7 @@ insert id nip app ({ windows, visible } as model) =
                 , focusing = Just id
             }
     in
-        model_
+        ( model_, Just id )
 
 
 refresh : ID -> Window -> Model -> Model
