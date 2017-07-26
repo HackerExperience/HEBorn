@@ -12,13 +12,16 @@ import OS.Subscriptions as OS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    case model of
-        Home model ->
-            home model
+subscriptions ({ state } as model) =
+    case state of
+        Home homeModel ->
+            home homeModel
 
-        Play model ->
-            play model
+        Setup setupModel ->
+            setup setupModel
+
+        Play playModel ->
+            play playModel
 
 
 
@@ -33,6 +36,11 @@ home model =
 
         Nothing ->
             Sub.none
+
+
+setup : SetupModel -> Sub Msg
+setup model =
+    Sub.none
 
 
 play : PlayModel -> Sub Msg

@@ -4,17 +4,18 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Core.Models as Core
 import Landing.Messages exposing (..)
+import Landing.Models exposing (..)
 import Landing.Login.View as Login
 import Landing.SignUp.View as SignUp
 import Landing.Resources exposing (..)
 
 
-view : Core.HomeModel -> Html Msg
-view model =
+view : Core.Model -> Model -> Html Msg
+view core model =
     div [ id viewId ]
         [ viewIntro
         , viewLogin model
-        , viewSignUp model
+        , viewSignUp core model
         ]
 
 
@@ -31,16 +32,15 @@ viewIntro =
         ]
 
 
-viewLogin : Core.HomeModel -> Html Msg
+viewLogin : Model -> Html Msg
 viewLogin model =
     Html.map LoginMsg
-        (Login.view model.landing.login)
+        (Login.view model.login)
 
 
-viewSignUp : Core.HomeModel -> Html Msg
-viewSignUp model =
-    if model.config.version == "dev" then
-        Html.map SignUpMsg
-            (SignUp.view model.landing.signUp)
+viewSignUp : Core.Model -> Model -> Html Msg
+viewSignUp core model =
+    if core.config.version == "dev" then
+        Html.map SignUpMsg (SignUp.view model.signUp)
     else
         div [] []

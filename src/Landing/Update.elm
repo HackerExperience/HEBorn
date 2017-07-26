@@ -9,7 +9,7 @@ import Landing.Login.Update as Login
 
 
 update :
-    Core.HomeModel
+    Core.Model
     -> Msg
     -> Model
     -> ( Model, Cmd Msg, Dispatch )

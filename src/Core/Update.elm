@@ -55,33 +55,43 @@ update msg model =
 
 
 generic : Msg -> Model -> ( Model, Cmd Msg )
-generic msg model =
-    case model of
-        Home model ->
+generic msg ({ state } as model) =
+    case state of
+        Home homeState ->
             let
                 ( model_, cmd ) =
-                    home msg model
+                    home model msg homeState
             in
                 ( model_, cmd )
 
-        Play model ->
+        Setup setupState ->
             let
                 ( model_, cmd ) =
-                    play msg model
+                    setup model msg setupState
+            in
+                ( model_, cmd )
+
+        Play playState ->
+            let
+                ( model_, cmd ) =
+                    play model msg playState
             in
                 ( model_, cmd )
 
 
-home : Msg -> HomeModel -> ( Model, Cmd Msg )
-home msg model =
+home : Model -> Msg -> HomeModel -> ( Model, Cmd Msg )
+home model msg state =
     case msg of
         LandingMsg msg ->
             let
                 ( landing, cmd, dispatch ) =
-                    Landing.update model msg model.landing
+                    Landing.update model msg state.landing
+
+                state_ =
+                    Home { state | landing = landing }
 
                 model_ =
-                    Home { model | landing = landing }
+                    { model | state = state_ }
 
                 cmd_ =
                     Cmd.map LandingMsg cmd
@@ -89,37 +99,47 @@ home msg model =
                 dispatcher model_ cmd_ dispatch
 
         _ ->
-            ( Home model, Cmd.none )
+            ( model, Cmd.none )
 
 
-play : Msg -> PlayModel -> ( Model, Cmd Msg )
-play msg model =
+setup : Model -> Msg -> SetupModel -> ( Model, Cmd Msg )
+setup model msg state =
+    case msg of
+        _ ->
+            ( model, Cmd.none )
+
+
+play : Model -> Msg -> PlayModel -> ( Model, Cmd Msg )
+play model msg state =
     case msg of
         WebsocketMsg (Ws.Broadcast event) ->
             -- special trap to route broadcasts to Game
-            game (Game.Event event) model
+            game model (Game.Event event) state
 
         WebsocketMsg msg ->
-            websocket msg model
+            websocket model msg state
 
         GameMsg msg ->
-            game msg model
+            game model msg state
 
         OSMsg msg ->
-            os msg model
+            os model msg state
 
         _ ->
-            ( Play model, Cmd.none )
+            ( model, Cmd.none )
 
 
-websocket : Ws.Msg -> PlayModel -> ( Model, Cmd Msg )
-websocket msg model =
+websocket : Model -> Ws.Msg -> PlayModel -> ( Model, Cmd Msg )
+websocket model msg state =
     let
         ( websocket, cmd ) =
-            Ws.update msg model.websocket
+            Ws.update msg state.websocket
+
+        state_ =
+            Play { state | websocket = websocket }
 
         model_ =
-            Play { model | websocket = websocket }
+            { model | state = state_ }
 
         cmd_ =
             Cmd.map WebsocketMsg cmd
@@ -127,14 +147,17 @@ websocket msg model =
         ( model_, cmd_ )
 
 
-game : Game.Msg -> PlayModel -> ( Model, Cmd Msg )
-game msg model =
+game : Model -> Game.Msg -> PlayModel -> ( Model, Cmd Msg )
+game model msg state =
     let
         ( game, cmd, dispatch ) =
-            Game.update msg model.game
+            Game.update msg state.game
+
+        state_ =
+            Play { state | game = game }
 
         model_ =
-            Play { model | game = game }
+            { model | state = state_ }
 
         cmd_ =
             Cmd.map GameMsg cmd
@@ -142,16 +165,19 @@ game msg model =
         dispatcher model_ cmd_ dispatch
 
 
-os : OS.Msg -> PlayModel -> ( Model, Cmd Msg )
-os msg model =
-    case Game.fromGateway model.game of
+os : Model -> OS.Msg -> PlayModel -> ( Model, Cmd Msg )
+os model msg state =
+    case Game.fromGateway state.game of
         Just data ->
             let
                 ( os, cmd, dispatch ) =
-                    OS.update data msg model.os
+                    OS.update data msg state.os
+
+                state_ =
+                    Play { state | os = os }
 
                 model_ =
-                    Play { model | os = os }
+                    { model | state = state_ }
 
                 cmd_ =
                     Cmd.map OSMsg cmd
@@ -159,7 +185,7 @@ os msg model =
                 dispatcher model_ cmd_ dispatch
 
         Nothing ->
-            ( Play model, Cmd.none )
+            ( model, Cmd.none )
 
 
 

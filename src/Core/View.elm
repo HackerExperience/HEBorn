@@ -9,15 +9,18 @@ import Landing.View as Landing
 
 
 view : Model -> Html Msg
-view model =
-    case model of
-        Home model ->
-            Html.map LandingMsg (Landing.view model)
+view ({ state } as model) =
+    case state of
+        Home home ->
+            Html.map LandingMsg (Landing.view model home.landing)
 
-        Play model ->
-            case Game.fromGateway model.game of
+        Setup setup ->
+            div [] []
+
+        Play play ->
+            case Game.fromGateway play.game of
                 Just data ->
-                    Html.map OSMsg (OS.view data model)
+                    Html.map OSMsg (OS.view data play.os)
 
                 Nothing ->
                     div [] []

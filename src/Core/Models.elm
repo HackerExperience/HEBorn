@@ -1,13 +1,15 @@
 module Core.Models
     exposing
-        ( Model(..)
+        ( Model
+        , State(..)
         , HomeModel
+        , SetupModel
         , PlayModel
         , initialModel
+        , getConfig
         , connect
         , login
         , logout
-        , getConfig
         )
 
 import Driver.Websocket.Models as Ws
@@ -19,99 +21,103 @@ import Landing.Models as Landing
 import Core.Config as Config exposing (Config)
 
 
-type Model
+type alias Model =
+    { state : State
+    , config : Config
+    , seed : Int
+    }
+
+
+type State
     = Home HomeModel
+    | Setup SetupModel
     | Play PlayModel
 
 
 type alias HomeModel =
     { landing : Landing.Model
     , websocket : Maybe Ws.Model
-    , config : Config
-    , seed : Int
-    , connection : Maybe ProbableConnection
+    , connecting : Maybe Connecting
     }
 
 
-type alias ProbableConnection =
+type alias SetupModel =
+    { websocket : Ws.Model
+    , connecting : Connecting
+    }
+
+
+type alias PlayModel =
+    { websocket : Ws.Model
+    , game : Game.Model
+    , os : OS.Model
+    }
+
+
+type alias Connecting =
     { id : Account.ID
     , username : Account.Username
     , token : Account.Token
     }
 
 
-type alias PlayModel =
-    { game : Game.Model
-    , os : OS.Model
-    , websocket : Ws.Model
-    , config : Config
-    , seed : Int
+initialModel : Int -> Config -> Model
+initialModel seed config =
+    { state = Home initialHome
+    , config = config
+    , seed = seed
     }
 
 
-initialModel : Int -> Config -> Model
-initialModel seed config =
-    Home
-        { landing = Landing.initialModel
-        , websocket = Nothing
-        , config = config
-        , seed = seed
-        , connection = Nothing
-        }
-
-
 connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model
-connect id username token model =
-    case model of
-        Home model ->
+connect id username token ({ state, config } as model) =
+    case state of
+        Home home ->
             let
+                connecting =
+                    Just <| Connecting id username token
+
                 websocket =
-                    Just (Ws.initialModel model.config.apiWsUrl token)
+                    Just <| Ws.initialModel config.apiWsUrl token
+
+                home_ =
+                    { home | websocket = websocket, connecting = connecting }
+
+                state_ =
+                    Home home_
+
+                model_ =
+                    { model | state = state_ }
             in
-                Home
-                    { model
-                        | websocket = websocket
-                        , connection =
-                            Just (ProbableConnection id username token)
-                    }
+                model_
 
         _ ->
             model
 
 
 login : Model -> Model
-login model =
-    case model of
-        Home { websocket, seed, config } ->
-            case websocket of
-                Just websocket ->
+login ({ state, config } as model) =
+    case state of
+        Home ({ connecting, websocket } as home) ->
+            case connecting of
+                Just ({ token } as connecting) ->
+                    -- TODO: add setup check here
                     let
-                        connection =
-                            case getProbableConection model of
-                                Just connection ->
-                                    connection
+                        websocket_ =
+                            Maybe.withDefault
+                                (Ws.initialModel config.apiWsUrl token)
+                                websocket
 
-                                Nothing ->
-                                    Debug.crash
-                                        "Trying to connect with invalid model."
+                        play =
+                            initialPlay websocket_ connecting config
 
-                        -- Replace this line with Game.initialModel
-                        -- when starting to integrate game with the
-                        -- server
-                        game =
-                            Game.dummy
-                                connection.id
-                                connection.username
-                                connection.token
-                                config
+                        state_ =
+                            Play play
+
+                        model_ =
+                            { model | state = state_ }
                     in
-                        Play
-                            { game = game
-                            , os = OS.initialModel
-                            , websocket = websocket
-                            , config = config
-                            , seed = seed
-                            }
+                        model_
 
                 Nothing ->
                     model
@@ -122,38 +128,34 @@ login model =
 
 logout : Model -> Model
 logout model =
-    case model of
-        Play { seed, config } ->
-            initialModel seed config
-
-        _ ->
-            model
+    { model | state = Home initialHome }
 
 
 getConfig : Model -> Config
-getConfig model =
-    case model of
-        Home m ->
-            m.config
-
-        Play m ->
-            m.config
+getConfig =
+    .config
 
 
 
 -- internals
 
 
-getProbableConection : Model -> Maybe ProbableConnection
-getProbableConection model =
-    case model of
-        Home model ->
-            case model.connection of
-                Just connection ->
-                    Just connection
+initialHome : HomeModel
+initialHome =
+    { websocket = Nothing
+    , landing = Landing.initialModel
+    , connecting = Nothing
+    }
 
-                Nothing ->
-                    Nothing
 
-        _ ->
-            Nothing
+initialSetup : Ws.Model -> Connecting -> SetupModel
+initialSetup ws connecting =
+    { websocket = ws, connecting = connecting }
+
+
+initialPlay : Ws.Model -> Connecting -> Config -> PlayModel
+initialPlay ws { id, username, token } config =
+    { websocket = ws
+    , game = Game.dummy id username token config
+    , os = OS.initialModel
+    }

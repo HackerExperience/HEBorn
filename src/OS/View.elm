@@ -5,7 +5,6 @@ import OS.Messages exposing (..)
 import OS.Resources as Res
 import Html exposing (..)
 import Html.CssHelpers
-import Core.Models as Core
 import Game.Data as GameData
 import OS.Header.View as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
@@ -16,16 +15,16 @@ import OS.SessionManager.View as SessionManager
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : GameData.Data -> Core.PlayModel -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view data model =
     div
         [ id Res.Dashboard
         , menuEmpty
         ]
-        [ viewHeader data model.os
-        , viewMain data model.os
-        , displayVersion model.game.config.version
-        , menuView model.os
+        [ viewHeader data model
+        , viewMain data model
+        , displayVersion data.game.config.version
+        , menuView model
         ]
 
 
