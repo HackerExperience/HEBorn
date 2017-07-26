@@ -3,17 +3,19 @@ module OS.SessionManager.Dock.Update exposing (update)
 import Dict
 import Game.Data as Game
 import Game.Servers.Models as Servers
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Models as WM
+import OS.SessionManager.Messages as SessionManager
 
 
 update :
     Game.Data
     -> Msg
     -> Model
-    -> Model
+    -> ( Model, Cmd SessionManager.Msg, Dispatch )
 update data msg ({ sessions } as model) =
     let
         id =
@@ -27,10 +29,10 @@ update data msg ({ sessions } as model) =
                             |> Game.getServer
                             |> Servers.getEndpoint
 
-                    model_ =
-                        openApp id ip app model
+                    ( model_, cmd, dispatch ) =
+                        openApp data id ip app model
                 in
-                    model_
+                    ( model_, cmd, dispatch )
 
             AppButton app ->
                 let
@@ -39,10 +41,10 @@ update data msg ({ sessions } as model) =
                             |> Game.getServer
                             |> Servers.getEndpoint
 
-                    model_ =
-                        openOrRestoreApp id ip app model
+                    ( model_, cmd, dispatch ) =
+                        openOrRestoreApp data id ip app model
                 in
-                    model_
+                    ( model_, cmd, dispatch )
 
             _ ->
                 case Dict.get id sessions of
@@ -57,10 +59,10 @@ update data msg ({ sessions } as model) =
                             model_ =
                                 { model | sessions = sessions_ }
                         in
-                            model_
+                            ( model_, Cmd.none, Dispatch.none )
 
                     Nothing ->
-                        model
+                        ( model, Cmd.none, Dispatch.none )
 
 
 

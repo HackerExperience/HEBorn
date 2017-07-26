@@ -9,7 +9,6 @@ import Apps.Messages as Apps
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import OS.SessionManager.WindowManager.Models exposing (..)
-import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 

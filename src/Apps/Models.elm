@@ -23,6 +23,9 @@ import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker
 import Apps.Apps exposing (..)
+import Apps.Messages exposing (..)
+import Game.Data as Game
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type AppModel
@@ -43,6 +46,10 @@ type AppModel
 type Contexts
     = ContextualApp
     | ContextlessApp
+
+
+type alias WindowID =
+    String
 
 
 contexts : App -> Contexts
@@ -205,44 +212,92 @@ title model =
             LocationPicker.title model
 
 
-model : App -> AppModel
-model app =
+model : Game.Data -> WindowID -> App -> ( AppModel, Cmd Msg, Dispatch )
+model data id app =
     case app of
         LogViewerApp ->
-            LogViewerModel LogViewer.initialModel
+            let
+                model =
+                    LogViewerModel LogViewer.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         TaskManagerApp ->
-            TaskManagerModel TaskManager.initialModel
+            let
+                model =
+                    TaskManagerModel TaskManager.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         BrowserApp ->
-            BrowserModel Browser.initialModel
+            let
+                model =
+                    BrowserModel Browser.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         ExplorerApp ->
-            ExplorerModel Explorer.initialModel
+            let
+                model =
+                    ExplorerModel Explorer.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         DatabaseApp ->
-            DatabaseModel Database.initialModel
+            let
+                model =
+                    DatabaseModel Database.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         ConnManagerApp ->
-            ConnManagerModel ConnManager.initialModel
+            let
+                model =
+                    ConnManagerModel ConnManager.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         BounceManagerApp ->
-            BounceManagerModel BounceManager.initialModel
+            let
+                model =
+                    BounceManagerModel BounceManager.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         FinanceApp ->
-            FinanceModel Finance.initialModel
+            let
+                model =
+                    FinanceModel Finance.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         MusicApp ->
-            MusicModel Hebamp.initialModel
+            let
+                model =
+                    MusicModel Hebamp.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         CtrlPanelApp ->
-            CtrlPanelModel CtrlPanel.initialModel
+            let
+                model =
+                    CtrlPanelModel CtrlPanel.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         ServersGearsApp ->
-            ServersGearsModel ServersGears.initialModel
+            let
+                model =
+                    ServersGearsModel ServersGears.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
         LocationPickerApp ->
-            LocationPickerModel LocationPicker.initialModel
+            let
+                model =
+                    LocationPickerModel LocationPicker.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
 
 isDecorated : App -> Bool

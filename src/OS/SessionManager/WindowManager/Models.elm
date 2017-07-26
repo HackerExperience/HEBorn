@@ -34,6 +34,7 @@ module OS.SessionManager.WindowManager.Models
         , getAppModelFromWindow
         , group
         , title
+        , windowData
         )
 
 import Dict exposing (Dict)
@@ -41,7 +42,12 @@ import Draggable
 import Apps.Apps as Apps
 import Apps.Models as Apps
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Models as Servers
 import OS.SessionManager.WindowManager.Context exposing (..)
+import OS.SessionManager.WindowManager.Messages exposing (..)
+import Game.Data as Game
+import Game.Models as Game
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
@@ -112,8 +118,14 @@ initialModel =
     }
 
 
-resert : String -> Maybe NIP -> Apps.App -> Model -> Model
-resert id nip app ({ visible, hidden, windows } as model) =
+resert :
+    Game.Data
+    -> String
+    -> Maybe NIP
+    -> Apps.App
+    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
+resert data id nip app ({ visible, hidden, windows } as model) =
     let
         noVisible =
             visible
@@ -129,17 +141,27 @@ resert id nip app ({ visible, hidden, windows } as model) =
             noVisible && noHidden
     in
         if noOpened then
-            insert id nip app model
+            insert data id nip app model
         else if noVisible then
-            hidden
-                |> List.filter (filterApp app windows)
-                |> List.foldl restore model
+            let
+                model_ =
+                    hidden
+                        |> List.filter (filterApp app windows)
+                        |> List.foldl restore model
+            in
+                ( model_, Cmd.none, Dispatch.none )
         else
-            insert id nip app model
+            insert data id nip app model
 
 
-insert : ID -> Maybe NIP -> Apps.App -> Model -> Model
-insert id nip app ({ windows, visible } as model) =
+insert :
+    Game.Data
+    -> ID
+    -> Maybe NIP
+    -> Apps.App
+    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
+insert data id nip app ({ windows, visible } as model) =
     let
         contexts =
             case Apps.contexts app of
@@ -149,13 +171,39 @@ insert id nip app ({ windows, visible } as model) =
                 Apps.ContextlessApp ->
                     NoContext
 
-        instance =
+        ( instance, cmd, dispatch ) =
             case Apps.contexts app of
                 Apps.ContextualApp ->
-                    DoubleContext (Apps.model app) (Apps.model app)
+                    let
+                        ( model1, cmd1, dispatch1 ) =
+                            Apps.model data id app
+
+                        data_ =
+                            data
+                                |> Game.getGame
+                                |> Game.fromEndpoint
+                                |> Maybe.withDefault data
+
+                        ( model2, cmd2, dispatch2 ) =
+                            Apps.model data_ id app
+
+                        cmd =
+                            Cmd.batch [ cmd1, cmd2 ]
+
+                        dispatch =
+                            Dispatch.batch [ dispatch1, dispatch2 ]
+                    in
+                        ( DoubleContext model1 model2, cmd, dispatch )
 
                 Apps.ContextlessApp ->
-                    SingleContext (Apps.model app)
+                    let
+                        ( model, cmd, dispatch ) =
+                            Apps.model data id app
+                    in
+                        ( SingleContext model, cmd, dispatch )
+
+        cmd_ =
+            Cmd.map (WindowMsg id) cmd
 
         window =
             Window
@@ -181,7 +229,7 @@ insert id nip app ({ windows, visible } as model) =
                 , focusing = Just id
             }
     in
-        model_
+        ( model_, cmd_, dispatch )
 
 
 refresh : ID -> Window -> Model -> Model
@@ -570,6 +618,39 @@ title window =
     window
         |> getAppModelFromWindow
         |> Apps.title
+
+
+windowData :
+    Game.Data
+    -> ID
+    -> Window
+    -> Model
+    -> Game.Data
+windowData data id window model =
+    let
+        game =
+            Game.getGame data
+
+        servers =
+            Game.getServers game
+    in
+        case context id model of
+            Just GatewayContext ->
+                game
+                    |> Game.fromGateway
+                    |> Maybe.withDefault data
+
+            Just EndpointContext ->
+                window.endpoint
+                    |> Maybe.andThen (flip Servers.mapNetwork servers)
+                    |> Maybe.andThen (flip Game.fromServerID game)
+                    |> Maybe.withDefault data
+
+            Just NoContext ->
+                data
+
+            Nothing ->
+                data
 
 
 

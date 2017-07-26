@@ -4,7 +4,6 @@ import Dict
 import Draggable
 import Game.Data as Game
 import Apps.Subscriptions as Apps
-import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import OS.SessionManager.WindowManager.Models exposing (..)
 

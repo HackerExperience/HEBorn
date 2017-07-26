@@ -15,7 +15,6 @@ import Apps.View as Apps
 import Game.Data as Game
 import OS.SessionManager.WindowManager.Context as Context
 import OS.SessionManager.WindowManager.Context exposing (..)
-import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res

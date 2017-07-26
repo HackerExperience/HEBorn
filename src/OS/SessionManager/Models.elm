@@ -18,7 +18,10 @@ import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import Apps.Apps as Apps
 import Game.Network.Types exposing (NIP)
+import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Data as Game
 
 
 type alias Model =
@@ -65,16 +68,25 @@ insert id ({ sessions } as model) =
         model
 
 
-openApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
-openApp id nip app ({ sessions } as model0) =
+openApp :
+    Game.Data
+    -> ID
+    -> Maybe NIP
+    -> Apps.App
+    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
+openApp data id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
                 ( model, uuid ) =
                     getUID model0
 
-                wm_ =
-                    WindowManager.insert uuid nip app wm
+                ( wm_, cmd, msg ) =
+                    WindowManager.insert data uuid nip app wm
+
+                cmd_ =
+                    Cmd.map WindowManagerMsg cmd
 
                 sessions_ =
                     Dict.insert id wm_ sessions
@@ -82,22 +94,31 @@ openApp id nip app ({ sessions } as model0) =
                 model_ =
                     { model | sessions = sessions_ }
             in
-                model_
+                ( model_, cmd_, msg )
 
         Nothing ->
-            model0
+            ( model0, Cmd.none, Dispatch.none )
 
 
-openOrRestoreApp : ID -> Maybe NIP -> Apps.App -> Model -> Model
-openOrRestoreApp id nip app ({ sessions } as model0) =
+openOrRestoreApp :
+    Game.Data
+    -> ID
+    -> Maybe NIP
+    -> Apps.App
+    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
+openOrRestoreApp data id nip app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
                 ( model, uuid ) =
                     getUID model0
 
-                wm_ =
-                    WindowManager.resert uuid nip app wm
+                ( wm_, cmd, msg ) =
+                    WindowManager.resert data uuid nip app wm
+
+                cmd_ =
+                    Cmd.map WindowManagerMsg cmd
 
                 sessions_ =
                     Dict.insert id wm_ sessions
@@ -105,10 +126,10 @@ openOrRestoreApp id nip app ({ sessions } as model0) =
                 model_ =
                     { model | sessions = sessions_ }
             in
-                model_
+                ( model_, cmd_, msg )
 
         Nothing ->
-            model0
+            ( model0, Cmd.none, Dispatch.none )
 
 
 getUID : Model -> ( Model, String )

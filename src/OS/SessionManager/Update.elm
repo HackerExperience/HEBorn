@@ -29,7 +29,7 @@ update data msg model =
                 windowManager data id msg model_
 
             DockMsg msg ->
-                ( Dock.update data msg model_, Cmd.none, Dispatch.none )
+                Dock.update data msg model_
 
 
 
