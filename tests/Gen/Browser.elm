@@ -8,11 +8,13 @@ import Random.Pcg
         , constant
         , int
         , list
+        , pair
         , choices
         , map
-        , map3
+        , map2
         , andThen
         )
+import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Models as Pages
 import Game.Web.Types as Web
@@ -36,6 +38,11 @@ emptyPage =
 pageList : Fuzzer (List Pages.Model)
 pageList =
     fuzzer genPageList
+
+
+pageURL : Fuzzer URL
+pageURL =
+    fuzzer genPageURL
 
 
 emptyHistory : Fuzzer BrowserHistory
@@ -105,6 +112,11 @@ genPage =
         map generate unique
 
 
+genPageURL : Generator URL
+genPageURL =
+    stringRange 2 12
+
+
 genEmptyPage : Generator Pages.Model
 genEmptyPage =
     constant <|
@@ -127,7 +139,7 @@ genEmptyHistory =
 
 genNonEmptyHistory : Generator BrowserHistory
 genNonEmptyHistory =
-    genPageList
+    andThen ((flip list) (pair genPageURL genPage)) (int 2 10)
 
 
 genHistory : Generator BrowserHistory
@@ -144,17 +156,19 @@ genNonEmptyBrowser : Generator Browser
 genNonEmptyBrowser =
     let
         mapper =
-            \past future current ->
-                Browser
-                    (Pages.getTitle current)
-                    current
-                    past
-                    future
+            \past future url current ->
+                { addressBar = url
+                , lastURL = url
+                , page = current
+                , previousPages = past
+                , nextPages = future
+                }
     in
-        map3 mapper
-            genNonEmptyHistory
-            genNonEmptyHistory
-            genPage
+        genNonEmptyHistory
+            |> map mapper
+            |> andMap genNonEmptyHistory
+            |> andMap genPageURL
+            |> andMap genPage
 
 
 genBrowser : Generator Browser
