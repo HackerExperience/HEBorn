@@ -25,6 +25,9 @@ update :
     -> ( AppModel, Cmd Msg, Dispatch )
 update data msg model =
     case ( msg, model ) of
+        ( Loaded wId, _ ) ->
+            appLoaded wId data model
+
         ( LogViewerMsg msg, LogViewerModel model ) ->
             map LogViewerModel LogViewerMsg (LogViewer.update data msg model)
 
@@ -60,6 +63,20 @@ update data msg model =
 
         ( LocationPickerMsg msg, LocationPickerModel model ) ->
             map LocationPickerModel LocationPickerMsg (LocationPicker.update data msg model)
+
+        _ ->
+            ( model, Cmd.none, Dispatch.none )
+
+
+appLoaded :
+    String
+    -> Game.Data
+    -> AppModel
+    -> ( AppModel, Cmd Msg, Dispatch )
+appLoaded wId data model =
+    case model of
+        LocationPickerModel model ->
+            map LocationPickerModel LocationPickerMsg (LocationPicker.loaded wId data model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

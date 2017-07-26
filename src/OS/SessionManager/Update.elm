@@ -4,6 +4,7 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Dock.Update as Dock
+import OS.SessionManager.Dock.Messages as Dock
 import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.WindowManager.Messages as WM
@@ -29,7 +30,7 @@ update data msg model =
                 windowManager data id msg model_
 
             DockMsg msg ->
-                ( Dock.update data msg model_, Cmd.none, Dispatch.none )
+                dock data msg model_
 
 
 
@@ -57,6 +58,22 @@ windowManager data id msg model =
 
         cmd_ =
             Cmd.map WindowManagerMsg cmd
+    in
+        ( model_, cmd_, dispatch )
+
+
+dock :
+    GameData.Data
+    -> Dock.Msg
+    -> Model
+    -> ( Model, Cmd Msg, Dispatch )
+dock data msg model =
+    let
+        ( model_, cmd, dispatch ) =
+            Dock.update data msg model
+
+        cmd_ =
+            Cmd.map DockMsg cmd
     in
         ( model_, cmd_, dispatch )
 

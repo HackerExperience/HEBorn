@@ -15,7 +15,8 @@ import Apps.LocationPicker.Messages as LocationPicker
 
 
 type Msg
-    = LogViewerMsg LogViewer.Msg
+    = Loaded String
+    | LogViewerMsg LogViewer.Msg
     | TaskManagerMsg TaskManager.Msg
     | BrowserMsg Browser.Msg
     | ExplorerMsg Explorer.Msg

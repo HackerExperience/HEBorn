@@ -19,10 +19,18 @@ module Core.Dispatch
         , tunnels
         , meta
         , web
+        , os
+        , sessmngr
+        , wm
+        , window
         )
 
 import Core.Messages exposing (..)
+import OS.Messages as OS
+import OS.SessionManager.Messages as SessMngr
+import OS.SessionManager.WindowManager.Messages as WM
 import Driver.Websocket.Messages as Ws
+import Apps.Messages as Apps
 import Game.Messages as Game
 import Game.Meta.Messages as Meta
 import Game.Web.Messages as Web
@@ -157,9 +165,29 @@ websocket msg =
     core (WebsocketMsg msg)
 
 
+os : OS.Msg -> Dispatch
+os msg =
+    core (OSMsg msg)
+
+
 game : Game.Msg -> Dispatch
 game msg =
     core (GameMsg msg)
+
+
+sessmngr : SessMngr.Msg -> Dispatch
+sessmngr msg =
+    os (OS.SessionManagerMsg msg)
+
+
+wm : WM.Msg -> Dispatch
+wm msg =
+    sessmngr (SessMngr.WindowManagerMsg msg)
+
+
+window : String -> Apps.Msg -> Dispatch
+window wId msg =
+    wm (WM.WindowMsg wId msg)
 
 
 account : Account.Msg -> Dispatch
@@ -175,6 +203,11 @@ servers msg =
 meta : Meta.Msg -> Dispatch
 meta msg =
     game (Game.MetaMsg msg)
+
+
+web : Web.Msg -> Dispatch
+web msg =
+    game (Game.WebMsg msg)
 
 
 filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
@@ -195,11 +228,6 @@ logs id msg =
 tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
 tunnels id msg =
     servers (Servers.TunnelsMsg id msg)
-
-
-web : Web.Msg -> Dispatch
-web msg =
-    game (Game.WebMsg msg)
 
 
 
