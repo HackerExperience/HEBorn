@@ -10,9 +10,12 @@ import Events.Events as Events exposing (..)
 import Landing.Update as Landing
 import Game.Data as Game
 import Game.Messages as Game
+import Game.Meta.Messages as Meta
 import Game.Update as Game
 import OS.Messages as OS
 import OS.Update as OS
+import OS.SessionManager.WindowManager.Messages as WM
+import OS.SessionManager.Messages as SM
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -210,9 +213,20 @@ onDebug model fun a =
         a
 
 
-received : a -> a
-received =
-    Debug.log "▶ Message"
+received : Msg -> Msg
+received msg =
+    case msg of
+        GameMsg (Game.MetaMsg (Meta.Tick _)) ->
+            msg
+
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.OnDragBy _))) ->
+            msg
+
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.DragMsg _))) ->
+            msg
+
+        _ ->
+            Debug.log "▶ Message" msg
 
 
 sent : a -> a
