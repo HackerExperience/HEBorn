@@ -17,3 +17,4 @@ exports.app = app;
 // HACK: TODO: Merge through webpack
 require('./audio.js');
 require('./map.js');
+require('./geoloc.js');

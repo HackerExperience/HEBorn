@@ -2,6 +2,8 @@ module Apps.LocationPicker.Update exposing (update)
 
 import Json.Decode as D exposing (decodeValue)
 import Json.Decode.Pipeline exposing (decode, required)
+import Utils.Ports.Map as Map
+import Utils.Ports.Geolocation as Geolocation
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Apps.LocationPicker.Models exposing (..)
@@ -35,20 +37,48 @@ update data msg ({ app } as model) =
         -- Map
         MapClick v ->
             let
-                decoder =
-                    decode LatLng
-                        |> required "lat" D.float
-                        |> required "lng" D.float
-
                 pos =
-                    decodeValue decoder v
-                        |> Result.map Just
-                        |> Result.withDefault Nothing
-
-                app_ =
-                    { app | pos = pos }
-
-                model_ =
-                    { model | app = app_ }
+                    decodeValue latLngDecoder v
+                        |> resToMaybe
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( setPos pos model, Cmd.none, Dispatch.none )
+
+        GeoResp v ->
+            let
+                pos =
+                    decodeValue latLngDecoder v
+                        |> resToMaybe
+
+                cmd =
+                    case pos of
+                        Just pos ->
+                            Cmd.batch
+                                [ Geolocation.geoStop ""
+                                , Map.mapCenter ( app.mapEId, pos.lat, pos.lng, 18 )
+                                ]
+
+                        Nothing ->
+                            Cmd.none
+            in
+                ( setPos pos model, cmd, Dispatch.none )
+
+
+latLngDecoder : D.Decoder LatLng
+latLngDecoder =
+    decode LatLng
+        |> required "lat" D.float
+        |> required "lng" D.float
+
+
+setPos : Maybe LatLng -> Model -> Model
+setPos pos ({ app } as model) =
+    let
+        app_ =
+            { app | pos = pos }
+    in
+        { model | app = app_ }
+
+
+resToMaybe : Result a b -> Maybe b
+resToMaybe =
+    Result.map Just >> Result.withDefault Nothing
