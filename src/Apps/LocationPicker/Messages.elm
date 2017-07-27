@@ -7,3 +7,4 @@ import Json.Encode exposing (Value)
 type Msg
     = MenuMsg Menu.Msg
     | MapClick Value
+    | GeoResp Value

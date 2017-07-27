@@ -20,6 +20,23 @@ view data ({ app } as model) =
         [ menuForDummy
         , class [ Super ]
         ]
-        [ Native.Untouchable.node "hemap" app.mapEId
+        [ div [ class [ Map ] ] [ Native.Untouchable.node "hemap" app.mapEId ]
+        , div [ class [ Interactive ] ] <|
+            case app.pos of
+                Just coord ->
+                    [ text "COORDENADAS"
+                    , br [] []
+                    , text " LAT: "
+                    , text <| toString coord.lat
+                    , br [] []
+                    , text " LNG: "
+                    , text <| toString coord.lng
+                    , br [] []
+                    , br [] []
+                    , text "CLIQUE NO MAPA PARA MUDAR SUA LOCALIZAÇÃO!"
+                    ]
+
+                Nothing ->
+                    [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
         , menuView model
         ]

@@ -1,6 +1,6 @@
 index = require('./index.js');
 app = index.app;
-app.ports.setCurrentTime.subscribe(function(id, time) {
+app.ports.setCurrentTime.subscribe(function([id, time]) {
     var audio = document.getElementById(id);
     audio.currentTime = time;
 });
