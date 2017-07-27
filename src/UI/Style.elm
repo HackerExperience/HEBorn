@@ -187,6 +187,7 @@ widgets =
     , horizontalTabs
     , customSelect
     , modal
+    , map
     ]
 
 
@@ -303,6 +304,15 @@ modal =
                     ]
                 ]
             ]
+        ]
+
+
+map : Snippet
+map =
+    typeSelector "hemap"
+        [ height (pct 100)
+        , display block
+        , zIndex (int 0)
         ]
 
 

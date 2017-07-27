@@ -1,8 +1,10 @@
 module Apps.LocationPicker.Update exposing (update)
 
+import Json.Decode as D exposing (decodeValue)
+import Json.Decode.Pipeline exposing (decode, required)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Apps.LocationPicker.Models exposing (Model)
+import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Messages as LocationPicker exposing (Msg(..))
 import Apps.LocationPicker.Menu.Messages as Menu
 import Apps.LocationPicker.Menu.Update as Menu
@@ -30,15 +32,23 @@ update data msg ({ app } as model) =
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
-        Loaded id ->
-            if app.mapEId == Maybe.Nothing then
-                let
-                    app_ =
-                        { app | mapEId = Just <| toString id }
+        -- Map
+        MapClick v ->
+            let
+                decoder =
+                    decode LatLng
+                        |> required "lat" D.float
+                        |> required "lng" D.float
 
-                    model_ =
-                        { model | app = app_ }
-                in
-                    ( model_, Cmd.none, Dispatch.none )
-            else
-                ( model, Cmd.none, Dispatch.none )
+                pos =
+                    decodeValue decoder v
+                        |> Result.map Just
+                        |> Result.withDefault Nothing
+
+                app_ =
+                    { app | pos = pos }
+
+                model_ =
+                    { model | app = app_ }
+            in
+                ( model_, Cmd.none, Dispatch.none )

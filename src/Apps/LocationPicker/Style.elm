@@ -8,6 +8,8 @@ import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
 css : Stylesheet
 css =
     (stylesheet << namespace prefix)
-        [ class Todo
-            []
+        [ class Super
+            [ height (pct 100)
+            , display block
+            ]
         ]

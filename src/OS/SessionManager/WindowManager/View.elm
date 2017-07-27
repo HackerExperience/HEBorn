@@ -2,10 +2,10 @@ module OS.SessionManager.WindowManager.View exposing (view)
 
 import Dict
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, attribute)
 import Html.Events exposing (onMouseDown)
 import Html.CssHelpers
-import Html.Attributes exposing (attribute)
+import Html.Keyed
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Utils.Html.Attributes exposing (dataDecorated, iconAttr)
@@ -35,12 +35,15 @@ view data ({ windows, visible } as model) =
                         |> Apps.view (windowData data id window model)
                         |> Html.map (WindowMsg id)
                         |> windowWrapper id window
+                        |> (,) id
                         |> Just
 
                 Nothing ->
                     Nothing
     in
-        div [ class [ Res.Super ] ] (List.filterMap mapper visible)
+        Html.Keyed.node Res.workspaceNode
+            [ class [ Res.Super ] ]
+            (List.filterMap mapper visible)
 
 
 styles : List Css.Style -> Attribute Msg
@@ -84,7 +87,9 @@ isDecorated window =
 header : ID -> Window -> Html Msg
 header id window =
     div
-        [ Draggable.mouseTrigger id DragMsg ]
+        [ Draggable.mouseTrigger id DragMsg
+        , class [ Res.HeaderSuper ]
+        ]
         [ div
             [ class [ Res.WindowHeader ]
             , onMouseDown (UpdateFocusTo (Just id))

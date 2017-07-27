@@ -2,7 +2,7 @@ module Apps.LocationPicker.Resources exposing (..)
 
 
 type Classes
-    = Todo
+    = Super
 
 
 prefix : String

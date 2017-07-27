@@ -10,6 +10,7 @@ module Apps.Models
         , isDecorated
         )
 
+import Apps.Messages exposing (..)
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
@@ -274,7 +275,7 @@ model data id app =
         MusicApp ->
             let
                 model =
-                    MusicModel Hebamp.initialModel
+                    MusicModel <| Hebamp.initialModel id
             in
                 ( model, Cmd.none, Dispatch.none )
 
@@ -294,10 +295,17 @@ model data id app =
 
         LocationPickerApp ->
             let
+                pureModel =
+                    LocationPicker.initialModel id
+
                 model =
-                    LocationPickerModel LocationPicker.initialModel
+                    LocationPickerModel pureModel
+
+                cmd =
+                    LocationPicker.startCmd pureModel
+                        |> Cmd.map LocationPickerMsg
             in
-                ( model, Cmd.none, Dispatch.none )
+                ( model, cmd, Dispatch.none )
 
 
 isDecorated : App -> Bool

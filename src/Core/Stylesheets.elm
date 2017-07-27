@@ -16,6 +16,7 @@ import Apps.ConnManager.Style
 import Apps.Finance.Style
 import Apps.BounceManager.Style
 import Apps.Hebamp.Style
+import Apps.LocationPicker.Style
 
 
 port files : CssFileStructure -> Cmd msg
@@ -41,6 +42,7 @@ fileStructure =
                 , Apps.Finance.Style.css
                 , Apps.BounceManager.Style.css
                 , Apps.Hebamp.Style.css
+                , Apps.LocationPicker.Style.css
                 ]
           )
         ]

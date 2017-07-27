@@ -1,8 +1,8 @@
 module Apps.LocationPicker.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (id)
 import Html.CssHelpers
+import Native.Untouchable
 import Game.Data as Game
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
@@ -18,12 +18,8 @@ view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     div
         [ menuForDummy
+        , class [ Super ]
         ]
-        [ div
-            (app.mapEId
-                |> Maybe.map ((++) "map-" >> id >> List.singleton)
-                |> Maybe.withDefault []
-            )
-            []
+        [ Native.Untouchable.node "hemap" app.mapEId
         , menuView model
         ]

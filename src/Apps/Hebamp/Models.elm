@@ -49,16 +49,16 @@ icon =
     "hebamp"
 
 
-initialModel : Model
-initialModel =
-    { app = initialHebamp
+initialModel : String -> Model
+initialModel id =
+    { app = initialHebamp id
     , menu = Menu.initialMenu
     }
 
 
-initialHebamp : Hebamp
-initialHebamp =
-    { playerId = "player-id"
+initialHebamp : String -> Hebamp
+initialHebamp id =
+    { playerId = "audio-" ++ id
     , now =
         Just
             { mediaUrl = "https://upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"

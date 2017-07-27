@@ -1,10 +1,18 @@
 module Apps.LocationPicker.Models exposing (..)
 
+import Utils.Ports.Map exposing (mapInit)
+import Apps.LocationPicker.Messages exposing (Msg)
 import Apps.LocationPicker.Menu.Models as Menu
 
 
+type alias LatLng =
+    { lat : Float, lng : Float }
+
+
 type alias LocationPicker =
-    { mapEId : Maybe String }
+    { mapEId : String
+    , pos : Maybe LatLng
+    }
 
 
 type alias Model =
@@ -28,13 +36,20 @@ icon =
     "locpk"
 
 
-initialModel : Model
-initialModel =
-    { app = initialLocationPicker
+initialModel : String -> Model
+initialModel id =
+    { app = initialLocationPicker id
     , menu = Menu.initialMenu
     }
 
 
-initialLocationPicker : LocationPicker
-initialLocationPicker =
-    { mapEId = Nothing }
+initialLocationPicker : String -> LocationPicker
+initialLocationPicker id =
+    { mapEId = "map-" ++ id
+    , pos = Nothing
+    }
+
+
+startCmd : Model -> Cmd Msg
+startCmd model =
+    mapInit model.app.mapEId
