@@ -6,13 +6,13 @@ import Apps.LocationPicker.Messages exposing (Msg)
 import Apps.LocationPicker.Menu.Models as Menu
 
 
-type alias LatLng =
+type alias Coordinates =
     { lat : Float, lng : Float }
 
 
 type alias LocationPicker =
     { mapEId : String
-    , pos : Maybe LatLng
+    , coordinates : Maybe Coordinates
     }
 
 
@@ -47,7 +47,7 @@ initialModel id =
 initialLocationPicker : String -> LocationPicker
 initialLocationPicker id =
     { mapEId = "map-" ++ id
-    , pos = Nothing
+    , coordinates = Nothing
     }
 
 
@@ -57,3 +57,15 @@ startCmd model =
         [ mapInit model.app.mapEId
         , geoReq "dummy"
         ]
+
+
+setPos : Maybe Coordinates -> Model -> Model
+setPos coordinates ({ app } as model) =
+    let
+        app_ =
+            { app | coordinates = coordinates }
+
+        model_ =
+            { model | app = app_ }
+    in
+        model_

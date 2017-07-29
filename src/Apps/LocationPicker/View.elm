@@ -22,7 +22,7 @@ view data ({ app } as model) =
         ]
         [ div [ class [ Map ] ] [ Native.Untouchable.node "hemap" app.mapEId ]
         , div [ class [ Interactive ] ] <|
-            case app.pos of
+            case app.coordinates of
                 Just coord ->
                     [ text "COORDENADAS"
                     , br [] []

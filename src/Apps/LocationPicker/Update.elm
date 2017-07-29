@@ -1,6 +1,6 @@
 module Apps.LocationPicker.Update exposing (update)
 
-import Json.Decode as D exposing (decodeValue)
+import Json.Decode exposing (Value, decodeValue, float)
 import Json.Decode.Pipeline exposing (decode, required)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation as Geolocation
@@ -34,51 +34,44 @@ update data msg ({ app } as model) =
             in
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
-        -- Map
-        MapClick v ->
+        MapClick value ->
             let
-                pos =
-                    decodeValue latLngDecoder v
-                        |> resToMaybe
+                model_ =
+                    value
+                        |> decodeCoordinates
+                        |> Result.toMaybe
+                        |> flip setPos model
             in
-                ( setPos pos model, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )
 
-        GeoResp v ->
+        GeoResp value ->
             let
-                pos =
-                    decodeValue latLngDecoder v
-                        |> resToMaybe
+                newPos =
+                    value
+                        |> decodeCoordinates
+                        |> Result.toMaybe
+
+                model_ =
+                    setPos newPos model
 
                 cmd =
-                    case pos of
-                        Just pos ->
+                    case newPos of
+                        Just { lat, lng } ->
                             Cmd.batch
                                 [ Geolocation.geoStop ""
-                                , Map.mapCenter ( app.mapEId, pos.lat, pos.lng, 18 )
+                                , Map.mapCenter
+                                    ( app.mapEId, lat, lng, 18 )
                                 ]
 
                         Nothing ->
                             Cmd.none
             in
-                ( setPos pos model, cmd, Dispatch.none )
+                ( model_, cmd, Dispatch.none )
 
 
-latLngDecoder : D.Decoder LatLng
-latLngDecoder =
-    decode LatLng
-        |> required "lat" D.float
-        |> required "lng" D.float
-
-
-setPos : Maybe LatLng -> Model -> Model
-setPos pos ({ app } as model) =
-    let
-        app_ =
-            { app | pos = pos }
-    in
-        { model | app = app_ }
-
-
-resToMaybe : Result a b -> Maybe b
-resToMaybe =
-    Result.map Just >> Result.withDefault Nothing
+decodeCoordinates : Value -> Result String Coordinates
+decodeCoordinates =
+    decode Coordinates
+        |> required "lat" float
+        |> required "lng" float
+        |> decodeValue
