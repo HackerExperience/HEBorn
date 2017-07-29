@@ -10,6 +10,7 @@ module Core.Models
         , connect
         , login
         , logout
+        , setupToPlay
         )
 
 import Driver.Websocket.Models as Ws
@@ -18,7 +19,10 @@ import Game.Account.Models as Account
 import Game.Dummy as Game
 import OS.Models as OS
 import Landing.Models as Landing
+import Setup.Models as Setup
 import Core.Config as Config exposing (Config)
+import Core.Messages exposing (..)
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
@@ -43,7 +47,8 @@ type alias HomeModel =
 
 type alias SetupModel =
     { websocket : Ws.Model
-    , connecting : Connecting
+    , game : Game.Model
+    , setup : Setup.Model
     }
 
 
@@ -95,7 +100,7 @@ connect id username token ({ state, config } as model) =
             model
 
 
-login : Model -> Model
+login : Model -> ( Model, Cmd Msg, Dispatch )
 login ({ state, config } as model) =
     case state of
         Home ({ connecting, websocket } as home) ->
@@ -108,8 +113,11 @@ login ({ state, config } as model) =
                                 (Ws.initialModel config.apiWsUrl token)
                                 websocket
 
-                        play =
-                            initialPlay websocket_ connecting config
+                        game =
+                            initialGame connecting config
+
+                        ( play, cmd, dispatch ) =
+                            initialPlay websocket_ game
 
                         state_ =
                             Play play
@@ -117,13 +125,13 @@ login ({ state, config } as model) =
                         model_ =
                             { model | state = state_ }
                     in
-                        model_
+                        ( model_, cmd, dispatch )
 
                 Nothing ->
-                    model
+                    ( model, Cmd.none, Dispatch.none )
 
         _ ->
-            model
+            ( model, Cmd.none, Dispatch.none )
 
 
 logout : Model -> Model
@@ -134,6 +142,23 @@ logout model =
 getConfig : Model -> Config
 getConfig =
     .config
+
+
+setupToPlay : State -> ( State, Cmd Msg, Dispatch )
+setupToPlay state =
+    case state of
+        Setup { websocket, game } ->
+            let
+                ( play, cmd, dispatch ) =
+                    initialPlay websocket game
+
+                state_ =
+                    Play play
+            in
+                ( state_, cmd, dispatch )
+
+        _ ->
+            ( state, Cmd.none, Dispatch.none )
 
 
 
@@ -148,14 +173,36 @@ initialHome =
     }
 
 
-initialSetup : Ws.Model -> Connecting -> SetupModel
-initialSetup ws connecting =
-    { websocket = ws, connecting = connecting }
+initialSetup : Ws.Model -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
+initialSetup ws game =
+    let
+        ( setup, cmd, msg ) =
+            Setup.initialModel game
+
+        cmd_ =
+            Cmd.map SetupMsg cmd
+
+        setup_ =
+            { websocket = ws
+            , game = game
+            , setup = setup
+            }
+    in
+        ( setup_, cmd_, msg )
 
 
-initialPlay : Ws.Model -> Connecting -> Config -> PlayModel
-initialPlay ws { id, username, token } config =
-    { websocket = ws
-    , game = Game.dummy id username token config
-    , os = OS.initialModel
-    }
+initialPlay : Ws.Model -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )
+initialPlay ws game =
+    let
+        play_ =
+            { websocket = ws
+            , game = game
+            , os = OS.initialModel
+            }
+    in
+        ( play_, Cmd.none, Dispatch.none )
+
+
+initialGame : Connecting -> Config -> Game.Model
+initialGame { id, username, token } config =
+    Game.dummy id username token config

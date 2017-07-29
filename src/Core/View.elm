@@ -6,6 +6,7 @@ import Core.Models exposing (..)
 import Game.Data as Game
 import OS.View as OS
 import Landing.View as Landing
+import Setup.View as Setup
 
 
 view : Model -> Html Msg
@@ -15,7 +16,7 @@ view ({ state } as model) =
             Html.map LandingMsg (Landing.view model home.landing)
 
         Setup setup ->
-            div [] []
+            Html.map SetupMsg (Setup.view setup.game setup.setup)
 
         Play play ->
             case Game.fromGateway play.game of
