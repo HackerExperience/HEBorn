@@ -2,6 +2,7 @@ module Landing.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.CssHelpers
 import Core.Models as Core
 import Landing.Messages exposing (..)
 import Landing.Models exposing (..)
@@ -10,12 +11,15 @@ import Landing.SignUp.View as SignUp
 import Landing.Resources exposing (..)
 
 
+{ id, class, classList } =
+    Html.CssHelpers.withNamespace prefix
+
+
 view : Core.Model -> Model -> Html Msg
 view core model =
     div [ id viewId ]
         [ viewIntro
-        , viewLogin model
-        , viewSignUp core model
+        , viewDisplayManager core model
         ]
 
 
@@ -29,6 +33,37 @@ viewIntro =
         [ text "Shh! Don't tell anyone, but this is the new HE1 website."
         , br [] []
         , text "We are under active development, and soon we'll release the new HE1 to public."
+        , br [] []
+        , br [] []
+        , text "$ startx /usr/bin/hedm"
+        , br [] []
+        , text "Starting graphics server..."
+        , br [] []
+        , text "> Loading resources:"
+        , br [] []
+        , text ">> Fonts... OKAY"
+        , br [] []
+        , text ">> Icons... OKAY"
+        , br [] []
+        , text ">> Images... OKAY"
+        , br [] []
+        , text ">> Dashboard..."
+        ]
+
+
+viewDisplayManager : Core.Model -> Model -> Html Msg
+viewDisplayManager core model =
+    div
+        [ id displayManagerId
+        , class
+            (if model.loaded then
+                [ Loaded ]
+             else
+                []
+            )
+        ]
+        [ viewLogin model
+        , viewSignUp core model
         ]
 
 

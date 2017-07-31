@@ -46,3 +46,9 @@ bgSelected =
 bgModal : Color
 bgModal =
     hex "0078D7"
+
+
+terminalPhosphor : Color
+terminalPhosphor =
+    -- OR AMBER "ffff33"
+    hex "33ff66"

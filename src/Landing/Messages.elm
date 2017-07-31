@@ -7,4 +7,5 @@ import Landing.Login.Messages as Login
 type Msg
     = SignUpMsg SignUp.Msg
     | LoginMsg Login.Msg
+    | LoadingEnd Int
     | NoOp

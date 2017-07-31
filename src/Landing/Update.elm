@@ -41,5 +41,12 @@ update core msg model =
             in
                 ( model_, cmd_, dispatch )
 
+        LoadingEnd z ->
+            let
+                model_ =
+                    { model | loaded = True }
+            in
+                ( model_, Cmd.none, Dispatch.none )
+
         _ ->
             ( model, Cmd.none, Dispatch.none )

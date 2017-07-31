@@ -18,11 +18,6 @@ css =
             , maxHeight (vh 100)
             , overflow hidden
             , margin (px 0)
-            , backgroundImage <| url "https://static.pexels.com/photos/176851/pexels-photo-176851.jpeg"
-            , backgroundSize cover
-            , fontFamily sansSerif
-            , fontFamilies [ "Open Sans" ]
-            , Css.fontWeight (int 300)
             , cursor default
             , unselectable
             ]

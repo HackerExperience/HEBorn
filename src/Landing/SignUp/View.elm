@@ -3,8 +3,14 @@ module Landing.SignUp.View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
+import Html.CssHelpers
+import Landing.Resources as Res
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Models exposing (Model)
+
+
+landClass =
+    (.class) <| Html.CssHelpers.withNamespace Res.prefix
 
 
 view : Model -> Html Msg
@@ -14,7 +20,8 @@ view model =
             [ id "signup-form"
             , action "javascript:void(0);"
             ]
-            [ h1 [] [ text "Sign up" ]
+            [ div [ landClass [ Res.Title ] ] [ text "Sign up" ]
+            , br [] []
             , label [ for "email-field" ] [ text "email: " ]
             , input
                 [ id "email-field"

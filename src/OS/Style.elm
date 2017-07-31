@@ -6,23 +6,7 @@ import Css.Elements exposing (typeSelector)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (transition, easingToString, Easing(..))
 import UI.Colors as Colors
-
-
-type Classes
-    = Session
-    | Header
-    | Dock
-    | Version
-
-
-type Id
-    = Dashboard
-    | DesktopVersion
-
-
-prefix : String
-prefix =
-    "os"
+import OS.Resources exposing (..)
 
 
 headerChildren : Style
@@ -73,6 +57,11 @@ css =
             , flexContainerVert
             , position relative
             , zIndex (int 0)
+            , backgroundImage <| url "https://static.pexels.com/photos/176851/pexels-photo-176851.jpeg"
+            , backgroundSize cover
+            , fontFamily sansSerif
+            , fontFamilies [ "Open Sans" ]
+            , Css.fontWeight (int 300)
             , children
                 [ class Header
                     [ backgroundColor Colors.bgWindow
