@@ -7,16 +7,7 @@ import UI.Style as UI
 import OS.Style as OS
 import OS.SessionManager.WindowManager.Style as WindowManager
 import OS.SessionManager.Dock.Style as Dock
-import Apps.Explorer.Style
-import Apps.LogViewer.Style
-import Apps.Browser.Style
-import Apps.TaskManager.Style
-import Apps.DBAdmin.Style
-import Apps.ConnManager.Style
-import Apps.Finance.Style
-import Apps.BounceManager.Style
-import Apps.Hebamp.Style
-import Apps.LocationPicker.Style
+import Apps.Style as Apps
 
 
 port files : CssFileStructure -> Cmd msg
@@ -27,23 +18,15 @@ fileStructure =
     Css.File.toFileStructure
         [ ( "index.css"
           , Css.File.compile
-                [ Core.css
-                , Landing.css
-                , OS.css
-                , UI.css
-                , WindowManager.css
-                , Dock.css
-                , Apps.Explorer.Style.css
-                , Apps.LogViewer.Style.css
-                , Apps.Browser.Style.css
-                , Apps.TaskManager.Style.css
-                , Apps.DBAdmin.Style.css
-                , Apps.ConnManager.Style.css
-                , Apps.Finance.Style.css
-                , Apps.BounceManager.Style.css
-                , Apps.Hebamp.Style.css
-                , Apps.LocationPicker.Style.css
-                ]
+                ([ Core.css
+                 , Landing.css
+                 , OS.css
+                 , UI.css
+                 , WindowManager.css
+                 , Dock.css
+                 ]
+                    ++ Apps.cssList
+                )
           )
         ]
 

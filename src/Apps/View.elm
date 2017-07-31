@@ -15,6 +15,7 @@ import Apps.Hebamp.View as Hebamp
 import Apps.CtrlPanel.View as CtrlPanel
 import Apps.ServersGears.View as ServersGears
 import Apps.LocationPicker.View as LocationPicker
+import Apps.LanViewer.View as LanViewer
 import Game.Data as Game
 
 
@@ -56,3 +57,6 @@ view data model =
 
         LocationPickerModel model ->
             Html.map LocationPickerMsg (LocationPicker.view data model)
+
+        LanViewerModel model ->
+            Html.map LanViewerMsg (LanViewer.view data model)

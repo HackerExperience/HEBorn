@@ -12,6 +12,7 @@ import Apps.Hebamp.Messages as Hebamp
 import Apps.CtrlPanel.Messages as CtrlPanel
 import Apps.ServersGears.Messages as ServersGears
 import Apps.LocationPicker.Messages as LocationPicker
+import Apps.LanViewer.Messages as LanViewer
 
 
 type Msg
@@ -27,3 +28,4 @@ type Msg
     | CtrlPanelMsg CtrlPanel.Msg
     | ServersGearsMsg ServersGears.Msg
     | LocationPickerMsg LocationPicker.Msg
+    | LanViewerMsg LanViewer.Msg

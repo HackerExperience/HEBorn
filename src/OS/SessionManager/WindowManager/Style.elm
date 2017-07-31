@@ -99,6 +99,7 @@ css =
                                         , addIco "cpanel" Icon.cpanel
                                         , addIco "srvgr" Icon.srvgr
                                         , addIco "locpk" Icon.locpk
+                                        , addIco "lanvw" Icon.lanvw
                                         ]
                                     , class HeaderButtons
                                         [ flex (int 0)

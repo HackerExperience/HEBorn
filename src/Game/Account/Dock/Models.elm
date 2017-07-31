@@ -21,4 +21,5 @@ initialModel =
     , Apps.CtrlPanelApp
     , Apps.ServersGearsApp
     , Apps.LocationPickerApp
+    , Apps.LanViewerApp
     ]
