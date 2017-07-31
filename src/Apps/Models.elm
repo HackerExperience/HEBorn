@@ -23,6 +23,7 @@ import Apps.Hebamp.Models as Hebamp
 import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker
+import Apps.LanViewer.Models as LanViewer
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
@@ -42,6 +43,7 @@ type AppModel
     | CtrlPanelModel CtrlPanel.Model
     | ServersGearsModel ServersGears.Model
     | LocationPickerModel LocationPicker.Model
+    | LanViewerModel LanViewer.Model
 
 
 type Contexts
@@ -92,6 +94,9 @@ contexts app =
         LocationPickerApp ->
             ContextlessApp
 
+        LanViewerApp ->
+            ContextualApp
+
 
 name : App -> String
 name app =
@@ -131,6 +136,9 @@ name app =
 
         LocationPickerApp ->
             LocationPicker.name
+
+        LanViewerApp ->
+            LanViewer.name
 
 
 icon : App -> String
@@ -172,6 +180,9 @@ icon app =
         LocationPickerApp ->
             LocationPicker.icon
 
+        LanViewerApp ->
+            LanViewer.icon
+
 
 title : AppModel -> String
 title model =
@@ -211,6 +222,9 @@ title model =
 
         LocationPickerModel model ->
             LocationPicker.title model
+
+        LanViewerModel model ->
+            LanViewer.title model
 
 
 model : Game.Data -> WindowID -> App -> ( AppModel, Cmd Msg, Dispatch )
@@ -306,6 +320,13 @@ model data id app =
                         |> Cmd.map LocationPickerMsg
             in
                 ( model, cmd, Dispatch.none )
+
+        LanViewerApp ->
+            let
+                model =
+                    LanViewerModel LanViewer.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
 
 
 isDecorated : App -> Bool

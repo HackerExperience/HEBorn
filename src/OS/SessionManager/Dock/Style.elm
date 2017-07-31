@@ -115,6 +115,7 @@ css =
                     , addIco "cpanel" Icon.cpanel
                     , addIco "srvgr" Icon.srvgr
                     , addIco "locpk" Icon.locpk
+                    , addIco "lanvw" Icon.lanvw
                     , addGrad "explorer" Gradients.mangoPulp
                     , addGrad "logvw" Gradients.stellar
                     , addGrad "browser" Gradients.pinotNoir
@@ -127,6 +128,7 @@ css =
                     , addGrad "cpanel" Gradients.emeraldWater
                     , addGrad "srvgr" Gradients.purplepine
                     , addGrad "locpk" Gradients.loveAndLiberty
+                    , addGrad "lanvw" Gradients.dusk
                     ]
                 , class AppContext
                     [ display none

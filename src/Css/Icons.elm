@@ -237,3 +237,8 @@ srvgr =
 locpk : Icon
 locpk =
     faIcon FA.streetView
+
+
+lanvw : Icon
+lanvw =
+    faIcon FA.podcast

@@ -15,6 +15,7 @@ import Apps.Hebamp.Subscriptions as Hebamp
 import Apps.CtrlPanel.Subscriptions as CtrlPanel
 import Apps.ServersGears.Subscriptions as ServersGears
 import Apps.LocationPicker.Subscriptions as LocationPicker
+import Apps.LanViewer.Subscriptions as LanViewer
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -67,3 +68,7 @@ subscriptions data model =
         LocationPickerModel model ->
             LocationPicker.subscriptions data model
                 |> Sub.map LocationPickerMsg
+
+        LanViewerModel model ->
+            LanViewer.subscriptions data model
+                |> Sub.map LanViewerMsg

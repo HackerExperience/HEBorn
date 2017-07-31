@@ -14,3 +14,4 @@ type App
     | CtrlPanelApp
     | ServersGearsApp
     | LocationPickerApp
+    | LanViewerApp
