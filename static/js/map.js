@@ -1,4 +1,4 @@
-index = require('./index.js');
+index = require('./app.js');
 app = index.app;
 var map = {};
 app.ports.mapInit.subscribe(function(id) {
@@ -22,8 +22,12 @@ app.ports.mapInit.subscribe(function(id) {
 	}
 	document.addEventListener('DOMNodeInserted', zeta);
 });
-app.ports.mapCenter.subscribe(function([id,lat,lng,zoom]) {
-	var m = map[id];
+app.ports.mapCenter.subscribe(function(data) {
+	var id=data[0],
+		lat=data[1],
+		lng=data[2],
+		zoom=data[3],
+		m = map[id];
     if(m != undefined) {
     	m.invalidateSize();
     	m.setView([lat, lng], zoom);

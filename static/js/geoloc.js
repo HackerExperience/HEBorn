@@ -1,4 +1,4 @@
-index = require('./index.js');
+index = require('./app.js');
 app = index.app;
 var watchID = null;
 poswatcher = function(pos) {
