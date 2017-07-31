@@ -29,6 +29,7 @@ type alias Model =
     { state : State
     , config : Config
     , seed : Int
+    , windowLoaded : Bool
     }
 
 
@@ -71,6 +72,7 @@ initialModel seed config =
     { state = Home initialHome
     , config = config
     , seed = seed
+    , windowLoaded = False
     }
 
 

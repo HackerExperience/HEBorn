@@ -21,27 +21,32 @@ view model =
         ]
         [ div [ landClass [ Res.Title ] ] [ text "Login" ]
         , br [] []
-        , label [ for "username-field" ] [ text "username: " ]
-        , input
-            [ id "username-field"
-            , type_ "text"
-            , value model.username
-            , onInput (\str -> SetUsername str)
-            , onBlur ValidateUsername
+        , div [ landClass [ Res.Input ] ]
+            [ label [ for "username-field" ] [ text "username: " ]
+            , input
+                [ id "username-field"
+                , type_ "text"
+                , value model.username
+                , onInput (\str -> SetUsername str)
+                , onBlur ValidateUsername
+                ]
+                []
             ]
-            []
         , div [ class "validation-error" ] [ text (viewErrorsUsername model) ]
-        , label [ for "password-field" ] [ text "password: " ]
-        , input
-            [ id "password-field"
-            , type_ "password"
-            , value model.password
-            , onInput (\str -> SetPassword str)
-            , onBlur ValidatePassword
+        , div [ landClass [ Res.Input ] ]
+            [ label [ for "password-field" ] [ text "password: " ]
+            , input
+                [ id "password-field"
+                , type_ "password"
+                , value model.password
+                , onInput (\str -> SetPassword str)
+                , onBlur ValidatePassword
+                ]
+                []
             ]
-            []
         , div [ class "validation-error" ] [ text (viewErrorsPassword model) ]
         , div [ class "login-error" ] [ text (viewErrorsLogin model) ]
+        , br [] []
         , button [ class ("signup-button " ++ buttonClass model), onClick SubmitLogin ] [ text "Login" ]
         ]
 

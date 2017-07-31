@@ -54,6 +54,13 @@ update msg model =
             in
                 dispatcher model_ cmd_ dispatch
 
+        LoadingEnd z ->
+            let
+                model_ =
+                    { model | windowLoaded = True }
+            in
+                ( model_, Cmd.none )
+
         _ ->
             generic msg model
 

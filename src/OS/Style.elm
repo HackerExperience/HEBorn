@@ -57,7 +57,7 @@ css =
             , flexContainerVert
             , position relative
             , zIndex (int 0)
-            , backgroundImage <| url "https://static.pexels.com/photos/176851/pexels-photo-176851.jpeg"
+            , backgroundImage <| url "https://raw.githubusercontent.com/elementary/wallpapers/master/Photo%20by%20SpaceX.jpg"
             , backgroundSize cover
             , fontFamily sansSerif
             , fontFamilies [ "Open Sans" ]

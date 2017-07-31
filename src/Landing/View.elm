@@ -56,7 +56,7 @@ viewDisplayManager core model =
     div
         [ id displayManagerId
         , class
-            (if model.loaded then
+            (if core.windowLoaded then
                 [ Loaded ]
              else
                 []

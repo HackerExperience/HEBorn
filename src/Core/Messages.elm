@@ -16,3 +16,4 @@ type Msg
     | GameMsg Game.Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
+    | LoadingEnd Int

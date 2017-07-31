@@ -1,5 +1,6 @@
 module Core.Subscriptions exposing (subscriptions)
 
+import Utils.Ports.OnLoad exposing (windowLoaded)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Models as Game
@@ -15,15 +16,22 @@ import OS.Subscriptions as OS
 
 subscriptions : Model -> Sub Msg
 subscriptions ({ state } as model) =
-    case state of
-        Home homeModel ->
-            home homeModel
+    let
+        stateSub =
+            case state of
+                Home homeModel ->
+                    home homeModel
 
-        Setup setupModel ->
-            setup setupModel
+                Setup setupModel ->
+                    setup setupModel
 
-        Play playModel ->
-            play playModel
+                Play playModel ->
+                    play playModel
+    in
+        Sub.batch
+            [ stateSub
+            , windowLoaded LoadingEnd
+            ]
 
 
 
