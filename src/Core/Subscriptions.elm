@@ -7,6 +7,8 @@ import Game.Data as Game
 import Game.Subscriptions as Game
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Subscriptions as Ws
+import Landing.Models as Landing
+import Landing.Subscriptions as Landing
 import OS.Models as OS
 import OS.Subscriptions as OS
 
@@ -30,12 +32,21 @@ subscriptions ({ state } as model) =
 
 home : HomeModel -> Sub Msg
 home model =
-    case model.websocket of
-        Just model ->
-            websocket model
+    let
+        landSub =
+            model.landing
+                |> Landing.subscriptions
+                |> Sub.map LandingMsg
+    in
+        case model.websocket of
+            Just model ->
+                Sub.batch
+                    [ websocket model
+                    , landSub
+                    ]
 
-        Nothing ->
-            Sub.none
+            Nothing ->
+                landSub
 
 
 setup : SetupModel -> Sub Msg

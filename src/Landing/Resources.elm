@@ -1,11 +1,29 @@
 module Landing.Resources exposing (..)
 
 
+type Class
+    = Title
+    | Label
+    | Input
+    | Button
+    | Loaded
+
+
+prefix : String
+prefix =
+    "land"
+
+
 viewId : String
 viewId =
-    "landView"
+    prefix ++ "View"
 
 
 introId : String
 introId =
-    "landIntro"
+    prefix ++ "Intro"
+
+
+displayManagerId : String
+displayManagerId =
+    prefix ++ "DM"
