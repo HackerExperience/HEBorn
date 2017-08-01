@@ -48,6 +48,7 @@ import OS.SessionManager.WindowManager.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
 import Game.Models as Game
+import Game.Meta.Models as Meta
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -167,7 +168,11 @@ insert data id nip app ({ windows, visible } as model) =
         contexts =
             case Apps.contexts app of
                 Apps.ContextualApp ->
-                    Just Gateway
+                    data
+                        |> Game.getGame
+                        |> Game.getMeta
+                        |> Meta.getContext
+                        |> Just
 
                 Apps.ContextlessApp ->
                     Nothing
@@ -193,8 +198,16 @@ insert data id nip app ({ windows, visible } as model) =
 
                         dispatch =
                             Dispatch.batch [ dispatch1, dispatch2 ]
+
+                        model3 =
+                            case contexts of
+                                Just Gateway ->
+                                    DoubleContext model1 model2
+
+                                _ ->
+                                    DoubleContext model2 model1
                     in
-                        ( DoubleContext model1 model2, cmd, dispatch )
+                        ( model3, cmd, dispatch )
 
                 Apps.ContextlessApp ->
                     let
