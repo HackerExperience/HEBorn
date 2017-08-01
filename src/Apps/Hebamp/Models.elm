@@ -61,7 +61,7 @@ initialHebamp id =
     { playerId = "audio-" ++ id
     , now =
         Just
-            { mediaUrl = "https://upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"
+            { mediaUrl = "//upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"
             , mediaType = "audio/ogg"
             , label = "Nyan Cat"
             , duration = 7.4

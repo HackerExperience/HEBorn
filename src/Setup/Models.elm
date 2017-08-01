@@ -1,13 +1,13 @@
 module Setup.Models
     exposing
         ( Model
-        , Coordinates
         , initialModel
         , setPos
         )
 
 import Game.Models as Game
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.Ports.Map exposing (Coordinates)
 import Utils.Ports.Geolocation exposing (geoReq)
 import Setup.Messages exposing (..)
 
@@ -15,10 +15,6 @@ import Setup.Messages exposing (..)
 type alias Model =
     { coordinates : Maybe Coordinates
     }
-
-
-type alias Coordinates =
-    { lat : Float, lng : Float }
 
 
 initialModel : Game.Model -> ( Model, Cmd Msg, Dispatch )
@@ -29,7 +25,7 @@ initialModel game =
             }
 
         cmd =
-            geoReq "dummy"
+            geoReq "setup"
     in
         ( model, cmd, Dispatch.none )
 

@@ -1,13 +1,9 @@
 module Apps.LocationPicker.Models exposing (..)
 
-import Utils.Ports.Map exposing (mapInit)
+import Utils.Ports.Map exposing (Coordinates, mapInit)
 import Utils.Ports.Geolocation exposing (geoReq)
 import Apps.LocationPicker.Messages exposing (Msg)
 import Apps.LocationPicker.Menu.Models as Menu
-
-
-type alias Coordinates =
-    { lat : Float, lng : Float }
 
 
 type alias LocationPicker =
@@ -19,6 +15,7 @@ type alias LocationPicker =
 type alias Model =
     { app : LocationPicker
     , menu : Menu.Model
+    , self : String
     }
 
 
@@ -41,6 +38,7 @@ initialModel : String -> Model
 initialModel id =
     { app = initialLocationPicker id
     , menu = Menu.initialMenu
+    , self = id
     }
 
 
@@ -55,7 +53,7 @@ startCmd : Model -> Cmd Msg
 startCmd model =
     Cmd.batch
         [ mapInit model.app.mapEId
-        , geoReq "dummy"
+        , geoReq model.self
         ]
 
 

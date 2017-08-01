@@ -1,9 +1,8 @@
 module Apps.LocationPicker.Update exposing (update)
 
-import Json.Decode exposing (Value, decodeValue, float)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode exposing (Value)
 import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation as Geolocation
+import Utils.Ports.Geolocation as Gloc
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Apps.LocationPicker.Models exposing (..)
@@ -38,40 +37,39 @@ update data msg ({ app } as model) =
             let
                 model_ =
                     value
-                        |> decodeCoordinates
+                        |> Map.decodeCoordinates
                         |> Result.toMaybe
                         |> flip setPos model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
         GeoResp value ->
-            let
-                newPos =
-                    value
-                        |> decodeCoordinates
-                        |> Result.toMaybe
-
-                model_ =
-                    setPos newPos model
-
-                cmd =
-                    case newPos of
-                        Just { lat, lng } ->
-                            Cmd.batch
-                                [ Geolocation.geoStop ""
-                                , Map.mapCenter
-                                    ( app.mapEId, lat, lng, 18 )
-                                ]
-
-                        Nothing ->
-                            Cmd.none
-            in
-                ( model_, cmd, Dispatch.none )
+            if Gloc.checkInstance value model.self then
+                geoResp value model
+            else
+                ( model, Cmd.none, Dispatch.none )
 
 
-decodeCoordinates : Value -> Result String Coordinates
-decodeCoordinates =
-    decode Coordinates
-        |> required "lat" float
-        |> required "lng" float
-        |> decodeValue
+geoResp : Value -> Model -> ( Model, Cmd LocationPicker.Msg, Dispatch )
+geoResp value ({ app } as model) =
+    let
+        newPos =
+            value
+                |> Map.decodeCoordinates
+                |> Result.toMaybe
+
+        model_ =
+            setPos newPos model
+
+        cmd =
+            case newPos of
+                Just { lat, lng } ->
+                    Cmd.batch
+                        [ Map.mapCenter
+                            ( app.mapEId, lat, lng, 18 )
+                        ]
+
+                Nothing ->
+                    Cmd.none
+    in
+        ( model_, cmd, Dispatch.none )

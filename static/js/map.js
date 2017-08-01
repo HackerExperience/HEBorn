@@ -7,7 +7,7 @@ app.ports.mapInit.subscribe(function(id) {
 		document.removeEventListener('DOMNodeInserted', zeta);
 		tmap = L.map(id).setView([38.487, -75.641], 10);
 		tmap.invalidateSize();
-		L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		    maxZoom: 18
 		}).addTo(tmap);
 		tmap.on('click', function onMapClick(e) {

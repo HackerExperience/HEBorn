@@ -1,7 +1,6 @@
 module Landing.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Core.Models as Core
 import Landing.Messages exposing (..)
