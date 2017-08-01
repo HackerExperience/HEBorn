@@ -5,6 +5,7 @@ import Game.Messages as Game
 import Game.Models as Game
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
+import Game.Meta.Types exposing (..)
 import Game.Meta.Messages exposing (..)
 import Game.Meta.Models exposing (..)
 

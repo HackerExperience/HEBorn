@@ -8,7 +8,7 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Game.Account.Bounces.Models as Bounces
 import Game.Data as Game
-import Game.Meta.Messages as Meta
+import Game.Meta.Types as Meta
 import Game.Meta.Models as Meta
 import Game.Models as Game
 import Game.Network.Types exposing (NIP)

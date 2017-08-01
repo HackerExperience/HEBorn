@@ -20,7 +20,7 @@ module Game.Models
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Meta.Messages as Meta
+import Game.Meta.Types as Meta
 import Game.Meta.Models as Meta
 import Game.Web.Models as Web
 import Core.Config exposing (Config)

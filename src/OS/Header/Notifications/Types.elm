@@ -9,7 +9,7 @@ module OS.Header.Notifications.Types
         )
 
 import Apps.Apps as Apps
-import Game.Meta.Messages exposing (Context(..))
+import Game.Meta.Types exposing (Context(..))
 import Utils.Model.RandomUuid as RandomUuid
 
 

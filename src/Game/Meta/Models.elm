@@ -9,6 +9,7 @@ module Game.Meta.Models
 import Game.Servers.Shared as Servers
 import Time exposing (Time)
 import Game.Meta.Messages exposing (..)
+import Game.Meta.Types exposing (..)
 
 
 type alias Model =
