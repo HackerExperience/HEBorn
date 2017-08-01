@@ -13,6 +13,7 @@ import Utils.Html.Events exposing (onClickMe)
 import Apps.Models as Apps
 import Apps.View as Apps
 import Game.Data as Game
+import Game.Meta.Types exposing (..)
 import OS.SessionManager.WindowManager.Context as Context
 import OS.SessionManager.WindowManager.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
@@ -105,7 +106,7 @@ header id window =
         ]
 
 
-headerContext : ID -> Context.Context -> Html Msg
+headerContext : ID -> Maybe Context -> Html Msg
 headerContext id context =
     div []
         [ span

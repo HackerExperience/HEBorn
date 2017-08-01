@@ -1,7 +1,7 @@
 module OS.SessionManager.Helpers exposing (toSessionID)
 
 import Game.Data as Game
-import Game.Meta.Messages as Meta
+import Game.Meta.Types as Meta
 import Game.Meta.Models as Meta
 import Game.Models as Game
 import Game.Servers.Models as Servers

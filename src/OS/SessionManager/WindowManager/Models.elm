@@ -43,6 +43,7 @@ import Apps.Apps as Apps
 import Apps.Models as Apps
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
+import Game.Meta.Types exposing (..)
 import OS.SessionManager.WindowManager.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
@@ -77,7 +78,7 @@ type alias Window =
     , size : Size
     , maximized : Bool
     , app : Apps.App
-    , context : Context
+    , context : Maybe Context
     , instance : Instance
     , locked : Bool
     , endpoint : Maybe NIP
@@ -166,10 +167,10 @@ insert data id nip app ({ windows, visible } as model) =
         contexts =
             case Apps.contexts app of
                 Apps.ContextualApp ->
-                    GatewayContext
+                    Just Gateway
 
                 Apps.ContextlessApp ->
-                    NoContext
+                    Nothing
 
         ( instance, cmd, dispatch ) =
             case Apps.contexts app of
@@ -380,12 +381,9 @@ minimizeAll app ({ visible, windows } as model) =
 
 context : ID -> Model -> Maybe Context
 context id model =
-    case Dict.get id model.windows of
-        Just window ->
-            Just window.context
-
-        Nothing ->
-            Nothing
+    model.windows
+        |> Dict.get id
+        |> Maybe.andThen .context
 
 
 move : String -> Float -> Float -> Model -> Model
@@ -485,14 +483,14 @@ toggleContext id ({ windows } as model) =
 
                         context_ =
                             case context of
-                                GatewayContext ->
-                                    EndpointContext
+                                Just Gateway ->
+                                    Just Endpoint
 
-                                EndpointContext ->
-                                    GatewayContext
+                                Just Endpoint ->
+                                    Just Gateway
 
-                                NoContext ->
-                                    NoContext
+                                Nothing ->
+                                    Nothing
 
                         window_ =
                             { window
@@ -635,19 +633,16 @@ windowData data id window model =
             Game.getServers game
     in
         case context id model of
-            Just GatewayContext ->
+            Just Gateway ->
                 game
                     |> Game.fromGateway
                     |> Maybe.withDefault data
 
-            Just EndpointContext ->
+            Just Endpoint ->
                 window.endpoint
                     |> Maybe.andThen (flip Servers.mapNetwork servers)
                     |> Maybe.andThen (flip Game.fromServerID game)
                     |> Maybe.withDefault data
-
-            Just NoContext ->
-                data
 
             Nothing ->
                 data

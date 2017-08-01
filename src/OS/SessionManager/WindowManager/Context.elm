@@ -1,20 +1,16 @@
-module OS.SessionManager.WindowManager.Context exposing (Context(..), toString)
+module OS.SessionManager.WindowManager.Context exposing (toString)
+
+import Game.Meta.Types exposing (Context(..))
 
 
-type Context
-    = GatewayContext
-    | EndpointContext
-    | NoContext
-
-
-toString : Context -> String
+toString : Maybe Context -> String
 toString context =
     case context of
-        GatewayContext ->
+        Just Gateway ->
             "Gateway"
 
-        EndpointContext ->
+        Just Endpoint ->
             "Endpoint"
 
-        NoContext ->
+        Nothing ->
             ""
