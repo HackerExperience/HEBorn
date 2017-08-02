@@ -116,19 +116,19 @@ css =
                     , addIco "srvgr" Icon.srvgr
                     , addIco "locpk" Icon.locpk
                     , addIco "lanvw" Icon.lanvw
-                    , addGrad "explorer" Gradients.mangoPulp
-                    , addGrad "logvw" Gradients.stellar
-                    , addGrad "browser" Gradients.pinotNoir
-                    , addGrad "taskmngr" Gradients.blurryBeach
-                    , addGrad "udb" Gradients.calmDarya
-                    , addGrad "connmngr" Gradients.influenza
-                    , addGrad "bouncemngr" Gradients.bourbon
-                    , addGrad "moneymngr" Gradients.army
-                    , addGrad "hebamp" Gradients.veryBlue
-                    , addGrad "cpanel" Gradients.emeraldWater
-                    , addGrad "srvgr" Gradients.purplepine
-                    , addGrad "locpk" Gradients.loveAndLiberty
-                    , addGrad "lanvw" Gradients.dusk
+                    , addGrad "explorer" <| Gradients.mangoPulp toBottom
+                    , addGrad "logvw" <| Gradients.stellar toBottom
+                    , addGrad "browser" <| Gradients.pinotNoir toBottom
+                    , addGrad "taskmngr" <| Gradients.blurryBeach toBottom
+                    , addGrad "udb" <| Gradients.calmDarya toBottom
+                    , addGrad "connmngr" <| Gradients.influenza toBottom
+                    , addGrad "bouncemngr" <| Gradients.bourbon toBottom
+                    , addGrad "moneymngr" <| Gradients.army toBottom
+                    , addGrad "hebamp" <| Gradients.veryBlue toBottom
+                    , addGrad "cpanel" <| Gradients.emeraldWater toBottom
+                    , addGrad "srvgr" <| Gradients.purplepine toBottom
+                    , addGrad "locpk" <| Gradients.loveAndLiberty toBottom
+                    , addGrad "lanvw" <| Gradients.dusk toBottom
                     ]
                 , class AppContext
                     [ display none
