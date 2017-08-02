@@ -9,7 +9,7 @@ type Msg
     = Logout
     | BouncesMsg Bounces.Msg
     | Request RequestMsg
-    | Event Events.Response
+    | Event Events.Event
 
 
 type RequestMsg

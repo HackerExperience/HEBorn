@@ -11,5 +11,5 @@ type Msg
     = SetGateway Servers.ID
     | SetEndpoint (Maybe NIP)
     | ContextTo Context
-    | Event Events.Response
+    | Event Events.Event
     | Tick Time

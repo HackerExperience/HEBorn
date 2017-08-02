@@ -74,7 +74,7 @@ response game response model =
 
 event :
     Game.Model
-    -> Events.Response
+    -> Events.Event
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
 event game ev model =

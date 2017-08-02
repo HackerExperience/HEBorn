@@ -19,7 +19,7 @@ type Msg
     | ProcessMsg ID Processes.Msg
     | TunnelsMsg ID Tunnels.Msg
     | Request RequestMsg
-    | Event Events.Response
+    | Event Events.Event
 
 
 type RequestMsg

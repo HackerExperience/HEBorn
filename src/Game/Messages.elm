@@ -12,5 +12,5 @@ type Msg
     | ServersMsg Servers.Msg
     | MetaMsg Meta.Msg
     | WebMsg Web.Msg
-    | Event Events.Response
+    | Event Events.Event
     | NoOp

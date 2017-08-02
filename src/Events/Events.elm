@@ -1,5 +1,6 @@
-module Events.Events exposing (Event(..), Response(..), map, handler)
+module Events.Events exposing (Event(..), handler)
 
+import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
 import Events.Account as Account
 import Json.Encode exposing (Value)
@@ -7,22 +8,19 @@ import Json.Encode exposing (Value)
 
 type Event
     = AccountEvent Account.Event
-
-
-type Response
-    = AccountEventResponse Account.Response
+    | ServerEvent
+    | RequestsEvent
     | Report Ws.Report
 
 
-map : (a -> b) -> List ( String, a ) -> List ( String, b )
-map mapper events =
-    List.map (\( name, event ) -> ( name, mapper event )) events
+handler : Ws.Channel -> String -> Value -> Event
+handler channel event value =
+    case channel of
+        Ws.AccountChannel ->
+            AccountEvent <| Account.handler event value
 
+        Ws.RequestsChannel ->
+            RequestsEvent
 
-handler : Event -> Value -> Response
-handler event value =
-    case event of
-        AccountEvent event ->
-            value
-                |> Account.handler event
-                |> AccountEventResponse
+        Ws.ServerChannel ->
+            ServerEvent

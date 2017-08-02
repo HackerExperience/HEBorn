@@ -1,36 +1,16 @@
-module Events.Account
-    exposing
-        ( Model
-        , Event(..)
-        , Response(..)
-        , events
-        , handler
-        )
+module Events.Account exposing (Event(..), handler)
 
 import Json.Encode exposing (Value)
 
 
 type Event
-    = Event
+    = NoOp
 
 
-type alias Model =
-    List ( String, Event )
-
-
-type Response
-    = EventResponse
-
-
-events : Model
-events =
-    [ ( "event", Event ) ]
-
-
-handler : Event -> Value -> Response
+handler : String -> Value -> Event
 handler event value =
     case event of
-        Event ->
+        _ ->
             eventHandler value
 
 
@@ -38,6 +18,6 @@ handler event value =
 -- internals
 
 
-eventHandler : Value -> Response
+eventHandler : Value -> Event
 eventHandler value =
-    EventResponse
+    NoOp

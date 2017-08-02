@@ -197,7 +197,7 @@ websocket msg ({ state } as model) =
             case websocket of
                 Just websocket ->
                     let
-                        ( websocket_, cmd ) =
+                        ( websocket_, cmd, dispatch ) =
                             Ws.update msg websocket
 
                         home_ =
@@ -209,14 +209,14 @@ websocket msg ({ state } as model) =
                         model_ =
                             { model | state = Home home_ }
                     in
-                        ( model_, cmd_ )
+                        dispatcher model_ cmd_ dispatch
 
                 Nothing ->
                     ( model, Cmd.none )
 
         Play ({ websocket } as play) ->
             let
-                ( websocket_, cmd ) =
+                ( websocket_, cmd, dispatch ) =
                     Ws.update msg websocket
 
                 play_ =
@@ -228,11 +228,11 @@ websocket msg ({ state } as model) =
                 model_ =
                     { model | state = Play play_ }
             in
-                ( model_, cmd_ )
+                dispatcher model_ cmd_ dispatch
 
         Setup ({ websocket } as setup) ->
             let
-                ( websocket_, cmd ) =
+                ( websocket_, cmd, dispatch ) =
                     Ws.update msg websocket
 
                 setup_ =
@@ -244,7 +244,7 @@ websocket msg ({ state } as model) =
                 model_ =
                     { model | state = Setup setup_ }
             in
-                ( model_, cmd_ )
+                dispatcher model_ cmd_ dispatch
 
 
 game : Game.Msg -> Model -> ( Model, Cmd Msg )

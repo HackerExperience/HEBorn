@@ -8,7 +8,7 @@ type Msg
     = Load String
     | Refresh String
     | Request RequestMsg
-    | Event Events.Response
+    | Event Events.Event
 
 
 type RequestMsg
