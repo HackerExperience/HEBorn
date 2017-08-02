@@ -11,6 +11,7 @@ import Driver.Websocket.Subscriptions as Ws
 import Landing.Subscriptions as Landing
 import OS.Models as OS
 import OS.Subscriptions as OS
+import Setup.Subscriptions as Setup
 
 
 subscriptions : Model -> Sub Msg
@@ -58,7 +59,9 @@ home model =
 
 setup : SetupModel -> Sub Msg
 setup model =
-    Sub.none
+    model.setup
+        |> Setup.subscriptions
+        |> Sub.map SetupMsg
 
 
 play : PlayModel -> Sub Msg

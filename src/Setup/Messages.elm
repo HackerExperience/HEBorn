@@ -2,9 +2,14 @@ module Setup.Messages exposing (..)
 
 import Events.Events as Events
 import Json.Encode exposing (Value)
+import Setup.Types exposing (..)
 
 
 type Msg
     = MapClick Value
-    | GeoResp Value
+    | GeoLocResp Value
+    | GeoRevResp Value
     | Event Events.Response
+    | ResetLoc
+    | GoStep Step
+    | GoOS

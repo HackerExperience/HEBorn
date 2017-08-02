@@ -32,13 +32,16 @@ update data msg ({ app } as model) =
                 ( { model | menu = menu_ }, cmd_, coreMsg )
 
         -- Intenals
-        TimeUpdate time ->
+        TimeUpdate playerId time ->
             let
-                app_ =
-                    { app | currentTime = time }
-
                 model_ =
-                    { model | app = app_ }
+                    if playerId == app.playerId then
+                        { model
+                            | app =
+                                { app | currentTime = time }
+                        }
+                    else
+                        model
             in
                 ( model_, Cmd.none, Dispatch.none )
 

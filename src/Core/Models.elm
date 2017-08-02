@@ -64,6 +64,7 @@ type alias Connecting =
     { id : Account.ID
     , username : Account.Username
     , token : Account.Token
+    , firstRun : Bool
     }
 
 
@@ -76,13 +77,13 @@ initialModel seed config =
     }
 
 
-connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model
-connect id username token ({ state, config } as model) =
+connect : Account.ID -> Account.Username -> Account.Token -> Bool -> Model -> Model
+connect id username token firstRun ({ state, config } as model) =
     case state of
         Home home ->
             let
                 connecting =
-                    Just <| Connecting id username token
+                    Just <| Connecting id username token firstRun
 
                 websocket =
                     Just <| Ws.initialModel config.apiWsUrl token
@@ -118,11 +119,13 @@ login ({ state, config } as model) =
                         game =
                             initialGame connecting config
 
-                        ( play, cmd, dispatch ) =
-                            initialPlay websocket_ game
-
-                        state_ =
-                            Play play
+                        ( state_, cmd, dispatch ) =
+                            if connecting.firstRun then
+                                initialSetup websocket_ game
+                                    |> (\( a, b, c ) -> ( Setup a, b, c ))
+                            else
+                                initialPlay websocket_ game
+                                    |> (\( a, b, c ) -> ( Play a, b, c ))
 
                         model_ =
                             { model | state = state_ }

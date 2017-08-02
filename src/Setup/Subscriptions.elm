@@ -1,15 +1,15 @@
 module Setup.Subscriptions exposing (subscriptions)
 
-import Game.Models as Game
-import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation as Geolocation
+import Utils.Ports.Map exposing (mapClick)
+import Utils.Ports.Geolocation exposing (geoLocResp, geoRevResp)
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
 
 
-subscriptions : Game.Model -> Model -> Sub Msg
-subscriptions game model =
+subscriptions : Model -> Sub Msg
+subscriptions model =
     Sub.batch
-        [ Map.mapClick MapClick
-        , Geolocation.geoResp GeoResp
+        [ mapClick MapClick
+        , geoLocResp GeoLocResp
+        , geoRevResp GeoRevResp
         ]

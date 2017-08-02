@@ -1,7 +1,7 @@
 module Apps.LocationPicker.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates, mapInit)
-import Utils.Ports.Geolocation exposing (geoReq)
+import Utils.Ports.Geolocation exposing (geoLocReq)
 import Apps.LocationPicker.Messages exposing (Msg)
 import Apps.LocationPicker.Menu.Models as Menu
 
@@ -53,7 +53,7 @@ startCmd : Model -> Cmd Msg
 startCmd model =
     Cmd.batch
         [ mapInit model.app.mapEId
-        , geoReq model.self
+        , geoLocReq model.self
         ]
 
 

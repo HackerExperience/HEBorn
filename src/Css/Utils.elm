@@ -79,3 +79,16 @@ unselectable =
         , property "-ms-user-select" "none"
         , property "user-select" "none"
         ]
+
+
+nest : List (List Style -> Style) -> List Style -> Style
+nest ns i =
+    List.foldr
+        (\n a -> n <| List.singleton a)
+        (batch i)
+        ns
+
+
+child : (List Style -> Snippet) -> List Style -> Style
+child selector styles =
+    children <| List.singleton (selector styles)

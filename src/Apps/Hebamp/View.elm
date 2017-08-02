@@ -100,7 +100,7 @@ nativeAudio playerId audioData =
                 Just audioData ->
                     [ src audioData.mediaUrl
                     , type_ audioData.mediaType
-                    , onTimeUpdate TimeUpdate
+                    , onTimeUpdate <| TimeUpdate playerId
                     ]
 
                 Nothing ->

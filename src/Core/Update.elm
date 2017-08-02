@@ -23,10 +23,10 @@ import OS.SessionManager.Messages as SM
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        Boot id username token ->
+        Boot id username token firstRun ->
             let
                 model_ =
-                    connect id username token model
+                    connect id username token firstRun model
             in
                 ( model_, Cmd.none )
 
@@ -60,6 +60,16 @@ update msg model =
                     { model | windowLoaded = True }
             in
                 ( model_, Cmd.none )
+
+        FinishSetup ->
+            let
+                ( state, cmd, dispatch ) =
+                    setupToPlay model.state
+
+                model_ =
+                    { model | state = state }
+            in
+                dispatcher model_ cmd dispatch
 
         _ ->
             generic msg model

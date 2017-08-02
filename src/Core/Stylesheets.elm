@@ -4,6 +4,7 @@ import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Core.Style as Core
 import Landing.Style as Landing
 import UI.Style as UI
+import Setup.Style as Setup
 import OS.Style as OS
 import OS.SessionManager.WindowManager.Style as WindowManager
 import OS.SessionManager.Dock.Style as Dock
@@ -20,6 +21,7 @@ fileStructure =
           , Css.File.compile
                 ([ Core.css
                  , Landing.css
+                 , Setup.css
                  , OS.css
                  , UI.css
                  , WindowManager.css

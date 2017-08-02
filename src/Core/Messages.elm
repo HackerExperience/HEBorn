@@ -9,7 +9,8 @@ import Driver.Websocket.Messages as Ws
 
 
 type Msg
-    = Boot Account.ID Account.Username Account.Token
+    = Boot Account.ID Account.Username Account.Token Bool
+    | FinishSetup
     | Shutdown
     | LandingMsg Landing.Msg
     | SetupMsg Setup.Msg

@@ -1,21 +1,26 @@
 port module Utils.Ports.Geolocation exposing (..)
 
-import Json.Decode as D exposing (decodeValue, string)
+import Json.Decode exposing (Value, decodeValue, at, string)
 import Json.Decode.Pipeline exposing (decode, required)
-import Json.Encode as E
 
 
 type alias InstanceCheck =
     { reqid : String }
 
 
-port geoReq : String -> Cmd msg
+port geoLocReq : String -> Cmd msg
 
 
-port geoResp : (E.Value -> msg) -> Sub msg
+port geoLocResp : (Value -> msg) -> Sub msg
 
 
-checkInstance : D.Value -> String -> Bool
+port geoRevReq : ( String, Float, Float ) -> Cmd msg
+
+
+port geoRevResp : (Value -> msg) -> Sub msg
+
+
+checkInstance : Value -> String -> Bool
 checkInstance v cmp =
     let
         instDecoder =
@@ -35,3 +40,8 @@ checkInstance v cmp =
 
             _ ->
                 False
+
+
+decodeLabel : Value -> Result String String
+decodeLabel =
+    decodeValue (at [ "label" ] string)

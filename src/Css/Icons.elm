@@ -242,3 +242,8 @@ locpk =
 lanvw : Icon
 lanvw =
     faIcon FA.podcast
+
+
+osLogo : Icon
+osLogo =
+    faIcon FA.superpowers

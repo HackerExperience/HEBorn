@@ -1,7 +1,7 @@
 module Apps.LocationPicker.Subscriptions exposing (..)
 
 import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation as Geolocation
+import Utils.Ports.Geolocation exposing (geoLocResp)
 import Game.Data as Game
 import Apps.LocationPicker.Models exposing (Model)
 import Apps.LocationPicker.Messages exposing (Msg(..))
@@ -13,5 +13,5 @@ subscriptions data model =
     Sub.batch
         [ Sub.map MenuMsg (Menu.subscriptions model.menu)
         , Map.mapClick MapClick
-        , Geolocation.geoResp GeoResp
+        , geoLocResp GeoResp
         ]
