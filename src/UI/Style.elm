@@ -1,4 +1,4 @@
-module UI.Style exposing (css)
+module UI.Style exposing (css, clickableBox)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
@@ -322,13 +322,28 @@ map =
 
 utils : List Snippet
 utils =
-    [ spacer ]
+    [ spacer
+    , button [ clickableBox ]
+    ]
 
 
 spacer : Snippet
 spacer =
     typeSelector "elastic"
         [ flex (int 1) ]
+
+
+clickableBox : Style
+clickableBox =
+    batch
+        [ backgroundImage <| linearGradient2 toBottom (stop Colors.white) (stop <| hex "e5e5e5") []
+        , border3 (px 1) solid (hex "bbb")
+        , borderRadius (px 4)
+        , boxShadow5 (px 0) (px 1) (px 0) (px 1) (rgba 0 0 0 0.04)
+        , color Colors.black
+        , textAlign center
+        , cursor pointer
+        ]
 
 
 

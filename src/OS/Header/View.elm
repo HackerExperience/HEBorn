@@ -15,7 +15,7 @@ import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import OS.Resources as Res
+import OS.Resources exposing (..)
 
 
 { id, class, classList } =
@@ -23,14 +23,15 @@ import OS.Resources as Res
 
 
 selector :
-    (Maybe a -> Msg)
+    List Class
+    -> (Maybe a -> Msg)
     -> OpenMenu
     -> (a -> Maybe (Html Msg))
     -> OpenMenu
     -> Maybe a
     -> List (Maybe a)
     -> Html Msg
-selector wrapper kind render open active list =
+selector classes wrapper kind render open active list =
     let
         render_ _ item =
             case item of
@@ -40,7 +41,9 @@ selector wrapper kind render open active list =
                 Nothing ->
                     Just (text "None")
     in
-        customSelect CustomSelect
+        customSelect
+            [ class classes ]
+            CustomSelect
             wrapper
             (ToggleMenus kind)
             render_
@@ -69,7 +72,7 @@ gatewaySelector data =
                 Nothing ->
                     Nothing
     in
-        selector SelectGateway OpenGateway renderGateway
+        selector [ SGateway ] SelectGateway OpenGateway renderGateway
 
 
 bounceSelector :
@@ -88,7 +91,7 @@ bounceSelector data =
                 Nothing ->
                     Nothing
     in
-        selector SelectBounce OpenBounce renderBounce
+        selector [ SBounce ] SelectBounce OpenBounce renderBounce
 
 
 endpointSelector :
@@ -124,7 +127,7 @@ endpointSelector data =
                         Nothing ->
                             Just <| text ip
     in
-        selector SelectEndpoint OpenEndpoint renderEndpoint
+        selector [ SEndpoint ] SelectEndpoint OpenEndpoint renderEndpoint
 
 
 view : Game.Data -> Model -> Html Msg
@@ -186,29 +189,47 @@ view data ({ openMenu } as model) =
         onGateway =
             Meta.Gateway == Meta.getContext meta
     in
-        div [ class [ Res.Header ] ]
-            [ gatewaySelector data openMenu gateway gateways
+        div [ class [ Header ] ]
+            [ span [ class [ Logo ] ] [ text "D'LayDOS" ]
+            , spacer
             , contextToggler onGateway (ContextTo Meta.Gateway)
-            , spacer
-            , text "Bounce: "
+            , gatewaySelector data openMenu gateway gateways
             , bounceSelector data openMenu bounce bounces
-            , spacer
-            , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
             , endpointSelector data openMenu endpoint endpoints
+            , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
+            , spacer
+            , notifications
             , button
                 [ onClick Logout
                 ]
-                [ text "logout" ]
+                [ text "Logout" ]
             ]
 
 
 contextToggler : Bool -> Msg -> Html Msg
 contextToggler active handler =
-    span
-        [ onClick handler ]
-        [ text <|
+    let
+        classes =
             if active then
-                "X"
+                [ Context, Selected ]
             else
-                "O"
+                [ Context ]
+    in
+        span [ onClick handler, class classes ] []
+
+
+notifications : Html Msg
+notifications =
+    node notificationsNode
+        []
+        [ ul []
+            [ li []
+                [ div [] [ text "Notifcations" ]
+                , spacer
+                , div [] [ text "Mark All as Read" ]
+                ]
+            , li [] [ text "@kress95 rejeitou #35" ]
+            , li [] [ text "@pedrohlc pediu revisão a @kress95 em #35" ]
+            , li [] [ text "Open Log Viewer" ]
+            ]
         ]

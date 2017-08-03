@@ -1,11 +1,18 @@
 module OS.Resources exposing (..)
 
 
-type Classes
+type Class
     = Session
     | Header
     | Dock
     | Version
+    | AutoHide
+    | SGateway
+    | SBounce
+    | SEndpoint
+    | Context
+    | Selected
+    | Logo
 
 
 type Id
@@ -16,3 +23,8 @@ type Id
 prefix : String
 prefix =
     "os"
+
+
+notificationsNode : String
+notificationsNode =
+    "notifs"

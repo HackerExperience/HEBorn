@@ -71,7 +71,8 @@ css =
 
 breezeDarkInput : List Style
 breezeDarkInput =
-    [ backgroundColor (rgb 35 38 41)
+    [ backgroundImage <| none
+    , backgroundColor (rgb 35 38 41)
     , color (rgb 239 240 241)
     , border3 (px 1) solid (rgb 49 54 59)
     , borderRadius (px 4)

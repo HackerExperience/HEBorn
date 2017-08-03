@@ -1,6 +1,6 @@
 module UI.Widgets.CustomSelect exposing (Msg(..), customSelect)
 
-import Html exposing (Html, node, text)
+import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html.Attributes exposing (selectedAttr, openAttr)
 import Utils.Html.Events exposing (onClickMe)
@@ -12,7 +12,8 @@ type Msg
 
 
 customSelect :
-    (Msg -> msg)
+    List (Attribute msg)
+    -> (Msg -> msg)
     -> (a -> msg)
     -> msg
     -> (Bool -> a -> Maybe (Html msg))
@@ -20,7 +21,7 @@ customSelect :
     -> a
     -> List a
     -> Html msg
-customSelect wrap msg open render opened active list =
+customSelect attrs wrap msg open render opened active list =
     let
         mapper item =
             customOption msg render (item == active) item
@@ -29,12 +30,13 @@ customSelect wrap msg open render opened active list =
             List.filterMap mapper list
 
         customNode =
-            node selectorNode
-                [ onMouseEnter <| wrap MouseEnter
-                , onMouseLeave <| wrap MouseLeave
-                , onClickMe open
-                , openAttr opened
-                ]
+            node selectorNode <|
+                (++) attrs
+                    [ onMouseEnter <| wrap MouseEnter
+                    , onMouseLeave <| wrap MouseLeave
+                    , onClickMe open
+                    , openAttr opened
+                    ]
     in
         case render True active of
             Just activeNode ->

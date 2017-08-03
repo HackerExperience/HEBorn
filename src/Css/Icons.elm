@@ -247,3 +247,33 @@ lanvw =
 osLogo : Icon
 osLogo =
     faIcon FA.superpowers
+
+
+gateway : Icon
+gateway =
+    faIcon FA.home
+
+
+bounce : Icon
+bounce =
+    faIcon FA.exchange
+
+
+endpoint : Icon
+endpoint =
+    faIcon FA.flagCheckered
+
+
+contextSelected : Icon
+contextSelected =
+    faIcon FA.crosshairs
+
+
+contextSelect : Icon
+contextSelect =
+    faIcon FA.circleThin
+
+
+notifications : Icon
+notifications =
+    faIcon FA.bellO
