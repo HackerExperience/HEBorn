@@ -17,17 +17,21 @@ import Setup.Resources exposing (..)
 
 view : Game.Model -> Model -> Html Msg
 view game model =
-    node setupNode
-        []
-        [ node leftBarNode [] <|
-            List.singleton <|
-                ul []
-                    [ li [] [ text "WELCOME" ]
-                    , li [] [ text "LOCATION PICKER" ]
-                    , li [] [ text "FINISH" ]
-                    ]
-        , viewStep game model
-        ]
+    let
+        isActive =
+            (==) model.step
+    in
+        node setupNode
+            []
+            [ node leftBarNode [] <|
+                List.singleton <|
+                    ul []
+                        [ stepMarker isActive Welcome "WELCOME"
+                        , stepMarker isActive PickLocation "LOCATION PICKER"
+                        , stepMarker isActive Finish "FINISH"
+                        ]
+            , viewStep game model
+            ]
 
 
 viewStep : Game.Model -> Model -> Html Msg
@@ -98,6 +102,17 @@ finish =
                 [ button [ onClick GoOS ] [ text "FINISH HIM" ] ]
             ]
         ]
+
+
+stepMarker : (a -> Bool) -> a -> String -> Html Msg
+stepMarker check key label =
+    li
+        (if check key then
+            [ class [ Selected ] ]
+         else
+            []
+        )
+        [ text label ]
 
 
 headerBanner : Html Msg

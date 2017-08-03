@@ -29,6 +29,8 @@ css =
             , withClass StepPickLocation locationPicker
             , withClass StepWelcome welcome
             ]
+        , class Selected
+            [ fontWeight bold ]
         ]
 
 

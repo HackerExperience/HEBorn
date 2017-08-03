@@ -6,6 +6,7 @@ type Class
     | StepPickLocation
     | StepChooseTheme
     | StepFinish
+    | Selected
 
 
 prefix : String
