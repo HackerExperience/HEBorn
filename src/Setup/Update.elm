@@ -36,9 +36,6 @@ update game msg model =
             in
                 ( model, Cmd.none, dispatch )
 
-        _ ->
-            ( model, Cmd.none, Dispatch.none )
-
 
 mapClick : Value -> Model -> ( Model, Cmd Msg, Dispatch )
 mapClick value model =

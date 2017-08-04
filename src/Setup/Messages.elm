@@ -9,7 +9,6 @@ type Msg
     = MapClick Value
     | GeoLocResp Value
     | GeoRevResp Value
-    | Event Events.Event
     | ResetLoc
     | GoStep Step
     | GoOS
