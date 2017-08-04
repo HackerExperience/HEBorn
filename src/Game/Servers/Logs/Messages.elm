@@ -1,10 +1,11 @@
 module Game.Servers.Logs.Messages exposing (Msg(..))
 
+import Json.Decode exposing (Value)
 import Game.Servers.Logs.Models exposing (ID, StdData)
 
 
 type Msg
-    = UpdateContent ID String
+    = BootstrapLogs Value
     | Crypt ID
     | Uncrypt ID String
     | Hide ID

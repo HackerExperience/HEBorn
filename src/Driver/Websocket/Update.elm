@@ -99,8 +99,14 @@ join channel topic model =
 
         model_ =
             { model | channels = channels }
+
+        broadcast =
+            Broadcast <| Events.Report (Joined channel)
+
+        dispatch =
+            Dispatch.websocket broadcast
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, Cmd.none, dispatch )
 
 
 
