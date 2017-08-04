@@ -52,3 +52,6 @@ update game msg model =
                     removeById logId model
             in
                 ( model_, Cmd.none, Dispatch.none )
+
+        _ ->
+            (model, Cmd.none, Dispatch.none)

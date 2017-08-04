@@ -6,6 +6,7 @@ import Game.Servers.Logs.Models exposing (ID, StdData)
 
 type Msg
     = BootstrapLogs Value
+    | UpdateContent ID String
     | Crypt ID
     | Uncrypt ID String
     | Hide ID
