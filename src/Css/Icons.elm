@@ -277,3 +277,8 @@ contextSelect =
 notifications : Icon
 notifications =
     faIcon FA.bellO
+
+
+chat : Icon
+chat =
+    faIcon FA.commentO

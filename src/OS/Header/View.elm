@@ -13,9 +13,12 @@ import Game.Meta.Models as Meta
 import Game.Models as Game
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
+import OS.Resources exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Notifications.Models as Notifications
+import OS.Header.Notifications.Types as Notifications
+import UI.Widgets.HorizontalTabs exposing (hzTabs)
 
 
 { id, class, classList } =
@@ -131,7 +134,7 @@ endpointSelector data =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ openMenu } as model) =
+view data ({ openMenu, notifications } as model) =
     let
         game =
             Game.getGame data
@@ -188,6 +191,9 @@ view data ({ openMenu } as model) =
 
         onGateway =
             Meta.Gateway == Meta.getContext meta
+
+        chatNots =
+            Notifications.listChat notifications
     in
         div [ class [ Header ] ]
             [ span [ class [ Logo ] ] [ text "D'LayDOS" ]
@@ -198,7 +204,8 @@ view data ({ openMenu } as model) =
             , endpointSelector data openMenu endpoint endpoints
             , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
             , spacer
-            , notifications
+            , chatNotifications chatNots
+            , accNotifications model.activeNotificationsTab notifications
             , button
                 [ onClick Logout
                 ]
@@ -218,18 +225,79 @@ contextToggler active handler =
         span [ onClick handler, class classes ] []
 
 
-notifications : Html Msg
-notifications =
-    node notificationsNode
-        []
-        [ ul []
-            [ li []
-                [ div [] [ text "Notifcations" ]
+chatNotifications : List ( Notifications.UserName, Notifications.Chat ) -> Html Msg
+chatNotifications chats =
+    let
+        firstItem =
+            li []
+                [ div [] [ text "Chat Notifcations" ]
                 , spacer
                 , div [] [ text "Mark All as Read" ]
                 ]
-            , li [] [ text "@kress95 rejeitou #35" ]
-            , li [] [ text "@pedrohlc pediu revisão a @kress95 em #35" ]
-            , li [] [ text "Open Log Viewer" ]
+
+        lastItem =
+            li [] [ text "Send new message" ]
+
+        itens =
+            List.map
+                (\( uname, { content } ) ->
+                    li [] [ text uname, br [] [], text content ]
+                )
+                chats
+    in
+        node notificationsNode
+            [ class [ NChat ] ]
+            [ div [] [ ul [] (firstItem :: (itens ++ [ lastItem ])) ] ]
+
+
+accNotifications : TabNotifications -> Notifications.Model -> Html Msg
+accNotifications activeTab notifications =
+    let
+        tabs =
+            hzTabs
+                ((==) activeTab)
+                (\a me ->
+                    (case me of
+                        TabGame ->
+                            "Game"
+
+                        TabAccount ->
+                            "Account"
+                    )
+                        |> text
+                        |> List.singleton
+                        |> (,) []
+                )
+                NotificationsTabGo
+                [ TabGame, TabAccount ]
+
+        firstItem =
+            li []
+                [ div []
+                    [ if activeTab == TabGame then
+                        text "Game Notifcations"
+                      else
+                        text "Account Notifcations"
+                    ]
+                , spacer
+                , div [] [ text "Mark All as Read" ]
+                ]
+
+        lastItem =
+            li [] [ text "Open Log Viewer" ]
+
+        itens =
+            if activeTab == TabGame then
+                Notifications.listGame notifications
+                    |> List.map (\( id, { content } ) -> li [] [ text content ])
+            else
+                Notifications.listAccount notifications
+                    |> List.map (\( id, { content } ) -> li [] [ text content ])
+    in
+        node notificationsNode
+            [ class [ NAcc ] ]
+            [ div []
+                [ tabs
+                , ul [] (firstItem :: (itens ++ [ lastItem ]))
+                ]
             ]
-        ]

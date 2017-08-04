@@ -13,6 +13,8 @@ type Class
     | Context
     | Selected
     | Logo
+    | NAcc
+    | NChat
 
 
 type Id

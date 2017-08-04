@@ -44,7 +44,7 @@ type alias GameNotifications =
 
 
 type alias ChatNotifications =
-    Dict ID Chat
+    Dict UserName Chat
 
 
 initialModel : Model
@@ -181,7 +181,7 @@ listAccount { account } =
     Dict.toList account
 
 
-listChat : Model -> List ( ID, Chat )
+listChat : Model -> List ( UserName, Chat )
 listChat { chat } =
     -- TODO: sort by date
     Dict.toList chat

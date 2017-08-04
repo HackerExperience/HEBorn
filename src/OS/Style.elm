@@ -2,7 +2,7 @@ module OS.Style exposing (..)
 
 import Css exposing (..)
 import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
-import Css.Elements exposing (typeSelector, ul, li)
+import Css.Elements exposing (typeSelector, ul, li, div)
 import Css.Namespace exposing (namespace)
 import Css.Utils exposing (..)
 import Css.Icons as Icons
@@ -87,6 +87,7 @@ customSelect =
                 , children
                     [ typeSelector "customOption"
                         [ display block
+                        , padding2 (px 0) (px 8)
                         , hover [ backgroundColor Colors.bgSelected ]
                         ]
                     ]
@@ -102,8 +103,7 @@ hoverMenu : Style
 hoverMenu =
     batch
         [ position absolute
-        , border3 (px 1) solid (rgb 49 54 59)
-        , padding2 (px 0) (px 8)
+        , border3 (px 1) solid (rgba 49 54 59 0.2)
         , minWidth (px 120)
         , zIndex (int 2)
         , backgroundColor Colors.separator
@@ -156,26 +156,39 @@ notifications =
         , marginRight (px 16)
         , before
             [ Icons.fontFamily
-            , Icons.notifications
             ]
-        , child ul
+        , child div
             [ hoverMenu
             , display none
             , right (px 0)
             , width (px 320)
             , margin (px 0)
             , backgroundColor Colors.white
-            , child li
-                [ borderBottom3 (px 1) solid Colors.separator
-                , firstChild [ flexContainerHorz ]
-                , lastChild
-                    [ borderBottom (px 0)
-                    , textAlign center
+            , fontSize (px 12)
+            , child ul
+                [ listStyle none
+                , padding (px 0)
+                , margin (px 0)
+                , child li
+                    [ borderBottom3 (px 1) solid Colors.separator
+                    , padding2 (px 0) (px 8)
+                    , firstChild
+                        [ flexContainerHorz
+                        , backgroundColor Colors.bgSelected
+                        ]
+                    , lastChild
+                        [ borderBottom (px 0)
+                        , textAlign center
+                        ]
                     ]
                 ]
             ]
-        , nest [ hover, child ul ]
+        , nest [ hover, child div ]
             [ display block ]
+        , withClass NChat
+            [ before [ Icons.chat ] ]
+        , withClass NAcc
+            [ before [ Icons.notifications ] ]
         ]
 
 

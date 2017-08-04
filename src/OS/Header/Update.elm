@@ -98,3 +98,10 @@ update data msg ({ openMenu } as model) =
                     Dispatch.meta <| Meta.ContextTo context
             in
                 ( model, Cmd.none, dispatch )
+
+        NotificationsTabGo target ->
+            let
+                model_ =
+                    { model | activeNotificationsTab = target }
+            in
+                ( model_, Cmd.none, Dispatch.none )

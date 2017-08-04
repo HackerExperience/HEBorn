@@ -6,6 +6,7 @@ module OS.Header.Notifications.Types
         , Origin
         , Content
         , ID
+        , UserName
         )
 
 import Apps.Apps as Apps
@@ -39,3 +40,7 @@ type alias Content =
 
 type alias ID =
     RandomUuid.Uuid
+
+
+type alias UserName =
+    String

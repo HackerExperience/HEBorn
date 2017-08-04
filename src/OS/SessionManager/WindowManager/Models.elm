@@ -44,7 +44,6 @@ import Apps.Models as Apps
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Meta.Types exposing (..)
-import OS.SessionManager.WindowManager.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
 import Game.Models as Game
