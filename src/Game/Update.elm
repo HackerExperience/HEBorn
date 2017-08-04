@@ -1,16 +1,22 @@
 module Game.Update exposing (..)
 
-import Game.Models exposing (..)
-import Game.Messages exposing (..)
-import Game.Account.Update as Account
-import Game.Account.Messages as Account
-import Game.Servers.Update as Servers
-import Game.Servers.Messages as Servers
-import Game.Meta.Update as Meta
-import Game.Meta.Messages as Meta
-import Game.Web.Update as Web
-import Game.Web.Messages as Web
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Driver.Websocket.Channels exposing (..)
+import Driver.Websocket.Messages as Ws
+import Driver.Websocket.Reports as Ws
+import Events.Events as Events
+import Game.Account.Messages as Account
+import Game.Account.Update as Account
+import Game.Meta.Messages as Meta
+import Game.Meta.Update as Meta
+import Game.Servers.Messages as Servers
+import Game.Servers.Update as Servers
+import Game.Web.Messages as Web
+import Game.Web.Update as Web
+import Game.Messages exposing (..)
+import Game.Models exposing (..)
+import Game.Requests exposing (..)
+import Game.Requests.Bootstrap as Bootstrap
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, Dispatch )
@@ -28,11 +34,15 @@ update msg model =
         WebMsg msg ->
             web msg model
 
-        Event event ->
+        Request data ->
+            response (receive data) model
+
+        Event data ->
             model
-                |> account (Account.Event event)
-                |> andThen (servers (Servers.Event event))
-                |> andThen (meta (Meta.Event event))
+                |> account (Account.Event data)
+                |> andThen (servers (Servers.Event data))
+                |> andThen (meta (Meta.Event data))
+                |> andThen (event data)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -100,6 +110,38 @@ web msg model =
             Cmd.map WebMsg cmd
     in
         ( model_, cmd_, dispatch )
+
+
+event : Events.Event -> Model -> ( Model, Cmd Msg, Dispatch )
+event ev model =
+    case ev of
+        Events.Report (Ws.Connected _) ->
+            let
+                dispatch =
+                    Dispatch.websocket
+                        (Ws.JoinChannel RequestsChannel Nothing)
+            in
+                ( model, Cmd.none, dispatch )
+
+        -- Events.Report (Ws.Joined AccountChannel) ->
+        --     let
+        --         cmd =
+        --             Bootstrap.request model.account.id model
+        --     in
+        --         ( model, cmd, Dispatch.none )
+
+        _ ->
+            ( model, Cmd.none, Dispatch.none )
+
+
+response :
+    Response
+    -> Model
+    -> ( Model, Cmd msg, Dispatch )
+response response model =
+    case response of
+        _ ->
+            ( model, Cmd.none, Dispatch.none )
 
 
 andThen :

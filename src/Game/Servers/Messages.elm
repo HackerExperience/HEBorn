@@ -13,7 +13,7 @@ import Game.Network.Types exposing (NIP)
 
 
 type Msg
-    = BootstrapServer Value
+    = BootstrapServers Value
     | SetBounce ID (Maybe Bounces.ID)
     | SetEndpoint ID (Maybe NIP)
     | FilesystemMsg ID Filesystem.Msg

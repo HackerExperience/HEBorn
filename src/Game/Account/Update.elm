@@ -88,12 +88,8 @@ event game ev model =
         Events.Report (Ws.Connected _) ->
             let
                 dispatch =
-                    Dispatch.batch
-                        [ Dispatch.websocket
-                            (Ws.JoinChannel AccountChannel (Just model.id))
-                        , Dispatch.websocket
-                            (Ws.JoinChannel RequestsChannel Nothing)
-                        ]
+                    Dispatch.websocket
+                        (Ws.JoinChannel AccountChannel (Just model.id))
             in
                 ( model, Cmd.none, dispatch )
 
