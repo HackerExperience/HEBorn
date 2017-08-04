@@ -4,12 +4,15 @@ import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
+import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
 import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events exposing (..)
+import Landing.Messages as Landing
 import Landing.Update as Landing
 import Game.Data as Game
 import Game.Messages as Game
+import Game.Models as Game
 import Game.Meta.Messages as Meta
 import Game.Update as Game
 import Setup.Messages as Setup
@@ -22,6 +25,7 @@ import OS.SessionManager.Messages as SM
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    -- DONE
     case (onDebug model received msg) of
         Boot id username token firstRun ->
             let
@@ -32,27 +36,10 @@ update msg model =
 
         Shutdown ->
             let
-                ( model1, cmd ) =
-                    generic msg model
-
                 model_ =
                     logout model
             in
-                ( model_, cmd )
-
-        WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
-            -- special trap to catch websocket connections
-            let
-                ( model1, cmd1, dispatch ) =
-                    login model
-
-                ( model_, cmd2 ) =
-                    generic msg model1
-
-                cmd_ =
-                    Cmd.batch [ cmd1, cmd2 ]
-            in
-                dispatcher model_ cmd_ dispatch
+                ( model_, Cmd.none )
 
         LoadingEnd z ->
             let
@@ -69,256 +56,161 @@ update msg model =
                 model_ =
                     { model | state = state }
             in
-                dispatcher model_ cmd dispatch
+                ( model_, Cmd.none )
 
         _ ->
-            generic msg model
+            updateState msg model
 
 
 
 -- internals
 
 
-generic : Msg -> Model -> ( Model, Cmd Msg )
-generic msg ({ state } as model) =
+updateState : Msg -> Model -> ( Model, Cmd Msg )
+updateState msg ({ state } as model) =
     case state of
-        Home homeState ->
-            let
-                ( model_, cmd ) =
-                    home model msg homeState
-            in
-                ( model_, cmd )
+        Home stateModel ->
+            updateHome msg model stateModel
 
-        Setup setupState ->
-            let
-                ( model_, cmd ) =
-                    setup model msg setupState
-            in
-                ( model_, cmd )
+        Setup stateModel ->
+            updateSetup msg model stateModel
 
-        Play _ ->
-            let
-                ( model_, cmd ) =
-                    play msg model
-            in
-                ( model_, cmd )
+        Play stateModel ->
+            updatePlay msg model stateModel
 
 
-home : Model -> Msg -> HomeModel -> ( Model, Cmd Msg )
-home model msg ({ landing } as state) =
+updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
+updateHome msg model stateModel =
+    -- DONE
     case msg of
-        LandingMsg msg ->
+        WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
+            -- trap used for login
             let
-                ( landing_, cmd, dispatch ) =
-                    Landing.update model msg landing
+                ( modelLogin, cmdLogin, dispatch ) =
+                    login model
 
-                home_ =
-                    { state | landing = landing_ }
+                -- not tail recursive, but should
+                -- only do a single recursion
+                ( modelLogin_, cmdLogin_ ) =
+                    dispatcher modelLogin cmdLogin dispatch
 
-                model_ =
-                    { model | state = Home home_ }
+                ( model_, cmdNext ) =
+                    updateState msg modelLogin_
 
-                cmd_ =
-                    Cmd.map LandingMsg cmd
+                cmd =
+                    Cmd.batch [ cmdLogin_, cmdNext ]
             in
-                dispatcher model_ cmd_ dispatch
-
-        _ ->
-            ( model, Cmd.none )
-
-
-setup : Model -> Msg -> SetupModel -> ( Model, Cmd Msg )
-setup model msg ({ setup } as setupState) =
-    case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            -- special trap to route broadcasts to Setup and Game
-            let
-                ( model1, cmd ) =
-                    game (Game.Event event) model
-            in
-                -- TODO: fix this hack
-                case model.state of
-                    Setup ({ setup } as setupState) ->
-                        let
-                            ( setup_, cmd1, dispatch ) =
-                                Setup.update setupState.game
-                                    (Setup.Event event)
-                                    setup
-
-                            cmd_ =
-                                Cmd.batch
-                                    [ cmd
-                                    , Cmd.map SetupMsg cmd1
-                                    ]
-
-                            setupState_ =
-                                { setupState | setup = setup_ }
-
-                            model_ =
-                                { model1 | state = Setup setupState_ }
-                        in
-                            dispatcher model_ cmd_ dispatch
-
-                    _ ->
-                        ( model, Cmd.none )
+                ( model_, cmd )
 
         WebsocketMsg msg ->
-            websocket msg model
-
-        GameMsg msg ->
-            game msg model
-
-        SetupMsg msg ->
-            let
-                ( setup_, cmd, dispatch ) =
-                    Setup.update setupState.game msg setup
-
-                cmd_ =
-                    Cmd.map SetupMsg cmd
-
-                setupState_ =
-                    { setupState | setup = setup_ }
-
-                model_ =
-                    { model | state = Setup setupState_ }
-            in
-                dispatcher model_ cmd_ dispatch
-
-        _ ->
-            ( model, Cmd.none )
-
-
-play : Msg -> Model -> ( Model, Cmd Msg )
-play msg model =
-    case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            -- special trap to route broadcasts to Game
-            game (Game.Event event) model
-
-        WebsocketMsg msg ->
-            websocket msg model
-
-        GameMsg msg ->
-            game msg model
-
-        OSMsg msg ->
-            os msg model
-
-        _ ->
-            ( model, Cmd.none )
-
-
-websocket : Ws.Msg -> Model -> ( Model, Cmd Msg )
-websocket msg ({ state } as model) =
-    case state of
-        Home ({ websocket } as home) ->
-            case websocket of
+            case stateModel.websocket of
                 Just websocket ->
                     let
                         ( websocket_, cmd, dispatch ) =
-                            Ws.update msg websocket
+                            updateWebsocket msg websocket
 
-                        home_ =
-                            { home | websocket = Just websocket_ }
-
-                        cmd_ =
-                            Cmd.map WebsocketMsg cmd
+                        stateModel_ =
+                            { stateModel | websocket = Just websocket_ }
 
                         model_ =
-                            { model | state = Home home_ }
+                            { model | state = Home stateModel_ }
                     in
-                        dispatcher model_ cmd_ dispatch
+                        ( model_, cmd )
 
                 Nothing ->
                     ( model, Cmd.none )
 
-        Play ({ websocket } as play) ->
-            let
-                ( websocket_, cmd, dispatch ) =
-                    Ws.update msg websocket
+        LandingMsg msg ->
+            updateLanding msg model stateModel
 
-                play_ =
-                    { play | websocket = websocket_ }
-
-                cmd_ =
-                    Cmd.map WebsocketMsg cmd
-
-                model_ =
-                    { model | state = Play play_ }
-            in
-                dispatcher model_ cmd_ dispatch
-
-        Setup ({ websocket } as setup) ->
-            let
-                ( websocket_, cmd, dispatch ) =
-                    Ws.update msg websocket
-
-                setup_ =
-                    { setup | websocket = websocket_ }
-
-                cmd_ =
-                    Cmd.map WebsocketMsg cmd
-
-                model_ =
-                    { model | state = Setup setup_ }
-            in
-                dispatcher model_ cmd_ dispatch
-
-
-game : Game.Msg -> Model -> ( Model, Cmd Msg )
-game msg ({ state } as model) =
-    case state of
-        Home home ->
+        _ ->
             ( model, Cmd.none )
 
-        Play ({ game } as play) ->
+
+updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
+updateSetup msg model stateModel =
+    -- DONE
+    case msg of
+        WebsocketMsg (Ws.Broadcast event) ->
+            updateEvent event model
+
+        WebsocketMsg msg ->
             let
-                ( game_, cmd, dispatch ) =
-                    Game.update msg game
+                ( websocket, cmd, dispatch ) =
+                    updateWebsocket msg stateModel.websocket
 
-                play_ =
-                    { play | game = game_ }
-
-                cmd_ =
-                    Cmd.map GameMsg cmd
+                stateModel_ =
+                    { stateModel | websocket = websocket }
 
                 model_ =
-                    { model | state = Play play_ }
+                    { model | state = Setup stateModel_ }
+            in
+                dispatcher model_ cmd dispatch
+
+        SetupMsg msg ->
+            let
+                ( setup, cmd, dispatch ) =
+                    Setup.update stateModel.game msg stateModel.setup
+
+                stateModel_ =
+                    { stateModel | setup = setup }
+
+                model_ =
+                    { model | state = Setup stateModel_ }
+
+                cmd_ =
+                    Cmd.map SetupMsg cmd
             in
                 dispatcher model_ cmd_ dispatch
 
-        Setup ({ game } as setup) ->
+        GameMsg msg ->
             let
-                ( game_, cmd, dispatch ) =
-                    Game.update msg game
+                ( game, cmd, dispatch ) =
+                    updateGame msg stateModel.game
 
-                setup_ =
-                    { setup | game = game_ }
-
-                cmd_ =
-                    Cmd.map GameMsg cmd
+                stateModel_ =
+                    { stateModel | game = game }
 
                 model_ =
-                    { model | state = Setup setup_ }
+                    { model | state = Setup stateModel_ }
             in
-                dispatcher model_ cmd_ dispatch
+                dispatcher model_ cmd dispatch
+
+        _ ->
+            ( model, Cmd.none )
 
 
-os : OS.Msg -> Model -> ( Model, Cmd Msg )
-os msg ({ state } as model) =
-    case state of
-        Play ({ os } as play) ->
-            case Game.fromGateway play.game of
+updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
+updatePlay msg model stateModel =
+    case msg of
+        WebsocketMsg (Ws.Broadcast event) ->
+            updateEvent event model
+
+        WebsocketMsg msg ->
+            let
+                ( websocket, cmd, dispatch ) =
+                    updateWebsocket msg stateModel.websocket
+
+                stateModel_ =
+                    { stateModel | websocket = websocket }
+
+                model_ =
+                    { model | state = Play stateModel_ }
+            in
+                dispatcher model_ cmd dispatch
+
+        OSMsg msg ->
+            case Game.fromGateway stateModel.game of
                 Just data ->
                     let
-                        ( os_, cmd, dispatch ) =
-                            OS.update data msg os
+                        ( os, cmd, dispatch ) =
+                            OS.update data msg stateModel.os
 
-                        play_ =
-                            { play | os = os_ }
+                        stateModel_ =
+                            { stateModel | os = os }
 
                         model_ =
-                            { model | state = Play play_ }
+                            { model | state = Play stateModel_ }
 
                         cmd_ =
                             Cmd.map OSMsg cmd
@@ -328,8 +220,106 @@ os msg ({ state } as model) =
                 Nothing ->
                     ( model, Cmd.none )
 
+        GameMsg msg ->
+            let
+                ( game, cmd, dispatch ) =
+                    updateGame msg stateModel.game
+
+                stateModel_ =
+                    { stateModel | game = game }
+
+                model_ =
+                    { model | state = Play stateModel_ }
+            in
+                dispatcher model_ cmd dispatch
+
         _ ->
             ( model, Cmd.none )
+
+
+updateLanding :
+    Landing.Msg
+    -> Model
+    -> HomeModel
+    -> ( Model, Cmd Msg )
+updateLanding msg model ({ landing } as stateModel) =
+    let
+        ( landing_, cmd, dispatch ) =
+            Landing.update model msg landing
+
+        cmd_ =
+            Cmd.map LandingMsg cmd
+
+        stateModel_ =
+            { stateModel | landing = landing_ }
+
+        model_ =
+            { model | state = Home stateModel_ }
+    in
+        dispatcher model_ cmd_ dispatch
+
+
+updateEvent : Events.Event -> Model -> ( Model, Cmd Msg )
+updateEvent event ({ state } as model) =
+    let
+        msg =
+            Game.Event event
+    in
+        -- this ould be done in a more generic way
+        case state of
+            Setup stateModel ->
+                let
+                    ( game, cmd, dispatch ) =
+                        updateGame msg stateModel.game
+
+                    stateModel_ =
+                        { stateModel | game = game }
+
+                    model_ =
+                        { model | state = Setup stateModel_ }
+                in
+                    dispatcher model_ cmd dispatch
+
+            Play stateModel ->
+                let
+                    ( game, cmd, dispatch ) =
+                        updateGame msg stateModel.game
+
+                    stateModel_ =
+                        { stateModel | game = game }
+
+                    model_ =
+                        { model | state = Play stateModel_ }
+                in
+                    dispatcher model_ cmd dispatch
+
+            _ ->
+                ( model, Cmd.none )
+
+
+updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
+updateGame msg model =
+    let
+        ( model_, cmd, dispatch ) =
+            Game.update msg model
+
+        cmd_ =
+            Cmd.map GameMsg cmd
+    in
+        ( model_, cmd_, dispatch )
+
+
+updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )
+updateWebsocket msg model =
+    -- DONE
+    let
+        ( model_, cmd, dispatch ) =
+            Ws.update msg model
+
+        cmd_ =
+            Cmd.map WebsocketMsg cmd
+    in
+        ( model_, cmd_, dispatch )
 
 
 
@@ -357,6 +347,7 @@ onDebug model fun a =
 received : Msg -> Msg
 received msg =
     case msg of
+        -- ignored messages
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
             msg
 
