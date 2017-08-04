@@ -128,32 +128,50 @@ home model msg ({ landing } as state) =
 
 
 setup : Model -> Msg -> SetupModel -> ( Model, Cmd Msg )
-setup model msg ({ game, setup } as setupState) =
+setup model msg ({ setup } as setupState) =
     case msg of
         WebsocketMsg (Ws.Broadcast event) ->
-            -- special trap to route broadcasts to Game
+            -- special trap to route broadcasts to Setup and Game
             let
-                ( setup_, cmd, dispatch ) =
-                    Setup.update game (Setup.Event event) setup
-
-                cmd_ =
-                    Cmd.map SetupMsg cmd
-
-                setupState_ =
-                    { setupState | setup = setup }
-
-                model_ =
-                    { model | state = Setup setupState_ }
+                ( model1, cmd ) =
+                    game (Game.Event event) model
             in
-                dispatcher model_ cmd_ dispatch
+                -- TODO: fix this hack
+                case model.state of
+                    Setup ({ setup } as setupState) ->
+                        let
+                            ( setup_, cmd1, dispatch ) =
+                                Setup.update setupState.game
+                                    (Setup.Event event)
+                                    setup
+
+                            cmd_ =
+                                Cmd.batch
+                                    [ cmd
+                                    , Cmd.map SetupMsg cmd1
+                                    ]
+
+                            setupState_ =
+                                { setupState | setup = setup_ }
+
+                            model_ =
+                                { model1 | state = Setup setupState_ }
+                        in
+                            dispatcher model_ cmd_ dispatch
+
+                    _ ->
+                        ( model, Cmd.none )
 
         WebsocketMsg msg ->
             websocket msg model
 
+        GameMsg msg ->
+            game msg model
+
         SetupMsg msg ->
             let
                 ( setup_, cmd, dispatch ) =
-                    Setup.update game msg setup
+                    Setup.update setupState.game msg setup
 
                 cmd_ =
                     Cmd.map SetupMsg cmd

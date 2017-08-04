@@ -3,7 +3,6 @@ module Game.Account.Update exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
 import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events
@@ -108,7 +107,7 @@ event game ev model =
             in
                 ( model, Cmd.none, dispatch )
 
-        Events.Report (Ws.Joined Ws.AccountChannel) ->
+        Events.Report (Ws.Joined AccountChannel) ->
             let
                 cmd =
                     ServerIndex.request model.id game

@@ -108,7 +108,7 @@ genericHttp msg result =
             msg ( getCode response.status.code, toValue response.body )
 
         _ ->
-            Debug.crash "Http Driver failure"
+            msg ( UnknownErrorCode, emptyPayload )
 
 
 genericWs : (ResponseType -> msg) -> Encode.Value -> msg
@@ -127,7 +127,7 @@ genericWs msg value =
                 msg ( OkCode, response.data )
 
             Err str ->
-                msg ( UnknownErrorCode, toValue str )
+                msg ( Timeout, toValue str )
 
 
 toValue : String -> Decode.Value

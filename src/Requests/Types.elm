@@ -37,6 +37,7 @@ type Code
     | NotFoundCode
     | BadRequestCode
     | UnknownErrorCode
+    | Timeout
 
 
 type alias Context =
