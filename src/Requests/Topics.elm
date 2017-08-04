@@ -15,6 +15,7 @@ type Topic
     = AccountLoginTopic
     | AccountCreateTopic
     | AccountLogoutTopic
+    | AccountBootstrapTopic
     | AccountServerIndexTopic
     | ServerLogIndexTopic
     | ServerFileIndexTopic
@@ -27,6 +28,9 @@ getChannel topic =
             RequestsChannel
 
         AccountServerIndexTopic ->
+            AccountChannel
+
+        AccountBootstrapTopic ->
             AccountChannel
 
         ServerLogIndexTopic ->
@@ -57,6 +61,9 @@ getWebsocketMsg topic =
     case topic of
         AccountLogoutTopic ->
             "account.logout"
+
+        AccountBootstrapTopic ->
+            "account.bootstrap"
 
         AccountServerIndexTopic ->
             "server.index"
