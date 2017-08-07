@@ -72,10 +72,10 @@ type alias EntryHeader ext =
 
 
 type alias FileData =
-    { size : FileSize
+    { extension : String
+    , size : FileSize
     , version : FileVersion
     , modules : List Module
-    , extension : String
     }
 
 

@@ -1,45 +1,27 @@
-module Game.Servers.Requests.FileIndex
-    exposing
-        ( Response(..)
-        , request
-        , receive
-        , Index
-        , Files
-        , File
-        , SoftwareType(..)
-        , SoftwareModule(..)
-        , CrackerModule(..)
-        , ExploitModule(..)
-        , FirewallModule(..)
-        , HasherModule(..)
-        , LogForgerModule(..)
-        , LogRecoverModule(..)
-        , EncryptorModule(..)
-        , DecryptorModule(..)
-        )
+module Game.Servers.Requests.FileIndex exposing (..)
 
-import Date exposing (Date)
-import Dict exposing (Dict)
 import Json.Decode
     exposing
         -- this request contains no payload, so no problems with importing this
         ( Decoder
         , Value
         , decodeValue
-        , succeed
-        , fail
         , andThen
+        , oneOf
+        , map
+        , maybe
+        , lazy
         , list
-        , dict
         , string
         , int
         )
-import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Utils.Json.Decode exposing (date)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Servers.Messages exposing (..)
+import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
 
 
 type Response
@@ -48,94 +30,31 @@ type Response
 
 
 type alias Index =
-    Dict String Files
+    List Entry
 
 
-type alias Files =
-    List File
-
-
-type alias File =
-    { id : String
-    , path : String -- full path
-    , type_ : SoftwareType
-    , size : Int
-    , insertedAt : Date
-    , updatedAt : Date
-
-    -- , modules : {}
-    -- , meta : {}
+type alias EntryHeader ext =
+    { ext
+        | id : FileID
+        , name : FileName
     }
 
 
-type SoftwareType
-    = Text
-    | Cracker
-    | Exploit
-    | Firewall
-    | Hasher
-    | LogForger
-    | LogRecover
-    | Encryptor
-    | Decryptor
-    | AnyMap
-    | CryptoKey
+type Entry
+    = FileEntry FileBox
+    | FolderEntry FolderBox
 
 
-
--- Software Modules draft
-
-
-type SoftwareModule
-    = CrackerModule CrackerModule
-    | ExploitModule ExploitModule
-    | FirewallModule FirewallModule
-    | HasherModule HasherModule
-    | LogForgerModule LogForgerModule
-    | LogRecoverModule LogRecoverModule
-    | EncryptorModule EncryptorModule
-    | DecryptorModule DecryptorModule
+type alias FileBox =
+    EntryHeader FileData
 
 
-type CrackerModule
-    = PasswordCracker
+type alias FolderWithChildrenData =
+    { children : Index }
 
 
-type ExploitModule
-    = FtpExploit
-    | SshExploit
-
-
-type FirewallModule
-    = ActiveFirewall
-    | PassiveFirewall
-
-
-type HasherModule
-    = PasswordHasher
-
-
-type LogForgerModule
-    = CreateLogForger
-    | EditLogForger
-
-
-type LogRecoverModule
-    = RecoverLogRecover
-
-
-type EncryptorModule
-    = FileEncryptor
-    | LogEncryptor
-    | ConnectionEncryptor
-    | ProcessEncryptor
-
-
-type DecryptorModule
-    = FileDecryptor
-    | LogDecryptor
-    | ConnectionDecryptor
-    | ProcessDecryptor
+type alias FolderBox =
+    EntryHeader FolderWithChildrenData
 
 
 request : ConfigSource a -> Cmd Msg
@@ -171,60 +90,57 @@ decoder json =
 
 index : Decoder Index
 index =
-    (dict (list file))
+    list entry
 
 
-file : Decoder File
+entry : Decoder Entry
+entry =
+    oneOf
+        [ file |> map FileEntry
+        , folder |> map FolderEntry
+        ]
+
+
+file : Decoder FileBox
 file =
-    decode File
-        |> required "file_id" string
-        |> required "path" string
-        |> required "software_type" softwareType
-        |> required "size" int
-        |> required "inserted_at" date
-        |> required "updated_at" date
+    decode fileConstructor
+        |> required "extension" string
+        |> optional "size" (maybe int) Nothing
+        |> optional "version" (maybe int) Nothing
+        |> optional "modules" (list module_) []
+        |> required "name" string
+        |> required "id" string
 
 
-softwareType : Decoder SoftwareType
-softwareType =
-    string |> andThen decodeSoftwareType
+module_ : Decoder Module
+module_ =
+    decode Module
+        |> required "name" string
+        |> required "version" int
 
 
-decodeSoftwareType : String -> Decoder SoftwareType
-decodeSoftwareType str =
-    case str of
-        "text" ->
-            succeed Text
+fileConstructor : String -> FileSize -> FileVersion -> List Module -> FileName -> FileID -> FileBox
+fileConstructor ext sz ver mods name id =
+    { id = id
+    , name = name
+    , extension = ext
+    , size = sz
+    , version = ver
+    , modules = mods
+    }
 
-        "cracker" ->
-            succeed Cracker
 
-        "exploit" ->
-            succeed Exploit
+folder : Decoder FolderBox
+folder =
+    decode folderConstructor
+        |> required "children" (list <| lazy (\_ -> entry))
+        |> required "name" string
+        |> required "id" string
 
-        "firewall" ->
-            succeed Firewall
 
-        "hasher" ->
-            succeed Hasher
-
-        "log_forger" ->
-            succeed LogForger
-
-        "log_recover" ->
-            succeed LogRecover
-
-        "encryptor" ->
-            succeed Encryptor
-
-        "decryptor" ->
-            succeed Decryptor
-
-        "anymap" ->
-            succeed AnyMap
-
-        error ->
-            fail <|
-                "Trying to decode software_type, but value "
-                    ++ toString error
-                    ++ " is not supported."
+folderConstructor : List Entry -> FileName -> FileID -> FolderBox
+folderConstructor children name id =
+    { id = id
+    , name = name
+    , children = children
+    }
