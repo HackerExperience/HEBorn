@@ -363,7 +363,9 @@ received msg =
 
 sent : a -> a
 sent =
-    Debug.log "◀ Message"
+    -- uncomment this line to see sent messages
+    --Debug.log "◀ Message"
+    identity
 
 
 dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
