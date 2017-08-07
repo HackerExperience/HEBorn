@@ -123,12 +123,12 @@ event ev model =
             in
                 ( model, Cmd.none, dispatch )
 
-        -- Events.Report (Ws.Joined AccountChannel) ->
-        --     let
-        --         cmd =
-        --             Bootstrap.request model.account.id model
-        --     in
-        --         ( model, cmd, Dispatch.none )
+        Events.Report (Ws.Joined AccountChannel) ->
+            let
+                cmd =
+                    Bootstrap.request model.account.id model
+            in
+                ( model, cmd, Dispatch.none )
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -137,9 +137,13 @@ event ev model =
 response :
     Response
     -> Model
-    -> ( Model, Cmd msg, Dispatch )
+    -> ( Model, Cmd Msg, Dispatch )
 response response model =
     case response of
+        BootstrapResponse (Bootstrap.OkResponse raw) ->
+            -- TODO: add Account and Meta bootstraps
+            servers (Servers.BootstrapServers raw.servers) model
+
         _ ->
             ( model, Cmd.none, Dispatch.none )
 

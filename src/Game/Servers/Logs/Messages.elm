@@ -1,7 +1,8 @@
-module Game.Servers.Logs.Messages exposing (Msg(..))
+module Game.Servers.Logs.Messages exposing (Msg(..), RequestMsg(..))
 
 import Json.Decode exposing (Value)
 import Game.Servers.Logs.Models exposing (ID, StdData)
+import Requests.Types exposing (ResponseType)
 
 
 type Msg
@@ -12,3 +13,8 @@ type Msg
     | Hide ID
     | Unhide StdData
     | Delete ID
+    | Request RequestMsg
+
+
+type RequestMsg
+    = LogIndexRequest ResponseType

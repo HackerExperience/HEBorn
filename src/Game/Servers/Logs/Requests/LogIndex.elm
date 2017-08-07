@@ -1,8 +1,9 @@
-module Game.Servers.Requests.LogIndex
+module Game.Servers.Logs.Requests.LogIndex
     exposing
         ( Response(..)
         , request
         , receive
+        , decoder
         )
 
 import Json.Decode
@@ -16,15 +17,15 @@ import Json.Decode
         , andThen
         , list
         , string
+        , float
         )
-import Date exposing (Date)
+import Time exposing (Time)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..))
-import Utils.Json.Decode exposing (date)
-import Game.Servers.Messages exposing (..)
+import Game.Servers.Logs.Messages exposing (..)
 
 
 type Response
@@ -43,7 +44,7 @@ type alias Logs =
 type alias Log =
     { id : String
     , message : String
-    , insertedAt : Date
+    , insertedAt : Time
     }
 
 
@@ -94,4 +95,4 @@ log =
     decode Log
         |> required "log_id" string
         |> required "message" string
-        |> required "inserted_at" date
+        |> required "inserted_at" float

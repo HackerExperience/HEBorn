@@ -25,5 +25,4 @@ type Msg
 
 
 type RequestMsg
-    = LogIndexRequest ResponseType
-    | FileIndexRequest ResponseType
+    = ServerRequest ResponseType
