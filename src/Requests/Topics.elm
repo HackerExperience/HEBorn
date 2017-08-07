@@ -72,7 +72,7 @@ getWebsocketMsg topic =
             "log.index"
 
         ServerFileIndexTopic ->
-            "server.index"
+            "file.index"
 
         _ ->
             Debug.crash ("No msg for topic " ++ (toString topic))
