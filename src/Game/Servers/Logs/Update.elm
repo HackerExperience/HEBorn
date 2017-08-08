@@ -13,7 +13,7 @@ update :
     Game.Model
     -> Msg
     -> Logs
-    -> ( Logs, Cmd Game.Msg, Dispatch )
+    -> ( Logs, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         UpdateContent logId value ->

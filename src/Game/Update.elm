@@ -81,8 +81,11 @@ servers msg model =
 
         model_ =
             { model | servers = servers }
+
+        cmd_ =
+            Cmd.map ServersMsg cmd
     in
-        ( model_, cmd, dispatch )
+        ( model_, cmd_, dispatch )
 
 
 meta : Meta.Msg -> Model -> ( Model, Cmd Msg, Dispatch )

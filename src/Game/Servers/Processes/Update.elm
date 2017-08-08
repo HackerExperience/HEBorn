@@ -20,7 +20,7 @@ update :
     Game.Model
     -> Msg
     -> Processes
-    -> ( Processes, Cmd Game.Msg, Dispatch )
+    -> ( Processes, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         Pause pID ->

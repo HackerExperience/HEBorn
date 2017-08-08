@@ -23,11 +23,15 @@ import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Server as Server
 
 
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
 update :
     Game.Model
     -> Msg
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 update game msg model =
     case msg of
         FilesystemMsg id msg ->
@@ -82,7 +86,7 @@ response :
     Game.Model
     -> Response
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 response response game model =
     case response of
         _ ->
@@ -94,7 +98,7 @@ filesystem :
     -> ID
     -> Filesystem.Msg
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 filesystem game id msg model =
     case get id model of
         Just server ->
@@ -107,8 +111,11 @@ filesystem game id msg model =
 
                 model_ =
                     safeUpdate id server_ model
+
+                cmd_ =
+                    Cmd.map (FilesystemMsg id) cmd
             in
-                ( model_, cmd, dispatch )
+                ( model_, cmd_, dispatch )
 
         Nothing ->
             ( model, Cmd.none, Dispatch.none )
@@ -119,7 +126,7 @@ log :
     -> ID
     -> Logs.Msg
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 log game id msg model =
     case get id model of
         Just server ->
@@ -132,8 +139,11 @@ log game id msg model =
 
                 model_ =
                     safeUpdate id server_ model
+
+                cmd_ =
+                    Cmd.map (LogMsg id) cmd
             in
-                ( model_, cmd, dispatch )
+                ( model_, cmd_, dispatch )
 
         Nothing ->
             ( model, Cmd.none, Dispatch.none )
@@ -144,7 +154,7 @@ tunnel :
     -> ID
     -> Tunnels.Msg
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 tunnel game id msg model =
     case get id model of
         Just server ->
@@ -153,9 +163,7 @@ tunnel game id msg model =
                     Tunnels.update game msg (getTunnels server)
 
                 cmd_ =
-                    cmd
-                        |> Cmd.map (TunnelsMsg id)
-                        |> Cmd.map Game.ServersMsg
+                    Cmd.map (TunnelsMsg id) cmd
 
                 server_ =
                     setTunnels tunnels_ server
@@ -174,7 +182,7 @@ process :
     -> ID
     -> Processes.Msg
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 process game id msg model =
     case get id model of
         Just server ->
@@ -187,8 +195,11 @@ process game id msg model =
 
                 model_ =
                     safeUpdate id server_ model
+
+                cmd_ =
+                    Cmd.map (ProcessMsg id) cmd
             in
-                ( model_, cmd, dispatch )
+                ( model_, cmd_, dispatch )
 
         Nothing ->
             ( model, Cmd.none, Dispatch.none )
@@ -198,7 +209,7 @@ bootstrap :
     Game.Model
     -> Value
     -> Model
-    -> ( Model, Cmd Game.Msg, Dispatch )
+    -> UpdateResponse
 bootstrap game json model =
     -- FIXME: this is not looking good
     let
