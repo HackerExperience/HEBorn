@@ -19,6 +19,10 @@ type Topic
     | AccountServerIndexTopic
     | ServerLogIndexTopic
     | ServerFileIndexTopic
+    | ServerFileDeleteTopic
+    | ServerFileMoveTopic
+    | ServerFileRenameTopic
+    | ServerFileCreateTopic
 
 
 getChannel : Topic -> Channel
@@ -37,6 +41,18 @@ getChannel topic =
             ServerChannel
 
         ServerFileIndexTopic ->
+            ServerChannel
+
+        ServerFileDeleteTopic ->
+            ServerChannel
+
+        ServerFileMoveTopic ->
+            ServerChannel
+
+        ServerFileRenameTopic ->
+            ServerChannel
+
+        ServerFileCreateTopic ->
             ServerChannel
 
         _ ->
@@ -73,6 +89,18 @@ getWebsocketMsg topic =
 
         ServerFileIndexTopic ->
             "file.index"
+
+        ServerFileDeleteTopic ->
+            "file.delete"
+
+        ServerFileMoveTopic ->
+            "file.move"
+
+        ServerFileRenameTopic ->
+            "file.rename"
+
+        ServerFileCreateTopic ->
+            "file.create"
 
         _ ->
             Debug.crash ("No msg for topic " ++ (toString topic))

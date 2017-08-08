@@ -1,4 +1,4 @@
-module Game.Servers.Filesystem.Requests.FileIndex exposing (..)
+module Game.Servers.Filesystem.Requests.Index exposing (..)
 
 import Json.Decode
     exposing
@@ -18,13 +18,9 @@ import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
-import Game.Servers.Messages exposing (..)
+import Game.Servers.Shared exposing (..)
+import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-
-
-type Response
-    = OkResponse Index
-    | NoOp
 
 
 type alias Index =
@@ -55,26 +51,12 @@ type alias FolderBox =
     EntryHeader FolderWithChildrenData
 
 
-request : ConfigSource a -> Cmd Msg
-request =
+request : ID -> ConfigSource a -> Cmd Msg
+request serverId =
     Requests.request ServerFileIndexTopic
-        (FileIndexRequest >> Request)
-        Nothing
+        (IndexRequest >> Request)
+        (Just serverId)
         emptyPayload
-
-
-receive : Code -> Value -> Response
-receive code json =
-    case code of
-        OkCode ->
-            json
-                |> decoder
-                |> Result.map OkResponse
-                |> Requests.report
-
-        _ ->
-            -- TODO: handle errors
-            NoOp
 
 
 

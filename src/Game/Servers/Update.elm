@@ -132,7 +132,7 @@ updateServer game id msg server =
             onSetEndpoint maybeNip id server
 
         FilesystemMsg msg ->
-            updateFilesystem game msg server
+            updateFilesystem game id msg server
 
         LogsMsg msg ->
             updateLogs game msg server
@@ -151,13 +151,13 @@ updateServer game id msg server =
             updateResponse game (receive data) id server
 
 
-updateFilesystem : Game.Model -> Filesystem.Msg -> Server -> ItemUpdateResponse
-updateFilesystem game =
+updateFilesystem : Game.Model -> ID -> Filesystem.Msg -> Server -> ItemUpdateResponse
+updateFilesystem game id =
     Update.child
         { get = .filesystem
         , set = (\fs model -> { model | filesystem = fs })
         , toMsg = FilesystemMsg
-        , update = (Filesystem.update game)
+        , update = (Filesystem.update game id)
         }
 
 
