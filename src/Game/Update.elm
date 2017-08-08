@@ -128,7 +128,7 @@ event ev model =
                 cmd =
                     Bootstrap.request model.account.id model
             in
-                ( model, cmd, Dispatch.none )
+                ( model, Cmd.none, Dispatch.none )
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
