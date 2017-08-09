@@ -9,6 +9,7 @@ import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Models exposing (Model)
 
 
+landClass : List class -> Attribute msg
 landClass =
     (.class) <| Html.CssHelpers.withNamespace Res.prefix
 

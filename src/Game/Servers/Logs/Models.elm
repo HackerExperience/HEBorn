@@ -3,7 +3,6 @@ module Game.Servers.Logs.Models exposing (..)
 import Dict exposing (Dict)
 import Time exposing (Time)
 import Utils.Dict as DictUtils
-import Json.Decode exposing (Value, decodeValue, list)
 import Game.Network.Types exposing (IP)
 import Game.Shared as Game exposing (ID, ServerUser)
 
@@ -68,31 +67,6 @@ initialLogs =
 initialModel : Logs
 initialModel =
     initialLogs
-
-
-bootstrap : Value -> Logs -> Logs
-bootstrap json model =
-    let
-        mapper data =
-            let
-                log =
-                    StdLog <|
-                        (StdData data.id
-                            StatusNormal
-                            data.insertedAt
-                            data.message
-                            (interpretRawContent data.message)
-                            NoEvent
-                        )
-            in
-                ( data.id, log )
-
-        insert id item model =
-            -- TODO: actually insert the logs
-            model
-    in
-        -- TODO: actually appply the new index
-        model
 
 
 getByID : ID -> Logs -> Log

@@ -1,7 +1,6 @@
 module Game.Meta.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Messages as Game
 import Game.Models as Game
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers

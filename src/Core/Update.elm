@@ -15,7 +15,6 @@ import Game.Messages as Game
 import Game.Models as Game
 import Game.Meta.Messages as Meta
 import Game.Update as Game
-import Setup.Messages as Setup
 import Setup.Update as Setup
 import OS.Messages as OS
 import OS.Update as OS
