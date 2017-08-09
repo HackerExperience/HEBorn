@@ -13,12 +13,13 @@ module Core.Dispatch
         , game
         , account
         , servers
+        , web
+        , server
         , filesystem
         , processes
         , logs
         , tunnels
         , meta
-        , web
         )
 
 import Core.Messages exposing (..)
@@ -135,7 +136,8 @@ toList dispatch =
 
 toCmd : Dispatch -> Cmd Msg
 toCmd dispatch =
-    -- TODO: check if reversing is really needed
+    -- TODO: check if reversing is really needed, ordering
+    -- must never be a problem
     dispatch
         |> toList
         |> List.reverse
@@ -154,52 +156,57 @@ core msg =
 
 websocket : Ws.Msg -> Dispatch
 websocket msg =
-    core (WebsocketMsg msg)
+    core <| WebsocketMsg msg
 
 
 game : Game.Msg -> Dispatch
 game msg =
-    core (GameMsg msg)
+    core <| GameMsg msg
 
 
 account : Account.Msg -> Dispatch
 account msg =
-    game (Game.AccountMsg msg)
+    game <| Game.AccountMsg msg
 
 
 servers : Servers.Msg -> Dispatch
 servers msg =
-    game (Game.ServersMsg msg)
+    game <| Game.ServersMsg msg
 
 
 meta : Meta.Msg -> Dispatch
 meta msg =
-    game (Game.MetaMsg msg)
-
-
-filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
-filesystem id msg =
-    servers (Servers.FilesystemMsg id msg)
-
-
-processes : Servers.ID -> Processes.Msg -> Dispatch
-processes id msg =
-    servers (Servers.ProcessMsg id msg)
-
-
-logs : Servers.ID -> Logs.Msg -> Dispatch
-logs id msg =
-    servers (Servers.LogMsg id msg)
-
-
-tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
-tunnels id msg =
-    servers (Servers.TunnelsMsg id msg)
+    game <| Game.MetaMsg msg
 
 
 web : Web.Msg -> Dispatch
 web msg =
     game (Game.WebMsg msg)
+
+
+server : Servers.ID -> Servers.ItemMsg -> Dispatch
+server id msg =
+    servers <| Servers.Item id msg
+
+
+filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
+filesystem id msg =
+    server id <| Servers.FilesystemMsg msg
+
+
+processes : Servers.ID -> Processes.Msg -> Dispatch
+processes id msg =
+    server id <| Servers.ProcessesMsg msg
+
+
+logs : Servers.ID -> Logs.Msg -> Dispatch
+logs id msg =
+    server id <| Servers.LogsMsg msg
+
+
+tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
+tunnels id msg =
+    server id <| Servers.TunnelsMsg msg
 
 
 

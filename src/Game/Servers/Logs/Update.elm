@@ -55,7 +55,7 @@ update game msg model =
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        BootstrapLogs json ->
+        Bootstrap json ->
             case LogIndex.decoder json of
                 Ok logs ->
                     let

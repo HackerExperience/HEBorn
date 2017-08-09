@@ -65,7 +65,7 @@ update data msg ({ openMenu } as model) =
         SelectBounce id ->
             let
                 dispatch =
-                    Dispatch.servers <| Servers.SetBounce data.id id
+                    Dispatch.server data.id <| Servers.SetBounce id
 
                 model_ =
                     { model | openMenu = NothingOpen }

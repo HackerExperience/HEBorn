@@ -1,6 +1,7 @@
-module Game.Update exposing (..)
+module Game.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.Update as Update
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Reports as Ws
@@ -19,151 +20,138 @@ import Game.Requests exposing (..)
 import Game.Requests.Bootstrap as Bootstrap
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update : Msg -> Model -> UpdateResponse
 update msg model =
     case msg of
         AccountMsg msg ->
-            account msg model
+            updateAccount msg model
 
         ServersMsg msg ->
-            servers msg model
+            updateServers msg model
 
         MetaMsg msg ->
-            meta msg model
+            updateMeta msg model
 
         WebMsg msg ->
-            web msg model
-
-        Request data ->
-            response (receive data) model
+            updateWeb msg model
 
         Event data ->
-            model
-                |> account (Account.Event data)
-                |> andThen (servers (Servers.Event data))
-                |> andThen (meta (Meta.Event data))
-                |> andThen (event data)
+            Update.andThen (updateEvent data) (broadcastEvent data model)
+
+        Request data ->
+            updateResponse (receive data) model
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model
 
 
 
 -- internals
 
 
-account :
-    Account.Msg
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-account msg model =
-    let
-        ( account, cmd, dispatch ) =
-            Account.update model msg model.account
-
-        model_ =
-            { model | account = account }
-
-        cmd_ =
-            Cmd.map AccountMsg cmd
-    in
-        ( model_, cmd_, dispatch )
+broadcastEvent : Events.Event -> Model -> UpdateResponse
+broadcastEvent event model =
+    updateAccount (Account.Event event) model
+        |> Update.andThen (updateMeta (Meta.Event event))
+        |> Update.andThen (updateWeb (Web.Event event))
+        |> Update.andThen (updateServers (Servers.Event event))
 
 
-servers :
-    Servers.Msg
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-servers msg model =
-    let
-        ( servers, cmd, dispatch ) =
-            Servers.update model msg model.servers
-
-        model_ =
-            { model | servers = servers }
-
-        cmd_ =
-            Cmd.map ServersMsg cmd
-    in
-        ( model_, cmd_, dispatch )
+updateAccount : Account.Msg -> Model -> UpdateResponse
+updateAccount msg game =
+    Update.child
+        { get = .account
+        , set = (\account game -> { game | account = account })
+        , toMsg = AccountMsg
+        , update = (Account.update game)
+        }
+        msg
+        game
 
 
-meta : Meta.Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-meta msg model =
-    let
-        ( meta, cmd, dispatch ) =
-            Meta.update model msg model.meta
-
-        model_ =
-            { model | meta = meta }
-    in
-        ( model_, cmd, dispatch )
-
-
-web : Web.Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-web msg model =
-    let
-        ( web, cmd, dispatch ) =
-            Web.update model msg model.web
-
-        model_ =
-            { model | web = web }
-
-        cmd_ =
-            Cmd.map WebMsg cmd
-    in
-        ( model_, cmd_, dispatch )
+updateMeta : Meta.Msg -> Model -> UpdateResponse
+updateMeta msg game =
+    Update.child
+        { get = .meta
+        , set = (\meta game -> { game | meta = meta })
+        , toMsg = MetaMsg
+        , update = (Meta.update game)
+        }
+        msg
+        game
 
 
-event : Events.Event -> Model -> ( Model, Cmd Msg, Dispatch )
-event ev model =
-    case ev of
+updateWeb : Web.Msg -> Model -> UpdateResponse
+updateWeb msg game =
+    Update.child
+        { get = .web
+        , set = (\web game -> { game | web = web })
+        , toMsg = WebMsg
+        , update = (Web.update game)
+        }
+        msg
+        game
+
+
+updateServers : Servers.Msg -> Model -> UpdateResponse
+updateServers msg game =
+    Update.child
+        { get = .servers
+        , set = (\servers game -> { game | servers = servers })
+        , toMsg = ServersMsg
+        , update = (Servers.update game)
+        }
+        msg
+        game
+
+
+updateEvent : Events.Event -> Model -> UpdateResponse
+updateEvent event model =
+    case event of
         Events.Report (Ws.Connected _) ->
-            let
-                dispatch =
-                    Dispatch.websocket
-                        (Ws.JoinChannel RequestsChannel Nothing)
-            in
-                ( model, Cmd.none, dispatch )
+            eventWsConnected model
 
         Events.Report (Ws.Joined AccountChannel) ->
-            let
-                cmd =
-                    Bootstrap.request model.account.id model
-            in
-                ( model, Cmd.none, Dispatch.none )
+            eventWsJoinedAccount model
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model
 
 
-response :
-    Response
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-response response model =
+updateResponse : Response -> Model -> UpdateResponse
+updateResponse response model =
     case response of
-        BootstrapResponse (Bootstrap.OkResponse raw) ->
-            -- TODO: add Account and Meta bootstraps
-            servers (Servers.BootstrapServers raw.servers) model
+        BootstrapResponse (Bootstrap.OkResponse data) ->
+            onBootstrapResponse data model
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model
 
 
-andThen :
-    (Model -> ( Model, Cmd Msg, Dispatch ))
-    -> ( Model, Cmd Msg, Dispatch )
-    -> ( Model, Cmd Msg, Dispatch )
-andThen func ( model, cmd, dispatch1 ) =
+eventWsConnected : Model -> UpdateResponse
+eventWsConnected model =
     let
-        ( model_, cmd1, dispatch2 ) =
-            func model
-
-        cmd_ =
-            Cmd.batch [ cmd, cmd1 ]
-
-        dispatch_ =
-            Dispatch.batch [ dispatch1, dispatch2 ]
+        dispatch =
+            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
     in
-        ( model_, cmd_, dispatch_ )
+        ( model, Cmd.none, dispatch )
+
+
+eventWsJoinedAccount : Model -> UpdateResponse
+eventWsJoinedAccount model =
+    let
+        request =
+            Bootstrap.request model.account.id model
+    in
+        -- replace Cmd.none to request to enable bootstrap
+        ( model, Cmd.none, Dispatch.none )
+
+
+onBootstrapResponse : Bootstrap.Data -> Model -> UpdateResponse
+onBootstrapResponse data model =
+    -- TODO: propagate change
+    updateServers (Servers.Bootstrap data.servers) model

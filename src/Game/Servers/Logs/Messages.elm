@@ -6,7 +6,7 @@ import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = BootstrapLogs Value
+    = Bootstrap Value
     | UpdateContent ID String
     | Crypt ID
     | Uncrypt ID String

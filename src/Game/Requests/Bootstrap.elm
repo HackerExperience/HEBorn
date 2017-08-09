@@ -1,7 +1,7 @@
 module Game.Requests.Bootstrap
     exposing
         ( Response(..)
-        , RawResponse
+        , Data
         , request
         , receive
         )
@@ -15,11 +15,11 @@ import Game.Messages exposing (..)
 
 
 type Response
-    = OkResponse RawResponse
+    = OkResponse Data
     | NoOp
 
 
-type alias RawResponse =
+type alias Data =
     { account : Value
     , meta : Value
     , servers : Value
@@ -51,14 +51,14 @@ receive code json =
 -- internals
 
 
-decoder : Value -> Result String RawResponse
+decoder : Value -> Result String Data
 decoder =
     decodeValue response
 
 
-response : Decoder RawResponse
+response : Decoder Data
 response =
-    decode RawResponse
+    decode Data
         |> required "account" value
         |> required "meta" value
         |> required "servers" value

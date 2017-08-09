@@ -10,7 +10,7 @@ import Game.Meta.Messages exposing (..)
 import Game.Meta.Models exposing (..)
 
 
-update : Game.Model -> Msg -> Model -> ( Model, Cmd Game.Msg, Dispatch )
+update : Game.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update game msg model =
     case msg of
         SetGateway id ->
@@ -29,7 +29,7 @@ update game msg model =
         SetEndpoint nip ->
             let
                 setEndpoint id =
-                    Dispatch.servers <| Servers.SetEndpoint id nip
+                    Dispatch.server id <| Servers.SetEndpoint nip
 
                 dispatch =
                     model
