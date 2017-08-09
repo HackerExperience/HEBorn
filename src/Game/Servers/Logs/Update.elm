@@ -1,11 +1,9 @@
-module Game.Servers.Logs.Update exposing (..)
+module Game.Servers.Logs.Update exposing (update, bootstrap)
 
-import Json.Decode as Decode
+import Json.Decode exposing (Value, decodeValue, list)
 import Game.Models as Game
-import Game.Messages as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Logs.Models exposing (..)
-import Game.Servers.Logs.Requests.LogIndex as LogIndex
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -55,32 +53,30 @@ update game msg model =
             in
                 ( model_, Cmd.none, Dispatch.none )
 
-        Bootstrap json ->
-            case LogIndex.decoder json of
-                Ok logs ->
-                    let
-                        reducer log model =
-                            let
-                                log_ =
-                                    StdLog <|
-                                        (StdData log.id
-                                            StatusNormal
-                                            log.insertedAt
-                                            log.message
-                                            (interpretRawContent log.message)
-                                            NoEvent
-                                        )
-                            in
-                                add log_ model
-                    in
-                        let
-                            model_ =
-                                List.foldl reducer model logs
-                        in
-                            ( model_, Cmd.none, Dispatch.none )
-
-                Err _ ->
-                    ( model, Cmd.none, Dispatch.none )
-
         _ ->
             ( model, Cmd.none, Dispatch.none )
+
+
+bootstrap : Value -> Logs -> Logs
+bootstrap json model =
+    let
+        mapper data =
+            let
+                log =
+                    StdLog <|
+                        (StdData data.id
+                            StatusNormal
+                            data.insertedAt
+                            data.message
+                            (interpretRawContent data.message)
+                            NoEvent
+                        )
+            in
+                ( data.id, log )
+
+        insert id item model =
+            -- TODO: actually insert the logs
+            model
+    in
+        -- TODO: actually appply the new index
+        model

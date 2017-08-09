@@ -1,11 +1,10 @@
 module Game.Servers.Update exposing (..)
 
 import Dict
-import Json.Decode as Decode exposing (Value)
+import Json.Decode as Decode exposing (Value, decodeValue, list)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
-import Game.Messages as Game
 import Game.Models as Game
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -47,6 +46,33 @@ update game msg model =
 
         Event event ->
             broadcastEvent game event model
+
+
+bootstrap : Game.Model -> Value -> Model -> Model
+bootstrap game json model =
+    let
+        mapper data =
+            let
+                -- TODO: propagate bootstrap to remaining parts
+                server =
+                    { name = data.name
+                    , coordinates = data.coordinates
+                    , nip = data.nip
+                    , nips = [ data.nip ]
+                    , filesystem = Filesystem.initialFilesystem
+                    , logs = Logs.bootstrap data.logs LogsModel.initialModel
+                    , processes = Processes.initialProcesses
+                    , tunnels = Tunnels.initialModel
+                    , meta =
+                        GatewayMeta <| GatewayMetadata Nothing Nothing
+                    }
+            in
+                ( data.id, server )
+    in
+        decodeValue (list Server.decoder) json
+            |> Result.withDefault []
+            |> List.map mapper
+            |> List.foldl (uncurry insert) model
 
 
 
@@ -179,41 +205,7 @@ updateResponse game response id server =
 
 onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
 onBootstrap game json model =
-    -- TODO: fix this it's only a POC on how not to do it
-    -- maybe add this to Model
-    let
-        decodeIndex =
-            Decode.decodeValue (Decode.list Decode.value)
-
-        reducer serverData (( servers, _, _ ) as acc) =
-            let
-                msg =
-                    LogsMsg <| Logs.Bootstrap serverData.logs
-
-                server =
-                    { name = "tmp"
-                    , nip = ( "", "" )
-                    , nips = [ ( "", "" ) ]
-                    , filesystem = Filesystem.initialFilesystem
-                    , logs = LogsModel.initialLogs
-                    , processes = Processes.initialProcesses
-                    , tunnels = Tunnels.initialModel
-                    , meta =
-                        GatewayMeta <| GatewayMetadata Nothing Nothing
-                    , coordinates = 0
-                    }
-            in
-                Update.andThen
-                    (insert serverData.id server
-                        >> updateItem game serverData.id msg
-                    )
-                    acc
-    in
-        decodeIndex json
-            |> Result.withDefault []
-            |> List.filterMap
-                (Decode.decodeValue Server.decoder >> Result.toMaybe)
-            |> List.foldl reducer (Update.fromModel model)
+    Update.fromModel <| bootstrap game json model
 
 
 onSetBounce : Maybe Bounces.ID -> ID -> Server -> ItemUpdateResponse
