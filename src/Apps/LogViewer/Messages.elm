@@ -13,7 +13,7 @@ type Msg
     | ApplyEditing ID
     | LeaveEditing ID
     | StartCrypting ID
-    | StartUncrypting ID
+    | StartDecrypting ID
     | StartHiding ID
     | StartDeleting ID
     | DummyNoOp

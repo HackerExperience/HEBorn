@@ -1,4 +1,4 @@
-module Game.Servers.Logs.Requests.LogIndex
+module Game.Servers.Logs.Requests.Index
     exposing
         ( Response(..)
         , request
@@ -12,15 +12,13 @@ import Json.Decode
         ( Decoder
         , Value
         , decodeValue
-        , succeed
-        , fail
-        , andThen
         , list
+        , maybe
         , string
         , float
         )
 import Time exposing (Time)
-import Json.Decode.Pipeline exposing (decode, required, hardcoded)
+import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
@@ -33,17 +31,13 @@ type Response
     | NoOp
 
 
-type alias Root =
-    { logs : Logs }
-
-
 type alias Logs =
     List Log
 
 
 type alias Log =
     { id : String
-    , message : String
+    , message : Maybe String
     , insertedAt : Time
     }
 
@@ -51,7 +45,7 @@ type alias Log =
 request : ConfigSource a -> Cmd Msg
 request =
     Requests.request ServerLogIndexTopic
-        (LogIndexRequest >> Request)
+        (IndexRequest >> Request)
         Nothing
         Encode.null
 
@@ -61,7 +55,7 @@ receive code json =
     case code of
         OkCode ->
             json
-                |> decoder
+                |> decodeValue decoder
                 |> Result.map OkResponse
                 |> Requests.report
 
@@ -74,25 +68,14 @@ receive code json =
 -- internals
 
 
-decoder : Value -> Result String Logs
-decoder json =
-    case decodeValue root json of
-        Ok root ->
-            Ok root.logs
-
-        Err reason ->
-            Err reason
-
-
-root : Decoder Root
-root =
-    decode Root
-        |> required "logs" (list log)
+decoder : Decoder Logs
+decoder =
+    list log
 
 
 log : Decoder Log
 log =
     decode Log
         |> required "log_id" string
-        |> required "message" string
+        |> required "message" (maybe string)
         |> required "inserted_at" float

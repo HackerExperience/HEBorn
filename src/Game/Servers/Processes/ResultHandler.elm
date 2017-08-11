@@ -1,7 +1,7 @@
 module Game.Servers.Processes.ResultHandler exposing (handle, completeProcess)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (..)
@@ -12,7 +12,7 @@ handleLogForge : String -> TargetLogID -> LogForgeAction -> Dispatch
 handleLogForge serverID logId logAction =
     case logAction of
         LogCrypt ->
-            Dispatch.logs serverID (Logs.Crypt logId)
+            Dispatch.logs serverID (Logs.LogMsg logId <| Logs.Encrypt)
 
         _ ->
             Dispatch.none

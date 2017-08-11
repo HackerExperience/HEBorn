@@ -8,6 +8,9 @@ import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Game.Servers.Logs.Models exposing (..)
 
 
+-- TODO: refactor
+
+
 all : Test
 all =
     describe "log"
@@ -43,26 +46,13 @@ addLogTests =
 addLogGenericTests : List Test
 addLogGenericTests =
     [ fuzz
-        (tuple ( Gen.model, Gen.log ))
+        (tuple ( Gen.model, Gen.tuple ))
         "can add a LogEntry but not a NoLog"
       <|
-        \( logs, log ) ->
-            let
-                model =
-                    add log logs
-
-                expectations =
-                    case log of
-                        StdLog log ->
-                            Just True
-
-                        NoLog ->
-                            Nothing
-            in
-                log
-                    |> getID
-                    |> Maybe.map (model |> flip exists)
-                    |> Expect.equal expectations
+        \( model, ( id, log ) ) ->
+            insert id log model
+                |> member id
+                |> Expect.equal True
     ]
 
 
@@ -82,37 +72,23 @@ updateLogTests =
 updateLogGenericTests : List Test
 updateLogGenericTests =
     [ fuzz
-        (tuple3 ( Gen.model, Gen.log, Gen.logContent ))
-        "update Log contents and noop on NoLog"
+        (tuple3 ( Gen.model, Gen.tuple, Gen.data ))
+        "update Log contents"
       <|
-        \( logs, log, content ) ->
+        \( model, ( id, log ), data ) ->
             let
-                log_ =
-                    case log of
-                        StdLog log ->
-                            StdLog { log | raw = content }
-
-                        NoLog ->
-                            NoLog
-
-                model =
-                    logs
-                        |> add log
-                        |> update log_
-
-                expectations =
-                    case log of
-                        StdLog _ ->
-                            Just content
-
-                        NoLog ->
-                            Nothing
+                content =
+                    getContent <|
+                        new
+                            (getTimestamp log)
+                            log.status
+                            (Just data.raw)
             in
-                log
-                    |> getID
-                    |> Maybe.map (model |> flip getByID)
-                    |> Maybe.andThen getRawContent
-                    |> Expect.equal expectations
+                insert id log model
+                    |> insert id (setContent (Just data.raw) log)
+                    |> get id
+                    |> Maybe.map getContent
+                    |> Expect.equal (Just content)
     ]
 
 
@@ -132,34 +108,18 @@ deleteLogTests =
 deleteLogGenericTests : List Test
 deleteLogGenericTests =
     [ fuzz
-        (tuple ( Gen.model, Gen.log ))
+        (tuple ( Gen.model, Gen.tuple ))
         "log no longer exists"
       <|
-        \( logs, log ) ->
-            let
-                model =
-                    logs
-                        |> add log
-                        |> remove log
-
-                expectations =
-                    case log of
-                        StdLog log ->
-                            Just False
-
-                        NoLog ->
-                            Nothing
-            in
-                log
-                    |> getID
-                    |> Maybe.map (model |> flip exists)
-                    |> Expect.equal expectations
+        \( model, ( id, log ) ) ->
+            insert id log model
+                |> remove id
+                |> member id
+                |> Expect.equal False
     , fuzz
-        (tuple ( Gen.model, Gen.log ))
+        (tuple ( Gen.model, Gen.id ))
         "can't delete a non-existing log"
       <|
-        \( logs, log ) ->
-            logs
-                |> remove log
-                |> Expect.equal logs
+        \( model, id ) ->
+            Expect.equal model <| remove id model
     ]

@@ -2,18 +2,7 @@ module Gen.Logs exposing (..)
 
 import Time exposing (Time)
 import Fuzz exposing (Fuzzer)
-import Random.Pcg
-    exposing
-        ( Generator
-        , constant
-        , map
-        , map3
-        , choices
-        , andThen
-        , list
-        , int
-        , float
-        )
+import Random.Pcg as Random exposing (Generator)
 import Random.Pcg.Extra exposing (andMap)
 import Gen.Utils exposing (..)
 import Game.Servers.Logs.Models as Logs exposing (..)
@@ -24,24 +13,24 @@ import Game.Servers.Logs.Models as Logs exposing (..)
 --------------------------------------------------------------------------------
 
 
-logID : Fuzzer ID
-logID =
-    fuzzer genLogID
+model : Fuzzer Model
+model =
+    fuzzer genModel
 
 
-logContent : Fuzzer RawContent
-logContent =
-    fuzzer genLogContent
+list : Fuzzer (List ( ID, Log ))
+list =
+    fuzzer genList
 
 
-logEntry : Fuzzer Log
-logEntry =
-    fuzzer genLogEntry
+tuple : Fuzzer ( ID, Log )
+tuple =
+    fuzzer genTuple
 
 
-noLog : Fuzzer Log
-noLog =
-    fuzzer genNoLog
+id : Fuzzer ID
+id =
+    fuzzer genID
 
 
 log : Fuzzer Log
@@ -49,29 +38,24 @@ log =
     fuzzer genLog
 
 
-logList : Fuzzer (List Log)
-logList =
-    fuzzer genLogList
+timestamp : Fuzzer Time
+timestamp =
+    fuzzer genTimestamp
 
 
-emptyLogs : Fuzzer Logs
-emptyLogs =
-    fuzzer genEmptyLogs
+status : Fuzzer Status
+status =
+    fuzzer genStatus
 
 
-nonEmptyLogs : Fuzzer Logs
-nonEmptyLogs =
-    fuzzer genNonEmptyLogs
+content : Fuzzer Content
+content =
+    fuzzer genContent
 
 
-logs : Fuzzer Logs
-logs =
-    fuzzer genLogs
-
-
-model : Fuzzer Logs
-model =
-    fuzzer genModel
+data : Fuzzer Data
+data =
+    fuzzer genData
 
 
 
@@ -80,85 +64,76 @@ model =
 --------------------------------------------------------------------------------
 
 
-genLogID : Generator ID
-genLogID =
+genModel : Generator Model
+genModel =
+    Random.andThen (List.foldl (uncurry insert) initialModel >> Random.constant)
+        genList
+
+
+genList : Generator (List ( ID, Log ))
+genList =
+    Random.andThen (genTuple |> flip Random.list) (Random.int 1 10)
+
+
+genTuple : Generator ( ID, Log )
+genTuple =
+    Random.map2 (,) genID genLog
+
+
+genID : Generator ID
+genID =
     unique
-
-
-genLogContent : Generator RawContent
-genLogContent =
-    stringRange 0 32
-
-
-genLogData : Generator StdData
-genLogData =
-    let
-        raw =
-            genLogContent
-    in
-        genLogID
-            |> map StdData
-            |> andMap genStatus
-            |> andMap genTimestamp
-            |> andMap raw
-            |> andMap (constant (Invalid ""))
-            |> andMap genEvent
-
-
-genLogEntry : Generator Log
-genLogEntry =
-    map StdLog genLogData
-
-
-genNoLog : Generator Log
-genNoLog =
-    constant NoLog
 
 
 genLog : Generator Log
 genLog =
-    choices [ genLogEntry, genNoLog ]
-
-
-genStatus : Generator Status
-genStatus =
-    [ StatusNormal, Cryptographed ]
-        |> List.map constant
-        |> choices
-
-
-genEvent : Generator Event
-genEvent =
-    [ NoEvent, EventRecentlyFound, EventRecentlyCreated ]
-        |> List.map constant
-        |> choices
-
-
-genLogList : Generator (List Log)
-genLogList =
-    andThen (genLog |> flip list) (int 1 10)
-
-
-genEmptyLogs : Generator Logs
-genEmptyLogs =
-    constant initialLogs
-
-
-genNonEmptyLogs : Generator Logs
-genNonEmptyLogs =
-    andThen ((List.foldl Logs.add initialLogs) >> constant) genLogList
-
-
-genLogs : Generator Logs
-genLogs =
-    choices [ genEmptyLogs, genNonEmptyLogs ]
-
-
-genModel : Generator Logs
-genModel =
-    genNonEmptyLogs
+    Random.map Log genTimestamp
+        |> andMap genStatus
+        |> andMap genContent
 
 
 genTimestamp : Generator Time
 genTimestamp =
-    float 1420070400 4102444799
+    Random.float 1420070400 4102444799
+
+
+genStatus : Generator Status
+genStatus =
+    [ Normal, RecentlyFound, RecentlyCreated ]
+        |> List.map Random.constant
+        |> Random.choices
+
+
+genContent : Generator Content
+genContent =
+    Random.choices
+        [ Random.constant Encrypted
+        , Random.map Uncrypted genData
+        ]
+
+
+genData : Generator Data
+genData =
+    let
+        customFormat =
+            Random.map Just <| stringRange 0 32
+
+        formats =
+            customFormat
+                :: List.map (Just >> Random.constant)
+                    [ "Address logged in as user"
+                    , "Logged into address"
+                    , "Subject bounced connection from origin to remote"
+                    , "File name downloaded by address"
+                    , "File name downloaded from address"
+                    ]
+
+        toData str =
+            case getContent <| new 0.0 Normal str of
+                Uncrypted data ->
+                    data
+
+                Encrypted ->
+                    Debug.crash "Wat?"
+    in
+        Random.map toData <| Random.choices formats

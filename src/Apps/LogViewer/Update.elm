@@ -1,6 +1,7 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.Update as Update
 import Game.Data as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
@@ -18,111 +19,94 @@ update :
     -> ( Model, Cmd LogViewer.Msg, Dispatch )
 update data msg ({ app } as model) =
     case msg of
-        -- -- Context
+        -- Context
         MenuMsg (Menu.MenuClick action) ->
             Menu.actionHandler data action model
 
         MenuMsg msg ->
             let
-                ( menu_, cmd, coreMsg ) =
+                ( menu_, cmd, dispatch ) =
                     Menu.update data msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
+
+                model_ =
+                    { model | menu = menu_ }
             in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+                ( model_, cmd_, dispatch )
 
         -- -- Real acts
-        ToogleExpand logId ->
-            let
-                app_ =
-                    toggleExpand app logId
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+        ToogleExpand id ->
+            { model | app = toggleExpand id app }
+                |> Update.fromModel
 
         UpdateTextFilter filter ->
-            let
-                app_ =
-                    updateTextFilter data app filter
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            { model | app = updateTextFilter data filter app }
+                |> Update.fromModel
 
-        EnterEditing logId ->
-            ( enterEditing data model logId
-            , Cmd.none
-            , Dispatch.none
-            )
+        EnterEditing id ->
+            enterEditing data id model
+                |> Update.fromModel
 
-        UpdateEditing logId input ->
-            let
-                app_ =
-                    updateEditing app logId input
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+        UpdateEditing id input ->
+            { model | app = updateEditing id input app }
+                |> Update.fromModel
 
-        LeaveEditing logId ->
-            let
-                app_ =
-                    leaveEditing app logId
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+        LeaveEditing id ->
+            { model | app = leaveEditing id app }
+                |> Update.fromModel
 
-        ApplyEditing logId ->
+        ApplyEditing id ->
             let
                 edited =
-                    getEdit app logId
+                    getEdit id app
 
-                app_ =
-                    leaveEditing app logId
+                model_ =
+                    { model | app = leaveEditing id app }
 
-                gameMsg =
-                    (case edited of
+                dispatch =
+                    case edited of
                         Just edited ->
-                            Dispatch.logs
-                                data.id
-                                (Logs.UpdateContent logId edited)
+                            Logs.UpdateContent edited
+                                |> Dispatch.log data.id id
 
                         Nothing ->
                             Dispatch.none
-                    )
             in
-                ( { model | app = app_ }, Cmd.none, gameMsg )
+                ( model_, Cmd.none, dispatch )
 
-        StartCrypting logId ->
+        StartCrypting id ->
             let
-                gameMsg =
-                    Dispatch.processes
-                        data.id
-                        (NewProcesses.localLogCrypt 1.0 logId data.game.meta.lastTick)
+                dispatch =
+                    NewProcesses.localLogCrypt 1.0 id data.game.meta.lastTick
+                        |> Dispatch.processes data.id
             in
-                ( model, Cmd.none, gameMsg )
+                ( model, Cmd.none, dispatch )
 
-        StartUncrypting logId ->
+        StartDecrypting id ->
             let
-                gameMsg =
-                    Dispatch.logs
-                        data.id
-                        (Logs.Uncrypt logId "NOT IMPLEMENTED YET")
+                dispatch =
+                    Logs.Decrypt "NOT IMPLEMENTED YET"
+                        |> Dispatch.log data.id id
             in
-                ( model, Cmd.none, gameMsg )
+                ( model, Cmd.none, dispatch )
 
-        StartHiding logId ->
+        StartHiding id ->
             let
-                gameMsg =
-                    Dispatch.logs
-                        data.id
-                        (Logs.Hide logId)
+                dispatch =
+                    Logs.Hide id
+                        |> Dispatch.logs data.id
             in
-                ( model, Cmd.none, gameMsg )
+                ( model, Cmd.none, dispatch )
 
-        StartDeleting logId ->
+        StartDeleting id ->
             let
-                gameMsg =
-                    Dispatch.logs
-                        data.id
-                        (Logs.Delete logId)
+                dispatch =
+                    Logs.Delete id
+                        |> Dispatch.logs data.id
             in
-                ( model, Cmd.none, gameMsg )
+                ( model, Cmd.none, dispatch )
 
         DummyNoOp ->
             ( model, Cmd.none, Dispatch.none )

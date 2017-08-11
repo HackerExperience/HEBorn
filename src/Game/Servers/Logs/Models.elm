@@ -1,250 +1,267 @@
-module Game.Servers.Logs.Models exposing (..)
+module Game.Servers.Logs.Models
+    exposing
+        ( Model
+        , ID
+        , Log
+        , Content(..)
+        , Data
+        , Status(..)
+        , Format(..)
+        , LocalLogin
+        , RemoteLogin
+        , Connection
+        , Download
+        , FileName
+        , ServerUser
+        , Render(..)
+        , initialModel
+        , new
+        , insert
+        , remove
+        , member
+        , get
+        , filter
+        , getTimestamp
+        , getContent
+        , setTimestamp
+        , setContent
+          -- TODO: Hide / UnHide
+        , render
+        )
 
 import Dict exposing (Dict)
 import Time exposing (Time)
-import Utils.Dict as DictUtils
-import Game.Network.Types exposing (IP)
-import Game.Shared as Game exposing (ID, ServerUser)
+import Game.Network.Types exposing (IP, NIP)
+
+
+type alias Model =
+    Dict ID Log
 
 
 type alias ID =
-    Game.ID
-
-
-type alias RawContent =
     String
 
 
-type alias StdData =
-    { id : ID
+type alias Log =
+    { timestamp : Time
     , status : Status
-    , timestamp : Time
-    , raw : RawContent
-    , smart : SmartContent
-    , event : Event
+    , content : Content
     }
 
 
-type Log
-    = StdLog StdData
-    | NoLog
+type Content
+    = Uncrypted Data
+    | Encrypted
 
 
-type alias Logs =
-    Dict ID Log
+type alias Data =
+    { raw : String
+    , format : Maybe Format
+    }
+
+
+type Status
+    = Normal
+    | RecentlyFound
+    | RecentlyCreated
+
+
+type Format
+    = LocalLoginFormat LocalLogin
+    | RemoteLoginFormat RemoteLogin
+    | ConnectionFormat Connection
+    | DownloadByFormat Download
+    | DownloadFromFormat Download
+
+
+type alias LocalLogin =
+    { from : IP
+    , user : ServerUser
+    }
+
+
+type alias RemoteLogin =
+    { into : IP
+    }
+
+
+type alias Connection =
+    { nip : IP
+    , from : IP
+    , to : IP
+    }
+
+
+type alias Download =
+    { filename : FileName
+    , nip : IP
+    }
 
 
 type alias FileName =
     String
 
 
-type SmartContent
-    = LoginLocal IP ServerUser
-    | LoginRemote IP
-    | Connection IP IP IP
-    | DownloadBy FileName IP
-    | DownloadFrom FileName IP
-    | Invalid String
-    | Unintelligible
+type alias ServerUser =
+    String
 
 
-type Event
-    = NoEvent
-    | EventRecentlyFound
-    | EventRecentlyCreated
+type
+    Render
+    -- TODO: this still's not as good as it should be
+    = TextE String
+    | NipE IP
+    | SpecialE String String
 
 
-type Status
-    = StatusNormal
-    | Cryptographed
-
-
-initialLogs : Logs
-initialLogs =
+initialModel : Model
+initialModel =
     Dict.empty
 
 
-initialModel : Logs
-initialModel =
-    initialLogs
+new : Time -> Status -> Maybe String -> Log
+new timestamp status content =
+    content
+        |> Maybe.map (parseData >> Uncrypted)
+        |> Maybe.withDefault Encrypted
+        |> Log timestamp status
 
 
-getByID : ID -> Logs -> Log
-getByID id logs =
-    case Dict.get id logs of
-        Just log ->
-            log
+insert : ID -> Log -> Model -> Model
+insert =
+    Dict.insert
+
+
+remove : ID -> Model -> Model
+remove =
+    Dict.remove
+
+
+member : ID -> Model -> Bool
+member =
+    Dict.member
+
+
+get : ID -> Model -> Maybe Log
+get =
+    Dict.get
+
+
+filter : (ID -> Log -> Bool) -> Model -> Dict ID Log
+filter =
+    Dict.filter
+
+
+getTimestamp : Log -> Time
+getTimestamp =
+    .timestamp
+
+
+getContent : Log -> Content
+getContent =
+    .content
+
+
+setTimestamp : Time -> Log -> Log
+setTimestamp timestamp log =
+    { log | timestamp = timestamp }
+
+
+setContent : Maybe String -> Log -> Log
+setContent newContent log =
+    let
+        content =
+            case newContent of
+                Just raw ->
+                    Uncrypted <| parseData raw
+
+                Nothing ->
+                    Encrypted
+
+        log_ =
+            { log | content = content }
+    in
+        log_
+
+
+render : Data -> List Render
+render { format, raw } =
+    case format of
+        Just format ->
+            case format of
+                LocalLoginFormat { from, user } ->
+                    [ NipE from
+                    , TextE " logged in as "
+                    , SpecialE "user" user
+                    ]
+
+                RemoteLoginFormat { into } ->
+                    [ TextE "Logged into "
+                    , NipE into
+                    ]
+
+                ConnectionFormat { nip, from, to } ->
+                    [ NipE nip
+                    , TextE " bounced connection from "
+                    , NipE from
+                    , TextE " to "
+                    , NipE to
+                    ]
+
+                DownloadByFormat { filename, nip } ->
+                    [ TextE "File "
+                    , SpecialE "file" filename
+                    , TextE " downloaded by "
+                    , NipE nip
+                    ]
+
+                DownloadFromFormat { filename, nip } ->
+                    [ TextE "File "
+                    , SpecialE "file" filename
+                    , TextE " downloaded from "
+                    , NipE nip
+                    ]
 
         Nothing ->
-            NoLog
+            [ TextE raw ]
 
 
-exists : ID -> Logs -> Bool
-exists id logs =
-    Dict.member id logs
+
+-- internals
 
 
-getTimestamp : Log -> Maybe Time
-getTimestamp log =
-    case log of
-        StdLog l ->
-            Just l.timestamp
+parseData : String -> Data
+parseData raw =
+    case String.split " " raw of
+        [ addr, "logged", "in", "as", user ] ->
+            LocalLogin addr user
+                |> LocalLoginFormat
+                |> Just
+                |> Data raw
 
-        NoLog ->
-            Nothing
+        [ "Logged", "into", addr ] ->
+            RemoteLogin addr
+                |> RemoteLoginFormat
+                |> Just
+                |> Data raw
 
+        [ subj, "bounced", "connection", "from", from, "to", to ] ->
+            Connection subj from to
+                |> ConnectionFormat
+                |> Just
+                |> Data raw
 
-getRawContent : Log -> Maybe RawContent
-getRawContent log =
-    case log of
-        StdLog l ->
-            Just l.raw
+        [ "File", file, "downloaded", "by", addr ] ->
+            Download file addr
+                |> DownloadByFormat
+                |> Just
+                |> Data raw
 
-        NoLog ->
-            Nothing
+        [ "File", file, "downloaded", "from", addr ] ->
+            Download file addr
+                |> DownloadFromFormat
+                |> Just
+                |> Data raw
 
-
-getSmartContent : Log -> Maybe SmartContent
-getSmartContent log =
-    case log of
-        StdLog l ->
-            Just l.smart
-
-        NoLog ->
-            Nothing
-
-
-getID : Log -> Maybe ID
-getID log =
-    case log of
-        StdLog l ->
-            Just l.id
-
-        NoLog ->
-            Nothing
-
-
-add : Log -> Logs -> Logs
-add log logs =
-    case (getID log) of
-        Just id ->
-            Dict.insert id log logs
-
-        Nothing ->
-            logs
-
-
-remove : Log -> Logs -> Logs
-remove log logs =
-    case (getID log) of
-        Just id ->
-            removeById id logs
-
-        Nothing ->
-            logs
-
-
-removeById : ID -> Logs -> Logs
-removeById logId logs =
-    Dict.remove logId logs
-
-
-update : Log -> Logs -> Logs
-update log logs =
-    case log of
-        StdLog entry ->
-            DictUtils.safeUpdate entry.id log logs
-
-        NoLog ->
-            logs
-
-
-interpretRawContent : RawContent -> SmartContent
-interpretRawContent src =
-    let
-        splitten =
-            String.split " " src
-    in
-        case splitten of
-            [ addr, "logged", "in", "as", user ] ->
-                LoginLocal addr user
-
-            [ actor, "bounced", "connection", "from", src, "to", dest ] ->
-                Connection actor src dest
-
-            [ "File", fileName, "downloaded", "by", destIP ] ->
-                DownloadBy fileName destIP
-
-            [ "File", fileName, "downloaded", "from", srcIP ] ->
-                DownloadFrom fileName srcIP
-
-            [ "Logged", "into", destinationIP ] ->
-                LoginRemote destinationIP
-
-            _ ->
-                Invalid src
-
-
-updateContent : Logs -> ID -> RawContent -> Logs
-updateContent model logId newRaw =
-    let
-        oldLog =
-            Dict.get logId model
-
-        newLog =
-            case oldLog of
-                Just (StdLog oldLogData) ->
-                    StdLog
-                        { oldLogData
-                            | raw = newRaw
-                            , smart = newRaw |> interpretRawContent
-                        }
-
-                _ ->
-                    NoLog
-    in
-        Dict.insert logId newLog model
-
-
-crypt : Logs -> ID -> Logs
-crypt model logId =
-    let
-        oldLog =
-            Dict.get logId model
-
-        newLog =
-            case oldLog of
-                Just (StdLog oldLogData) ->
-                    StdLog
-                        { oldLogData
-                            | raw = ""
-                            , status = Cryptographed
-                            , smart = Unintelligible
-                        }
-
-                _ ->
-                    NoLog
-    in
-        Dict.insert logId newLog model
-
-
-uncrypt : Logs -> ID -> RawContent -> Logs
-uncrypt model logId restoredValue =
-    let
-        oldLog =
-            Dict.get logId model
-
-        newLog =
-            case oldLog of
-                Just (StdLog oldLogData) ->
-                    StdLog
-                        { oldLogData
-                            | raw = restoredValue
-                            , status = StatusNormal
-                            , smart = restoredValue |> interpretRawContent
-                        }
-
-                _ ->
-                    NoLog
-    in
-        Dict.insert logId newLog model
+        _ ->
+            Data raw Nothing

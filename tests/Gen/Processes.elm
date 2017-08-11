@@ -21,7 +21,7 @@ import Game.Servers.Processes.Types.Local as Local exposing (..)
 import Game.Servers.Processes.Types.Remote as Remote exposing (..)
 import Game.Servers.Processes.Models as Logs exposing (..)
 import Gen.Utils exposing (..)
-import Gen.Logs exposing (genLogID, genLogContent)
+import Gen.Logs as Logs
 
 
 --------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ genLocalProcessType =
         , map3 Local.Decryptor genVersion genFileID genScope
         , map2 Local.Encryptor genVersion genFileID
         , map Local.FileTransference genFileID
-        , map3 Local.LogForge genVersion genLogID genLogForgeAction
+        , map3 Local.LogForge genVersion Logs.genID genLogForgeAction
         , map PassiveFirewall genVersion
         ]
 
@@ -208,7 +208,7 @@ genRemoteProcessType =
         , map2 Remote.Decryptor genFileID genScope
         , map Remote.Encryptor genFileID
         , map Remote.FileTransference genFileID
-        , map Remote.LogForge genLogID
+        , map Remote.LogForge Logs.genID
         ]
 
 
@@ -357,7 +357,7 @@ genRemoteProcesses =
 genLogForgeAction : Generator LogForgeAction
 genLogForgeAction =
     choices
-        [ map LogForgeMessage genLogContent
+        [ map LogForgeMessage (map .raw Logs.genData)
         , constant LogCrypt
         , constant LogUncrypt
         , constant LogHide

@@ -18,6 +18,7 @@ module Core.Dispatch
         , filesystem
         , processes
         , logs
+        , log
         , tunnels
         , meta
         )
@@ -32,6 +33,7 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
+import Game.Servers.Logs.Models as Logs
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Shared as Servers
 import Utils.Cmd as CmdUtils
@@ -58,7 +60,7 @@ batch list =
             case List.tail list of
                 Just iter ->
                     -- this function **may** need to change into a foldr
-                    fromList (List.foldl reducer (toList accum) iter)
+                    fromList <| List.foldl reducer (toList accum) iter
 
                 Nothing ->
                     accum
@@ -181,12 +183,12 @@ meta msg =
 
 web : Web.Msg -> Dispatch
 web msg =
-    game (Game.WebMsg msg)
+    game <| Game.WebMsg msg
 
 
-server : Servers.ID -> Servers.ItemMsg -> Dispatch
+server : Servers.ID -> Servers.ServerMsg -> Dispatch
 server id msg =
-    servers <| Servers.Item id msg
+    servers <| Servers.ServerMsg id msg
 
 
 filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
@@ -202,6 +204,11 @@ processes id msg =
 logs : Servers.ID -> Logs.Msg -> Dispatch
 logs id msg =
     server id <| Servers.LogsMsg msg
+
+
+log : Servers.ID -> Logs.ID -> Logs.LogMsg -> Dispatch
+log serverId id msg =
+    logs serverId <| Logs.LogMsg id msg
 
 
 tunnels : Servers.ID -> Tunnels.Msg -> Dispatch

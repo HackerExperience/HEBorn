@@ -23,7 +23,7 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Servers.Requests.Server as Server
+import Game.Servers.Requests.Fetch as Fetch
 import Game.Network.Types exposing (NIP)
 
 
@@ -31,8 +31,8 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-type alias ItemUpdateResponse =
-    ( Server, Cmd ItemMsg, Dispatch )
+type alias ServerUpdateResponse =
+    ( Server, Cmd ServerMsg, Dispatch )
 
 
 update : Game.Model -> Msg -> Model -> UpdateResponse
@@ -41,11 +41,14 @@ update game msg model =
         Bootstrap json ->
             onBootstrap game json model
 
-        Item id msg ->
-            updateItem game id msg model
+        ServerMsg id msg ->
+            onServerMsg game id msg model
 
         Event event ->
-            broadcastEvent game event model
+            onEvent game event model
+
+        Request data ->
+            updateRequest game (receive data) model
 
 
 bootstrap : Game.Model -> Value -> Model -> Model
@@ -69,90 +72,124 @@ bootstrap game json model =
             in
                 ( data.id, server )
     in
-        decodeValue (list Server.decoder) json
+        decodeValue (list Fetch.decoder) json
             |> Result.withDefault []
             |> List.map mapper
             |> List.foldl (uncurry insert) model
 
 
 
--- internals
+-- collection message handlers
 
 
-updateItem : Game.Model -> ID -> ItemMsg -> Model -> UpdateResponse
-updateItem game id msg ({ servers } as model) =
+onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
+onBootstrap game json model =
+    Update.fromModel <| bootstrap game json model
+
+
+onServerMsg : Game.Model -> ID -> ServerMsg -> Model -> UpdateResponse
+onServerMsg game id msg ({ servers } as model) =
     case Dict.get id servers of
         Just server ->
             updateServer game id msg server
                 |> Update.mapModel (flip (Dict.insert id) servers)
                 |> Update.mapModel (\servers -> { model | servers = servers })
-                |> Update.mapCmd (Item id)
+                |> Update.mapCmd (ServerMsg id)
 
         Nothing ->
             Update.fromModel model
 
 
-broadcastEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-broadcastEvent game event ({ servers } as model) =
+onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
+onEvent game event ({ servers } as model) =
     let
         msg =
-            ItemEvent event
+            ServerEvent event
 
-        reducer id item (( servers, _, _ ) as updateState) =
-            Update.fromModel item
+        reducer id server ( servers, cmd, dispatch ) =
+            Update.fromModel server
                 |> Update.andThen (updateServer game id msg)
                 |> Update.mapModel (flip (Dict.insert id) servers)
-                |> Update.mapCmd (Item id)
+                |> Update.mapCmd (ServerMsg id)
+                |> Update.addCmd cmd
+                |> Update.addDispatch dispatch
     in
         Dict.foldl reducer (Update.fromModel servers) servers
             |> Update.mapModel (\servers -> { model | servers = servers })
+            |> Update.andThen (updateEvent game event)
 
 
-broadcastItemEvent :
-    Game.Model
-    -> ID
-    -> Events.Event
-    -> Server
-    -> ItemUpdateResponse
-broadcastItemEvent game id event server =
-    -- updateFilesystem game (Filesystem.Event ev) server
-    -- |> Update.andThen (updateLogs game (Logs.Event ev))
-    -- |> Update.andThen (updateProcesses game (Processes.Event ev))
-    -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
-    Update.fromModel server
+updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
+updateEvent game event model =
+    Update.fromModel model
 
 
-updateServer : Game.Model -> ID -> ItemMsg -> Server -> ItemUpdateResponse
+updateRequest : Game.Model -> Response -> Model -> UpdateResponse
+updateRequest game data model =
+    Update.fromModel model
+
+
+
+--content message handlers
+
+
+updateServer : Game.Model -> ID -> ServerMsg -> Server -> ServerUpdateResponse
 updateServer game id msg server =
     case msg of
         SetBounce maybeId ->
-            onSetBounce maybeId id server
+            onSetBounce game id maybeId server
 
         SetEndpoint maybeNip ->
-            onSetEndpoint maybeNip id server
+            onSetEndpoint game id maybeNip server
 
         FilesystemMsg msg ->
-            updateFilesystem game id msg server
+            onFilesystemMsg game id msg server
 
         LogsMsg msg ->
-            updateLogs game msg server
+            onLogsMsg game msg server
 
         ProcessesMsg msg ->
-            updateProcesses game msg server
+            onProcessesMsg game msg server
 
         TunnelsMsg msg ->
-            updateTunnels game msg server
+            onTunnelsMsg game msg server
 
-        ItemEvent ev ->
-            Update.andThen (updateEvent game id ev)
-                (broadcastItemEvent game id ev server)
+        ServerEvent event ->
+            onServerEvent game id event server
 
-        Request data ->
-            updateResponse game (receive data) id server
+        ServerRequest data ->
+            updateServerRequest game id (serverReceive data) server
 
 
-updateFilesystem : Game.Model -> ID -> Filesystem.Msg -> Server -> ItemUpdateResponse
-updateFilesystem game id =
+onSetBounce :
+    Game.Model
+    -> ID
+    -> Maybe Bounces.ID
+    -> Server
+    -> ServerUpdateResponse
+onSetBounce game id maybeId server =
+    setBounce maybeId server
+        |> Update.fromModel
+
+
+onSetEndpoint :
+    Game.Model
+    -> ID
+    -> Maybe NIP
+    -> Server
+    -> ServerUpdateResponse
+onSetEndpoint game id maybeNip server =
+    setEndpoint maybeNip server
+        |> Update.fromModel
+
+
+onFilesystemMsg :
+    Game.Model
+    -> ID
+    -> Filesystem.Msg
+    -> Server
+    -> ServerUpdateResponse
+onFilesystemMsg game id =
     Update.child
         { get = .filesystem
         , set = (\fs model -> { model | filesystem = fs })
@@ -161,8 +198,8 @@ updateFilesystem game id =
         }
 
 
-updateLogs : Game.Model -> Logs.Msg -> Server -> ItemUpdateResponse
-updateLogs game =
+onLogsMsg : Game.Model -> Logs.Msg -> Server -> ServerUpdateResponse
+onLogsMsg game =
     Update.child
         { get = .logs
         , set = (\logs model -> { model | logs = logs })
@@ -171,8 +208,8 @@ updateLogs game =
         }
 
 
-updateProcesses : Game.Model -> Processes.Msg -> Server -> ItemUpdateResponse
-updateProcesses game =
+onProcessesMsg : Game.Model -> Processes.Msg -> Server -> ServerUpdateResponse
+onProcessesMsg game =
     Update.child
         { get = .processes
         , set = (\processes model -> { model | processes = processes })
@@ -181,8 +218,8 @@ updateProcesses game =
         }
 
 
-updateTunnels : Game.Model -> Tunnels.Msg -> Server -> ItemUpdateResponse
-updateTunnels game =
+onTunnelsMsg : Game.Model -> Tunnels.Msg -> Server -> ServerUpdateResponse
+onTunnelsMsg game =
     Update.child
         { get = .tunnels
         , set = (\tunnels model -> { model | tunnels = tunnels })
@@ -191,30 +228,29 @@ updateTunnels game =
         }
 
 
-updateEvent : Game.Model -> ID -> Events.Event -> Server -> ItemUpdateResponse
-updateEvent game id msg server =
-    -- no handled events yet
+onServerEvent game id event server =
+    -- updateFilesystem game (Filesystem.Event ev) server
+    -- |> Update.andThen (updateLogs game (Logs.Event ev))
+    -- |> Update.andThen (updateProcesses game (Processes.Event ev))
+    -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
+    updateServerEvent game id event server
+
+
+updateServerEvent :
+    Game.Model
+    -> ID
+    -> Events.Event
+    -> Server
+    -> ServerUpdateResponse
+updateServerEvent game id event server =
     Update.fromModel server
 
 
-updateResponse : Game.Model -> Response -> ID -> Server -> ItemUpdateResponse
-updateResponse game response id server =
-    -- no handled responses yet
+updateServerRequest :
+    Game.Model
+    -> ID
+    -> ServerResponse
+    -> Server
+    -> ServerUpdateResponse
+updateServerRequest game id response server =
     Update.fromModel server
-
-
-onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
-onBootstrap game json model =
-    Update.fromModel <| bootstrap game json model
-
-
-onSetBounce : Maybe Bounces.ID -> ID -> Server -> ItemUpdateResponse
-onSetBounce maybeId id server =
-    setBounce maybeId server
-        |> Update.fromModel
-
-
-onSetEndpoint : Maybe NIP -> ID -> Server -> ItemUpdateResponse
-onSetEndpoint maybeNip id server =
-    setEndpoint maybeNip server
-        |> Update.fromModel

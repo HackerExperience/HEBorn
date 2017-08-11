@@ -38,7 +38,7 @@ module Game.Servers.Models
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Shared as Filesystem exposing (Filesystem)
-import Game.Servers.Logs.Models as Logs exposing (Logs)
+import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes exposing (Processes)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
@@ -60,7 +60,7 @@ type alias Server =
     , nip : NIP
     , nips : List NIP
     , filesystem : Filesystem
-    , logs : Logs
+    , logs : Logs.Model
     , processes : Processes
     , tunnels : Tunnels.Model
     , coordinates : Coordinates
@@ -211,12 +211,12 @@ setFilesystem filesystem model =
     { model | filesystem = filesystem }
 
 
-getLogs : Server -> Logs
+getLogs : Server -> Logs.Model
 getLogs =
     .logs
 
 
-setLogs : Logs -> Server -> Server
+setLogs : Logs.Model -> Server -> Server
 setLogs logs model =
     { model | logs = logs }
 

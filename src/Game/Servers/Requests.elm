@@ -1,17 +1,32 @@
-module Game.Servers.Requests exposing (Response(..), receive)
+module Game.Servers.Requests
+    exposing
+        ( Response(..)
+        , ServerResponse(..)
+        , receive
+        , serverReceive
+        )
 
-import Game.Servers.Requests.Server as Server
+import Game.Servers.Requests.Fetch as Fetch
 import Game.Servers.Messages exposing (..)
 
 
 type Response
-    = ServerResponse Server.Response
+    = FetchResponse Fetch.Response
+
+
+type ServerResponse
+    = NoResponse
 
 
 receive : RequestMsg -> Response
 receive response =
     case response of
-        ServerRequest ( code, data ) ->
+        FetchRequest ( code, data ) ->
             data
-                |> Server.receive code
-                |> ServerResponse
+                |> Fetch.receive code
+                |> FetchResponse
+
+
+serverReceive : ServerRequestMsg -> ServerResponse
+serverReceive response =
+    NoResponse

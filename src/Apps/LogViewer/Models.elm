@@ -1,9 +1,9 @@
 module Apps.LogViewer.Models exposing (..)
 
-import Dict
+import Dict exposing (Dict)
 import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
-import Game.Servers.Logs.Models as Logs exposing (..)
+import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Menu.Models as Menu
 
 
@@ -14,10 +14,10 @@ type Sorting
 type alias LogViewer =
     { filterText : String
     , filterFlags : List Never
-    , filterCache : List ID
+    , filterCache : List Logs.ID
     , sorting : Sorting
-    , expanded : List ID
-    , editing : Dict.Dict ID String
+    , expanded : List Logs.ID
+    , editing : Dict.Dict Logs.ID String
     }
 
 
@@ -25,6 +25,10 @@ type alias Model =
     { app : LogViewer
     , menu : Menu.Model
     }
+
+
+
+-- TODO: rewrite this model's functions
 
 
 name : String
@@ -56,22 +60,6 @@ icon =
     "logvw"
 
 
-isEntryExpanded : LogViewer -> ID -> Bool
-isEntryExpanded app log =
-    List.member log app.expanded
-
-
-toggleExpanded : LogViewer -> ID -> LogViewer
-toggleExpanded app log =
-    { app
-        | expanded =
-            if (isEntryExpanded app log) then
-                List.filter ((/=) log) app.expanded
-            else
-                log :: app.expanded
-    }
-
-
 initialModel : Model
 initialModel =
     { app = initialLogViewer
@@ -90,122 +78,132 @@ initialLogViewer =
     }
 
 
-catchDataWhenFiltering : List ID -> Log -> Maybe StdData
-catchDataWhenFiltering filterCache log =
-    case log of
-        StdLog logData ->
-            if (List.member logData.id filterCache) then
-                Just logData
+isEntryExpanded : Logs.ID -> LogViewer -> Bool
+isEntryExpanded log app =
+    List.member log app.expanded
+
+
+toggleExpanded : Logs.ID -> LogViewer -> LogViewer
+toggleExpanded id app =
+    { app
+        | expanded =
+            if (isEntryExpanded id app) then
+                List.filter ((/=) id) app.expanded
             else
-                Nothing
-
-        NoLog ->
-            Nothing
+                id :: app.expanded
+    }
 
 
-catchData : Log -> Maybe StdData
-catchData log =
-    case log of
-        StdLog logData ->
-            Just logData
-
-        NoLog ->
-            Nothing
+catchDataWhenFiltering : List Logs.ID -> Logs.ID -> Maybe Logs.ID
+catchDataWhenFiltering filterCache log =
+    if (List.member log filterCache) then
+        Just log
+    else
+        Nothing
 
 
-applyFilter : LogViewer -> Logs -> List StdData
-applyFilter app logs =
-    logs
-        |> Dict.values
-        |> List.filterMap
+
+--catchData : Logs.Log -> Maybe Logs.Data
+--catchData log =
+--    --    case log of
+--    --        StdLog logData ->
+--    --            Just logData
+--    --        NoLog ->
+--    --            Nothing
+--    Nothing
+
+
+applyFilter : LogViewer -> Logs.Model -> Dict Logs.ID Logs.Log
+applyFilter app =
+    let
+        filterer id log =
             (if ((String.length app.filterText) > 0) then
-                catchDataWhenFiltering app.filterCache
+                catchDataWhenFiltering app.filterCache id
+                    |> Maybe.map (always True)
+                    |> Maybe.withDefault False
              else
-                catchData
+                True
             )
+    in
+        Logs.filter filterer
 
 
-enterEditing : Game.Data -> Model -> ID -> Model
-enterEditing data ({ app } as model) logId =
+enterEditing : Game.Data -> Logs.ID -> Model -> Model
+enterEditing data id ({ app } as model) =
     let
         logs =
             Servers.getLogs data.server
 
-        log =
-            Dict.get logId logs
-
         app_ =
-            (case log of
-                Just (StdLog log) ->
-                    Just (updateEditing app log.id log.raw)
+            case Dict.get id logs of
+                Just log ->
+                    case Logs.getContent log of
+                        Logs.Uncrypted data ->
+                            Just (updateEditing id data.raw app)
+
+                        Logs.Encrypted ->
+                            Nothing
 
                 _ ->
                     Nothing
-            )
     in
         app_
             |> Maybe.andThen (\v -> Just { model | app = v })
             |> Maybe.withDefault model
 
 
-updateEditing : LogViewer -> ID -> String -> LogViewer
-updateEditing app logId value =
+updateEditing : Logs.ID -> String -> LogViewer -> LogViewer
+updateEditing id value app =
     let
         editing_ =
-            Dict.insert logId value app.editing
+            Dict.insert id value app.editing
     in
         { app | editing = editing_ }
 
 
-toggleExpand : LogViewer -> ID -> LogViewer
-toggleExpand app logId =
+toggleExpand : Logs.ID -> LogViewer -> LogViewer
+toggleExpand id app =
     { app
         | expanded =
-            if (List.member logId app.expanded) then
-                List.filter ((/=) logId) app.expanded
+            if (List.member id app.expanded) then
+                List.filter ((/=) id) app.expanded
             else
-                logId :: app.expanded
+                id :: app.expanded
     }
 
 
-leaveEditing : LogViewer -> ID -> LogViewer
-leaveEditing app logId =
+leaveEditing : Logs.ID -> LogViewer -> LogViewer
+leaveEditing id app =
     let
         editing_ =
-            Dict.filter (\k _ -> k /= logId) app.editing
+            Dict.filter (\k _ -> k /= id) app.editing
     in
         { app | editing = editing_ }
 
 
-getEdit : LogViewer -> ID -> Maybe String
-getEdit app logId =
-    Dict.get logId app.editing
+getEdit : Logs.ID -> LogViewer -> Maybe Logs.ID
+getEdit id app =
+    Dict.get id app.editing
 
 
-logFilterMapFun : String -> Log -> Maybe ID
-logFilterMapFun filter log =
-    case log of
-        NoLog ->
-            Nothing
-
-        StdLog data ->
-            if (String.contains filter data.raw) then
-                Just data.id
-            else
-                Nothing
-
-
-updateTextFilter : Game.Data -> LogViewer -> String -> LogViewer
-updateTextFilter data app newFilter =
+updateTextFilter : Game.Data -> String -> LogViewer -> LogViewer
+updateTextFilter data filter app =
     let
-        newFilterCache =
+        filterer id log =
+            case Logs.getContent log of
+                Logs.Uncrypted data ->
+                    String.contains filter data.raw
+
+                Logs.Encrypted ->
+                    False
+
+        filterCache =
             data.server
                 |> Servers.getLogs
-                |> Dict.values
-                |> List.filterMap
-                    (logFilterMapFun newFilter)
+                |> Logs.filter filterer
+                |> Dict.keys
     in
         { app
-            | filterText = newFilter
-            , filterCache = newFilterCache
+            | filterText = filter
+            , filterCache = filterCache
         }

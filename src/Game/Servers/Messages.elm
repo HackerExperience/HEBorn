@@ -1,4 +1,10 @@
-module Game.Servers.Messages exposing (Msg(..), ItemMsg(..), RequestMsg(..))
+module Game.Servers.Messages
+    exposing
+        ( Msg(..)
+        , ServerMsg(..)
+        , RequestMsg(..)
+        , ServerRequestMsg(..)
+        )
 
 import Json.Decode exposing (Value)
 import Events.Events as Events
@@ -14,20 +20,25 @@ import Game.Network.Types exposing (NIP)
 
 type Msg
     = Bootstrap Value
-    | Item ID ItemMsg
+    | ServerMsg ID ServerMsg
+    | Request RequestMsg
     | Event Events.Event
 
 
-type ItemMsg
+type ServerMsg
     = SetBounce (Maybe Bounces.ID)
     | SetEndpoint (Maybe NIP)
     | FilesystemMsg Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
     | TunnelsMsg Tunnels.Msg
-    | ItemEvent Events.Event
-    | Request RequestMsg
+    | ServerEvent Events.Event
+    | ServerRequest ServerRequestMsg
 
 
 type RequestMsg
-    = ServerRequest ResponseType
+    = FetchRequest ResponseType
+
+
+type ServerRequestMsg
+    = NoOp

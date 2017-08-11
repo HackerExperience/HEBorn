@@ -13,7 +13,7 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
-import Game.Servers.Logs.Models exposing (..)
+import Game.Servers.Logs.Models as Logs
 import Apps.DBAdmin.Models exposing (Model)
 import Apps.DBAdmin.Messages as DBAdmin
 import Apps.DBAdmin.Menu.Messages exposing (Msg(..), MenuAction(..))
@@ -54,12 +54,12 @@ menu model context =
             []
 
 
-menuNormalEntry : ID -> Html.Attribute DBAdmin.Msg
+menuNormalEntry : Logs.ID -> Html.Attribute DBAdmin.Msg
 menuNormalEntry logID =
     menuFor (MenuNormalEntry logID)
 
 
-menuEditingEntry : ID -> Html.Attribute DBAdmin.Msg
+menuEditingEntry : Logs.ID -> Html.Attribute DBAdmin.Msg
 menuEditingEntry logID =
     menuFor (MenuEditingEntry logID)
 

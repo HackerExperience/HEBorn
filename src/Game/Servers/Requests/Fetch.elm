@@ -1,4 +1,4 @@
-module Game.Servers.Requests.Server
+module Game.Servers.Requests.Fetch
     exposing
         ( Response(..)
         , Server

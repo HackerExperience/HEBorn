@@ -1,6 +1,6 @@
 module Apps.LogViewer.View exposing (view)
 
-import Dict
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -15,7 +15,7 @@ import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Servers.Logs.Models as Logs exposing (..)
+import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
@@ -24,229 +24,6 @@ import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
-
-
-isEntryExpanded : LogViewer -> StdData -> Bool
-isEntryExpanded app log =
-    List.member log.id app.expanded
-
-
-isEntryEditing : LogViewer -> StdData -> Bool
-isEntryEditing app log =
-    Dict.member log.id app.editing
-
-
-renderFlag : Classes -> List (Html Msg)
-renderFlag flag =
-    [ text " "
-    , span [ class [ flag ] ] []
-    ]
-
-
-renderFlags : List Classes -> List (Html Msg)
-renderFlags =
-    List.map renderFlag
-        >> List.concat
-        >> List.tail
-        >> Maybe.withDefault []
-
-
-renderMsg : SmartContent -> Html Msg
-renderMsg msg =
-    div []
-        (case msg of
-            LoginLocal addr user ->
-                [ Inlines.addr addr
-                , span [] [ text " logged in as " ]
-                , Inlines.user user
-                ]
-
-            LoginRemote dest ->
-                [ span [] [ text "Logged into " ]
-                , Inlines.addr dest
-                ]
-
-            Connection actor src dest ->
-                [ Inlines.addr actor
-                , span [] [ text " bounced connection from " ]
-                , Inlines.addr src
-                , span [] [ text " to " ]
-                , Inlines.addr dest
-                ]
-
-            DownloadBy fileName destIP ->
-                [ span [] [ text "File " ]
-                , Inlines.file fileName
-                , span [] [ text " downloaded by " ]
-                , Inlines.addr destIP
-                ]
-
-            DownloadFrom fileName srcIP ->
-                [ span [] [ text "File " ]
-                , Inlines.file fileName
-                , span [] [ text " downloaded from " ]
-                , Inlines.addr srcIP
-                ]
-
-            Invalid msg ->
-                [ span [] [ text "Corrupted: " ]
-                , span [] [ text msg ]
-                ]
-
-            Unintelligible ->
-                [ span [] [ text "● ◐ ◑ ◒ ◓ ◔ ◕ ◖ ◗" ] ]
-        )
-
-
-renderMiniMsg : SmartContent -> Html Msg
-renderMiniMsg msg =
-    (case msg of
-        Connection actor src dest ->
-            div []
-                [ Inlines.addr actor
-                , span [] [ text " bounced connection from " ]
-                , Inlines.addr src
-                , span [] [ text " to ..." ]
-                ]
-
-        _ ->
-            renderMsg msg
-    )
-
-
-renderEditing : Logs.ID -> String -> Html Msg
-renderEditing logID src =
-    input
-        [ class [ BoxifyMe ]
-        , value src
-        , onInput (UpdateEditing logID)
-        ]
-        []
-
-
-renderTopActions : StdData -> Html Msg
-renderTopActions entry =
-    div []
-        -- TODO: Catch the flags for real
-        (renderFlags [ BtnUser, BtnEdit, BtnCrypt ])
-
-
-btnsEditing : Logs.ID -> List ( Attribute Msg, Msg )
-btnsEditing logID =
-    [ ( class [ BtnApply, BottomButton ], ApplyEditing logID )
-    , ( class [ BtnCancel, BottomButton ], LeaveEditing logID )
-    ]
-
-
-btnsNormal : Logs.ID -> List ( Attribute Msg, Msg )
-btnsNormal logID =
-    [ ( class [ BtnCrypt, BottomButton ], StartCrypting logID )
-    , ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnEdit, BottomButton ], EnterEditing logID )
-    , ( class [ BtnDelete, BottomButton ], StartDeleting logID )
-    ]
-
-
-btnsCryptographed : Logs.ID -> List ( Attribute Msg, Msg )
-btnsCryptographed logID =
-    [ ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnUncrypt, BottomButton ], StartUncrypting logID )
-    ]
-
-
-renderBottomActions : LogViewer -> StdData -> Html Msg
-renderBottomActions app entry =
-    let
-        btns =
-            if (isEntryEditing app entry) then
-                btnsEditing entry.id
-            else if (isEntryExpanded app entry) then
-                case entry.status of
-                    StatusNormal ->
-                        btnsNormal entry.id
-
-                    Cryptographed ->
-                        btnsCryptographed entry.id
-            else
-                []
-    in
-        horizontalBtnPanel btns
-
-
-renderData : LogViewer -> StdData -> Html Msg
-renderData app entry =
-    case (Dict.get entry.id app.editing) of
-        Just x ->
-            renderEditing entry.id x
-
-        Nothing ->
-            if (isEntryExpanded app entry) then
-                renderMsg entry.smart
-            else
-                renderMiniMsg entry.smart
-
-
-renderBottom : LogViewer -> StdData -> Html Msg
-renderBottom app entry =
-    let
-        data =
-            if (isEntryEditing app entry) then
-                [ renderBottomActions app entry ]
-            else if (isEntryExpanded app entry) then
-                [ renderBottomActions app entry ]
-            else
-                []
-    in
-        div
-            [ class [ EBottom ] ]
-            data
-
-
-menuInclude : LogViewer -> StdData -> List (Attribute Msg)
-menuInclude app entry =
-    if (isEntryEditing app entry) then
-        [ menuEditingEntry entry.id ]
-    else
-        case entry.status of
-            StatusNormal ->
-                [ menuNormalEntry entry.id ]
-
-            _ ->
-                []
-
-
-renderEntry : LogViewer -> StdData -> Html Msg
-renderEntry app entry =
-    let
-        expandedState =
-            isEntryExpanded app entry
-
-        editingState =
-            isEntryEditing app entry
-
-        etop =
-            [ div [] [ entry.timestamp |> timestampToFullData |> text ]
-            , spacer
-            , renderTopActions entry
-            ]
-
-        data =
-            [ div [ class [ ETop ] ] etop
-            , renderData app entry
-            , renderBottom app entry
-            ]
-    in
-        toogableEntry
-            (not editingState)
-            (menuInclude app entry)
-            (ToogleExpand entry.id)
-            expandedState
-            data
-
-
-renderEntryList : LogViewer -> List StdData -> List (Html Msg)
-renderEntryList app =
-    List.map (renderEntry app)
 
 
 view : Game.Data -> Model -> Html Msg
@@ -270,7 +47,7 @@ view data ({ app } as model) =
                 (data.server
                     |> Servers.getLogs
                     |> applyFilter app
-                    |> renderEntryList app
+                    |> renderEntries app
                 )
     in
         verticalSticked
@@ -279,3 +56,209 @@ view data ({ app } as model) =
             , menuView model
             ]
             Nothing
+
+
+
+-- internals
+
+
+encrypted : String
+encrypted =
+    "⠽⠕⠥ ⠚⠥⠎⠞ ⠇⠕⠎⠞ ⠠⠠⠞⠓⠑ ⠠⠠⠛⠁⠍⠑"
+
+
+renderEntries : LogViewer -> Dict Logs.ID Logs.Log -> List (Html Msg)
+renderEntries app logs =
+    logs
+        |> Dict.toList
+        |> List.map (uncurry <| renderEntry app)
+
+
+renderEntry : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
+renderEntry app id log =
+    let
+        expandedState =
+            isEntryExpanded app id
+
+        editingState =
+            isEntryEditing app id
+
+        etop =
+            [ div [] [ log.timestamp |> timestampToFullData |> text ]
+            , spacer
+            , renderTopActions log
+            ]
+
+        data =
+            [ div [ class [ ETop ] ] etop
+            , renderData app id log
+            , renderBottom app id log
+            ]
+    in
+        toogableEntry
+            (not editingState)
+            (menuInclude app id log)
+            (ToogleExpand id)
+            expandedState
+            data
+
+
+isEntryExpanded : LogViewer -> Logs.ID -> Bool
+isEntryExpanded app id =
+    List.member id app.expanded
+
+
+isEntryEditing : LogViewer -> Logs.ID -> Bool
+isEntryEditing app id =
+    Dict.member id app.editing
+
+
+renderFlag : Classes -> List (Html Msg)
+renderFlag flag =
+    [ text " "
+    , span [ class [ flag ] ] []
+    ]
+
+
+renderFlags : List Classes -> List (Html Msg)
+renderFlags =
+    List.map renderFlag
+        >> List.concat
+        >> List.tail
+        >> Maybe.withDefault []
+
+
+renderContent : Logs.Log -> Html Msg
+renderContent log =
+    let
+        toHtml item =
+            case item of
+                Logs.NipE ip ->
+                    Inlines.addr ip
+
+                Logs.TextE str ->
+                    span [] [ text str ]
+
+                Logs.SpecialE "file" file ->
+                    Inlines.file file
+
+                Logs.SpecialE "user" user ->
+                    Inlines.user user
+
+                Logs.SpecialE _ str ->
+                    span [] [ text str ]
+
+        rendered =
+            case Logs.getContent log of
+                Logs.Uncrypted data ->
+                    List.map toHtml <| Logs.render data
+
+                Logs.Encrypted ->
+                    [ span [] [ text encrypted ] ]
+    in
+        div [] rendered
+
+
+renderMiniContent : Logs.Log -> Html Msg
+renderMiniContent =
+    renderContent
+
+
+renderEditing : Logs.ID -> String -> Html Msg
+renderEditing logID src =
+    input
+        [ class [ BoxifyMe ]
+        , value src
+        , onInput (UpdateEditing logID)
+        ]
+        []
+
+
+renderTopActions : Logs.Log -> Html Msg
+renderTopActions log =
+    -- TODO: Catch the flags for real
+    div [] <| renderFlags [ BtnUser, BtnEdit, BtnCrypt ]
+
+
+btnsEditing : Logs.ID -> List ( Attribute Msg, Msg )
+btnsEditing logID =
+    [ ( class [ BtnApply, BottomButton ], ApplyEditing logID )
+    , ( class [ BtnCancel, BottomButton ], LeaveEditing logID )
+    ]
+
+
+btnsNormal : Logs.ID -> List ( Attribute Msg, Msg )
+btnsNormal logID =
+    [ ( class [ BtnCrypt, BottomButton ], StartCrypting logID )
+    , ( class [ BtnHide, BottomButton ], StartHiding logID )
+    , ( class [ BtnEdit, BottomButton ], EnterEditing logID )
+    , ( class [ BtnDelete, BottomButton ], StartDeleting logID )
+    ]
+
+
+btnsCryptographed : Logs.ID -> List ( Attribute Msg, Msg )
+btnsCryptographed logID =
+    [ ( class [ BtnHide, BottomButton ], StartHiding logID )
+    , ( class [ BtnUncrypt, BottomButton ], StartDecrypting logID )
+    ]
+
+
+renderBottomActions : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
+renderBottomActions app id log =
+    let
+        btns =
+            if (isEntryEditing app id) then
+                btnsEditing id
+            else if (isEntryExpanded app id) then
+                case log.content of
+                    Logs.Uncrypted _ ->
+                        btnsNormal id
+
+                    Logs.Encrypted ->
+                        btnsCryptographed id
+            else
+                []
+    in
+        horizontalBtnPanel btns
+
+
+renderData : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
+renderData app id log =
+    case (Dict.get id app.editing) of
+        Just x ->
+            renderEditing id x
+
+        Nothing ->
+            if (isEntryExpanded app id) then
+                renderContent log
+            else
+                renderMiniContent log
+
+
+renderBottom : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
+renderBottom app id log =
+    let
+        data =
+            if (isEntryEditing app id) then
+                [ renderBottomActions app id log ]
+            else if (isEntryExpanded app id) then
+                [ renderBottomActions app id log ]
+            else
+                []
+    in
+        div
+            [ class [ EBottom ] ]
+            data
+
+
+menuInclude : LogViewer -> Logs.ID -> Logs.Log -> List (Attribute Msg)
+menuInclude app id log =
+    if (isEntryEditing app id) then
+        [ menuEditingEntry id ]
+    else
+        case log.content of
+            Logs.Uncrypted _ ->
+                [ menuNormalEntry id ]
+
+            Logs.Encrypted ->
+                []

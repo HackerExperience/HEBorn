@@ -2,7 +2,8 @@ module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
+import Utils.Update as Update
+import Game.Servers.Logs.Messages as Logs
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
@@ -16,35 +17,34 @@ actionHandler :
 actionHandler data action ({ app } as model) =
     case action of
         NormalEntryEdit logId ->
-            ( enterEditing data model logId
-            , Cmd.none
-            , Dispatch.none
-            )
+            enterEditing data logId model
+                |> Update.fromModel
 
         EdittingEntryApply logId ->
             let
                 edited =
-                    getEdit app logId
+                    getEdit logId app
 
-                app_ =
-                    leaveEditing app logId
-
-                gameMsg =
-                    (case edited of
+                dispatch =
+                    case edited of
                         Just edited ->
-                            Dispatch.logs
-                                data.id
-                                (Logs.UpdateContent logId edited)
+                            Logs.UpdateContent edited
+                                |> Dispatch.log data.id logId
 
                         Nothing ->
                             Dispatch.none
-                    )
+
+                model_ =
+                    { model | app = leaveEditing logId app }
             in
-                ( { model | app = app_ }, Cmd.none, gameMsg )
+                ( model_, Cmd.none, dispatch )
 
         EdittingEntryCancel logId ->
             let
                 app_ =
-                    leaveEditing app logId
+                    leaveEditing logId app
+
+                model_ =
+                    { model | app = app_ }
             in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+                Update.fromModel model_
