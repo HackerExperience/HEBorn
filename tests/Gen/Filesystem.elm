@@ -224,7 +224,7 @@ genEntryList =
 
 genEmptyFilesystem : Generator Filesystem
 genEmptyFilesystem =
-    constant initialFilesystem
+    constant initialModel
 
 
 genNonEmptyFilesystem : Generator Filesystem
@@ -238,7 +238,7 @@ genNonEmptyFilesystem =
                             |> addEntry f
                             |> moveEntry ( location, getEntryBasename f ) f
                     )
-                    (initialFilesystem
+                    (initialModel
                         |> createLocation fileID location
                     )
                     entryList

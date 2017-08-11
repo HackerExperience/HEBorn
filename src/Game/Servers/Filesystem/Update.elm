@@ -69,7 +69,7 @@ bootstrap value _ =
     value
         |> RqIndex.decoder
         |> Requests.report
-        |> List.foldl (convEntry RootRef) initialFilesystem
+        |> List.foldl (convEntry RootRef) initialModel
 
 
 

@@ -5,8 +5,8 @@ import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.PathTree exposing (..)
 
 
-initialFilesystem : Filesystem
-initialFilesystem =
+initialModel : Filesystem
+initialModel =
     { entries = Dict.empty, rootTree = Dict.empty }
 
 

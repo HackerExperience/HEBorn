@@ -11,7 +11,7 @@ import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Logs.Models as LogsModel
+import Game.Servers.Logs.Models as Logs
 import Game.Servers.Logs.Update as Logs
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
@@ -62,8 +62,8 @@ bootstrap game json model =
                     , coordinates = data.coordinates
                     , nip = data.nip
                     , nips = [ data.nip ]
-                    , filesystem = Filesystem.initialFilesystem
-                    , logs = Logs.bootstrap data.logs LogsModel.initialModel
+                    , filesystem = Filesystem.bootstrap data.filesystem Filesystem.initialModel
+                    , logs = Logs.bootstrap data.logs Logs.initialModel
                     , processes = Processes.initialProcesses
                     , tunnels = Tunnels.initialModel
                     , meta =

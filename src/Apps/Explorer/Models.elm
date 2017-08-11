@@ -39,16 +39,15 @@ title ({ app } as model) =
             locationToString app.path
 
         posfix =
-            if (String.length path) > 12 then
-                Just
-                    (": \""
+            if String.length path > 12 then
+                Just <|
+                    ": \""
                         ++ (String.left 5 path)
                         ++ "[...]"
                         ++ (String.right 5 path)
                         ++ "\""
-                    )
-            else if (String.length path) > 0 then
-                Just (": \"" ++ path ++ "\"")
+            else if String.length path > 0 then
+                Just <| ": \"" ++ path ++ "\""
             else
                 Nothing
     in
@@ -81,8 +80,8 @@ getPath explorer =
     explorer.path
 
 
-setPath : Explorer -> Filesystem.Location -> Explorer
-setPath explorer loc =
+setPath : Filesystem.Location -> Explorer -> Explorer
+setPath loc explorer =
     { explorer
         | path = loc
         , editing =
@@ -102,7 +101,7 @@ changePath :
     -> Explorer
 changePath path filesystem explorer =
     if Filesystem.isLocationValid path filesystem then
-        setPath explorer path
+        setPath path explorer
     else
         explorer
 

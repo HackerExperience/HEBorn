@@ -6,7 +6,7 @@ import Game.Servers.Filesystem.Models exposing (..)
 
 dummy : Filesystem
 dummy =
-    initialFilesystem
+    initialModel
         |> addEntry (FolderEntry { id = "001", name = "home", parent = RootRef })
         |> addEntry (FolderEntry { id = "002", name = "root", parent = NodeRef "001" })
         |> addEntry
