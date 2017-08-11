@@ -8,7 +8,7 @@ dummy =
     Database
         [ { nip = ( "::", "153.249.31.179" )
           , password = "WhenYouWereHereBefore"
-          , nick = "Creep"
+          , label = Just "Creep 1"
           , notes = Just "Weirdo"
           , virusInstalled =
                 [ ( "dummyVirus", "GrandpaChair.mlw", 2.1 )
@@ -20,7 +20,7 @@ dummy =
           }
         , { nip = ( "::", "143.239.31.169" )
           , password = "WhenYouWereHereBefore"
-          , nick = "Creep"
+          , label = Just "Creep 2"
           , notes = Just "Weirdo"
           , virusInstalled =
                 [ ( "dummyVirus", "GrandpaChair.mlw", 2.1 )

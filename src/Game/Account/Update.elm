@@ -1,5 +1,7 @@
-module Game.Account.Update exposing (..)
+module Game.Account.Update exposing (update, bootstrap)
 
+import Json.Decode exposing (Value, decodeValue)
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
 import Utils.Update as Update
@@ -7,6 +9,8 @@ import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events
+import Events.Account as Account
+import Requests.Requests as Requests
 import Game.Account.Bounces.Update as Bounces
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
@@ -36,8 +40,31 @@ update game msg model =
             onRequest game (receive data) model
 
 
+bootstrap : Value -> Model -> Model
+bootstrap json model =
+    decodeValue Account.decoder json
+        |> Requests.report
+        |> Maybe.map (merge model)
+        |> Maybe.withDefault model
+
+
 
 -- internals
+
+
+merge : Model -> Account.AccountHolder -> Model
+merge src new =
+    { id = src.id
+    , username = src.username
+    , auth = src.auth
+    , email = new.email
+    , database = new.database
+    , dock = new.dock
+    , servers = new.servers
+    , bounces = new.bounces
+    , inventory = new.inventory
+    , logout = src.logout
+    }
 
 
 onDoLogout : Game.Model -> Model -> UpdateResponse

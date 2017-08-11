@@ -12,6 +12,7 @@ module Game.Account.Inventory.Models
         , NICSpec
         , MOBOSpec
         , MOBOSlot
+        , MOBOSlots
         , initialModel
         , get
         , insert
@@ -56,8 +57,7 @@ type ComponentType
 
 
 type alias RAMSpec =
-    { clock : Int
-    , cores : Int
+    { size : Int
     }
 
 
@@ -76,8 +76,12 @@ type alias NICSpec =
     {}
 
 
+type alias MOBOSlots =
+    Dict SlotID MOBOSlot
+
+
 type alias MOBOSpec =
-    { slots : Dict SlotID MOBOSlot }
+    { slots : MOBOSlots }
 
 
 type alias MOBOSlot =

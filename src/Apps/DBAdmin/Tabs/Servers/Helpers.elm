@@ -53,13 +53,16 @@ enterEditing itemId database app =
                 |> List.filter ((.nip) >> Tuple.second >> ((==) itemId))
                 |> List.head
 
+        start =
+            Maybe.withDefault ""
+
         app_ =
             item
                 |> Maybe.map
                     (\item ->
                         let
                             edit_ =
-                                EditingTexts ( item.nick, Maybe.withDefault "" item.notes )
+                                EditingTexts ( start item.label, start item.notes )
                         in
                             updateEditing (Network.toString item.nip) edit_ app
                     )
@@ -129,7 +132,7 @@ updateTextFilter newFilter database app =
                 has =
                     [ Tuple.second item.nip
                     , item.password
-                    , item.nick
+                    , Maybe.withDefault "" item.label
                     , Maybe.withDefault "" item.notes
                     ]
                         |> List.filter (String.contains newFilter)

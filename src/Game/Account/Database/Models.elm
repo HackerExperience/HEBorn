@@ -11,22 +11,30 @@ type ServerType
     | Player
 
 
+type alias InstalledVirus =
+    ( ID, String, Float )
+
+
+type alias RunningVirus =
+    ( ID, Time )
+
+
 type alias HackedServer =
     { nip : NIP
     , password : String
-    , nick : String
+    , label : Maybe String
     , notes : Maybe String
-    , virusInstalled : List ( ID, String, Float )
-    , activeVirus : Maybe ( ID, Time )
+    , virusInstalled : List InstalledVirus
+    , activeVirus : Maybe RunningVirus
     , type_ : ServerType
-    , remoteConn : Maybe Never
+    , remoteConn : Maybe String
     }
 
 
 type alias Database =
     { servers : List HackedServer
-    , bankAccounts : List Never
-    , wallets : List Never
+    , bankAccounts : List String
+    , btcWallets : List String
     }
 
 

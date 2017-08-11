@@ -57,7 +57,7 @@ renderData item =
         , text " psw: "
         , text item.password
         , text " nick: "
-        , text item.nick
+        , text <| Maybe.withDefault "[Unlabeled]" item.label
         , text " notes: "
         , item.notes |> Maybe.withDefault "S/N" |> text
         , span [ onClick <| EnterSelectingVirus (Network.toString item.nip) ]
@@ -73,7 +73,7 @@ renderMiniData item =
         , text " psw: "
         , text item.password
         , text " nick: "
-        , text item.nick
+        , text <| Maybe.withDefault "[Unlabeled]" item.label
         ]
 
 

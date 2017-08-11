@@ -43,10 +43,10 @@ type alias Model =
     , email : Maybe Email
     , database : Database
     , dock : Dock.Model
-    , logout : Bool
     , servers : List Servers.ID
     , bounces : Bounces.Model
     , inventory : Inventory.Model
+    , logout : Bool
     }
 
 
@@ -63,10 +63,10 @@ initialModel id username token =
     , email = Nothing
     , database = Database.initialModel
     , dock = Dock.initialModel
-    , logout = False
     , servers = []
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
+    , logout = False
     }
 
 
