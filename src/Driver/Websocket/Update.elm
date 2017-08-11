@@ -21,15 +21,15 @@ update msg model =
             else
                 join channel topic model
 
-        NewEvent channel value ->
+        NewEvent channel topic value ->
             case decodeEvent value of
                 Ok { event, data } ->
                     let
-                        broadcast =
-                            Broadcast <| Events.handler channel event data
-
                         dispatch =
-                            Dispatch.websocket broadcast
+                            Events.handler channel topic event data
+                                |> Maybe.map Broadcast
+                                |> Maybe.map Dispatch.websocket
+                                |> Maybe.withDefault Dispatch.none
                     in
                         ( model, Cmd.none, dispatch )
 
@@ -92,7 +92,7 @@ join channel topic model =
                 |> getAddress channel
                 |> Channel.init
                 |> Channel.onJoin (reportJoin channel)
-                |> Channel.on "event" (NewEvent channel)
+                |> Channel.on "event" (NewEvent channel topic)
 
         channels =
             channel_ :: model.channels

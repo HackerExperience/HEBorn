@@ -1,26 +1,30 @@
 module Events.Events exposing (Event(..), handler)
 
+import Utils.Events exposing (Router)
 import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
 import Events.Account as Account
-import Json.Encode exposing (Value)
+import Events.Meta as Meta
+import Events.Servers as Servers
 
 
 type Event
     = AccountEvent Account.Event
-    | ServerEvent
-    | RequestsEvent
+    | ServersEvent Servers.Event
+    | MetaEvent Meta.Event
     | Report Ws.Report
 
 
-handler : Ws.Channel -> String -> Value -> Event
-handler channel event value =
+handler : Ws.Channel -> Router Event
+handler channel context event json =
     case channel of
-        Ws.AccountChannel ->
-            AccountEvent <| Account.handler event value
-
         Ws.RequestsChannel ->
-            RequestsEvent
+            Nothing
+
+        Ws.AccountChannel ->
+            Account.handler context event json
+                |> Maybe.map AccountEvent
 
         Ws.ServerChannel ->
-            ServerEvent
+            Servers.handler context event json
+                |> Maybe.map ServersEvent
