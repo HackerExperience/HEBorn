@@ -9,6 +9,9 @@ import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
 
 
+-- FIXME: this API is weird
+
+
 request : String -> String -> Location -> ID -> ConfigSource a -> Cmd Msg
 request what newBaseName newLocation serverId =
     let
