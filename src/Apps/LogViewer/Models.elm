@@ -43,10 +43,10 @@ title ({ app } as model) =
             app.filterText
 
         posfix =
-            if (String.length filter) > 12 then
-                Just (": \"" ++ (String.left 10 filter) ++ "[...]\"")
-            else if (String.length filter) > 0 then
-                Just (": \"" ++ filter ++ "\"")
+            if String.length filter > 12 then
+                Just <| ": \"" ++ (String.left 10 filter) ++ "[...]\""
+            else if String.length filter > 0 then
+                Just <| ": \"" ++ filter ++ "\""
             else
                 Nothing
     in
@@ -87,7 +87,7 @@ toggleExpanded : Logs.ID -> LogViewer -> LogViewer
 toggleExpanded id app =
     { app
         | expanded =
-            if (isEntryExpanded id app) then
+            if isEntryExpanded id app then
                 List.filter ((/=) id) app.expanded
             else
                 id :: app.expanded
@@ -96,34 +96,22 @@ toggleExpanded id app =
 
 catchDataWhenFiltering : List Logs.ID -> Logs.ID -> Maybe Logs.ID
 catchDataWhenFiltering filterCache log =
-    if (List.member log filterCache) then
+    if List.member log filterCache then
         Just log
     else
         Nothing
-
-
-
---catchData : Logs.Log -> Maybe Logs.Data
---catchData log =
---    --    case log of
---    --        StdLog logData ->
---    --            Just logData
---    --        NoLog ->
---    --            Nothing
---    Nothing
 
 
 applyFilter : LogViewer -> Logs.Model -> Dict Logs.ID Logs.Log
 applyFilter app =
     let
         filterer id log =
-            (if ((String.length app.filterText) > 0) then
+            if String.length app.filterText > 0 then
                 catchDataWhenFiltering app.filterCache id
                     |> Maybe.map (always True)
                     |> Maybe.withDefault False
-             else
+            else
                 True
-            )
     in
         Logs.filter filterer
 
@@ -139,7 +127,7 @@ enterEditing data id ({ app } as model) =
                 Just log ->
                     case Logs.getContent log of
                         Logs.Uncrypted data ->
-                            Just (updateEditing id data.raw app)
+                            Just <| updateEditing id data.raw app
 
                         Logs.Encrypted ->
                             Nothing
@@ -165,7 +153,7 @@ toggleExpand : Logs.ID -> LogViewer -> LogViewer
 toggleExpand id app =
     { app
         | expanded =
-            if (List.member id app.expanded) then
+            if List.member id app.expanded then
                 List.filter ((/=) id) app.expanded
             else
                 id :: app.expanded
