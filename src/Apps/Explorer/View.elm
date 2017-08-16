@@ -1,7 +1,7 @@
 module Apps.Explorer.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (value)
+import Html.Attributes exposing (value, attribute)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
@@ -24,11 +24,16 @@ import Apps.Explorer.Menu.View
         , menuActiveAction
         , menuPassiveAction
         )
-import Apps.Explorer.Resources exposing (Classes(..), prefix)
+import Apps.Explorer.Resources exposing (Classes(..), prefix, idAttrKey)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
+
+
+idAttr : String -> Attribute msg
+idAttr =
+    attribute idAttrKey
 
 
 
@@ -183,6 +188,7 @@ detailedEntry server file =
                     [ class [ CntListEntry, EntryDir ]
                     , menuMainDir data.id
                     , onClick <| GoPath meAsLoc
+                    , idAttr data.id
                     ]
                     [ span [ class [ DirIcon ] ] []
                     , span [] [ text data.name ]
@@ -194,6 +200,7 @@ detailedEntry server file =
                     div
                         [ class [ CntListEntry, EntryArchive ]
                         , menuMainArchive prop.id
+                        , idAttr prop.id
                         ]
                         [ span [ class [ entryIcon file ] ] []
                         , span [] [ text <| getEntryName file ]
@@ -207,6 +214,7 @@ detailedEntry server file =
                             div
                                 [ class [ CntListEntry, EntryArchive ]
                                 , menuExecutable prop.id
+                                , idAttr prop.id
                                 ]
                                 [ span [ class [ entryIcon file ] ] []
                                 , span [] [ text <| getEntryName file ]

@@ -72,7 +72,7 @@ toogable =
                 , minHeight (px 16)
                 , before [ Icon.divExpand ]
                 , cursor pointer
-                , withAttribute (Css.EQ "expanded" "\"1\"")
+                , withAttribute (Css.EQ "expanded" "1")
                     [ before [ Icon.divContract ] ]
                 ]
             ]
@@ -100,7 +100,7 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        , withAttribute (Css.EQ "localhost" "\"1\"")
+        , withAttribute (Css.EQ "localhost" "1")
             [ color Colors.localhost
             , fontWeight bold
             , children
@@ -123,7 +123,7 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        , withAttribute (Css.EQ "root" "\"1\"")
+        , withAttribute (Css.EQ "root" "1")
             [ color Colors.root
             , fontWeight bold
             , children
@@ -223,7 +223,7 @@ horizontalTabs =
                 , borderTop3 (px 1) solid Colors.separator
                 , borderTopLeftRadius (px 12)
                 , borderTopRightRadius (px 12)
-                , withAttribute (Css.EQ "data-selected" "\"1\"")
+                , withAttribute (Css.EQ "data-selected" "1")
                     [ backgroundColor Colors.bgSelected
                     ]
                 ]
