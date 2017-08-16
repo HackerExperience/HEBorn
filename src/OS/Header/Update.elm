@@ -16,7 +16,7 @@ update data msg ({ openMenu } as model) =
         Logout ->
             let
                 dispatch =
-                    Dispatch.account Account.Logout
+                    Dispatch.account Account.DoLogout
             in
                 ( model, Cmd.none, dispatch )
 

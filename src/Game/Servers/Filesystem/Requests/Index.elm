@@ -1,4 +1,12 @@
-module Game.Servers.Filesystem.Requests.Index exposing (..)
+module Game.Servers.Filesystem.Requests.Index
+    exposing
+        ( Response(..)
+        , Index
+        , Entry(..)
+        , request
+        , receive
+        , decoder
+        )
 
 import Json.Decode
     exposing
@@ -21,6 +29,10 @@ import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
+
+
+type Response
+    = Okay Index
 
 
 type alias Index =
@@ -59,17 +71,26 @@ request serverId =
         emptyPayload
 
 
+receive : Code -> Value -> Maybe Response
+receive code json =
+    case code of
+        OkCode ->
+            json
+                |> decodeValue decoder
+                |> Result.map Okay
+                |> Result.toMaybe
+
+        _ ->
+            -- TODO: handle errors
+            Nothing
+
+
 
 -- internals
 
 
-decoder : Value -> Result String Index
-decoder json =
-    decodeValue index json
-
-
-index : Decoder Index
-index =
+decoder : Decoder Index
+decoder =
     list <| lazy entry
 
 

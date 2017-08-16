@@ -24,8 +24,7 @@ import Json.Encode as Encode
 
 
 type Response
-    = OkResponse Web.Site
-    | ErrorResponse
+    = Okay Web.Site
 
 
 type Root
@@ -73,17 +72,17 @@ request url =
         (encoder url)
 
 
-receive : String -> Code -> Value -> Response
+receive : String -> Code -> Value -> Maybe Response
 receive url code json =
     case code of
         OkCode ->
             json
                 |> decoder url
-                |> Result.map OkResponse
-                |> Requests.report
+                |> Result.map Okay
+                |> Result.toMaybe
 
         _ ->
-            ErrorResponse
+            Nothing
 
 
 

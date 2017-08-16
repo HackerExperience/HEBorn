@@ -23,12 +23,12 @@ import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..))
+import Game.Servers.Shared as Servers
 import Game.Servers.Logs.Messages exposing (..)
 
 
 type Response
-    = OkResponse Logs
-    | NoOp
+    = Okay Logs
 
 
 type alias Logs =
@@ -42,26 +42,26 @@ type alias Log =
     }
 
 
-request : ConfigSource a -> Cmd Msg
-request =
+request : Servers.ID -> ConfigSource a -> Cmd Msg
+request id =
     Requests.request ServerLogIndexTopic
         (IndexRequest >> Request)
-        Nothing
+        (Just id)
         Encode.null
 
 
-receive : Code -> Value -> Response
+receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
             json
                 |> decodeValue decoder
-                |> Result.map OkResponse
-                |> Requests.report
+                |> Result.map Okay
+                |> Result.toMaybe
 
         _ ->
             -- TODO: handle errors
-            NoOp
+            Nothing
 
 
 

@@ -15,8 +15,7 @@ import Game.Messages exposing (..)
 
 
 type Response
-    = OkResponse Data
-    | NoOp
+    = Okay Data
 
 
 type alias Data =
@@ -34,17 +33,18 @@ request account =
         emptyPayload
 
 
-receive : Code -> Value -> Response
+receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
             json
                 |> decoder
-                |> Result.map OkResponse
+                |> Result.map Okay
                 |> Requests.report
+                |> Just
 
         _ ->
-            NoOp
+            Nothing
 
 
 

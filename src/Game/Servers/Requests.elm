@@ -11,22 +11,22 @@ import Game.Servers.Messages exposing (..)
 
 
 type Response
-    = FetchResponse Fetch.Response
+    = Fetch Fetch.Response
 
 
 type ServerResponse
-    = NoResponse
+    = Server
 
 
-receive : RequestMsg -> Response
+receive : RequestMsg -> Maybe Response
 receive response =
     case response of
         FetchRequest ( code, data ) ->
             data
                 |> Fetch.receive code
-                |> FetchResponse
+                |> Maybe.map Fetch
 
 
-serverReceive : ServerRequestMsg -> ServerResponse
+serverReceive : ServerRequestMsg -> Maybe ServerResponse
 serverReceive response =
-    NoResponse
+    Nothing

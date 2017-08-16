@@ -48,7 +48,7 @@ update game msg model =
             onEvent game event model
 
         Request data ->
-            updateRequest game (receive data) model
+            onRequest game (receive data) model
 
 
 bootstrap : Game.Model -> Value -> Model -> Model
@@ -119,6 +119,16 @@ onEvent game event ({ servers } as model) =
             |> Update.andThen (updateEvent game event)
 
 
+onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
+onRequest game response model =
+    case response of
+        Just response ->
+            updateRequest game response model
+
+        Nothing ->
+            Update.fromModel model
+
+
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     Update.fromModel model
@@ -146,7 +156,7 @@ updateServer game id msg server =
             onFilesystemMsg game id msg server
 
         LogsMsg msg ->
-            onLogsMsg game msg server
+            onLogsMsg game id msg server
 
         ProcessesMsg msg ->
             onProcessesMsg game msg server
@@ -158,7 +168,7 @@ updateServer game id msg server =
             onServerEvent game id event server
 
         ServerRequest data ->
-            updateServerRequest game id (serverReceive data) server
+            onServerRequest game id (serverReceive data) server
 
 
 onSetBounce :
@@ -198,13 +208,13 @@ onFilesystemMsg game id =
         }
 
 
-onLogsMsg : Game.Model -> Logs.Msg -> Server -> ServerUpdateResponse
-onLogsMsg game =
+onLogsMsg : Game.Model -> ID -> Logs.Msg -> Server -> ServerUpdateResponse
+onLogsMsg game id =
     Update.child
         { get = .logs
         , set = (\logs model -> { model | logs = logs })
         , toMsg = LogsMsg
-        , update = (Logs.update game)
+        , update = (Logs.update game id)
         }
 
 
@@ -234,6 +244,21 @@ onServerEvent game id event server =
     -- |> Update.andThen (updateProcesses game (Processes.Event ev))
     -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
     updateServerEvent game id event server
+
+
+onServerRequest :
+    Game.Model
+    -> ID
+    -> Maybe ServerResponse
+    -> Server
+    -> ServerUpdateResponse
+onServerRequest game id response server =
+    case response of
+        Just response ->
+            updateServerRequest game id response server
+
+        Nothing ->
+            Update.fromModel server
 
 
 updateServerEvent :

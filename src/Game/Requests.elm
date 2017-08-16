@@ -5,13 +5,13 @@ import Game.Messages exposing (..)
 
 
 type Response
-    = BootstrapResponse Bootstrap.Response
+    = Bootstrap Bootstrap.Response
 
 
-receive : RequestMsg -> Response
+receive : RequestMsg -> Maybe Response
 receive response =
     case response of
         BootstrapRequest ( code, data ) ->
             data
                 |> Bootstrap.receive code
-                |> BootstrapResponse
+                |> Maybe.map Bootstrap

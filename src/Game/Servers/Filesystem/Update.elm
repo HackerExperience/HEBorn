@@ -1,14 +1,15 @@
 module Game.Servers.Filesystem.Update exposing (update, bootstrap)
 
-import Json.Decode exposing (Value)
+import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
 import Requests.Types exposing (Code(..))
 import Game.Models as Game
-import Game.Servers.Shared exposing (..)
+import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages exposing (Msg(..), RequestMsg(..))
 import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Requests exposing (..)
 import Game.Servers.Filesystem.Requests.Delete as RqDelete
 import Game.Servers.Filesystem.Requests.Move as RqMove
 import Game.Servers.Filesystem.Requests.Rename as RqRename
@@ -23,61 +24,46 @@ type alias UpdateResponse =
 
 update :
     Game.Model
-    -> ID
+    -> Servers.ID
     -> Msg
     -> Filesystem
     -> UpdateResponse
 update game serverId msg model =
     case msg of
         Delete fileId ->
-            delete fileId game serverId model
+            onDelete game serverId fileId model
 
         CreateTextFile path ->
-            createTextFile path
-                (toString game.meta.lastTick)
-                game
+            onCreateTextFile game
                 serverId
+                (toString game.meta.lastTick)
+                path
                 model
 
         CreateEmptyDir path ->
-            createEmptyDir path
-                (toString game.meta.lastTick)
-                game
-                serverId
-                model
+            onEmptyDir game serverId (toString game.meta.lastTick) path model
 
         Move fileId newLocation ->
-            move fileId newLocation game serverId model
+            onMove game serverId fileId newLocation model
 
         Rename fileId newBaseName ->
-            rename fileId newBaseName game serverId model
+            onRename game serverId fileId newBaseName model
 
-        Request (IndexRequest ( code, value )) ->
-            case code of
-                OkCode ->
-                    Update.fromModel <| bootstrap value model
-
-                _ ->
-                    Update.fromModel model
-
-        Request _ ->
+        Request request ->
             Update.fromModel model
 
 
 bootstrap : Value -> Filesystem -> Filesystem
 bootstrap value _ =
-    value
-        |> RqIndex.decoder
+    -- TODO: rewrite to include logic
+    decodeValue RqIndex.decoder value
         |> Requests.report
         |> List.foldl (convEntry RootRef) initialModel
 
 
-
--- INTERNALS
-
-
 convEntry : ParentReference -> RqIndex.Entry -> Filesystem -> Filesystem
 convEntry parentRef src filesystem =
+    -- TODO: rewrite to be more readable
     case src of
         RqIndex.FileEntry data ->
             addEntry
@@ -97,7 +83,12 @@ convEntry parentRef src filesystem =
             let
                 meAdded =
                     addEntry
-                        (FolderEntry { id = data.id, name = data.name, parent = parentRef })
+                        (FolderEntry
+                            { id = data.id
+                            , name = data.name
+                            , parent = parentRef
+                            }
+                        )
                         filesystem
 
                 parentRef =
@@ -109,8 +100,8 @@ convEntry parentRef src filesystem =
                     data.children
 
 
-delete : FileID -> Game.Model -> ID -> Filesystem -> UpdateResponse
-delete fileId game serverId model =
+onDelete : Game.Model -> Servers.ID -> FileID -> Filesystem -> UpdateResponse
+onDelete game serverId fileId model =
     let
         file =
             getEntry fileId model
@@ -129,39 +120,61 @@ delete fileId game serverId model =
         ( model_, serverCmd, Dispatch.none )
 
 
-createTextFile : FilePath -> FileID -> Game.Model -> ID -> Filesystem -> UpdateResponse
-createTextFile ( fileLocation, fileBaseName ) fileId game serverId model =
+onCreateTextFile :
+    Game.Model
+    -> Servers.ID
+    -> FileID
+    -> FilePath
+    -> Filesystem
+    -> UpdateResponse
+onCreateTextFile game serverId fileId ( fileLocation, fileBaseName ) model =
     let
-        model_ =
-            model
-                |> locationToParentRef fileLocation
-                |> Maybe.map
-                    (\path ->
-                        FileEntry
-                            { id =
-                                "tempID"
-                                    ++ "_TXT_"
-                                    ++ (fileBaseName ++ "_")
-                                    ++ fileId
-                            , name = fileBaseName
-                            , extension = "txt"
-                            , version = Nothing
-                            , size = Just 0
-                            , parent = path
-                            , modules = []
-                            }
-                    )
-                |> Maybe.map (\e -> addEntry e model)
-                |> Maybe.withDefault model
+        toFileEntry path =
+            FileEntry
+                { id =
+                    "tempID"
+                        ++ "_TXT_"
+                        ++ (fileBaseName)
+                        ++ "_"
+                        ++ fileId
+                , name = fileBaseName
+                , extension = "txt"
+                , version = Nothing
+                , size = Just 0
+                , parent = path
+                , modules = []
+                }
 
-        serverCmd =
-            RqCreate.request "txt" fileBaseName fileLocation serverId game
+        maybeModel =
+            locationToParentRef fileLocation model
+                |> Maybe.map toFileEntry
+                |> Maybe.map (flip addEntry model)
     in
-        ( model_, serverCmd, Dispatch.none )
+        case maybeModel of
+            Just model_ ->
+                let
+                    cmd =
+                        RqCreate.request "txt"
+                            fileBaseName
+                            fileLocation
+                            serverId
+                            game
+                in
+                    ( model_, cmd, Dispatch.none )
+
+            Nothing ->
+                Update.fromModel model
 
 
-createEmptyDir : FilePath -> FileID -> Game.Model -> ID -> Filesystem -> UpdateResponse
-createEmptyDir ( fileLocation, fileName ) fileId game serverId model =
+onEmptyDir :
+    Game.Model
+    -> Servers.ID
+    -> FileID
+    -> FilePath
+    -> Filesystem
+    -> UpdateResponse
+onEmptyDir game serverId fileId ( fileLocation, fileName ) model =
+    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -190,8 +203,15 @@ createEmptyDir ( fileLocation, fileName ) fileId game serverId model =
         ( model_, serverCmd, Dispatch.none )
 
 
-move : FileID -> Location -> Game.Model -> ID -> Filesystem -> UpdateResponse
-move fileId newLocation game serverId model =
+onMove :
+    Game.Model
+    -> Servers.ID
+    -> FileID
+    -> Location
+    -> Filesystem
+    -> UpdateResponse
+onMove game serverId fileId newLocation model =
+    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -211,8 +231,15 @@ move fileId newLocation game serverId model =
         ( model_, serverCmd, Dispatch.none )
 
 
-rename : FileID -> String -> Game.Model -> ID -> Filesystem -> UpdateResponse
-rename fileId newBaseName game serverId model =
+onRename :
+    Game.Model
+    -> Servers.ID
+    -> FileID
+    -> String
+    -> Filesystem
+    -> UpdateResponse
+onRename game serverId fileId newBaseName model =
+    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -232,3 +259,13 @@ rename fileId newBaseName game serverId model =
             RqRename.request newBaseName fileId serverId game
     in
         ( model_, serverCmd, Dispatch.none )
+
+
+onRequest :
+    Game.Model
+    -> Servers.ID
+    -> Maybe Response
+    -> Filesystem
+    -> UpdateResponse
+onRequest game serverId response model =
+    Update.fromModel model

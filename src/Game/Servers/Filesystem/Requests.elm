@@ -1,21 +1,15 @@
-module Game.Servers.Logs.Requests
+module Game.Servers.Filesystem.Requests
     exposing
         ( Response(..)
-        , LogResponse(..)
         , receive
-        , logReceive
         )
 
-import Game.Servers.Logs.Requests.Index as Index
-import Game.Servers.Logs.Messages exposing (..)
+import Game.Servers.Filesystem.Requests.Index as Index
+import Game.Servers.Filesystem.Messages exposing (..)
 
 
 type Response
     = Index Index.Response
-
-
-type LogResponse
-    = LogResponse
 
 
 receive : RequestMsg -> Maybe Response
@@ -26,7 +20,5 @@ receive response =
                 |> Index.receive code
                 |> Maybe.map Index
 
-
-logReceive : LogRequestMsg -> Maybe LogResponse
-logReceive response =
-    Nothing
+        _ ->
+            Nothing

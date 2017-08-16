@@ -23,8 +23,7 @@ import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 
 
 type Response
-    = OkResponse Server
-    | NoOp
+    = Okay Server
 
 
 type alias Server =
@@ -43,16 +42,16 @@ type alias Server =
     }
 
 
-receive : Code -> Value -> Response
+receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
             decodeValue decoder json
-                |> Result.map OkResponse
-                |> Requests.report
+                |> Result.map Okay
+                |> Result.toMaybe
 
         _ ->
-            NoOp
+            Nothing
 
 
 decoder : Decoder Server

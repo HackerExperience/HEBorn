@@ -6,7 +6,7 @@ import Game.Account.Bounces.Messages as Bounces
 
 
 type Msg
-    = Logout
+    = DoLogout
     | BouncesMsg Bounces.Msg
     | Request RequestMsg
     | Event Events.Event
@@ -14,4 +14,3 @@ type Msg
 
 type RequestMsg
     = LogoutRequest ResponseType
-    | ServerIndexRequest ResponseType

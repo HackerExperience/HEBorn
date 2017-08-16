@@ -4,8 +4,11 @@ import Json.Decode exposing (Value, decodeValue, list)
 import Dict
 import Utils.Update as Update
 import Game.Models as Game
-import Events.Events as Events
-import Game.Servers.Logs.Messages as Logs exposing (..)
+import Game.Servers.Shared as Servers
+import Events.Events as Events exposing (Event(ServersEvent))
+import Events.Servers exposing (Event(ServerEvent), ServerEvent(LogsEvent))
+import Events.Servers.Logs as Logs
+import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Requests.Index as Index
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
@@ -20,23 +23,23 @@ type alias LogUpdateResponse =
     ( Log, Cmd LogMsg, Dispatch )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Game.Model -> Servers.ID -> Msg -> Model -> UpdateResponse
+update game serverId msg model =
     case msg of
         Delete id ->
-            onDelete game id model
+            onDelete game serverId id model
 
         Hide id ->
-            onHide game id model
+            onHide game serverId id model
 
         LogMsg id msg ->
-            onLogMsg game id msg model
+            onLogMsg game serverId id msg model
 
         Event event ->
-            onEvent game event model
+            onEvent game serverId event model
 
         Request data ->
-            updateRequest game (receive data) model
+            onRequest game serverId (receive data) model
 
 
 bootstrap : Value -> Model -> Model
@@ -55,39 +58,49 @@ bootstrap json model =
 -- collection message handlers
 
 
-onDelete : Game.Model -> ID -> Model -> UpdateResponse
-onDelete game id model =
+onDelete : Game.Model -> Servers.ID -> ID -> Model -> UpdateResponse
+onDelete game serverId id model =
     Update.fromModel model
 
 
-onHide : Game.Model -> ID -> Model -> UpdateResponse
-onHide game id model =
+onHide : Game.Model -> Servers.ID -> ID -> Model -> UpdateResponse
+onHide game serverId id model =
     Update.fromModel model
 
 
-onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-onEvent game event model =
+onEvent : Game.Model -> Servers.ID -> Events.Event -> Model -> UpdateResponse
+onEvent game serverId event model =
     let
         msg =
             LogEvent event
 
         reducer id log ( model, cmd, dispatch ) =
             Update.fromModel log
-                |> Update.andThen (updateLog game id msg)
+                |> Update.andThen (updateLog game serverId id msg)
                 |> Update.mapModel (flip (insert id) model)
                 |> Update.mapCmd (LogMsg id)
                 |> Update.addCmd cmd
                 |> Update.addDispatch dispatch
     in
         Dict.foldl reducer (Update.fromModel model) model
-            |> Update.andThen (updateEvent game event)
+            |> Update.andThen (updateEvent game serverId event)
 
 
-onLogMsg : Game.Model -> ID -> LogMsg -> Model -> UpdateResponse
-onLogMsg game id msg model =
+onRequest : Game.Model -> Servers.ID -> Maybe Response -> Model -> UpdateResponse
+onRequest game serverId response model =
+    case response of
+        Just response ->
+            updateRequest game serverId response model
+
+        Nothing ->
+            Update.fromModel model
+
+
+onLogMsg : Game.Model -> Servers.ID -> ID -> LogMsg -> Model -> UpdateResponse
+onLogMsg game serverId id msg model =
     case get id model of
         Just log ->
-            updateLog game id msg log
+            updateLog game serverId id msg log
                 |> Update.mapModel (flip (insert id) model)
                 |> Update.mapCmd (LogMsg id)
 
@@ -95,13 +108,27 @@ onLogMsg game id msg model =
             Update.fromModel model
 
 
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    Update.fromModel model
+updateEvent :
+    Game.Model
+    -> Servers.ID
+    -> Events.Event
+    -> Model
+    -> UpdateResponse
+updateEvent game serverId event model =
+    case event of
+        ServersEvent (ServerEvent _ (LogsEvent Logs.Changed)) ->
+            let
+                cmd =
+                    Index.request serverId game
+            in
+                ( model, cmd, Dispatch.none )
+
+        _ ->
+            Update.fromModel model
 
 
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game data model =
+updateRequest : Game.Model -> Servers.ID -> Response -> Model -> UpdateResponse
+updateRequest game serverId data model =
     Update.fromModel model
 
 
@@ -109,50 +136,78 @@ updateRequest game data model =
 -- content message handlers
 
 
-updateLog : Game.Model -> ID -> LogMsg -> Log -> LogUpdateResponse
-updateLog game id msg log =
+updateLog : Game.Model -> Servers.ID -> ID -> LogMsg -> Log -> LogUpdateResponse
+updateLog game serverId id msg log =
     case msg of
         UpdateContent content ->
-            onUpdateContent game id content log
+            onUpdateContent game serverId id content log
 
         Encrypt ->
-            onEncrypt game id log
+            onEncrypt game serverId id log
 
         Decrypt content ->
-            onDecrypt game id content log
+            onDecrypt game serverId id content log
 
         LogRequest data ->
-            updateLogRequest game id (logReceive data) log
+            onLogRequest game serverId id (logReceive data) log
 
         LogEvent event ->
-            updateLogEvent game id event log
+            updateLogEvent game serverId id event log
 
 
-onUpdateContent : Game.Model -> ID -> String -> Log -> LogUpdateResponse
-onUpdateContent game id content log =
+onUpdateContent : Game.Model -> Servers.ID -> ID -> String -> Log -> LogUpdateResponse
+onUpdateContent game serverId id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-onEncrypt : Game.Model -> ID -> Log -> LogUpdateResponse
-onEncrypt game id log =
+onEncrypt : Game.Model -> Servers.ID -> ID -> Log -> LogUpdateResponse
+onEncrypt game serverId id log =
     setContent Nothing log
         |> Update.fromModel
 
 
-onDecrypt : Game.Model -> ID -> String -> Log -> LogUpdateResponse
-onDecrypt game id content log =
+onDecrypt : Game.Model -> Servers.ID -> ID -> String -> Log -> LogUpdateResponse
+onDecrypt game serverId id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-updateLogRequest : Game.Model -> ID -> LogResponse -> Log -> LogUpdateResponse
-updateLogRequest game id resposne log =
+onLogRequest :
+    Game.Model
+    -> Servers.ID
+    -> ID
+    -> Maybe LogResponse
+    -> Log
+    -> LogUpdateResponse
+onLogRequest game serverId id response log =
+    case response of
+        Just response ->
+            updateLogRequest game serverId id response log
+
+        Nothing ->
+            Update.fromModel log
+
+
+updateLogRequest :
+    Game.Model
+    -> Servers.ID
+    -> ID
+    -> LogResponse
+    -> Log
+    -> LogUpdateResponse
+updateLogRequest game serverId id resposne log =
     -- no log responses yet
     Update.fromModel log
 
 
-updateLogEvent : Game.Model -> ID -> Events.Event -> Log -> LogUpdateResponse
-updateLogEvent game id event log =
+updateLogEvent :
+    Game.Model
+    -> Servers.ID
+    -> ID
+    -> Events.Event
+    -> Log
+    -> LogUpdateResponse
+updateLogEvent game serverId id event log =
     -- no log event responses yet
     Update.fromModel log
