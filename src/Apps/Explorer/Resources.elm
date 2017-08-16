@@ -39,3 +39,8 @@ type Classes
 prefix : String
 prefix =
     "explorer"
+
+
+idAttrKey : String
+idAttrKey =
+    "data-id"
