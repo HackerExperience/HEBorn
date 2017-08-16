@@ -1,4 +1,4 @@
-module Events.Servers exposing (Event(..), handler)
+module Events.Servers exposing (Event(..), ServerEvent(..), handler)
 
 import Utils.Events exposing (Router, Handler, parse)
 import Events.Servers.Filesystem as Filesystem
@@ -44,7 +44,7 @@ handleServer event json =
         ( Just "hardware", event ) ->
             Maybe.map HardwareEvent <| Hardware.handler event json
 
-        ( Just "log", event ) ->
+        ( Just "logs", event ) ->
             Maybe.map LogsEvent <| Logs.handler event json
 
         ( Just "processes", event ) ->
