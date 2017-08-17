@@ -54,11 +54,12 @@ update game serverId msg model =
 
 
 bootstrap : Value -> Filesystem -> Filesystem
-bootstrap value _ =
+bootstrap value model =
     -- TODO: rewrite to include logic
-    decodeValue RqIndex.decoder value
-        |> Requests.report
-        |> List.foldl (convEntry RootRef) initialModel
+    --decodeValue Index.decoder value
+    --    |> Requests.report
+    --    |> List.foldl (convEntry RootRef) initialModel
+    model
 
 
 convEntry : ParentReference -> RqIndex.Entry -> Filesystem -> Filesystem
