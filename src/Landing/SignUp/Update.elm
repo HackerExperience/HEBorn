@@ -1,5 +1,6 @@
 module Landing.SignUp.Update exposing (update)
 
+import Utils.Update as Update
 import Landing.SignUp.Models exposing (Model, FormError)
 import Landing.SignUp.Messages exposing (Msg(..))
 import Landing.SignUp.Requests exposing (..)
@@ -8,7 +9,11 @@ import Core.Models as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Core.Model -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update : Core.Model -> Msg -> Model -> UpdateResponse
 update core msg model =
     case msg of
         SubmitForm ->
@@ -71,26 +76,32 @@ update core msg model =
                 ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
 
         Request data ->
-            response core (receive data) model
+            onRequest core (receive data) model
 
 
 
 -- internals
 
 
-response :
-    Core.Model
-    -> Response
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-response core response model =
+onRequest : Core.Model -> Maybe Response -> Model -> UpdateResponse
+onRequest core response model =
+    case response of
+        Just response ->
+            updateRequest core response model
+
+        Nothing ->
+            Update.fromModel model
+
+
+updateRequest : Core.Model -> Response -> Model -> UpdateResponse
+updateRequest core response model =
     case response of
         -- TODO: add more types to match response status
-        SignUpResponse (SignUp.OkResponse _ _ _) ->
-            ( model, Cmd.none, Dispatch.none )
+        SignUpResponse (SignUp.Okay _ _ _) ->
+            Update.fromModel model
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model
 
 
 getErrorsUsername : Model -> String

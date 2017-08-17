@@ -12,14 +12,18 @@ import Requests.Topics exposing (..)
 import Requests.Types exposing (..)
 
 
-report : Result String a -> a
+report : Result String a -> Maybe a
 report result =
     case result of
         Ok response ->
-            response
+            Just response
 
-        Err _ ->
-            Debug.crash "Failed to decode response from server"
+        Err msg ->
+            let
+                msg_ =
+                    Debug.log ("Request Decode Error " ++ msg) "..."
+            in
+                Nothing
 
 
 request :

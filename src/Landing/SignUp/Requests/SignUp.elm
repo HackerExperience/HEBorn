@@ -15,8 +15,8 @@ import Requests.Types exposing (ConfigSource, Code(..))
 
 
 type Response
-    = OkResponse String String String
-    | ErrorResponse
+    = Okay String String String
+    | Error
 
 
 request : String -> String -> String -> ConfigSource a -> Cmd Msg
@@ -27,14 +27,14 @@ request email username password =
         (encoder email username password)
 
 
-receive : Code -> Value -> Response
+receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
             Requests.report (decodeValue decoder json)
 
         _ ->
-            ErrorResponse
+            Just Error
 
 
 
@@ -52,7 +52,7 @@ encoder email username password =
 
 decoder : Decoder Response
 decoder =
-    decode OkResponse
+    decode Okay
         |> required "username" Decode.string
         |> required "email" Decode.string
         |> required "account_id" Decode.string

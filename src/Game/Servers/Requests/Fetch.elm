@@ -48,7 +48,7 @@ receive code json =
         OkCode ->
             decodeValue decoder json
                 |> Result.map Okay
-                |> Result.toMaybe
+                |> Requests.report
 
         _ ->
             Nothing

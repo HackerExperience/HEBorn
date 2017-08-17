@@ -8,10 +8,10 @@ type Response
     = LoginResponse Login.Response
 
 
-receive : RequestMsg -> Response
+receive : RequestMsg -> Maybe Response
 receive request =
     case request of
         LoginRequest ( code, json ) ->
             json
                 |> Login.receive code
-                |> LoginResponse
+                |> Maybe.map LoginResponse
