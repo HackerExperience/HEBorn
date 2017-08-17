@@ -4,6 +4,7 @@ import Json.Decode exposing (Value, decodeValue, list)
 import Dict
 import Utils.Update as Update
 import Game.Models as Game
+import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Events.Events as Events exposing (Event(ServersEvent))
 import Events.Servers exposing (Event(ServerEvent), ServerEvent(LogsEvent))
@@ -44,14 +45,10 @@ update game serverId msg model =
 
 bootstrap : Value -> Model -> Model
 bootstrap json model =
-    let
-        mapper data =
-            ( data.id, new data.insertedAt Normal data.message )
-    in
-        decodeValue Index.decoder json
-            |> Result.withDefault []
-            |> List.map mapper
-            |> List.foldl (uncurry insert) model
+    decodeValue Index.decoder json
+        |> Requests.report
+        |> Maybe.withDefault []
+        |> toModel
 
 
 
@@ -128,12 +125,25 @@ updateEvent game serverId event model =
 
 
 updateRequest : Game.Model -> Servers.ID -> Response -> Model -> UpdateResponse
-updateRequest game serverId data model =
-    Update.fromModel model
+updateRequest game serverId response model =
+    case response of
+        Index (Index.Okay data) ->
+            Update.fromModel (toModel data)
 
 
 
 -- content message handlers
+
+
+toModel : Index.Index -> Model
+toModel index =
+    let
+        mapper data =
+            ( data.id, new data.insertedAt Normal data.message )
+    in
+        index
+            |> List.map mapper
+            |> List.foldl (uncurry insert) initialModel
 
 
 updateLog : Game.Model -> Servers.ID -> ID -> LogMsg -> Log -> LogUpdateResponse
@@ -209,5 +219,4 @@ updateLogEvent :
     -> Log
     -> LogUpdateResponse
 updateLogEvent game serverId id event log =
-    -- no log event responses yet
     Update.fromModel log

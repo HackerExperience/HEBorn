@@ -1,6 +1,7 @@
 module Game.Servers.Logs.Requests.Index
     exposing
         ( Response(..)
+        , Index
         , request
         , receive
         , decoder
@@ -28,10 +29,10 @@ import Game.Servers.Logs.Messages exposing (..)
 
 
 type Response
-    = Okay Logs
+    = Okay Index
 
 
-type alias Logs =
+type alias Index =
     List Log
 
 
@@ -68,7 +69,7 @@ receive code json =
 -- internals
 
 
-decoder : Decoder Logs
+decoder : Decoder Index
 decoder =
     list log
 
