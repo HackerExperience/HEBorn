@@ -239,11 +239,11 @@ onTunnelsMsg game =
 
 
 onServerEvent game id event server =
-    -- updateFilesystem game (Filesystem.Event ev) server
-    -- |> Update.andThen (updateLogs game (Logs.Event ev))
-    -- |> Update.andThen (updateProcesses game (Processes.Event ev))
-    -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
-    updateServerEvent game id event server
+    onLogsMsg game id (Logs.Event event) server
+        -- |> Update.andThen (updateFilesystem game (Filesystem.Event ev))
+        -- |> Update.andThen (updateProcesses game (Processes.Event ev))
+        -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
+        |> Update.andThen (updateServerEvent game id event)
 
 
 onServerRequest :

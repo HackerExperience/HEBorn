@@ -23,14 +23,9 @@ initialSocket apiWsUrl token =
         |> Socket.onClose (\_ -> Disconnected |> Events.Report |> Broadcast)
 
 
-initialChannels : List (Channel.Channel Msg)
-initialChannels =
-    [ Channel.init "requests" ]
-
-
 initialModel : String -> String -> Model
 initialModel apiWsUrl token =
     { socket = initialSocket apiWsUrl token
-    , channels = initialChannels
-    , defer = True
+    , channels = []
+    , defer = False
     }

@@ -28,7 +28,7 @@ parse str =
                     String.slice 0 index str
 
                 remains =
-                    String.slice (index) -1 str
+                    String.slice (index + 1) (String.length str) str
             in
                 ( Just context, remains )
 

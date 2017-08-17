@@ -59,9 +59,16 @@ home model =
 
 setup : SetupModel -> Sub Msg
 setup model =
-    model.setup
-        |> Setup.subscriptions
-        |> Sub.map SetupMsg
+    let
+        setupSub =
+            model.setup
+                |> Setup.subscriptions
+                |> Sub.map SetupMsg
+    in
+        Sub.batch
+            [ websocket model.websocket
+            , setupSub
+            ]
 
 
 play : PlayModel -> Sub Msg
