@@ -20,6 +20,6 @@ initialModel =
     , Apps.MusicApp
     , Apps.CtrlPanelApp
     , Apps.ServersGearsApp
-    , Apps.LocationPickerApp
     , Apps.LanViewerApp
+    , Apps.EmailApp
     ]

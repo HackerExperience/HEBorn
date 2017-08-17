@@ -100,6 +100,7 @@ css =
                                         , addIco "srvgr" Icon.srvgr
                                         , addIco "locpk" Icon.locpk
                                         , addIco "lanvw" Icon.lanvw
+                                        , addIco "email" Icon.email
                                         ]
                                     , class HeaderButtons
                                         [ flex (int 0)

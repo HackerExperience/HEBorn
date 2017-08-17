@@ -16,6 +16,7 @@ import Apps.CtrlPanel.Subscriptions as CtrlPanel
 import Apps.ServersGears.Subscriptions as ServersGears
 import Apps.LocationPicker.Subscriptions as LocationPicker
 import Apps.LanViewer.Subscriptions as LanViewer
+import Apps.Email.Subscriptions as Email
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -72,3 +73,7 @@ subscriptions data model =
         LanViewerModel model ->
             LanViewer.subscriptions data model
                 |> Sub.map LanViewerMsg
+
+        EmailModel model ->
+            Email.subscriptions data model
+                |> Sub.map EmailMsg

@@ -24,6 +24,7 @@ import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker
 import Apps.LanViewer.Models as LanViewer
+import Apps.Email.Models as Email
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
@@ -44,6 +45,7 @@ type AppModel
     | ServersGearsModel ServersGears.Model
     | LocationPickerModel LocationPicker.Model
     | LanViewerModel LanViewer.Model
+    | EmailModel Email.Model
 
 
 type Contexts
@@ -97,6 +99,9 @@ contexts app =
         LanViewerApp ->
             ContextualApp
 
+        EmailApp ->
+            ContextualApp
+
 
 name : App -> String
 name app =
@@ -139,6 +144,9 @@ name app =
 
         LanViewerApp ->
             LanViewer.name
+
+        EmailApp ->
+            Email.name
 
 
 icon : App -> String
@@ -183,6 +191,9 @@ icon app =
         LanViewerApp ->
             LanViewer.icon
 
+        EmailApp ->
+            Email.icon
+
 
 title : AppModel -> String
 title model =
@@ -225,6 +236,9 @@ title model =
 
         LanViewerModel model ->
             LanViewer.title model
+
+        EmailModel model ->
+            Email.title model
 
 
 model : Game.Data -> WindowID -> App -> ( AppModel, Cmd Msg, Dispatch )
@@ -325,6 +339,13 @@ model data id app =
             let
                 model =
                     LanViewerModel LanViewer.initialModel
+            in
+                ( model, Cmd.none, Dispatch.none )
+
+        EmailApp ->
+            let
+                model =
+                    EmailModel Email.initialModel
             in
                 ( model, Cmd.none, Dispatch.none )
 

@@ -16,6 +16,7 @@ import Apps.CtrlPanel.Update as CtrlPanel
 import Apps.ServersGears.Update as ServersGears
 import Apps.LocationPicker.Update as LocationPicker
 import Apps.LanViewer.Update as LanViewer
+import Apps.Email.Update as Email
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -64,6 +65,9 @@ update data msg model =
 
         ( LanViewerMsg msg, LanViewerModel model ) ->
             map LanViewerModel LanViewerMsg (LanViewer.update data msg model)
+
+        ( EmailMsg msg, EmailModel model ) ->
+            map EmailModel EmailMsg (Email.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
