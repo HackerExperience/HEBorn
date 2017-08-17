@@ -15,4 +15,36 @@ import Apps.Email.Menu.View exposing (..)
 
 view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
-    div [ menuForDummy ] [ menuView model ]
+    let
+        contactList =
+            ul [ class [ Contacts ] ]
+                [ li [ class [ Active ] ] [ text "Christian" ]
+                , li [] [ text "Pedro" ]
+                , li [] [ text "Charlotte" ]
+                , li [] [ text "Mr Massaro" ]
+                ]
+
+        baloon dir msg =
+            li [ class [ dir ] ] [ span [] [ text msg ] ]
+
+        mainChat =
+            div [ class [ MainChat ] ]
+                [ ul []
+                    [ baloon Sys "Today"
+                    , baloon From "Wasap?"
+                    , baloon To "Wasap!"
+                    , baloon To "Just lost"
+                    , baloon From "lost what?"
+                    , baloon To "THE GAME"
+                    , baloon From "'¬¬"
+                    ]
+                ]
+    in
+        div
+            [ menuForDummy
+            , class [ Super ]
+            ]
+            [ contactList
+            , mainChat
+            , menuView model
+            ]
