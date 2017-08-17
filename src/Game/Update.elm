@@ -14,6 +14,8 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Update as Servers
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
+import Game.Storyline.Messages as Story
+import Game.Storyline.Update as Story
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Requests exposing (..)
@@ -38,6 +40,9 @@ update msg model =
 
         WebMsg msg ->
             onWeb msg model
+
+        StoryMsg msg ->
+            onStory msg model
 
         Event data ->
             onEvent data model
@@ -84,6 +89,18 @@ onWeb msg game =
         , set = (\web game -> { game | web = web })
         , toMsg = WebMsg
         , update = (Web.update game)
+        }
+        msg
+        game
+
+
+onStory : Story.Msg -> Model -> UpdateResponse
+onStory msg game =
+    Update.child
+        { get = .story
+        , set = (\story game -> { game | story = story })
+        , toMsg = StoryMsg
+        , update = (Story.update game)
         }
         msg
         game

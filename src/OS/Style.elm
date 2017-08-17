@@ -44,6 +44,7 @@ dashboard =
         , zIndex (int 0)
         , backgroundImage <| url "//raw.githubusercontent.com/elementary/wallpapers/master/Photo%20by%20SpaceX.jpg"
         , backgroundSize cover
+        , backgroundPosition center
         , fontFamily sansSerif
         , fontFamilies [ "Open Sans" ]
         , Css.fontWeight (int 300)
