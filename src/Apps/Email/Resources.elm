@@ -2,7 +2,13 @@ module Apps.Email.Resources exposing (..)
 
 
 type Classes
-    = Todo
+    = Super
+    | Active
+    | Contacts
+    | MainChat
+    | From
+    | To
+    | Sys
 
 
 prefix : String
