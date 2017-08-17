@@ -16,6 +16,7 @@ import Apps.CtrlPanel.View as CtrlPanel
 import Apps.ServersGears.View as ServersGears
 import Apps.LocationPicker.View as LocationPicker
 import Apps.LanViewer.View as LanViewer
+import Apps.Email.View as Email
 import Game.Data as Game
 
 
@@ -60,3 +61,6 @@ view data model =
 
         LanViewerModel model ->
             Html.map LanViewerMsg (LanViewer.view data model)
+
+        EmailModel model ->
+            Html.map EmailMsg (Email.view data model)

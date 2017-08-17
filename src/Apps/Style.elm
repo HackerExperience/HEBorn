@@ -12,6 +12,7 @@ import Apps.BounceManager.Style as BounceManager
 import Apps.Hebamp.Style as Hebamp
 import Apps.LocationPicker.Style as LocationPicker
 import Apps.LanViewer.Style as LanViewer
+import Apps.Email.Style as Email
 
 
 cssList : List Stylesheet
@@ -27,4 +28,5 @@ cssList =
     , Hebamp.css
     , LocationPicker.css
     , LanViewer.css
+    , Email.css
     ]

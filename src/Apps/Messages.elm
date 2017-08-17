@@ -13,6 +13,7 @@ import Apps.CtrlPanel.Messages as CtrlPanel
 import Apps.ServersGears.Messages as ServersGears
 import Apps.LocationPicker.Messages as LocationPicker
 import Apps.LanViewer.Messages as LanViewer
+import Apps.Email.Messages as Email
 
 
 type Msg
@@ -29,3 +30,4 @@ type Msg
     | ServersGearsMsg ServersGears.Msg
     | LocationPickerMsg LocationPicker.Msg
     | LanViewerMsg LanViewer.Msg
+    | EmailMsg Email.Msg
