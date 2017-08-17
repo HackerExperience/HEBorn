@@ -14,6 +14,7 @@ module Core.Dispatch
         , account
         , servers
         , web
+        , story
         , server
         , filesystem
         , processes
@@ -28,6 +29,7 @@ import Driver.Websocket.Messages as Ws
 import Game.Messages as Game
 import Game.Meta.Messages as Meta
 import Game.Web.Messages as Web
+import Game.Storyline.Messages as Story
 import Game.Account.Messages as Account
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -184,6 +186,11 @@ meta msg =
 web : Web.Msg -> Dispatch
 web msg =
     game <| Game.WebMsg msg
+
+
+story : Story.Msg -> Dispatch
+story msg =
+    game <| Game.StoryMsg msg
 
 
 server : Servers.ID -> Servers.ServerMsg -> Dispatch

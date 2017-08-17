@@ -1,10 +1,14 @@
 module OS.Header.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
+--TODO: Convert this entirely to Utils.Update
+
+import Utils.Update as Update
 import UI.Widgets.CustomSelect as CustomSelect
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Game.Data as Game
 import Game.Meta.Messages as Meta
+import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
@@ -31,21 +35,21 @@ update data msg ({ openMenu } as model) =
                 model_ =
                     { model | openMenu = openMenu_ }
             in
-                ( model_, Cmd.none, Dispatch.none )
+                Update.fromModel model_
 
         CustomSelect CustomSelect.MouseEnter ->
             let
                 model_ =
                     { model | mouseSomewhereInside = True }
             in
-                ( model_, Cmd.none, Dispatch.none )
+                Update.fromModel model_
 
         CustomSelect CustomSelect.MouseLeave ->
             let
                 model_ =
                     { model | mouseSomewhereInside = False }
             in
-                ( model_, Cmd.none, Dispatch.none )
+                Update.fromModel model_
 
         SelectGateway id ->
             let
@@ -90,7 +94,7 @@ update data msg ({ openMenu } as model) =
                     else
                         model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                Update.fromModel model_
 
         ContextTo context ->
             let
@@ -104,4 +108,11 @@ update data msg ({ openMenu } as model) =
                 model_ =
                     { model | activeNotificationsTab = target }
             in
-                ( model_, Cmd.none, Dispatch.none )
+                Update.fromModel model_
+
+        ToggleCampaign ->
+            let
+                dispatch =
+                    Dispatch.story <| Story.Toggle
+            in
+                ( model, Cmd.none, dispatch )
