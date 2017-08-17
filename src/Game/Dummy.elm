@@ -4,7 +4,7 @@ import Core.Config exposing (Config)
 import Game.Models exposing (..)
 import Game.Account.Dummy as Account
 import Game.Account.Models as Account
-import Game.Servers.Dummy as Servers
+import Game.Servers.Models as Servers
 import Game.Meta.Dummy as Meta
 
 
@@ -18,7 +18,7 @@ dummy id username token config =
             Account.dummy id username token
 
         servers =
-            Servers.dummy
+            Servers.initialModel
 
         meta =
             Meta.dummy

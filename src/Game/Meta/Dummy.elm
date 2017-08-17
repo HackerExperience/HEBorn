@@ -10,6 +10,6 @@ dummy =
             initialModel
 
         model_ =
-            { model | gateway = Just "gateway0" }
+            { model | gateway = Just "gate1" }
     in
         model_
