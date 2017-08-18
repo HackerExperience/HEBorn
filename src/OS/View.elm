@@ -20,20 +20,33 @@ import OS.SessionManager.View as SessionManager
 
 view : Game.Data -> Model -> Html Msg
 view data model =
-    div
-        [ id Res.Dashboard
-        , menuEmpty
-        ]
-        [ viewHeader
-            data
-            model.header
-        , viewMain data model
-        , lazy displayVersion
-            data.game.config.version
-        , menuView model
-        , lazy DynamicStyle.view
+    let
+        storyStyle story =
+            if story.enabled then
+                [ lazy DynamicStyle.view story.missions ]
+            else
+                []
+
+        staticContent =
+            [ viewHeader
+                data
+                model.header
+            , viewMain data model
+            , lazy displayVersion
+                data.game.config.version
+            , menuView model
+            ]
+
+        fullContent =
             data.game.story
-        ]
+                |> storyStyle
+                |> (++) staticContent
+    in
+        div
+            [ id Res.Dashboard
+            , menuEmpty
+            ]
+            fullContent
 
 
 viewHeader : Game.Data -> Header.Model -> Html Msg
