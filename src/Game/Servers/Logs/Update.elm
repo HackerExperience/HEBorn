@@ -113,12 +113,8 @@ updateEvent :
     -> UpdateResponse
 updateEvent game serverId event model =
     case event of
-        ServersEvent (ServerEvent _ (LogsEvent Logs.Changed)) ->
-            let
-                cmd =
-                    Index.request serverId game
-            in
-                ( model, cmd, Dispatch.none )
+        ServersEvent (ServerEvent _ (LogsEvent (Logs.Changed data))) ->
+            Update.fromModel (toModel data)
 
         _ ->
             Update.fromModel model
@@ -126,9 +122,7 @@ updateEvent game serverId event model =
 
 updateRequest : Game.Model -> Servers.ID -> Response -> Model -> UpdateResponse
 updateRequest game serverId response model =
-    case response of
-        Index (Index.Okay data) ->
-            Update.fromModel (toModel data)
+    Update.fromModel model
 
 
 
