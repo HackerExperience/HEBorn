@@ -55,7 +55,7 @@ update msg model =
                 model_ =
                     { model | state = state }
             in
-                ( model_, Cmd.none )
+                dispatcher model_ cmd dispatch
 
         _ ->
             updateState msg model
@@ -80,7 +80,6 @@ updateState msg ({ state } as model) =
 
 updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
 updateHome msg model stateModel =
-    -- DONE
     case msg of
         WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
             -- trap used for login
@@ -114,7 +113,7 @@ updateHome msg model stateModel =
                         model_ =
                             { model | state = Home stateModel_ }
                     in
-                        ( model_, cmd )
+                        dispatcher model_ cmd dispatch
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -264,7 +263,6 @@ updateEvent event ({ state } as model) =
         msg =
             Game.Event event
     in
-        -- this ould be done in a more generic way
         case state of
             Setup stateModel ->
                 let
@@ -310,7 +308,6 @@ updateGame msg model =
 
 updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )
 updateWebsocket msg model =
-    -- DONE
     let
         ( model_, cmd, dispatch ) =
             Ws.update msg model

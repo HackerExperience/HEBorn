@@ -12,14 +12,18 @@ import Requests.Topics exposing (..)
 import Requests.Types exposing (..)
 
 
-report : Result String a -> a
+report : Result String a -> Maybe a
 report result =
     case result of
         Ok response ->
-            response
+            Just response
 
-        Err _ ->
-            Debug.crash "Failed to decode response from server"
+        Err msg ->
+            let
+                msg_ =
+                    Debug.log ("Request Decode Error " ++ msg) "..."
+            in
+                Nothing
 
 
 request :
@@ -100,7 +104,7 @@ requestWebsocket url topic msg context data =
 
 genericHttp : (ResponseType -> msg) -> Result Http.Error String -> msg
 genericHttp msg result =
-    case result of
+    case Debug.log "▶ HTTP" result of
         Ok data ->
             msg ( OkCode, toValue data )
 
@@ -120,7 +124,7 @@ genericWs msg value =
                 |> required "data" Decode.value
 
         result =
-            Decode.decodeValue decoder value
+            Decode.decodeValue decoder <| Debug.log "▶ Websocket" value
     in
         case result of
             Ok response ->

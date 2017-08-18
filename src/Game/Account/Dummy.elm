@@ -15,8 +15,8 @@ dummy id username token =
             Database.dummy
 
         servers =
-            [ "gateway0"
-            , "gateway1"
+            [ "gate1"
+            , "gate2"
             ]
 
         bounces =

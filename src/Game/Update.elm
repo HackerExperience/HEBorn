@@ -2,6 +2,7 @@ module Game.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
+import Dict
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Reports as Ws
@@ -156,10 +157,31 @@ onWsJoinedAccount model =
             Bootstrap.request model.account.id model
     in
         -- replace Cmd.none to request to enable bootstrap
-        ( model, Cmd.none, Dispatch.none )
+        ( model, request, Dispatch.none )
 
 
 onBootstrapResponse : Bootstrap.Data -> Model -> UpdateResponse
 onBootstrapResponse data model =
     -- TODO: propagate change
     onServers (Servers.Bootstrap data.servers) model
+        |> joinActiveServer
+
+
+joinActiveServer : UpdateResponse -> UpdateResponse
+joinActiveServer (( model, _, _ ) as response) =
+    let
+        maybeId =
+            model.servers.servers
+                |> Dict.keys
+                |> List.head
+    in
+        case maybeId of
+            Just id ->
+                Update.addDispatch
+                    (Dispatch.websocket
+                        (Ws.JoinChannel ServerChannel <| Just id)
+                    )
+                    response
+
+            Nothing ->
+                response

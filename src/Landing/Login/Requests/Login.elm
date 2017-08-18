@@ -15,9 +15,8 @@ import Requests.Types exposing (ConfigSource, Code(..))
 
 
 type Response
-    = OkResponse String String
-    | ErrorResponse
-    | NoOp
+    = Okay String String
+    | Error
 
 
 request : String -> String -> ConfigSource a -> Cmd Msg
@@ -28,7 +27,7 @@ request username password =
         (encoder username password)
 
 
-receive : Code -> Value -> Response
+receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
@@ -37,10 +36,10 @@ receive code json =
                 |> Requests.report
 
         NotFoundCode ->
-            ErrorResponse
+            Just Error
 
         _ ->
-            NoOp
+            Nothing
 
 
 
@@ -57,6 +56,6 @@ encoder username password =
 
 decoder : Decoder Response
 decoder =
-    decode OkResponse
+    decode Okay
         |> required "token" Decode.string
         |> required "account_id" Decode.string

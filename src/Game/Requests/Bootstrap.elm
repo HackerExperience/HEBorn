@@ -41,7 +41,6 @@ receive code json =
                 |> decoder
                 |> Result.map Okay
                 |> Requests.report
-                |> Just
 
         _ ->
             Nothing

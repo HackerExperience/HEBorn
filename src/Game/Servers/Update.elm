@@ -5,6 +5,8 @@ import Json.Decode as Decode exposing (Value, decodeValue, list)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
+import Events.Servers as ServersEvents
+import Requests.Requests as Requests
 import Game.Models as Game
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -73,7 +75,9 @@ bootstrap game json model =
                 ( data.id, server )
     in
         decodeValue (list Fetch.decoder) json
-            |> Result.withDefault []
+            |> Requests.report
+            |> Maybe.withDefault []
+            |> Debug.log "SERVER"
             |> List.map mapper
             |> List.foldl (uncurry insert) model
 
@@ -238,12 +242,21 @@ onTunnelsMsg game =
         }
 
 
+onServerEvent :
+    Game.Model
+    -> ID
+    -> Events.Event
+    -> Server
+    -> ServerUpdateResponse
 onServerEvent game id event server =
-    -- updateFilesystem game (Filesystem.Event ev) server
-    -- |> Update.andThen (updateLogs game (Logs.Event ev))
-    -- |> Update.andThen (updateProcesses game (Processes.Event ev))
-    -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
-    updateServerEvent game id event server
+    if shouldRouteEvent id event then
+        onLogsMsg game id (Logs.Event event) server
+            -- |> Update.andThen (updateFilesystem game (Filesystem.Event ev))
+            -- |> Update.andThen (updateProcesses game (Processes.Event ev))
+            -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
+            |> Update.andThen (updateServerEvent game id event)
+    else
+        Update.fromModel server
 
 
 onServerRequest :
@@ -279,3 +292,13 @@ updateServerRequest :
     -> ServerUpdateResponse
 updateServerRequest game id response server =
     Update.fromModel server
+
+
+shouldRouteEvent : ID -> Events.Event -> Bool
+shouldRouteEvent id event =
+    case event of
+        Events.ServersEvent (ServersEvents.ServerEvent id_ event) ->
+            id == id_
+
+        _ ->
+            True

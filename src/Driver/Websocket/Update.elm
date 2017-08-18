@@ -3,7 +3,8 @@ module Driver.Websocket.Update exposing (update)
 import Json.Decode exposing (Value, decodeValue, value, string)
 import Json.Decode.Pipeline exposing (decode, required)
 import Phoenix.Channel as Channel
-import Utils.Cmd as CmdUtils
+import Utils.Cmd as Cmd
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages exposing (..)
@@ -34,11 +35,11 @@ update msg model =
                         ( model, Cmd.none, dispatch )
 
                 Err _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    Update.fromModel model
 
         Broadcast _ ->
             -- ignore broadcasts
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model
 
 
 
@@ -75,7 +76,7 @@ defer channel topic model =
             { model | defer = False }
 
         cmd =
-            CmdUtils.delay 0.5 (JoinChannel channel topic)
+            Cmd.delay 0.5 (JoinChannel channel topic)
     in
         ( model_, cmd, Dispatch.none )
 
@@ -99,14 +100,8 @@ join channel topic model =
 
         model_ =
             { model | channels = channels }
-
-        broadcast =
-            Broadcast <| Events.Report (Joined channel)
-
-        dispatch =
-            Dispatch.websocket broadcast
     in
-        ( model_, Cmd.none, dispatch )
+        Update.fromModel model_
 
 
 
