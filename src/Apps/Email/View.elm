@@ -14,7 +14,7 @@ import Apps.Email.Menu.View exposing (..)
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     let
         contactList =
             ul [ class [ Contacts ] ]
@@ -30,13 +30,24 @@ view data ({ app } as model) =
         mainChat =
             div [ class [ MainChat ] ]
                 [ ul []
-                    [ baloon Sys "Today"
+                    [ baloon Sys "Yesterday"
                     , baloon From "Wasap?"
                     , baloon To "Wasap!"
                     , baloon To "Just lost"
                     , baloon From "lost what?"
                     , baloon To "THE GAME"
                     , baloon From "'¬¬"
+                    , baloon Sys "Today"
+                    , baloon From "Wasap?"
+                    , baloon To "Wasap!"
+                    , baloon To "Just lost"
+                    , baloon From "lost what?"
+                    , baloon To "THE GAME"
+                    , baloon From "'¬¬"
+                    ]
+                , div []
+                    [ span [] [ text "Tell me more..." ]
+                    , span [] [ text "Reply " ]
                     ]
                 ]
     in

@@ -100,7 +100,7 @@ contexts app =
             ContextualApp
 
         EmailApp ->
-            ContextualApp
+            ContextlessApp
 
 
 name : App -> String

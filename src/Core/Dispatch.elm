@@ -14,6 +14,8 @@ module Core.Dispatch
         , account
         , servers
         , web
+        , mission
+        , missionAction
         , story
         , server
         , filesystem
@@ -27,9 +29,12 @@ module Core.Dispatch
 import Core.Messages exposing (..)
 import Driver.Websocket.Messages as Ws
 import Game.Messages as Game
+import Game.Data as Game
 import Game.Meta.Messages as Meta
 import Game.Web.Messages as Web
 import Game.Storyline.Messages as Story
+import Game.Storyline.Missions.Messages as Missions
+import Game.Storyline.Missions.Actions as Missions
 import Game.Account.Messages as Account
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -191,6 +196,19 @@ web msg =
 story : Story.Msg -> Dispatch
 story msg =
     game <| Game.StoryMsg msg
+
+
+mission : Missions.Msg -> Dispatch
+mission msg =
+    story <| Story.MissionsMsg msg
+
+
+missionAction : Game.Data -> Missions.Action -> Dispatch
+missionAction data act =
+    if data.game.story.enabled then
+        mission <| Missions.ActionDone act
+    else
+        None
 
 
 server : Servers.ID -> Servers.ServerMsg -> Dispatch

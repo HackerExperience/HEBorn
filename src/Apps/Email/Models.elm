@@ -3,13 +3,8 @@ module Apps.Email.Models exposing (..)
 import Apps.Email.Menu.Models as Menu
 
 
-type alias Email =
-    {}
-
-
 type alias Model =
-    { app : Email
-    , menu : Menu.Model
+    { menu : Menu.Model
     }
 
 
@@ -30,11 +25,5 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialEmail
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
     }
-
-
-initialEmail : Email
-initialEmail =
-    {}
