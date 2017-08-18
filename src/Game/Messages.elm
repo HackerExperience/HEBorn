@@ -6,6 +6,7 @@ import Game.Meta.Messages as Meta
 import Game.Web.Messages as Web
 import Events.Events as Events
 import Requests.Types exposing (ResponseType)
+import Apps.Messages
 
 
 type Msg
