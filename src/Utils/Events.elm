@@ -34,3 +34,17 @@ parse str =
 
         Nothing ->
             ( Nothing, str )
+
+
+notify : Result String a -> Maybe a
+notify result =
+    case result of
+        Ok data ->
+            Just data
+
+        Err str ->
+            let
+                log =
+                    Debug.log ("▶ Event parse error " ++ str) ""
+            in
+                Nothing

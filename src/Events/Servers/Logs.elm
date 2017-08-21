@@ -1,4 +1,11 @@
-module Events.Servers.Logs exposing (Event(..), handler)
+module Events.Servers.Logs
+    exposing
+        ( Event(..)
+        , Index
+        , Log
+        , handler
+        , decoder
+        )
 
 import Json.Decode
     exposing
@@ -40,23 +47,23 @@ handler event json =
             Nothing
 
 
+decoder : Decoder Index
+decoder =
+    list log
+
+
 
 -- internals
 
 
 onChanged : Handler Event
 onChanged json =
-    case decodeValue index json of
+    case decodeValue decoder json of
         Ok data ->
             Just <| Changed data
 
         Err str ->
             Debug.log ("▶ Event parse error " ++ str) Nothing
-
-
-index : Decoder Index
-index =
-    list log
 
 
 log : Decoder Log
