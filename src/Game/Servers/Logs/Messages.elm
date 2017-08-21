@@ -24,7 +24,6 @@ type LogMsg
     | Encrypt
     | Decrypt String
     | LogRequest LogRequestMsg
-    | LogEvent Events.Event
 
 
 type RequestMsg

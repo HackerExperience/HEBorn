@@ -6,12 +6,11 @@ module Game.Servers.Logs.Requests
         , logReceive
         )
 
-import Game.Servers.Logs.Requests.Index as Index
 import Game.Servers.Logs.Messages exposing (..)
 
 
 type Response
-    = Index Index.Response
+    = Response
 
 
 type LogResponse
@@ -21,10 +20,8 @@ type LogResponse
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        IndexRequest ( code, data ) ->
-            data
-                |> Index.receive code
-                |> Maybe.map Index
+        _ ->
+            Nothing
 
 
 logReceive : LogRequestMsg -> Maybe LogResponse

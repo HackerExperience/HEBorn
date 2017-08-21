@@ -10,7 +10,6 @@ import Events.Events as Events exposing (Event(ServersEvent))
 import Events.Servers exposing (Event(ServerEvent), ServerEvent(LogsEvent))
 import Events.Servers.Logs as Logs
 import Game.Servers.Logs.Messages exposing (..)
-import Game.Servers.Logs.Requests.Index as Index
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -37,7 +36,7 @@ update game serverId msg model =
             onLogMsg game serverId id msg model
 
         Event event ->
-            onEvent game serverId event model
+            updateEvent game serverId event model
 
         Request data ->
             onRequest game serverId (receive data) model
@@ -45,7 +44,7 @@ update game serverId msg model =
 
 bootstrap : Value -> Model -> Model
 bootstrap json model =
-    decodeValue Index.decoder json
+    decodeValue Logs.decoder json
         |> Requests.report
         |> Maybe.withDefault []
         |> toModel
@@ -63,24 +62,6 @@ onDelete game serverId id model =
 onHide : Game.Model -> Servers.ID -> ID -> Model -> UpdateResponse
 onHide game serverId id model =
     Update.fromModel model
-
-
-onEvent : Game.Model -> Servers.ID -> Events.Event -> Model -> UpdateResponse
-onEvent game serverId event model =
-    let
-        msg =
-            LogEvent event
-
-        reducer id log ( model, cmd, dispatch ) =
-            Update.fromModel log
-                |> Update.andThen (updateLog game serverId id msg)
-                |> Update.mapModel (flip (insert id) model)
-                |> Update.mapCmd (LogMsg id)
-                |> Update.addCmd cmd
-                |> Update.addDispatch dispatch
-    in
-        Dict.foldl reducer (Update.fromModel model) model
-            |> Update.andThen (updateEvent game serverId event)
 
 
 onRequest : Game.Model -> Servers.ID -> Maybe Response -> Model -> UpdateResponse
@@ -129,7 +110,7 @@ updateRequest game serverId response model =
 -- content message handlers
 
 
-toModel : Index.Index -> Model
+toModel : Logs.Index -> Model
 toModel index =
     let
         mapper data =
@@ -154,9 +135,6 @@ updateLog game serverId id msg log =
 
         LogRequest data ->
             onLogRequest game serverId id (logReceive data) log
-
-        LogEvent event ->
-            updateLogEvent game serverId id event log
 
 
 onUpdateContent : Game.Model -> Servers.ID -> ID -> String -> Log -> LogUpdateResponse
@@ -202,15 +180,4 @@ updateLogRequest :
     -> LogUpdateResponse
 updateLogRequest game serverId id resposne log =
     -- no log responses yet
-    Update.fromModel log
-
-
-updateLogEvent :
-    Game.Model
-    -> Servers.ID
-    -> ID
-    -> Events.Event
-    -> Log
-    -> LogUpdateResponse
-updateLogEvent game serverId id event log =
     Update.fromModel log
