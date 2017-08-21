@@ -32,12 +32,12 @@ type alias Server =
     , coordinates : Float
     , nip : ( String, String )
     , logs : Value
+    , tunnels : Value
     , filesystem : Value
+    , processes : Value
 
     -- remaining fields:
     --, nips : List (String, String)
-    --, processes : Value
-    --, tunnels : Value
     --, meta : Value
     }
 
@@ -62,7 +62,9 @@ decoder =
         |> required "coordinates" float
         |> required "nip" decodeNip
         |> required "logs" value
+        |> required "tunnels" value
         |> required "filesystem" value
+        |> required "processes" value
 
 
 

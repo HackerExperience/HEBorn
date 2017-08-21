@@ -8,18 +8,25 @@ module Game.Servers.Tunnels.Models
         , Connection
         , ConnectionType(..)
         , initialModel
-        , get
-        , insert
-        , remove
-        , getConnections
-        , setConnections
+        , newTunnel
+        , newConnection
+        , toTunnelID
+        , getTunnel
+        , getConnection
         , insertConnection
-        , removeConnection
+        , insertTunnel
+          --, get
+          --, insert
+          --, remove
+          --, getConnections
+          --, setConnections
+          --, insertConnection
+          --, removeConnection
         )
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network
 
 
 type alias Model =
@@ -27,12 +34,11 @@ type alias Model =
 
 
 type alias ID =
-    ( Bounces.ID, NIP )
+    ( Bounces.ID, Network.ID, Network.IP )
 
 
 type alias Tunnel =
-    { active : Bool
-    , connections : Connections
+    { connections : Connections
     }
 
 
@@ -65,102 +71,68 @@ initialModel =
 -- tunnel crud
 
 
-get : Maybe Bounces.ID -> NIP -> Model -> Tunnel
-get bounce endpoint model =
-    model
-        |> Dict.get (toTunnelID bounce endpoint)
-        |> Maybe.withDefault { active = True, connections = Dict.empty }
+newTunnel : Tunnel
+newTunnel =
+    { connections = Dict.empty }
 
 
-insert : Maybe Bounces.ID -> NIP -> Tunnel -> Model -> Model
-insert bounce endpoint tunnel model =
-    Dict.insert (toTunnelID bounce endpoint) tunnel model
+newConnection : String -> Connection
+newConnection string =
+    { type_ = toConnectionType string }
 
 
-remove : Maybe Bounces.ID -> NIP -> Model -> Model
-remove bounce endpoint model =
-    Dict.remove (toTunnelID bounce endpoint) model
-
-
-
--- tunnel getters/setters
-
-
-getConnections : Tunnel -> Connections
-getConnections =
-    .connections
-
-
-setConnections : Connections -> Tunnel -> Tunnel
-setConnections connections tunnel =
-    { tunnel | connections = connections }
-
-
-
--- connection crud
-
-
-insertConnection :
-    Maybe Bounces.ID
-    -> NIP
-    -> ConnectionID
-    -> Connection
-    -> Model
-    -> Model
-insertConnection bounce endpoint id connection model =
-    let
-        tunnel =
-            get bounce endpoint model
-
-        { connections } =
-            tunnel
-
-        connections_ =
-            Dict.insert id connection connections
-
-        tunnel_ =
-            { tunnel | connections = connections_ }
-
-        model_ =
-            Dict.insert (toTunnelID bounce endpoint) tunnel_ model
-    in
-        model_
-
-
-removeConnection :
-    Maybe Bounces.ID
-    -> NIP
-    -> ConnectionID
-    -> Model
-    -> Model
-removeConnection bounce endpoint id model =
-    let
-        tunnel =
-            get bounce endpoint model
-
-        { connections } =
-            tunnel
-
-        connections_ =
-            Dict.remove id connections
-
-        tunnel_ =
-            { tunnel | connections = connections_ }
-
-        model_ =
-            Dict.insert (toTunnelID bounce endpoint) tunnel_ model
-    in
-        model_
-
-
-
--- internals
-
-
-toTunnelID : Maybe Bounces.ID -> NIP -> ID
+toTunnelID : Maybe Bounces.ID -> String -> ID
 toTunnelID bounce endpoint =
     let
         bounce_ =
             Maybe.withDefault "" bounce
+
+        ( network, ip ) =
+            Network.fromString endpoint
     in
-        ( bounce_, endpoint )
+        ( bounce_, network, ip )
+
+
+getTunnel : ID -> Model -> Tunnel
+getTunnel id model =
+    Dict.get id model
+        |> Maybe.withDefault newTunnel
+
+
+getConnection : ConnectionID -> Tunnel -> Maybe Connection
+getConnection id { connections } =
+    Dict.get id connections
+
+
+insertConnection : ConnectionID -> Connection -> Tunnel -> Tunnel
+insertConnection id conn ({ connections } as tunnel) =
+    let
+        connections_ =
+            Dict.insert id conn connections
+
+        tunnel_ =
+            { tunnel | connections = connections_ }
+    in
+        tunnel_
+
+
+insertTunnel : ID -> Tunnel -> Model -> Model
+insertTunnel =
+    Dict.insert
+
+
+
+---- internals
+
+
+toConnectionType : String -> ConnectionType
+toConnectionType str =
+    case str of
+        "ftp" ->
+            ConnectionFTP
+
+        "ssh" ->
+            ConnectionSSH
+
+        _ ->
+            ConnectionUnknown

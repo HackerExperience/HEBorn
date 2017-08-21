@@ -25,14 +25,10 @@ module Game.Servers.Models
         , setLogs
         , getProcesses
         , setProcesses
-        , getTunnels
-        , setTunnels
         , getEndpoint
         , setEndpoint
         , getBounce
         , setBounce
-        , getTunnel
-        , setTunnel
         )
 
 import Dict exposing (Dict)
@@ -231,16 +227,6 @@ setProcesses processes model =
     { model | processes = processes }
 
 
-getTunnels : Server -> Tunnels.Model
-getTunnels =
-    .tunnels
-
-
-setTunnels : Tunnels.Model -> Server -> Server
-setTunnels tunnels model =
-    { model | tunnels = tunnels }
-
-
 getEndpoint : Server -> Maybe NIP
 getEndpoint server =
     case server.meta of
@@ -284,40 +270,6 @@ setBounce id server =
                     GatewayMeta { meta | bounce = id }
             in
                 { server | meta = meta_ }
-
-        _ ->
-            server
-
-
-getTunnel : Server -> Maybe Tunnels.Tunnel
-getTunnel ({ tunnels } as server) =
-    case server.meta of
-        GatewayMeta { bounce, endpoint } ->
-            case endpoint of
-                Just id ->
-                    Just <| Tunnels.get bounce id tunnels
-
-                Nothing ->
-                    Nothing
-
-        _ ->
-            Nothing
-
-
-setTunnel : Tunnels.Tunnel -> Server -> Server
-setTunnel tunnel ({ tunnels } as server) =
-    case server.meta of
-        GatewayMeta ({ bounce, endpoint } as meta) ->
-            case endpoint of
-                Just id ->
-                    let
-                        tunnels_ =
-                            Tunnels.insert bounce id tunnel tunnels
-                    in
-                        setTunnels tunnels_ server
-
-                Nothing ->
-                    server
 
         _ ->
             server

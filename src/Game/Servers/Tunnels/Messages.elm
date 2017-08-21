@@ -1,5 +1,13 @@
 module Game.Servers.Tunnels.Messages exposing (Msg(..))
 
+import Events.Events as Events
+import Requests.Types exposing (ResponseType)
+
 
 type Msg
-    = NoOp
+    = Request RequestMsg
+    | Event Events.Event
+
+
+type RequestMsg
+    = RequestMsg

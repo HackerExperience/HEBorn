@@ -29,17 +29,17 @@ connView conn =
 
 
 tunnelView : NIP -> ( Tunnels.ID, Tunnels.Tunnel ) -> Html Msg
-tunnelView gateway ( id, tunnel ) =
+tunnelView gateway ( ( _, _, ip ), tunnel ) =
     div [ class [ GroupedTunnel ] ]
         [ text "Gateway: "
         , text <| Tuple.second gateway
         , br [] []
         , text "Endpoint: "
-        , text <| (id |> Tuple.second |> Tuple.second)
+        , text <| ip
         , br [] []
         , text "Connections: "
         , tunnel
-            |> Tunnels.getConnections
+            |> .connections
             |> Dict.values
             |> List.map connView
             |> div []
@@ -85,7 +85,7 @@ view data ({ app } as model) =
         mainEntries =
             data
                 |> Game.getServer
-                |> Servers.getTunnels
+                |> .tunnels
                 |> Dict.toList
                 |> List.map (tunnelView nip)
                 |> verticalList

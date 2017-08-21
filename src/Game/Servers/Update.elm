@@ -64,10 +64,17 @@ bootstrap game json model =
                     , coordinates = data.coordinates
                     , nip = data.nip
                     , nips = [ data.nip ]
-                    , filesystem = Filesystem.bootstrap data.filesystem Filesystem.initialModel
-                    , logs = Logs.bootstrap data.logs Logs.initialModel
-                    , processes = Processes.initialProcesses
-                    , tunnels = Tunnels.initialModel
+                    , filesystem =
+                        Filesystem.bootstrap data.filesystem
+                            Filesystem.initialModel
+                    , logs =
+                        Logs.bootstrap data.logs
+                            Logs.initialModel
+                    , processes =
+                        Processes.initialProcesses
+                    , tunnels =
+                        Tunnels.bootstrap data.tunnels
+                            Tunnels.initialModel
                     , meta =
                         GatewayMeta <| GatewayMetadata Nothing Nothing
                     }
