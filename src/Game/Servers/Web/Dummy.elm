@@ -1,6 +1,6 @@
-module Game.Web.Dummy exposing (..)
+module Game.Servers.Web.Dummy exposing (..)
 
-import Game.Web.Types exposing (..)
+import Game.Servers.Web.Types exposing (..)
 
 
 dummyTunnel : List String -> Type

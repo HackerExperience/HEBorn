@@ -17,7 +17,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Models as Pages
-import Game.Web.Types as Web
+import Game.Servers.Web.Types as Web
 
 
 --------------------------------------------------------------------------------

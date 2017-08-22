@@ -1,4 +1,4 @@
-module Game.Web.Types exposing (..)
+module Game.Servers.Web.Types exposing (..)
 
 
 type alias Site =

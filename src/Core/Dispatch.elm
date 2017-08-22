@@ -31,7 +31,6 @@ import Driver.Websocket.Messages as Ws
 import Game.Messages as Game
 import Game.Data as Game
 import Game.Meta.Messages as Meta
-import Game.Web.Messages as Web
 import Game.Storyline.Messages as Story
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Missions.Actions as Missions
@@ -42,6 +41,7 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Tunnels.Messages as Tunnels
+import Game.Servers.Web.Messages as Web
 import Game.Servers.Shared as Servers
 import Utils.Cmd as CmdUtils
 
@@ -188,11 +188,6 @@ meta msg =
     game <| Game.MetaMsg msg
 
 
-web : Web.Msg -> Dispatch
-web msg =
-    game <| Game.WebMsg msg
-
-
 story : Story.Msg -> Dispatch
 story msg =
     game <| Game.StoryMsg msg
@@ -239,6 +234,11 @@ log serverId id msg =
 tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
 tunnels id msg =
     server id <| Servers.TunnelsMsg msg
+
+
+web : Servers.ID -> Web.Msg -> Dispatch
+web id msg =
+    server id <| Servers.WebMsg msg
 
 
 

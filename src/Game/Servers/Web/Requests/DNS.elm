@@ -1,12 +1,12 @@
-module Game.Web.Requests.DNS
+module Game.Servers.Web.Requests.DNS
     exposing
         ( Response(..)
         , request
         , receive
         )
 
-import Game.Web.Types as Web
-import Game.Web.Messages exposing (..)
+import Game.Servers.Web.Types as Web
+import Game.Servers.Web.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics exposing (Topic(..))
 import Requests.Types exposing (ConfigSource, Code(..))

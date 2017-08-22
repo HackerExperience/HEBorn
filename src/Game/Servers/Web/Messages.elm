@@ -1,4 +1,4 @@
-module Game.Web.Messages exposing (Msg(..), RequestMsg(..))
+module Game.Servers.Web.Messages exposing (Msg(..), RequestMsg(..))
 
 import Events.Events as Events
 import Requests.Types exposing (ResponseType)

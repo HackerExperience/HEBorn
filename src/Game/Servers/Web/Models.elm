@@ -1,4 +1,4 @@
-module Game.Web.Models
+module Game.Servers.Web.Models
     exposing
         ( Model
         , Url
@@ -10,8 +10,8 @@ module Game.Web.Models
         )
 
 import Dict exposing (Dict)
-import Game.Web.Types exposing (..)
-import Game.Web.Dummy exposing (dummyTunnel)
+import Game.Servers.Web.Types exposing (..)
+import Game.Servers.Web.Dummy exposing (dummyTunnel)
 
 
 type alias Model =

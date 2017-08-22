@@ -25,6 +25,9 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
+import Game.Servers.Web.Messages as Web
+import Game.Servers.Web.Models as Web
+import Game.Servers.Web.Update as Web
 import Game.Servers.Requests.Fetch as Fetch
 import Game.Network.Types exposing (NIP)
 
@@ -75,6 +78,8 @@ bootstrap game json model =
                     , tunnels =
                         Tunnels.bootstrap data.tunnels
                             Tunnels.initialModel
+                    , web =
+                        Web.initialModel
                     , meta =
                         GatewayMeta <| GatewayMetadata Nothing Nothing
                     }
@@ -175,6 +180,9 @@ updateServer game id msg server =
         TunnelsMsg msg ->
             onTunnelsMsg game msg server
 
+        WebMsg msg ->
+            onWebMsg game msg server
+
         ServerEvent event ->
             onServerEvent game id event server
 
@@ -248,6 +256,14 @@ onTunnelsMsg game =
         , update = (Tunnels.update game)
         }
 
+onWebMsg : Game.Model -> Web.Msg -> Server -> ServerUpdateResponse
+onWebMsg game =
+    Update.child
+        { get = .web
+        , set = (\web model -> { model | web = web })
+        , toMsg = WebMsg
+        , update = (Web.update game)
+        }
 
 onServerEvent :
     Game.Model

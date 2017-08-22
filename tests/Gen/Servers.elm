@@ -18,6 +18,7 @@ import Random.Pcg.Extra exposing (andMap)
 import Fuzz exposing (Fuzzer)
 import Game.Network.Types exposing (IP)
 import Game.Servers.Models exposing (..)
+import Game.Servers.Web.Models as Web
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Gen.Utils exposing (..)
@@ -109,6 +110,7 @@ genServer =
             , logs = logs
             , processes = proc
             , tunnels = Tunnels.initialModel
+            , web = Web.initialModel
             , meta = meta
             , coordinates = 0
             }

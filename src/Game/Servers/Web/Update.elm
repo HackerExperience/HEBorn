@@ -1,14 +1,14 @@
-module Game.Web.Update exposing (update)
+module Game.Servers.Web.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
 import Utils.Update as Update
 import Game.Models as Game
-import Game.Web.Models exposing (..)
-import Game.Web.Messages exposing (..)
-import Game.Web.Types exposing (..)
-import Game.Web.Requests exposing (..)
-import Game.Web.Requests.DNS as DNS
+import Game.Servers.Web.Models exposing (..)
+import Game.Servers.Web.Messages exposing (..)
+import Game.Servers.Web.Types exposing (..)
+import Game.Servers.Web.Requests exposing (..)
+import Game.Servers.Web.Requests.DNS as DNS
 
 
 type alias UpdateResponse =

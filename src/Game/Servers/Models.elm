@@ -38,6 +38,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes exposing (Processes)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
+import Game.Servers.Web.Models as Web
 import Game.Network.Types exposing (NIP)
 
 
@@ -59,6 +60,7 @@ type alias Server =
     , logs : Logs.Model
     , processes : Processes
     , tunnels : Tunnels.Model
+    , web : Web.Model
     , coordinates : Coordinates
     , meta : ServerMeta
     }

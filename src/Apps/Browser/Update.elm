@@ -3,8 +3,8 @@ module Apps.Browser.Update exposing (update)
 import Game.Data as GameData
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Models as Pages
-import Game.Web.Models as Web
-import Game.Web.Types as Web
+import Game.Servers.Web.Models as Web
+import Game.Servers.Web.Types as Web
 import Apps.Browser.Messages exposing (Msg(..))
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
@@ -107,7 +107,7 @@ goPage : String -> GameData.Data -> Browser -> ( Browser, Dispatch )
 goPage url data app =
     let
         site =
-            Web.get url data.game.web
+            Web.get url data.server.web
 
         dispatch =
             case site.type_ of
