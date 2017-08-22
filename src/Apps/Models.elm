@@ -67,7 +67,7 @@ contexts app =
             ContextualApp
 
         BrowserApp ->
-            ContextlessApp
+            ContextualApp
 
         ExplorerApp ->
             ContextualApp
