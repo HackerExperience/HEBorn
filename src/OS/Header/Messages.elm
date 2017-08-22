@@ -15,3 +15,4 @@ type Msg
     | CheckMenus
     | ContextTo Context
     | NotificationsTabGo TabNotifications
+    | ToggleCampaign

@@ -1,12 +1,15 @@
 module OS.View exposing (view)
 
-import OS.Models exposing (..)
-import OS.Messages exposing (..)
-import OS.Resources as Res
-import Html exposing (..)
+import Html exposing (Html, div, text)
+import Html.Lazy exposing (lazy)
 import Html.CssHelpers
-import Game.Data as GameData
+import Game.Data as Game
+import OS.Models exposing (Model)
+import OS.Messages exposing (Msg(HeaderMsg, SessionManagerMsg))
+import OS.Resources as Res
+import OS.DynamicStyle as DynamicStyle
 import OS.Header.View as Header
+import OS.Header.Models as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 
@@ -15,27 +18,44 @@ import OS.SessionManager.View as SessionManager
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : GameData.Data -> Model -> Html Msg
+view : Game.Data -> Model -> Html Msg
 view data model =
-    div
-        [ id Res.Dashboard
-        , menuEmpty
-        ]
-        [ viewHeader data model
-        , viewMain data model
-        , displayVersion data.game.config.version
-        , menuView model
-        ]
+    let
+        storyStyle story =
+            if story.enabled then
+                [ lazy DynamicStyle.view story.missions ]
+            else
+                []
+
+        staticContent =
+            [ viewHeader
+                data
+                model.header
+            , viewMain data model
+            , lazy displayVersion
+                data.game.config.version
+            , menuView model
+            ]
+
+        fullContent =
+            data.game.story
+                |> storyStyle
+                |> (++) staticContent
+    in
+        div
+            [ id Res.Dashboard
+            , menuEmpty
+            ]
+            fullContent
 
 
-viewHeader : GameData.Data -> Model -> Html Msg
-viewHeader game model =
-    model.header
-        |> Header.view game
+viewHeader : Game.Data -> Header.Model -> Html Msg
+viewHeader game header =
+    Header.view game header
         |> Html.map HeaderMsg
 
 
-viewMain : GameData.Data -> Model -> Html Msg
+viewMain : Game.Data -> Model -> Html Msg
 viewMain game model =
     model.session
         |> SessionManager.view game

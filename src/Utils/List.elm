@@ -10,7 +10,11 @@ module Utils.List
         , indexedFoldr
         , foldlWhile
         , foldrWhile
+        , unique
+        , uniqueBy
         )
+
+import Set exposing (Set)
 
 
 find : (a -> Bool) -> List a -> Maybe a
@@ -132,6 +136,33 @@ foldlWhile func acc list =
 foldrWhile : (a -> b -> ( Bool, b )) -> b -> List a -> ( Bool, b )
 foldrWhile func acc list =
     foldlWhile func acc (List.reverse list)
+
+
+unique : List comparable -> List comparable
+unique list =
+    uniqueHelp identity Set.empty list
+
+
+uniqueBy : (a -> comparable) -> List a -> List a
+uniqueBy f list =
+    uniqueHelp f Set.empty list
+
+
+uniqueHelp : (a -> comparable) -> Set comparable -> List a -> List a
+uniqueHelp f existing remaining =
+    case remaining of
+        [] ->
+            []
+
+        first :: rest ->
+            let
+                computedFirst =
+                    f first
+            in
+                if Set.member computedFirst existing then
+                    uniqueHelp f existing rest
+                else
+                    first :: uniqueHelp f (Set.insert computedFirst existing) rest
 
 
 

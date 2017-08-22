@@ -282,3 +282,8 @@ notifications =
 chat : Icon
 chat =
     faIcon FA.commentO
+
+
+email : Icon
+email =
+    faIcon FA.envelopeO

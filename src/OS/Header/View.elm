@@ -194,9 +194,31 @@ view data ({ openMenu, notifications } as model) =
 
         chatNots =
             Notifications.listChat notifications
+
+        logo =
+            span
+                [ class [ Logo ] ]
+                [ text "D'LayDOS" ]
+
+        toggleCampaignBtn =
+            button
+                [ onClick ToggleCampaign ]
+                [ text <|
+                    if game.story.enabled then
+                        "Go Multiplayer"
+                    else
+                        "Go Campaign"
+                ]
+
+        logoutBtn =
+            button
+                [ onClick Logout ]
+                [ text "Logout" ]
     in
         div [ class [ Header ] ]
-            [ span [ class [ Logo ] ] [ text "D'LayDOS" ]
+            [ logo
+            , spacer
+            , toggleCampaignBtn
             , spacer
             , contextToggler onGateway (ContextTo Meta.Gateway)
             , gatewaySelector data openMenu gateway gateways
@@ -206,10 +228,7 @@ view data ({ openMenu, notifications } as model) =
             , spacer
             , chatNotifications chatNots
             , accNotifications model.activeNotificationsTab notifications
-            , button
-                [ onClick Logout
-                ]
-                [ text "Logout" ]
+            , logoutBtn
             ]
 
 

@@ -52,7 +52,7 @@ conditionToString : Condition -> String
 conditionToString cond =
     case cond of
         EQ a b ->
-            a ++ "=" ++ b
+            a ++ "=\"" ++ b ++ "\""
 
 
 withAttribute : Condition -> List Style -> Style

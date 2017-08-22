@@ -15,3 +15,4 @@ type App
     | ServersGearsApp
     | LocationPickerApp
     | LanViewerApp
+    | EmailApp
