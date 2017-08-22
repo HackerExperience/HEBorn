@@ -1,7 +1,7 @@
-module Game.Web.Requests exposing (Response(..), receive)
+module Game.Servers.Web.Requests exposing (Response(..), receive)
 
-import Game.Web.Requests.DNS as DNS
-import Game.Web.Messages exposing (..)
+import Game.Servers.Web.Requests.DNS as DNS
+import Game.Servers.Web.Messages exposing (..)
 
 
 type Response

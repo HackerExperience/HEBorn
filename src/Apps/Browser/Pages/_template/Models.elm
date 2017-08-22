@@ -4,7 +4,7 @@ module Apps.Browser.Pages.Template.Models
         , getSite
         )
 
-import Game.Web.Types as Web
+import Game.Servers.Web.Types as Web
 
 
 getTitle : String

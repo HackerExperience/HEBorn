@@ -13,8 +13,6 @@ import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Servers.Messages as Servers
 import Game.Servers.Update as Servers
-import Game.Web.Messages as Web
-import Game.Web.Update as Web
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Messages exposing (..)
@@ -38,9 +36,6 @@ update msg model =
 
         MetaMsg msg ->
             onMeta msg model
-
-        WebMsg msg ->
-            onWeb msg model
 
         StoryMsg msg ->
             onStory msg model
@@ -83,18 +78,6 @@ onMeta msg game =
         game
 
 
-onWeb : Web.Msg -> Model -> UpdateResponse
-onWeb msg game =
-    Update.child
-        { get = .web
-        , set = (\web game -> { game | web = web })
-        , toMsg = WebMsg
-        , update = (Web.update game)
-        }
-        msg
-        game
-
-
 onStory : Story.Msg -> Model -> UpdateResponse
 onStory msg game =
     Update.child
@@ -105,7 +88,6 @@ onStory msg game =
         }
         msg
         game
-
 
 onServers : Servers.Msg -> Model -> UpdateResponse
 onServers msg game =
@@ -123,7 +105,6 @@ onEvent : Events.Event -> Model -> UpdateResponse
 onEvent event model =
     onAccount (Account.Event event) model
         |> Update.andThen (onMeta (Meta.Event event))
-        |> Update.andThen (onWeb (Web.Event event))
         |> Update.andThen (onServers (Servers.Event event))
         |> Update.andThen (updateEvent event)
 

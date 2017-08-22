@@ -6,7 +6,7 @@ module Apps.Browser.Pages.Models
         , getTitle
         )
 
-import Game.Web.Types as Web
+import Game.Servers.Web.Types as Web
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Default.Models as PageDefault
 import Apps.Browser.Pages.Profile.Models as PageProfile
