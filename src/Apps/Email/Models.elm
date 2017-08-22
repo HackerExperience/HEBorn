@@ -5,6 +5,7 @@ import Apps.Email.Menu.Models as Menu
 
 type alias Model =
     { menu : Menu.Model
+    , activeContact : Maybe String
     }
 
 
@@ -26,4 +27,15 @@ icon =
 initialModel : Model
 initialModel =
     { menu = Menu.initialMenu
+    , activeContact = Nothing
     }
+
+
+getActiveContact : Model -> Maybe String
+getActiveContact =
+    (.activeContact)
+
+
+setActiveContact : Maybe String -> Model -> Model
+setActiveContact v m =
+    { m | activeContact = v }

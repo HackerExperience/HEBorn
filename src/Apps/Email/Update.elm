@@ -1,19 +1,24 @@
 module Apps.Email.Update exposing (update)
 
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Apps.Email.Models exposing (Model)
+import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.Email.Menu.Messages as Menu
 import Apps.Email.Menu.Update as Menu
 import Apps.Email.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
 update :
     Game.Data
     -> Email.Msg
     -> Model
-    -> ( Model, Cmd Email.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -21,11 +26,26 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
+            onMenuMsg data msg model
 
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+        SelectContact email ->
+            onSelectContact email model
+
+
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    Update.child
+        { get = .menu
+        , set = (\menu model -> { model | menu = menu })
+        , toMsg = MenuMsg
+        , update = (Menu.update data)
+        }
+        msg
+        model
+
+
+onSelectContact : String -> Model -> UpdateResponse
+onSelectContact email model =
+    Update.mapModel
+        (setActiveContact <| Just email)
+        (Update.fromModel model)
