@@ -31,6 +31,9 @@ update data msg model =
             DockMsg msg ->
                 Dock.update data msg model_
 
+            _ ->
+                ( model, Cmd.none, Dispatch.none )
+
 
 
 -- internals

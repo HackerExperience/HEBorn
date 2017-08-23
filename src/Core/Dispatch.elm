@@ -24,11 +24,14 @@ module Core.Dispatch
         , log
         , tunnels
         , meta
+        , browser
         )
 
+import Apps.Messages as Apps
+import Apps.Browser.Messages as Browser
+import Game.Messages as Game
 import Core.Messages exposing (..)
 import Driver.Websocket.Messages as Ws
-import Game.Messages as Game
 import Game.Data as Game
 import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
@@ -43,6 +46,9 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Web.Messages as Web
 import Game.Servers.Shared as Servers
+import OS.Messages as OS
+import OS.SessionManager.Messages as SessionManager
+import OS.SessionManager.WindowManager.Messages as WindowManager
 import Utils.Cmd as CmdUtils
 
 
@@ -241,8 +247,28 @@ web id msg =
     server id <| Servers.WebMsg msg
 
 
+browser : Maybe String -> Browser.Msg -> Dispatch
+browser maybeId msg =
+    sessionManagerAppMsg maybeId <| Apps.BrowserMsg msg
+
+
 
 -- internals
+
+
+os : OS.Msg -> Dispatch
+os msg =
+    core <| OSMsg msg
+
+
+sessionManager : SessionManager.Msg -> Dispatch
+sessionManager msg =
+    os <| OS.SessionManagerMsg msg
+
+
+sessionManagerAppMsg : Maybe String -> Apps.Msg -> Dispatch
+sessionManagerAppMsg maybeId msg =
+    sessionManager <| SessionManager.AppMsg maybeId msg
 
 
 reducer : Dispatch -> List Msg -> List Msg
