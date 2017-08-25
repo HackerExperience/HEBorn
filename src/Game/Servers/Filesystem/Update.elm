@@ -3,7 +3,7 @@ module Game.Servers.Filesystem.Update exposing (update, bootstrap)
 import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
-import Requests.Types exposing (Code(..))
+import Events.Servers.Filesystem as Index exposing (apply)
 import Game.Models as Game
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages exposing (Msg(..), RequestMsg(..))
@@ -14,7 +14,6 @@ import Game.Servers.Filesystem.Requests.Delete as RqDelete
 import Game.Servers.Filesystem.Requests.Move as RqMove
 import Game.Servers.Filesystem.Requests.Rename as RqRename
 import Game.Servers.Filesystem.Requests.Create as RqCreate
-import Game.Servers.Filesystem.Requests.Index as RqIndex exposing (Index)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -54,51 +53,11 @@ update game serverId msg model =
 
 
 bootstrap : Value -> Filesystem -> Filesystem
-bootstrap value model =
-    -- TODO: rewrite to include logic
-    --decodeValue Index.decoder value
-    --    |> Requests.report
-    --    |> List.foldl (convEntry RootRef) initialModel
-    model
-
-
-convEntry : ParentReference -> RqIndex.Entry -> Filesystem -> Filesystem
-convEntry parentRef src filesystem =
-    -- TODO: rewrite to be more readable
-    case src of
-        RqIndex.FileEntry data ->
-            addEntry
-                (FileEntry
-                    { id = data.id
-                    , name = data.name
-                    , parent = parentRef
-                    , extension = data.extension
-                    , version = data.version
-                    , size = data.size
-                    , modules = data.modules
-                    }
-                )
-                filesystem
-
-        RqIndex.FolderEntry data ->
-            let
-                meAdded =
-                    addEntry
-                        (FolderEntry
-                            { id = data.id
-                            , name = data.name
-                            , parent = parentRef
-                            }
-                        )
-                        filesystem
-
-                parentRef =
-                    NodeRef data.id
-            in
-                List.foldl
-                    (convEntry parentRef)
-                    meAdded
-                    data.children
+bootstrap json model =
+    decodeValue Index.decoder json
+        |> Requests.report
+        |> Maybe.map (apply model)
+        |> Maybe.withDefault model
 
 
 onDelete : Game.Model -> Servers.ID -> FileID -> Filesystem -> UpdateResponse
