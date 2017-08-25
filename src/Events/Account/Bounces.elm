@@ -9,12 +9,12 @@ import Json.Decode
         , string
         )
 import Json.Decode.Pipeline exposing (decode, required)
-import Utils.Events exposing (Handler)
+import Utils.Events exposing (Handler, notify)
 import Game.Account.Bounces.Models exposing (..)
 
 
 type Event
-    = Changed
+    = Changed Model
 
 
 handler : String -> Handler Event
@@ -33,7 +33,9 @@ handler event json =
 
 onChanged : Handler Event
 onChanged json =
-    Just Changed
+    decodeValue decoder json
+        |> Result.map Changed
+        |> notify
 
 
 decoder : Decoder Model

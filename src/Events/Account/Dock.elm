@@ -10,13 +10,13 @@ import Json.Decode
         , list
         , string
         )
-import Utils.Events exposing (Handler, commonError)
+import Utils.Events exposing (Handler, notify, commonError)
 import Game.Account.Dock.Models as Dock
 import Apps.Apps as Apps
 
 
 type Event
-    = Changed
+    = Changed Dock.Model
 
 
 handler : String -> Handler Event
@@ -35,7 +35,9 @@ handler event json =
 
 onChanged : Handler Event
 onChanged json =
-    Just Changed
+    decodeValue decoder json
+        |> Result.map Changed
+        |> notify
 
 
 decoder : Decoder Dock.Model

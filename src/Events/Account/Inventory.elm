@@ -13,12 +13,12 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Dict
-import Utils.Events exposing (Handler, commonError)
+import Utils.Events exposing (Handler, notify, commonError)
 import Game.Account.Inventory.Models exposing (..)
 
 
 type Event
-    = Changed
+    = Changed Model
 
 
 handler : String -> Handler Event
@@ -37,7 +37,9 @@ handler event json =
 
 onChanged : Handler Event
 onChanged json =
-    Just Changed
+    decodeValue decoder json
+        |> Result.map Changed
+        |> notify
 
 
 decoder : Decoder Model
