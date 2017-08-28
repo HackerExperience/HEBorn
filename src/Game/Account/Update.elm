@@ -142,7 +142,7 @@ onWsConnected game model =
     let
         dispatch =
             Dispatch.websocket
-                (Ws.JoinChannel AccountChannel (Just model.id))
+                (Ws.JoinChannel AccountChannel (Just model.id) Nothing)
     in
         ( model, Cmd.none, dispatch )
 

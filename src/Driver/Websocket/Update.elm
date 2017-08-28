@@ -16,11 +16,8 @@ import Events.Events as Events
 update : Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update msg model =
     case msg of
-        JoinChannel channel topic ->
-            if model.defer then
-                defer channel topic model
-            else
-                join channel topic model
+        JoinChannel channel topic payload ->
+            join channel topic payload model
 
         NewEvent channel topic value ->
             case decodeEvent value of
@@ -63,37 +60,28 @@ decodeEvent =
         decodeValue decoder
 
 
-defer :
-    Channel
-    -> Maybe String
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-defer channel topic model =
-    -- I think that defer is not going to be used anywhere
-    -- it's on the line for removal
-    let
-        model_ =
-            { model | defer = False }
-
-        cmd =
-            Cmd.delay 0.5 (JoinChannel channel topic)
-    in
-        ( model_, cmd, Dispatch.none )
-
-
 join :
     Channel
     -> Maybe String
+    -> Maybe Value
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-join channel topic model =
+join channel topic payload model =
     let
         channel_ =
-            topic
-                |> getAddress channel
-                |> Channel.init
-                |> Channel.onJoin (reportJoin channel)
-                |> Channel.on "event" (NewEvent channel topic)
+            let
+                channel__ =
+                    getAddress channel topic
+                        |> Channel.init
+                        |> Channel.onJoin (reportJoin channel)
+                        |> Channel.on "event" (NewEvent channel topic)
+            in
+                case payload of
+                    Just payload ->
+                        Channel.withPayload payload channel__
+
+                    Nothing ->
+                        channel__
 
         channels =
             channel_ :: model.channels
