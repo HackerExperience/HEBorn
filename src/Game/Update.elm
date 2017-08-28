@@ -89,6 +89,7 @@ onStory msg game =
         msg
         game
 
+
 onServers : Servers.Msg -> Model -> UpdateResponse
 onServers msg game =
     Update.child
@@ -143,7 +144,7 @@ onWsConnected : Model -> UpdateResponse
 onWsConnected model =
     let
         dispatch =
-            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
+            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing Nothing)
     in
         ( model, Cmd.none, dispatch )
 
@@ -177,7 +178,7 @@ joinActiveServer (( model, _, _ ) as response) =
             Just id ->
                 Update.addDispatch
                     (Dispatch.websocket
-                        (Ws.JoinChannel ServerChannel <| Just id)
+                        (Ws.JoinChannel ServerChannel (Just id) Nothing)
                     )
                     response
 
