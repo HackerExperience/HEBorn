@@ -108,7 +108,14 @@ module_ =
         |> required "version" int
 
 
-fileConstructor : String -> FileSize -> FileVersion -> List Module -> FileName -> FileID -> FileBox
+fileConstructor :
+    String
+    -> FileSize
+    -> FileVersion
+    -> List Module
+    -> FileName
+    -> FileID
+    -> FileBox
 fileConstructor ext sz ver mods name id =
     { id = id
     , name = name
@@ -135,7 +142,11 @@ folderConstructor children name id =
     }
 
 
-convEntry : ParentReference -> Entry -> Filesystem.Filesystem -> Filesystem.Filesystem
+convEntry :
+    ParentReference
+    -> Entry
+    -> Filesystem.Filesystem
+    -> Filesystem.Filesystem
 convEntry parentRef src filesystem =
     -- TODO: rewrite to be more readable
     case src of
