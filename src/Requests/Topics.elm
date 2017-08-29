@@ -16,8 +16,14 @@ type Topic
     | AccountCreateTopic
     | AccountLogoutTopic
     | AccountBootstrapTopic
-    | AccountServerIndexTopic
-    | ServerLogIndexTopic
+    | ServerBoostrapTopic
+    -- sync
+    | AccountSyncTopic
+    | ServerLogsSyncTopic
+    | ServerMetaSyncTopic
+    | ServerFilesystemSyncTopic
+    | ServerProcessesSyncTopic
+    -- filesystem
     | ServerFileIndexTopic
     | ServerFileDeleteTopic
     | ServerFileMoveTopic
@@ -31,15 +37,29 @@ getChannel topic =
         AccountLogoutTopic ->
             RequestsChannel
 
-        AccountServerIndexTopic ->
-            AccountChannel
-
         AccountBootstrapTopic ->
             AccountChannel
 
-        ServerLogIndexTopic ->
+        ServerBoostrapTopic ->
             ServerChannel
 
+        -- sync
+        AccountSyncTopic ->
+            ServerChannel
+
+        ServerLogsSyncTopic ->
+            ServerChannel
+
+        ServerMetaSyncTopic ->
+            ServerChannel
+
+        ServerFilesystemSyncTopic ->
+            ServerChannel
+
+        ServerProcessesSyncTopic ->
+            ServerChannel
+
+        -- filesystem requests
         ServerFileIndexTopic ->
             ServerChannel
 
@@ -81,15 +101,23 @@ getWebsocketMsg topic =
         AccountBootstrapTopic ->
             "account.bootstrap"
 
-        AccountServerIndexTopic ->
-            "server.index"
-
-        ServerLogIndexTopic ->
+        -- sync
+        AccountSyncTopic ->
             "log.index"
 
-        ServerFileIndexTopic ->
+        ServerLogsSyncTopic ->
             "file.index"
 
+        ServerMetaSyncTopic ->
+            "meta.index"
+
+        ServerFilesystemSyncTopic ->
+            "filesystem.index"
+
+        ServerProcessesSyncTopic ->
+            "processes.index"
+
+        -- filesystem
         ServerFileDeleteTopic ->
             "file.delete"
 
