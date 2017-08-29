@@ -142,31 +142,3 @@ viewPg data pg =
     div
         [ class [ PageContent ] ]
         [ (Html.map pageMsgIntersept (Pages.view data pg)) ]
-
-
-
--- PAGES
-
-
-pgWelcomeHost : String -> List (Html Msg)
-pgWelcomeHost ip =
-    [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-    , div [ class [ LoginPageForm ] ]
-        [ div []
-            [ input [ placeholder "Password" ] []
-            , text "E"
-            ]
-        ]
-    , div [ class [ LoginPageFooter ] ]
-        [ div []
-            [ text "C"
-            , br [] []
-            , text "Crack"
-            ]
-        , div []
-            [ text "M"
-            , br [] []
-            , text "AnyMap"
-            ]
-        ]
-    ]
