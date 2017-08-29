@@ -79,6 +79,7 @@ decoder =
         |> required "nips" (list decodeNip)
 
 
+
 -- internals
 
 

@@ -3,6 +3,7 @@ module Game.Network.Types exposing (..)
 import Json.Decode exposing (Decoder, index, string)
 import Json.Decode.Pipeline exposing (decode, custom)
 
+
 type alias IP =
     String
 
@@ -32,6 +33,7 @@ fromString str =
 
         _ ->
             ( "::", "" )
+
 
 decodeNip : Decoder ( String, String )
 decodeNip =

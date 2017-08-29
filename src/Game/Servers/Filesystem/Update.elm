@@ -3,17 +3,18 @@ module Game.Servers.Filesystem.Update exposing (update, bootstrap)
 import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
-import Events.Servers.Filesystem as Index exposing (apply)
 import Game.Models as Game
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages exposing (Msg(..), RequestMsg(..))
 import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
-import Game.Servers.Filesystem.Requests.Delete as RqDelete
-import Game.Servers.Filesystem.Requests.Move as RqMove
-import Game.Servers.Filesystem.Requests.Rename as RqRename
-import Game.Servers.Filesystem.Requests.Create as RqCreate
+import Events.Servers.Filesystem as FilesystemEvent
+import Game.Servers.Filesystem.Requests.Sync as Sync
+import Game.Servers.Filesystem.Requests.Delete as Delete
+import Game.Servers.Filesystem.Requests.Move as Move
+import Game.Servers.Filesystem.Requests.Rename as Rename
+import Game.Servers.Filesystem.Requests.Create as Create
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -54,10 +55,14 @@ update game serverId msg model =
 
 bootstrap : Value -> Filesystem -> Filesystem
 bootstrap json model =
-    decodeValue Index.decoder json
+    decodeValue Sync.decoder json
         |> Requests.report
         |> Maybe.map (apply model)
         |> Maybe.withDefault model
+
+
+
+-- internals
 
 
 onDelete : Game.Model -> Servers.ID -> FileID -> Filesystem -> UpdateResponse
@@ -75,7 +80,7 @@ onDelete game serverId fileId model =
                     model
 
         serverCmd =
-            RqDelete.request fileId serverId game
+            Delete.request fileId serverId game
     in
         ( model_, serverCmd, Dispatch.none )
 
@@ -114,7 +119,7 @@ onCreateTextFile game serverId fileId ( fileLocation, fileBaseName ) model =
             Just model_ ->
                 let
                     cmd =
-                        RqCreate.request "txt"
+                        Create.request "txt"
                             fileBaseName
                             fileLocation
                             serverId
@@ -158,7 +163,7 @@ onEmptyDir game serverId fileId ( fileLocation, fileName ) model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            RqCreate.request "/" fileName fileLocation serverId game
+            Create.request "/" fileName fileLocation serverId game
     in
         ( model_, serverCmd, Dispatch.none )
 
@@ -186,7 +191,7 @@ onMove game serverId fileId newLocation model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            RqMove.request newLocation fileId serverId game
+            Move.request newLocation fileId serverId game
     in
         ( model_, serverCmd, Dispatch.none )
 
@@ -216,7 +221,7 @@ onRename game serverId fileId newBaseName model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            RqRename.request newBaseName fileId serverId game
+            Rename.request newBaseName fileId serverId game
     in
         ( model_, serverCmd, Dispatch.none )
 
@@ -229,3 +234,43 @@ onRequest :
     -> UpdateResponse
 onRequest game serverId response model =
     Update.fromModel model
+
+
+
+-- sync/bootstrap internals
+
+
+apply : Filesystem -> Sync.Index -> Filesystem
+apply =
+    let
+        convEntry parentRef src filesystem =
+            case src of
+                FilesystemEvent.FileEntry data ->
+                    let
+                        entry =
+                            FileEntry
+                                { id = data.id
+                                , name = data.name
+                                , parent = parentRef
+                                , extension = data.extension
+                                , version = data.version
+                                , size = data.size
+                                , modules = data.modules
+                                }
+                    in
+                        addEntry entry filesystem
+
+                FilesystemEvent.FolderEntry data ->
+                    let
+                        entry =
+                            FolderEntry
+                                { id = data.id
+                                , name = data.name
+                                , parent = parentRef
+                                }
+                    in
+                        List.foldl (convEntry <| NodeRef data.id)
+                            (addEntry entry filesystem)
+                            data.children
+    in
+        List.foldl (convEntry RootRef)
