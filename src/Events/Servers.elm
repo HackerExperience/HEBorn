@@ -1,11 +1,48 @@
-module Events.Servers exposing (Event(..), ServerEvent(..), handler)
+module Events.Servers
+    exposing
+        ( Event(..)
+        , ServerEvent(..)
+        , Server
+        , ID
+        , Name
+        , Coordinates
+        , handler
+        , decoder
+        )
 
-import Utils.Events exposing (Router, Handler, parse)
+import Json.Decode exposing (Decoder, decodeValue, list, string, float)
+import Json.Decode.Pipeline exposing (decode, required)
+import Utils.Events exposing (Router, Handler, parse, notify)
 import Events.Servers.Filesystem as Filesystem
 import Events.Servers.Hardware as Hardware
 import Events.Servers.Logs as Logs
 import Events.Servers.Processes as Processes
 import Events.Servers.Tunnels as Tunnels
+import Game.Network.Types exposing (NIP, decodeNip)
+
+
+-- server changed events doesn't include the full server
+
+
+type alias Server =
+    { id : ID
+    , name : Name
+    , coordinates : Coordinates
+    , nip : NIP
+    , nips : List NIP
+    }
+
+
+type alias ID =
+    String
+
+
+type alias Name =
+    String
+
+
+type alias Coordinates =
+    Float
 
 
 type Event
@@ -13,7 +50,7 @@ type Event
 
 
 type ServerEvent
-    = Changed
+    = Changed Server
     | FilesystemEvent Filesystem.Event
     | HardwareEvent Hardware.Event
     | LogsEvent Logs.Event
@@ -30,6 +67,16 @@ handler context event json =
         Nothing ->
             Nothing
 
+
+decoder : Decoder Server
+decoder =
+    -- this will only handle local server informations
+    decode Server
+        |> required "id" string
+        |> required "name" string
+        |> required "coordinates" float
+        |> required "nip" decodeNip
+        |> required "nips" (list decodeNip)
 
 
 -- internals
@@ -62,4 +109,6 @@ handleServer event json =
 
 onChanged : Handler ServerEvent
 onChanged json =
-    Just Changed
+    decodeValue decoder json
+        |> Result.map Changed
+        |> notify
