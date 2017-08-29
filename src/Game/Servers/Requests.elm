@@ -6,12 +6,16 @@ module Game.Servers.Requests
         , serverReceive
         )
 
-import Game.Servers.Requests.Fetch as Fetch
-import Game.Servers.Messages exposing (..)
+import Game.Servers.Requests.Bootstrap as Bootstrap
+import Game.Servers.Messages
+    exposing
+        ( RequestMsg(BootstrapRequest)
+        , ServerRequestMsg
+        )
 
 
 type Response
-    = Fetch Fetch.Response
+    = BootstrapServer Bootstrap.Response
 
 
 type ServerResponse
@@ -21,10 +25,10 @@ type ServerResponse
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        FetchRequest ( code, data ) ->
+        BootstrapRequest ( code, data ) ->
             data
-                |> Fetch.receive code
-                |> Maybe.map Fetch
+                |> Bootstrap.receive code
+                |> Maybe.map BootstrapServer
 
 
 serverReceive : ServerRequestMsg -> Maybe ServerResponse

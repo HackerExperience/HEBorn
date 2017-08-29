@@ -28,7 +28,7 @@ import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Web.Messages as Web
 import Game.Servers.Web.Models as Web
 import Game.Servers.Web.Update as Web
-import Game.Servers.Requests.Fetch as Fetch
+import Game.Servers.Requests.Bootstrap as Bootstrap
 import Game.Network.Types exposing (NIP)
 
 
@@ -86,7 +86,7 @@ bootstrap game json model =
             in
                 ( data.id, server )
     in
-        decodeValue (list Fetch.decoder) json
+        decodeValue (list Bootstrap.decoder) json
             |> Requests.report
             |> Maybe.withDefault []
             |> Debug.log "SERVER"
@@ -256,6 +256,7 @@ onTunnelsMsg game =
         , update = (Tunnels.update game)
         }
 
+
 onWebMsg : Game.Model -> Web.Msg -> Server -> ServerUpdateResponse
 onWebMsg game =
     Update.child
@@ -264,6 +265,7 @@ onWebMsg game =
         , toMsg = WebMsg
         , update = (Web.update game)
         }
+
 
 onServerEvent :
     Game.Model
