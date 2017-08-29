@@ -17,13 +17,13 @@ type Topic
     | AccountLogoutTopic
     | AccountBootstrapTopic
     | ServerBoostrapTopic
-    -- sync
+      -- sync
     | AccountSyncTopic
     | ServerLogsSyncTopic
     | ServerMetaSyncTopic
     | ServerFilesystemSyncTopic
     | ServerProcessesSyncTopic
-    -- filesystem
+      -- filesystem
     | ServerFileIndexTopic
     | ServerFileDeleteTopic
     | ServerFileMoveTopic

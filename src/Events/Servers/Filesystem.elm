@@ -1,4 +1,15 @@
-module Events.Servers.Filesystem exposing (Event(..), handler, decoder, apply)
+module Events.Servers.Filesystem
+    exposing
+        ( Event(..)
+        , Index
+        , EntryHeader
+        , Entry(..)
+        , FileBox
+        , FolderWithChildrenData
+        , FolderBox
+        , handler
+        , decoder
+        )
 
 import Utils.Events exposing (Handler, notify)
 import Json.Decode
@@ -20,49 +31,11 @@ import Game.Servers.Filesystem.Models exposing (..)
 
 
 type Event
-    = Changed Index
-
-
-handler : String -> Handler Event
-handler event json =
-    case event of
-        "changed" ->
-            onChanged json
-
-        _ ->
-            Nothing
-
-
-apply : Filesystem -> Index -> Filesystem
-apply model values =
-    List.foldl (convEntry RootRef) model values
-
-
-decoder : Decoder Index
-decoder =
-    list <| lazy entry
-
-
-
--- internals
-
-
-onChanged : Handler Event
-onChanged json =
-    decodeValue decoder json
-        |> Result.map Changed
-        |> notify
+    = Newfile Entry
 
 
 type alias Index =
     List Entry
-
-
-type alias EntryHeader ext =
-    { ext
-        | id : FileID
-        , name : FileName
-    }
 
 
 type Entry
@@ -74,20 +47,53 @@ type alias FileBox =
     EntryHeader FileData
 
 
-type alias FolderWithChildrenData =
-    { children : Index }
-
-
 type alias FolderBox =
     EntryHeader FolderWithChildrenData
 
 
-entry : () -> Decoder Entry
-entry () =
+type alias EntryHeader ext =
+    { ext
+        | id : FileID
+        , name : FileName
+    }
+
+
+type alias FolderWithChildrenData =
+    { children : Index }
+
+
+handler : String -> Handler Event
+handler event json =
+    case event of
+        "new_file" ->
+            onNewFile json
+
+        _ ->
+            Nothing
+
+
+decoder : Decoder Entry
+decoder =
     oneOf
         [ file |> map FileEntry
         , (lazy folder) |> map FolderEntry
         ]
+
+
+
+-- internals
+
+
+entry : () -> Decoder Entry
+entry _ =
+    decoder
+
+
+onNewFile : Handler Event
+onNewFile json =
+    decodeValue decoder json
+        |> Result.map Newfile
+        |> notify
 
 
 file : Decoder FileBox
@@ -140,46 +146,3 @@ folderConstructor children name id =
     , name = name
     , children = children
     }
-
-
-convEntry :
-    ParentReference
-    -> Entry
-    -> Filesystem.Filesystem
-    -> Filesystem.Filesystem
-convEntry parentRef src filesystem =
-    -- TODO: rewrite to be more readable
-    case src of
-        FileEntry data ->
-            addEntry
-                (Filesystem.FileEntry
-                    { id = data.id
-                    , name = data.name
-                    , parent = parentRef
-                    , extension = data.extension
-                    , version = data.version
-                    , size = data.size
-                    , modules = data.modules
-                    }
-                )
-                filesystem
-
-        FolderEntry data ->
-            let
-                meAdded =
-                    addEntry
-                        (Filesystem.FolderEntry
-                            { id = data.id
-                            , name = data.name
-                            , parent = parentRef
-                            }
-                        )
-                        filesystem
-
-                parentRef =
-                    Filesystem.NodeRef data.id
-            in
-                List.foldl
-                    (convEntry parentRef)
-                    meAdded
-                    data.children

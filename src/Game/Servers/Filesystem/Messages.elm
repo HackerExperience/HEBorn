@@ -14,7 +14,8 @@ type Msg
 
 
 type RequestMsg
-    = DeleteRequest ResponseType
+    = SyncRequest ResponseType
+    | DeleteRequest ResponseType
     | RenameRequest ResponseType
     | MoveRequest ResponseType
     | CreateRequest ResponseType
