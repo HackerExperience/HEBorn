@@ -19,11 +19,22 @@ import Game.Servers.Web.Messages as Web
 import Game.Network.Types exposing (NIP)
 
 
+-- messages and requests received by the server collection
+
+
 type Msg
-    = Bootstrap Value
+    = Bootstrap Value -- TODO: remove this Value
     | ServerMsg ID ServerMsg
     | Request RequestMsg
     | Event Events.Event
+
+
+type RequestMsg
+    = BootstrapRequest ResponseType
+
+
+
+-- messages and requests received by a single server
 
 
 type ServerMsg
@@ -36,10 +47,6 @@ type ServerMsg
     | WebMsg Web.Msg
     | ServerEvent Events.Event
     | ServerRequest ServerRequestMsg
-
-
-type RequestMsg
-    = FetchRequest ResponseType
 
 
 type ServerRequestMsg

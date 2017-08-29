@@ -1,25 +1,34 @@
-module Game.Servers.Requests.Fetch
+module Game.Servers.Requests.Bootstrap
     exposing
         ( Response(..)
         , Server
+        , request
         , receive
         , decoder
         )
 
-import Json.Decode.Pipeline exposing (decode, required, custom)
 import Json.Decode
     exposing
         ( Decoder
         , Value
         , decodeValue
         , list
-        , index
         , string
         , float
+        , index
         , value
         )
+import Json.Decode.Pipeline exposing (decode, required)
 import Requests.Requests as Requests
+import Requests.Topics exposing (Topic(ServerBoostrapTopic))
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Events.Servers exposing (ID, Name, Coordinates)
+import Game.Network.Types exposing (NIP, decodeNip)
+import Game.Servers.Messages
+    exposing
+        ( Msg(Request)
+        , RequestMsg(BootstrapRequest)
+        )
 
 
 type Response
@@ -27,19 +36,28 @@ type Response
 
 
 type alias Server =
-    { id : String
-    , name : String
-    , coordinates : Float
-    , nip : ( String, String )
+    { id : ID
+    , name : Name
+    , coordinates : Coordinates
+    , nip : NIP
+    , nips : List NIP
+
+    -- TODO: remove Values, use the decoder directly :)
     , logs : Value
     , tunnels : Value
     , filesystem : Value
     , processes : Value
-
-    -- remaining fields:
-    --, nips : List (String, String)
-    --, meta : Value
+    , meta : Value
     }
+
+
+request : ID -> ConfigSource a -> Cmd Msg
+request id =
+    -- this request is mainly used to fetch invaded computers
+    Requests.request ServerBoostrapTopic
+        (BootstrapRequest >> Request)
+        (Just id)
+        emptyPayload
 
 
 receive : Code -> Value -> Maybe Response
@@ -61,18 +79,9 @@ decoder =
         |> required "name" string
         |> required "coordinates" float
         |> required "nip" decodeNip
+        |> required "nips" (list decodeNip)
         |> required "logs" value
         |> required "tunnels" value
         |> required "filesystem" value
         |> required "processes" value
-
-
-
--- internals
-
-
-decodeNip : Decoder ( String, String )
-decodeNip =
-    decode (\network ip -> ( network, ip ))
-        |> custom (index 0 string)
-        |> custom (index 1 string)
+        |> required "meta" value
