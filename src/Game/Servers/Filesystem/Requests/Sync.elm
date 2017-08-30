@@ -10,7 +10,7 @@ module Game.Servers.Filesystem.Requests.Sync
 import Events.Servers.Filesystem as Filesystem
 import Requests.Requests as Requests
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
-import Requests.Topics exposing (Topic(ServerFilesystemSyncTopic))
+import Requests.Topics as Topics
 import Json.Decode
     exposing
         ( Decoder
@@ -45,7 +45,7 @@ type Response
 
 request : ServerID -> ConfigSource a -> Cmd Msg
 request id =
-    Requests.request ServerFilesystemSyncTopic
+    Requests.request Topics.fsSync
         (SyncRequest >> Request)
         (Just id)
         emptyPayload

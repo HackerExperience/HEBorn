@@ -8,7 +8,7 @@ module Game.Servers.Web.Requests.DNS
 import Game.Servers.Web.Types as Web
 import Game.Servers.Web.Messages exposing (..)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Utils.Json.Decode exposing (exclusively)
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
@@ -66,7 +66,7 @@ type alias Bank =
 request : String -> ConfigSource a -> Cmd Msg
 request url =
     -- TODO: change topic to target the correct request
-    Requests.request AccountLogoutTopic
+    Requests.request Topics.browse
         (DNSRequest url >> Request)
         Nothing
         (encoder url)

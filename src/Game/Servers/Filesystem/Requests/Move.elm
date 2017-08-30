@@ -2,7 +2,7 @@ module Game.Servers.Filesystem.Requests.Move exposing (..)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
@@ -21,7 +21,7 @@ request newLocation fileId serverId =
                 , ( "destination", destination )
                 ]
     in
-        Requests.request ServerFileMoveTopic
+        Requests.request Topics.fsMove
             (MoveRequest >> Request)
             (Just serverId)
             payload

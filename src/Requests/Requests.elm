@@ -8,7 +8,7 @@ import Driver.Http.Http as HttpDriver
 import Driver.Websocket.Channels as WebsocketDriver
 import Driver.Websocket.Websocket as WebsocketDriver
 import Utils.Cmd as Cmd
-import Requests.Topics exposing (..)
+import Requests.Topics as Topics exposing (Topic(..))
 import Requests.Types exposing (..)
 
 
@@ -34,20 +34,19 @@ request :
     -> ConfigSource a
     -> Cmd msg
 request topic msg context data source =
-    case getDriver topic of
-        HttpDriver ->
-            requestHttp source.config.apiHttpUrl
-                topic
-                msg
-                context
+    case topic of
+        WebsocketTopic channel path ->
+            WebsocketDriver.send (genericWs msg)
+                source.config.apiWsUrl
+                (WebsocketDriver.getAddress channel context)
+                path
                 data
 
-        WebsocketDriver ->
-            requestWebsocket source.config.apiWsUrl
-                topic
-                msg
-                context
-                data
+        HttpTopic path ->
+            HttpDriver.send (genericHttp msg)
+                source.config.apiHttpUrl
+                path
+                (Encode.encode 0 data)
 
 
 fake :
@@ -64,42 +63,6 @@ fake _ msg _ _ response _ =
 
 
 -- internals
-
-
-requestHttp :
-    String
-    -> Topic
-    -> (ResponseType -> msg)
-    -> Context
-    -> Encode.Value
-    -> Cmd msg
-requestHttp url topic msg context data =
-    data
-        |> Encode.encode 0
-        |> HttpDriver.send
-            (genericHttp msg)
-            url
-            (getHttpPath topic)
-
-
-requestWebsocket :
-    String
-    -> Topic
-    -> (ResponseType -> msg)
-    -> Context
-    -> Encode.Value
-    -> Cmd msg
-requestWebsocket url topic msg context data =
-    let
-        channelAddress =
-            WebsocketDriver.getAddress (getChannel topic) context
-    in
-        data
-            |> WebsocketDriver.send
-                (genericWs msg)
-                url
-                channelAddress
-                (getWebsocketMsg topic)
 
 
 genericHttp : (ResponseType -> msg) -> Result Http.Error String -> msg

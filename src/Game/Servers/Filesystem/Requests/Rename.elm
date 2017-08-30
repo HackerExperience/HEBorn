@@ -2,7 +2,7 @@ module Game.Servers.Filesystem.Requests.Rename exposing (..)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
@@ -18,7 +18,7 @@ request newBaseName fileId serverId =
                 , ( "basename", Encode.string newBaseName )
                 ]
     in
-        Requests.request ServerFileRenameTopic
+        Requests.request Topics.fsRename
             (RenameRequest >> Request)
             (Just serverId)
             payload

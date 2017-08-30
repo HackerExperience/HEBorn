@@ -2,7 +2,7 @@ module Game.Servers.Filesystem.Requests.Delete exposing (..)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
@@ -16,7 +16,7 @@ request fileId serverId =
             Encode.object
                 [ ( "fileId", Encode.string fileId ) ]
     in
-        Requests.request ServerFileDeleteTopic
+        Requests.request Topics.fsDelete
             (DeleteRequest >> Request)
             (Just serverId)
             payload

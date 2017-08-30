@@ -20,7 +20,7 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(ServerBoostrapTopic))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Events.Servers exposing (ID, Name, Coordinates)
 import Game.Network.Types exposing (NIP, decodeNip)
@@ -53,7 +53,7 @@ type alias Server =
 request : ID -> ConfigSource a -> Cmd Msg
 request id =
     -- this request is mainly used to fetch invaded computers
-    Requests.request ServerBoostrapTopic
+    Requests.request Topics.serverBootstrap
         (BootstrapRequest >> Request)
         (Just id)
         emptyPayload

@@ -10,7 +10,7 @@ import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
 import Landing.SignUp.Messages exposing (..)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 
 
@@ -21,7 +21,7 @@ type Response
 
 request : String -> String -> String -> ConfigSource a -> Cmd Msg
 request email username password =
-    Requests.request AccountCreateTopic
+    Requests.request Topics.fsCreate
         (SignUpRequest >> Request)
         Nothing
         (encoder email username password)

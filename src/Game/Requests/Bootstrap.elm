@@ -9,7 +9,7 @@ module Game.Requests.Bootstrap
 import Json.Decode exposing (Decoder, Value, decodeValue, value)
 import Json.Decode.Pipeline exposing (decode, required)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Messages exposing (..)
 
@@ -27,7 +27,7 @@ type alias Data =
 
 request : String -> ConfigSource a -> Cmd Msg
 request account =
-    Requests.request AccountBootstrapTopic
+    Requests.request Topics.accountBootstrap
         (BootstrapRequest >> Request)
         (Just account)
         emptyPayload

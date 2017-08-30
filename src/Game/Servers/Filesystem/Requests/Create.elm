@@ -2,7 +2,7 @@ module Game.Servers.Filesystem.Requests.Create exposing (..)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
-import Requests.Topics exposing (Topic(..))
+import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
@@ -25,7 +25,7 @@ request what newBaseName newLocation serverId =
                 , ( "what", Encode.string what )
                 ]
     in
-        Requests.request ServerFileCreateTopic
+        Requests.request Topics.fsCreate
             (CreateRequest >> Request)
             (Just serverId)
             payload
