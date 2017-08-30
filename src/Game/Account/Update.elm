@@ -39,6 +39,9 @@ update game msg model =
         Request data ->
             onRequest game (receive data) model
 
+        Bootstrap json ->
+            onBootstrap json model
+
 
 bootstrap : Value -> Model -> Model
 bootstrap json model =
@@ -50,6 +53,11 @@ bootstrap json model =
 
 
 -- internals
+
+
+onBootstrap : Value -> Model -> UpdateResponse
+onBootstrap json model =
+    Update.fromModel <| bootstrap json model
 
 
 merge : Model -> Account.AccountHolder -> Model

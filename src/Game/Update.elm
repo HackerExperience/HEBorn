@@ -161,9 +161,17 @@ onWsJoinedAccount model =
 
 onBootstrapResponse : Bootstrap.Data -> Model -> UpdateResponse
 onBootstrapResponse data model =
-    -- TODO: propagate change
-    onServers (Servers.Bootstrap data.servers) model
-        |> joinActiveServer
+    let
+        goServers =
+            onServers (Servers.Bootstrap data.servers)
+
+        goAccount =
+            onAccount (Account.Bootstrap data.account)
+    in
+        model
+            |> goServers
+            |> Update.andThen goAccount
+            |> joinActiveServer
 
 
 joinActiveServer : UpdateResponse -> UpdateResponse

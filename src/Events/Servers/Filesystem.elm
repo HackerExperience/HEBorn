@@ -74,10 +74,7 @@ handler event json =
 
 decoder : Decoder Entry
 decoder =
-    oneOf
-        [ file |> map FileEntry
-        , (lazy folder) |> map FolderEntry
-        ]
+    entry ()
 
 
 
@@ -85,8 +82,11 @@ decoder =
 
 
 entry : () -> Decoder Entry
-entry _ =
-    decoder
+entry () =
+    oneOf
+        [ file |> map FileEntry
+        , (lazy folder) |> map FolderEntry
+        ]
 
 
 onNewFile : Handler Event

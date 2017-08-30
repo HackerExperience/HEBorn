@@ -47,7 +47,6 @@ type alias Server =
     , tunnels : Value
     , filesystem : Value
     , processes : Value
-    , meta : Value
     }
 
 
@@ -84,4 +83,3 @@ decoder =
         |> required "tunnels" value
         |> required "filesystem" value
         |> required "processes" value
-        |> required "meta" value
