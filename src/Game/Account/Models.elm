@@ -44,6 +44,7 @@ type alias Model =
     , database : Database
     , dock : Dock.Model
     , servers : List Servers.ID
+    , activeGateway : Servers.ID
     , bounces : Bounces.Model
     , inventory : Inventory.Model
     , logout : Bool
@@ -64,6 +65,7 @@ initialModel id username token =
     , database = Database.initialModel
     , dock = Dock.initialModel
     , servers = []
+    , activeGateway = ""
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
     , logout = False

@@ -5,11 +5,14 @@ import Json.Decode
         ( Decoder
         , Value
         , decodeValue
+        , andThen
+        , succeed
+        , fail
         , maybe
         , list
         , string
         )
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, optional)
 import Utils.Events exposing (Router, Handler, parse, notify)
 import Game.Servers.Shared as Servers
 import Game.Account.Models as Database exposing (Model, Email)
@@ -53,19 +56,37 @@ handler context event json =
             Nothing
 
 
+type alias AccountHolder =
+    { email : Maybe Email
+    , database : Maybe Database
+    , dock : Maybe Dock.Model
+    , servers : List Servers.ID
+    , activeGateway : Servers.ID
+    , bounces : Maybe Bounces.Model
+    , inventory : Maybe Inventory.Model
+    }
+
+
 decoder : Decoder AccountHolder
 decoder =
     decode AccountHolder
-        |> required "email" (maybe string)
-        |> required "database" Database.decoder
-        |> required "dock" Dock.decoder
-        |> required "servers" (list string)
-        |> required "bounces" Bounces.decoder
-        |> required "inventory" Inventory.decoder
+        |> optional "email" (maybe string) Nothing
+        |> optional "database" (maybe Database.decoder) Nothing
+        |> optional "dock" (maybe Dock.decoder) Nothing
+        |> optional "servers" (list string) []
+        |> optional "active_gateway" string invalidGateway
+        |> optional "bounces" (maybe Bounces.decoder) Nothing
+        |> optional "inventory" (maybe Inventory.decoder) Nothing
+        |> andThen requireActiveGateway
 
 
 
 -- internals
+
+
+invalidGateway : String
+invalidGateway =
+    ""
 
 
 onChanged : Handler Event
@@ -75,11 +96,14 @@ onChanged json =
         |> notify
 
 
-type alias AccountHolder =
-    { email : Maybe Email
-    , database : Database
-    , dock : Dock.Model
-    , servers : List Servers.ID
-    , bounces : Bounces.Model
-    , inventory : Inventory.Model
-    }
+requireActiveGateway : AccountHolder -> Decoder AccountHolder
+requireActiveGateway ({ servers, activeGateway } as acc) =
+    if activeGateway == invalidGateway then
+        case List.head servers of
+            Just head ->
+                succeed { acc | activeGateway = head }
+
+            _ ->
+                fail "Player must have at least one server"
+    else
+        succeed acc

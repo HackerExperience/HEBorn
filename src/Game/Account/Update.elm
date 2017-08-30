@@ -9,7 +9,7 @@ import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events
-import Events.Account as Account
+import Events.Account as Account exposing (AccountHolder)
 import Requests.Requests as Requests
 import Game.Account.Bounces.Update as Bounces
 import Game.Account.Messages exposing (..)
@@ -60,18 +60,30 @@ onBootstrap json model =
     Update.fromModel <| bootstrap json model
 
 
-merge : Model -> Account.AccountHolder -> Model
+merge : Model -> AccountHolder -> Model
 merge src new =
-    { id = src.id
-    , username = src.username
-    , auth = src.auth
-    , email = new.email
-    , database = new.database
-    , dock = new.dock
-    , servers = new.servers
-    , bounces = new.bounces
-    , inventory = new.inventory
-    , logout = src.logout
+    { id =
+        src.id
+    , username =
+        src.username
+    , auth =
+        src.auth
+    , email =
+        new.email
+    , database =
+        Maybe.withDefault src.database <| new.database
+    , dock =
+        Maybe.withDefault src.dock <| new.dock
+    , servers =
+        new.servers
+    , activeGateway =
+        new.activeGateway
+    , bounces =
+        Maybe.withDefault src.bounces <| new.bounces
+    , inventory =
+        Maybe.withDefault src.inventory <| new.inventory
+    , logout =
+        src.logout
     }
 
 
