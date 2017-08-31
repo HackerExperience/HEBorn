@@ -173,7 +173,8 @@ view data ({ openMenu, notifications } as model) =
                 |> Game.getAccount
                 |> (.database)
                 |> (.servers)
-                |> List.map (\server -> Just server.nip)
+                |> Dict.keys
+                |> List.map Just
                 |> (::) Nothing
 
         bounces =

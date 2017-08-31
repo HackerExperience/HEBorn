@@ -3,7 +3,7 @@ module Apps.BounceManager.View exposing (view)
 import Dict
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Account.Database.Models exposing (HackedServer)
+import Game.Account.Database.Models exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
 import Game.Data as Game
 import Game.Network.Types as Network
@@ -73,17 +73,13 @@ viewTabManage src =
         |> verticalList
 
 
-viewSelectServer : HackedServer -> Html Msg
-viewSelectServer srv =
-    text <| Tuple.second srv.nip
-
-
-viewTabCreate : List HackedServer -> Html Msg
+viewTabCreate : HackedServers -> Html Msg
 viewTabCreate servers =
     let
         available =
             servers
-                |> List.map viewSelectServer
+                |> Dict.keys
+                |> List.map (Network.toString >> text)
     in
         flexCols
             [ div [] available

@@ -12,7 +12,7 @@ import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Utils.Html exposing (spacer)
 import Utils.Html.Events exposing (onChange)
 import Game.Account.Database.Models exposing (..)
-import Game.Network.Types as Network
+import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
@@ -24,14 +24,14 @@ import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-isEntryExpanded : DBAdmin -> HackedServer -> Bool
-isEntryExpanded app item =
-    List.member (Network.toString item.nip) app.servers.expanded
+isEntryExpanded : DBAdmin -> ( NIP, HackedServer ) -> Bool
+isEntryExpanded app ( nip, _ ) =
+    List.member (Network.toString nip) app.servers.expanded
 
 
-isEntryEditing : DBAdmin -> HackedServer -> Bool
-isEntryEditing app item =
-    Dict.member (Network.toString item.nip) app.serversEditing
+isEntryEditing : DBAdmin -> ( NIP, HackedServer ) -> Bool
+isEntryEditing app ( nip, _ ) =
+    Dict.member (Network.toString nip) app.serversEditing
 
 
 renderFlag : Classes -> List (Html Msg)
@@ -49,27 +49,27 @@ renderFlags =
         >> Maybe.withDefault []
 
 
-renderData : HackedServer -> Html Msg
-renderData item =
+renderData : ( NIP, HackedServer ) -> Html Msg
+renderData ( nip, item ) =
     div []
         [ text "ip: "
-        , text <| Tuple.second item.nip
+        , text <| Tuple.second nip
         , text " psw: "
         , text item.password
         , text " nick: "
         , text <| Maybe.withDefault "[Unlabeled]" item.label
         , text " notes: "
         , item.notes |> Maybe.withDefault "S/N" |> text
-        , span [ onClick <| EnterSelectingVirus (Network.toString item.nip) ]
+        , span [ onClick <| EnterSelectingVirus (Network.toString nip) ]
             [ text " !!!!VIRUS!!!!" ]
         ]
 
 
-renderMiniData : HackedServer -> Html Msg
-renderMiniData item =
+renderMiniData : ( NIP, HackedServer ) -> Html Msg
+renderMiniData ( nip, item ) =
     div []
         [ text "ip: "
-        , text <| Tuple.second item.nip
+        , text <| Tuple.second nip
         , text " psw: "
         , text item.password
         , text " nick: "
@@ -84,24 +84,24 @@ renderVirusOption activeId ( id, label, version ) =
         [ text (label ++ " (" ++ (toString version) ++ ")") ]
 
 
-renderEditing : HackedServer -> EditingServers -> Html Msg
-renderEditing item src =
+renderEditing : ( NIP, HackedServer ) -> EditingServers -> Html Msg
+renderEditing (( nip, item ) as entry) src =
     case src of
         EditingTexts ( nick, notes ) ->
             div []
-                [ renderMiniData item
+                [ renderMiniData entry
                 , input
                     [ class []
                     , value nick
                     , onInput
-                        (UpdateServersEditingNick (Network.toString item.nip))
+                        (UpdateServersEditingNick (Network.toString nip))
                     ]
                     []
                 , input
                     [ class [ BoxifyMe ]
                     , value notes
                     , onInput
-                        (UpdateServersEditingNotes (Network.toString item.nip))
+                        (UpdateServersEditingNotes (Network.toString nip))
                     ]
                     []
                 ]
@@ -110,7 +110,7 @@ renderEditing item src =
             select
                 [ class [ BoxifyMe ]
                 , onChange
-                    (UpdateServersSelectVirus (Network.toString item.nip))
+                    (UpdateServersSelectVirus (Network.toString nip))
                 ]
                 (List.map
                     (renderVirusOption <| Maybe.withDefault "" activeId)
@@ -118,8 +118,8 @@ renderEditing item src =
                 )
 
 
-renderTopFlags : HackedServer -> Html Msg
-renderTopFlags entry =
+renderTopFlags : ( NIP, HackedServer ) -> Html Msg
+renderTopFlags _ =
     div []
         -- TODO: Catch the flags for real
         (renderFlags [ BtnEdit ])
@@ -139,23 +139,23 @@ btnsNormal itemId =
     ]
 
 
-renderBottomActions : DBAdmin -> HackedServer -> Html Msg
-renderBottomActions app entry =
+renderBottomActions : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderBottomActions app (( nip, _ ) as entry) =
     let
         btns =
             if (isEntryEditing app entry) then
-                btnsEditing <| Network.toString entry.nip
+                btnsEditing <| Network.toString nip
             else if (isEntryExpanded app entry) then
-                btnsNormal <| Network.toString entry.nip
+                btnsNormal <| Network.toString nip
             else
                 []
     in
         horizontalBtnPanel btns
 
 
-renderAnyData : DBAdmin -> HackedServer -> Html Msg
-renderAnyData app entry =
-    case (Dict.get (Network.toString entry.nip) app.serversEditing) of
+renderAnyData : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderAnyData app (( nip, _ ) as entry) =
+    case (Dict.get (Network.toString nip) app.serversEditing) of
         Just x ->
             renderEditing entry x
 
@@ -166,7 +166,7 @@ renderAnyData app entry =
                 renderMiniData entry
 
 
-renderBottom : DBAdmin -> HackedServer -> Html Msg
+renderBottom : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
 renderBottom app entry =
     let
         data =
@@ -180,16 +180,16 @@ renderBottom app entry =
             data
 
 
-menuInclude : DBAdmin -> HackedServer -> List (Attribute Msg)
-menuInclude app entry =
+menuInclude : DBAdmin -> ( NIP, HackedServer ) -> List (Attribute Msg)
+menuInclude app (( nip, _ ) as entry) =
     if (isEntryEditing app entry) then
-        [ menuEditingEntry <| Network.toString entry.nip ]
+        [ menuEditingEntry <| Network.toString nip ]
     else
-        [ menuNormalEntry <| Network.toString entry.nip ]
+        [ menuNormalEntry <| Network.toString nip ]
 
 
-renderEntry : DBAdmin -> HackedServer -> Html Msg
-renderEntry app entry =
+renderEntry : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderEntry app (( nip, _ ) as entry) =
     let
         expandedState =
             isEntryExpanded app entry
@@ -212,14 +212,16 @@ renderEntry app entry =
         toogableEntry
             (not editingState)
             (menuInclude app entry)
-            (ToogleExpand TabServers <| Network.toString entry.nip)
+            (ToogleExpand TabServers <| Network.toString nip)
             expandedState
             data
 
 
-renderEntryList : DBAdmin -> List HackedServer -> List (Html Msg)
+renderEntryList : DBAdmin -> HackedServers -> List (Html Msg)
 renderEntryList app entries =
-    List.map (renderEntry app) entries
+    entries
+        |> Dict.toList
+        |> List.map (renderEntry app)
 
 
 view : Database -> Model -> DBAdmin -> Html Msg

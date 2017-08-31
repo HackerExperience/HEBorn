@@ -6,18 +6,15 @@ import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Models exposing (..)
 
 
-catchDataWhenFiltering : List String -> HackedServer -> Maybe HackedServer
-catchDataWhenFiltering filterCache item =
-    if (List.member (Network.toString item.nip) filterCache) then
-        Just item
-    else
-        Nothing
+catchDataWhenFiltering : List String -> NIP -> HackedServer -> Bool
+catchDataWhenFiltering filterCache nip value =
+    List.member (Network.toString nip) filterCache
 
 
-applyFilter : DBAdmin -> List HackedServer -> List HackedServer
+applyFilter : DBAdmin -> HackedServers -> HackedServers
 applyFilter app itens =
     if ((String.length app.servers.filterText) > 0) then
-        List.filterMap
+        Dict.filter
             (catchDataWhenFiltering app.servers.filterCache)
             itens
     else
@@ -50,7 +47,8 @@ enterEditing itemId database app =
 
         item =
             items
-                |> List.filter ((.nip) >> Tuple.second >> ((==) itemId))
+                |> Dict.filter (\nip _ -> Network.toString nip == itemId)
+                |> Dict.toList
                 |> List.head
 
         start =
@@ -59,12 +57,12 @@ enterEditing itemId database app =
         app_ =
             item
                 |> Maybe.map
-                    (\item ->
+                    (\( nip, item ) ->
                         let
                             edit_ =
                                 EditingTexts ( start item.label, start item.notes )
                         in
-                            updateEditing (Network.toString item.nip) edit_ app
+                            updateEditing (Network.toString nip) edit_ app
                     )
     in
         Maybe.withDefault app app_
@@ -78,20 +76,21 @@ enterSelectingVirus itemId database app =
 
         item =
             items
-                |> List.filter ((.nip) >> Tuple.second >> ((==) itemId))
+                |> Dict.filter (\nip _ -> Network.toString nip == itemId)
+                |> Dict.toList
                 |> List.head
 
         app_ =
             item
                 |> Maybe.map
-                    (\item ->
+                    (\( nip, item ) ->
                         let
                             edit_ =
                                 item.activeVirus
                                     |> Maybe.map Tuple.first
                                     |> SelectingVirus
                         in
-                            updateEditing (Network.toString item.nip) edit_ app
+                            updateEditing (Network.toString nip) edit_ app
                     )
     in
         Maybe.withDefault app app_
@@ -127,25 +126,21 @@ leaveEditing itemId app =
 updateTextFilter : String -> Database -> DBAdmin -> DBAdmin
 updateTextFilter newFilter database app =
     let
-        filterMapFunc item =
-            let
-                has =
-                    [ Tuple.second item.nip
-                    , item.password
-                    , Maybe.withDefault "" item.label
-                    , Maybe.withDefault "" item.notes
-                    ]
-                        |> List.filter (String.contains newFilter)
-                        |> List.isEmpty
-                        |> not
-            in
-                if has then
-                    Just (Network.toString item.nip)
-                else
-                    Nothing
+        filterMapFunc nip item =
+            [ Tuple.second nip
+            , item.password
+            , Maybe.withDefault "" item.label
+            , Maybe.withDefault "" item.notes
+            ]
+                |> List.filter (String.contains newFilter)
+                |> List.isEmpty
+                |> not
 
         newFilterCache =
-            List.filterMap filterMapFunc database.servers
+            database.servers
+                |> Dict.filter filterMapFunc
+                |> Dict.keys
+                |> List.map Network.toString
 
         servers =
             app.servers

@@ -1,5 +1,6 @@
 module Game.Account.Database.Models exposing (..)
 
+import Dict exposing (Dict)
 import Time exposing (Time)
 import Game.Network.Types exposing (NIP)
 import Game.Shared exposing (ID)
@@ -20,8 +21,7 @@ type alias RunningVirus =
 
 
 type alias HackedServer =
-    { nip : NIP
-    , password : String
+    { password : String
     , label : Maybe String
     , notes : Maybe String
     , virusInstalled : List InstalledVirus
@@ -31,8 +31,12 @@ type alias HackedServer =
     }
 
 
+type alias HackedServers =
+    Dict NIP HackedServer
+
+
 type alias Database =
-    { servers : List HackedServer
+    { servers : HackedServers
     , bankAccounts : List String
     , btcWallets : List String
     }
@@ -40,4 +44,4 @@ type alias Database =
 
 initialModel : Database
 initialModel =
-    Database [] [] []
+    Database Dict.empty [] []
