@@ -31,6 +31,7 @@ type Msg
 
 type RequestMsg
     = BootstrapRequest ResponseType
+    | BruteforceRequest ResponseType
 
 
 

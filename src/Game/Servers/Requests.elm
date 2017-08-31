@@ -7,15 +7,17 @@ module Game.Servers.Requests
         )
 
 import Game.Servers.Requests.Bootstrap as Bootstrap
+import Game.Servers.Requests.Bruteforce as Bruteforce
 import Game.Servers.Messages
     exposing
-        ( RequestMsg(BootstrapRequest)
+        ( RequestMsg(..)
         , ServerRequestMsg
         )
 
 
 type Response
     = BootstrapServer Bootstrap.Response
+    | Bruteforce Bruteforce.Response
 
 
 type ServerResponse
@@ -26,9 +28,10 @@ receive : RequestMsg -> Maybe Response
 receive response =
     case response of
         BootstrapRequest ( code, data ) ->
-            data
-                |> Bootstrap.receive code
-                |> Maybe.map BootstrapServer
+            Maybe.map BootstrapServer <| Bootstrap.receive code data
+
+        BruteforceRequest ( code, data ) ->
+            Maybe.map Bruteforce <| Bruteforce.receive code data
 
 
 serverReceive : ServerRequestMsg -> Maybe ServerResponse
