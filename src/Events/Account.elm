@@ -11,6 +11,7 @@ import Json.Decode
         , maybe
         , list
         , string
+        , value
         )
 import Json.Decode.Pipeline exposing (decode, optional)
 import Utils.Events exposing (Router, Handler, parse, notify)
@@ -32,6 +33,17 @@ type Event
     | DatabaseEvent Database.Event
     | DockEvent Dock.Event
     | InventoryEvent Inventory.Event
+
+
+type alias AccountHolder =
+    { email : Maybe Email
+    , database : Maybe Value
+    , dock : Maybe Dock.Model
+    , servers : List Servers.ID
+    , activeGateway : Servers.ID
+    , bounces : Maybe Bounces.Model
+    , inventory : Maybe Inventory.Model
+    }
 
 
 handler : Router Event
@@ -56,22 +68,11 @@ handler context event json =
             Nothing
 
 
-type alias AccountHolder =
-    { email : Maybe Email
-    , database : Maybe Database
-    , dock : Maybe Dock.Model
-    , servers : List Servers.ID
-    , activeGateway : Servers.ID
-    , bounces : Maybe Bounces.Model
-    , inventory : Maybe Inventory.Model
-    }
-
-
 decoder : Decoder AccountHolder
 decoder =
     decode AccountHolder
         |> optional "email" (maybe string) Nothing
-        |> optional "database" (maybe Database.decoder) Nothing
+        |> optional "database" (maybe value) Nothing
         |> optional "dock" (maybe Dock.decoder) Nothing
         |> optional "servers" (list string) []
         |> optional "active_gateway" string invalidGateway

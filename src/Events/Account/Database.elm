@@ -1,4 +1,4 @@
-module Events.Account.Database exposing (Event(..), handler, decoder)
+module Events.Account.Database exposing (Event(..), handler)
 
 import Dict
 import Json.Decode
@@ -19,8 +19,20 @@ import Game.Network.Types exposing (NIP)
 import Game.Account.Database.Models exposing (..)
 
 
+-- TODO: move changed to sync
+
+
 type Event
     = Changed Database
+    | PasswordAcquired PasswordAcquiredData
+
+
+type alias PasswordAcquiredData =
+    { nip : NIP
+    , password : String
+    , processId : String
+    , gatewayId : String
+    }
 
 
 handler : String -> Handler Event
@@ -28,6 +40,9 @@ handler event json =
     case event of
         "changed" ->
             onChanged json
+
+        "server_password_acquired" ->
+            onServerPasswordAcquired json
 
         _ ->
             Nothing
@@ -38,76 +53,93 @@ handler event json =
 
 
 onChanged : Handler Event
-onChanged json =
-    decodeValue decoder json
-        |> Result.map Changed
-        |> notify
-
-
-decoder : Decoder Database
-decoder =
-    decode Database
-        |> required "servers" servers
-        |> required "accounts" (list string)
-        |> required "wallets" (list string)
-
-
-server : Decoder ( NIP, HackedServer )
-server =
-    decode
-        (\nId ipAddr p l n v a t r ->
-            ( ( nId, ipAddr )
-            , HackedServer p l n v a t r
-            )
-        )
-        |> required "netid" string
-        |> required "ip" string
-        |> required "password" string
-        |> optional "label" (maybe string) Nothing
-        |> optional "notes" (maybe string) Nothing
-        |> required "viruses" (list virus)
-        |> optional "active" (maybe activeVirus) Nothing
-        |> required "type" serverType
-        |> optional "remote" (maybe string) Nothing
-
-
-servers : Decoder HackedServers
-servers =
-    list server
-        |> andThen (Dict.fromList >> succeed)
-
-
-serverType : Decoder ServerType
-serverType =
+onChanged =
     let
-        guesser str =
-            case str of
-                "corp" ->
-                    succeed Corporation
+        activeVirus =
+            decode (,)
+                |> required "id" string
+                |> required "since" float
 
-                "npc" ->
-                    succeed NPC
+        virus =
+            decode (\a b c -> ( a, b, c ))
+                |> required "id" string
+                |> required "filename" string
+                |> required "version" float
 
-                "player" ->
-                    succeed Player
+        serverType =
+            let
+                guesser str =
+                    case str of
+                        "corp" ->
+                            succeed Corporation
 
-                error ->
-                    fail <| commonError "server_type" error
+                        "npc" ->
+                            succeed NPC
+
+                        "player" ->
+                            succeed Player
+
+                        error ->
+                            fail <| commonError "server_type" error
+            in
+                andThen guesser string
+
+        serverDecoder =
+            decode
+                (\nId ipAddr p l n v a t r ->
+                    ( ( nId, ipAddr )
+                    , HackedServer p l n v a t r
+                    )
+                )
+                |> required "netid" string
+                |> required "ip" string
+                |> required "password" string
+                |> optional "label" (maybe string) Nothing
+                |> optional "notes" (maybe string) Nothing
+                |> required "viruses" (list virus)
+                |> optional "active" (maybe activeVirus) Nothing
+                |> required "type" serverType
+                |> optional "remote" (maybe string) Nothing
+
+        servers =
+            list serverDecoder
+                |> andThen (Dict.fromList >> succeed)
+
+        decoder =
+            decode Database
+                |> required "servers" servers
+                |> required "accounts" (list string)
+                |> required "wallets" (list string)
+
+        handler json =
+            decodeValue decoder json
+                |> Result.map Changed
+                |> notify
     in
-        string
-            |> andThen guesser
+        handler
 
 
-virus : Decoder InstalledVirus
-virus =
-    decode (\a b c -> ( a, b, c ))
-        |> required "id" string
-        |> required "filename" string
-        |> required "version" float
+onServerPasswordAcquired : Handler Event
+onServerPasswordAcquired =
+    let
+        constructor sIp nId pass procId gId =
+            { nip = ( nId, sIp )
+            , password = pass
+            , processId = procId
+            , gatewayId = gId
+            }
 
+        decoder =
+            decode constructor
+                |> required "server_ip" string
+                |> required "network_id" string
+                |> required "password" string
+                |> required "process_id" string
+                |> required "gateway_id" string
 
-activeVirus : Decoder RunningVirus
-activeVirus =
-    decode (,)
-        |> required "id" string
-        |> required "since" float
+        handler json =
+            decodeValue decoder json
+                |> Result.map PasswordAcquired
+                |> notify
+    in
+        handler

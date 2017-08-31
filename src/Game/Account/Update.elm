@@ -71,7 +71,9 @@ merge src new =
     , email =
         new.email
     , database =
-        Maybe.withDefault src.database <| new.database
+        -- TODO: remake bootstrap
+        --Maybe.withDefault src.database <| new.database
+        src.database
     , dock =
         Maybe.withDefault src.dock <| new.dock
     , servers =
