@@ -64,9 +64,7 @@ fromServerID id model =
                 |> Maybe.withDefault ( Nothing, Nothing )
 
         endpointID =
-            gateway
-                |> Maybe.andThen Servers.getEndpoint
-                |> Maybe.andThen (flip Servers.mapNetwork servers)
+            Maybe.andThen Servers.getEndpoint gateway
 
         maybeID =
             Just id

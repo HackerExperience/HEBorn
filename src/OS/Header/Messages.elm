@@ -11,7 +11,7 @@ type Msg
     | CustomSelect CustomSelect.Msg
     | SelectGateway (Maybe String)
     | SelectBounce (Maybe String)
-    | SelectEndpoint (Maybe ( String, String ))
+    | SelectEndpoint (Maybe String)
     | CheckMenus
     | ContextTo Context
     | NotificationsTabGo TabNotifications

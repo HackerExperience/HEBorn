@@ -2,12 +2,21 @@ module Game.Requests.Bootstrap
     exposing
         ( Response(..)
         , Data
+        , ServerIndex
         , request
         , receive
+        , decoder
         )
 
-import Json.Decode exposing (Decoder, Value, decodeValue, value)
+import Json.Decode exposing (Decoder, Value, decodeValue, list)
 import Json.Decode.Pipeline exposing (decode, required)
+import Game.Servers.Requests.Bootstrap
+    exposing
+        ( GatewayData
+        , EndpointData
+        , gatewayDecoder
+        , endpointDecoder
+        )
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
@@ -19,9 +28,16 @@ type Response
 
 
 type alias Data =
-    { account : Value
-    , meta : Value
-    , servers : Value
+    { servers :
+        ServerIndex
+    }
+
+
+type alias ServerIndex =
+    { gateways :
+        List GatewayData
+    , endpoints :
+        List EndpointData
     }
 
 
@@ -38,7 +54,7 @@ receive code json =
     case code of
         OkCode ->
             json
-                |> decoder
+                |> decodeValue decoder
                 |> Result.map Okay
                 |> Requests.report
 
@@ -46,18 +62,18 @@ receive code json =
             Nothing
 
 
+decoder : Decoder Data
+decoder =
+    decode Data
+        |> required "servers" serverIndexDecoder
+
+
 
 -- internals
 
 
-decoder : Value -> Result String Data
-decoder =
-    decodeValue response
-
-
-response : Decoder Data
-response =
-    decode Data
-        |> required "account" value
-        |> required "meta" value
-        |> required "servers" value
+serverIndexDecoder : Decoder ServerIndex
+serverIndexDecoder =
+    decode ServerIndex
+        |> required "gateways" (list gatewayDecoder)
+        |> required "endpoints" (list endpointDecoder)

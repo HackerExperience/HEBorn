@@ -21,6 +21,7 @@ import Events.Servers.Tunnels as Tunnels
 import Game.Network.Types exposing (NIP, decodeNip)
 
 
+-- TODO: refactor me to conform the new Game.Servers.Requests.Bootstrap
 -- server changed events doesn't include the full server
 
 

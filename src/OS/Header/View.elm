@@ -13,6 +13,7 @@ import Game.Meta.Models as Meta
 import Game.Models as Game
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import OS.Resources exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
@@ -100,35 +101,34 @@ bounceSelector data =
 endpointSelector :
     Game.Data
     -> OpenMenu
-    -> Maybe NIP
-    -> List (Maybe NIP)
+    -> Maybe Servers.ID
+    -> List (Maybe Servers.ID)
     -> Html Msg
 endpointSelector data =
     let
-        renderEndpoint nip =
-            if nip == ( "", "" ) then
+        renderEndpoint id =
+            if id == "" then
                 Just <| text "None"
             else
                 let
-                    ip =
-                        Tuple.second nip
-
                     servers =
                         data
                             |> Game.getGame
                             |> Game.getServers
 
                     server =
-                        servers
-                            |> Servers.mapNetwork nip
-                            |> Maybe.andThen (flip Servers.get servers)
+                        Servers.get id servers
                 in
                     case server of
-                        Just { name } ->
-                            Just <| text (name ++ " (" ++ ip ++ ")")
+                        Just { name, nip } ->
+                            let
+                                ip =
+                                    Tuple.second nip
+                            in
+                                Just <| text (name ++ " (" ++ ip ++ ")")
 
                         Nothing ->
-                            Just <| text ip
+                            Nothing
     in
         selector [ SEndpoint ] SelectEndpoint OpenEndpoint renderEndpoint
 
@@ -162,9 +162,9 @@ view data ({ openMenu, notifications } as model) =
 
         endpoint =
             game
-                |> Game.fromEndpoint
-                |> Maybe.map (Game.getServer >> Servers.getNIP >> Just)
-                |> Maybe.withDefault Nothing
+                |> Game.fromGateway
+                |> Maybe.map Game.getServer
+                |> Maybe.andThen Servers.getEndpoint
 
         endpoints =
             -- TODO: add getters for database and servers
@@ -174,6 +174,7 @@ view data ({ openMenu, notifications } as model) =
                 |> (.database)
                 |> (.servers)
                 |> Dict.keys
+                |> List.filterMap (flip Servers.mapNetwork servers)
                 |> List.map Just
                 |> (::) Nothing
 

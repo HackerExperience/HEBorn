@@ -92,32 +92,36 @@ genIP =
     unique
 
 
-genMeta : Generator ServerMeta
-genMeta =
+genOwnserhip : Generator Ownership
+genOwnserhip =
     choice
-        (GatewayMeta (GatewayMetadata Nothing Nothing))
-        (EndpointMeta {})
-
+        (GatewayOwnership <| GatewayData Nothing [])
+        (EndpointOwnership <| EndpointData Nothing Nothing)
 
 genServer : Generator Server
 genServer =
     let
-        buildServerRecord ip meta fs logs proc =
+        buildServerRecord ip ownership fs logs proc =
             { name = "Dummy"
+            , type_ = Desktop
             , nip = ("::", ip)
             , nips = [("::", ip)]
+            , coordinates = Just 0
             , filesystem = fs
             , logs = logs
             , processes = proc
             , tunnels = Tunnels.initialModel
             , web = Web.initialModel
-            , meta = meta
-            , coordinates = 0
+            , ownership =
+                GatewayOwnership
+                    { endpoint = Nothing
+                    , endpoints = []
+                    }
             }
     in
         genIP
             |> map buildServerRecord
-            |> andMap genMeta
+            |> andMap genOwnserhip
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel

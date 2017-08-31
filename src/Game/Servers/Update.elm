@@ -60,36 +60,16 @@ bootstrap : Game.Model -> Value -> Model -> Model
 bootstrap game json model =
     let
         mapper data =
-            let
-                -- TODO: propagate bootstrap to remaining parts
-                server =
-                    { name = data.name
-                    , coordinates = data.coordinates
-                    , nip = data.nip
-                    , nips = [ data.nip ]
-                    , filesystem =
-                        Filesystem.bootstrap data.filesystem
-                            Filesystem.initialModel
-                    , logs =
-                        Logs.bootstrap data.logs
-                            Logs.initialModel
-                    , processes =
-                        Processes.initialProcesses
-                    , tunnels =
-                        Tunnels.bootstrap data.tunnels
-                            Tunnels.initialModel
-                    , web =
-                        Web.initialModel
-                    , meta =
-                        GatewayMeta <| GatewayMetadata Nothing Nothing
-                    }
-            in
-                ( data.id, server )
+            case data of
+                Bootstrap.GatewayServer { id } ->
+                    ( id, Bootstrap.toServer data )
+
+                Bootstrap.EndpointServer { id } ->
+                    ( id, Bootstrap.toServer data )
     in
         decodeValue (list Bootstrap.decoder) json
             |> Requests.report
             |> Maybe.withDefault []
-            |> Debug.log "SERVER"
             |> List.map mapper
             |> List.foldl (uncurry insert) model
 
@@ -165,8 +145,8 @@ updateServer game id msg server =
         SetBounce maybeId ->
             onSetBounce game id maybeId server
 
-        SetEndpoint maybeNip ->
-            onSetEndpoint game id maybeNip server
+        SetEndpoint maybeID ->
+            onSetEndpoint game id maybeID server
 
         FilesystemMsg msg ->
             onFilesystemMsg game id msg server
@@ -204,7 +184,7 @@ onSetBounce game id maybeId server =
 onSetEndpoint :
     Game.Model
     -> ID
-    -> Maybe NIP
+    -> Maybe ID
     -> Server
     -> ServerUpdateResponse
 onSetEndpoint game id maybeNip server =

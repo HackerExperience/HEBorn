@@ -76,10 +76,10 @@ update data msg ({ openMenu } as model) =
             in
                 ( model_, Cmd.none, dispatch )
 
-        SelectEndpoint ip ->
+        SelectEndpoint serverId ->
             let
                 dispatch =
-                    Dispatch.meta <| Meta.SetEndpoint ip
+                    Dispatch.meta <| Meta.SetEndpoint serverId
 
                 model_ =
                     { model | openMenu = NothingOpen }

@@ -7,6 +7,7 @@ module Game.Account.Models
         , Email
         , initialModel
         , getToken
+        , insertServer
         )
 
 import Game.Servers.Shared as Servers
@@ -75,3 +76,11 @@ initialModel id username token =
 getToken : Model -> Token
 getToken model =
     model.auth.token
+
+
+insertServer : Servers.ID -> Model -> Model
+insertServer id ({ servers } as model) =
+    if not <| List.member id servers then
+        { model | servers = id :: servers }
+    else
+        model

@@ -1,35 +1,4 @@
-module Game.Servers.Models
-    exposing
-        ( Model
-        , Servers
-        , Server
-        , ServerMeta(..)
-        , GatewayMetadata
-        , EndpointMetadata
-        , AnalyzedMetadata
-        , initialModel
-        , get
-        , insert
-        , remove
-        , safeUpdate
-        , mapNetwork
-        , getName
-        , setName
-        , getNIP
-        , setNIP
-        , getNIPs
-        , setNIPs
-        , getFilesystem
-        , setFilesystem
-        , getLogs
-        , setLogs
-        , getProcesses
-        , setProcesses
-        , getEndpoint
-        , setEndpoint
-        , getBounce
-        , setBounce
-        )
+module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
@@ -39,13 +8,21 @@ import Game.Servers.Processes.Models as Processes exposing (Processes)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Web.Models as Web
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network
 
 
 type alias Model =
-    { servers : Servers
-    , network : NetworkMap
+    { network : NetworkMap
+    , servers : Servers
     }
+
+
+type alias NetworkMap =
+    Dict NIP ID
+
+
+type alias NIP =
+    Network.NIP
 
 
 type alias Servers =
@@ -54,44 +31,47 @@ type alias Servers =
 
 type alias Server =
     { name : String
+    , type_ : ServerType
     , nip : NIP
     , nips : List NIP
+    , coordinates : Maybe Coordinates
     , filesystem : Filesystem
     , logs : Logs.Model
     , processes : Processes
     , tunnels : Tunnels.Model
     , web : Web.Model
-    , coordinates : Coordinates
-    , meta : ServerMeta
+    , ownership : Ownership
     }
-
-
-type ServerMeta
-    = GatewayMeta GatewayMetadata
-    | EndpointMeta EndpointMetadata
-    | AnalyzedMeta AnalyzedMetadata
-
-
-type alias GatewayMetadata =
-    { bounce : Maybe Bounces.ID
-    , endpoint : Maybe NIP
-    }
-
-
-type alias EndpointMetadata =
-    {}
-
-
-type alias AnalyzedMetadata =
-    {}
 
 
 type alias Coordinates =
     Float
 
 
-type alias NetworkMap =
-    Dict NIP ID
+type ServerType
+    = Desktop
+    | Mobile
+
+
+type Ownership
+    = GatewayOwnership GatewayData
+    | EndpointOwnership EndpointData
+
+
+type alias GatewayData =
+    { endpoint : Maybe ID
+    , endpoints : List ID
+    }
+
+
+type alias EndpointData =
+    { bounce : Maybe Bounces.ID
+    , analyzed : Maybe AnalyzedEndpoint
+    }
+
+
+type alias AnalyzedEndpoint =
+    {}
 
 
 initialModel : Model
@@ -166,7 +146,7 @@ mapNetwork nip { network } =
 
 
 
--- server getters/setters
+---- server getters/setters
 
 
 getName : Server -> String
@@ -229,56 +209,66 @@ setProcesses processes model =
     { model | processes = processes }
 
 
-getEndpoint : Server -> Maybe NIP
+getEndpoint : Server -> Maybe ID
 getEndpoint server =
-    case server.meta of
-        GatewayMeta meta ->
-            meta.endpoint
+    case server.ownership of
+        GatewayOwnership data ->
+            data.endpoint
 
         _ ->
             Nothing
 
 
-setEndpoint : Maybe NIP -> Server -> Server
-setEndpoint ip server =
-    case server.meta of
-        GatewayMeta meta ->
-            let
-                meta_ =
-                    GatewayMeta { meta | endpoint = ip }
-            in
-                { server | meta = meta_ }
+setEndpoint : Maybe ID -> Server -> Server
+setEndpoint endpoint ({ ownership } as server) =
+    let
+        ownership_ =
+            case ownership of
+                GatewayOwnership data ->
+                    GatewayOwnership { data | endpoint = endpoint }
+
+                ownership ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
+
+
+getEndpoints : Server -> Maybe (List ID)
+getEndpoints server =
+    case server.ownership of
+        GatewayOwnership data ->
+            Just data.endpoints
 
         _ ->
-            server
+            Nothing
 
 
 getBounce : Server -> Maybe Bounces.ID
 getBounce server =
-    case server.meta of
-        GatewayMeta meta ->
-            meta.bounce
+    case server.ownership of
+        EndpointOwnership data ->
+            data.bounce
 
         _ ->
             Nothing
 
 
 setBounce : Maybe Bounces.ID -> Server -> Server
-setBounce id server =
-    case server.meta of
-        GatewayMeta meta ->
-            let
-                meta_ =
-                    GatewayMeta { meta | bounce = id }
-            in
-                { server | meta = meta_ }
+setBounce bounce ({ ownership } as server) =
+    let
+        ownership_ =
+            case ownership of
+                EndpointOwnership data ->
+                    EndpointOwnership { data | bounce = bounce }
 
-        _ ->
-            server
+                ownership ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
 
 
 
--- internals
+---- internals
 
 
 setServers : Servers -> Model -> Model

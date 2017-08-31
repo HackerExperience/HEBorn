@@ -19,6 +19,10 @@ type alias Model =
     }
 
 
+
+-- TODO: move active gateway / context to account
+
+
 initialModel : Model
 initialModel =
     { online = 0

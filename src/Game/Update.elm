@@ -8,10 +8,12 @@ import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Reports as Ws
 import Events.Events as Events
 import Game.Account.Messages as Account
+import Game.Account.Models as Account
 import Game.Account.Update as Account
 import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Servers.Messages as Servers
+import Game.Servers.Models as Servers
 import Game.Servers.Update as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
@@ -19,6 +21,7 @@ import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Requests exposing (..)
 import Game.Requests.Bootstrap as Bootstrap
+import Game.Servers.Requests.Bootstrap as ServerBootstrap
 
 
 type alias UpdateResponse =
@@ -162,15 +165,41 @@ onWsJoinedAccount model =
 onBootstrapResponse : Bootstrap.Data -> Model -> UpdateResponse
 onBootstrapResponse data model =
     let
-        goServers =
-            onServers (Servers.Bootstrap data.servers)
+        gateways =
+            List.map .id data.servers.gateways
 
-        goAccount =
-            onAccount (Account.Bootstrap data.account)
+        activeServer =
+            List.head gateways
+
+        account_ =
+            List.foldl Account.insertServer
+                model.account
+                gateways
+
+        insertServer toServerUnion generic servers =
+            let
+                server =
+                    ServerBootstrap.toServer <| toServerUnion generic
+            in
+                Servers.insert generic.id server servers
+
+        serversWithGateways =
+            List.foldl (insertServer ServerBootstrap.GatewayServer)
+                model.servers
+                data.servers.gateways
+
+        servers_ =
+            List.foldl (insertServer ServerBootstrap.EndpointServer)
+                serversWithGateways
+                data.servers.endpoints
+
+        model_ =
+            { model
+                | account = account_
+                , servers = servers_
+            }
     in
-        model
-            |> goServers
-            |> Update.andThen goAccount
+        Update.fromModel model_
             |> joinActiveServer
 
 

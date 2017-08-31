@@ -40,7 +40,7 @@ type RequestMsg
 
 type ServerMsg
     = SetBounce (Maybe Bounces.ID)
-    | SetEndpoint (Maybe NIP)
+    | SetEndpoint (Maybe ID)
     | FilesystemMsg Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

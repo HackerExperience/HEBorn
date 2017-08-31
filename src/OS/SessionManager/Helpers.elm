@@ -22,6 +22,4 @@ toSessionID data =
                 data
                     |> Game.getServer
                     |> Servers.getEndpoint
-                    |> Maybe.andThen
-                        (flip Servers.mapNetwork <| Game.getServers game)
                     |> Maybe.withDefault data.id

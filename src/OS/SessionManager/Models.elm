@@ -17,7 +17,7 @@ import Dict exposing (Dict)
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import Apps.Apps as Apps
-import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared as Servers
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -71,11 +71,11 @@ insert id ({ sessions } as model) =
 openApp :
     Game.Data
     -> ID
-    -> Maybe NIP
+    -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-openApp data id nip app ({ sessions } as model0) =
+openApp data id serverID app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
@@ -83,7 +83,7 @@ openApp data id nip app ({ sessions } as model0) =
                     getUID model0
 
                 ( wm_, cmd, msg ) =
-                    WindowManager.insert data uuid nip app wm
+                    WindowManager.insert data uuid serverID app wm
 
                 cmd_ =
                     Cmd.map WindowManagerMsg cmd
@@ -103,11 +103,11 @@ openApp data id nip app ({ sessions } as model0) =
 openOrRestoreApp :
     Game.Data
     -> ID
-    -> Maybe NIP
+    -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-openOrRestoreApp data id nip app ({ sessions } as model0) =
+openOrRestoreApp data id serverID app ({ sessions } as model0) =
     case Dict.get id sessions of
         Just wm ->
             let
@@ -115,7 +115,7 @@ openOrRestoreApp data id nip app ({ sessions } as model0) =
                     getUID model0
 
                 ( wm_, cmd, msg ) =
-                    WindowManager.resert data uuid nip app wm
+                    WindowManager.resert data uuid serverID app wm
 
                 cmd_ =
                     Cmd.map WindowManagerMsg cmd

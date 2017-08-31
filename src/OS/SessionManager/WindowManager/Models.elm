@@ -41,8 +41,8 @@ import Dict exposing (Dict)
 import Draggable
 import Apps.Apps as Apps
 import Apps.Models as Apps
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
+import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
@@ -81,7 +81,7 @@ type alias Window =
     , context : Maybe Context
     , instance : Instance
     , locked : Bool
-    , endpoint : Maybe NIP
+    , endpoint : Maybe Servers.ID
     }
 
 
@@ -122,11 +122,11 @@ initialModel =
 resert :
     Game.Data
     -> String
-    -> Maybe NIP
+    -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data id nip app ({ visible, hidden, windows } as model) =
+resert data id serverID app ({ visible, hidden, windows } as model) =
     let
         noVisible =
             visible
@@ -142,7 +142,7 @@ resert data id nip app ({ visible, hidden, windows } as model) =
             noVisible && noHidden
     in
         if noOpened then
-            insert data id nip app model
+            insert data id serverID app model
         else if noVisible then
             let
                 model_ =
@@ -152,17 +152,17 @@ resert data id nip app ({ visible, hidden, windows } as model) =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data id nip app model
+            insert data id serverID app model
 
 
 insert :
     Game.Data
     -> ID
-    -> Maybe NIP
+    -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data id nip app ({ windows, visible } as model) =
+insert data id serverID app ({ windows, visible } as model) =
     let
         contexts =
             case Apps.contexts app of
@@ -227,7 +227,7 @@ insert data id nip app ({ windows, visible } as model) =
                 contexts
                 instance
                 False
-                nip
+                serverID
 
         windows_ =
             Dict.insert id window windows
@@ -652,7 +652,6 @@ windowData data id window model =
 
             Just Endpoint ->
                 window.endpoint
-                    |> Maybe.andThen (flip Servers.mapNetwork servers)
                     |> Maybe.andThen (flip Game.fromServerID game)
                     |> Maybe.withDefault data
 
