@@ -98,12 +98,11 @@ genPage =
         generate str =
             let
                 site =
-                    { type_ = Web.Default
+                    { type_ = Web.NoWebserver
                     , url = str
                     , meta =
-                        str
-                            |> Web.DefaultMetadata
-                            |> Web.DefaultMeta
+                        { serverId = str, nip = ( str, str ) }
+                            |> Web.NoWebserverMeta
                             |> Just
                     }
             in

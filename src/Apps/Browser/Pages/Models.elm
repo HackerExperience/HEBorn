@@ -8,7 +8,7 @@ module Apps.Browser.Pages.Models
 
 import Game.Servers.Web.Types as Web
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
-import Apps.Browser.Pages.Default.Models as PageDefault
+import Apps.Browser.Pages.NoWebserver.Models as PageNoWebserver
 import Apps.Browser.Pages.Profile.Models as PageProfile
 import Apps.Browser.Pages.Directory.Models as PageDirectory
 import Apps.Browser.Pages.MissionCenter.Models as PageMissionCenter
@@ -24,7 +24,7 @@ type Model
     | UnknownModel
     | HomeModel
     | CustomModel
-    | DefaultModel PageDefault.Model
+    | NoWebserverModel PageNoWebserver.Model
     | ProfileModel
     | DirectoryModel
     | DownloadCenterModel
@@ -59,10 +59,10 @@ initialModel ({ type_, meta } as site) =
                 |> PageNotFound.initialModel
                 |> NotFoundModel
 
-        ( Web.Default, Just (Web.DefaultMeta meta) ) ->
-            site
-                |> PageDefault.initialModel
-                |> DefaultModel
+        ( Web.NoWebserver, Just (Web.NoWebserverMeta meta) ) ->
+            meta
+                |> PageNoWebserver.initialModel
+                |> NoWebserverModel
 
         ( Web.Profile, _ ) ->
             ProfileModel

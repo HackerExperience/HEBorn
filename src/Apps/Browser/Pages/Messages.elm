@@ -4,7 +4,8 @@ module Apps.Browser.Pages.Messages exposing (Msg(..))
 type Msg
     = HomeMsg
     | BlankMsg
-    | CustomMsg
+    | WebserverMsg
+    | NoWebserverMsg
     | EmptyMsg
     | ProfileMsg
     | DirectoryMsg

@@ -5,6 +5,7 @@ import Game.Data as GameData
 import Apps.Browser.Pages.Models exposing (..)
 import Apps.Browser.Pages.Messages exposing (..)
 import Apps.Browser.Pages.Blank.View as Blank
+import Apps.Browser.Pages.NoWebserver.View as NoWebserver
 import Apps.Browser.Pages.NotFound.View as NotFound
 import Apps.Browser.Pages.Home.Messages as Home
 import Apps.Browser.Pages.Home.View as Home
@@ -59,5 +60,10 @@ view data model =
         NewsModel ->
             Html.map (always NewsMsg) News.view
 
+        NoWebserverModel model ->
+            Html.map (always NoWebserverMsg) (NoWebserver.view model)
+
         _ ->
-            Html.map (always UnknownMsg) Blank.view
+            -- REMOVE ON PRODUCTION
+            Debug.log "Unexpected fallback page" <|
+                Html.map (always UnknownMsg) Blank.view

@@ -1,5 +1,7 @@
 module Game.Servers.Web.Types exposing (..)
 
+import Game.Network.Types exposing (NIP)
+
 
 type alias Site =
     { type_ : Type
@@ -13,8 +15,8 @@ type Type
     | NotFound
     | Unknown
     | Home
-    | Custom
-    | Default
+    | Webserver
+    | NoWebserver
     | Profile
     | Directory
     | DownloadCenter
@@ -30,8 +32,8 @@ type Type
 
 type Meta
     = HomeMeta HomeMetadata
-    | CustomMeta CustomMetadata
-    | DefaultMeta DefaultMetadata
+    | WebserverMeta WebserverMetadata
+    | NoWebserverMeta NoWebserverMetadata
     | ProfileMeta ProfileMetadata
     | DirectoryMeta DirectoryMetadata
     | DownloadCenterMeta DownloadCenterMetadata
@@ -49,12 +51,12 @@ type alias HomeMetadata =
     {}
 
 
-type alias CustomMetadata =
-    {}
+type alias WebserverMetadata =
+    { serverId : String, nip : NIP }
 
 
-type alias DefaultMetadata =
-    { wip : String }
+type alias NoWebserverMetadata =
+    { serverId : String, nip : NIP }
 
 
 type alias ProfileMetadata =
