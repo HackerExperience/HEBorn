@@ -30,10 +30,10 @@ initialModel =
 isHackable : Type -> Bool
 isHackable t =
     case t of
-        Custom ->
+        Webserver ->
             True
 
-        Default ->
+        NoWebserver ->
             True
 
         -- TODO: add exceptions for store and banks
@@ -60,7 +60,7 @@ unknownSite url =
 homepageSite : String -> Site
 homepageSite url =
     { url = url
-    , type_ = Default
+    , type_ = Home
     , meta = Nothing
     }
 

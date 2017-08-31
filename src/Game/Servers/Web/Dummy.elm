@@ -27,5 +27,8 @@ dummyTunnel req =
         "headquarters" :: _ ->
             MissionCenter
 
+        "hacking" :: _ ->
+            NoWebserver
+
         _ ->
             Unknown

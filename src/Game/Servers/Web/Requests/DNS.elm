@@ -41,19 +41,19 @@ type alias Npc =
 
 
 type VpcSites
-    = CustomSite Custom
-    | DefaultSite Default
+    = WebserverSite Webserver
+    | NoWebserverSite NoWebserver
 
 
 type NpcSites
     = BankSite Bank
 
 
-type alias Custom =
+type alias Webserver =
     { web : String }
 
 
-type alias Default =
+type alias NoWebserver =
     { web : String }
 
 
@@ -109,16 +109,16 @@ convert url root =
     case root of
         VpcRoot { vpc } ->
             case vpc of
-                CustomSite meta ->
-                    { type_ = Web.Custom
+                WebserverSite meta ->
+                    { type_ = Web.Webserver
                     , url = url
-                    , meta = Just (Web.CustomMeta {})
+                    , meta = Just (Web.WebserverMeta { serverId = "TODO", nip = ( "", "" ) })
                     }
 
-                DefaultSite meta ->
-                    { type_ = Web.Default
+                NoWebserverSite meta ->
+                    { type_ = Web.NoWebserver
                     , url = url
-                    , meta = Just (Web.DefaultMeta { wip = "" })
+                    , meta = Just (Web.NoWebserverMeta { serverId = "TODO", nip = ( "", "" ) })
                     }
 
         NpcRoot { npc } ->
@@ -159,22 +159,22 @@ npcSites =
 vpcSites : Decoder VpcSites
 vpcSites =
     Decode.oneOf
-        [ Decode.map CustomSite custom
-        , Decode.map DefaultSite default
+        [ Decode.map WebserverSite custom
+        , Decode.map NoWebserverSite default
         ]
 
 
-custom : Decoder Custom
+custom : Decoder Webserver
 custom =
     -- TODO: the string type here is temporary
-    decode Custom
+    decode Webserver
         |> required "web" Decode.string
 
 
-default : Decoder Default
+default : Decoder NoWebserver
 default =
     -- TODO: the string type here is temporary
-    decode Default
+    decode NoWebserver
         |> required "web" Decode.string
 
 
