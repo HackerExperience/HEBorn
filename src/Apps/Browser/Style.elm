@@ -58,6 +58,11 @@ css =
             , overflowY auto
             , Css.backgroundColor Colors.white
             ]
+        , class AutoHeight
+            [ flexContainerVert
+            , overflowY visible
+            , minHeight (pct 100)
+            ]
         , class LoginPageHeader
             [ lineHeight (int 3)
             , minHeight (px 48) -- CHROME HACK

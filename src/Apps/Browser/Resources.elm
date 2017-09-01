@@ -13,6 +13,7 @@ type Classes
     | LoginPageFooter
     | Btn
     | InactiveBtn
+    | AutoHeight
 
 
 prefix : String

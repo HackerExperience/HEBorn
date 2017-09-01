@@ -13,7 +13,7 @@ import Apps.Browser.Pages.NoWebserver.Models exposing (Model)
 
 view : Model -> Html Never
 view model =
-    div []
+    div [ class [ AutoHeight ] ]
         [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
         , div [ class [ LoginPageForm ] ]
             [ div []
