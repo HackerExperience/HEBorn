@@ -6,12 +6,12 @@ import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Models exposing (..)
 
 
-catchDataWhenFiltering : List String -> NIP -> HackedServer -> Bool
+catchDataWhenFiltering : List String -> NIP -> Database.HackedServer -> Bool
 catchDataWhenFiltering filterCache nip value =
     List.member (Network.toString nip) filterCache
 
 
-applyFilter : DBAdmin -> HackedServers -> HackedServers
+applyFilter : DBAdmin -> Database.HackedServers -> Database.HackedServers
 applyFilter app itens =
     if ((String.length app.servers.filterText) > 0) then
         Dict.filter

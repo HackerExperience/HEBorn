@@ -20,14 +20,13 @@ import Game.Models as Game
 type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
+
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        Event event -> 
-            updateEvent event
+        Event event ->
+            updateEvent game event model
 
-        _ ->
-            Update.fromModel model
 
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
@@ -38,10 +37,11 @@ updateEvent game event model =
         _ ->
             Update.fromModel model
 
+
 onPasswordAcquired :
-        Game.Model
-        -> DbEv.PasswordAcquiredData
-        -> Model
-        -> UpdateResponse
+    Game.Model
+    -> DbEv.PasswordAcquiredData
+    -> Model
+    -> UpdateResponse
 onPasswordAcquired game data model =
     Update.fromModel model
