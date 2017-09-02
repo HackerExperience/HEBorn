@@ -10,7 +10,8 @@ import Driver.Websocket.Messages as Ws
 import Events.Events as Events exposing (Event(Report, AccountEvent))
 import Events.Account as Account exposing (AccountHolder)
 import Requests.Requests as Requests
-import Game.Account.Database.Update as Database 
+import Game.Account.Database.Messages as Database
+import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
@@ -33,6 +34,9 @@ update game msg model =
         BouncesMsg msg ->
             onBounce game msg model
 
+        DatabaseMsg msg ->
+            onDatabase game msg model
+
         Event data ->
             onEvent game data model
 
@@ -51,10 +55,12 @@ bootstrap json model =
         |> Maybe.withDefault model
 
 
+
 -- internals
 
-onDatabase : Account.Msg -> Model -> UpdateResponse
-onDatabase msg game =
+
+onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
+onDatabase game msg model =
     Update.child
         { get = .database
         , set = (\database game -> { game | database = database })
@@ -62,7 +68,8 @@ onDatabase msg game =
         , update = (Database.update game)
         }
         msg
-        game
+        model
+
 
 onBootstrap : Value -> Model -> UpdateResponse
 onBootstrap json model =
@@ -130,7 +137,7 @@ onBounce game msg model =
 
 onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 onEvent game event model =
-    onDatabase (Database.Event event) model
+    onDatabase game (Database.Event event) model
 
 
 onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse

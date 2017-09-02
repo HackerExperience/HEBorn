@@ -1,4 +1,9 @@
-module Events.Account.Database exposing (Event(..), handler)
+module Events.Account.Database
+    exposing
+        ( Event(..)
+        , PasswordAcquiredData
+        , handler
+        )
 
 import Dict
 import Json.Decode
