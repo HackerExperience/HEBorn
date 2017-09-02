@@ -11,6 +11,10 @@ import Game.Servers.Processes.Types.Local exposing (ProcessState(..))
 import Game.Servers.Processes.Models exposing (..)
 
 
+type alias Process =
+    ( ProcessID, ProcessProp )
+
+
 all : Test
 all =
     describe "process"
@@ -34,9 +38,9 @@ processOperationsTests =
         ]
 
 
-getState : Process -> Maybe ProcessState
-getState process =
-    case process.prop of
+getState : ProcessProp -> Maybe ProcessState
+getState prop =
+    case prop of
         LocalProcess prop ->
             Just prop.state
 
@@ -44,9 +48,9 @@ getState process =
             Nothing
 
 
-getStateForJust : Process -> ProcessState
-getStateForJust process =
-    Maybe.withDefault StateStandby (getState process)
+getStateForJust : ProcessProp -> ProcessState
+getStateForJust prop =
+    Maybe.withDefault StateStandby (getState prop)
 
 
 
@@ -68,11 +72,11 @@ addProcessGenericTests =
         (tuple ( Gen.emptyProcesses, Gen.localProcess ))
         "can add a process"
       <|
-        \( processes, process ) ->
+        \( processes, ( id, prop ) ) ->
             processes
-                |> addProcess process
-                |> getProcessByID process.id
-                |> Expect.equal (Just process)
+                |> addProcess id prop
+                |> getProcess id
+                |> Expect.equal (Just prop)
     ]
 
 
@@ -98,9 +102,9 @@ pauseProcessGenericTests =
       <|
         \( model, process ) ->
             model
-                |> addProcess process
-                |> (flip pauseProcess) process
-                |> getProcessByID process.id
+                |> uncurry addProcess process
+                |> pauseProcess (Tuple.first process)
+                |> getProcess (Tuple.first process)
                 |> Maybe.andThen getState
                 |> Expect.equal (Just StatePaused)
     ]
@@ -126,18 +130,17 @@ resumeProcessGenericTests =
         (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can resume a paused process"
       <|
-        \( processes, process ) ->
+        \( processes, ( id, prop ) ) ->
             let
                 model =
                     processes
-                        |> addProcess process
-                        |> (flip pauseProcess) process
+                        |> addProcess id prop
+                        |> pauseProcess id
 
                 maybeState =
                     model
-                        |> getProcessByID process.id
-                        |> Maybe.map (resumeProcess model)
-                        |> Maybe.andThen (getProcessByID process.id)
+                        |> resumeProcess id
+                        |> getProcess id
                         |> Maybe.map getStateForJust
             in
                 Expect.equal (Just StateRunning) maybeState
@@ -145,17 +148,16 @@ resumeProcessGenericTests =
         (tuple ( Gen.localProcesses, Gen.localProcess ))
         "can't resume a running process"
       <|
-        \( processes, process ) ->
+        \( processes, ( id, prop ) ) ->
             let
                 model =
                     processes
-                        |> addProcess process
-                        |> (flip resumeProcess) process
+                        |> addProcess id prop
+                        |> resumeProcess id
             in
                 model
-                    |> getProcessByID process.id
-                    |> Maybe.map (resumeProcess model)
-                    |> Maybe.andThen (getProcessByID process.id)
+                    |> resumeProcess id
+                    |> getProcess id
                     |> Maybe.map getStateForJust
                     |> Expect.equal (Just StateRunning)
     ]
@@ -185,11 +187,12 @@ completeProcessGenericTests =
             let
                 model =
                     processes
-                        |> addProcess process
-                        |> (flip completeProcess) process
+                        |> uncurry addProcess process
+                        |> completeProcess (Tuple.first process)
+                        |> Tuple.first
             in
                 model
-                    |> getProcessByID (getProcessID process)
+                    |> getProcess (Tuple.first process)
                     |> Maybe.map getStateForJust
                     |> Expect.equal (Just StateComplete)
     ]
@@ -216,9 +219,9 @@ deleteProcessGenericTests =
       <|
         \( processes, process ) ->
             processes
-                |> addProcess process
-                |> (flip removeProcess) process
-                |> getProcessByID process.id
+                |> uncurry addProcess process
+                |> removeProcess (Tuple.first process)
+                |> getProcess (Tuple.first process)
                 |> Expect.equal Nothing
     , fuzz
         (tuple ( Gen.localProcesses, Gen.localProcess ))
@@ -226,6 +229,6 @@ deleteProcessGenericTests =
       <|
         \( processes, process ) ->
             processes
-                |> (flip removeProcess) process
+                |> removeProcess (Tuple.first process)
                 |> Expect.equal processes
     ]

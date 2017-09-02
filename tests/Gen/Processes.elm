@@ -19,9 +19,14 @@ import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (..)
 import Game.Servers.Processes.Types.Remote as Remote exposing (..)
-import Game.Servers.Processes.Models as Logs exposing (..)
+import Game.Servers.Processes.Models as Processes exposing (..)
 import Gen.Utils exposing (..)
 import Gen.Logs as Logs
+
+
+type alias Process =
+    ( ProcessID, Processes.ProcessProp )
+
 
 
 --------------------------------------------------------------------------------
@@ -287,30 +292,16 @@ genRemoteProcessProp =
 
 genLocalProcess : Generator Process
 genLocalProcess =
-    let
-        buildProcessRecord =
-            \id prop ->
-                { id = id
-                , prop = prop
-                }
-    in
-        genProcessID
-            |> map buildProcessRecord
-            |> andMap (map LocalProcess genLocalProcessProp)
+    genProcessID
+        |> map (,)
+        |> andMap (map LocalProcess genLocalProcessProp)
 
 
 genRemoteProcess : Generator Process
 genRemoteProcess =
-    let
-        buildProcessRecord =
-            \id prop ->
-                { id = id
-                , prop = prop
-                }
-    in
-        genProcessID
-            |> map buildProcessRecord
-            |> andMap (map RemoteProcess genRemoteProcessProp)
+    genProcessID
+        |> map (,)
+        |> andMap (map RemoteProcess genRemoteProcessProp)
 
 
 genLocalProcessList : Generator (List Process)
@@ -333,14 +324,14 @@ genEmptyProcesses =
 genNonEmptyLocalProcesses : Generator Processes
 genNonEmptyLocalProcesses =
     andThen
-        ((List.foldl addProcess initialProcesses) >> constant)
+        ((List.foldl (uncurry addProcess) initialProcesses) >> constant)
         genLocalProcessList
 
 
 genNonEmptyRemoteProcesses : Generator Processes
 genNonEmptyRemoteProcesses =
     andThen
-        ((List.foldl addProcess initialProcesses) >> constant)
+        ((List.foldl (uncurry addProcess) initialProcesses) >> constant)
         genRemoteProcessList
 
 
