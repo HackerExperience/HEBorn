@@ -2,7 +2,9 @@ module Game.Servers.Processes.Update exposing (..)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Events.Events as Events
+import Events.Events as Events exposing (Event(ServersEvent))
+import Events.Servers exposing (Event(ServerEvent), ServerEvent(ProcessesEvent))
+import Events.Servers.Processes as Processes exposing (Event(..))
 import Game.Models as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models
@@ -44,8 +46,11 @@ update game msg model =
         Create process ->
             onCreate process model
 
-        Event event ->
-            onEvent event model
+        Event (ServersEvent (ServerEvent serverId (ProcessesEvent event))) ->
+            onEvent serverId event model
+
+        Event _ ->
+            Update.fromModel model
 
 
 onPause : ProcessID -> Processes -> UpdateResponse
@@ -85,6 +90,15 @@ onCreate ( pId, prop ) model =
     Update.fromModel <| addProcess pId prop model
 
 
-onEvent : Events.Event -> Processes -> UpdateResponse
-onEvent event model =
-    Update.fromModel model
+onEvent : String -> Processes.Event -> Processes -> UpdateResponse
+onEvent serverId event model =
+    case event of
+        Changed ->
+            Update.fromModel model
+
+        Started data ->
+            Update.fromModel model
+
+        Conclusion processId ->
+            completeProcess serverId model processId
+                |> \( m, d ) -> ( m, Cmd.none, d )
