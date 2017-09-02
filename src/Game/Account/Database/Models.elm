@@ -6,6 +6,13 @@ import Game.Network.Types exposing (NIP)
 import Game.Shared exposing (ID)
 
 
+
+type alias Model =
+    { servers : HackedServers
+    , bankAccounts : List String
+    , btcWallets : List String
+    }
+
 type ServerType
     = Corporation
     | NPC
@@ -19,6 +26,9 @@ type alias InstalledVirus =
 type alias RunningVirus =
     ( ID, Time )
 
+type alias HackedServers =
+    Dict NIP HackedServer
+
 
 type alias HackedServer =
     { password : String
@@ -31,17 +41,7 @@ type alias HackedServer =
     }
 
 
-type alias HackedServers =
-    Dict NIP HackedServer
 
-
-type alias Database =
-    { servers : HackedServers
-    , bankAccounts : List String
-    , btcWallets : List String
-    }
-
-
-initialModel : Database
+initialModel : Model
 initialModel =
-    Database Dict.empty [] []
+    Model Dict.empty [] []

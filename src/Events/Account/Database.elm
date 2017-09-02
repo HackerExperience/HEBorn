@@ -23,7 +23,7 @@ import Game.Account.Database.Models exposing (..)
 
 
 type Event
-    = Changed Database
+    = Changed Model
     | PasswordAcquired PasswordAcquiredData
 
 
@@ -106,7 +106,7 @@ onChanged =
                 |> andThen (Dict.fromList >> succeed)
 
         decoder =
-            decode Database
+            decode Model
                 |> required "servers" servers
                 |> required "accounts" (list string)
                 |> required "wallets" (list string)

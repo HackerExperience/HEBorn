@@ -42,7 +42,7 @@ type alias Model =
     , username : String
     , auth : AuthData
     , email : Maybe Email
-    , database : Database
+    , database : Database.Model
     , dock : Dock.Model
     , servers : List Servers.ID
     , activeGateway : Servers.ID
