@@ -3,8 +3,9 @@ module Apps.TaskManager.Models exposing (..)
 import Dict
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Models as Servers
-import Game.Servers.Processes.Models as Processes exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
+import Game.Servers.Processes.Models as Processes exposing (Processes, ProcessProp(..))
+import Game.Servers.Processes.Types.Shared exposing (ProcessID)
+import Game.Servers.Processes.Types.Local as Local
 
 
 type alias ResourceUsage =
@@ -16,7 +17,7 @@ type alias ResourceUsage =
 
 
 type alias Entries =
-    List Processes.Process
+    List ( ProcessID, ProcessProp )
 
 
 type alias TaskManager =
@@ -82,7 +83,7 @@ packUsage ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) =
 
 
 taskUsageSum : Local.ProcessProp -> ( Float, Float, Float, Float ) -> ( Float, Float, Float, Float )
-taskUsageSum ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) ( cpu_, mem_, down_, up_ ) =
+taskUsageSum { cpuUsage, memUsage, downloadUsage, uploadUsage } ( cpu_, mem_, down_, up_ ) =
     ( cpu_ + (toFloat cpuUsage)
     , mem_ + (toFloat memUsage)
     , down_ + (toFloat downloadUsage)
@@ -95,7 +96,7 @@ onlyLocalTasks =
     Dict.values
         >> List.filterMap
             (\v ->
-                case v.prop of
+                case v of
                     LocalProcess p ->
                         Just p
 

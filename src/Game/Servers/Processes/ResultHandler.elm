@@ -4,8 +4,8 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Game.Servers.Processes.Types.Shared exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (..)
-import Game.Servers.Processes.Types.Remote as Remote exposing (..)
+import Game.Servers.Processes.Types.Local as Local
+import Game.Servers.Processes.Types.Remote as Remote
 
 
 handleLogForge : String -> TargetLogID -> LogForgeAction -> Dispatch
@@ -33,9 +33,9 @@ handleRemote _ =
     Dispatch.none
 
 
-handle : String -> Process -> Dispatch
+handle : String -> ProcessProp -> Dispatch
 handle serverID proc =
-    case proc.prop of
+    case proc of
         Processes.LocalProcess prop ->
             handleLocal serverID prop
 
@@ -43,13 +43,15 @@ handle serverID proc =
             handleRemote prop
 
 
-completeProcess : String -> Processes -> Process -> ( Processes, Dispatch )
-completeProcess serverID processes process =
+completeProcess : String -> Processes -> ProcessID -> ( Processes, Dispatch )
+completeProcess serverID processes pId =
     let
-        processes_ =
-            Processes.completeProcess processes process
+        ( processes_, prop ) =
+            Processes.completeProcess pId processes
 
         callback =
-            handle serverID process
+            prop
+                |> Maybe.map (handleLocal serverID)
+                |> Maybe.withDefault Dispatch.none
     in
         ( processes_, callback )

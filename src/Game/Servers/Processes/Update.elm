@@ -1,79 +1,90 @@
 module Game.Servers.Processes.Update exposing (..)
 
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Events.Events as Events
 import Game.Models as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models
     exposing
         ( Processes
-        , getProcessByID
+        , ProcessProp
         , pauseProcess
         , resumeProcess
         , removeProcess
         , addProcess
         )
+import Game.Servers.Processes.Types.Shared exposing (ProcessID)
 import Game.Servers.Processes.ResultHandler exposing (completeProcess)
+
+
+type alias UpdateResponse =
+    ( Processes, Cmd Msg, Dispatch )
 
 
 update :
     Game.Model
     -> Msg
     -> Processes
-    -> ( Processes, Cmd Msg, Dispatch )
+    -> UpdateResponse
 update game msg model =
     case msg of
-        Pause pID ->
-            let
-                processes_ =
-                    pID
-                        |> (flip getProcessByID) model
-                        |> Maybe.map (pauseProcess model)
-                        |> Maybe.withDefault model
-            in
-                ( processes_, Cmd.none, Dispatch.none )
+        Pause processId ->
+            onPause processId model
 
-        Resume pID ->
-            let
-                processes_ =
-                    pID
-                        |> (flip getProcessByID) model
-                        |> Maybe.map (resumeProcess model)
-                        |> Maybe.withDefault model
-            in
-                ( processes_, Cmd.none, Dispatch.none )
+        Resume processId ->
+            onResume processId model
 
-        Complete pID ->
-            let
-                serverId =
-                    game
-                        |> Game.getActiveServer
-                        |> Maybe.map Tuple.first
-                        |> Maybe.withDefault ""
+        Complete processId ->
+            onComplete game processId model
 
-                ( processes_, feedback ) =
-                    -- TODO: use a better method to cast the feedback
-                    pID
-                        |> (flip getProcessByID) model
-                        |> Maybe.map (completeProcess serverId model)
-                        |> Maybe.withDefault ( model, Dispatch.none )
-            in
-                ( processes_, Cmd.none, feedback )
-
-        Remove pID ->
-            let
-                processes_ =
-                    pID
-                        |> (flip getProcessByID) model
-                        |> Maybe.map (removeProcess model)
-                        |> Maybe.withDefault model
-            in
-                ( processes_, Cmd.none, Dispatch.none )
+        Remove processId ->
+            onRemove processId model
 
         Create process ->
-            let
-                processes_ =
-                    addProcess
-                        process
-                        model
-            in
-                ( processes_, Cmd.none, Dispatch.none )
+            onCreate process model
+
+        Event event ->
+            onEvent event model
+
+
+onPause : ProcessID -> Processes -> UpdateResponse
+onPause processId model =
+    processId
+        |> flip pauseProcess model
+        |> Update.fromModel
+
+
+onResume : ProcessID -> Processes -> UpdateResponse
+onResume processId model =
+    processId
+        |> flip resumeProcess model
+        |> Update.fromModel
+
+
+onComplete : Game.Model -> ProcessID -> Processes -> UpdateResponse
+onComplete game processId model =
+    case Game.getActiveServer game of
+        Just ( serverId, _ ) ->
+            completeProcess serverId model processId
+                |> \( m, d ) -> ( m, Cmd.none, d )
+
+        _ ->
+            Update.fromModel model
+
+
+onRemove : ProcessID -> Processes -> UpdateResponse
+onRemove processId model =
+    processId
+        |> flip removeProcess model
+        |> Update.fromModel
+
+
+onCreate : ( ProcessID, ProcessProp ) -> Processes -> UpdateResponse
+onCreate ( pId, prop ) model =
+    Update.fromModel <| addProcess pId prop model
+
+
+onEvent : Events.Event -> Processes -> UpdateResponse
+onEvent event model =
+    Update.fromModel model

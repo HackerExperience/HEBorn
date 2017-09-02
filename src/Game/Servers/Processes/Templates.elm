@@ -2,7 +2,7 @@ module Game.Servers.Processes.Templates exposing (..)
 
 import Time exposing (Time)
 import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
-import Game.Servers.Processes.Models exposing (Process, ProcessProp(LocalProcess))
+import Game.Servers.Processes.Models exposing (ProcessProp(LocalProcess))
 import Game.Servers.Processes.Types.Shared exposing (LogForgeAction(LogCrypt), TargetLogID)
 import Game.Servers.Processes.Types.Local as Local exposing (Version, ProcessType(LogForge), ProcessState(StateRunning), ProcessProp)
 
@@ -32,4 +32,4 @@ localLogCrypt forgeVersion logId lastTick =
                     0
                 )
     in
-        Processes.Create (Process id task)
+        Processes.Create ( id, task )

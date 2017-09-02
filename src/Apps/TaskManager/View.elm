@@ -10,23 +10,41 @@ import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyTo
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (ProcessProp, ProcessState(..))
-import Game.Servers.Processes.Types.Remote as Remote exposing (ProcessProp)
+import Game.Servers.Processes.Types.Shared as Processes exposing (..)
+import Game.Servers.Processes.Types.Local as Local exposing (ProcessState(..))
+import Game.Servers.Processes.Types.Remote as Remote
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
+view : Game.Data -> Model -> Html Msg
+view data ({ app } as model) =
+    let
+        tasks =
+            Servers.getProcesses data.server
+    in
+        div [ class [ MainLayout ] ]
+            [ viewTasksTable (Dict.toList tasks) data.game.meta.lastTick
+            , viewTotalResources app
+            , menuView model
+            ]
+
+
+
+-- PRIVATE
+
+
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
-processName : Process -> String
-processName entry =
-    case entry.prop of
-        LocalProcess it ->
-            (case it.processType of
+processName : ProcessProp -> String
+processName proc =
+    case proc of
+        LocalProcess prop ->
+            (case prop.processType of
                 Local.Cracker _ ->
                     "Cracker"
 
@@ -46,8 +64,8 @@ processName entry =
                     "Passive Firewall"
             )
 
-        RemoteProcess it ->
-            (case it.processType of
+        RemoteProcess prop ->
+            (case prop.processType of
                 Remote.Cracker ->
                     "Cracker"
 
@@ -82,9 +100,9 @@ etaBar secondsLeft progress =
         16
 
 
-viewState : Time -> Process -> Html Msg
-viewState now entry =
-    case entry.prop of
+viewState : Time -> ProcessProp -> Html Msg
+viewState now proc =
+    case proc of
         LocalProcess prop ->
             (case prop.state of
                 StateRunning ->
@@ -106,30 +124,28 @@ viewState now entry =
             text "Running"
 
 
-processMenu : Process -> Attribute Msg
-processMenu process =
-    (case process.prop of
-        LocalProcess entry ->
-            (case entry.state of
-                StateRunning ->
-                    menuForRunning
+processMenu : ( ProcessID, ProcessProp ) -> Attribute Msg
+processMenu ( pId, prop ) =
+    pId
+        |> case prop of
+            LocalProcess prop ->
+                case prop.state of
+                    StateRunning ->
+                        menuForRunning
 
-                StatePaused ->
-                    menuForPaused
+                    StatePaused ->
+                        menuForPaused
 
-                _ ->
-                    menuForComplete
-            )
+                    _ ->
+                        menuForComplete
 
-        RemoteProcess entry ->
-            menuForRemote
-    )
-        process.id
+            RemoteProcess _ ->
+                menuForRemote
 
 
-fromLocal : (Local.ProcessProp -> a) -> a -> Process -> a
-fromLocal toGet default process =
-    case process.prop of
+fromLocal : (Local.ProcessProp -> a) -> a -> ( ProcessID, ProcessProp ) -> a
+fromLocal toGet default ( _, prop ) =
+    case prop of
         LocalProcess data ->
             toGet data
 
@@ -159,15 +175,15 @@ getVersion prop =
             Just v
 
 
-viewTaskRow : Time -> Process -> Html Msg
-viewTaskRow now entry =
+viewTaskRow : Time -> ( ProcessID, ProcessProp ) -> Html Msg
+viewTaskRow now (( _, prop ) as entry) =
     let
         name =
-            processName entry
+            processName prop
 
         fileName =
             fromLocal
-                (\d -> Maybe.withDefault "UNKNOWN" d.fileID)
+                (.fileID >> Maybe.withDefault "UNKNOWN")
                 "HIDDEN"
                 entry
 
@@ -179,13 +195,13 @@ viewTaskRow now entry =
 
         usage =
             fromLocal
-                (\d -> packUsage d)
+                packUsage
                 (ResourceUsage -1 -1 -1 -1)
                 entry
 
         target =
             fromLocal
-                (\d -> d.targetServerID)
+                .targetServerID
                 "localhost"
                 entry
     in
@@ -199,7 +215,7 @@ viewTaskRow now entry =
                     , span [] [ text fileVer ]
                     ]
                 ]
-            , div [] [ viewState now entry ]
+            , div [] [ viewState now prop ]
             , div [] (viewTaskRowUsage usage)
             ]
 
@@ -245,16 +261,3 @@ viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } a
         , viewGraphUsage "Downlink" "red" historyDown limits.down
         , viewGraphUsage "Uplink" "yellow" historyUp limits.up
         ]
-
-
-view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
-    let
-        tasks =
-            Servers.getProcesses data.server
-    in
-        div [ class [ MainLayout ] ]
-            [ viewTasksTable (Dict.values tasks) data.game.meta.lastTick
-            , viewTotalResources app
-            , menuView model
-            ]

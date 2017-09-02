@@ -24,10 +24,10 @@ import Apps.TaskManager.Menu.Actions as Menu
 processComplete : Servers.ID -> Processes -> Time -> Dispatch
 processComplete serverID tasks now =
     tasks
-        |> Dict.values
+        |> Dict.toList
         |> List.filterMap
-            (\process ->
-                case process.prop of
+            (\(( pId, prop ) as process) ->
+                case prop of
                     LocalProcess prop ->
                         let
                             completed =
@@ -38,7 +38,7 @@ processComplete serverID tasks now =
                             if (prop.state == StateRunning) && completed then
                                 Just
                                     (Dispatch.processes serverID
-                                        (Processes.Complete process.id)
+                                        (Processes.Complete pId)
                                     )
                             else
                                 Nothing

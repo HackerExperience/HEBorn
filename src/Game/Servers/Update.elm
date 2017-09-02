@@ -256,9 +256,9 @@ onServerEvent :
 onServerEvent game id event server =
     if shouldRouteEvent id event then
         onLogsMsg game id (Logs.Event event) server
-            -- |> Update.andThen (updateFilesystem game (Filesystem.Event ev))
-            -- |> Update.andThen (updateProcesses game (Processes.Event ev))
-            -- |> Update.andThen (updateTunnels game (Tunnels.Event ev))
+            -- |> Update.andThen (onFilesystemMsg game (Filesystem.Event event))
+            |> Update.andThen (onProcessesMsg game (Processes.Event event))
+            -- |> Update.andThen (onTunnelsMsg game (Tunnels.Event event))
             |> Update.andThen (updateServerEvent game id event)
     else
         Update.fromModel server
