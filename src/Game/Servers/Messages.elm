@@ -31,8 +31,6 @@ type Msg
 
 type RequestMsg
     = BootstrapRequest ResponseType
-    | BruteforceRequest ResponseType
-
 
 
 -- messages and requests received by a single server

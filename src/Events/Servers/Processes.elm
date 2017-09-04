@@ -1,4 +1,9 @@
-module Events.Servers.Processes exposing (Event(..), handler)
+module Events.Servers.Processes
+    exposing
+        ( Event(..)
+        , StartedData
+        , handler
+        )
 
 import Utils.Events exposing (Handler, notify)
 import Json.Decode
