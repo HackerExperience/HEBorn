@@ -1,19 +1,19 @@
 module Game.Servers.Processes.Models exposing (..)
 
-import Dict
+import Dict exposing (Dict)
 import Utils.Dict as DictUtils
 import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local as Local exposing (ProcessState(..))
 import Game.Servers.Processes.Types.Remote as Remote
+
+type alias Processes =
+    Dict ProcessID ProcessProp
 
 
 type ProcessProp
     = LocalProcess Local.ProcessProp
     | RemoteProcess Remote.ProcessProp
 
-
-type alias Processes =
-    Dict.Dict ProcessID ProcessProp
 
 
 initialProcesses : Processes

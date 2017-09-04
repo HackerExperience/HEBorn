@@ -1,4 +1,4 @@
-module Game.Servers.Requests.Bruteforce
+module Game.Servers.Processes.Requests.Bruteforce
     exposing
         ( Response(..)
         , Data
@@ -25,12 +25,10 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Network.Types exposing (NIP)
-import Game.Servers.Messages
+import Game.Servers.Processes.Messages
     exposing
-        ( Msg(ServerMsg)
-        , ServerMsg(ServerRequest)
-        , RequestMsg
-        , ServerRequestMsg(BruteforceRequest)
+        ( Msg(Request)
+        , RequestMsg(BruteforceRequest)
         )
 
 
@@ -57,7 +55,7 @@ request target origin =
                 ]
     in
         Requests.request Topics.bruteforce
-            (BruteforceRequest >> ServerRequest >> ServerMsg origin)
+            (BruteforceRequest >> Request)
             (Just origin)
             payload
 
@@ -82,5 +80,4 @@ decoder =
         |> required "target_ip" string
         |> required "file_id" string
         |> required "connection_id" string
-        -- TODO: add union type here
         |> required "type" string

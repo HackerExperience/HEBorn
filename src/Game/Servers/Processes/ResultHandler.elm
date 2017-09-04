@@ -7,6 +7,7 @@ import Game.Servers.Processes.Types.Shared exposing (..)
 import Game.Servers.Processes.Types.Local as Local
 import Game.Servers.Processes.Types.Remote as Remote
 
+-- TODO: think of a better way for doing this,
 
 handleLogForge : String -> TargetLogID -> LogForgeAction -> Dispatch
 handleLogForge serverID logId logAction =
@@ -45,6 +46,8 @@ handle serverID proc =
 
 completeProcess : String -> Processes -> ProcessID -> ( Processes, Dispatch )
 completeProcess serverID processes pId =
+    -- TODO: do not assume that the process was a success, log doesn't need
+    -- a dispatch for that, the server will send 
     let
         ( processes_, prop ) =
             Processes.completeProcess pId processes
