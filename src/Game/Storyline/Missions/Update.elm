@@ -15,12 +15,8 @@ update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
         ActionDone action ->
-            List.map
-                (\mission ->
-                    { mission
-                        | now =
-                            List.filter ((/=) action) mission.now
-                    }
-                )
-                model
+            model
+                |> getActions
+                |> List.filter ((/=) action)
+                |> flip setActions model
                 |> Update.fromModel

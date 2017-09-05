@@ -36,10 +36,9 @@ highlights mission =
 
 
 dynCss : Model -> Stylesheet
-dynCss missions =
-    missions
-        |> List.map (.now)
-        |> List.concat
+dynCss model =
+    model
+        |> getActions
         |> List.uniqueBy toString
         |> List.map highlights
         |> List.concat

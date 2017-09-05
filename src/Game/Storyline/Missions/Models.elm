@@ -1,39 +1,55 @@
 module Game.Storyline.Missions.Models exposing (..)
 
 import Apps.Apps exposing (App(..))
-import Game.Storyline.Missions.Actions exposing (Action(..))
+import Game.Storyline.Missions.Actions as Actions exposing (..)
+
+
+type alias SyncID =
+    String
 
 
 type alias Model =
-    List Mission
-
-
-type alias Step =
-    List Action
-
-
-type alias Mission =
-    { id : MissionKey
-    , done : List Step
-    , now : Step
-    , todo : List Step
+    { mission : Missions
+    , goal : Goals
+    , step : Maybe Step
     }
 
 
-type MissionKey
-    = FirstMission
+type Missions
+    = Tutorial
 
 
-initMission mk =
-    let
-        create =
-            Mission mk []
-    in
-        case mk of
-            FirstMission ->
-                create [ RunApp ExplorerApp, RunFile "003" ] []
+type Goals
+    = TutorialIntroduction
+
+
+type alias Step =
+    { current : SyncID
+    , actions : List Action
+    , next : SyncID
+    }
+
+
+getActions : Model -> List Action
+getActions model =
+    model.step
+        |> Maybe.map (.actions)
+        |> Maybe.withDefault []
+
+
+setActions : List Action -> Model -> Model
+setActions actions model =
+    case model.step of
+        Just step ->
+            { model | step = Just { step | actions = actions } }
+
+        Nothing ->
+            model
 
 
 initialModel : Model
 initialModel =
-    [ initMission FirstMission ]
+    { mission = Tutorial
+    , goal = TutorialIntroduction
+    , step = Just <| Step "001" (fromSteps "001") "002"
+    }
