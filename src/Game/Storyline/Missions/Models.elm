@@ -47,9 +47,26 @@ setActions actions model =
             model
 
 
+validateStep : ( SyncID, SyncID ) -> Model -> Bool
+validateStep ( current, next ) model =
+    model.step
+        |> Maybe.map (\s -> s.current == current && s.next == next)
+        |> Maybe.withDefault False
+
+
+setStep : Maybe Step -> Model -> Model
+setStep newStep model =
+    { model | step = newStep }
+
+
+initStep : SyncID -> SyncID -> Maybe Step
+initStep from to =
+    Just (Step from (fromStep from) to)
+
+
 initialModel : Model
 initialModel =
     { mission = Tutorial
     , goal = TutorialIntroduction
-    , step = Just <| Step "001" (fromSteps "001") "002"
+    , step = Just <| Step "001" (fromStep "001") "002"
     }

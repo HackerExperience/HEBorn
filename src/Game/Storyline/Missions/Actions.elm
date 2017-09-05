@@ -1,4 +1,4 @@
-module Game.Storyline.Missions.Actions exposing (Action(..), fromSteps)
+module Game.Storyline.Missions.Actions exposing (Action(..), fromStep)
 
 import Apps.Apps exposing (App(..))
 
@@ -12,11 +12,11 @@ type Action
     | RunApp App
 
 
-fromSteps : ID -> List Action
-fromSteps id =
+fromStep : ID -> List Action
+fromStep id =
     case id of
         "001" ->
-            [ RunApp ExplorerApp ]
+            [ RunApp ExplorerApp, RunFile "003" ]
 
         _ ->
             []
