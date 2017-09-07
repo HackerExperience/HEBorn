@@ -6,203 +6,316 @@ import Events.Events as Events exposing (Event(ServersEvent))
 import Events.Servers exposing (Event(ServerEvent), ServerEvent(ProcessesEvent))
 import Events.Servers.Processes as Processes exposing (Event(..))
 import Game.Models as Game
-import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
 import Game.Servers.Processes.Messages exposing (Msg(..))
-import Game.Servers.Processes.Models
-    exposing
-        ( Processes
-        , ProcessProp(..)
-        , pauseProcess
-        , resumeProcess
-        , removeProcess
-        , addProcess
-        )
-import Game.Servers.Processes.Types.Shared exposing (ProcessID)
-import Game.Servers.Processes.ResultHandler exposing (completeProcess)
+import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
 import Game.Servers.Processes.Requests exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (ProcessState(..))
-import Game.Servers.Processes.Types.Remote as Remote
 
 
 type alias UpdateResponse =
-    ( Processes, Cmd Msg, Dispatch )
+    ( Model, Cmd Msg, Dispatch )
 
 
 update :
     Game.Model
+    -> ServerID
     -> Msg
-    -> Processes
+    -> Model
     -> UpdateResponse
-update game msg model =
+update game serverId msg model =
     case msg of
-        Pause processId ->
-            onPause processId model
+        Pause id ->
+            onPause game
+                serverId
+                id
+                model
 
-        Resume processId ->
-            onResume processId model
+        Resume id ->
+            onResume game serverId id model
 
-        Complete processId ->
-            onComplete game processId model
+        Remove id ->
+            onRemove game serverId id model
 
-        Remove processId ->
-            onRemove processId model
+        Start t origin target version file ->
+            onStart
+                game
+                serverId
+                (newOptimistic t origin target version file)
+                model
 
-        Create process ->
-            onCreate process model
+        Complete id ->
+            onComplete game serverId id model
 
+        --onRemove processId model
         Request data ->
-            onRequest game (receive data) model
-
-        Event (ServersEvent (ServerEvent serverId (ProcessesEvent event))) ->
-            updateEvent game serverId event model
-
-        Event _ ->
             Update.fromModel model
+
+        Event event ->
+            updateEvent game serverId event model
 
 
 
 -- internals
 
 
-onPause : ProcessID -> Processes -> UpdateResponse
-onPause processId model =
-    processId
-        |> flip pauseProcess model
-        |> Update.fromModel
+updateOrSync :
+    (Process -> UpdateResponse)
+    -> ID
+    -> Model
+    -> UpdateResponse
+updateOrSync f id model =
+    case get id model of
+        Just process ->
+            f process
+
+        Nothing ->
+            -- TODO: add sync request here
+            Update.fromModel model
 
 
-onResume : ProcessID -> Processes -> UpdateResponse
-onResume processId model =
-    processId
-        |> flip resumeProcess model
-        |> Update.fromModel
+dummyProcess : String -> ServerID -> ServerID -> Process
+dummyProcess t origin target =
+    let
+        type_ =
+            typeFromName t
+                |> Maybe.withDefault Cracker
+    in
+        { type_ = type_
+        , access =
+            Full
+                { origin = origin
+                , priority = Normal
+                , usage =
+                    { cpu = ( 0.0, "" )
+                    , ram = ( 0.0, "" )
+                    , downlink = ( 0.0, "" )
+                    , uplink = ( 0.0, "" )
+                    }
+                , connection = Nothing
+                }
+        , state = Starting
+        , version = Nothing
+        , progress = ( 0.0, Nothing )
+        , file = Nothing
+        , target = target
+        }
 
 
-onComplete : Game.Model -> ProcessID -> Processes -> UpdateResponse
-onComplete game processId model =
-    -- TODO: pass serverId down instead
-    case Game.getActiveServer game of
-        Just ( serverId, _ ) ->
-            completeProcess serverId model processId
-                |> \( m, d ) -> ( m, Cmd.none, d )
+
+-- event routers
+
+
+updateEvent :
+    Game.Model
+    -> ServerID
+    -> Events.Event
+    -> Model
+    -> UpdateResponse
+updateEvent game serverId event model =
+    case event of
+        ServersEvent (ServerEvent _ (ProcessesEvent event)) ->
+            updateProcessesEvent game serverId event model
 
         _ ->
             Update.fromModel model
 
 
-onRemove : ProcessID -> Processes -> UpdateResponse
-onRemove processId model =
-    processId
-        |> flip removeProcess model
+updateProcessesEvent :
+    Game.Model
+    -> ServerID
+    -> Processes.Event
+    -> Model
+    -> UpdateResponse
+updateProcessesEvent game serverId event model =
+    case event of
+        Started data ->
+            onStartedEvent game
+                serverId
+                data.processId
+                (dummyProcess data.type_ serverId serverId)
+                model
+
+        Conclusion id ->
+            onCompleteEvent game serverId id Nothing model
+
+        BruteforceFailed data ->
+            onBruteforceFailedEvent game serverId data model
+
+
+
+-- processes messages
+
+
+onPause : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
+onPause game serverId id model =
+    let
+        update process =
+            model
+                |> upsert id (pause process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+onResume : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
+onResume game serverId id model =
+    let
+        update process =
+            model
+                |> upsert id (resume process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+onRemove : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
+onRemove game serverId id model =
+    let
+        model_ =
+            remove id model
+    in
+        Update.fromModel model_
+
+
+onStart : Game.Model -> ServerID -> Process -> Model -> UpdateResponse
+onStart game serverId process model =
+    let
+        ( id, model_ ) =
+            insertOptimistic process model
+    in
+        Update.fromModel model_
+
+
+onComplete :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Model
+    -> UpdateResponse
+onComplete game serverId id model =
+    let
+        update process =
+            model
+                |> upsert id (complete Nothing process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+
+-- process event handlers
+
+
+onStartedEvent :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Process
+    -> Model
+    -> UpdateResponse
+onStartedEvent game serverId id process model =
+    model
+        |> insert id process
         |> Update.fromModel
 
 
-onCreate : ( ProcessID, ProcessProp ) -> Processes -> UpdateResponse
-onCreate ( pId, prop ) model =
-    Update.fromModel <| addProcess pId prop model
+onPauseEvent :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Model
+    -> UpdateResponse
+onPauseEvent game serverId id model =
+    let
+        update process =
+            model
+                |> upsert id (pause process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
 
 
-onRequest : Game.Model -> Maybe Response -> Processes -> UpdateResponse
-onRequest game response model =
+onResumeEvent :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Model
+    -> UpdateResponse
+onResumeEvent game serverId id model =
+    let
+        update process =
+            model
+                |> upsert id (resume process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+onCompleteEvent :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Maybe Status
+    -> Model
+    -> UpdateResponse
+onCompleteEvent game serverId id status model =
+    let
+        update process =
+            model
+                |> upsert id (complete status process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+onRemoveEvent :
+    Game.Model
+    -> ServerID
+    -> ID
+    -> Model
+    -> UpdateResponse
+onRemoveEvent game serverId id model =
+    model
+        |> remove id
+        |> Update.fromModel
+
+
+onBruteforceFailedEvent :
+    Game.Model
+    -> ServerID
+    -> Processes.BruteforceFailedData
+    -> Model
+    -> UpdateResponse
+onBruteforceFailedEvent game serverId response model =
+    -- TODO: implement
+    Update.fromModel model
+
+
+
+-- request handlers
+
+
+updateRequest :
+    Game.Model
+    -> ServerID
+    -> Maybe Response
+    -> Model
+    -> UpdateResponse
+updateRequest game serverId response model =
     case response of
-        Just response ->
-            updateRequest game response model
+        Just (Bruteforce data) ->
+            onBruteforceRequest game serverId data model
 
         Nothing ->
             Update.fromModel model
 
 
-updateRequest : Game.Model -> Response -> Processes -> UpdateResponse
-updateRequest game response model =
-    case response of
-        Bruteforce data ->
-            onBruteforce game data model
-
-
-updateEvent : Game.Model -> String -> Processes.Event -> Processes -> UpdateResponse
-updateEvent game serverId event model =
-    case event of
-        Started _ ->
-            Update.fromModel model
-
-        Changed ->
-            Update.fromModel model
-
-        Conclusion processId ->
-            onConclusion game serverId processId model
-
-
-onBruteforce :
+onBruteforceRequest :
     Game.Model
+    -> ServerID
     -> Bruteforce.Response
-    -> Processes
+    -> Model
     -> UpdateResponse
-onBruteforce game data model =
-    -- TODO: fixme, the whole process model is wrong
-    case data of
-        Bruteforce.Okay data ->
-            let
-                process =
-                    LocalProcess
-                        (Local.ProcessProp
-                            (Local.Cracker 0)
-                            3
-                            StateRunning
-                            (Just game.meta.lastTick)
-                            (Just 0)
-                            Nothing
-                            "gateway0"
-                            "gateway0"
-                            Nothing
-                            Nothing
-                            100000
-                            32000
-                            0
-                            0
-                        )
-            in
-                addProcess data.processId process model
-                    |> Update.fromModel
-
-
-onStarted :
-    Game.Model
-    -> String
-    -> Processes.StartedData
-    -> Processes
-    -> UpdateResponse
-onStarted game serverId data model =
-    -- TODO: fixme, the whole process model is wrong
-    let
-        process =
-            LocalProcess
-                (Local.ProcessProp
-                    (Local.Cracker 0)
-                    3
-                    StateRunning
-                    (Just game.meta.lastTick)
-                    (Just 0)
-                    Nothing
-                    "gateway0"
-                    "gateway0"
-                    Nothing
-                    Nothing
-                    100000
-                    32000
-                    0
-                    0
-                )
-    in
-        addProcess data.processId process model
-            |> Update.fromModel
-
-
-onConclusion :
-    Game.Model
-    -> String
-    -> String
-    -> Processes
-    -> UpdateResponse
-onConclusion game serverId processId model =
-    completeProcess serverId model processId
-        |> \( m, d ) -> ( m, Cmd.none, d )
+onBruteforceRequest game serverId response model =
+    -- TODO: implement
+    Update.fromModel model

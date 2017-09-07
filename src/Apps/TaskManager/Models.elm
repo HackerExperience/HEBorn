@@ -3,12 +3,12 @@ module Apps.TaskManager.Models exposing (..)
 import Dict
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Models as Servers
-import Game.Servers.Processes.Models as Processes exposing (Processes, ProcessProp(..))
-import Game.Servers.Processes.Types.Shared exposing (ProcessID)
-import Game.Servers.Processes.Types.Local as Local
+import Game.Shared exposing (ID)
+import Game.Servers.Processes.Models as Processes
 
 
 type alias ResourceUsage =
+    -- REVIEW: maybe update fields to follow Processes format
     { cpu : Float
     , mem : Float
     , down : Float
@@ -17,7 +17,7 @@ type alias ResourceUsage =
 
 
 type alias Entries =
-    List ( ProcessID, ProcessProp )
+    List ( ID, Processes.Process )
 
 
 type alias TaskManager =
@@ -73,36 +73,31 @@ initialTaskManager =
         []
 
 
-packUsage : Local.ProcessProp -> ResourceUsage
-packUsage ({ cpuUsage, memUsage, downloadUsage, uploadUsage } as entry) =
+packUsage : Processes.ResourcesUsage -> ResourceUsage
+packUsage { cpu, ram, downlink, uplink } =
     ResourceUsage
-        (toFloat cpuUsage)
-        (toFloat memUsage)
-        (toFloat downloadUsage)
-        (toFloat uploadUsage)
+        (Processes.getPercentUsage cpu)
+        (Processes.getPercentUsage ram)
+        (Processes.getPercentUsage downlink)
+        (Processes.getPercentUsage uplink)
 
 
-taskUsageSum : Local.ProcessProp -> ( Float, Float, Float, Float ) -> ( Float, Float, Float, Float )
-taskUsageSum { cpuUsage, memUsage, downloadUsage, uploadUsage } ( cpu_, mem_, down_, up_ ) =
-    ( cpu_ + (toFloat cpuUsage)
-    , mem_ + (toFloat memUsage)
-    , down_ + (toFloat downloadUsage)
-    , up_ + (toFloat uploadUsage)
+taskUsageSum :
+    Processes.ResourcesUsage
+    -> ( Float, Float, Float, Float )
+    -> ( Float, Float, Float, Float )
+taskUsageSum { cpu, ram, downlink, uplink } ( cpu_, mem_, down_, up_ ) =
+    ( cpu_ + (Tuple.first cpu)
+    , mem_ + (Tuple.first ram)
+    , down_ + (Tuple.first downlink)
+    , up_ + (Tuple.first uplink)
     )
 
 
-onlyLocalTasks : Processes -> List Local.ProcessProp
-onlyLocalTasks =
-    Dict.values
-        >> List.filterMap
-            (\v ->
-                case v of
-                    LocalProcess p ->
-                        Just p
-
-                    _ ->
-                        Nothing
-            )
+onlyLocalTasks : Processes.Model -> List Processes.Process
+onlyLocalTasks processes =
+    -- TODO: decide a better method for filtering this
+    Processes.values processes
 
 
 updateTasks : Servers.Server -> ResourceUsage -> TaskManager -> TaskManager
@@ -111,11 +106,16 @@ updateTasks server limit old =
         tasks =
             Servers.getProcesses server
 
+        reduce process sum =
+            process
+                |> Processes.getUsage
+                |> Maybe.map (flip taskUsageSum sum)
+                |> Maybe.withDefault sum
+
         ( cpu, mem, down, up ) =
-            List.foldr
-                taskUsageSum
-                ( 0.0, 0.0, 0.0, 0.0 )
-                (onlyLocalTasks tasks)
+            tasks
+                |> onlyLocalTasks
+                |> List.foldr reduce ( 0.0, 0.0, 0.0, 0.0 )
 
         historyCPU =
             (increaseHistory cpu old.historyCPU)

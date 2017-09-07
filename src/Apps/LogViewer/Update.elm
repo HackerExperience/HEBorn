@@ -4,7 +4,8 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
-import Game.Servers.Processes.Templates as NewProcesses exposing (localLogCrypt)
+import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Processes.Models as Processes
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
@@ -79,8 +80,12 @@ update data msg ({ app } as model) =
         StartCrypting id ->
             let
                 dispatch =
-                    NewProcesses.localLogCrypt 1.0 id data.game.meta.lastTick
-                        |> Dispatch.processes data.id
+                    Dispatch.processes data.id <|
+                        Processes.Start Processes.Encryptor
+                            data.id
+                            id
+                            Nothing
+                            Nothing
             in
                 ( model, Cmd.none, dispatch )
 

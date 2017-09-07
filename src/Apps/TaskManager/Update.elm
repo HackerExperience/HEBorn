@@ -4,11 +4,10 @@ import Dict
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Servers.Processes.Types.Local exposing (ProcessState(StateRunning))
-import Game.Servers.Processes.Models exposing (Processes, ProcessProp(LocalProcess))
-import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
+import Game.Servers.Models as Servers
+import Game.Servers.Processes.Models as Processes
+import Game.Servers.Processes.Messages as Processes
 import Apps.TaskManager.Models
     exposing
         ( Model
@@ -21,32 +20,34 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-processComplete : Servers.ID -> Processes -> Time -> Dispatch
-processComplete serverID tasks now =
-    tasks
-        |> Dict.toList
-        |> List.filterMap
-            (\(( pId, prop ) as process) ->
-                case prop of
-                    LocalProcess prop ->
-                        let
-                            completed =
-                                prop.eta
-                                    |> Maybe.map ((>) now)
-                                    |> Maybe.withDefault False
-                        in
-                            if (prop.state == StateRunning) && completed then
-                                Just
-                                    (Dispatch.processes serverID
-                                        (Processes.Complete pId)
-                                    )
-                            else
-                                Nothing
+processComplete : Servers.ID -> Processes.Model -> Time -> Dispatch
+processComplete serverID processes now =
+    let
+        complete ( id, proc ) =
+            let
+                completion =
+                    Processes.getCompletionDate proc
+
+                isCompleted =
+                    Maybe.map ((>) now) completion
+                        |> Maybe.withDefault False
+            in
+                case Processes.getState proc of
+                    Processes.Running ->
+                        if isCompleted then
+                            Just <|
+                                Dispatch.processes serverID <|
+                                    Processes.Complete id
+                        else
+                            Nothing
 
                     _ ->
                         Nothing
-            )
-        |> Dispatch.batch
+    in
+        processes
+            |> Processes.toList
+            |> List.filterMap complete
+            |> Dispatch.batch
 
 
 update :

@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Shared as Filesystem exposing (Filesystem)
 import Game.Servers.Logs.Models as Logs
-import Game.Servers.Processes.Models as Processes exposing (Processes)
+import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Web.Models as Web
@@ -37,7 +37,7 @@ type alias Server =
     , coordinates : Maybe Coordinates
     , filesystem : Filesystem
     , logs : Logs.Model
-    , processes : Processes
+    , processes : Processes.Model
     , tunnels : Tunnels.Model
     , web : Web.Model
     , ownership : Ownership
@@ -199,12 +199,12 @@ setLogs logs model =
     { model | logs = logs }
 
 
-getProcesses : Server -> Processes
+getProcesses : Server -> Processes.Model
 getProcesses =
     .processes
 
 
-setProcesses : Processes -> Server -> Server
+setProcesses : Processes.Model -> Server -> Server
 setProcesses processes model =
     { model | processes = processes }
 
