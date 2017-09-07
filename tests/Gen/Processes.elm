@@ -10,23 +10,17 @@ import Random.Pcg
         , float
         , list
         , choices
+        , sample
         , map
         , map2
         , map3
         , andThen
         )
 import Random.Pcg.Extra exposing (andMap)
-import Game.Servers.Processes.Types.Shared exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (..)
-import Game.Servers.Processes.Types.Remote as Remote exposing (..)
+import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Processes.Models as Processes exposing (..)
 import Gen.Utils exposing (..)
 import Gen.Logs as Logs
-
-
-type alias Process =
-    ( ProcessID, Processes.ProcessProp )
-
 
 
 --------------------------------------------------------------------------------
@@ -34,24 +28,64 @@ type alias Process =
 --------------------------------------------------------------------------------
 
 
-processID : Fuzzer ProcessID
-processID =
-    fuzzer genProcessID
+model : Fuzzer Model
+model =
+    fuzzer genModel
 
 
-gatewayID : Fuzzer GatewayID
-gatewayID =
-    fuzzer genGatewayID
+processes : Fuzzer (List ( ID, Process ))
+processes =
+    fuzzer genProcesses
 
 
-networkID : Fuzzer NetworkID
-networkID =
-    fuzzer genNetworkID
+pair : Fuzzer ( ID, Process )
+pair =
+    fuzzer genPair
 
 
-targetServerID : Fuzzer TargetServerID
-targetServerID =
-    fuzzer genTargetServerID
+id : Fuzzer ID
+id =
+    fuzzer genID
+
+
+process : Fuzzer Process
+process =
+    fuzzer genProcess
+
+
+type_ : Fuzzer Type
+type_ =
+    fuzzer genType
+
+
+access : Fuzzer Access
+access =
+    fuzzer genAccess
+
+
+fullAccess : Fuzzer FullAccess
+fullAccess =
+    fuzzer genFullAccess
+
+
+partialAccess : Fuzzer PartialAccess
+partialAccess =
+    fuzzer genPartialAccess
+
+
+priority : Fuzzer Priority
+priority =
+    fuzzer genPriority
+
+
+resourcesUsage : Fuzzer ResourcesUsage
+resourcesUsage =
+    fuzzer genResourcesUsage
+
+
+usage : Fuzzer Usage
+usage =
+    fuzzer genUsage
 
 
 connectionID : Fuzzer ConnectionID
@@ -59,79 +93,54 @@ connectionID =
     fuzzer genConnectionID
 
 
-priority : Fuzzer ProcessPriority
-priority =
-    fuzzer genPriority
+originConnection : Fuzzer ( ServerID, ConnectionID )
+originConnection =
+    fuzzer genOriginConnection
 
 
-processLocalType : Fuzzer Local.ProcessType
-processLocalType =
-    fuzzer genLocalProcessType
+state : Fuzzer State
+state =
+    fuzzer genState
 
 
-processRemoteType : Fuzzer Remote.ProcessType
-processRemoteType =
-    fuzzer genRemoteProcessType
+status : Fuzzer Status
+status =
+    fuzzer genStatus
 
 
-processState : Fuzzer ProcessState
-processState =
-    fuzzer genProcessState
+reason : Fuzzer Reason
+reason =
+    fuzzer genReason
 
 
-progress : Fuzzer Float
+version : Fuzzer Version
+version =
+    fuzzer genVersion
+
+
+progress : Fuzzer Progress
 progress =
     fuzzer genProgress
 
 
-localProcess : Fuzzer Process
-localProcess =
-    fuzzer genLocalProcess
+percentage : Fuzzer Percentage
+percentage =
+    fuzzer genPercentage
 
 
-localProcessList : Fuzzer (List Process)
-localProcessList =
-    fuzzer genLocalProcessList
+completionDate : Fuzzer CompletionDate
+completionDate =
+    fuzzer genCompletionDate
 
 
-emptyProcesses : Fuzzer Processes
-emptyProcesses =
-    fuzzer genEmptyProcesses
+fileID : Fuzzer FileID
+fileID =
+    fuzzer genFileID
 
 
-nonEmptyLocalProcesses : Fuzzer Processes
-nonEmptyLocalProcesses =
-    fuzzer genNonEmptyLocalProcesses
-
-
-localProcesses : Fuzzer Processes
-localProcesses =
-    fuzzer genLocalProcesses
-
-
-remoteProcess : Fuzzer Process
-remoteProcess =
-    fuzzer genRemoteProcess
-
-
-remoteProcessList : Fuzzer (List Process)
-remoteProcessList =
-    fuzzer genRemoteProcessList
-
-
-nonEmptyRemoteProcesses : Fuzzer Processes
-nonEmptyRemoteProcesses =
-    fuzzer genNonEmptyRemoteProcesses
-
-
-remoteProcesses : Fuzzer Processes
-remoteProcesses =
-    fuzzer genRemoteProcesses
-
-
-model : Fuzzer Processes
-model =
-    fuzzer genModel
+serverID : Fuzzer ServerID
+serverID =
+    fuzzer genServerID
 
 
 
@@ -140,31 +149,97 @@ model =
 --------------------------------------------------------------------------------
 
 
-genProcessID : Generator ProcessID
-genProcessID =
+genModel : Generator Model
+genModel =
+    genProcesses
+        |> andThen (List.foldl (uncurry insert) initialModel >> constant)
+
+
+genProcesses : Generator (List ( ID, Process ))
+genProcesses =
+    andThen (genPair |> flip list) (int 1 10)
+
+
+genPair : Generator ( ID, Process )
+genPair =
+    map2 (,) genID genProcess
+
+
+genID : Generator ID
+genID =
     unique
 
 
-{-| Remove this as soon as Gen.Filesystem gets updated
--}
-genFileID : Generator String
-genFileID =
+genProcess : Generator Process
+genProcess =
+    genType
+        |> map Process
+        |> andMap genAccess
+        |> andMap genState
+        |> andMap (maybe genVersion)
+        |> andMap genProgress
+        |> andMap (maybe genFileID)
+        |> andMap genServerID
+
+
+genType : Generator Type
+genType =
+    [ Cracker
+    , Decryptor
+    , Encryptor
+    , FileTransference
+    , PassiveFirewall
+    ]
+        |> List.map constant
+        |> choices
+
+
+genAccess : Generator Access
+genAccess =
+    choices
+        [ map Full genFullAccess
+        , map Partial genPartialAccess
+        ]
+
+
+genFullAccess : Generator FullAccess
+genFullAccess =
     unique
+        |> map FullAccess
+        |> andMap genPriority
+        |> andMap genResourcesUsage
+        |> andMap (maybe genConnectionID)
 
 
-genGatewayID : Generator GatewayID
-genGatewayID =
-    unique
+genPartialAccess : Generator PartialAccess
+genPartialAccess =
+    map PartialAccess (maybe genOriginConnection)
 
 
-genNetworkID : Generator NetworkID
-genNetworkID =
-    unique
+genPriority : Generator Priority
+genPriority =
+    [ Lowest
+    , Low
+    , Normal
+    , High
+    , Highest
+    ]
+        |> List.map constant
+        |> choices
 
 
-genTargetServerID : Generator TargetServerID
-genTargetServerID =
-    unique
+genResourcesUsage : Generator ResourcesUsage
+genResourcesUsage =
+    genUsage
+        |> map ResourcesUsage
+        |> andMap genUsage
+        |> andMap genUsage
+        |> andMap genUsage
+
+
+genUsage : Generator Usage
+genUsage =
+    constant ( 0, "" )
 
 
 genConnectionID : Generator ConnectionID
@@ -172,189 +247,63 @@ genConnectionID =
     unique
 
 
-genPriority : Generator ProcessPriority
-genPriority =
-    int 0 5
+genOriginConnection : Generator ( ServerID, ConnectionID )
+genOriginConnection =
+    map2 (,) unique genConnectionID
 
 
-genScope : Generator Scope
-genScope =
-    [ Local, Global ]
+genState : Generator State
+genState =
+    choices
+        [ constant Starting
+        , constant Running
+        , constant Standby
+        , constant Paused
+        , map Completed (maybe genStatus)
+        ]
+
+
+genStatus : Generator Status
+genStatus =
+    choices
+        [ constant Success
+        , map Failure genReason
+        ]
+
+
+genReason : Generator Reason
+genReason =
+    [ Misc "for some reason"
+    ]
         |> List.map constant
         |> choices
 
 
-genVersion : Generator Version
+genVersion : Generator Float
 genVersion =
-    float 1 65
+    float 0.1 100.0
 
 
-genUsage : Generator Int
-genUsage =
-    int 0 (10 ^ 9)
-
-
-genLocalProcessType : Generator Local.ProcessType
-genLocalProcessType =
-    choices
-        [ map Local.Cracker genVersion
-        , map3 Local.Decryptor genVersion genFileID genScope
-        , map2 Local.Encryptor genVersion genFileID
-        , map Local.FileTransference genFileID
-        , map3 Local.LogForge genVersion Logs.genID genLogForgeAction
-        , map PassiveFirewall genVersion
-        ]
-
-
-genRemoteProcessType : Generator Remote.ProcessType
-genRemoteProcessType =
-    choices
-        [ constant Remote.Cracker
-        , map2 Remote.Decryptor genFileID genScope
-        , map Remote.Encryptor genFileID
-        , map Remote.FileTransference genFileID
-        , map Remote.LogForge Logs.genID
-        ]
-
-
-genProcessState : Generator ProcessState
-genProcessState =
-    [ StateStandby, StatePaused, StateComplete ]
-        |> List.map constant
-        |> choices
-
-
-genProgress : Generator Float
+genProgress : Generator Progress
 genProgress =
-    percentage
+    map2 (,) genPercentage (maybe genCompletionDate)
 
 
-genETA : Generator CompletionDate
-genETA =
+genPercentage : Generator Percentage
+genPercentage =
+    float 0.0 1.0
+
+
+genCompletionDate : Generator CompletionDate
+genCompletionDate =
     float 1420070400 4102444799
 
 
-genLocalProcessProp : Generator Local.ProcessProp
-genLocalProcessProp =
-    let
-        buildProcessRecord =
-            \fID gID nID cID tID priority type_ state eta progress cpuU memU downU upU ->
-                { processType = type_
-                , priority = priority
-                , state = state
-                , eta = eta
-                , progress = progress
-                , fileID = fID
-                , gatewayID = gID
-                , targetServerID = tID
-                , networkID = nID
-                , connectionID = cID
-                , cpuUsage = cpuU
-                , memUsage = memU
-                , downloadUsage = downU
-                , uploadUsage = upU
-                }
-    in
-        (maybe genFileID)
-            |> map buildProcessRecord
-            |> andMap genGatewayID
-            |> andMap (maybe genNetworkID)
-            |> andMap (maybe genConnectionID)
-            |> andMap genTargetServerID
-            |> andMap genPriority
-            |> andMap genLocalProcessType
-            |> andMap genProcessState
-            |> andMap (maybe genETA)
-            |> andMap (maybe genProgress)
-            |> andMap genUsage
-            |> andMap genUsage
-            |> andMap genUsage
-            |> andMap genUsage
+genFileID : Generator FileID
+genFileID =
+    unique
 
 
-genRemoteProcessProp : Generator Remote.ProcessProp
-genRemoteProcessProp =
-    let
-        buildProcessRecord =
-            \gID nID cID type_ ->
-                { processType = type_
-                , gatewayID = gID
-                , networkID = nID
-                , connectionID = cID
-                }
-    in
-        genGatewayID
-            |> map buildProcessRecord
-            |> andMap (maybe genNetworkID)
-            |> andMap (maybe genConnectionID)
-            |> andMap genRemoteProcessType
-
-
-genLocalProcess : Generator Process
-genLocalProcess =
-    genProcessID
-        |> map (,)
-        |> andMap (map LocalProcess genLocalProcessProp)
-
-
-genRemoteProcess : Generator Process
-genRemoteProcess =
-    genProcessID
-        |> map (,)
-        |> andMap (map RemoteProcess genRemoteProcessProp)
-
-
-genLocalProcessList : Generator (List Process)
-genLocalProcessList =
-    int 1 8
-        |> andThen (\num -> list num genLocalProcess)
-
-
-genRemoteProcessList : Generator (List Process)
-genRemoteProcessList =
-    int 1 8
-        |> andThen (\num -> list num genRemoteProcess)
-
-
-genEmptyProcesses : Generator Processes
-genEmptyProcesses =
-    constant initialProcesses
-
-
-genNonEmptyLocalProcesses : Generator Processes
-genNonEmptyLocalProcesses =
-    andThen
-        ((List.foldl (uncurry addProcess) initialProcesses) >> constant)
-        genLocalProcessList
-
-
-genNonEmptyRemoteProcesses : Generator Processes
-genNonEmptyRemoteProcesses =
-    andThen
-        ((List.foldl (uncurry addProcess) initialProcesses) >> constant)
-        genRemoteProcessList
-
-
-genLocalProcesses : Generator Processes
-genLocalProcesses =
-    choices [ genEmptyProcesses, genNonEmptyLocalProcesses ]
-
-
-genRemoteProcesses : Generator Processes
-genRemoteProcesses =
-    choices [ genEmptyProcesses, genNonEmptyRemoteProcesses ]
-
-
-genLogForgeAction : Generator LogForgeAction
-genLogForgeAction =
-    choices
-        [ map LogForgeMessage (map .raw Logs.genData)
-        , constant LogCrypt
-        , constant LogUncrypt
-        , constant LogHide
-        ]
-
-
-genModel : Generator Processes
-genModel =
-    genNonEmptyLocalProcesses
+genServerID : Generator ServerID
+genServerID =
+    unique
