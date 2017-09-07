@@ -6,8 +6,11 @@ import Fuzz exposing (int, tuple)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Utils.Core exposing (swap)
-import Game.Servers.Processes.Types.Shared exposing (..)
-import Game.Servers.Processes.Types.Local exposing (ProcessState(..))
+
+
+--import Game.Servers.Processes.Types.Shared exposing (..)
+--import Game.Servers.Processes.Types.Local exposing (ProcessState(..))
+
 import Game.Servers.Processes.Models exposing (..)
 
 

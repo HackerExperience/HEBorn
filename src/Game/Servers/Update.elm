@@ -155,7 +155,7 @@ updateServer game id msg server =
             onLogsMsg game id msg server
 
         ProcessesMsg msg ->
-            onProcessesMsg game msg server
+            onProcessesMsg game id msg server
 
         TunnelsMsg msg ->
             onTunnelsMsg game msg server
@@ -167,7 +167,7 @@ updateServer game id msg server =
             onServerEvent game id event server
 
         ServerRequest data ->
-            onServerRequest game id (serverReceive data) server
+            updateServerRequest game id (serverReceive data) server
 
 
 onSetBounce :
@@ -217,13 +217,13 @@ onLogsMsg game id =
         }
 
 
-onProcessesMsg : Game.Model -> Processes.Msg -> Server -> ServerUpdateResponse
-onProcessesMsg game =
+onProcessesMsg : Game.Model -> ID -> Processes.Msg -> Server -> ServerUpdateResponse
+onProcessesMsg game id =
     Update.child
         { get = .processes
         , set = (\processes model -> { model | processes = processes })
         , toMsg = ProcessesMsg
-        , update = (Processes.update game)
+        , update = (Processes.update game id)
         }
 
 
@@ -257,23 +257,23 @@ onServerEvent game id event server =
     if shouldRouteEvent id event then
         onLogsMsg game id (Logs.Event event) server
             -- |> Update.andThen (onFilesystemMsg game (Filesystem.Event event))
-            |> Update.andThen (onProcessesMsg game (Processes.Event event))
+            |> Update.andThen (onProcessesMsg game id (Processes.Event event))
             -- |> Update.andThen (onTunnelsMsg game (Tunnels.Event event))
             |> Update.andThen (updateServerEvent game id event)
     else
         Update.fromModel server
 
 
-onServerRequest :
+updateServerRequest :
     Game.Model
     -> ID
     -> Maybe ServerResponse
     -> Server
     -> ServerUpdateResponse
-onServerRequest game id response server =
+updateServerRequest game id response server =
     case response of
-        Just response ->
-            updateServerRequest game id response server
+        Just _ ->
+            Update.fromModel server
 
         Nothing ->
             Update.fromModel server
@@ -286,16 +286,6 @@ updateServerEvent :
     -> Server
     -> ServerUpdateResponse
 updateServerEvent game id event server =
-    Update.fromModel server
-
-
-updateServerRequest :
-    Game.Model
-    -> ID
-    -> ServerResponse
-    -> Server
-    -> ServerUpdateResponse
-updateServerRequest game id response server =
     Update.fromModel server
 
 

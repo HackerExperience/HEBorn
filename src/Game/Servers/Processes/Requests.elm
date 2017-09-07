@@ -1,4 +1,4 @@
-module Game.Servers.Processes.Requests exposing ( Response(..), receive )
+module Game.Servers.Processes.Requests exposing (Response(..), receive)
 
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
 import Game.Servers.Processes.Messages exposing (RequestMsg(..))

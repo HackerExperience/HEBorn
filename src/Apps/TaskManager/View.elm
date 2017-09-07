@@ -9,10 +9,8 @@ import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Servers.Processes.Models as Processes exposing (..)
-import Game.Servers.Processes.Types.Shared as Processes exposing (..)
-import Game.Servers.Processes.Types.Local as Local exposing (ProcessState(..))
-import Game.Servers.Processes.Types.Remote as Remote
+import Game.Shared exposing (ID)
+import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
@@ -23,10 +21,12 @@ view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
         tasks =
-            Servers.getProcesses data.server
+            data.server
+                |> Servers.getProcesses
+                |> Processes.toList
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable (Dict.toList tasks) data.game.meta.lastTick
+            [ viewTasksTable tasks data.game.meta.lastTick
             , viewTotalResources app
             , menuView model
             ]
@@ -40,170 +40,110 @@ view data ({ app } as model) =
     Html.CssHelpers.withNamespace prefix
 
 
-processName : ProcessProp -> String
-processName proc =
-    case proc of
-        LocalProcess prop ->
-            (case prop.processType of
-                Local.Cracker _ ->
-                    "Cracker"
 
-                Local.Decryptor _ _ _ ->
-                    "Decryptor"
-
-                Local.Encryptor _ _ ->
-                    "Encryptor"
-
-                Local.FileTransference _ ->
-                    "File Transference"
-
-                Local.LogForge _ _ _ ->
-                    "Log Forge"
-
-                Local.PassiveFirewall _ ->
-                    "Passive Firewall"
-            )
-
-        RemoteProcess prop ->
-            (case prop.processType of
-                Remote.Cracker ->
-                    "Cracker"
-
-                Remote.Decryptor _ _ ->
-                    "Decryptor"
-
-                Remote.Encryptor _ ->
-                    "Encryptor"
-
-                Remote.FileTransference _ ->
-                    "File Transference"
-
-                Remote.LogForge _ ->
-                    "Log Forge"
-            )
+-- private
 
 
-viewTaskRowUsage : ResourceUsage -> List (Html Msg)
+viewTaskRowUsage : ResourceUsage -> Html Msg
 viewTaskRowUsage usage =
-    [ div [] [ text (frequencyToString usage.cpu) ]
-    , div [] [ text (bibytesToString usage.mem) ]
-    , div [] [ text (bitsPerSecondToString usage.down) ]
-    , div [] [ text (bitsPerSecondToString usage.up) ]
-    ]
+    div []
+        [ div [] [ text (frequencyToString usage.cpu) ]
+        , div [] [ text (bibytesToString usage.mem) ]
+        , div [] [ text (bitsPerSecondToString usage.down) ]
+        , div [] [ text (bitsPerSecondToString usage.up) ]
+        ]
 
 
 etaBar : Time -> Float -> Html Msg
 etaBar secondsLeft progress =
-    progressBar
-        progress
-        (secondsToTimeNotation secondsLeft)
-        16
+    let
+        formattedTime =
+            secondsToTimeNotation secondsLeft
+    in
+        progressBar progress formattedTime 16
 
 
-viewState : Time -> ProcessProp -> Html Msg
+viewState : Time -> Processes.Process -> Html Msg
 viewState now proc =
-    case proc of
-        LocalProcess prop ->
-            (case prop.state of
-                StateRunning ->
-                    etaBar
-                        (prop.eta |> Maybe.map ((flip (-)) now) |> Maybe.withDefault 0)
-                        (Maybe.withDefault 0 prop.progress)
+    case Processes.getState proc of
+        Processes.Starting ->
+            text "Starting..."
 
-                StateStandby ->
-                    text "Processing..."
+        Processes.Running ->
+            let
+                progress =
+                    Processes.getProgressPct proc
 
-                StatePaused ->
-                    text "Paused"
+                timeLeft =
+                    proc
+                        |> Processes.getCompletionDate
+                        |> Maybe.map (flip (-) now)
+                        |> Maybe.withDefault 0
+            in
+                etaBar timeLeft progress
 
-                StateComplete ->
-                    text "Finished"
-            )
+        Processes.Standby ->
+            text "Processing..."
 
-        RemoteProcess _ ->
-            text "Running"
+        Processes.Paused ->
+            text "Paused"
 
-
-processMenu : ( ProcessID, ProcessProp ) -> Attribute Msg
-processMenu ( pId, prop ) =
-    pId
-        |> case prop of
-            LocalProcess prop ->
-                case prop.state of
-                    StateRunning ->
-                        menuForRunning
-
-                    StatePaused ->
-                        menuForPaused
-
-                    _ ->
-                        menuForComplete
-
-            RemoteProcess _ ->
-                menuForRemote
+        Processes.Completed _ ->
+            -- TODO: match completion result
+            text "Finished"
 
 
-fromLocal : (Local.ProcessProp -> a) -> a -> ( ProcessID, ProcessProp ) -> a
-fromLocal toGet default ( _, prop ) =
-    case prop of
-        LocalProcess data ->
-            toGet data
+processMenu : ( Processes.ID, Processes.Process ) -> Attribute Msg
+processMenu ( id, process ) =
+    let
+        menu =
+            case Processes.getAccess process of
+                Processes.Full _ ->
+                    case Processes.getState process of
+                        Processes.Running ->
+                            menuForRunning
 
-        _ ->
-            default
+                        Processes.Paused ->
+                            menuForPaused
 
+                        _ ->
+                            menuForComplete
 
-getVersion : Local.ProcessProp -> Maybe Float
-getVersion prop =
-    case prop.processType of
-        Local.Cracker v ->
-            Just v
-
-        Local.Decryptor v _ _ ->
-            Just v
-
-        Local.Encryptor v _ ->
-            Just v
-
-        Local.FileTransference _ ->
-            Nothing
-
-        Local.LogForge v _ _ ->
-            Just v
-
-        Local.PassiveFirewall v ->
-            Just v
+                Processes.Partial _ ->
+                    menuForPartial
+    in
+        menu id
 
 
-viewTaskRow : Time -> ( ProcessID, ProcessProp ) -> Html Msg
-viewTaskRow now (( _, prop ) as entry) =
+viewTaskRow : Time -> ( Processes.ID, Processes.Process ) -> Html Msg
+viewTaskRow now (( _, process ) as entry) =
     let
         name =
-            processName prop
+            Processes.getName process
 
         fileName =
-            fromLocal
-                (.fileID >> Maybe.withDefault "UNKNOWN")
-                "HIDDEN"
-                entry
+            -- TODO: fetch actual file name
+            process
+                |> Processes.getFileID
+                |> Maybe.withDefault "HIDDEN"
 
         fileVer =
-            entry
-                |> fromLocal getVersion Nothing
-                |> Maybe.andThen (toString >> Just)
+            process
+                |> Processes.getVersion
+                |> Maybe.map toString
                 |> Maybe.withDefault "N/V"
 
         usage =
-            fromLocal
-                packUsage
-                (ResourceUsage -1 -1 -1 -1)
-                entry
+            process
+                |> Processes.getUsage
+                |> Maybe.map (packUsage >> viewTaskRowUsage)
 
         target =
-            fromLocal
-                .targetServerID
-                "localhost"
-                entry
+            -- TODO: fetch server ip
+            Processes.getTarget process
+
+        maybe =
+            Maybe.withDefault (div [] [])
     in
         div [ class [ EntryDivision ], (processMenu entry) ]
             [ div []
@@ -215,8 +155,8 @@ viewTaskRow now (( _, prop ) as entry) =
                     , span [] [ text fileVer ]
                     ]
                 ]
-            , div [] [ viewState now prop ]
-            , div [] (viewTaskRowUsage usage)
+            , div [] [ viewState now process ]
+            , maybe usage
             ]
 
 
@@ -254,10 +194,14 @@ viewGraphUsage title color history limit =
 
 
 viewTotalResources : TaskManager -> Html Msg
-viewTotalResources ({ historyCPU, historyMem, historyDown, historyUp, limits } as app) =
-    div [ class [ BottomGraphsRow ] ]
-        [ viewGraphUsage "CPU" "green" historyCPU limits.cpu
-        , viewGraphUsage "Memory" "blue" historyMem limits.mem
-        , viewGraphUsage "Downlink" "red" historyDown limits.down
-        , viewGraphUsage "Uplink" "yellow" historyUp limits.up
-        ]
+viewTotalResources model =
+    let
+        { historyCPU, historyMem, historyDown, historyUp, limits } =
+            model
+    in
+        div [ class [ BottomGraphsRow ] ]
+            [ viewGraphUsage "CPU" "green" historyCPU limits.cpu
+            , viewGraphUsage "Memory" "blue" historyMem limits.mem
+            , viewGraphUsage "Downlink" "red" historyDown limits.down
+            , viewGraphUsage "Uplink" "yellow" historyUp limits.up
+            ]

@@ -29,7 +29,6 @@ receive response =
             Maybe.map BootstrapServer <| Bootstrap.receive code data
 
 
-
 serverReceive : ServerRequestMsg -> Maybe ServerResponse
 serverReceive response =
     case response of
