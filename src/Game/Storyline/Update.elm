@@ -3,6 +3,9 @@ module Game.Storyline.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Models as Game
+import Events.Events exposing (Event(AccountEvent))
+import Events.Account exposing (Event(StoryEvent))
+import Events.Account.Story exposing (Event(StepDone))
 import Game.Storyline.Models exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Missions.Messages as Missions
@@ -21,6 +24,12 @@ update game msg model =
 
         MissionsMsg msg ->
             onMission game msg model
+
+        Event (AccountEvent (StoryEvent (StepDone ( c, n, nn )))) ->
+            onMission game (Missions.StepDone ( c, n ) nn) model
+
+        Event _ ->
+            Update.fromModel model
 
 
 onToggle : Model -> UpdateResponse
