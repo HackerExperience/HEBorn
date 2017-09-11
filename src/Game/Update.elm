@@ -110,6 +110,7 @@ onEvent event model =
     onAccount (Account.Event event) model
         |> Update.andThen (onMeta (Meta.Event event))
         |> Update.andThen (onServers (Servers.Event event))
+        |> Update.andThen (onStory (Story.Event event))
         |> Update.andThen (updateEvent event)
 
 
