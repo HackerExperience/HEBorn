@@ -1,5 +1,6 @@
 module Game.Account.Database.Update exposing (update)
 
+import Dict exposing (Dict)
 import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -44,4 +45,18 @@ onPasswordAcquired :
     -> Model
     -> UpdateResponse
 onPasswordAcquired game data model =
-    Update.fromModel model
+    let
+        server =
+            { password = data.password
+            , label = Nothing
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = NPC
+            , remoteConn = Nothing
+            }
+    in
+        model.servers
+            |> Dict.insert data.nip server
+            |> (\s -> { model | servers = s })
+            |> Update.fromModel

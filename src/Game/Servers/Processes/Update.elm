@@ -287,8 +287,13 @@ onBruteforceFailedEvent :
     -> Model
     -> UpdateResponse
 onBruteforceFailedEvent game serverId response model =
-    -- TODO: implement
-    Update.fromModel model
+    let
+        update process =
+            model
+                |> upsert response.processId (complete Nothing process)
+                |> Update.fromModel
+    in
+        updateOrSync update response.processId model
 
 
 
@@ -317,5 +322,13 @@ onBruteforceRequest :
     -> Model
     -> UpdateResponse
 onBruteforceRequest game serverId response model =
-    -- TODO: implement
-    Update.fromModel model
+    case response of
+        Bruteforce.Okay data ->
+            let
+                process =
+                    dummyProcess data.type_ serverId data.targetIp
+
+                model_ =
+                    insert data.processId process model
+            in
+                Update.fromModel model_

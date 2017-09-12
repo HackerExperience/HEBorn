@@ -1,5 +1,11 @@
 module TestUtils exposing (..)
 
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Messages as Core
+import Game.Messages as Game
+import Game.Models as Game
+import Game.Update as Game
+import Json.Decode as Decode
 import Test exposing (..)
 import Config
 
@@ -29,3 +35,53 @@ ensureDifferentSeed seed =
                 seed
     in
         seed_
+
+
+updateGame : Game.Msg -> Game.Model -> Game.Model
+updateGame msg0 model0 =
+    let
+        ( model1, _, dispatch ) =
+            Game.update msg0 model0
+
+        keepGameMsg msg =
+            case msg of
+                Core.GameMsg msg ->
+                    Just msg
+
+                _ ->
+                    Nothing
+
+        msgs =
+            dispatch
+                |> Dispatch.toList
+                |> List.filterMap keepGameMsg
+
+        reduce msg model =
+            updateGame msg model
+    in
+        List.foldl reduce model1 msgs
+
+
+fromJust : Maybe a -> a
+fromJust m =
+    case m of
+        Just a ->
+            a
+
+        Nothing ->
+            Debug.crash "fromJust called with Nothing"
+
+
+fromOk : Result b a -> a
+fromOk m =
+    case m of
+        Ok a ->
+            a
+
+        Err _ ->
+            Debug.crash "fromOk called with Err"
+
+
+toValue : String -> Decode.Value
+toValue =
+    Decode.decodeString Decode.value >> fromOk

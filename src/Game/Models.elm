@@ -98,24 +98,13 @@ getConfig =
 getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
 getGateway model =
     let
-        meta =
-            getMeta model
-
-        servers =
-            getServers model
-
-        maybeGatewayID =
-            Meta.getGateway meta
-
-        maybeGateway =
-            Maybe.andThen (flip Servers.get servers) maybeGatewayID
+        gatewayId =
+            Account.getGateway model.account
     in
-        case ( maybeGatewayID, maybeGateway ) of
-            ( Just id, Just gateway ) ->
-                Just ( id, gateway )
-
-            _ ->
-                Nothing
+        model
+            |> getServers
+            |> Servers.get gatewayId
+            |> Maybe.map ((,) gatewayId)
 
 
 setGateway : Servers.Server -> Model -> Model
