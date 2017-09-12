@@ -6,8 +6,10 @@ module Game.Account.Models
         , Username
         , Email
         , initialModel
-        , getToken
         , insertServer
+        , getToken
+        , getGateway
+        , getDatabase
         )
 
 import Game.Servers.Shared as Servers
@@ -78,9 +80,29 @@ getToken model =
     model.auth.token
 
 
+getGateway : Model -> Servers.ID
+getGateway =
+    .activeGateway
+
+
+getDatabase : Model -> Database.Model
+getDatabase =
+    .database
+
+
 insertServer : Servers.ID -> Model -> Model
 insertServer id ({ servers } as model) =
-    if not <| List.member id servers then
-        { model | servers = id :: servers }
-    else
-        model
+    let
+        activeGateway =
+            if model.activeGateway == "" then
+                id
+            else
+                model.activeGateway
+
+        servers =
+            if not <| List.member id model.servers then
+                id :: model.servers
+            else
+                model.servers
+    in
+        { model | activeGateway = activeGateway, servers = servers }

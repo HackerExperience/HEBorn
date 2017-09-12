@@ -98,14 +98,15 @@ genOwnserhip =
         (GatewayOwnership <| GatewayData Nothing [])
         (EndpointOwnership <| EndpointData Nothing Nothing)
 
+
 genServer : Generator Server
 genServer =
     let
         buildServerRecord ip ownership fs logs proc =
             { name = "Dummy"
             , type_ = Desktop
-            , nip = ("::", ip)
-            , nips = [("::", ip)]
+            , nip = ( "::", ip )
+            , nips = [ ( "::", ip ) ]
             , coordinates = Just 0
             , filesystem = fs
             , logs = logs
@@ -113,10 +114,7 @@ genServer =
             , tunnels = Tunnels.initialModel
             , web = Web.initialModel
             , ownership =
-                GatewayOwnership
-                    { endpoint = Nothing
-                    , endpoints = []
-                    }
+                ownership
             }
     in
         genIP
