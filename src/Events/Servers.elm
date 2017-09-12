@@ -57,7 +57,6 @@ type ServerEvent
     | LogsEvent Logs.Event
     | ProcessesEvent Processes.Event
     | TunnelsEvent Tunnels.Event
-    | BruteforceFailed String
 
 
 handler : Router Event
@@ -106,9 +105,6 @@ handleServer event json =
         ( Just "server", "changed" ) ->
             onChanged json
 
-        ( Just "server", "bruteforce_failed" ) ->
-            onBruteforceFailed json
-
         _ ->
             Nothing
 
@@ -118,18 +114,3 @@ onChanged json =
     decodeValue decoder json
         |> Result.map Changed
         |> notify
-
-
-onBruteforceFailed : Handler ServerEvent
-onBruteforceFailed =
-    let
-        decoder =
-            decode identity
-                |> required "process_id" string
-
-        handler json =
-            decodeValue decoder json
-                |> Result.map BruteforceFailed
-                |> notify
-    in
-        handler

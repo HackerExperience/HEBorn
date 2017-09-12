@@ -17,7 +17,7 @@ import Json.Decode.Pipeline exposing (decode, optional)
 import Utils.Events exposing (Router, Handler, parse, notify)
 import Game.Servers.Shared as Servers
 import Game.Account.Models as Database exposing (Model, Email)
-import Game.Account.Database.Models as Database exposing (Database)
+import Game.Account.Database.Models as Database
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory

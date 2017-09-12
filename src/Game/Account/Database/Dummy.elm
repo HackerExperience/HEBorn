@@ -3,9 +3,9 @@ module Game.Account.Database.Dummy exposing (dummy)
 import Game.Account.Database.Models exposing (..)
 
 
-dummy : Database
+dummy : Model
 dummy =
-    Database
+    Model
         [ { nip = ( "::", "153.249.31.179" )
           , password = "WhenYouWereHereBefore"
           , label = Just "Creep 1"

@@ -11,7 +11,7 @@ import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Utils.Html exposing (spacer)
 import Utils.Html.Events exposing (onChange)
-import Game.Account.Database.Models exposing (..)
+import Game.Account.Database.Models as Database
 import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
@@ -24,12 +24,12 @@ import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-isEntryExpanded : DBAdmin -> ( NIP, HackedServer ) -> Bool
+isEntryExpanded : DBAdmin -> ( NIP, Database.HackedServer ) -> Bool
 isEntryExpanded app ( nip, _ ) =
     List.member (Network.toString nip) app.servers.expanded
 
 
-isEntryEditing : DBAdmin -> ( NIP, HackedServer ) -> Bool
+isEntryEditing : DBAdmin -> ( NIP, Database.HackedServer ) -> Bool
 isEntryEditing app ( nip, _ ) =
     Dict.member (Network.toString nip) app.serversEditing
 
@@ -49,7 +49,7 @@ renderFlags =
         >> Maybe.withDefault []
 
 
-renderData : ( NIP, HackedServer ) -> Html Msg
+renderData : ( NIP, Database.HackedServer ) -> Html Msg
 renderData ( nip, item ) =
     div []
         [ text "ip: "
@@ -65,7 +65,7 @@ renderData ( nip, item ) =
         ]
 
 
-renderMiniData : ( NIP, HackedServer ) -> Html Msg
+renderMiniData : ( NIP, Database.HackedServer ) -> Html Msg
 renderMiniData ( nip, item ) =
     div []
         [ text "ip: "
@@ -84,7 +84,7 @@ renderVirusOption activeId ( id, label, version ) =
         [ text (label ++ " (" ++ (toString version) ++ ")") ]
 
 
-renderEditing : ( NIP, HackedServer ) -> EditingServers -> Html Msg
+renderEditing : ( NIP, Database.HackedServer ) -> EditingServers -> Html Msg
 renderEditing (( nip, item ) as entry) src =
     case src of
         EditingTexts ( nick, notes ) ->
@@ -118,7 +118,7 @@ renderEditing (( nip, item ) as entry) src =
                 )
 
 
-renderTopFlags : ( NIP, HackedServer ) -> Html Msg
+renderTopFlags : ( NIP, Database.HackedServer ) -> Html Msg
 renderTopFlags _ =
     div []
         -- TODO: Catch the flags for real
@@ -139,7 +139,7 @@ btnsNormal itemId =
     ]
 
 
-renderBottomActions : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderBottomActions : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
 renderBottomActions app (( nip, _ ) as entry) =
     let
         btns =
@@ -153,7 +153,7 @@ renderBottomActions app (( nip, _ ) as entry) =
         horizontalBtnPanel btns
 
 
-renderAnyData : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderAnyData : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
 renderAnyData app (( nip, _ ) as entry) =
     case (Dict.get (Network.toString nip) app.serversEditing) of
         Just x ->
@@ -166,7 +166,7 @@ renderAnyData app (( nip, _ ) as entry) =
                 renderMiniData entry
 
 
-renderBottom : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderBottom : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
 renderBottom app entry =
     let
         data =
@@ -180,7 +180,7 @@ renderBottom app entry =
             data
 
 
-menuInclude : DBAdmin -> ( NIP, HackedServer ) -> List (Attribute Msg)
+menuInclude : DBAdmin -> ( NIP, Database.HackedServer ) -> List (Attribute Msg)
 menuInclude app (( nip, _ ) as entry) =
     if (isEntryEditing app entry) then
         [ menuEditingEntry <| Network.toString nip ]
@@ -188,7 +188,7 @@ menuInclude app (( nip, _ ) as entry) =
         [ menuNormalEntry <| Network.toString nip ]
 
 
-renderEntry : DBAdmin -> ( NIP, HackedServer ) -> Html Msg
+renderEntry : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
 renderEntry app (( nip, _ ) as entry) =
     let
         expandedState =
@@ -217,14 +217,14 @@ renderEntry app (( nip, _ ) as entry) =
             data
 
 
-renderEntryList : DBAdmin -> HackedServers -> List (Html Msg)
+renderEntryList : DBAdmin -> Database.HackedServers -> List (Html Msg)
 renderEntryList app entries =
     entries
         |> Dict.toList
         |> List.map (renderEntry app)
 
 
-view : Database -> Model -> DBAdmin -> Html Msg
+view : Database.Model -> Model -> DBAdmin -> Html Msg
 view database model app =
     verticalList
         ([ menuView model

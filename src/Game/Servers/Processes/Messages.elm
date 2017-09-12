@@ -1,14 +1,19 @@
-module Game.Servers.Processes.Messages exposing (Msg(..))
+module Game.Servers.Processes.Messages exposing (Msg(..), RequestMsg(..))
 
 import Events.Events as Events
-import Game.Servers.Processes.Types.Shared exposing (ProcessID)
-import Game.Servers.Processes.Models exposing (ProcessProp)
+import Requests.Types exposing (ResponseType)
+import Game.Servers.Processes.Models exposing (..)
 
 
 type Msg
-    = Pause ProcessID
-    | Resume ProcessID
-    | Complete ProcessID
-    | Remove ProcessID
-    | Create ( ProcessID, ProcessProp )
+    = Pause ID
+    | Resume ID
+    | Remove ID
+    | Start Type ServerID ServerID (Maybe Version) (Maybe FileID)
+    | Complete ID
+    | Request RequestMsg
     | Event Events.Event
+
+
+type RequestMsg
+    = BruteforceRequest ResponseType

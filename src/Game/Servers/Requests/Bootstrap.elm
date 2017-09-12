@@ -173,7 +173,7 @@ toServer server =
             , nip = toNip data.nips
             , filesystem = Filesystem.initialModel
             , logs = Logs.initialModel
-            , processes = Processes.initialProcesses
+            , processes = Processes.initialModel
             , tunnels = Tunnels.initialModel
             , web = Web.initialModel
             }

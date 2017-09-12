@@ -1,17 +1,17 @@
 module Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
 import Dict exposing (Dict)
-import Game.Account.Database.Models exposing (..)
+import Game.Account.Database.Models as Database
 import Game.Network.Types as Network exposing (NIP)
 import Apps.DBAdmin.Models exposing (..)
 
 
-catchDataWhenFiltering : List String -> NIP -> HackedServer -> Bool
+catchDataWhenFiltering : List String -> NIP -> Database.HackedServer -> Bool
 catchDataWhenFiltering filterCache nip value =
     List.member (Network.toString nip) filterCache
 
 
-applyFilter : DBAdmin -> HackedServers -> HackedServers
+applyFilter : DBAdmin -> Database.HackedServers -> Database.HackedServers
 applyFilter app itens =
     if ((String.length app.servers.filterText) > 0) then
         Dict.filter
@@ -39,7 +39,7 @@ toggleExpand itemId app =
         { app | servers = servers_ }
 
 
-enterEditing : String -> Database -> DBAdmin -> DBAdmin
+enterEditing : String -> Database.Model -> DBAdmin -> DBAdmin
 enterEditing itemId database app =
     let
         items =
@@ -68,7 +68,7 @@ enterEditing itemId database app =
         Maybe.withDefault app app_
 
 
-enterSelectingVirus : String -> Database -> DBAdmin -> DBAdmin
+enterSelectingVirus : String -> Database.Model -> DBAdmin -> DBAdmin
 enterSelectingVirus itemId database app =
     let
         items =
@@ -123,7 +123,7 @@ leaveEditing itemId app =
         { app | serversEditing = editing_ }
 
 
-updateTextFilter : String -> Database -> DBAdmin -> DBAdmin
+updateTextFilter : String -> Database.Model -> DBAdmin -> DBAdmin
 updateTextFilter newFilter database app =
     let
         filterMapFunc nip item =

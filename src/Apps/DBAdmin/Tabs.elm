@@ -1,7 +1,7 @@
 module Apps.DBAdmin.Tabs exposing (..)
 
 import Apps.DBAdmin.Models exposing (..)
-import Game.Account.Database.Models exposing (Database)
+import Game.Account.Database.Models as Database
 import Apps.DBAdmin.Tabs.Servers.Helpers as Servers exposing (..)
 
 
@@ -15,7 +15,7 @@ toggleExpand itemId tab app =
             app
 
 
-enterEditing : String -> MainTab -> Database -> DBAdmin -> DBAdmin
+enterEditing : String -> MainTab -> Database.Model -> DBAdmin -> DBAdmin
 enterEditing itemId tab database app =
     case tab of
         TabServers ->
@@ -35,7 +35,7 @@ leaveEditing itemId tab app =
             app
 
 
-updateTextFilter : String -> MainTab -> Database -> DBAdmin -> DBAdmin
+updateTextFilter : String -> MainTab -> Database.Model -> DBAdmin -> DBAdmin
 updateTextFilter newFilter tab database app =
     case tab of
         TabServers ->

@@ -4,13 +4,14 @@ import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
-import Utils.Update as Update
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
-import Events.Events as Events
+import Events.Events as Events exposing (Event(Report, AccountEvent))
 import Events.Account as Account exposing (AccountHolder)
 import Requests.Requests as Requests
+import Game.Account.Database.Messages as Database
+import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
@@ -33,6 +34,9 @@ update game msg model =
         BouncesMsg msg ->
             onBounce game msg model
 
+        DatabaseMsg msg ->
+            onDatabase game msg model
+
         Event data ->
             onEvent game data model
 
@@ -53,6 +57,18 @@ bootstrap json model =
 
 
 -- internals
+
+
+onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
+onDatabase game msg model =
+    Update.child
+        { get = .database
+        , set = (\database game -> { game | database = database })
+        , toMsg = DatabaseMsg
+        , update = (Database.update game)
+        }
+        msg
+        model
 
 
 onBootstrap : Value -> Model -> UpdateResponse
@@ -121,8 +137,7 @@ onBounce game msg model =
 
 onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 onEvent game event model =
-    -- TODO: route events to Bounces, Database and Inventory.
-    updateEvent game event model
+    onDatabase game (Database.Event event) model
 
 
 onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
@@ -138,14 +153,14 @@ onRequest game response model =
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
-        Events.Report (Ws.Connected _) ->
+        Report (Ws.Connected _) ->
             onWsConnected game model
 
-        Events.Report (Ws.Joined AccountChannel) ->
+        Report (Ws.Joined AccountChannel) ->
             -- TODO: maybe remove this handler
             onWsJoinedAccount game model
 
-        Events.Report Ws.Disconnected ->
+        Report Ws.Disconnected ->
             onWsDisconnected game model
 
         _ ->

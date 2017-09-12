@@ -1,4 +1,10 @@
-module Events.Servers.Processes exposing (Event(..), handler)
+module Events.Servers.Processes
+    exposing
+        ( Event(..)
+        , StartedData
+        , BruteforceFailedData
+        , handler
+        )
 
 import Utils.Events exposing (Handler, notify)
 import Json.Decode
@@ -17,9 +23,9 @@ import Utils.Events exposing (Handler)
 
 
 type Event
-    = Changed
-    | Started StartedData
+    = Started StartedData
     | Conclusion String
+    | BruteforceFailed BruteforceFailedData
 
 
 type alias StartedData =
@@ -28,17 +34,23 @@ type alias StartedData =
     }
 
 
+type alias BruteforceFailedData =
+    { processId : String
+    , reason : String
+    }
+
+
 handler : String -> Handler Event
 handler event json =
     case event of
-        "changed" ->
-            onChanged json
-
         "started" ->
             onStarted json
 
         "conclusion" ->
             onConclusion json
+
+        "bruteforce_failed" ->
+            onBruteforceFailed json
 
         _ ->
             Nothing
@@ -46,11 +58,6 @@ handler event json =
 
 
 -- internals
-
-
-onChanged : Handler Event
-onChanged json =
-    Just Changed
 
 
 onStarted : Handler Event
@@ -84,3 +91,19 @@ onConclusion json =
         decodeValue decoder json
             |> Result.map Conclusion
             |> notify
+
+
+onBruteforceFailed : Handler Event
+onBruteforceFailed =
+    let
+        decoder =
+            decode BruteforceFailedData
+                |> required "process_id" string
+                |> required "reason" string
+
+        handler json =
+            decodeValue decoder json
+                |> Result.map BruteforceFailed
+                |> notify
+    in
+        handler
