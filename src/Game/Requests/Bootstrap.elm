@@ -8,8 +8,14 @@ module Game.Requests.Bootstrap
         , decoder
         )
 
-import Json.Decode exposing (Decoder, Value, decodeValue, list)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode exposing (Decoder, Value, decodeValue, list, bool)
+import Json.Decode.Pipeline exposing (decode, required, optional)
+import Requests.Requests as Requests
+import Requests.Topics as Topics
+import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Events.Storyline.Missions as Missions
+import Events.Storyline.Emails as Emails
+import Game.Messages exposing (..)
 import Game.Servers.Requests.Bootstrap
     exposing
         ( GatewayData
@@ -17,10 +23,12 @@ import Game.Servers.Requests.Bootstrap
         , gatewayDecoder
         , endpointDecoder
         )
-import Requests.Requests as Requests
-import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
-import Game.Messages exposing (..)
+import Game.Storyline.Models as Story
+import Game.Storyline.Requests.Bootstrap
+    exposing
+        ( emailsDecoder
+        , missionsDecoder
+        )
 
 
 type Response
@@ -30,6 +38,8 @@ type Response
 type alias Data =
     { servers :
         ServerIndex
+    , story :
+        Story.Model
     }
 
 
@@ -66,6 +76,7 @@ decoder : Decoder Data
 decoder =
     decode Data
         |> required "servers" serverIndexDecoder
+        |> optional "story" storyDecoder Story.initialModel
 
 
 
@@ -77,3 +88,11 @@ serverIndexDecoder =
     decode ServerIndex
         |> required "gateways" (list gatewayDecoder)
         |> required "endpoints" (list endpointDecoder)
+
+
+storyDecoder : Decoder Story.Model
+storyDecoder =
+    decode Story.Model
+        |> optional "enabled" bool False
+        |> required "missions" missionsDecoder
+        |> required "emails" emailsDecoder
