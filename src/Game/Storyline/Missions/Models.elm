@@ -1,11 +1,12 @@
 module Game.Storyline.Missions.Models exposing (..)
 
 import Apps.Apps exposing (App(..))
+import Game.Shared
 import Game.Storyline.Missions.Actions as Actions exposing (..)
 
 
-type alias SyncID =
-    String
+type alias ID =
+    Game.Shared.ID
 
 
 type alias Model =
@@ -16,17 +17,19 @@ type alias Model =
 
 
 type Missions
-    = Tutorial
+    = NoMission
+    | Tutorial
 
 
 type Goals
-    = TutorialIntroduction
+    = NoGoal
+    | TutorialIntroduction
 
 
 type alias Step =
-    { current : SyncID
+    { current : ID
     , actions : List Action
-    , next : SyncID
+    , next : ID
     }
 
 
@@ -47,7 +50,7 @@ setActions actions model =
             model
 
 
-validateStep : ( SyncID, SyncID ) -> Model -> Bool
+validateStep : ( ID, ID ) -> Model -> Bool
 validateStep ( current, next ) model =
     model.step
         |> Maybe.map (\s -> s.current == current && s.next == next)
@@ -59,14 +62,14 @@ setStep newStep model =
     { model | step = newStep }
 
 
-initStep : SyncID -> SyncID -> Maybe Step
+initStep : ID -> ID -> Maybe Step
 initStep from to =
     Just (Step from (fromStep from) to)
 
 
 initialModel : Model
 initialModel =
-    { mission = Tutorial
-    , goal = TutorialIntroduction
-    , step = Just <| Step "001" (fromStep "001") "002"
+    { mission = NoMission
+    , goal = NoGoal
+    , step = Nothing
     }

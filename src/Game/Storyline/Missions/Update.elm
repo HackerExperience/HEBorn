@@ -37,7 +37,7 @@ requestSync =
     Cmd.none
 
 
-onStepDone : ( SyncID, SyncID ) -> SyncID -> Model -> UpdateResponse
+onStepDone : ( ID, ID ) -> ID -> Model -> UpdateResponse
 onStepDone (( current, next ) as validate) nextCheckpoint model =
     if (validateStep validate model) then
         model
