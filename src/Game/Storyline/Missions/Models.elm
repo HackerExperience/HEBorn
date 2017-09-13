@@ -16,11 +16,13 @@ type alias Model =
 
 
 type Missions
-    = Tutorial
+    = NoMission
+    | Tutorial
 
 
 type Goals
-    = TutorialIntroduction
+    = NoGoal
+    | TutorialIntroduction
 
 
 type alias Step =
@@ -66,7 +68,7 @@ initStep from to =
 
 initialModel : Model
 initialModel =
-    { mission = Tutorial
-    , goal = TutorialIntroduction
-    , step = Just <| Step "001" (fromStep "001") "002"
+    { mission = NoMission
+    , goal = NoGoal
+    , step = Nothing
     }

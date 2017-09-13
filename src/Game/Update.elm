@@ -198,6 +198,7 @@ onBootstrapResponse data model =
             { model
                 | account = account_
                 , servers = servers_
+                , story = data.story
             }
     in
         Update.fromModel model_

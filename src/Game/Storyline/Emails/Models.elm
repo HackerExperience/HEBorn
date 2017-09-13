@@ -5,19 +5,23 @@ import Dict exposing (Dict)
 
 
 type alias Model =
-    Dict Email Chat
+    Dict PersonID Person
 
 
 type alias Email =
     String
 
 
-type alias Chat =
-    ( Contact, Messages, Responses )
+type alias Person =
+    { about : Maybe About
+    , messages : Messages
+    , responses : Responses
+    }
 
 
-type alias Contact =
-    { name : String
+type alias About =
+    { email : Email
+    , name : String
     , picture : String
     }
 
@@ -39,32 +43,41 @@ type alias PhraseID =
     String
 
 
+type alias PersonID =
+    String
+
+
+type alias ReceiveData =
+    ( PersonID, Messages, Responses )
+
+
+getPerson : PersonID -> Model -> Maybe Person
+getPerson =
+    Dict.get
+
+
+setPerson : PersonID -> Person -> Model -> Model
+setPerson =
+    Dict.insert
+
+
+getMessages : Person -> Messages
+getMessages =
+    .messages
+
+
+getAvailableResponses : Person -> Responses
+getAvailableResponses =
+    .responses
+
+
+personMetadata : PersonID -> Maybe About
+personMetadata who =
+    case who of
+        _ ->
+            Nothing
+
+
 initialModel : Model
 initialModel =
-    Dict.fromList
-        [ ( "kress@hackerexperience.com"
-          , ( (Contact "Christian" "meme.jpg")
-            , Dict.fromList
-                [ ( 1503355711568, Sended "Wasap?" )
-                , ( 1503355740378, Received "Hello" )
-                , ( 1503355855175, Sended "Just lost" )
-                , ( 1503355909360, Received "lost what??" )
-                , ( 1503355924759, Sended "THE GAME" )
-                , ( 1503355933071, Received "'¬¬" )
-                ]
-            , [ "Tell me more...", "Reply" ]
-            )
-          )
-        , ( "renato@hackerexperience.com"
-          , ( Contact "Mr. Massaro" "familyfather.jpg"
-            , Dict.empty
-            , []
-            )
-          )
-        , ( "mememori@hackerexperience.com"
-          , ( Contact "Charlotte" "nicegirl.jpg"
-            , Dict.empty
-            , []
-            )
-          )
-        ]
+    Dict.empty
