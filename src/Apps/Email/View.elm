@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Game.Data as Game
-import Game.Storyline.Emails.Models as Emails exposing (Email, Chat)
+import Game.Storyline.Emails.Models as Emails exposing (PersonID, Person)
 import Apps.Email.Messages exposing (Msg(..))
 import Apps.Email.Models exposing (..)
 import Apps.Email.Resources exposing (Classes(..), prefix)
@@ -41,10 +41,10 @@ view data model =
             ]
 
 
-mainChat : Maybe Chat -> Html Msg
+mainChat : Maybe Person -> Html Msg
 mainChat active =
     active
-        |> Maybe.map (\( _, _, acts ) -> acts)
+        |> Maybe.map Emails.getAvailableResponses
         |> Maybe.withDefault []
         |> List.map (text >> List.singleton >> span [])
         |> div []
@@ -53,10 +53,10 @@ mainChat active =
         |> div [ class [ MainChat ] ]
 
 
-mainChatMessages : Maybe Chat -> List (Html Msg)
+mainChatMessages : Maybe Person -> List (Html Msg)
 mainChatMessages active =
     active
-        |> Maybe.map (\( _, v, _ ) -> Dict.values v)
+        |> Maybe.map (Emails.getMessages >> Dict.values)
         |> Maybe.withDefault []
         |> List.map
             (\v ->
@@ -75,12 +75,12 @@ baloon dir msg =
 
 
 contactProcessor :
-    Maybe Email
-    -> Email
-    -> Chat
+    Maybe PersonID
+    -> PersonID
+    -> Person
     -> List (Html Msg)
     -> List (Html Msg)
-contactProcessor activeKey k ( meta, _, _ ) acu =
+contactProcessor activeKey k { about } acu =
     let
         activeAttr =
             case activeKey of
@@ -97,7 +97,9 @@ contactProcessor activeKey k ( meta, _, _ ) acu =
         attrs =
             (onClick <| SelectContact k) :: activeAttr
     in
-        meta.name
+        about
+            |> Maybe.map (.name)
+            |> Maybe.withDefault "[UNKNOWN]"
             |> text
             |> List.singleton
             |> li attrs

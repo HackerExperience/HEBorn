@@ -25,7 +25,8 @@ import Events.Account.Bounces as Bounces
 import Events.Account.Database as Database
 import Events.Account.Dock as Dock
 import Events.Account.Inventory as Inventory
-import Events.Account.Story as Story
+import Events.Storyline.Missions as Missions
+import Events.Storyline.Emails as Emails
 
 
 type Event
@@ -34,7 +35,8 @@ type Event
     | DatabaseEvent Database.Event
     | DockEvent Dock.Event
     | InventoryEvent Inventory.Event
-    | StoryEvent Story.Event
+    | MissionsEvent Missions.Event
+    | EmailsEvent Emails.Event
 
 
 type alias AccountHolder =
@@ -67,7 +69,10 @@ handler context event json =
             onChanged json
 
         ( Just "story", event ) ->
-            Maybe.map StoryEvent <| Story.handler event json
+            Maybe.map MissionsEvent <| Missions.handler event json
+
+        ( Just "email", event ) ->
+            Maybe.map EmailsEvent <| Emails.handler event json
 
         _ ->
             Nothing
