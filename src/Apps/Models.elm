@@ -6,7 +6,6 @@ module Apps.Models
         , name
         , title
         , icon
-        , model
         , isDecorated
         )
 
@@ -28,7 +27,6 @@ import Apps.Email.Models as Email
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type AppModel
@@ -51,10 +49,6 @@ type AppModel
 type Contexts
     = ContextualApp
     | ContextlessApp
-
-
-type alias WindowID =
-    String
 
 
 contexts : App -> Contexts
@@ -239,115 +233,6 @@ title model =
 
         EmailModel model ->
             Email.title model
-
-
-model : Game.Data -> WindowID -> App -> ( AppModel, Cmd Msg, Dispatch )
-model data id app =
-    case app of
-        LogViewerApp ->
-            let
-                model =
-                    LogViewerModel LogViewer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        TaskManagerApp ->
-            let
-                model =
-                    TaskManagerModel TaskManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        BrowserApp ->
-            let
-                model =
-                    BrowserModel Browser.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        ExplorerApp ->
-            let
-                model =
-                    ExplorerModel Explorer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        DatabaseApp ->
-            let
-                model =
-                    DatabaseModel Database.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        ConnManagerApp ->
-            let
-                model =
-                    ConnManagerModel ConnManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        BounceManagerApp ->
-            let
-                model =
-                    BounceManagerModel BounceManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        FinanceApp ->
-            let
-                model =
-                    FinanceModel Finance.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        MusicApp ->
-            let
-                model =
-                    MusicModel <| Hebamp.initialModel id
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        CtrlPanelApp ->
-            let
-                model =
-                    CtrlPanelModel CtrlPanel.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        ServersGearsApp ->
-            let
-                model =
-                    ServersGearsModel ServersGears.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        LocationPickerApp ->
-            let
-                pureModel =
-                    LocationPicker.initialModel id
-
-                model =
-                    LocationPickerModel pureModel
-
-                cmd =
-                    LocationPicker.startCmd pureModel
-                        |> Cmd.map LocationPickerMsg
-            in
-                ( model, cmd, Dispatch.none )
-
-        LanViewerApp ->
-            let
-                model =
-                    LanViewerModel LanViewer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
-
-        EmailApp ->
-            let
-                model =
-                    EmailModel Email.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
 
 
 isDecorated : App -> Bool

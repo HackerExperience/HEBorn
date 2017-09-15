@@ -2,6 +2,7 @@ module OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 import Draggable
 import Apps.Messages as Apps
+import Game.Meta.Types exposing (Context(..))
 
 
 type alias WindowID =
@@ -11,6 +12,7 @@ type alias WindowID =
 
 type Msg
     = WindowMsg WindowID Apps.Msg
+    | AppMsg WindowID Context Apps.Msg
     | Close WindowID
     | Minimize WindowID
     | ToggleMaximize WindowID

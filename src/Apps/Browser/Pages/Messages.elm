@@ -8,7 +8,7 @@ type Msg
     | NoWebserverMsg
     | EmptyMsg
     | ProfileMsg
-    | DirectoryMsg
+    | WhoisMsg
     | DownloadCenterMsg
     | ISPMsg
     | BankMsg

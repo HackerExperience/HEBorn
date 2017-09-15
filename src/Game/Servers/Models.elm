@@ -7,7 +7,6 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Servers.Web.Models as Web
 import Game.Network.Types as Network
 
 
@@ -39,7 +38,6 @@ type alias Server =
     , logs : Logs.Model
     , processes : Processes.Model
     , tunnels : Tunnels.Model
-    , web : Web.Model
     , ownership : Ownership
     }
 

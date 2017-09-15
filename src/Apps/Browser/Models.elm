@@ -2,6 +2,8 @@ module Apps.Browser.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
+import Game.Meta.Types exposing (Context(..))
+import Apps.Config exposing (..)
 import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages.Models as Pages
 
@@ -14,7 +16,7 @@ type alias BrowserHistory =
     List ( URL, Pages.Model )
 
 
-type alias Browser =
+type alias Tab =
     { addressBar : URL
     , lastURL : URL
     , page : Pages.Model
@@ -24,11 +26,12 @@ type alias Browser =
 
 
 type alias Tabs =
-    Dict Int Browser
+    Dict Int Tab
 
 
 type alias Model =
-    { tabs : Tabs
+    { me : Config
+    , tabs : Tabs
     , nowTab : Int
     , leftTabs : List Int
     , rightTabs : List Int
@@ -46,7 +49,7 @@ title : Model -> String
 title model =
     let
         app =
-            getApp model
+            getNowTab model
 
         pgTitle =
             Pages.getTitle (getPage app)
@@ -69,8 +72,8 @@ icon =
     "browser"
 
 
-initialBrowser : Browser
-initialBrowser =
+initTab : Tab
+initTab =
     { addressBar = "about:home"
     , lastURL = "about:home"
     , page = Pages.HomeModel
@@ -79,11 +82,22 @@ initialBrowser =
     }
 
 
-initialModel : Model
-initialModel =
-    { tabs =
+emptyTab : Tab
+emptyTab =
+    { addressBar = ""
+    , lastURL = "about:blank"
+    , page = Pages.BlankModel
+    , previousPages = []
+    , nextPages = []
+    }
+
+
+initialModel : Config -> Model
+initialModel me =
+    { me = me
+    , tabs =
         Dict.fromList
-            [ ( 0, initialBrowser ) ]
+            [ ( 0, initTab ) ]
     , nowTab = 0
     , lastTab = 0
     , leftTabs = []
@@ -92,33 +106,36 @@ initialModel =
     }
 
 
-getPage : Browser -> Pages.Model
+getPage : Tab -> Pages.Model
 getPage browser =
     browser.page
 
 
-getURL : Browser -> URL
+getURL : Tab -> URL
 getURL browser =
     browser.lastURL
 
 
-getPreviousPages : Browser -> BrowserHistory
+getPreviousPages : Tab -> BrowserHistory
 getPreviousPages browser =
     browser.previousPages
 
 
-getNextPages : Browser -> BrowserHistory
+getNextPages : Tab -> BrowserHistory
 getNextPages browser =
     browser.nextPages
 
 
-gotoPage : String -> Pages.Model -> Browser -> Browser
+gotoPage : String -> Pages.Model -> Tab -> Tab
 gotoPage url page browser =
     if page /= getPage browser then
         let
             previousPages =
-                ( browser.lastURL, browser.page )
-                    :: (getPreviousPages browser)
+                if (Pages.isLoading browser.page) then
+                    getPreviousPages browser
+                else
+                    ( browser.lastURL, browser.page )
+                        :: (getPreviousPages browser)
         in
             { browser
                 | addressBar = url
@@ -131,14 +148,12 @@ gotoPage url page browser =
         browser
 
 
-gotoPreviousPage : Browser -> Browser
+gotoPreviousPage : Tab -> Tab
 gotoPreviousPage browser =
-    let
-        maybeReorderedHistory =
-            reorderHistory getPreviousPages getNextPages browser
-    in
-        case maybeReorderedHistory of
-            Just ( ( url, page ), prev, next ) ->
+    browser
+        |> reorderHistory getPreviousPages getNextPages
+        |> Maybe.map
+            (\( ( url, page ), prev, next ) ->
                 { browser
                     | page = page
                     , previousPages = prev
@@ -146,19 +161,17 @@ gotoPreviousPage browser =
                     , lastURL = url
                     , addressBar = url
                 }
+            )
+        |> Maybe.withDefault
+            browser
 
-            Nothing ->
-                browser
 
-
-gotoNextPage : Browser -> Browser
+gotoNextPage : Tab -> Tab
 gotoNextPage browser =
-    let
-        maybeReorderedHistory =
-            reorderHistory getNextPages getPreviousPages browser
-    in
-        case maybeReorderedHistory of
-            Just ( ( url, page ), next, prev ) ->
+    browser
+        |> reorderHistory getNextPages getPreviousPages
+        |> Maybe.map
+            (\( ( url, page ), next, prev ) ->
                 { browser
                     | page = page
                     , previousPages = prev
@@ -166,15 +179,15 @@ gotoNextPage browser =
                     , lastURL = url
                     , addressBar = url
                 }
-
-            Nothing ->
-                browser
+            )
+        |> Maybe.withDefault
+            browser
 
 
 reorderHistory :
-    (Browser -> BrowserHistory)
-    -> (Browser -> BrowserHistory)
-    -> Browser
+    (Tab -> BrowserHistory)
+    -> (Tab -> BrowserHistory)
+    -> Tab
     -> Maybe ( ( URL, Pages.Model ), BrowserHistory, BrowserHistory )
 reorderHistory getFromList getToList browser =
     let
@@ -190,42 +203,42 @@ reorderHistory getFromList getToList browser =
         oldURL =
             getURL browser
     in
-        case List.head from of
-            Just newPage ->
-                let
-                    from_ =
-                        from
-                            |> List.tail
-                            |> Maybe.withDefault ([])
+        from
+            |> List.head
+            |> Maybe.map
+                (\newPage ->
+                    let
+                        from_ =
+                            from
+                                |> List.tail
+                                |> Maybe.withDefault ([])
 
-                    to_ =
-                        ( oldURL, oldPage ) :: to
-                in
-                    Just ( newPage, from_, to_ )
-
-            Nothing ->
-                Nothing
+                        to_ =
+                            ( oldURL, oldPage ) :: to
+                    in
+                        ( newPage, from_, to_ )
+                )
 
 
-getTab : Int -> Tabs -> Browser
+getTab : Int -> Tabs -> Tab
 getTab id src =
     Dict.get id src
         |> Maybe.withDefault
-            initialBrowser
+            initTab
 
 
-setTab : Int -> Browser -> Tabs -> Tabs
+setTab : Int -> Tab -> Tabs -> Tabs
 setTab id value src =
     Dict.insert id value src
 
 
-getApp : Model -> Browser
-getApp model =
+getNowTab : Model -> Tab
+getNowTab model =
     getTab model.nowTab model.tabs
 
 
-setApp : Browser -> Model -> Model
-setApp app model =
+setNowTab : Tab -> Model -> Model
+setNowTab app model =
     let
         newTabs =
             setTab model.nowTab app model.tabs
@@ -282,7 +295,7 @@ addTab model =
             model.lastTab + 1
 
         tabs =
-            Dict.insert newN initialBrowser model.tabs
+            Dict.insert newN emptyTab model.tabs
 
         rightTabs =
             newN :: model.rightTabs
@@ -297,7 +310,7 @@ deleteTab nTab model =
             [] ->
                 case List.reverse model.leftTabs of
                     [] ->
-                        initialModel
+                        initialModel model.me
 
                     [ unique ] ->
                         { model | nowTab = unique, leftTabs = [] }

@@ -29,7 +29,7 @@ view : GameData.Data -> Model -> Html Msg
 view data model =
     let
         app =
-            getApp model
+            getNowTab model
     in
         div
             [ class [ Window, Content, Client ]
@@ -55,54 +55,59 @@ renderToolbarBtn active label callback =
         [ text label ]
 
 
-viewToolbar : Browser -> Html Msg
+viewToolbar : Tab -> Html Msg
 viewToolbar browser =
-    div
-        [ menuNav
-        , class [ Toolbar ]
-        ]
-        [ div
-            -- TODO: Add classes
-            [ class
-                (if (List.length browser.previousPages) > 0 then
-                    [ Btn ]
-                 else
-                    [ Btn, InactiveBtn ]
-                )
-            , onClick GoPrevious
+    let
+        btnClass lengthFn =
+            if (lengthFn browser) > 0 then
+                [ Btn ]
+            else
+                [ Btn, InactiveBtn ]
+
+        genBtn lengthFn action label =
+            div
+                [ class <| btnClass lengthFn
+                , onClick action
+                ]
+                [ text label ]
+
+        prevBtn =
+            genBtn
+                ((.previousPages) >> List.length)
+                GoPrevious
+                "<"
+
+        nextBtn =
+            genBtn
+                ((.nextPages) >> List.length)
+                GoNext
+                ">"
+
+        goBtn =
+            genBtn
+                ((.addressBar) >> String.length)
+                (GoAddress browser.addressBar)
+                "%"
+    in
+        div
+            [ menuNav
+            , class [ Toolbar ]
             ]
-            [ text "<" ]
-        , div
-            [ class
-                (if (List.length browser.nextPages) > 0 then
-                    [ Btn ]
-                 else
-                    [ Btn, InactiveBtn ]
-                )
-            , onClick GoNext
-            ]
-            [ text ">" ]
-        , div
-            [ class
-                (if (String.length browser.addressBar) > 0 then
-                    [ Btn ]
-                 else
-                    [ Btn, InactiveBtn ]
-                )
-            ]
-            [ text "%" ]
-        , div
-            [ class [ AddressBar ] ]
-            [ Html.form
-                [ onSubmit <| GoAddress browser.addressBar ]
-                [ input
-                    [ value browser.addressBar
-                    , onInput UpdateAddress
+            [ prevBtn
+            , nextBtn
+            , goBtn
+            , div
+                [ class [ AddressBar ] ]
+                [ Html.form
+                    [ onSubmit <| GoAddress browser.addressBar ]
+                    [ input
+                        [ value browser.addressBar
+                        , onInput UpdateAddress
+                        ]
+                        []
                     ]
-                    []
                 ]
             ]
-        ]
 
 
 viewTabLabel : Tabs -> Bool -> Int -> ( List (Attribute Msg), List (Html Msg) )

@@ -1,5 +1,6 @@
 module Apps.Browser.Messages exposing (Msg(..))
 
+import Game.Web.DNS exposing (Response)
 import Apps.Browser.Menu.Messages as Menu
 
 
@@ -12,3 +13,4 @@ type Msg
     | TabGo Int
     | GoAddress String
     | NewTabInAddress String
+    | Fetched Int Response

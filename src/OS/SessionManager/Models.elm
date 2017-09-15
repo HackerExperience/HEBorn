@@ -1,27 +1,9 @@
-module OS.SessionManager.Models
-    exposing
-        ( Model
-        , Sessions
-        , ID
-        , WindowRef
-        , initialModel
-        , get
-        , insert
-        , openApp
-        , openOrRestoreApp
-        , refresh
-        , remove
-        )
+module OS.SessionManager.Models exposing (..)
 
 import Dict exposing (Dict)
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
-import Apps.Apps as Apps
-import Game.Servers.Shared as Servers
-import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 
 
 type alias Model =
@@ -60,76 +42,12 @@ insert id ({ sessions } as model) =
             sessions_ =
                 Dict.insert
                     id
-                    WindowManager.initialModel
+                    (WindowManager.initialModel id)
                     sessions
         in
             { model | sessions = sessions_ }
     else
         model
-
-
-openApp :
-    Game.Data
-    -> ID
-    -> Maybe Servers.ID
-    -> Apps.App
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-openApp data id serverID app ({ sessions } as model0) =
-    case Dict.get id sessions of
-        Just wm ->
-            let
-                ( model, uuid ) =
-                    getUID model0
-
-                ( wm_, cmd, msg ) =
-                    WindowManager.insert data uuid serverID app wm
-
-                cmd_ =
-                    Cmd.map WindowManagerMsg cmd
-
-                sessions_ =
-                    Dict.insert id wm_ sessions
-
-                model_ =
-                    { model | sessions = sessions_ }
-            in
-                ( model_, cmd_, msg )
-
-        Nothing ->
-            ( model0, Cmd.none, Dispatch.none )
-
-
-openOrRestoreApp :
-    Game.Data
-    -> ID
-    -> Maybe Servers.ID
-    -> Apps.App
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-openOrRestoreApp data id serverID app ({ sessions } as model0) =
-    case Dict.get id sessions of
-        Just wm ->
-            let
-                ( model, uuid ) =
-                    getUID model0
-
-                ( wm_, cmd, msg ) =
-                    WindowManager.resert data uuid serverID app wm
-
-                cmd_ =
-                    Cmd.map WindowManagerMsg cmd
-
-                sessions_ =
-                    Dict.insert id wm_ sessions
-
-                model_ =
-                    { model | sessions = sessions_ }
-            in
-                ( model_, cmd_, msg )
-
-        Nothing ->
-            ( model0, Cmd.none, Dispatch.none )
 
 
 getUID : Model -> ( Model, String )

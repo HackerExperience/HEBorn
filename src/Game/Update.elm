@@ -17,6 +17,8 @@ import Game.Servers.Models as Servers
 import Game.Servers.Update as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
+import Game.Web.Messages as Web
+import Game.Web.Update as Web
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Requests exposing (..)
@@ -42,6 +44,9 @@ update msg model =
 
         StoryMsg msg ->
             onStory msg model
+
+        WebMsg msg ->
+            onWebMsg msg model
 
         Event data ->
             onEvent data model
@@ -91,6 +96,13 @@ onStory msg game =
         }
         msg
         game
+
+
+onWebMsg : Web.Msg -> Model -> UpdateResponse
+onWebMsg msg model =
+    Web.update model msg
+        |> uncurry ((,,) model)
+        |> Update.mapCmd WebMsg
 
 
 onServers : Servers.Msg -> Model -> UpdateResponse

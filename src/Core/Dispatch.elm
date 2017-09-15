@@ -33,6 +33,7 @@ import Game.Messages as Game
 import Core.Messages exposing (..)
 import Driver.Websocket.Messages as Ws
 import Game.Data as Game
+import Game.Meta.Types exposing (Context(..))
 import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
 import Game.Storyline.Missions.Messages as Missions
@@ -44,11 +45,11 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Tunnels.Messages as Tunnels
-import Game.Servers.Web.Messages as Web
+import Game.Web.Messages as Web
 import Game.Servers.Shared as Servers
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
-import OS.SessionManager.WindowManager.Messages as WindowManager
+import OS.SessionManager.Models exposing (WindowRef)
 import Utils.Cmd as CmdUtils
 
 
@@ -242,14 +243,14 @@ tunnels id msg =
     server id <| Servers.TunnelsMsg msg
 
 
-web : Servers.ID -> Web.Msg -> Dispatch
-web id msg =
-    server id <| Servers.WebMsg msg
+web : Web.Msg -> Dispatch
+web msg =
+    game <| Game.WebMsg msg
 
 
-browser : Maybe String -> Browser.Msg -> Dispatch
-browser maybeId msg =
-    sessionManagerAppMsg maybeId <| Apps.BrowserMsg msg
+browser : WindowRef -> Context -> Browser.Msg -> Dispatch
+browser windowRef context msg =
+    sessionManagerAppMsg windowRef context <| Apps.BrowserMsg msg
 
 
 
@@ -266,9 +267,9 @@ sessionManager msg =
     os <| OS.SessionManagerMsg msg
 
 
-sessionManagerAppMsg : Maybe String -> Apps.Msg -> Dispatch
-sessionManagerAppMsg maybeId msg =
-    sessionManager <| SessionManager.AppMsg maybeId msg
+sessionManagerAppMsg : WindowRef -> Context -> Apps.Msg -> Dispatch
+sessionManagerAppMsg windowRef context msg =
+    sessionManager <| SessionManager.AppMsg windowRef context msg
 
 
 reducer : Dispatch -> List Msg -> List Msg

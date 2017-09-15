@@ -15,7 +15,6 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
-import Game.Servers.Web.Messages as Web
 import Game.Network.Types exposing (NIP)
 
 
@@ -44,7 +43,6 @@ type ServerMsg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
     | TunnelsMsg Tunnels.Msg
-    | WebMsg Web.Msg
     | ServerEvent Events.Event
     | ServerRequest ServerRequestMsg
 

@@ -1,4 +1,4 @@
-module Apps.Browser.Pages.Directory.View exposing (view)
+module Apps.Browser.Pages.Bithub.View exposing (view)
 
 import Html exposing (Html, div, text)
 

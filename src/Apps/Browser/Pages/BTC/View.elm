@@ -1,4 +1,4 @@
-module Apps.Browser.Pages.Template.View exposing (view)
+module Apps.Browser.Pages.BTC.View exposing (view)
 
 import Html exposing (Html, div, text)
 

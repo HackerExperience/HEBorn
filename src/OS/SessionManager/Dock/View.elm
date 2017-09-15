@@ -48,7 +48,7 @@ dock data ({ sessions } as model) =
         wm =
             sessions
                 |> Dict.get id
-                |> Maybe.withDefault WM.initialModel
+                |> Maybe.withDefault (WM.initialModel id)
 
         content =
             icons data.game.account.dock wm

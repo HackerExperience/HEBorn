@@ -2,91 +2,85 @@ module Apps.Browser.Pages.Models
     exposing
         ( Model(..)
         , initialModel
-        , getSite
         , getTitle
+        , isLoading
         )
 
-import Game.Servers.Web.Types as Web
+import Game.Web.Types as Web
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
+import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.NoWebserver.Models as PageNoWebserver
-import Apps.Browser.Pages.Profile.Models as PageProfile
-import Apps.Browser.Pages.Directory.Models as PageDirectory
-import Apps.Browser.Pages.MissionCenter.Models as PageMissionCenter
-import Apps.Browser.Pages.DownloadCenter.Models as PageDownloadCenter
-import Apps.Browser.Pages.ISP.Models as PageISP
-import Apps.Browser.Pages.FBI.Models as PageFBI
-import Apps.Browser.Pages.News.Models as PageNews
+import Apps.Browser.Pages.Bank.Models as PageBank
 
 
 type Model
-    = BlankModel
-    | NotFoundModel PageNotFound.Model
-    | UnknownModel
+    = NotFoundModel PageNotFound.Model
     | HomeModel
-    | CustomModel
+    | WebserverModel PageWebserver.Model
     | NoWebserverModel PageNoWebserver.Model
     | ProfileModel
-    | DirectoryModel
+    | WhoisModel
     | DownloadCenterModel
     | ISPModel
-    | BankModel
+    | BankModel PageBank.Model
     | StoreModel
     | BTCModel
     | FBIModel
     | NewsModel
     | BithubModel
     | MissionCenterModel
-
-
-type alias Meta =
-    { url : String, title : String }
+      -- Virtual ones
+    | LoadingModel
+    | BlankModel
 
 
 initialModel : Web.Site -> Model
-initialModel ({ type_, meta } as site) =
-    case ( type_, meta ) of
-        ( Web.Blank, _ ) ->
-            BlankModel
+initialModel { url, type_ } =
+    case type_ of
+        Web.NotFound ->
+            NotFoundModel <| PageNotFound.initialModel url
 
-        ( Web.Home, _ ) ->
+        Web.Home ->
             HomeModel
 
-        ( Web.Unknown, _ ) ->
-            UnknownModel
+        Web.Webserver meta ->
+            WebserverModel <| PageWebserver.initialModel url meta
 
-        ( Web.NotFound, _ ) ->
-            site
-                |> PageNotFound.initialModel
-                |> NotFoundModel
+        Web.NoWebserver meta ->
+            NoWebserverModel <| PageNoWebserver.initialModel url meta
 
-        ( Web.NoWebserver, Just (Web.NoWebserverMeta meta) ) ->
-            meta
-                |> PageNoWebserver.initialModel
-                |> NoWebserverModel
-
-        ( Web.Profile, _ ) ->
+        Web.Profile ->
             ProfileModel
 
-        ( Web.Directory, _ ) ->
-            DirectoryModel
+        Web.Whois ->
+            WhoisModel
 
-        ( Web.MissionCenter, _ ) ->
-            MissionCenterModel
-
-        ( Web.DownloadCenter, _ ) ->
+        Web.DownloadCenter ->
             DownloadCenterModel
 
-        ( Web.ISP, _ ) ->
+        Web.ISP ->
             ISPModel
 
-        ( Web.FBI, _ ) ->
+        Web.Bank meta ->
+            BankModel <| PageBank.initialModel url meta
+
+        Web.Store ->
+            StoreModel
+
+        Web.BTC ->
+            BTCModel
+
+        Web.FBI ->
             FBIModel
 
-        ( Web.News, _ ) ->
+        Web.News ->
             NewsModel
 
-        _ ->
-            UnknownModel
+        Web.Bithub ->
+            BithubModel
+
+        Web.MissionCenter ->
+            MissionCenterModel
 
 
 getTitle : Model -> String
@@ -95,69 +89,60 @@ getTitle model =
         NotFoundModel model ->
             PageNotFound.getTitle model
 
-        UnknownModel ->
-            "Loading..."
-
         HomeModel ->
             "Home"
 
+        WebserverModel model ->
+            PageWebserver.getTitle model
+
+        NoWebserverModel model ->
+            PageNoWebserver.getTitle model
+
         ProfileModel ->
-            PageProfile.getTitle
+            "Your Profile"
 
-        DirectoryModel ->
-            PageDirectory.getTitle
-
-        MissionCenterModel ->
-            PageMissionCenter.getTitle
+        WhoisModel ->
+            "Whois"
 
         DownloadCenterModel ->
-            PageDownloadCenter.getTitle
+            "Download Center"
 
         ISPModel ->
-            PageISP.getTitle
+            "Internet Provider"
+
+        BankModel model ->
+            PageBank.getTitle model
+
+        StoreModel ->
+            "Store"
+
+        BTCModel ->
+            "BTV"
 
         FBIModel ->
-            PageFBI.getTitle
+            "Federal Bureal Intelligence"
 
         NewsModel ->
-            PageNews.getTitle
+            "News"
 
-        _ ->
+        BithubModel ->
+            "Software Reasearch"
+
+        MissionCenterModel ->
+            "Head Quarters"
+
+        LoadingModel ->
+            "Loading..."
+
+        BlankModel ->
             "New Tab"
 
 
-getSite : Model -> ( Web.Type, Maybe Web.Meta )
-getSite model =
+isLoading : Model -> Bool
+isLoading model =
     case model of
-        NotFoundModel model ->
-            PageNotFound.getSite model
-
-        BlankModel ->
-            ( Web.Blank, Nothing )
-
-        HomeModel ->
-            ( Web.Home, Nothing )
-
-        ProfileModel ->
-            PageProfile.getSite
-
-        DirectoryModel ->
-            PageDirectory.getSite
-
-        MissionCenterModel ->
-            PageMissionCenter.getSite
-
-        DownloadCenterModel ->
-            PageDownloadCenter.getSite
-
-        ISPModel ->
-            PageISP.getSite
-
-        FBIModel ->
-            PageFBI.getSite
-
-        NewsModel ->
-            PageNews.getSite
+        LoadingModel ->
+            True
 
         _ ->
-            ( Web.Unknown, Nothing )
+            False

@@ -1,4 +1,4 @@
-module Requests.Requests exposing (request, report, fake)
+module Requests.Requests exposing (request, report, fake, decodeGenericError)
 
 import Http
 import Json.Decode as Decode
@@ -59,6 +59,16 @@ fake :
     -> Cmd msg
 fake _ msg _ _ response _ =
     Cmd.fromMsg (msg response)
+
+
+decodeGenericError :
+    Decode.Value
+    -> (String -> Decode.Decoder a)
+    -> Result String a
+decodeGenericError value decodeMessage =
+    Decode.field "message" Decode.string
+        |> Decode.andThen decodeMessage
+        |> flip Decode.decodeValue value
 
 
 

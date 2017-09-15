@@ -31,33 +31,33 @@ actionHandler data action model =
 
         GoPrevious ->
             let
-                app_ =
-                    gotoPreviousPage <| getApp model
+                tab_ =
+                    gotoPreviousPage <| getNowTab model
 
                 model_ =
-                    setApp app_ model
+                    setNowTab tab_ model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
         GoNext ->
             let
-                app_ =
-                    gotoNextPage <| getApp model
+                tab_ =
+                    gotoNextPage <| getNowTab model
 
                 model_ =
-                    setApp app_ model
+                    setNowTab tab_ model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
         GoHome ->
             let
                 app =
-                    getApp model
+                    getNowTab model
 
-                app_ =
+                tab_ =
                     gotoPage "about:blank" Pages.BlankModel app
 
                 model_ =
-                    setApp app_ model
+                    setNowTab tab_ model
             in
                 ( model_, Cmd.none, Dispatch.none )

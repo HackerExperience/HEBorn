@@ -3,6 +3,7 @@ module OS.SessionManager.Update exposing (update)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
+import OS.SessionManager.Launch exposing (..)
 import OS.SessionManager.Dock.Update as Dock
 import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
@@ -15,7 +16,7 @@ update :
     GameData.Data
     -> Msg
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     let
         id =
@@ -31,12 +32,19 @@ update data msg model =
             DockMsg msg ->
                 Dock.update data msg model_
 
-            _ ->
-                ( model, Cmd.none, Dispatch.none )
+            AppMsg ( sessionId, windowId ) context msg ->
+                windowManager data
+                    sessionId
+                    (WM.AppMsg windowId context msg)
+                    model
 
 
 
 -- internals
+
+
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
 
 
 windowManager :
@@ -44,13 +52,13 @@ windowManager :
     -> ID
     -> WM.Msg
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
+    -> UpdateResponse
 windowManager data id msg model =
     let
         wm =
             model
                 |> get id
-                |> Maybe.withDefault WM.initialModel
+                |> Maybe.withDefault (WM.initialModel id)
 
         ( wm_, cmd, dispatch ) =
             WM.update data msg wm

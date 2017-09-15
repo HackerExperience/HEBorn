@@ -10,8 +10,6 @@ module OS.SessionManager.WindowManager.Models
         , Instance(..)
         , GroupedWindows
         , initialModel
-        , resert
-        , insert
         , refresh
         , insertLocked
         , remove
@@ -35,6 +33,9 @@ module OS.SessionManager.WindowManager.Models
         , group
         , title
         , windowData
+        , initialPosition
+        , filterApp
+        , moveTail
         )
 
 import Dict exposing (Dict)
@@ -48,7 +49,6 @@ import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
@@ -58,6 +58,7 @@ type alias Model =
     , drag : Draggable.State ID
     , dragging : Maybe ID
     , focusing : Maybe ID
+    , parentSession : ID
     }
 
 
@@ -108,141 +109,16 @@ type alias GroupedWindows =
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : ID -> Model
+initialModel parent =
     { windows = Dict.empty
     , hidden = []
     , visible = []
     , drag = Draggable.init
     , dragging = Nothing
     , focusing = Nothing
+    , parentSession = parent
     }
-
-
-resert :
-    Game.Data
-    -> String
-    -> Maybe Servers.ID
-    -> Apps.App
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-resert data id serverID app ({ visible, hidden, windows } as model) =
-    let
-        noVisible =
-            visible
-                |> List.filter (filterApp app windows)
-                |> List.isEmpty
-
-        noHidden =
-            hidden
-                |> List.filter (filterApp app windows)
-                |> List.isEmpty
-
-        noOpened =
-            noVisible && noHidden
-    in
-        if noOpened then
-            insert data id serverID app model
-        else if noVisible then
-            let
-                model_ =
-                    hidden
-                        |> List.filter (filterApp app windows)
-                        |> List.foldl restore model
-            in
-                ( model_, Cmd.none, Dispatch.none )
-        else
-            insert data id serverID app model
-
-
-insert :
-    Game.Data
-    -> ID
-    -> Maybe Servers.ID
-    -> Apps.App
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-insert data id serverID app ({ windows, visible } as model) =
-    let
-        contexts =
-            case Apps.contexts app of
-                Apps.ContextualApp ->
-                    data
-                        |> Game.getGame
-                        |> Game.getAccount
-                        |> Account.getContext
-                        |> Just
-
-                Apps.ContextlessApp ->
-                    Nothing
-
-        ( instance, cmd, dispatch ) =
-            case Apps.contexts app of
-                Apps.ContextualApp ->
-                    let
-                        ( model1, cmd1, dispatch1 ) =
-                            Apps.model data id app
-
-                        data_ =
-                            data
-                                |> Game.getGame
-                                |> Game.fromEndpoint
-                                |> Maybe.withDefault data
-
-                        ( model2, cmd2, dispatch2 ) =
-                            Apps.model data_ id app
-
-                        cmd =
-                            Cmd.batch [ cmd1, cmd2 ]
-
-                        dispatch =
-                            Dispatch.batch [ dispatch1, dispatch2 ]
-
-                        model3 =
-                            case contexts of
-                                Just Gateway ->
-                                    DoubleContext model1 model2
-
-                                _ ->
-                                    DoubleContext model2 model1
-                    in
-                        ( model3, cmd, dispatch )
-
-                Apps.ContextlessApp ->
-                    let
-                        ( model, cmd, dispatch ) =
-                            Apps.model data id app
-                    in
-                        ( SingleContext model, cmd, dispatch )
-
-        cmd_ =
-            Cmd.map (WindowMsg id) cmd
-
-        window =
-            Window
-                (initialPosition model)
-                (Size 600 400)
-                False
-                app
-                contexts
-                instance
-                False
-                serverID
-
-        windows_ =
-            Dict.insert id window windows
-
-        visible_ =
-            moveTail id visible
-
-        model_ =
-            { model
-                | windows = windows_
-                , visible = visible_
-                , focusing = Just id
-            }
-    in
-        ( model_, cmd_, dispatch )
 
 
 refresh : ID -> Window -> Model -> Model
@@ -659,10 +535,6 @@ windowData data id window model =
                 data
 
 
-
--- internals
-
-
 initialPosition : Model -> Position
 initialPosition model =
     let
@@ -713,6 +585,10 @@ moveTail target list =
         list
             |> List.reverse
             |> reducer [ target ]
+
+
+
+-- internals
 
 
 dropElement : a -> List a -> List a

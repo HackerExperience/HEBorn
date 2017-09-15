@@ -41,7 +41,6 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Models exposing (..)
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Servers.Web.Models as Web
 
 
 type Response
@@ -175,7 +174,6 @@ toServer server =
             , logs = Logs.initialModel
             , processes = Processes.initialModel
             , tunnels = Tunnels.initialModel
-            , web = Web.initialModel
             }
 
         toNip =
@@ -203,7 +201,6 @@ toServer server =
                     , logs = common.logs
                     , processes = common.processes
                     , tunnels = common.tunnels
-                    , web = common.web
                     }
 
             EndpointServer data ->
@@ -227,7 +224,6 @@ toServer server =
                     , logs = common.logs
                     , processes = common.processes
                     , tunnels = common.tunnels
-                    , web = common.web
                     }
 
 

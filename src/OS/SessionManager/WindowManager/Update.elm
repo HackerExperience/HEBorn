@@ -7,6 +7,7 @@ import Draggable.Events exposing (onDragBy, onDragStart)
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import Game.Data as Game
+import Game.Meta.Types exposing (Context(..))
 import Game.Servers.Models as Servers
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
@@ -88,6 +89,16 @@ update data msg model =
             in
                 ( model_, cmd_, dispatch )
 
+        AppMsg id context msg ->
+            let
+                ( model_, cmd, dispatch ) =
+                    updateContext data id context msg model
+
+                cmd_ =
+                    Cmd.map (WindowMsg id) cmd
+            in
+                ( model_, cmd_, dispatch )
+
 
 
 -- internals
@@ -133,6 +144,34 @@ updateApp data id msg ({ windows } as model0) =
 
         Nothing ->
             ( model0, Cmd.none, Dispatch.none )
+
+
+updateContext :
+    Game.Data
+    -> ID
+    -> Context
+    -> Apps.Msg
+    -> Model
+    -> ( Model, Cmd Apps.Msg, Dispatch )
+updateContext data id targetContext msg ({ windows } as model0) =
+    case Dict.get id windows of
+        Nothing ->
+            ( model0, Cmd.none, Dispatch.none )
+
+        Just window0 ->
+            case window0.context of
+                Just activeContext ->
+                    if (targetContext == activeContext) then
+                        updateApp data id msg model0
+                    else
+                        -- TODO: Code this case (when nsg has to go to unactive context)
+                        ( model0, Cmd.none, Dispatch.none )
+
+                Nothing ->
+                    if (targetContext /= Gateway) then
+                        ( model0, Cmd.none, Dispatch.none )
+                    else
+                        updateApp data id msg model0
 
 
 wrapEmpty : Model -> ( Model, Cmd Msg, Dispatch )

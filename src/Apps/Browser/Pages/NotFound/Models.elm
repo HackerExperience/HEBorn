@@ -3,30 +3,22 @@ module Apps.Browser.Pages.NotFound.Models
         ( Model
         , initialModel
         , getTitle
-        , getSite
         )
 
-import Game.Servers.Web.Types as Web
+import Game.Web.Types exposing (Url)
 
 
 type alias Model =
-    { title : String
-    , site : Web.Site
+    { url : Url
     }
 
 
-initialModel : Web.Site -> Model
-initialModel site =
-    { title = site.url
-    , site = site
+initialModel : Url -> Model
+initialModel url =
+    { url = url
     }
 
 
 getTitle : Model -> String
-getTitle { title } =
-    title
-
-
-getSite : Model -> ( Web.Type, Maybe Web.Meta )
-getSite { site } =
-    ( Web.NotFound, Nothing )
+getTitle { url } =
+    "Unknown " ++ url
