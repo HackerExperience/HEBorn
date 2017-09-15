@@ -11,5 +11,5 @@ type Response
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        BruteforceRequest ( code, data ) ->
-            Maybe.map Bruteforce <| Bruteforce.receive code data
+        BruteforceRequest optimistic ( code, data ) ->
+            Maybe.map Bruteforce <| Bruteforce.receive optimistic code data

@@ -35,7 +35,7 @@ genModel =
             map2 (,) Gen.Servers.genServerID Gen.Servers.genServer
 
         genServers =
-            andThen (flip list genPairs) (int 6 10)
+            andThen (flip list genPairs) (int 8 10)
 
         insertServer ( id, server ) game =
             let

@@ -289,6 +289,8 @@ updateServerEvent game id event server =
     Update.fromModel server
 
 
+{-| Only route server events when server IDs match.
+-}
 shouldRouteEvent : ID -> Events.Event -> Bool
 shouldRouteEvent id event =
     case event of

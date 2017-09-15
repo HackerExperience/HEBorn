@@ -9,11 +9,11 @@ type Msg
     = Pause ID
     | Resume ID
     | Remove ID
-    | Start Type ServerID ServerID (Maybe Version) (Maybe FileID)
+    | Start Type ServerID ServerID ( Maybe FileID, Maybe Version, FileName )
     | Complete ID
     | Request RequestMsg
     | Event Events.Event
 
 
 type RequestMsg
-    = BruteforceRequest ResponseType
+    = BruteforceRequest ID ResponseType

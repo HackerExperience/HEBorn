@@ -127,7 +127,7 @@ genServer =
 
 genServerList : Generator (List Server)
 genServerList =
-    andThen (\num -> list num genServer) (int 1 8)
+    andThen (\num -> list num genServer) (int 8 10)
 
 
 genEmptyModel : Generator Model

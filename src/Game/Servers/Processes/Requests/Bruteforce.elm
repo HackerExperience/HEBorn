@@ -33,7 +33,7 @@ import Game.Servers.Processes.Messages
 
 
 type Response
-    = Okay Data
+    = Okay ID Data
 
 
 type alias Data =
@@ -46,8 +46,8 @@ type alias Data =
     }
 
 
-request : ID -> ID -> ConfigSource a -> Cmd Msg
-request target origin =
+request : ID -> ID -> ID -> ConfigSource a -> Cmd Msg
+request optimistic target origin =
     let
         payload =
             Encode.object
@@ -55,17 +55,17 @@ request target origin =
                 ]
     in
         Requests.request Topics.bruteforce
-            (BruteforceRequest >> Request)
+            (BruteforceRequest optimistic >> Request)
             (Just origin)
             payload
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
+receive : ID -> Code -> Value -> Maybe Response
+receive optimistic code json =
     case code of
         OkCode ->
             decodeValue decoder json
-                |> Result.map Okay
+                |> Result.map (Okay optimistic)
                 |> Requests.report
 
         _ ->

@@ -45,3 +45,47 @@ type alias HackedServer =
 initialModel : Model
 initialModel =
     Model Dict.empty [] []
+
+
+getHackedServers : Model -> HackedServers
+getHackedServers =
+    .servers
+
+
+setHackedServers : HackedServers -> Model -> Model
+setHackedServers servers model =
+    { model | servers = servers }
+
+
+getPassword : HackedServer -> String
+getPassword =
+    .password
+
+
+setPassword : String -> HackedServer -> HackedServer
+setPassword password server =
+    { server | password = password }
+
+
+{-| Returns a new HackedServer if no one is found.
+-}
+getHackedServer : NIP -> HackedServers -> HackedServer
+getHackedServer nip servers =
+    case Dict.get nip servers of
+        Just server ->
+            server
+
+        Nothing ->
+            { password = ""
+            , label = Nothing
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = NPC
+            , remoteConn = Nothing
+            }
+
+
+insertServer : NIP -> HackedServer -> HackedServers -> HackedServers
+insertServer =
+    Dict.insert

@@ -8,6 +8,8 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
+import Game.Models as Game
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Models as Servers
 import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
@@ -26,7 +28,7 @@ view data ({ app } as model) =
                 |> Processes.toList
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable tasks data.game.meta.lastTick
+            [ viewTasksTable data tasks data.game.meta.lastTick
             , viewTotalResources app
             , menuView model
             ]
@@ -42,6 +44,11 @@ view data ({ app } as model) =
 
 
 -- private
+
+
+maybe : Maybe (Html msg) -> Html msg
+maybe =
+    Maybe.withDefault <| text ""
 
 
 viewTaskRowUsage : ResourceUsage -> Html Msg
@@ -80,16 +87,15 @@ viewState now proc =
                         |> Maybe.map (flip (-) now)
                         |> Maybe.withDefault 0
             in
-                etaBar timeLeft progress
-
-        Processes.Standby ->
-            text "Processing..."
+                progress
+                    |> Maybe.map (etaBar timeLeft)
+                    |> maybe
 
         Processes.Paused ->
             text "Paused"
 
         Processes.Completed _ ->
-            -- TODO: match completion result
+            -- TODO: match completion status (after defining them)
             text "Finished"
 
 
@@ -115,53 +121,71 @@ processMenu ( id, process ) =
         menu id
 
 
-viewTaskRow : Time -> ( Processes.ID, Processes.Process ) -> Html Msg
-viewTaskRow now (( _, process ) as entry) =
+viewTaskRow :
+    Game.Data
+    -> Time
+    -> ( Processes.ID, Processes.Process )
+    -> Html Msg
+viewTaskRow data now (( _, process ) as entry) =
     let
-        name =
-            Processes.getName process
+        maybeAnd ma mb =
+            Maybe.andThen (\a -> Maybe.map (\b -> ( a, b )) mb) ma
 
-        fileName =
-            -- TODO: fetch actual file name
-            process
-                |> Processes.getFileID
-                |> Maybe.withDefault "HIDDEN"
+        fileInfo =
+            let
+                servers =
+                    data
+                        |> Game.getGame
+                        |> Game.getServers
 
-        fileVer =
-            process
-                |> Processes.getVersion
-                |> Maybe.map toString
-                |> Maybe.withDefault "N/V"
+                maybeFileID =
+                    Processes.getFileID process
 
-        usage =
+                maybeFilesystem =
+                    process
+                        |> Processes.getOrigin
+                        |> Maybe.andThen (flip Servers.get servers)
+                        |> Maybe.map Servers.getFilesystem
+
+                fileInformation fileName =
+                    div []
+                        [ text "File:"
+                        , text fileName
+                        , process
+                            |> Processes.getVersion
+                            |> Maybe.map
+                                (toString
+                                    >> text
+                                    >> List.singleton
+                                    >> span []
+                                )
+                            |> maybe
+                        ]
+            in
+                maybeAnd maybeFileID maybeFilesystem
+                    |> Maybe.andThen (uncurry Filesystem.getEntry)
+                    |> Maybe.map Filesystem.getEntryName
+                    |> Maybe.map fileInformation
+                    |> maybe
+
+        usageView =
             process
                 |> Processes.getUsage
                 |> Maybe.map (packUsage >> viewTaskRowUsage)
-
-        target =
-            -- TODO: fetch server ip
-            Processes.getTarget process
-
-        maybe =
-            Maybe.withDefault (div [] [])
+                |> maybe
     in
         div [ class [ EntryDivision ], (processMenu entry) ]
-            [ div []
-                [ div [] [ text name ]
-                , div [] [ text "Target: ", text target ]
-                , div []
-                    [ text "File: "
-                    , text fileName
-                    , span [] [ text fileVer ]
-                    ]
-                ]
-            , div [] [ viewState now process ]
-            , maybe usage
+            [ text <| Processes.getName process
+            , text "Target: "
+            , text <| Processes.getTarget process
+            , fileInfo
+            , viewState now process
+            , usageView
             ]
 
 
-viewTasksTable : Entries -> Time -> Html Msg
-viewTasksTable entries now =
+viewTasksTable : Game.Data -> Entries -> Time -> Html Msg
+viewTasksTable data entries now =
     div [ class [ TaskTable ] ]
         ([ div [ class [ EntryDivision ] ]
             -- TODO: Hide when too small (responsive design)
@@ -170,7 +194,7 @@ viewTasksTable entries now =
             , div [] [ text "Resources" ]
             ]
          ]
-            ++ (List.map (viewTaskRow now) entries)
+            ++ (List.map (viewTaskRow data now) entries)
         )
 
 

@@ -26,9 +26,8 @@ type alias Process =
     { type_ : Type
     , access : Access
     , state : State
-    , version : Maybe Version
-    , progress : Progress
-    , file : Maybe FileID
+    , file : Maybe ProcessFile
+    , progress : Maybe Progress
     , target : ServerID
     }
 
@@ -44,10 +43,6 @@ type
 
 
 type alias ServerID =
-    Game.Shared.ID
-
-
-type alias FileID =
     Game.Shared.ID
 
 
@@ -74,14 +69,11 @@ type alias PartialAccess =
     }
 
 
-type alias Version =
-    Float
-
-
+{-| Starting processes are used for optimistic UI.
+-}
 type State
     = Starting
     | Running
-    | Standby -- MIGHT BE REMOVED
     | Paused
     | Completed (Maybe Status)
 
@@ -93,6 +85,25 @@ type Status
 
 type Reason
     = Misc String
+
+
+type alias ProcessFile =
+    { id : Maybe FileID
+    , version : Maybe Version
+    , name : String
+    }
+
+
+type alias FileID =
+    Game.Shared.ID
+
+
+type alias Version =
+    Float
+
+
+type alias FileName =
+    String
 
 
 type Priority
@@ -140,6 +151,8 @@ initialModel =
     }
 
 
+{-| Inserts a Process, can't replace existing ones.
+-}
 insert : ID -> Process -> Model -> Model
 insert id process model =
     case Dict.get id model.processes of
@@ -151,6 +164,8 @@ insert id process model =
             model
 
 
+{-| Inserts a Process optimistically, generating a temporary id for it.
+-}
 insertOptimistic : Process -> Model -> ( ID, Model )
 insertOptimistic process model0 =
     let
@@ -164,6 +179,9 @@ insertOptimistic process model0 =
         ( id, model2 )
 
 
+{-| Replace a process, can't replace optimistic ones as they shouldn't be
+changed until replaced with real ones.
+-}
 upsert : ID -> Process -> Model -> Model
 upsert id process model =
     case process.state of
@@ -180,6 +198,8 @@ get id model =
     Dict.get id model.processes
 
 
+{-| Removes a process, can't remove partial access processes.
+-}
 remove : ID -> Model -> Model
 remove id model =
     case get id model of
@@ -210,10 +230,9 @@ newOptimistic :
     Type
     -> ServerID
     -> ServerID
-    -> Maybe Version
-    -> Maybe FileID
+    -> ProcessFile
     -> Process
-newOptimistic t origin target version file =
+newOptimistic t origin target file =
     { type_ = t
     , access =
         Full
@@ -228,15 +247,10 @@ newOptimistic t origin target version file =
             , connection = Nothing
             }
     , state = Starting
-    , version = version
-    , progress = ( 0.0, Nothing )
-    , file = file
+    , progress = Just ( 0.0, Nothing )
+    , file = Just file
     , target = target
     }
-
-
-
--- WIP: do not use this yet, subject to change
 
 
 replace : ID -> ID -> Process -> Model -> Model
@@ -324,13 +338,18 @@ getOrigin { access } =
 
 
 getVersion : Process -> Maybe Version
-getVersion =
-    .version
+getVersion { file } =
+    Maybe.andThen .version file
 
 
 getFileID : Process -> Maybe FileID
-getFileID =
-    .file
+getFileID { file } =
+    Maybe.andThen .id file
+
+
+getFileName : Process -> Maybe FileName
+getFileName { file } =
+    Maybe.map .name file
 
 
 getPriority : Process -> Maybe Priority
@@ -353,19 +372,19 @@ getUsage { access } =
             Nothing
 
 
-getProgress : Process -> Progress
+getProgress : Process -> Maybe Progress
 getProgress =
     .progress
 
 
-getProgressPct : Process -> Percentage
+getProgressPct : Process -> Maybe Percentage
 getProgressPct =
-    getProgress >> Tuple.first
+    getProgress >> Maybe.map Tuple.first
 
 
 getCompletionDate : Process -> Maybe CompletionDate
 getCompletionDate =
-    getProgress >> Tuple.second
+    getProgress >> Maybe.andThen Tuple.second
 
 
 getConnectionId : Process -> Maybe ConnectionID
@@ -395,7 +414,7 @@ getName { type_ } =
             "File Transference"
 
         PassiveFirewall ->
-            "PassiveFirewall"
+            "Passive Firewall"
 
 
 getPercentUsage : Usage -> Float
@@ -429,8 +448,24 @@ typeFromName t =
         "File Transference" ->
             Just FileTransference
 
-        "PassiveFirewall" ->
+        "Passive Firewall" ->
             Just PassiveFirewall
 
         _ ->
             Nothing
+
+
+isRecurive : Process -> Bool
+isRecurive process =
+    process
+        |> getProgress
+        |> Maybe.map (always False)
+        |> Maybe.withDefault True
+
+
+newProcessFile : ( Maybe FileID, Maybe Version, FileName ) -> ProcessFile
+newProcessFile ( id, version, name ) =
+    { id = id
+    , version = version
+    , name = name
+    }

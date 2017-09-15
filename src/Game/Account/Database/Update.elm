@@ -10,8 +10,8 @@ import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events exposing (Event(Report, AccountEvent))
-import Events.Account as AccEv
-import Events.Account.Database as DbEv
+import Events.Account as EventsAccount
+import Events.Account.Database as EventsDatabase
 import Requests.Requests as Requests
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
@@ -31,32 +31,50 @@ update game msg model =
 
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
-    case event of
-        AccountEvent (AccEv.DatabaseEvent (DbEv.PasswordAcquired data)) ->
-            onPasswordAcquired game data model
+    let
+        databaseEvents event =
+            case event of
+                EventsDatabase.PasswordAcquired data ->
+                    onPasswordAcquired game data model
 
-        _ ->
-            Update.fromModel model
+                _ ->
+                    Update.fromModel model
+
+        accountEvents event =
+            case event of
+                EventsAccount.DatabaseEvent event ->
+                    databaseEvents event
+
+                _ ->
+                    Update.fromModel model
+    in
+        case event of
+            AccountEvent event ->
+                accountEvents event
+
+            _ ->
+                Update.fromModel model
 
 
+{-| Saves password for that server, inserts a new server entry
+if none is found.
+-}
 onPasswordAcquired :
     Game.Model
-    -> DbEv.PasswordAcquiredData
+    -> EventsDatabase.PasswordAcquiredData
     -> Model
     -> UpdateResponse
 onPasswordAcquired game data model =
     let
-        server =
-            { password = data.password
-            , label = Nothing
-            , notes = Nothing
-            , virusInstalled = []
-            , activeVirus = Nothing
-            , type_ = NPC
-            , remoteConn = Nothing
-            }
+        servers =
+            getHackedServers model
+
+        model_ =
+            servers
+                |> getHackedServer data.nip
+                |> setPassword data.password
+                |> flip (insertServer data.nip) servers
+                |> flip setHackedServers model
     in
-        model.servers
-            |> Dict.insert data.nip server
-            |> (\s -> { model | servers = s })
-            |> Update.fromModel
+        -- TODO: we need a new hacked server request here
+        Update.fromModel model_

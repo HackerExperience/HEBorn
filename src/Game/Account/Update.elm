@@ -156,10 +156,6 @@ updateEvent game event model =
         Report (Ws.Connected _) ->
             onWsConnected game model
 
-        Report (Ws.Joined AccountChannel) ->
-            -- TODO: maybe remove this handler
-            onWsJoinedAccount game model
-
         Report Ws.Disconnected ->
             onWsDisconnected game model
 
@@ -182,12 +178,6 @@ onWsConnected game model =
                 (Ws.JoinChannel AccountChannel (Just model.id) Nothing)
     in
         ( model, Cmd.none, dispatch )
-
-
-onWsJoinedAccount : Game.Model -> Model -> UpdateResponse
-onWsJoinedAccount game model =
-    -- TODO: maybe remove this function
-    Update.fromModel model
 
 
 onWsDisconnected : Game.Model -> Model -> UpdateResponse

@@ -181,10 +181,14 @@ genProcess =
         |> map Process
         |> andMap genAccess
         |> andMap genState
-        |> andMap (maybe genVersion)
-        |> andMap genProgress
-        |> andMap (maybe genFileID)
+        |> andMap (maybe genProcessFile)
+        |> andMap (maybe genProgress)
         |> andMap genServerID
+
+
+
+--|> andMap (maybe genVersion)
+--|> andMap (maybe genFileID)
 
 
 genFullProcess : Generator Process
@@ -193,9 +197,8 @@ genFullProcess =
         |> map Process
         |> andMap (map Full genFullAccess)
         |> andMap genState
-        |> andMap (maybe genVersion)
-        |> andMap genProgress
-        |> andMap (maybe genFileID)
+        |> andMap (maybe genProcessFile)
+        |> andMap (maybe genProgress)
         |> andMap genServerID
 
 
@@ -274,7 +277,6 @@ genState =
     choices
         [ constant Starting
         , constant Running
-        , constant Standby
         , constant Paused
         , map Completed (maybe genStatus)
         ]
@@ -296,9 +298,27 @@ genReason =
         |> choices
 
 
+genProcessFile : Generator ProcessFile
+genProcessFile =
+    (maybe genFileID)
+        |> map ProcessFile
+        |> andMap (maybe genVersion)
+        |> andMap genFileName
+
+
+genFileID : Generator FileID
+genFileID =
+    unique
+
+
 genVersion : Generator Float
 genVersion =
     float 0.1 100.0
+
+
+genFileName : Generator FileName
+genFileName =
+    unique
 
 
 genProgress : Generator Progress
@@ -314,11 +334,6 @@ genPercentage =
 genCompletionDate : Generator CompletionDate
 genCompletionDate =
     float 1420070400 4102444799
-
-
-genFileID : Generator FileID
-genFileID =
-    unique
 
 
 genServerID : Generator ServerID

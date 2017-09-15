@@ -79,13 +79,13 @@ update data msg ({ app } as model) =
 
         StartCrypting id ->
             let
+                -- this dispatch is probably temporary
                 dispatch =
                     Dispatch.processes data.id <|
                         Processes.Start Processes.Encryptor
                             data.id
                             id
-                            Nothing
-                            Nothing
+                            ( Nothing, Nothing, "File Name" )
             in
                 ( model, Cmd.none, dispatch )
 

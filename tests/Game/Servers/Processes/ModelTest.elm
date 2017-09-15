@@ -40,7 +40,7 @@ processOperationsTests =
 
 addProcessTests : List Test
 addProcessTests =
-    [ describe "generic add complete or partial process test"
+    [ describe "generic add full or partial process test"
         addProcessGenericTests
     ]
 
@@ -67,7 +67,7 @@ addProcessGenericTests =
 
 pauseProcessTests : List Test
 pauseProcessTests =
-    [ describe "impossible to pause complete or partial process test"
+    [ describe "impossible to pause completed or partial process test"
         invalidPauseProcessTests
     ]
 
@@ -88,7 +88,7 @@ invalidPauseProcessTests =
 
 resumeProcessTests : List Test
 resumeProcessTests =
-    [ describe "impossible to resume complete or partial process test"
+    [ describe "impossible to resume completed or partial process test"
         invalidResumeProcessTests
     ]
 
@@ -181,7 +181,7 @@ invalidCompleteProcessTests =
 
 deleteProcessTests : List Test
 deleteProcessTests =
-    [ describe "impossible to delete complete or partial process test"
+    [ describe "impossible to delete completed or partial process test"
         deleteProcessGenericTests
     ]
 

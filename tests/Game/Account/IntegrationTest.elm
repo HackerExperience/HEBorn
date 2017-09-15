@@ -19,6 +19,7 @@ import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
+import Game.Account.Database.Models exposing (..)
 
 
 all : Test
@@ -44,7 +45,8 @@ eventTests =
         \game ->
             let
                 ( serverId, server ) =
-                    fromJust <| Game.getGateway game
+                    fromJust "server_password_acquired fetching gateway" <|
+                        Game.getGateway game
 
                 -- building event
                 channel =
@@ -59,25 +61,25 @@ eventTests =
                 json =
                     toValue
                         """
-                        { "server_ip": "phoebe"
-                        , "password": "asdfasdf"
-                        , "network_id": "id"
-                        , "process_id": "id"
-                        , "gateway_id": "id"
-                        }
-                        """
+                    { "server_ip": "phoebe"
+                    , "password": "asdfasdf"
+                    , "network_id": "id"
+                    , "process_id": "id"
+                    , "gateway_id": "id"
+                    }
+                    """
 
                 msg =
                     Events.handler channel context name json
-                        |> fromJust
+                        |> fromJust ""
                         |> Game.Event
             in
                 game
                     |> updateGame msg
                     |> Game.getAccount
                     |> Account.getDatabase
-                    |> .servers
+                    |> getHackedServers
                     |> Dict.get ( "id", "phoebe" )
-                    |> Maybe.map (always "found")
-                    |> Expect.equal (Just "found")
+                    |> Maybe.map getPassword
+                    |> Expect.equal (Just "asdfasdf")
     ]

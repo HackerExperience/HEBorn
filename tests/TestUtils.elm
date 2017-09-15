@@ -62,26 +62,34 @@ updateGame msg0 model0 =
         List.foldl reduce model1 msgs
 
 
-fromJust : Maybe a -> a
-fromJust m =
+fromJust : String -> Maybe a -> a
+fromJust tip m =
     case m of
         Just a ->
             a
 
         Nothing ->
-            Debug.crash "fromJust called with Nothing"
+            Debug.crash ("fromJust called with Nothing" ++ hint tip)
 
 
-fromOk : Result b a -> a
-fromOk m =
+fromOk : String -> Result b a -> a
+fromOk tip m =
     case m of
         Ok a ->
             a
 
         Err _ ->
-            Debug.crash "fromOk called with Err"
+            Debug.crash ("fromOk called with Err" ++ hint tip)
 
 
 toValue : String -> Decode.Value
 toValue =
-    Decode.decodeString Decode.value >> fromOk
+    Decode.decodeString Decode.value >> fromOk "invalid json"
+
+
+hint : String -> String
+hint str =
+    if str == "" then
+        ""
+    else
+        " (" ++ str ++ ")"
