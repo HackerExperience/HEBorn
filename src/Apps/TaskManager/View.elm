@@ -94,6 +94,9 @@ viewState now proc =
         Processes.Paused ->
             text "Paused"
 
+        Processes.Concluded ->
+            text "Completed"
+
         Processes.Succeeded ->
             -- TODO: match completion status
             text "Completed (success)"

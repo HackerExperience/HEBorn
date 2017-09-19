@@ -75,6 +75,7 @@ type State
     = Starting
     | Running
     | Paused
+    | Concluded
     | Succeeded
     | Failed (Maybe String)
 
@@ -136,6 +137,24 @@ type alias CompletionDate =
     Time
 
 
+whenIncomplete : (Process -> Process) -> Process -> Process
+whenIncomplete func process =
+    if isConcluded process then
+        process
+    else 
+        func process
+
+
+whenFullAccess : (Process -> Process) -> Process -> Process
+whenFullAccess func process =
+    case getAccess process of
+        Full _ ->
+            func process
+
+        _ ->
+            process
+
+
 initialModel : Model
 initialModel =
     { randomUuidSeed = Random.initialSeed 42
@@ -176,13 +195,21 @@ changed until replaced with real ones.
 -}
 upsert : ID -> Process -> Model -> Model
 upsert id process model =
-    case process.state of
-        Starting ->
-            model
-
-        _ ->
+    let 
+        override () =
             Dict.insert id process model.processes
                 |> flip setProcesses model
+    in
+        case get id model of
+            Just process ->
+                case getState process of
+                    Starting ->
+                        model
+
+                    _ ->
+                        override ()
+            _ ->
+                override ()
 
 
 get : ID -> Model -> Maybe Process
@@ -255,48 +282,29 @@ replace previousId id process model =
 
 pause : Process -> Process
 pause ({ access } as process) =
-    case access of
-        Full _ ->
-            if isConcluded process then
-                process
-            else
-                { process | state = Paused }
-
-        Partial _ ->
-            process
+    { process | state = Paused }
 
 
 resume : Process -> Process
 resume ({ access } as process) =
-    case access of
-        Full _ ->
-            if isConcluded process then
-                process
-            else
-                { process | state = Running }
-
-        Partial _ ->
-            process
+    { process | state = Running }
 
 
-conclude : Bool -> Maybe String -> Process -> Process
+conclude : Maybe Bool -> Maybe String -> Process -> Process
 conclude succeeded status ({ access } as process) =
     let
         toState =
-            if succeeded then
-                always Succeeded
-            else
-                Failed
-    in
-        case access of
-            Full _ ->
-                if isConcluded process then
-                    process
-                else
-                    { process | state = toState status }
+            case succeeded of 
+                Just True ->
+                    always Succeeded
 
-            Partial _ ->
-                process
+                Just False ->
+                    Failed
+
+                Nothing ->
+                    always Concluded
+    in
+        { process | state = toState status }
 
 
 getState : Process -> State
@@ -455,23 +463,23 @@ isRecurive process =
         |> Maybe.map (always False)
         |> Maybe.withDefault True
 
-
+{-| This function will return True for Concluded, Succeeded and Failed process,
+as each of these states are conclusion states.
+-}
 isConcluded : Process -> Bool
 isConcluded process =
-    case getProgress process of
-        Just ( 1.0, _ ) ->
-            True
+        case getState process of
+            Concluded ->
+                True
 
-        _ ->
-            case getState process of
-                Succeeded ->
-                    True
+            Succeeded ->
+                True
 
-                Failed _ ->
-                    True
+            Failed _ ->
+                True
 
-                _ ->
-                    False
+            _ ->
+                False
 
 
 newProcessFile : ( Maybe FileID, Maybe Version, FileName ) -> ProcessFile

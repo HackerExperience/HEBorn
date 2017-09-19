@@ -4,9 +4,9 @@ import Expect
 import Gen.Processes as Gen
 import Fuzz exposing (int, tuple)
 import Test exposing (Test, describe)
-import TestUtils exposing (fuzz, once, ensureDifferentSeed)
+import TestUtils exposing (fuzz, once, batch, ensureDifferentSeed)
 import Utils.Core exposing (swap)
-import Game.Servers.Processes.Models as Processes exposing (Process)
+import Game.Servers.Processes.Models as Processes exposing (..)
 
 
 all : Test
@@ -16,20 +16,109 @@ all =
         ]
 
 
+processContractTests : Test
+processContractTests =
+    describe "process contract guards"
+        [ describe "when incomplete"
+            whenIncompleteTests
+        , describe "when full access"
+            whenFullAccessTests
+        ]
+
+
 processOperationsTests : Test
 processOperationsTests =
     describe "process operations"
         [ describe "add process"
             addProcessTests
-        , describe "pause process"
-            pauseProcessTests
-        , describe "resume process"
-            resumeProcessTests
-        , describe "complete process"
-            completeProcessTests
+        , describe "state change"
+            processStateChangeTests
         , describe "delete process"
             deleteProcessTests
         ]
+
+
+
+--------------------------------------------------------------------------------
+-- Process when incomplete constraint tests
+--------------------------------------------------------------------------------
+
+
+whenIncompleteTests : List Test
+whenIncompleteTests =
+    [ fuzz
+        Gen.process
+        "can perform action on incomplete processes"
+      <|
+        \process0 ->
+            let
+                process1 =
+                    { process0 | state = Running }
+
+                process2 =
+                    whenIncomplete resume process1
+            in
+                Expect.notEqual process1 process2
+    , fuzz
+        Gen.process
+        "can't perform action on complete processes"
+      <|
+        \process ->
+            let
+                processSucceeded =
+                    { process | state = Succeeded }
+
+                processSucceeded_ =
+                    conclude (Just False) Nothing processSucceeded
+
+                processFailed =
+                    { process | state = Failed Nothing }
+
+                processFailed_ =
+                    conclude (Just True) Nothing processFailed
+            in
+                batch
+                    [ Expect.equal processSucceeded processSucceeded_
+                    , Expect.equal processFailed processFailed_
+                    ]
+    ]
+
+
+
+--------------------------------------------------------------------------------
+-- Process when full access constraint tests
+--------------------------------------------------------------------------------
+
+
+whenFullAccessTests : List Test
+whenFullAccessTests =
+    [ fuzz
+        Gen.fullProcess
+        "can perform action on full processes"
+      <|
+        \process0 ->
+            let
+                process1 =
+                    { process0 | state = Paused }
+
+                process2 =
+                    whenFullAccess resume process1
+            in
+                Expect.notEqual process1 process2
+    , fuzz
+        Gen.partialProcess
+        "can perform action on full processes"
+      <|
+        \process0 ->
+            let
+                process1 =
+                    { process0 | state = Paused }
+
+                process2 =
+                    whenFullAccess resume process1
+            in
+                Expect.equal process1 process2
+    ]
 
 
 
@@ -61,109 +150,48 @@ addProcessGenericTests =
 
 
 --------------------------------------------------------------------------------
--- Pause Process
+-- Change Process State
 --------------------------------------------------------------------------------
 
 
-pauseProcessTests : List Test
-pauseProcessTests =
-    [ describe "impossible to pause completed or partial process test"
-        invalidPauseProcessTests
-    ]
-
-
-invalidPauseProcessTests : List Test
-invalidPauseProcessTests =
-    stateChangeHelper
-        "can pause allowed process"
-        Processes.Paused
-        Processes.pause
-
-
-
--- --------------------------------------------------------------------------------
--- -- Resume Process
--- --------------------------------------------------------------------------------
-
-
-resumeProcessTests : List Test
-resumeProcessTests =
-    [ describe "impossible to resume completed or partial process test"
-        invalidResumeProcessTests
-    ]
-
-
-invalidResumeProcessTests : List Test
-invalidResumeProcessTests =
-    stateChangeHelper
-        "can resume allowed process"
-        Processes.Running
-        Processes.resume
-
-
-
---------------------------------------------------------------------------------
--- State Changing Helper
---------------------------------------------------------------------------------
-
-
-assertStateChange : Processes.State -> Process -> (Process -> Expect.Expectation)
-assertStateChange expected process =
-    case Processes.getAccess process of
-        Processes.Full _ ->
-            if Processes.isConcluded process then
-                Expect.equal process
-            else
-                (Processes.getState >> Expect.equal expected)
-
-        Processes.Partial _ ->
-            Expect.equal process
-
-
-stateChangeHelper : String -> Processes.State -> (Process -> Process) -> List Test
-stateChangeHelper label expected handler =
+processStateChangeTests : List Test
+processStateChangeTests =
     [ fuzz
         Gen.process
-        label
-        (\process -> process |> handler |> assertStateChange expected process)
+        "resume a process"
+      <|
+        resume
+            >> getState
+            >> Expect.equal Running
+    , fuzz
+        Gen.process
+        "pause a process"
+      <|
+        pause
+            >> getState
+            >> Expect.equal Paused
+    , fuzz
+        Gen.process
+        "conclude a process with no conclusion status"
+      <|
+        conclude Nothing Nothing
+            >> getState
+            >> Expect.equal Concluded
+    , fuzz
+        Gen.process
+        "conclude a process with failure"
+      <|
+        conclude (Just False) (Just "failed")
+            >> getState
+            >> Expect.equal (Failed <| Just "failed")
+    , fuzz
+        Gen.process
+        "conclude a process with success"
+      <|
+        conclude (Just True) Nothing
+            >> getState
+            >> Expect.equal Succeeded
     ]
-
-
-
---------------------------------------------------------------------------------
--- Complete Process
---------------------------------------------------------------------------------
-
-
-completeProcessTests : List Test
-completeProcessTests =
-    [ describe "impossible to complete partial process test"
-        invalidCompleteProcessTests
-    ]
-
-
-invalidCompleteProcessTests : List Test
-invalidCompleteProcessTests =
-    let
-        assert process =
-            case Processes.getAccess process of
-                Processes.Full _ ->
-                    if Processes.isConcluded process then
-                        Expect.equal process
-                    else
-                        (Processes.getState >> Expect.equal Processes.Succeeded)
-
-                Processes.Partial _ ->
-                    Expect.equal process
-    in
-        [ fuzz
-            Gen.process
-            "can complete allowed process"
-            (\process ->
-                Processes.conclude True (Just "") process
-                    |> assert process
-            )
-        ]
 
 
 

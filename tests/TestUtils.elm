@@ -1,5 +1,6 @@
 module TestUtils exposing (..)
 
+import Expect exposing (Expectation)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
 import Game.Messages as Game
@@ -16,6 +17,10 @@ once param =
 
 fuzz param =
     fuzzWith { runs = Config.baseFuzzRuns } param
+
+batch : List Expectation -> Expectation
+batch =
+    List.map always >> flip Expect.all ()
 
 
 ensureDifferentSeed : ( Int, Int ) -> ( Int, Int )

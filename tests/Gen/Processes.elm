@@ -58,6 +58,10 @@ fullProcess =
     fuzzer genFullProcess
 
 
+partialProcess : Fuzzer Process
+partialProcess =
+    fuzzer genPartialProcess
+
 type_ : Fuzzer Type
 type_ =
     fuzzer genType
@@ -186,6 +190,15 @@ genFullProcess =
         |> andMap (maybe genProgress)
         |> andMap genServerID
 
+genPartialProcess : Generator Process
+genPartialProcess =
+    genType
+        |> map Process
+        |> andMap (map Partial genPartialAccess)
+        |> andMap genState
+        |> andMap (maybe genProcessFile)
+        |> andMap (maybe genProgress)
+        |> andMap genServerID
 
 genType : Generator Type
 genType =

@@ -141,7 +141,7 @@ onComplete game serverId id model =
     let
         update process =
             model
-                |> upsert id (conclude False Nothing process)
+                |> upsert id (conclude Nothing Nothing process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -255,7 +255,7 @@ onCompleteEvent game serverId id status model =
     let
         update process =
             model
-                |> upsert id (conclude True status process)
+                |> upsert id (conclude (Just True) status process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -283,7 +283,8 @@ onBruteforceFailedEvent game serverId response model =
     let
         update process =
             model
-                |> upsert response.processId (conclude False Nothing process)
+                |> upsert response.processId
+                    (conclude (Just False) Nothing process)
                 |> Update.fromModel
     in
         updateOrSync update response.processId model

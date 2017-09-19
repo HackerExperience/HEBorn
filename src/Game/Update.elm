@@ -170,9 +170,6 @@ onWsJoinedAccount model =
     let
         request =
             Bootstrap.request model.account.id model
-
-        a =
-            Debug.log ">>>>>>>>>>>>>>>>>>>>>>>>>" "------------------------------"
     in
         -- replace Cmd.none to request to enable bootstrap
         ( model, request, Dispatch.none )
