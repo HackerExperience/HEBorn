@@ -1,10 +1,28 @@
-module Apps.Browser.Pages.Subscriptions exposing (subscriptions)
+module Apps.Browser.Pages.Update exposing (update)
 
-import Game.Data as GameData
-import Apps.Browser.Pages.Models exposing (..)
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.Update as Update
+import Game.Data as Game
+import Apps.Browser.Pages.Models exposing (Model(..))
 import Apps.Browser.Pages.Messages exposing (..)
+import Apps.Browser.Pages.NoWebserver.Update as NoWebserver
 
 
-update : GameData.Data -> Msg -> Model -> Sub Msg
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update :
+    Game.Data
+    -> Msg
+    -> Model
+    -> UpdateResponse
 update data msg model =
-    ( model, Cmd.none )
+    case ( model, msg ) of
+        ( NoWebserverModel page, NoWebserverMsg msg ) ->
+            NoWebserver.update data msg page
+                |> Update.mapModel NoWebserverModel
+                |> Update.mapCmd NoWebserverMsg
+
+        _ ->
+            Update.fromModel model

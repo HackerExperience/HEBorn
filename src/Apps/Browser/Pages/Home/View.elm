@@ -2,10 +2,10 @@ module Apps.Browser.Pages.Home.View exposing (view)
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Apps.Browser.Pages.Home.Messages exposing (Msg(..))
+import Apps.Browser.Pages.CommonActions exposing (..)
 
 
-view : Html Msg
+view : Html CommonActions
 view =
     div []
         [ node "center"
@@ -14,25 +14,25 @@ view =
         , ul
             []
             [ li
-                [ onClick <| BrowserTabAddress "baixaki.dmy" ]
+                [ onClick <| NewTabIn "baixaki.dmy" ]
                 [ text "Download Center" ]
             , li
-                [ onClick <| BrowserTabAddress "profile.dmy" ]
+                [ onClick <| NewTabIn "profile.dmy" ]
                 [ text "My profile" ]
             , li
-                [ onClick <| BrowserGoAddress "directory.dmy" ]
+                [ onClick <| GoAddress "directory.dmy" ]
                 [ text "Directory" ]
             , li
-                [ onClick <| BrowserGoAddress "headquarters.dmy" ]
+                [ onClick <| GoAddress "headquarters.dmy" ]
                 [ text "Mission Center" ]
             , li
-                [ onClick <| BrowserGoAddress "meuisp.dmy" ]
+                [ onClick <| GoAddress "meuisp.dmy" ]
                 [ text "ISP" ]
             , li
-                [ onClick <| BrowserGoAddress "fbi.dmy" ]
+                [ onClick <| GoAddress "fbi.dmy" ]
                 [ text "FBI" ]
             , li
-                [ onClick <| BrowserGoAddress "lulapresoamanha.dmy" ]
+                [ onClick <| GoAddress "lulapresoamanha.dmy" ]
                 [ text "News" ]
             ]
         ]

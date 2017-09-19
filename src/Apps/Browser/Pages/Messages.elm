@@ -1,24 +1,10 @@
 module Apps.Browser.Pages.Messages exposing (Msg(..))
 
+import Apps.Browser.Pages.CommonActions exposing (..)
+import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver
+
 
 type Msg
-    = HomeMsg
-    | BlankMsg
-    | WebserverMsg
-    | NoWebserverMsg
-    | EmptyMsg
-    | ProfileMsg
-    | WhoisMsg
-    | DownloadCenterMsg
-    | ISPMsg
-    | BankMsg
-    | StoreMsg
-    | BTCMsg
-    | FBIMsg
-    | NewsMsg
-    | BithubMsg
-    | MissionCenterMsg
-    | NotFoundMsg
-    | UnknownMsg
-    | BrowserGoAddress String
-    | BrowserTabAddress String
+    = NoWebserverMsg NoWebserver.Msg
+    | GlobalMsg CommonActions
+    | Ignore

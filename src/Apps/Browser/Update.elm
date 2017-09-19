@@ -1,13 +1,16 @@
 module Apps.Browser.Update exposing (update)
 
 import Utils.Update as Update
-import Game.Data as GameData
-import Game.Meta.Types exposing (Context(..))
+import Game.Data as Game
+import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
 import Game.Web.DNS exposing (..)
 import Apps.Config exposing (..)
-import Apps.Browser.Messages exposing (Msg(..))
+import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Pages.Messages as Pages
+import Apps.Browser.Pages.Update as Pages
 import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
@@ -19,7 +22,15 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-update : GameData.Data -> Msg -> Model -> UpdateResponse
+type alias TabUpdateResponse =
+    ( Tab, Cmd TabMsg, Dispatch )
+
+
+update :
+    Game.Data
+    -> Msg
+    -> Model
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- Menu
@@ -27,54 +38,204 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
+            onMenuMsg data msg model
 
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+        -- TabMsgs
+        ActiveTabMsg msg ->
+            onSomeTabMsg data model.nowTab msg model
 
-        -- App
-        UpdateAddress newAddr ->
-            updateAddress newAddr model
+        SomeTabMsg tabK msg ->
+            onSomeTabMsg data tabK msg model
 
-        GoPrevious ->
-            goPrevious model
+        Crack ip ->
+            onCrack ip model
 
-        GoNext ->
-            goNext model
+        -- Browser
+        NewTabIn url ->
+            onNewTabIn url model
 
-        PageMsg ->
-            -- WHAT THE HELL IS THIS?
-            ( model, Cmd.none, Dispatch.none )
-
-        TabGo tabK ->
+        ChangeTab tabK ->
             goTab tabK model
                 |> Update.fromModel
 
-        GoAddress url ->
-            goAddress url model
-
-        NewTabInAddress url ->
-            newTabInAddress url model
-
-        Fetched tabK response ->
-            fetched tabK response model
 
 
+-- browser internals
 
--- internals
+
+onMenuMsg :
+    Game.Data
+    -> Menu.Msg
+    -> Model
+    -> UpdateResponse
+onMenuMsg data msg model =
+    Update.child
+        { get = .menu
+        , set = (\menu model -> { model | menu = menu })
+        , toMsg = MenuMsg
+        , update = (Menu.update data)
+        }
+        msg
+        model
 
 
-goPage :
+onNewTabIn : URL -> Model -> UpdateResponse
+onNewTabIn url model =
+    let
+        createTabModel =
+            addTab model
+
+        goTabModel =
+            goTab
+                createTabModel.lastTab
+                createTabModel
+
+        tabK =
+            goTabModel.nowTab
+
+        tab =
+            getTab tabK goTabModel.tabs
+
+        ( tab_, cmd, dispatch ) =
+            requestPage url model.me tabK tab
+
+        model_ =
+            setNowTab tab_ goTabModel
+
+        cmd_ =
+            Cmd.map (SomeTabMsg tabK) cmd
+    in
+        ( model_, cmd_, dispatch )
+
+
+onSomeTabMsg :
+    Game.Data
+    -> Int
+    -> TabMsg
+    -> Model
+    -> UpdateResponse
+onSomeTabMsg data tabK msg model =
+    let
+        tab =
+            getTab tabK model.tabs
+
+        result =
+            case msg of
+                UpdateAddress newAddr ->
+                    onUpdateAddress newAddr tab
+
+                GoPrevious ->
+                    onGoPrevious tab
+
+                GoNext ->
+                    goNext tab
+
+                PageMsg msg ->
+                    onPageMsg data msg tab
+
+                GoAddress url ->
+                    requestPage url model.me tabK tab
+
+                Fetched response ->
+                    onFetched response tab
+
+        setThisTab tab_ =
+            { model | tabs = (setTab tabK tab_ model.tabs) }
+    in
+        result
+            |> Update.mapModel setThisTab
+            |> Update.mapCmd (SomeTabMsg tabK)
+
+
+onCrack : String -> Model -> UpdateResponse
+onCrack ip ({ me } as model) =
+    let
+        dispatch =
+            case me.serverId of
+                Just serverId ->
+                    Processes.Start
+                        Processes.Cracker
+                        serverId
+                        ip
+                        ( Nothing, Nothing, "Palatura" )
+                        |> Dispatch.processes serverId
+
+                Nothing ->
+                    Debug.crash "Browser always need a serverId"
+    in
+        ( model, Cmd.none, dispatch )
+
+
+
+-- tabs internals
+
+
+onPageMsg :
+    Game.Data
+    -> Pages.Msg
+    -> Tab
+    -> TabUpdateResponse
+onPageMsg data msg tab =
+    Update.child
+        { get = .page
+        , set = (\page tab -> { tab | page = page })
+        , toMsg = PageMsg
+        , update = (Pages.update data)
+        }
+        msg
+        tab
+
+
+onUpdateAddress : URL -> Tab -> TabUpdateResponse
+onUpdateAddress newAddr tab =
+    { tab | addressBar = newAddr }
+        |> Update.fromModel
+
+
+onGoPrevious : Tab -> TabUpdateResponse
+onGoPrevious =
+    gotoPreviousPage >> Update.fromModel
+
+
+goNext : Tab -> TabUpdateResponse
+goNext =
+    gotoNextPage >> Update.fromModel
+
+
+onFetched : Response -> Tab -> TabUpdateResponse
+onFetched response tab =
+    let
+        ( url, pageModel ) =
+            case response of
+                ConnectionError url ->
+                    -- TODO: Change to some "failed" page
+                    ( url, Pages.BlankModel )
+
+                NotFounded url ->
+                    ( url, Pages.NotFoundModel { url = url } )
+
+                Okay site ->
+                    ( site.url, Pages.initialModel site )
+
+        isLoadingThisRequest =
+            (Pages.isLoading <| getPage tab)
+                && (getURL tab == url)
+    in
+        if (isLoadingThisRequest) then
+            tab
+                |> gotoPage url pageModel
+                |> Update.fromModel
+        else
+            Update.fromModel tab
+
+
+requestPage :
     String
     -> Config
     -> Int
     -> Tab
-    -> ( Tab, Dispatch )
-goPage url { sessionId, windowId, context, serverId } tabK tab =
+    -> TabUpdateResponse
+requestPage url { sessionId, windowId, context, serverId } tabK tab =
     let
         requester =
             { sessionId = sessionId
@@ -95,115 +256,4 @@ goPage url { sessionId, windowId, context, serverId } tabK tab =
         tab_ =
             gotoPage url Pages.LoadingModel tab
     in
-        ( tab_, dispatch )
-
-
-updateAddress : URL -> Model -> UpdateResponse
-updateAddress newAddr model =
-    let
-        tab =
-            getNowTab model
-
-        tab_ =
-            { tab | addressBar = newAddr }
-
-        model_ =
-            setNowTab tab_ model
-    in
-        Update.fromModel model_
-
-
-goPrevious : Model -> UpdateResponse
-goPrevious model =
-    let
-        tab_ =
-            gotoPreviousPage <| getNowTab model
-
-        model_ =
-            setNowTab tab_ model
-    in
-        Update.fromModel model_
-
-
-goNext : Model -> UpdateResponse
-goNext model =
-    let
-        tab_ =
-            gotoNextPage <| getNowTab model
-
-        model_ =
-            setNowTab tab_ model
-    in
-        Update.fromModel model_
-
-
-goAddress : URL -> Model -> UpdateResponse
-goAddress url model =
-    let
-        ( tab_, dispatch ) =
-            goPage url model.me model.nowTab <| getNowTab model
-
-        model_ =
-            setNowTab tab_ model
-    in
-        ( model_, Cmd.none, dispatch )
-
-
-newTabInAddress : URL -> Model -> UpdateResponse
-newTabInAddress url model =
-    let
-        createTabModel =
-            addTab model
-
-        goTabModel =
-            -- DIRTY
-            goTab
-                createTabModel.lastTab
-                createTabModel
-
-        ( tab_, dispatch ) =
-            goPage url model.me goTabModel.nowTab <| getNowTab goTabModel
-
-        model_ =
-            setNowTab tab_ goTabModel
-    in
-        ( model_, Cmd.none, dispatch )
-
-
-fetched : Int -> Response -> Model -> UpdateResponse
-fetched tabK response model =
-    let
-        tab =
-            getTab tabK model.tabs
-
-        ( url, pageModel ) =
-            case response of
-                ConnectionError url ->
-                    -- TODO: Change to some "failed" page
-                    ( url, Pages.BlankModel )
-
-                NotFounded url ->
-                    ( url, Pages.NotFoundModel { url = url } )
-
-                Okay site ->
-                    ( site.url, Pages.initialModel site )
-    in
-        if
-            ((&&)
-                (Pages.isLoading <| getPage tab)
-                ((getURL tab) == url)
-            )
-        then
-            let
-                tab_ =
-                    gotoPage url pageModel tab
-
-                tabs_ =
-                    setTab tabK tab_ model.tabs
-
-                model_ =
-                    { model | tabs = tabs_ }
-            in
-                Update.fromModel model_
-        else
-            Update.fromModel model
+        ( tab_, Cmd.none, dispatch )

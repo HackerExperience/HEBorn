@@ -1,13 +1,14 @@
 module Apps.Browser.Pages.View exposing (view)
 
 import Html exposing (Html, div, text)
-import Game.Data as GameData
+import Game.Data as Game
 import Apps.Browser.Pages.Models exposing (..)
 import Apps.Browser.Pages.Messages exposing (..)
+import Apps.Browser.Pages.CommonActions exposing (CommonActions)
 import Apps.Browser.Pages.NotFound.View as NotFound
-import Apps.Browser.Pages.Home.Messages as Home
 import Apps.Browser.Pages.Home.View as Home
 import Apps.Browser.Pages.Webserver.View as Webserver
+import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver
 import Apps.Browser.Pages.NoWebserver.View as NoWebserver
 import Apps.Browser.Pages.Profile.View as Profile
 import Apps.Browser.Pages.Whois.View as Whois
@@ -22,65 +23,91 @@ import Apps.Browser.Pages.Bithub.View as Bithub
 import Apps.Browser.Pages.MissionCenter.View as MissionCenter
 
 
-view : GameData.Data -> Model -> Html Msg
+view : Game.Data -> Model -> Html Msg
 view data model =
     case model of
         NotFoundModel _ ->
-            Html.map (always NotFoundMsg) NotFound.view
+            NotFound.view
+                |> ignoreMsg
 
         HomeModel ->
-            Html.map
-                (\msg ->
-                    case msg of
-                        Home.BrowserGoAddress url ->
-                            BrowserGoAddress url
-
-                        Home.BrowserTabAddress url ->
-                            BrowserTabAddress url
-                )
-                Home.view
+            Home.view
+                |> globalMsg
 
         WebserverModel model ->
-            Html.map (always WebserverMsg) (Webserver.view model)
+            Webserver.view model
+                |> ignoreMsg
 
         NoWebserverModel model ->
-            Html.map (always NoWebserverMsg) (NoWebserver.view model)
+            NoWebserver.view data model
+                |> Html.map handleNoWebserver
 
         ProfileModel ->
-            Html.map (always ProfileMsg) Profile.view
+            Profile.view
+                |> ignoreMsg
 
         WhoisModel ->
-            Html.map (always WhoisMsg) Whois.view
+            Whois.view
+                |> ignoreMsg
 
         DownloadCenterModel ->
-            Html.map (always DownloadCenterMsg) DownloadCenter.view
+            DownloadCenter.view
+                |> ignoreMsg
 
         ISPModel ->
-            Html.map (always ISPMsg) ISP.view
+            ISP.view
+                |> ignoreMsg
 
         BankModel model ->
-            Html.map (always BankMsg) (Bank.view model)
+            Bank.view model
+                |> ignoreMsg
 
         StoreModel ->
-            Html.map (always StoreMsg) Store.view
+            Store.view
+                |> ignoreMsg
 
         BTCModel ->
-            Html.map (always BTCMsg) BTC.view
+            BTC.view
+                |> ignoreMsg
 
         FBIModel ->
-            Html.map (always FBIMsg) FBI.view
+            FBI.view
+                |> ignoreMsg
 
         NewsModel ->
-            Html.map (always NewsMsg) News.view
+            News.view
+                |> ignoreMsg
 
         BithubModel ->
-            Html.map (always BithubMsg) Bithub.view
+            Bithub.view
+                |> ignoreMsg
 
         MissionCenterModel ->
-            Html.map (always MissionCenterMsg) MissionCenter.view
+            MissionCenter.view
+                |> ignoreMsg
 
         LoadingModel ->
             div [] []
 
         BlankModel ->
             div [] []
+
+
+handleNoWebserver : NoWebserver.Msg -> Msg
+handleNoWebserver msg =
+    case msg of
+        NoWebserver.GlobalMsg msg ->
+            GlobalMsg msg
+
+        _ ->
+            NoWebserverMsg msg
+
+
+ignoreMsg : Html a -> Html Msg
+ignoreMsg =
+    Html.map (always Ignore)
+
+
+globalMsg : Html CommonActions -> Html Msg
+globalMsg =
+    Html.map GlobalMsg

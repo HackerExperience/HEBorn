@@ -59,7 +59,8 @@ onDNS : Game.Model -> DNS.Requester -> DNS.Response -> UpdateResponse
 onDNS game { sessionId, windowId, context, tabK } response =
     let
         dispatch =
-            Browser.Fetched tabK response
+            Browser.Fetched response
+                |> Browser.SomeTabMsg tabK
                 |> Dispatch.browser ( sessionId, windowId ) context
     in
         ( Cmd.none, dispatch )

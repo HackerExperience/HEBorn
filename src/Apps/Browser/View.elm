@@ -5,11 +5,12 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
-import Game.Data as GameData
-import Apps.Browser.Messages exposing (Msg(..))
+import Game.Data as Game
+import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
 import Apps.Browser.Pages.Messages as Pages
+import Apps.Browser.Pages.CommonActions as Common
 import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Pages.View as Pages
 import Apps.Browser.Resources exposing (Classes(..), prefix)
@@ -25,18 +26,18 @@ styles =
     Css.asPairs >> style
 
 
-view : GameData.Data -> Model -> Html Msg
+view : Game.Data -> Model -> Html Msg
 view data model =
     let
-        app =
+        tab =
             getNowTab model
     in
         div
             [ class [ Window, Content, Client ]
             ]
             [ viewTabs model
-            , viewToolbar app
-            , viewPg data app.page
+            , viewToolbar tab
+            , viewPg data tab.page
             , menuView model
             ]
 
@@ -74,19 +75,19 @@ viewToolbar browser =
         prevBtn =
             genBtn
                 ((.previousPages) >> List.length)
-                GoPrevious
+                (ActiveTabMsg <| GoPrevious)
                 "<"
 
         nextBtn =
             genBtn
                 ((.nextPages) >> List.length)
-                GoNext
+                (ActiveTabMsg <| GoNext)
                 ">"
 
         goBtn =
             genBtn
                 ((.addressBar) >> String.length)
-                (GoAddress browser.addressBar)
+                (ActiveTabMsg <| GoAddress browser.addressBar)
                 "%"
     in
         div
@@ -99,10 +100,14 @@ viewToolbar browser =
             , div
                 [ class [ AddressBar ] ]
                 [ Html.form
-                    [ onSubmit <| GoAddress browser.addressBar ]
+                    [ browser.addressBar
+                        |> GoAddress
+                        |> ActiveTabMsg
+                        |> onSubmit
+                    ]
                     [ input
                         [ value browser.addressBar
-                        , onInput UpdateAddress
+                        , onInput (ActiveTabMsg << UpdateAddress)
                         ]
                         []
                     ]
@@ -125,24 +130,29 @@ viewTabs b =
     hzTabs
         ((==) b.nowTab)
         (viewTabLabel b.tabs)
-        TabGo
+        ChangeTab
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
 pageMsgIntersept : Pages.Msg -> Msg
 pageMsgIntersept msg =
     case msg of
-        Pages.BrowserGoAddress url ->
-            GoAddress url
+        Pages.GlobalMsg msg ->
+            case msg of
+                Common.GoAddress url ->
+                    ActiveTabMsg <| GoAddress url
 
-        Pages.BrowserTabAddress url ->
-            NewTabInAddress url
+                Common.NewTabIn url ->
+                    NewTabIn url
+
+                Common.Crack ip ->
+                    Crack ip
 
         _ ->
-            PageMsg
+            ActiveTabMsg <| PageMsg msg
 
 
-viewPg : GameData.Data -> Pages.Model -> Html Msg
+viewPg : Game.Data -> Pages.Model -> Html Msg
 viewPg data pg =
     div
         [ class [ PageContent ] ]
