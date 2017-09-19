@@ -179,12 +179,18 @@ viewTaskRow data now (( _, process ) as entry) =
                 |> maybe
     in
         div [ class [ EntryDivision ], (processMenu entry) ]
-            [ text <| Processes.getName process
-            , text "Target: "
-            , text <| Processes.getTarget process
-            , fileInfo
-            , viewState now process
-            , usageView
+            [ div []
+                [ text <| Processes.getName process
+                , br [] []
+                , text "Target: "
+                , text <| Processes.getTarget process
+                , br [] []
+                , fileInfo
+                ]
+            , div []
+                [ viewState now process ]
+            , div []
+                [ usageView ]
             ]
 
 
