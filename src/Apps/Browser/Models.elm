@@ -131,6 +131,7 @@ gotoPage url page browser =
     if page /= getPage browser then
         let
             previousPages =
+                -- Loading pages should not be added to history
                 if (Pages.isLoading browser.page) then
                     getPreviousPages browser
                 else

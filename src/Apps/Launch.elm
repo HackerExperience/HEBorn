@@ -2,6 +2,7 @@ module Apps.Launch exposing (launch)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Utils.Update as Update
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Apps.Models exposing (..)
@@ -26,81 +27,59 @@ launch : Game.Data -> Config -> App -> ( AppModel, Cmd Msg, Dispatch )
 launch data ({ windowId } as config) app =
     case app of
         LogViewerApp ->
-            let
-                model =
-                    LogViewerModel LogViewer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            LogViewer.initialModel
+                |> LogViewerModel
+                |> Update.fromModel
 
         TaskManagerApp ->
-            let
-                model =
-                    TaskManagerModel TaskManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            TaskManager.initialModel
+                |> TaskManagerModel
+                |> Update.fromModel
 
         BrowserApp ->
-            let
-                model =
-                    BrowserModel <| Browser.initialModel config
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Browser.initialModel config
+                |> BrowserModel
+                |> Update.fromModel
 
         ExplorerApp ->
-            let
-                model =
-                    ExplorerModel Explorer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Explorer.initialModel
+                |> ExplorerModel
+                |> Update.fromModel
 
         DatabaseApp ->
-            let
-                model =
-                    DatabaseModel Database.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Database.initialModel
+                |> DatabaseModel
+                |> Update.fromModel
 
         ConnManagerApp ->
-            let
-                model =
-                    ConnManagerModel ConnManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            ConnManager.initialModel
+                |> ConnManagerModel
+                |> Update.fromModel
 
         BounceManagerApp ->
-            let
-                model =
-                    BounceManagerModel BounceManager.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            BounceManager.initialModel
+                |> BounceManagerModel
+                |> Update.fromModel
 
         FinanceApp ->
-            let
-                model =
-                    FinanceModel Finance.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Finance.initialModel
+                |> FinanceModel
+                |> Update.fromModel
 
         MusicApp ->
-            let
-                model =
-                    MusicModel <| Hebamp.initialModel windowId
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Hebamp.initialModel windowId
+                |> MusicModel
+                |> Update.fromModel
 
         CtrlPanelApp ->
-            let
-                model =
-                    CtrlPanelModel CtrlPanel.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            CtrlPanel.initialModel
+                |> CtrlPanelModel
+                |> Update.fromModel
 
         ServersGearsApp ->
-            let
-                model =
-                    ServersGearsModel ServersGears.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            ServersGears.initialModel
+                |> ServersGearsModel
+                |> Update.fromModel
 
         LocationPickerApp ->
             let
@@ -117,15 +96,11 @@ launch data ({ windowId } as config) app =
                 ( model, cmd, Dispatch.none )
 
         LanViewerApp ->
-            let
-                model =
-                    LanViewerModel LanViewer.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            LanViewer.initialModel
+                |> LanViewerModel
+                |> Update.fromModel
 
         EmailApp ->
-            let
-                model =
-                    EmailModel Email.initialModel
-            in
-                ( model, Cmd.none, Dispatch.none )
+            Email.initialModel
+                |> EmailModel
+                |> Update.fromModel
