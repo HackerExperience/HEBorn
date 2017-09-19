@@ -9,6 +9,7 @@ module Game.Account.Models
         , insertServer
         , getToken
         , getGateway
+        , getContext
         , getDatabase
         )
 
@@ -17,6 +18,7 @@ import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
+import Game.Meta.Types exposing (..)
 
 
 type alias ID =
@@ -48,6 +50,7 @@ type alias Model =
     , dock : Dock.Model
     , servers : List Servers.ID
     , activeGateway : Servers.ID
+    , context : Context
     , bounces : Bounces.Model
     , inventory : Inventory.Model
     , logout : Bool
@@ -69,6 +72,7 @@ initialModel id username token =
     , dock = Dock.initialModel
     , servers = []
     , activeGateway = ""
+    , context = Gateway
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
     , logout = False
@@ -83,6 +87,11 @@ getToken model =
 getGateway : Model -> Servers.ID
 getGateway =
     .activeGateway
+
+
+getContext : Model -> Context
+getContext =
+    .context
 
 
 getDatabase : Model -> Database.Model

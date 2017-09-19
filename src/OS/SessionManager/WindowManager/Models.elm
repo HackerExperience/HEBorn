@@ -47,7 +47,7 @@ import Game.Meta.Types exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
 import Game.Models as Game
-import Game.Meta.Models as Meta
+import Game.Account.Models as Account
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -169,8 +169,8 @@ insert data id serverID app ({ windows, visible } as model) =
                 Apps.ContextualApp ->
                     data
                         |> Game.getGame
-                        |> Game.getMeta
-                        |> Meta.getContext
+                        |> Game.getAccount
+                        |> Account.getContext
                         |> Just
 
                 Apps.ContextlessApp ->

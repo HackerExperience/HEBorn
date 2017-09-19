@@ -8,6 +8,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Game.Data as Game
 import Game.Meta.Messages as Meta
+import Game.Account.Messages as Account
 import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers
 import OS.Header.Messages exposing (..)
@@ -56,7 +57,7 @@ update data msg ({ openMenu } as model) =
                 dispatch =
                     case id of
                         Just id ->
-                            Dispatch.meta <| Meta.SetGateway id
+                            Dispatch.account <| Account.SetGateway id
 
                         Nothing ->
                             Dispatch.none
@@ -79,12 +80,19 @@ update data msg ({ openMenu } as model) =
         SelectEndpoint serverId ->
             let
                 dispatch =
-                    Dispatch.meta <| Meta.SetEndpoint serverId
+                    Dispatch.account <| Account.SetEndpoint serverId
 
                 model_ =
                     { model | openMenu = NothingOpen }
             in
                 ( model_, Cmd.none, dispatch )
+
+        ContextTo context ->
+            let
+                dispatch =
+                    Dispatch.account <| Account.ContextTo context
+            in
+                ( model, Cmd.none, dispatch )
 
         CheckMenus ->
             let
@@ -95,13 +103,6 @@ update data msg ({ openMenu } as model) =
                         model
             in
                 Update.fromModel model_
-
-        ContextTo context ->
-            let
-                dispatch =
-                    Dispatch.meta <| Meta.ContextTo context
-            in
-                ( model, Cmd.none, dispatch )
 
         NotificationsTabGo target ->
             let

@@ -20,7 +20,7 @@ module Game.Models
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Meta.Types as Meta
+import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Core.Config exposing (Config)
@@ -120,16 +120,14 @@ setGateway server model =
 getEndpoint : Model -> Maybe ( Servers.ID, Servers.Server )
 getEndpoint model =
     let
-        meta =
-            getMeta model
-
         servers =
             getServers model
 
         maybeGateway =
-            meta
-                |> Meta.getGateway
-                |> Maybe.andThen (flip Servers.get servers)
+            model
+                |> getAccount
+                |> Account.getGateway
+                |> flip Servers.get servers
 
         maybeEndpointID =
             Maybe.andThen Servers.getEndpoint maybeGateway
@@ -157,30 +155,22 @@ setEndpoint server model =
 
 getActiveServer : Model -> Maybe ( Servers.ID, Servers.Server )
 getActiveServer model =
-    let
-        meta =
-            getMeta model
-    in
-        case Meta.getContext meta of
-            Meta.Gateway ->
-                getGateway model
+    case Account.getContext <| getAccount model of
+        Gateway ->
+            getGateway model
 
-            Meta.Endpoint ->
-                getEndpoint model
+        Endpoint ->
+            getEndpoint model
 
 
 setActiveServer : Servers.Server -> Model -> Model
 setActiveServer server model =
-    let
-        meta =
-            getMeta model
-    in
-        case Meta.getContext meta of
-            Meta.Gateway ->
-                setGateway server model
+    case Account.getContext <| getAccount model of
+        Gateway ->
+            setGateway server model
 
-            Meta.Endpoint ->
-                setEndpoint server model
+        Endpoint ->
+            setEndpoint server model
 
 
 

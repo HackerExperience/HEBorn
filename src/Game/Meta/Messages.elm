@@ -7,8 +7,5 @@ import Game.Meta.Types exposing (..)
 
 
 type Msg
-    = SetGateway Servers.ID
-    | SetEndpoint (Maybe Servers.ID)
-    | ContextTo Context
-    | Event Events.Event
+    = Event Events.Event
     | Tick Time

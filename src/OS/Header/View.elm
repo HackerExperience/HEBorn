@@ -8,8 +8,8 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Game.Account.Bounces.Models as Bounces
 import Game.Data as Game
-import Game.Meta.Types as Meta
-import Game.Meta.Models as Meta
+import Game.Meta.Types exposing (..)
+import Game.Account.Models as Account
 import Game.Models as Game
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
@@ -139,8 +139,10 @@ view data ({ openMenu, notifications } as model) =
         game =
             Game.getGame data
 
-        meta =
-            Game.getMeta game
+        account =
+            data
+                |> Game.getGame
+                |> Game.getAccount
 
         servers =
             Game.getServers game
@@ -149,9 +151,7 @@ view data ({ openMenu, notifications } as model) =
             Just <| Game.getID data
 
         gateways =
-            data
-                |> Game.getGame
-                |> Game.getAccount
+            account
                 |> (.servers)
                 |> List.map Just
 
@@ -192,7 +192,7 @@ view data ({ openMenu, notifications } as model) =
                         |> (::) Nothing
 
         onGateway =
-            Meta.Gateway == Meta.getContext meta
+            Gateway == Account.getContext account
 
         chatNots =
             Notifications.listChat notifications
@@ -222,11 +222,11 @@ view data ({ openMenu, notifications } as model) =
             , spacer
             , toggleCampaignBtn
             , spacer
-            , contextToggler onGateway (ContextTo Meta.Gateway)
+            , contextToggler onGateway (ContextTo Gateway)
             , gatewaySelector data openMenu gateway gateways
             , bounceSelector data openMenu bounce bounces
             , endpointSelector data openMenu endpoint endpoints
-            , contextToggler (not onGateway) (ContextTo Meta.Endpoint)
+            , contextToggler (not onGateway) (ContextTo Endpoint)
             , spacer
             , chatNotifications chatNots
             , accNotifications model.activeNotificationsTab notifications

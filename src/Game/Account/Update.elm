@@ -10,6 +10,10 @@ import Driver.Websocket.Messages as Ws
 import Events.Events as Events exposing (Event(Report, AccountEvent))
 import Events.Account as Account exposing (AccountHolder)
 import Requests.Requests as Requests
+import Game.Servers.Shared as Servers
+import Game.Servers.Messages as Servers
+import Game.Servers.Models as Servers
+import Game.Meta.Types exposing (..)
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
@@ -30,6 +34,15 @@ update game msg model =
     case msg of
         DoLogout ->
             onDoLogout game model
+
+        SetGateway id ->
+            onSetGateway game id model
+
+        SetEndpoint id ->
+            onSetEndpoint game id model
+
+        ContextTo context ->
+            onContextTo game context model
 
         BouncesMsg msg ->
             onBounce game msg model
@@ -57,6 +70,43 @@ bootstrap json model =
 
 
 -- internals
+
+
+onSetGateway : Game.Model -> Servers.ID -> Model -> UpdateResponse
+onSetGateway game serverId model =
+    Update.fromModel { model | activeGateway = serverId }
+
+
+onSetEndpoint : Game.Model -> Maybe Servers.ID -> Model -> UpdateResponse
+onSetEndpoint game serverId model =
+    let
+        setEndpoint id =
+            Dispatch.server id <| Servers.SetEndpoint serverId
+
+        dispatch =
+            model
+                |> getGateway
+                |> setEndpoint
+
+        model_ =
+            if serverId == Nothing then
+                ensureValidContext game { model | context = Gateway }
+            else
+                ensureValidContext game model
+    in
+        ( model_, Cmd.none, dispatch )
+
+
+onContextTo : Game.Model -> Context -> Model -> UpdateResponse
+onContextTo game context model =
+    let
+        model1 =
+            { model | context = context }
+
+        model_ =
+            ensureValidContext game model1
+    in
+        ( model_, Cmd.none, Dispatch.none )
 
 
 onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
@@ -96,6 +146,8 @@ merge src new =
         new.servers
     , activeGateway =
         new.activeGateway
+    , context =
+        src.context
     , bounces =
         Maybe.withDefault src.bounces <| new.bounces
     , inventory =
@@ -192,3 +244,22 @@ onWsDisconnected game model =
                 Dispatch.none
     in
         ( model, Cmd.none, dispatch )
+
+
+ensureValidContext : Game.Model -> Model -> Model
+ensureValidContext game model =
+    let
+        servers =
+            Game.getServers game
+
+        endpoint =
+            model
+                |> getGateway
+                |> flip Servers.get servers
+                |> Maybe.andThen Servers.getEndpoint
+                |> Maybe.andThen (flip Servers.get servers)
+    in
+        if getContext model == Endpoint && endpoint == Nothing then
+            { model | context = Gateway }
+        else
+            model
