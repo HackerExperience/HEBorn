@@ -64,8 +64,28 @@ eventTests =
                 json =
                     toValue
                         """
-                        { "process_id": "id"
-                        , "type": "Cracker"
+                        { "type" : "Cracker"
+                        , "access" :
+                            { "origin" : "id"
+                            , "priority" : 3
+                            , "usage" :
+                                { "cpu" : [0.1, "1mb"]
+                                , "mem" : [0.1, "1mb"]
+                                , "down" : [0.1, "1mb"]
+                                , "up" : [0.1, "1mb"]
+                                }
+                            , "connection_id" : "id"
+                            }
+                        , "state" : "running"
+                        , "file" :
+                            { "id" : "id"
+                            , "version" : 1.0
+                            , "name" : "process"
+                            }
+                        , "status" : ""
+                        , "progress" : [0.1, "1mb"]
+                        , "target_id" : "id"
+                        , "process_id" : "id"
                         }
                         """
 
@@ -140,7 +160,7 @@ eventTests =
                     |> Servers.getProcesses
                     |> get "id"
                     |> Maybe.map getState
-                    |> Expect.equal (Just <| Completed Nothing)
+                    |> Expect.equal (Just <| Succeeded)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
         "event 'process.bruteforce_failed' concludes a process"
@@ -200,7 +220,7 @@ eventTests =
                     |> Servers.getProcesses
                     |> get "id"
                     |> Maybe.map getState
-                    |> Expect.equal (Just <| Completed Nothing)
+                    |> Expect.equal (Just <| Failed Nothing)
     ]
 
 
@@ -243,12 +263,28 @@ requestTests =
                 json =
                     toValue
                         """
-                        { "process_id" : "id"
-                        , "network_id" : "b"
-                        , "target_ip" : "c"
-                        , "file_id" : "d"
-                        , "connection_id" : "e"
-                        , "type" : "Cracker"
+                        { "type" : "Cracker"
+                        , "access" :
+                            { "origin" : "id"
+                            , "priority" : 3
+                            , "usage" :
+                                { "cpu" : [0.1, "1mb"]
+                                , "mem" : [0.1, "1mb"]
+                                , "down" : [0.1, "1mb"]
+                                , "up" : [0.1, "1mb"]
+                                }
+                            , "connection_id" : "id"
+                            }
+                        , "state" : "running"
+                        , "file" :
+                            { "id" : "id"
+                            , "version" : 1.0
+                            , "name" : "process"
+                            }
+                        , "status" : ""
+                        , "progress" : [0.1, "1mb"]
+                        , "target_id" : "id"
+                        , "process_id" : "id"
                         }
                         """
 

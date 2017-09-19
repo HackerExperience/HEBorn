@@ -111,12 +111,10 @@ assertStateChange : Processes.State -> Process -> (Process -> Expect.Expectation
 assertStateChange expected process =
     case Processes.getAccess process of
         Processes.Full _ ->
-            case Processes.getState process of
-                Processes.Completed _ ->
-                    Expect.equal process
-
-                _ ->
-                    (Processes.getState >> Expect.equal expected)
+            if Processes.isConcluded process then
+                Expect.equal process
+            else
+                (Processes.getState >> Expect.equal expected)
 
         Processes.Partial _ ->
             Expect.equal process
@@ -147,18 +145,13 @@ completeProcessTests =
 invalidCompleteProcessTests : List Test
 invalidCompleteProcessTests =
     let
-        valid =
-            Just Processes.Success
-
         assert process =
             case Processes.getAccess process of
                 Processes.Full _ ->
-                    case Processes.getState process of
-                        Processes.Completed _ ->
-                            Expect.equal process
-
-                        _ ->
-                            (Processes.getState >> Expect.equal (Processes.Completed valid))
+                    if Processes.isConcluded process then
+                        Expect.equal process
+                    else
+                        (Processes.getState >> Expect.equal Processes.Succeeded)
 
                 Processes.Partial _ ->
                     Expect.equal process
@@ -167,7 +160,7 @@ invalidCompleteProcessTests =
             Gen.process
             "can complete allowed process"
             (\process ->
-                Processes.complete valid process
+                Processes.conclude True (Just "") process
                     |> assert process
             )
         ]

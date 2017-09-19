@@ -94,9 +94,13 @@ viewState now proc =
         Processes.Paused ->
             text "Paused"
 
-        Processes.Completed _ ->
-            -- TODO: match completion status (after defining them)
-            text "Finished"
+        Processes.Succeeded ->
+            -- TODO: match completion status
+            text "Completed (success)"
+
+        Processes.Failed _ ->
+            -- TODO: match completion status
+            text "Completed (failure)"
 
 
 processMenu : ( Processes.ID, Processes.Process ) -> Attribute Msg

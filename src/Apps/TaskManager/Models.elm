@@ -74,23 +74,23 @@ initialTaskManager =
 
 
 packUsage : Processes.ResourcesUsage -> ResourceUsage
-packUsage { cpu, ram, downlink, uplink } =
+packUsage { cpu, mem, down, up } =
     ResourceUsage
         (Processes.getPercentUsage cpu)
-        (Processes.getPercentUsage ram)
-        (Processes.getPercentUsage downlink)
-        (Processes.getPercentUsage uplink)
+        (Processes.getPercentUsage mem)
+        (Processes.getPercentUsage down)
+        (Processes.getPercentUsage up)
 
 
 taskUsageSum :
     Processes.ResourcesUsage
     -> ( Float, Float, Float, Float )
     -> ( Float, Float, Float, Float )
-taskUsageSum { cpu, ram, downlink, uplink } ( cpu_, mem_, down_, up_ ) =
+taskUsageSum { cpu, mem, down, up } ( cpu_, mem_, down_, up_ ) =
     ( cpu_ + (Tuple.first cpu)
-    , mem_ + (Tuple.first ram)
-    , down_ + (Tuple.first downlink)
-    , up_ + (Tuple.first uplink)
+    , mem_ + (Tuple.first mem)
+    , down_ + (Tuple.first down)
+    , up_ + (Tuple.first up)
     )
 
 

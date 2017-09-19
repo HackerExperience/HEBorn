@@ -108,16 +108,6 @@ state =
     fuzzer genState
 
 
-status : Fuzzer Status
-status =
-    fuzzer genStatus
-
-
-reason : Fuzzer Reason
-reason =
-    fuzzer genReason
-
-
 version : Fuzzer Version
 version =
     fuzzer genVersion
@@ -184,11 +174,6 @@ genProcess =
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
         |> andMap genServerID
-
-
-
---|> andMap (maybe genVersion)
---|> andMap (maybe genFileID)
 
 
 genFullProcess : Generator Process
@@ -278,24 +263,9 @@ genState =
         [ constant Starting
         , constant Running
         , constant Paused
-        , map Completed (maybe genStatus)
+        , constant Succeeded
+        , constant <| Failed (Just "")
         ]
-
-
-genStatus : Generator Status
-genStatus =
-    choices
-        [ constant Success
-        , map Failure genReason
-        ]
-
-
-genReason : Generator Reason
-genReason =
-    [ Misc "for some reason"
-    ]
-        |> List.map constant
-        |> choices
 
 
 genProcessFile : Generator ProcessFile

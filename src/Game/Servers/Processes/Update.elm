@@ -75,33 +75,6 @@ updateOrSync func id model =
             Update.fromModel model
 
 
-dummyProcess : String -> ServerID -> ServerID -> State -> Process
-dummyProcess type_ origin target state =
-    let
-        procType =
-            typeFromName type_
-                |> Maybe.withDefault Cracker
-    in
-        { type_ = procType
-        , access =
-            Full
-                { origin = origin
-                , priority = Normal
-                , usage =
-                    { cpu = ( 0.0, "" )
-                    , ram = ( 0.0, "" )
-                    , downlink = ( 0.0, "" )
-                    , uplink = ( 0.0, "" )
-                    }
-                , connection = Nothing
-                }
-        , state = state
-        , progress = Just ( 0.0, Nothing )
-        , file = Nothing
-        , target = target
-        }
-
-
 
 -- processes messages
 
@@ -168,7 +141,7 @@ onComplete game serverId id model =
     let
         update process =
             model
-                |> upsert id (complete Nothing process)
+                |> upsert id (conclude False Nothing process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -201,12 +174,11 @@ updateProcessesEvent :
     -> UpdateResponse
 updateProcessesEvent game serverId event model =
     case event of
-        Started data ->
-            onStartedEvent game
-                serverId
-                data.processId
-                (dummyProcess data.type_ serverId serverId Running)
-                model
+        Changed processes ->
+            onChangedEvent processes model
+
+        Started ( id, process ) ->
+            onStartedEvent game serverId id process model
 
         Conclusion id ->
             onCompleteEvent game serverId id Nothing model
@@ -217,6 +189,14 @@ updateProcessesEvent game serverId event model =
 
 
 -- process event handlers
+
+
+onChangedEvent :
+    Processes
+    -> Model
+    -> UpdateResponse
+onChangedEvent processes model =
+    Update.fromModel { model | processes = processes }
 
 
 onStartedEvent :
@@ -268,14 +248,14 @@ onCompleteEvent :
     Game.Model
     -> ServerID
     -> ID
-    -> Maybe Status
+    -> Maybe String
     -> Model
     -> UpdateResponse
 onCompleteEvent game serverId id status model =
     let
         update process =
             model
-                |> upsert id (complete status process)
+                |> upsert id (conclude True status process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -303,7 +283,7 @@ onBruteforceFailedEvent game serverId response model =
     let
         update process =
             model
-                |> upsert response.processId (complete Nothing process)
+                |> upsert response.processId (conclude False Nothing process)
                 |> Update.fromModel
     in
         updateOrSync update response.processId model
@@ -321,8 +301,8 @@ updateRequest :
     -> UpdateResponse
 updateRequest game serverId response model =
     case response of
-        Just (Bruteforce data) ->
-            onBruteforceRequest game serverId data model
+        Just (Bruteforce oldId response) ->
+            onBruteforceRequest game serverId oldId response model
 
         Nothing ->
             Update.fromModel model
@@ -331,17 +311,15 @@ updateRequest game serverId response model =
 onBruteforceRequest :
     Game.Model
     -> ServerID
+    -> ID
     -> Bruteforce.Response
     -> Model
     -> UpdateResponse
-onBruteforceRequest game serverId response model =
+onBruteforceRequest game serverId oldId response model =
     case response of
-        Bruteforce.Okay oldId data ->
+        Bruteforce.Okay id process ->
             let
-                process =
-                    dummyProcess data.type_ serverId data.targetIp Running
-
                 model_ =
-                    replace oldId data.processId process model
+                    replace oldId id process model
             in
                 Update.fromModel model_

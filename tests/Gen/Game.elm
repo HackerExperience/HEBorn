@@ -31,11 +31,30 @@ model =
 genModel : Generator Model
 genModel =
     let
-        genPairs =
-            map2 (,) Gen.Servers.genServerID Gen.Servers.genServer
+        game =
+            { account =
+                Account.initialModel "" "" ""
+            , servers =
+                Servers.initialModel
+            , meta =
+                Meta.initialModel
+            , story =
+                Story.initialModel
+            , config =
+                { apiHttpUrl = ""
+                , apiWsUrl = ""
+                , version = "test"
+                }
+            }
 
-        genServers =
-            andThen (flip list genPairs) (int 8 10)
+        genPairs =
+            map2 (,) Gen.Servers.genServerID
+
+        genGatewayServer =
+            genPairs Gen.Servers.genGatewayServer
+
+        genEndpointServer =
+            genPairs Gen.Servers.genEndpointServer
 
         insertServer ( id, server ) game =
             let
@@ -60,25 +79,6 @@ genModel =
                     | servers = servers
                     , account = account
                 }
-
-        construct servers =
-            let
-                game =
-                    { account =
-                        Account.initialModel "" "" ""
-                    , servers =
-                        Servers.initialModel
-                    , meta =
-                        Meta.initialModel
-                    , story =
-                        Story.initialModel
-                    , config =
-                        { apiHttpUrl = ""
-                        , apiWsUrl = ""
-                        , version = "test"
-                        }
-                    }
-            in
-                List.foldl insertServer game servers
     in
-        map construct genServers
+        map2 (\gate end -> [ gate, end ]) genGatewayServer genEndpointServer
+            |> map (List.foldl insertServer game)

@@ -75,16 +75,8 @@ type State
     = Starting
     | Running
     | Paused
-    | Completed (Maybe Status)
-
-
-type Status
-    = Success
-    | Failure Reason
-
-
-type Reason
-    = Misc String
+    | Succeeded
+    | Failed (Maybe String)
 
 
 type alias ProcessFile =
@@ -116,9 +108,9 @@ type Priority
 
 type alias ResourcesUsage =
     { cpu : Usage
-    , ram : Usage
-    , downlink : Usage
-    , uplink : Usage
+    , mem : Usage
+    , down : Usage
+    , up : Usage
     }
 
 
@@ -232,17 +224,17 @@ newOptimistic :
     -> ServerID
     -> ProcessFile
     -> Process
-newOptimistic t origin target file =
-    { type_ = t
+newOptimistic type_ origin target file =
+    { type_ = type_
     , access =
         Full
             { origin = origin
             , priority = Normal
             , usage =
                 { cpu = ( 0.0, "" )
-                , ram = ( 0.0, "" )
-                , downlink = ( 0.0, "" )
-                , uplink = ( 0.0, "" )
+                , mem = ( 0.0, "" )
+                , down = ( 0.0, "" )
+                , up = ( 0.0, "" )
                 }
             , connection = Nothing
             }
@@ -262,48 +254,49 @@ replace previousId id process model =
 
 
 pause : Process -> Process
-pause ({ state, access } as process) =
+pause ({ access } as process) =
     case access of
         Full _ ->
-            case state of
-                Completed _ ->
-                    process
-
-                _ ->
-                    { process | state = Paused }
+            if isConcluded process then
+                process
+            else
+                { process | state = Paused }
 
         Partial _ ->
             process
 
 
 resume : Process -> Process
-resume ({ state, access } as process) =
+resume ({ access } as process) =
     case access of
         Full _ ->
-            case state of
-                Completed _ ->
-                    process
-
-                _ ->
-                    { process | state = Running }
+            if isConcluded process then
+                process
+            else
+                { process | state = Running }
 
         Partial _ ->
             process
 
 
-complete : Maybe Status -> Process -> Process
-complete status ({ state, access } as process) =
-    case access of
-        Full _ ->
-            case state of
-                Completed _ ->
+conclude : Bool -> Maybe String -> Process -> Process
+conclude succeeded status ({ access } as process) =
+    let
+        toState =
+            if succeeded then
+                always Succeeded
+            else
+                Failed
+    in
+        case access of
+            Full _ ->
+                if isConcluded process then
                     process
+                else
+                    { process | state = toState status }
 
-                _ ->
-                    { process | state = Completed status }
-
-        Partial _ ->
-            process
+            Partial _ ->
+                process
 
 
 getState : Process -> State
@@ -433,9 +426,9 @@ setProcesses processes model =
 
 
 typeFromName : String -> Maybe Type
-typeFromName t =
+typeFromName type_ =
     -- this may change a little, to acomodate more data
-    case t of
+    case type_ of
         "Cracker" ->
             Just Cracker
 
@@ -461,6 +454,24 @@ isRecurive process =
         |> getProgress
         |> Maybe.map (always False)
         |> Maybe.withDefault True
+
+
+isConcluded : Process -> Bool
+isConcluded process =
+    case getProgress process of
+        Just ( 1.0, _ ) ->
+            True
+
+        _ ->
+            case getState process of
+                Succeeded ->
+                    True
+
+                Failed _ ->
+                    True
+
+                _ ->
+                    False
 
 
 newProcessFile : ( Maybe FileID, Maybe Version, FileName ) -> ProcessFile

@@ -1,7 +1,6 @@
 module Events.Servers.Processes
     exposing
         ( Event(..)
-        , StartedData
         , BruteforceFailedData
         , handler
         )
@@ -18,31 +17,31 @@ import Json.Decode
         , string
         , int
         )
+import Decoders.Process
+import Game.Servers.Processes.Models exposing (..)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Utils.Events exposing (Handler)
 
 
 type Event
-    = Started StartedData
-    | Conclusion String
+    = Changed Processes
+    | Started ( ID, Process )
+    | Conclusion ID
     | BruteforceFailed BruteforceFailedData
 
 
-type alias StartedData =
-    { processId : String
-    , type_ : String
-    }
-
-
 type alias BruteforceFailedData =
-    { processId : String
-    , reason : String
+    { processId : ID
+    , status : String
     }
 
 
 handler : String -> Handler Event
 handler event json =
     case event of
+        "changed" ->
+            onChanged json
+
         "started" ->
             onStarted json
 
@@ -60,25 +59,18 @@ handler event json =
 -- internals
 
 
+onChanged : Handler Event
+onChanged json =
+    decodeValue Decoders.Process.processDict json
+        |> Result.map Changed
+        |> notify
+
+
 onStarted : Handler Event
-onStarted =
-    let
-        constructor proc type_ =
-            { processId = proc
-            , type_ = type_
-            }
-
-        decoder =
-            decode constructor
-                |> required "process_id" string
-                |> required "type" string
-
-        handler json =
-            decodeValue decoder json
-                |> Result.map Started
-                |> notify
-    in
-        handler
+onStarted json =
+    decodeValue Decoders.Process.process json
+        |> Result.map Started
+        |> notify
 
 
 onConclusion : Handler Event

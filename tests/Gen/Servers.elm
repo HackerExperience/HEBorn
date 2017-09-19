@@ -125,6 +125,56 @@ genServer =
             |> andMap Gen.Processes.genModel
 
 
+genGatewayServer : Generator Server
+genGatewayServer =
+    let
+        buildServerRecord ip fs logs proc =
+            { name = "Dummy"
+            , type_ = Desktop
+            , nip = ( "::", ip )
+            , nips = [ ( "::", ip ) ]
+            , coordinates = Just 0
+            , filesystem = fs
+            , logs = logs
+            , processes = proc
+            , tunnels = Tunnels.initialModel
+            , web = Web.initialModel
+            , ownership =
+                GatewayOwnership <| GatewayData Nothing []
+            }
+    in
+        genIP
+            |> map buildServerRecord
+            |> andMap Gen.Filesystem.genModel
+            |> andMap Gen.Logs.genModel
+            |> andMap Gen.Processes.genModel
+
+
+genEndpointServer : Generator Server
+genEndpointServer =
+    let
+        buildServerRecord ip fs logs proc =
+            { name = "Dummy"
+            , type_ = Desktop
+            , nip = ( "::", ip )
+            , nips = [ ( "::", ip ) ]
+            , coordinates = Just 0
+            , filesystem = fs
+            , logs = logs
+            , processes = proc
+            , tunnels = Tunnels.initialModel
+            , web = Web.initialModel
+            , ownership =
+                GatewayOwnership <| GatewayData Nothing []
+            }
+    in
+        genIP
+            |> map buildServerRecord
+            |> andMap Gen.Filesystem.genModel
+            |> andMap Gen.Logs.genModel
+            |> andMap Gen.Processes.genModel
+
+
 genServerList : Generator (List Server)
 genServerList =
     andThen (\num -> list num genServer) (int 8 10)

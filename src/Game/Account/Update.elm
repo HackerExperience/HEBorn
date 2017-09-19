@@ -137,7 +137,9 @@ onBounce game msg model =
 
 onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 onEvent game event model =
-    onDatabase game (Database.Event event) model
+    model
+        |> onDatabase game (Database.Event event)
+        |> Update.andThen (updateEvent game event)
 
 
 onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
