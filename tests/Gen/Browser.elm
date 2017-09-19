@@ -17,7 +17,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Models as Pages
-import Game.Servers.Web.Types as Web
+import Game.Web.Types as Web
 
 
 --------------------------------------------------------------------------------
@@ -60,27 +60,27 @@ history =
     fuzzer genHistory
 
 
-emptyBrowser : Fuzzer Browser
-emptyBrowser =
-    fuzzer genEmptyBrowser
+emptyTab : Fuzzer Tab
+emptyTab =
+    fuzzer genEmptyTab
 
 
-nonEmptyBrowser : Fuzzer Browser
-nonEmptyBrowser =
-    fuzzer genNonEmptyBrowser
+nonEmptyTab : Fuzzer Tab
+nonEmptyTab =
+    fuzzer genNonEmptyTab
 
 
-browser : Fuzzer Browser
-browser =
-    fuzzer genBrowser
+tab : Fuzzer Tab
+tab =
+    fuzzer genTab
 
 
-model : Fuzzer Browser
+model : Fuzzer Tab
 model =
     fuzzer genModel
 
 
-emptyModel : Fuzzer Browser
+emptyModel : Fuzzer Tab
 emptyModel =
     fuzzer genEmptyModel
 
@@ -98,12 +98,10 @@ genPage =
         generate str =
             let
                 site =
-                    { type_ = Web.NoWebserver
+                    { type_ =
+                        Web.NoWebserver
+                            { password = Nothing }
                     , url = str
-                    , meta =
-                        { serverId = str, nip = ( str, str ) }
-                            |> Web.NoWebserverMeta
-                            |> Just
                     }
             in
                 Pages.initialModel site
@@ -118,12 +116,7 @@ genPageURL =
 
 genEmptyPage : Generator Pages.Model
 genEmptyPage =
-    constant <|
-        Pages.initialModel
-            { type_ = Web.Blank
-            , url = "about:blank"
-            , meta = Nothing
-            }
+    constant Pages.BlankModel
 
 
 genPageList : Generator (List Pages.Model)
@@ -146,13 +139,13 @@ genHistory =
     choices [ genEmptyHistory, genNonEmptyHistory ]
 
 
-genEmptyBrowser : Generator Browser
-genEmptyBrowser =
-    constant initialBrowser
+genEmptyTab : Generator Tab
+genEmptyTab =
+    constant initTab
 
 
-genNonEmptyBrowser : Generator Browser
-genNonEmptyBrowser =
+genNonEmptyTab : Generator Tab
+genNonEmptyTab =
     let
         mapper =
             \past future url current ->
@@ -170,16 +163,16 @@ genNonEmptyBrowser =
             |> andMap genPage
 
 
-genBrowser : Generator Browser
-genBrowser =
-    choices [ genEmptyBrowser, genNonEmptyBrowser ]
+genTab : Generator Tab
+genTab =
+    choices [ genEmptyTab, genNonEmptyTab ]
 
 
-genModel : Generator Browser
+genModel : Generator Tab
 genModel =
-    genNonEmptyBrowser
+    genNonEmptyTab
 
 
-genEmptyModel : Generator Browser
+genEmptyModel : Generator Tab
 genEmptyModel =
-    genEmptyBrowser
+    genEmptyTab
