@@ -18,7 +18,8 @@ import Events.Servers.Hardware as Hardware
 import Events.Servers.Logs as Logs
 import Events.Servers.Processes as Processes
 import Events.Servers.Tunnels as Tunnels
-import Game.Network.Types exposing (NIP, decodeNip)
+import Game.Network.Types exposing (NIP)
+import Decoders.Network
 
 
 -- TODO: refactor me to conform the new Game.Servers.Requests.Bootstrap
@@ -76,8 +77,8 @@ decoder =
         |> required "id" string
         |> required "name" string
         |> required "coordinates" float
-        |> required "nip" decodeNip
-        |> required "nips" (list decodeNip)
+        |> required "nip" Decoders.Network.nip
+        |> required "nips" (list Decoders.Network.nip)
 
 
 

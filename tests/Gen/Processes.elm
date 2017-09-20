@@ -19,6 +19,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Gen.Network as GenNetwork
 import Gen.Utils exposing (..)
 import Gen.Logs as Logs
 
@@ -61,6 +62,7 @@ fullProcess =
 partialProcess : Fuzzer Process
 partialProcess =
     fuzzer genPartialProcess
+
 
 type_ : Fuzzer Type
 type_ =
@@ -177,7 +179,7 @@ genProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap genServerID
+        |> andMap GenNetwork.genNip
 
 
 genFullProcess : Generator Process
@@ -188,7 +190,8 @@ genFullProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap genServerID
+        |> andMap GenNetwork.genNip
+
 
 genPartialProcess : Generator Process
 genPartialProcess =
@@ -198,7 +201,8 @@ genPartialProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap genServerID
+        |> andMap GenNetwork.genNip
+
 
 genType : Generator Type
 genType =

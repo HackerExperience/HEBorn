@@ -84,7 +84,8 @@ eventTests =
                             }
                         , "status" : ""
                         , "progress" : [0.1, "1mb"]
-                        , "target_id" : "id"
+                        , "network_id" : "id"
+                        , "target_ip" : "id"
                         , "process_id" : "id"
                         }
                         """
@@ -283,7 +284,8 @@ requestTests =
                             }
                         , "status" : ""
                         , "progress" : [0.1, "1mb"]
-                        , "target_id" : "id"
+                        , "network_id" : "id"
+                        , "target_ip" : "id"
                         , "process_id" : "id"
                         }
                         """

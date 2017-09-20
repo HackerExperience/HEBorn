@@ -3,6 +3,7 @@ module Apps.LogViewer.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
@@ -79,12 +80,16 @@ update data msg ({ app } as model) =
 
         StartCrypting id ->
             let
-                -- this dispatch is probably temporary
+                target =
+                    data
+                        |> Game.getServer
+                        |> Servers.getNIP
+
                 dispatch =
                     Dispatch.processes data.id <|
                         Processes.Start Processes.Encryptor
                             data.id
-                            id
+                            target
                             ( Nothing, Nothing, "File Name" )
             in
                 ( model, Cmd.none, dispatch )

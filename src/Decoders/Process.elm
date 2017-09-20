@@ -19,21 +19,45 @@ processList =
 process : Decoder ( ID, Process )
 process =
     let
-        toProcess ( type_, access, state_, file, status, progress, tid, id ) =
+        constructor t a ste f stus p nid tip id =
+            { type_ = t
+            , access = a
+            , state = ste
+            , file = f
+            , status = stus
+            , progress = p
+            , networkId = nid
+            , targetIp = tip
+            , processId = id
+            }
+
+        toProcess data =
             let
-                constructor state =
-                    ( id, Process type_ access state file progress tid )
+                process state_ =
+                    Process
+                        data.type_
+                        data.access
+                        state_
+                        data.file
+                        data.progress
+                        ( data.networkId, data.targetIp )
+
+                toPair state =
+                    state
+                        |> process
+                        |> (,) data.processId
             in
-                map constructor <| state state_ status
+                map toPair <| state data.state data.status
     in
-        decode (,,,,,,,)
+        decode constructor
             |> required "type" type_
             |> required "access" access
             |> required "state" string
             |> optional "file" (maybe file) Nothing
             |> optional "status" (maybe string) Nothing
             |> optional "progress" (maybe progress) Nothing
-            |> required "target_id" string
+            |> required "network_id" string
+            |> required "target_ip" string
             |> required "process_id" string
             |> andThen toProcess
 

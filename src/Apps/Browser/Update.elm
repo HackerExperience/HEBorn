@@ -156,7 +156,8 @@ onCrack ip ({ me } as model) =
                     Processes.Start
                         Processes.Cracker
                         serverId
-                        ip
+                        -- todo: change the first ip with nid
+                        ( ip, ip )
                         ( Nothing, Nothing, "Palatura" )
                         |> Dispatch.processes serverId
 
