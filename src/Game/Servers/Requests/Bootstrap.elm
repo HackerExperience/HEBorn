@@ -28,7 +28,8 @@ import Json.Decode.Pipeline exposing (decode, required, optional)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
-import Game.Network.Types exposing (decodeNip)
+import Game.Network.Types exposing (NIP)
+import Decoders.Network
 import Game.Servers.Messages
     exposing
         ( Msg(Request)
@@ -248,7 +249,7 @@ genericDecoder =
         decode constructor
             |> required "id" string
             |> required "name" string
-            |> required "nips" (list decodeNip)
+            |> required "nips" (list Decoders.Network.nip)
             |> optional "coordinates" (maybe float) Nothing
             |> optional "logs" (maybe value) Nothing
             |> optional "tunnels" (maybe value) Nothing

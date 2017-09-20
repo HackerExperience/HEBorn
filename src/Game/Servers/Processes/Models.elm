@@ -28,7 +28,7 @@ type alias Process =
     , state : State
     , file : Maybe ProcessFile
     , progress : Maybe Progress
-    , target : ServerID
+    , target : NIP
     }
 
 
@@ -141,7 +141,7 @@ whenIncomplete : (Process -> Process) -> Process -> Process
 whenIncomplete func process =
     if isConcluded process then
         process
-    else 
+    else
         func process
 
 
@@ -195,7 +195,7 @@ changed until replaced with real ones.
 -}
 upsert : ID -> Process -> Model -> Model
 upsert id process model =
-    let 
+    let
         override () =
             Dict.insert id process model.processes
                 |> flip setProcesses model
@@ -208,6 +208,7 @@ upsert id process model =
 
                     _ ->
                         override ()
+
             _ ->
                 override ()
 
@@ -248,7 +249,7 @@ toList =
 newOptimistic :
     Type
     -> ServerID
-    -> ServerID
+    -> NIP
     -> ProcessFile
     -> Process
 newOptimistic type_ origin target file =
@@ -294,7 +295,7 @@ conclude : Maybe Bool -> Maybe String -> Process -> Process
 conclude succeeded status ({ access } as process) =
     let
         toState =
-            case succeeded of 
+            case succeeded of
                 Just True ->
                     always Succeeded
 
@@ -322,7 +323,7 @@ getAccess =
     .access
 
 
-getTarget : Process -> ServerID
+getTarget : Process -> NIP
 getTarget =
     .target
 
@@ -463,23 +464,24 @@ isRecurive process =
         |> Maybe.map (always False)
         |> Maybe.withDefault True
 
+
 {-| This function will return True for Concluded, Succeeded and Failed process,
 as each of these states are conclusion states.
 -}
 isConcluded : Process -> Bool
 isConcluded process =
-        case getState process of
-            Concluded ->
-                True
+    case getState process of
+        Concluded ->
+            True
 
-            Succeeded ->
-                True
+        Succeeded ->
+            True
 
-            Failed _ ->
-                True
+        Failed _ ->
+            True
 
-            _ ->
-                False
+        _ ->
+            False
 
 
 newProcessFile : ( Maybe FileID, Maybe Version, FileName ) -> ProcessFile

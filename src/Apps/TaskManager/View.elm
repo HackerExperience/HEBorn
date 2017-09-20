@@ -186,7 +186,7 @@ viewTaskRow data now (( _, process ) as entry) =
                 [ text <| Processes.getName process
                 , br [] []
                 , text "Target: "
-                , text <| Processes.getTarget process
+                , text <| Tuple.second <| Processes.getTarget process
                 , br [] []
                 , fileInfo
                 ]

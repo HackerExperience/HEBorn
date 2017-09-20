@@ -7,7 +7,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Network.Types as Network
+import Game.Network.Types exposing (NIP)
 
 
 type alias Model =
@@ -18,10 +18,6 @@ type alias Model =
 
 type alias NetworkMap =
     Dict NIP ID
-
-
-type alias NIP =
-    Network.NIP
 
 
 type alias Servers =

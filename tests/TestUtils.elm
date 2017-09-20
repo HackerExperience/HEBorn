@@ -18,6 +18,7 @@ once param =
 fuzz param =
     fuzzWith { runs = Config.baseFuzzRuns } param
 
+
 batch : List Expectation -> Expectation
 batch =
     List.map always >> flip Expect.all ()

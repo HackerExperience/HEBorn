@@ -24,12 +24,14 @@ type Response
     = Okay ID Process
 
 
-request : ID -> ID -> ID -> ConfigSource a -> Cmd Msg
-request optimistic target origin =
+request : ID -> NIP -> ID -> ConfigSource a -> Cmd Msg
+request optimistic nip origin =
     let
         payload =
             Encode.object
-                [ ( "target", Encode.string target )
+                [ ( "network_id", Encode.string <| Tuple.first nip )
+                , ( "ip", Encode.string <| Tuple.second nip )
+                , ( "bounces", Encode.list [] )
                 ]
     in
         Requests.request Topics.bruteforce
