@@ -81,10 +81,6 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Gateway
-                                , serverId =
-                                    data
-                                        |> Game.getID
-                                        |> Just
                                 }
                                 app
 
@@ -99,10 +95,6 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Endpoint
-                                , serverId =
-                                    data
-                                        |> Game.getServer
-                                        |> Servers.getEndpoint
                                 }
                                 app
 
@@ -129,7 +121,6 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Gateway
-                                , serverId = serverID
                                 }
                                 app
                     in

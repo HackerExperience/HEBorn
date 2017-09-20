@@ -19,5 +19,4 @@ type alias Config =
     { sessionId : SessionID
     , windowId : WindowID
     , context : Context
-    , serverId : Maybe ServerID
     }

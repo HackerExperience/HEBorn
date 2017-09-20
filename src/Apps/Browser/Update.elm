@@ -2,6 +2,7 @@ module Apps.Browser.Update exposing (update)
 
 import Utils.Update as Update
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
@@ -48,11 +49,11 @@ update data msg model =
             onSomeTabMsg data tabK msg model
 
         Crack ip ->
-            onCrack ip model
+            onCrack data ip model
 
         -- Browser
         NewTabIn url ->
-            onNewTabIn url model
+            onNewTabIn data url model
 
         ChangeTab tabK ->
             goTab tabK model
@@ -79,8 +80,8 @@ onMenuMsg data msg model =
         model
 
 
-onNewTabIn : URL -> Model -> UpdateResponse
-onNewTabIn url model =
+onNewTabIn : Game.Data -> URL -> Model -> UpdateResponse
+onNewTabIn data url model =
     let
         createTabModel =
             addTab model
@@ -97,7 +98,7 @@ onNewTabIn url model =
             getTab tabK goTabModel.tabs
 
         ( tab_, cmd, dispatch ) =
-            requestPage url model.me tabK tab
+            onGoAddress data url model.me tabK tab
 
         model_ =
             setNowTab tab_ goTabModel
@@ -128,13 +129,13 @@ onSomeTabMsg data tabK msg model =
                     onGoPrevious tab
 
                 GoNext ->
-                    goNext tab
+                    onGoNext tab
 
                 PageMsg msg ->
                     onPageMsg data msg tab
 
                 GoAddress url ->
-                    requestPage url model.me tabK tab
+                    onGoAddress data url model.me tabK tab
 
                 Fetched response ->
                     onFetched response tab
@@ -147,22 +148,25 @@ onSomeTabMsg data tabK msg model =
             |> Update.mapCmd (SomeTabMsg tabK)
 
 
-onCrack : String -> Model -> UpdateResponse
-onCrack ip ({ me } as model) =
+onCrack : Game.Data -> String -> Model -> UpdateResponse
+onCrack data ip ({ me } as model) =
     let
-        dispatch =
-            case me.serverId of
-                Just serverId ->
-                    Processes.Start
-                        Processes.Cracker
-                        serverId
-                        -- todo: change the first ip with nid
-                        ( ip, ip )
-                        ( Nothing, Nothing, "Palatura" )
-                        |> Dispatch.processes serverId
+        serverId =
+            Game.getID data
 
-                Nothing ->
-                    Debug.crash "Browser always need a serverId"
+        network =
+            data
+                |> Game.getServer
+                |> Servers.getNIP
+                |> Tuple.first
+
+        dispatch =
+            Processes.Start
+                Processes.Cracker
+                serverId
+                ( network, ip )
+                ( Nothing, Nothing, "Palatura" )
+                |> Dispatch.processes serverId
     in
         ( model, Cmd.none, dispatch )
 
@@ -198,8 +202,8 @@ onGoPrevious =
     gotoPreviousPage >> Update.fromModel
 
 
-goNext : Tab -> TabUpdateResponse
-goNext =
+onGoNext : Tab -> TabUpdateResponse
+onGoNext =
     gotoNextPage >> Update.fromModel
 
 
@@ -230,14 +234,18 @@ onFetched response tab =
             Update.fromModel tab
 
 
-requestPage :
-    String
+onGoAddress :
+    Game.Data
+    -> String
     -> Config
     -> Int
     -> Tab
     -> TabUpdateResponse
-requestPage url { sessionId, windowId, context, serverId } tabK tab =
+onGoAddress data url { sessionId, windowId, context } tabK tab =
     let
+        serverId =
+            Game.getID data
+
         requester =
             { sessionId = sessionId
             , windowId = windowId
@@ -246,13 +254,8 @@ requestPage url { sessionId, windowId, context, serverId } tabK tab =
             }
 
         dispatch =
-            case serverId of
-                Just serverId ->
-                    Web.FetchUrl serverId url requester
-                        |> Dispatch.web
-
-                Nothing ->
-                    Debug.crash "Browser always need a serverId"
+            Web.FetchUrl serverId url requester
+                |> Dispatch.web
 
         tab_ =
             gotoPage url Pages.LoadingModel tab
