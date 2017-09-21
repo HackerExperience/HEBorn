@@ -32,11 +32,11 @@ type Type
 
 
 type alias WebserverMetadata =
-    { password : Maybe String, custom : String }
+    { nip : NIP, password : Maybe String, custom : String }
 
 
 type alias NoWebserverMetadata =
-    { password : Maybe String }
+    { nip : NIP, password : Maybe String }
 
 
 type alias BankMetadata =

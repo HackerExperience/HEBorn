@@ -29,6 +29,7 @@ import Utils.Json.Decode exposing (exclusively)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
+import Decoders.Network exposing (nip)
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.DNS exposing (..)
@@ -145,6 +146,7 @@ matchSite url typeStr =
 webServer : Url -> Decoder Response
 webServer url =
     decode WebserverMetadata
+        |> required "nip" nip
         |> optional "password" (maybe string) Nothing
         |> required "custom" string
         |> andThen (Webserver >> okayPack url)
@@ -153,6 +155,7 @@ webServer url =
 noWebServer : Url -> Decoder Response
 noWebServer url =
     decode NoWebserverMetadata
+        |> required "nip" nip
         |> optional "password" (maybe string) Nothing
         |> andThen (NoWebserver >> okayPack url)
 

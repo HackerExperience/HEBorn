@@ -25,9 +25,6 @@ update game msg =
         FetchUrl serverId url requester ->
             ( DNS.request serverId url requester game, Dispatch.none )
 
-        Event data ->
-            updateEvent game data
-
 
 
 -- internals
@@ -50,17 +47,12 @@ updateRequest game response =
             onDNS game requester response
 
 
-updateEvent : Game.Model -> Events.Event -> UpdateResponse
-updateEvent game event =
-    ( Cmd.none, Dispatch.none )
-
-
 onDNS : Game.Model -> DNS.Requester -> DNS.Response -> UpdateResponse
-onDNS game { sessionId, windowId, context, tabK } response =
+onDNS game { sessionId, windowId, context, tabId } response =
     let
         dispatch =
             Browser.Fetched response
-                |> Browser.SomeTabMsg tabK
+                |> Browser.SomeTabMsg tabId
                 |> Dispatch.browser ( sessionId, windowId ) context
     in
         ( Cmd.none, dispatch )

@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Network.Types exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(Crack))
 import Apps.Browser.Pages.NoWebserver.Messages exposing (Msg(..))
@@ -26,7 +27,7 @@ view data model =
                 ]
             ]
         , div [ class [ LoginPageFooter ] ]
-            [ crackBtn model.url
+            [ crackBtn model.target
             , div []
                 [ text "M"
                 , br [] []
@@ -36,7 +37,7 @@ view data model =
         ]
 
 
-crackBtn : String -> Html Msg
+crackBtn : NIP -> Html Msg
 crackBtn target =
     div
         [ onClick <| GlobalMsg <| Crack target

@@ -14,5 +14,5 @@ type alias Requester =
     { sessionId : String
     , windowId : String
     , context : Context
-    , tabK : Int
+    , tabId : Int
     }
