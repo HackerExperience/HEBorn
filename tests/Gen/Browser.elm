@@ -100,7 +100,7 @@ genPage =
                 site =
                     { type_ =
                         Web.NoWebserver
-                            { password = Nothing }
+                            { password = Nothing, nip = ( "main", str ) }
                     , url = str
                     }
             in

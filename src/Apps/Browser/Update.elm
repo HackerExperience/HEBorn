@@ -2,6 +2,7 @@ module Apps.Browser.Update exposing (update)
 
 import Utils.Update as Update
 import Game.Data as Game
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
@@ -45,18 +46,18 @@ update data msg model =
         ActiveTabMsg msg ->
             onSomeTabMsg data model.nowTab msg model
 
-        SomeTabMsg tabK msg ->
-            onSomeTabMsg data tabK msg model
+        SomeTabMsg tabId msg ->
+            onSomeTabMsg data tabId msg model
 
-        Crack ip ->
-            onCrack data ip model
+        Crack nip ->
+            onCrack data nip model
 
         -- Browser
         NewTabIn url ->
             onNewTabIn data url model
 
-        ChangeTab tabK ->
-            goTab tabK model
+        ChangeTab tabId ->
+            goTab tabId model
                 |> Update.fromModel
 
 
@@ -91,20 +92,20 @@ onNewTabIn data url model =
                 createTabModel.lastTab
                 createTabModel
 
-        tabK =
+        tabId =
             goTabModel.nowTab
 
         tab =
-            getTab tabK goTabModel.tabs
+            getTab tabId goTabModel.tabs
 
         ( tab_, cmd, dispatch ) =
-            onGoAddress data url model.me tabK tab
+            onGoAddress data url model.me tabId tab
 
         model_ =
             setNowTab tab_ goTabModel
 
         cmd_ =
-            Cmd.map (SomeTabMsg tabK) cmd
+            Cmd.map (SomeTabMsg tabId) cmd
     in
         ( model_, cmd_, dispatch )
 
@@ -115,10 +116,10 @@ onSomeTabMsg :
     -> TabMsg
     -> Model
     -> UpdateResponse
-onSomeTabMsg data tabK msg model =
+onSomeTabMsg data tabId msg model =
     let
         tab =
-            getTab tabK model.tabs
+            getTab tabId model.tabs
 
         result =
             case msg of
@@ -135,21 +136,21 @@ onSomeTabMsg data tabK msg model =
                     onPageMsg data msg tab
 
                 GoAddress url ->
-                    onGoAddress data url model.me tabK tab
+                    onGoAddress data url model.me tabId tab
 
                 Fetched response ->
                     onFetched response tab
 
         setThisTab tab_ =
-            { model | tabs = (setTab tabK tab_ model.tabs) }
+            { model | tabs = (setTab tabId tab_ model.tabs) }
     in
         result
             |> Update.mapModel setThisTab
-            |> Update.mapCmd (SomeTabMsg tabK)
+            |> Update.mapCmd (SomeTabMsg tabId)
 
 
-onCrack : Game.Data -> String -> Model -> UpdateResponse
-onCrack data ip ({ me } as model) =
+onCrack : Game.Data -> NIP -> Model -> UpdateResponse
+onCrack data nip ({ me } as model) =
     let
         serverId =
             Game.getID data
@@ -164,7 +165,7 @@ onCrack data ip ({ me } as model) =
             Processes.Start
                 Processes.Cracker
                 serverId
-                ( network, ip )
+                nip
                 ( Nothing, Nothing, "Palatura" )
                 |> Dispatch.processes serverId
     in
@@ -241,7 +242,7 @@ onGoAddress :
     -> Int
     -> Tab
     -> TabUpdateResponse
-onGoAddress data url { sessionId, windowId, context } tabK tab =
+onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
         serverId =
             Game.getID data
@@ -250,7 +251,7 @@ onGoAddress data url { sessionId, windowId, context } tabK tab =
             { sessionId = sessionId
             , windowId = windowId
             , context = context
-            , tabK = tabK
+            , tabId = tabId
             }
 
         dispatch =

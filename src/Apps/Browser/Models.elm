@@ -127,18 +127,18 @@ getNextPages browser =
 
 
 gotoPage : String -> Pages.Model -> Tab -> Tab
-gotoPage url page browser =
-    if page /= getPage browser then
+gotoPage url page tab =
+    if page /= getPage tab then
         let
             previousPages =
                 -- Loading pages should not be added to history
-                if (Pages.isLoading browser.page) then
-                    getPreviousPages browser
+                if (Pages.isLoading tab.page) then
+                    getPreviousPages tab
                 else
-                    ( browser.lastURL, browser.page )
-                        :: (getPreviousPages browser)
+                    ( tab.lastURL, tab.page )
+                        :: (getPreviousPages tab)
         in
-            { browser
+            { tab
                 | addressBar = url
                 , lastURL = url
                 , page = page
@@ -146,16 +146,16 @@ gotoPage url page browser =
                 , nextPages = []
             }
     else
-        browser
+        tab
 
 
 gotoPreviousPage : Tab -> Tab
-gotoPreviousPage browser =
-    browser
+gotoPreviousPage tab =
+    tab
         |> reorderHistory getPreviousPages getNextPages
         |> Maybe.map
             (\( ( url, page ), prev, next ) ->
-                { browser
+                { tab
                     | page = page
                     , previousPages = prev
                     , nextPages = next
@@ -164,16 +164,16 @@ gotoPreviousPage browser =
                 }
             )
         |> Maybe.withDefault
-            browser
+            tab
 
 
 gotoNextPage : Tab -> Tab
-gotoNextPage browser =
-    browser
+gotoNextPage tab =
+    tab
         |> reorderHistory getNextPages getPreviousPages
         |> Maybe.map
             (\( ( url, page ), next, prev ) ->
-                { browser
+                { tab
                     | page = page
                     , previousPages = prev
                     , nextPages = next
@@ -182,7 +182,7 @@ gotoNextPage browser =
                 }
             )
         |> Maybe.withDefault
-            browser
+            tab
 
 
 reorderHistory :
@@ -190,19 +190,19 @@ reorderHistory :
     -> (Tab -> BrowserHistory)
     -> Tab
     -> Maybe ( ( URL, Pages.Model ), BrowserHistory, BrowserHistory )
-reorderHistory getFromList getToList browser =
+reorderHistory getFromList getToList tab =
     let
         from =
-            getFromList browser
+            getFromList tab
 
         to =
-            getToList browser
+            getToList tab
 
         oldPage =
-            getPage browser
+            getPage tab
 
         oldURL =
-            getURL browser
+            getURL tab
     in
         from
             |> List.head

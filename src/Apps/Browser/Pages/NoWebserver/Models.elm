@@ -5,14 +5,14 @@ module Apps.Browser.Pages.NoWebserver.Models
         , getTitle
         )
 
-import Game.Network.Types as Network
+import Game.Network.Types exposing (NIP)
 import Game.Web.Types exposing (Url, NoWebserverMetadata)
 import Game.Web.Types as Web exposing (Site)
 
 
 type alias Model =
     { password : Maybe String
-    , url : Url
+    , target : NIP
     }
 
 
@@ -23,10 +23,10 @@ type alias Model =
 initialModel : Url -> NoWebserverMetadata -> Model
 initialModel url meta =
     { password = meta.password
-    , url = url
+    , target = meta.nip
     }
 
 
 getTitle : Model -> String
-getTitle { url } =
-    "Accessing " ++ url
+getTitle { target } =
+    "Accessing " ++ (Tuple.second target)
