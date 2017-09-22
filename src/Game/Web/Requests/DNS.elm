@@ -36,6 +36,7 @@ import Game.Network.Types exposing (NIP)
 import Decoders.Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
+import Game.Web.Models exposing (..)
 import Game.Web.DNS exposing (..)
 
 

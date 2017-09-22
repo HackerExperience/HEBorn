@@ -24,3 +24,5 @@ type TabMsg
     | GoNext
     | PageMsg Page.Msg
     | Fetched Response
+    | Login
+    | LoginFailed

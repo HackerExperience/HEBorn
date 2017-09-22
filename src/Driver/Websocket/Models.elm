@@ -1,5 +1,6 @@
 module Driver.Websocket.Models exposing (Model, initialModel)
 
+import Dict exposing (Dict)
 import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Reports exposing (..)
 import Events.Events as Events exposing (Event(..))
@@ -9,9 +10,12 @@ import Phoenix.Channel as Channel
 
 type alias Model =
     { socket : Socket.Socket Msg
-    , channels : List (Channel.Channel Msg)
-    , defer : Bool
+    , channels : Channels
     }
+
+
+type alias Channels =
+    Dict String (Channel.Channel Msg)
 
 
 initialSocket : String -> String -> Socket.Socket Msg
@@ -26,6 +30,5 @@ initialSocket apiWsUrl token =
 initialModel : String -> String -> Model
 initialModel apiWsUrl token =
     { socket = initialSocket apiWsUrl token
-    , channels = []
-    , defer = False
+    , channels = Dict.empty
     }

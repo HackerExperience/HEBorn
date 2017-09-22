@@ -26,7 +26,6 @@ import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Bootstrap as Bootstrap
-import Game.Network.Types exposing (NIP)
 
 
 type alias UpdateResponse =
@@ -133,7 +132,7 @@ updateRequest game data model =
 
 
 
---content message handlers
+-- content message handlers
 
 
 updateServer : Game.Model -> ID -> ServerMsg -> Server -> ServerUpdateResponse

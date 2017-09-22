@@ -5,6 +5,7 @@ import Random.Pcg exposing (Generator, andThen, map, map2, list, int)
 import Game.Account.Models as Account
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
+import Game.Web.Models as Web
 import Game.Models exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
@@ -40,6 +41,8 @@ genModel =
                 Meta.initialModel
             , story =
                 Story.initialModel
+            , web =
+                Web.initialModel
             , config =
                 { apiHttpUrl = ""
                 , apiWsUrl = ""
