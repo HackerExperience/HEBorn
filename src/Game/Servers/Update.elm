@@ -29,7 +29,6 @@ import Game.Servers.Requests.Bootstrap as Bootstrap
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Models as Notifications
 import Game.Notifications.Update as Notifications
-import Game.Network.Types exposing (NIP)
 
 
 type alias UpdateResponse =
@@ -136,7 +135,7 @@ updateRequest game data model =
 
 
 
---content message handlers
+-- content message handlers
 
 
 updateServer : Game.Model -> ID -> ServerMsg -> Server -> ServerUpdateResponse

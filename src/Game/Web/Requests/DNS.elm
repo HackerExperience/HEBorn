@@ -1,7 +1,6 @@
 module Game.Web.Requests.DNS
     exposing
-        ( Response(..)
-        , request
+        ( request
         , receive
         )
 
@@ -35,16 +34,16 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
-import Game.Web.DNS exposing (..)
+import Game.Web.Models as Web
 
 
-type Response
-    = Okay Site
-    | NotFounded Url
-    | ConnectionError Url
-
-
-request : String -> String -> String -> Requester -> ConfigSource a -> Cmd Msg
+request :
+    String
+    -> String
+    -> String
+    -> Web.Requester
+    -> ConfigSource a
+    -> Cmd Msg
 request serverId url networkId requester =
     Requests.request Topics.browse
         (DNSRequest url requester >> Request)
@@ -52,7 +51,7 @@ request serverId url networkId requester =
         (encoder url)
 
 
-receive : String -> Code -> Value -> Maybe Response
+receive : String -> Code -> Value -> Maybe Web.Response
 receive url code json =
     case code of
         OkCode ->
@@ -66,7 +65,7 @@ receive url code json =
                 |> Requests.report
 
         _ ->
-            Just <| ConnectionError url
+            Just <| Web.ConnectionError url
 
 
 
@@ -80,12 +79,12 @@ encoder url =
         ]
 
 
-decoder : Url -> Decoder Response
+decoder : Url -> Decoder Web.Response
 decoder url =
     field "type" string
         |> andThen (decodeType >> field "content")
         |> andThen (decodeSite url)
-        |> map Okay
+        |> map Web.Okay
 
 
 decodeType : String -> Decoder Type
@@ -171,11 +170,11 @@ decodeDownloadCenter =
         |> map DownloadCenter
 
 
-decodeErrorMessage : Url -> String -> Decoder Response
+decodeErrorMessage : Url -> String -> Decoder Web.Response
 decodeErrorMessage url str =
     case str of
         "web_not_found" ->
-            succeed <| NotFounded url
+            succeed <| Web.NotFound url
 
         _ ->
             fail "Unexpected error"

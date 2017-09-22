@@ -16,7 +16,6 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Notifications.Messages as Notifications
-import Game.Network.Types exposing (NIP)
 
 
 -- messages and requests received by the server collection

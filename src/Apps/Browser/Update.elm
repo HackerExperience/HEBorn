@@ -7,7 +7,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
-import Game.Web.Requests.DNS as DNS
+import Game.Web.Models as Web
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -141,6 +141,12 @@ onSomeTabMsg data tabId msg model =
                 Fetched response ->
                     onFetched response tab
 
+                Login ->
+                    Update.fromModel tab
+
+                LoginFailed ->
+                    Update.fromModel tab
+
         setThisTab tab_ =
             { model | tabs = (setTab tabId tab_ model.tabs) }
     in
@@ -208,18 +214,18 @@ onGoNext =
     gotoNextPage >> Update.fromModel
 
 
-onFetched : DNS.Response -> Tab -> TabUpdateResponse
+onFetched : Web.Response -> Tab -> TabUpdateResponse
 onFetched response tab =
     let
         ( url, pageModel ) =
             case response of
-                DNS.Okay site ->
+                Web.Okay site ->
                     ( site.url, Pages.initialModel site )
 
-                DNS.NotFounded url ->
+                Web.NotFound url ->
                     ( url, Pages.NotFoundModel { url = url } )
 
-                DNS.ConnectionError url ->
+                Web.ConnectionError url ->
                     -- TODO: Change to some "failed" page
                     ( url, Pages.BlankModel )
 
