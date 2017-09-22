@@ -46,7 +46,7 @@ update msg model =
             onStory msg model
 
         WebMsg msg ->
-            onWebMsg msg model
+            onWeb msg model
 
         Event data ->
             onEvent data model
@@ -98,11 +98,16 @@ onStory msg game =
         game
 
 
-onWebMsg : Web.Msg -> Model -> UpdateResponse
-onWebMsg msg model =
-    Web.update model msg
-        |> uncurry ((,,) model)
-        |> Update.mapCmd WebMsg
+onWeb : Web.Msg -> Model -> UpdateResponse
+onWeb msg game =
+    Update.child
+        { get = .web
+        , set = (\web game -> { game | web = web })
+        , toMsg = WebMsg
+        , update = (Web.update game)
+        }
+        msg
+        game
 
 
 onServers : Servers.Msg -> Model -> UpdateResponse
@@ -123,6 +128,7 @@ onEvent event model =
         |> Update.andThen (onMeta (Meta.Event event))
         |> Update.andThen (onServers (Servers.Event event))
         |> Update.andThen (onStory (Story.Event event))
+        |> Update.andThen (onWeb (Web.Event event))
         |> Update.andThen (updateEvent event)
 
 
@@ -142,7 +148,7 @@ updateEvent event model =
         Events.Report (Ws.Connected _) ->
             onWsConnected model
 
-        Events.Report (Ws.Joined AccountChannel) ->
+        Events.Report (Ws.Joined AccountChannel _ _) ->
             onWsJoinedAccount model
 
         _ ->

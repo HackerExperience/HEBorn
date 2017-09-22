@@ -1,5 +1,6 @@
 module Driver.Websocket.Update exposing (update)
 
+import Dict exposing (Dict)
 import Json.Decode exposing (Value, decodeValue, value, string)
 import Json.Decode.Pipeline exposing (decode, required)
 import Phoenix.Channel as Channel
@@ -18,6 +19,9 @@ update msg model =
     case msg of
         JoinChannel channel topic payload ->
             join channel topic payload model
+
+        LeaveChannel channel topic ->
+            leave channel topic model
 
         NewEvent channel topic value ->
             case decodeEvent value of
@@ -68,12 +72,16 @@ join :
     -> ( Model, Cmd Msg, Dispatch )
 join channel topic payload model =
     let
+        channelAddress =
+            getAddress channel topic
+
         channel_ =
             let
                 channel__ =
-                    getAddress channel topic
+                    channelAddress
                         |> Channel.init
-                        |> Channel.onJoin (reportJoin channel)
+                        |> Channel.onJoin (reportJoin channel topic)
+                        |> Channel.onJoinError (reportJoinFailed channel topic)
                         |> Channel.on "event" (NewEvent channel topic)
             in
                 case payload of
@@ -84,7 +92,22 @@ join channel topic payload model =
                         channel__
 
         channels =
-            channel_ :: model.channels
+            Dict.insert channelAddress channel_ model.channels
+
+        model_ =
+            { model | channels = channels }
+    in
+        Update.fromModel model_
+
+
+leave : Channel -> Maybe String -> Model -> ( Model, Cmd Msg, Dispatch )
+leave channel topic model =
+    let
+        channelAddress =
+            getAddress channel topic
+
+        channels =
+            Dict.remove channelAddress model.channels
 
         model_ =
             { model | channels = channels }
@@ -96,9 +119,15 @@ join channel topic payload model =
 -- reports
 
 
-reportJoin : Channel -> a -> Msg
-reportJoin channel _ =
-    channel
-        |> Joined
+reportJoin : Channel -> Maybe String -> Value -> Msg
+reportJoin channel topic json =
+    Joined channel topic json
+        |> Events.Report
+        |> Broadcast
+
+
+reportJoinFailed : Channel -> Maybe String -> Value -> Msg
+reportJoinFailed channel topic json =
+    JoinFailed channel topic json
         |> Events.Report
         |> Broadcast

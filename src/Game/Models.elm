@@ -23,6 +23,7 @@ import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
+import Game.Web.Models as Web
 import Core.Config exposing (Config)
 
 
@@ -31,6 +32,7 @@ type alias Model =
     , servers : Servers.Model
     , meta : Meta.Model
     , story : Story.Model
+    , web : Web.Model
     , config : Config
     }
 
@@ -46,6 +48,7 @@ initialModel id username token config =
     , servers = Servers.initialModel
     , meta = Meta.initialModel
     , story = Story.initialModel
+    , web = Web.initialModel
     , config = config
     }
 
@@ -88,6 +91,16 @@ getStory =
 setStory : Story.Model -> Model -> Model
 setStory story model =
     { model | story = story }
+
+
+getWeb : Model -> Web.Model
+getWeb =
+    .web
+
+
+setWeb : Web.Model -> Model -> Model
+setWeb web model =
+    { model | web = web }
 
 
 getConfig : Model -> Config

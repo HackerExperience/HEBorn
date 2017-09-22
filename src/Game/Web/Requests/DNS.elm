@@ -32,6 +32,7 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network exposing (nip)
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
+import Game.Web.Models exposing (..)
 import Game.Web.DNS exposing (..)
 
 

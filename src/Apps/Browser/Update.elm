@@ -141,6 +141,12 @@ onSomeTabMsg data tabId msg model =
                 Fetched response ->
                     onFetched response tab
 
+                Login ->
+                    Update.fromModel tab
+
+                LoginFailed ->
+                    Update.fromModel tab
+
         setThisTab tab_ =
             { model | tabs = (setTab tabId tab_ model.tabs) }
     in
