@@ -33,7 +33,7 @@ update game msg model =
             onLogin game id ip password data model
 
         Request data ->
-            onRequest game (receive data) model
+            updateRequest game (receive data) model
 
         FetchUrl serverId url nid requester ->
             let
@@ -50,33 +50,13 @@ update game msg model =
 -- internals
 
 
-onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest game response model =
-    case response of
-        Just response ->
-            updateRequest game response model
-
-        Nothing ->
-            ( model, Cmd.none, Dispatch.none )
-
-
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
+updateRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
 updateRequest game response model =
     case response of
-        DNS requester response ->
+        Just (DNS requester response) ->
             onDNS game requester response model
 
-
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    case event of
-        Events.Report (Ws.Joined ServerChannel (Just serverId) _) ->
-            onJoined game serverId model
-
-        Events.Report (Ws.JoinFailed ServerChannel (Just serverId) _) ->
-            onJoinFailed game serverId model
-
-        _ ->
+        Nothing ->
             ( model, Cmd.none, Dispatch.none )
 
 
@@ -122,13 +102,26 @@ onLogin game serverId serverIp password requester model =
         ( model_, Cmd.none, dispatch )
 
 
+updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
+updateEvent game event model =
+    case event of
+        Events.Report (Ws.Joined ServerChannel (Just serverId) _) ->
+            onJoined game serverId model
+
+        Events.Report (Ws.JoinFailed ServerChannel (Just serverId) _) ->
+            onJoinFailed game serverId model
+
+        _ ->
+            ( model, Cmd.none, Dispatch.none )
+
+
 {-| Reports success back to the loading page.
 -}
 onJoined : Game.Model -> Servers.ID -> Model -> UpdateResponse
-onJoined game serverId model0 =
+onJoined game serverId model =
     let
-        ( maybeRequester, model ) =
-            finishLoading serverId model0
+        ( maybeRequester, model_ ) =
+            finishLoading serverId model
 
         dispatch =
             case maybeRequester of
@@ -151,16 +144,16 @@ onJoined game serverId model0 =
                 Nothing ->
                     Dispatch.none
     in
-        ( model, Cmd.none, dispatch )
+        ( model_, Cmd.none, dispatch )
 
 
 {-| Reports failure back to the loading page.
 -}
 onJoinFailed : Game.Model -> Servers.ID -> Model -> UpdateResponse
-onJoinFailed game serverId model0 =
+onJoinFailed game serverId model =
     let
-        ( maybeRequester, model ) =
-            finishLoading serverId model0
+        ( maybeRequester, model_ ) =
+            finishLoading serverId model
 
         dispatch =
             case maybeRequester of
@@ -172,4 +165,4 @@ onJoinFailed game serverId model0 =
                 Nothing ->
                     Dispatch.none
     in
-        ( model, Cmd.none, dispatch )
+        ( model_, Cmd.none, dispatch )
