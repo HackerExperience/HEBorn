@@ -13,13 +13,15 @@ import Game.Web.Types as Web exposing (Site)
 type alias Model =
     { title : String
     , location : ( Float, Float )
+    , password : Maybe String
     }
 
 
-initialModel : Url -> BankMetadata -> Model
-initialModel url meta =
+initialModel : Site -> BankMetadata -> Model
+initialModel site meta =
     { title = meta.title
     , location = ( 0, 0 )
+    , password = site.password
     }
 
 

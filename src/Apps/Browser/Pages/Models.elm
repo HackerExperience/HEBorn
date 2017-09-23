@@ -62,7 +62,7 @@ initialModel ({ url, type_ } as site) =
             ISPModel
 
         Web.Bank meta ->
-            BankModel <| PageBank.initialModel url meta
+            BankModel <| PageBank.initialModel site meta
 
         Web.Store ->
             StoreModel
