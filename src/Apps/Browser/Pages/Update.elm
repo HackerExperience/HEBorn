@@ -6,6 +6,7 @@ import Game.Data as Game
 import Apps.Browser.Pages.Models exposing (Model(..))
 import Apps.Browser.Pages.Messages exposing (..)
 import Apps.Browser.Pages.NoWebserver.Update as NoWebserver
+import Apps.Browser.Pages.Bank.Update as Bank
 
 
 type alias UpdateResponse =
@@ -23,6 +24,11 @@ update data msg model =
             NoWebserver.update data msg page
                 |> Update.mapModel NoWebserverModel
                 |> Update.mapCmd NoWebserverMsg
+
+        ( BankModel page, BankMsg msg ) ->
+            Bank.update data msg page
+                |> Update.mapModel BankModel
+                |> Update.mapCmd BankMsg
 
         _ ->
             Update.fromModel model

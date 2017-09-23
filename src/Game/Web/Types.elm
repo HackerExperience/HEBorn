@@ -52,17 +52,14 @@ type alias DownloadCenterContent =
     }
 
 
-isHackable : Type -> Bool
-isHackable t =
-    case t of
-        NotFound ->
-            False
 
-        Profile ->
-            False
+-- This response is located here to avoid a dependency cycle
 
-        _ ->
-            True
+
+type Response
+    = PageLoaded Site
+    | PageNotFound Url
+    | ConnectionError Url
 
 
 getType : Site -> Type

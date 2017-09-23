@@ -98,10 +98,12 @@ genPage =
         generate str =
             let
                 site =
-                    { type_ = Web.NoWebserver
-                    , password = Nothing
-                    , nip = ( "main", str )
-                    , url = str
+                    { url = str
+                    , type_ = Web.NoWebserver
+                    , meta =
+                        { password = Nothing
+                        , nip = ( "main", str )
+                        }
                     }
             in
                 Pages.initialModel site

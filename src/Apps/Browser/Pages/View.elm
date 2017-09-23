@@ -86,7 +86,7 @@ view data model =
             MissionCenter.view
                 |> ignoreMsg
 
-        LoadingModel ->
+        LoadingModel _ ->
             div [] []
 
         BlankModel ->

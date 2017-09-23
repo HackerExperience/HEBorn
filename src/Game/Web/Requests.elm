@@ -1,12 +1,13 @@
 module Game.Web.Requests exposing (Response(..), receive)
 
 import Game.Web.Messages exposing (..)
-import Game.Web.Models as Web
+import Game.Web.Models exposing (..)
+import Game.Web.Types as DNS
 import Game.Web.Requests.DNS as DNS
 
 
 type Response
-    = DNS Web.Requester Web.Response
+    = DNS Requester DNS.Response
 
 
 receive : RequestMsg -> Maybe Response

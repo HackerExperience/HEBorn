@@ -3,7 +3,6 @@ module Game.Web.Models
         ( Model
         , LoadingPages
         , Requester
-        , Response(..)
         , initialModel
         , startLoading
         , finishLoading
@@ -30,12 +29,6 @@ type alias Requester =
     , context : Context
     , tabId : Int
     }
-
-
-type Response
-    = Okay Site
-    | NotFound Url
-    | ConnectionError Url
 
 
 initialModel : Model

@@ -7,3 +7,5 @@ type CommonActions
     = GoAddress String
     | NewTabIn String
     | Crack NIP
+    | AnyMap NIP
+    | Login NIP String

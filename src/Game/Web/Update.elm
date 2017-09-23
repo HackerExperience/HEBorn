@@ -133,7 +133,7 @@ onJoined game serverId model =
                     -- is always a gateway id
                     let
                         dispatch0 =
-                            Browser.Login
+                            Browser.ReportLogin
                                 |> Browser.SomeTabMsg tabId
                                 |> Dispatch.browser ( sessionId, windowId )
                                     context
@@ -161,7 +161,7 @@ onJoinFailed game serverId model =
         dispatch =
             case maybeRequester of
                 Just { sessionId, windowId, context, tabId } ->
-                    Browser.LoginFailed
+                    Browser.ReportLoginFailed
                         |> Browser.SomeTabMsg tabId
                         |> Dispatch.browser ( sessionId, windowId ) context
 

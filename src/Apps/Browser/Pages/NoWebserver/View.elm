@@ -10,54 +10,23 @@ import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(Crack))
 import Apps.Browser.Pages.NoWebserver.Messages exposing (Msg(..))
 import Apps.Browser.Pages.NoWebserver.Models exposing (Model)
+import Apps.Browser.Widgets.HackingToolkit as HackingToolkit exposing (hackingToolkit)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
+hackingToolkitConfig : HackingToolkit.Config Msg
+hackingToolkitConfig =
+    { onInput = UpdatePasswordField
+    , onCommonAction = GlobalMsg
+    }
+
+
 view : Game.Data -> Model -> Html Msg
 view data model =
     div [ class [ AutoHeight ] ]
         [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-        , div [ class [ LoginPageForm ] ]
-            [ div []
-                [ passwordInput model.password
-                , text "E"
-                ]
-            ]
-        , div [ class [ LoginPageFooter ] ]
-            [ crackBtn model.target
-            , div []
-                [ text "M"
-                , br [] []
-                , text "AnyMap"
-                ]
-            ]
+        , hackingToolkit hackingToolkitConfig model.toolkit
         ]
-
-
-crackBtn : NIP -> Html Msg
-crackBtn target =
-    div
-        [ onClick <| GlobalMsg <| Crack target
-        ]
-        [ text "C"
-        , br [] []
-        , text "Crack"
-        ]
-
-
-passwordInput : Maybe String -> Html Msg
-passwordInput psw =
-    -- TODO: Hide when already on Endpoints
-    let
-        value_ =
-            psw
-                |> Maybe.withDefault ""
-                |> value
-
-        onInput_ =
-            onInput UpdatePasswordField
-    in
-        input [ placeholder "Password", value_, onInput_ ] []

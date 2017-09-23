@@ -1,6 +1,6 @@
 module Apps.Browser.Messages exposing (..)
 
-import Game.Web.Models exposing (Response)
+import Game.Web.Types exposing (Response)
 import Game.Network.Types exposing (NIP)
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Pages.Messages as Page
@@ -14,7 +14,6 @@ type Msg
       -- Browser actions
     | NewTabIn String
     | ChangeTab Int
-    | Crack NIP
 
 
 type TabMsg
@@ -24,5 +23,8 @@ type TabMsg
     | GoNext
     | PageMsg Page.Msg
     | Fetched Response
-    | Login
-    | LoginFailed
+    | Crack NIP
+    | AnyMap NIP
+    | Login NIP String
+    | ReportLogin
+    | ReportLoginFailed

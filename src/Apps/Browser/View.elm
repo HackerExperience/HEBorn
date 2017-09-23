@@ -145,8 +145,14 @@ pageMsgIntersept msg =
                 Common.NewTabIn url ->
                     NewTabIn url
 
-                Common.Crack ip ->
-                    Crack ip
+                Common.Crack nip ->
+                    ActiveTabMsg <| Crack nip
+
+                Common.AnyMap nip ->
+                    ActiveTabMsg <| AnyMap nip
+
+                Common.Login nip password ->
+                    ActiveTabMsg <| Login nip password
 
         _ ->
             ActiveTabMsg <| PageMsg msg

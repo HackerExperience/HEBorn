@@ -8,11 +8,11 @@ module Apps.Browser.Pages.NoWebserver.Models
 import Game.Network.Types exposing (NIP)
 import Game.Web.Types exposing (Url)
 import Game.Web.Types as Web
+import Apps.Browser.Widgets.HackingToolkit as HackingToolkit
 
 
 type alias Model =
-    { password : Maybe String
-    , target : NIP
+    { toolkit : HackingToolkit.State
     }
 
 
@@ -22,11 +22,13 @@ type alias Model =
 
 initialModel : Web.Meta -> Model
 initialModel meta =
-    { password = meta.password
-    , target = meta.nip
+    { toolkit =
+        { password = meta.password
+        , target = meta.nip
+        }
     }
 
 
 getTitle : Model -> String
-getTitle { target } =
-    "Accessing " ++ (Tuple.second target)
+getTitle model =
+    "Accessing " ++ (Tuple.second model.toolkit.target)

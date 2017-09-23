@@ -7,7 +7,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
-import Game.Web.Models as Web
+import Game.Web.Types as Web
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -48,9 +48,6 @@ update data msg model =
 
         SomeTabMsg tabId msg ->
             onSomeTabMsg data tabId msg model
-
-        Crack nip ->
-            onCrack data nip model
 
         -- Browser
         NewTabIn url ->
@@ -141,10 +138,19 @@ onSomeTabMsg data tabId msg model =
                 Fetched response ->
                     onFetched response tab
 
-                Login ->
+                Crack _ ->
                     Update.fromModel tab
 
-                LoginFailed ->
+                AnyMap _ ->
+                    Update.fromModel tab
+
+                Login _ _ ->
+                    Update.fromModel tab
+
+                ReportLogin ->
+                    Update.fromModel tab
+
+                ReportLoginFailed ->
                     Update.fromModel tab
 
         setThisTab tab_ =
@@ -157,6 +163,8 @@ onSomeTabMsg data tabId msg model =
 
 onCrack : Game.Data -> NIP -> Model -> UpdateResponse
 onCrack data nip ({ me } as model) =
+    --Crack nip ->
+    --    onCrack data nip model
     let
         serverId =
             Game.getID data
@@ -219,10 +227,10 @@ onFetched response tab =
     let
         ( url, pageModel ) =
             case response of
-                Web.Okay site ->
+                Web.PageLoaded site ->
                     ( site.url, Pages.initialModel site )
 
-                Web.NotFound url ->
+                Web.PageNotFound url ->
                     ( url, Pages.NotFoundModel { url = url } )
 
                 Web.ConnectionError url ->
@@ -271,6 +279,6 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
                 |> Dispatch.web
 
         tab_ =
-            gotoPage url Pages.LoadingModel tab
+            gotoPage url (Pages.LoadingModel url) tab
     in
         ( tab_, Cmd.none, dispatch )

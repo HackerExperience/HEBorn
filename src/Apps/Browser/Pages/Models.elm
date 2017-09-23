@@ -30,7 +30,7 @@ type Model
     | BithubModel
     | MissionCenterModel
       -- Virtual ones
-    | LoadingModel
+    | LoadingModel String
     | BlankModel
 
 
@@ -131,7 +131,7 @@ getTitle model =
         MissionCenterModel ->
             "Head Quarters"
 
-        LoadingModel ->
+        LoadingModel _ ->
             "Loading..."
 
         BlankModel ->
@@ -141,7 +141,7 @@ getTitle model =
 isLoading : Model -> Bool
 isLoading model =
     case model of
-        LoadingModel ->
+        LoadingModel _ ->
             True
 
         _ ->
