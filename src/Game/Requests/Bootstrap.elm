@@ -86,8 +86,8 @@ decoder =
 serverIndexDecoder : Decoder ServerIndex
 serverIndexDecoder =
     decode ServerIndex
-        |> required "gateways" (list gatewayDecoder)
-        |> required "endpoints" (list endpointDecoder)
+        |> required "player" (list gatewayDecoder)
+        |> required "remote" (list endpointDecoder)
 
 
 storyDecoder : Decoder Story.Model

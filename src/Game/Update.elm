@@ -7,6 +7,7 @@ import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Reports as Ws
 import Events.Events as Events
+import Json.Encode as Encode
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Account.Update as Account
@@ -212,26 +213,28 @@ onBootstrapResponse data model =
                 , servers = servers_
                 , story = data.story
             }
+
+        joinServer gatewayId list =
+            -- TODO: include endpoint join
+            let
+                context =
+                    Just gatewayId
+
+                payload =
+                    Just <|
+                        Encode.object
+                            [ ( "gateway_id", Encode.string gatewayId )
+                            ]
+
+                dispatch =
+                    Dispatch.websocket <|
+                        Ws.JoinChannel ServerChannel context payload
+            in
+                dispatch :: list
+
+        dispatch =
+            gateways
+                |> List.foldl joinServer []
+                |> Dispatch.batch
     in
-        Update.fromModel model_
-            |> joinActiveServer
-
-
-joinActiveServer : UpdateResponse -> UpdateResponse
-joinActiveServer (( model, _, _ ) as response) =
-    let
-        maybeId =
-            model.servers.servers
-                |> Dict.keys
-                |> List.head
-    in
-        case maybeId of
-            Just id ->
-                Update.addDispatch
-                    (Dispatch.websocket
-                        (Ws.JoinChannel ServerChannel (Just id) Nothing)
-                    )
-                    response
-
-            Nothing ->
-                response
+        ( model_, Cmd.none, dispatch )

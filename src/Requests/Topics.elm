@@ -26,7 +26,7 @@ logout =
 
 accountBootstrap : Topic
 accountBootstrap =
-    WebsocketTopic AccountChannel "account.bootstrap"
+    WebsocketTopic AccountChannel "bootstrap"
 
 
 serverBootstrap : Topic
@@ -110,4 +110,4 @@ bruteforce =
 
 browse : Topic
 browse =
-    WebsocketTopic ServerChannel "network_browse"
+    WebsocketTopic ServerChannel "network.browse"
