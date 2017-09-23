@@ -173,23 +173,8 @@ decodeNpcSite url npc meta nip password =
 
 decodeBankMeta : Decoder BankMetadata
 decodeBankMeta =
-    let
-        bankCoords =
-            let
-                matchCoords lst =
-                    case lst of
-                        [ a, b ] ->
-                            succeed ( a, b )
-
-                        _ ->
-                            fail "Invalid coords format"
-            in
-                list float
-                    |> andThen matchCoords
-    in
-        decode BankMetadata
-            |> required "title" string
-            |> required "location" bankCoords
+    decode BankMetadata
+        |> required "title" string
 
 
 decodeDownloadCenterMeta : Decoder DownloadCenterMetadata

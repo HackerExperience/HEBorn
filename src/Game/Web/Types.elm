@@ -39,7 +39,6 @@ type alias WebserverMetadata =
 
 type alias BankMetadata =
     { title : String
-    , location : ( Float, Float )
     }
 
 

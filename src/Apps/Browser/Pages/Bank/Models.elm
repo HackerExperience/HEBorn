@@ -19,7 +19,7 @@ type alias Model =
 initialModel : Url -> BankMetadata -> Model
 initialModel url meta =
     { title = meta.title
-    , location = meta.location
+    , location = ( 0, 0 )
     }
 
 
