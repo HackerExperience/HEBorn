@@ -22,8 +22,8 @@ update game msg =
         Request data ->
             onRequest game (receive data)
 
-        FetchUrl serverId url requester ->
-            ( DNS.request serverId url requester game, Dispatch.none )
+        FetchUrl serverId url nid requester ->
+            ( DNS.request serverId url nid requester game, Dispatch.none )
 
 
 

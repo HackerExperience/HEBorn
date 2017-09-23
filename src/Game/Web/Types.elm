@@ -10,6 +10,8 @@ type alias Url =
 type alias Site =
     { type_ : Type
     , url : String
+    , nip : NIP
+    , password : Maybe String
     }
 
 
@@ -17,10 +19,10 @@ type Type
     = NotFound
     | Home
     | Webserver WebserverMetadata
-    | NoWebserver NoWebserverMetadata
+    | NoWebserver
     | Profile
     | Whois
-    | DownloadCenter
+    | DownloadCenter DownloadCenterMetadata
     | ISP
     | Bank BankMetadata
     | Store
@@ -32,16 +34,17 @@ type Type
 
 
 type alias WebserverMetadata =
-    { nip : NIP, password : Maybe String, custom : String }
-
-
-type alias NoWebserverMetadata =
-    { nip : NIP, password : Maybe String }
+    { custom : String }
 
 
 type alias BankMetadata =
     { title : String
     , location : ( Float, Float )
+    }
+
+
+type alias DownloadCenterMetadata =
+    { title : String
     }
 
 

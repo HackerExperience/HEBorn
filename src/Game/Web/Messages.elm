@@ -6,7 +6,7 @@ import Game.Web.DNS exposing (Requester)
 
 type Msg
     = Request RequestMsg
-    | FetchUrl String String Requester
+    | FetchUrl String String String Requester
 
 
 type RequestMsg

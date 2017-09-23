@@ -244,6 +244,12 @@ onGoAddress :
     -> TabUpdateResponse
 onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
+        networkId =
+            data
+                |> Game.getServer
+                |> Servers.getNIP
+                |> Tuple.first
+
         serverId =
             Game.getID data
 
@@ -255,7 +261,7 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Web.FetchUrl serverId url requester
+            Web.FetchUrl serverId url networkId requester
                 |> Dispatch.web
 
         tab_ =

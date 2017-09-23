@@ -20,10 +20,10 @@ type alias Model =
 -- Default page for valid IP with a server
 
 
-initialModel : Url -> WebserverMetadata -> Model
-initialModel url meta =
-    { password = meta.password
-    , url = url
+initialModel : Site -> WebserverMetadata -> Model
+initialModel site meta =
+    { password = site.password
+    , url = site.url
     }
 
 
