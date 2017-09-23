@@ -6,20 +6,17 @@ module Apps.Browser.Pages.Bank.Models
         )
 
 import Game.Network.Types as Network
-import Game.Web.Types exposing (Url, BankMetadata)
-import Game.Web.Types as Web exposing (Site)
+import Game.Web.Types as Web
 
 
 type alias Model =
     { title : String
-    , location : ( Float, Float )
     }
 
 
-initialModel : Url -> BankMetadata -> Model
-initialModel url meta =
-    { title = meta.title
-    , location = meta.location
+initialModel : Web.Url -> Web.BankContent -> Model
+initialModel url content =
+    { title = content.title
     }
 
 

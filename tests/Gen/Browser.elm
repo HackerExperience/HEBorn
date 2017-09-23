@@ -98,9 +98,9 @@ genPage =
         generate str =
             let
                 site =
-                    { type_ =
-                        Web.NoWebserver
-                            { password = Nothing, nip = ( "main", str ) }
+                    { type_ = Web.NoWebserver
+                    , password = Nothing
+                    , nip = ( "main", str )
                     , url = str
                     }
             in

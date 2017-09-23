@@ -35,7 +35,7 @@ type Model
 
 
 initialModel : Web.Site -> Model
-initialModel { url, type_ } =
+initialModel ({ url, type_, meta } as site) =
     case type_ of
         Web.NotFound ->
             NotFoundModel <| PageNotFound.initialModel url
@@ -43,11 +43,11 @@ initialModel { url, type_ } =
         Web.Home ->
             HomeModel
 
-        Web.Webserver meta ->
-            WebserverModel <| PageWebserver.initialModel url meta
+        Web.Webserver content ->
+            WebserverModel <| PageWebserver.initialModel url meta content
 
-        Web.NoWebserver meta ->
-            NoWebserverModel <| PageNoWebserver.initialModel url meta
+        Web.NoWebserver ->
+            NoWebserverModel <| PageNoWebserver.initialModel meta
 
         Web.Profile ->
             ProfileModel
@@ -55,14 +55,14 @@ initialModel { url, type_ } =
         Web.Whois ->
             WhoisModel
 
-        Web.DownloadCenter ->
+        Web.DownloadCenter content ->
             DownloadCenterModel
 
         Web.ISP ->
             ISPModel
 
-        Web.Bank meta ->
-            BankModel <| PageBank.initialModel url meta
+        Web.Bank content ->
+            BankModel <| PageBank.initialModel url content
 
         Web.Store ->
             StoreModel

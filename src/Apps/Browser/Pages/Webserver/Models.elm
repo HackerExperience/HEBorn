@@ -6,13 +6,12 @@ module Apps.Browser.Pages.Webserver.Models
         )
 
 import Game.Network.Types as Network
-import Game.Web.Types exposing (Url, WebserverMetadata)
-import Game.Web.Types as Web exposing (Site)
+import Game.Web.Types as Web
 
 
 type alias Model =
     { password : Maybe String
-    , url : Url
+    , url : Web.Url
     }
 
 
@@ -20,8 +19,8 @@ type alias Model =
 -- Default page for valid IP with a server
 
 
-initialModel : Url -> WebserverMetadata -> Model
-initialModel url meta =
+initialModel : Web.Url -> Web.Meta -> Web.WebserverContent -> Model
+initialModel url meta content =
     { password = meta.password
     , url = url
     }

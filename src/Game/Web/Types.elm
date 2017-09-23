@@ -8,21 +8,28 @@ type alias Url =
 
 
 type alias Site =
-    { type_ : Type
-    , url : String
+    { url : String
+    , type_ : Type
+    , meta : Meta
+    }
+
+
+type alias Meta =
+    { password : Maybe String
+    , nip : NIP
     }
 
 
 type Type
     = NotFound
     | Home
-    | Webserver WebserverMetadata
-    | NoWebserver NoWebserverMetadata
+    | Webserver WebserverContent
+    | NoWebserver
     | Profile
     | Whois
-    | DownloadCenter
+    | DownloadCenter DownloadCenterContent
     | ISP
-    | Bank BankMetadata
+    | Bank BankContent
     | Store
     | BTC
     | FBI
@@ -31,17 +38,17 @@ type Type
     | MissionCenter
 
 
-type alias WebserverMetadata =
-    { nip : NIP, password : Maybe String, custom : String }
+type alias WebserverContent =
+    { custom : String }
 
 
-type alias NoWebserverMetadata =
-    { nip : NIP, password : Maybe String }
-
-
-type alias BankMetadata =
+type alias BankContent =
     { title : String
-    , location : ( Float, Float )
+    }
+
+
+type alias DownloadCenterContent =
+    { title : String
     }
 
 

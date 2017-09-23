@@ -6,8 +6,8 @@ module Apps.Browser.Pages.NoWebserver.Models
         )
 
 import Game.Network.Types exposing (NIP)
-import Game.Web.Types exposing (Url, NoWebserverMetadata)
-import Game.Web.Types as Web exposing (Site)
+import Game.Web.Types exposing (Url)
+import Game.Web.Types as Web
 
 
 type alias Model =
@@ -20,8 +20,8 @@ type alias Model =
 -- Default page for valid IP without a server
 
 
-initialModel : Url -> NoWebserverMetadata -> Model
-initialModel url meta =
+initialModel : Web.Meta -> Model
+initialModel meta =
     { password = meta.password
     , target = meta.nip
     }

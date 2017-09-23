@@ -1,6 +1,7 @@
 module Game.Web.Requests.DNS
     exposing
-        ( request
+        ( Response(..)
+        , request
         , receive
         )
 
@@ -12,7 +13,9 @@ import Json.Decode as Decode
         , andThen
         , field
         , succeed
+        , map
         , fail
+        , nullable
         , list
         , maybe
         , string
@@ -29,14 +32,20 @@ import Utils.Json.Decode exposing (exclusively)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
-import Decoders.Network exposing (nip)
+import Decoders.Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.DNS exposing (..)
 
 
-request : String -> String -> Requester -> ConfigSource a -> Cmd Msg
-request serverId url requester =
+type Response
+    = Okay Site
+    | NotFounded Url
+    | ConnectionError Url
+
+
+request : String -> String -> String -> Requester -> ConfigSource a -> Cmd Msg
+request serverId url networkId requester =
     Requests.request Topics.browse
         (DNSRequest url requester >> Request)
         (Just serverId)
@@ -53,7 +62,7 @@ receive url code json =
 
         ErrorCode ->
             Requests.decodeGenericError json
-                (errorMessage url)
+                (decodeErrorMessage url)
                 |> Requests.report
 
         _ ->
@@ -64,17 +73,7 @@ receive url code json =
 -- internals
 
 
-errorMessage : Url -> String -> Decoder Response
-errorMessage url str =
-    case str of
-        "web_not_found" ->
-            succeed <| NotFounded url
-
-        _ ->
-            fail "Unexpected error"
-
-
-encoder : String -> Value
+encoder : Url -> Value
 encoder url =
     Encode.object
         [ ( "url", Encode.string url )
@@ -84,100 +83,99 @@ encoder url =
 decoder : Url -> Decoder Response
 decoder url =
     field "type" string
-        |> andThen (matchSite url)
+        |> andThen (decodeType >> field "content")
+        |> andThen (decodeSite url)
+        |> map Okay
 
 
-okayPack : Url -> Type -> Decoder Response
-okayPack url type_ =
-    { type_ = type_, url = url }
-        |> Okay
-        |> succeed
-
-
-matchSite : Url -> String -> Decoder Response
-matchSite url typeStr =
+decodeType : String -> Decoder Type
+decodeType typeStr =
     case typeStr of
         "home" ->
-            okayPack url Home
-
-        "web" ->
-            webServer url
-
-        "noweb" ->
-            noWebServer url
+            succeed Home
 
         "profile" ->
-            okayPack url Profile
+            succeed Profile
 
-        "whois" ->
-            okayPack url Whois
+        "vpc_web" ->
+            decodeWeb
 
-        "downcenter" ->
-            okayPack url DownloadCenter
+        "vpc_noweb" ->
+            succeed NoWebserver
 
-        "isp" ->
-            okayPack url ISP
+        "npc_whois" ->
+            succeed Whois
 
-        "bank" ->
-            bank url
+        "npc_downcenter" ->
+            decodeDownloadCenter
 
-        "store" ->
-            okayPack url Store
+        "npc_isp" ->
+            succeed ISP
 
-        "btc" ->
-            okayPack url BTC
+        "npc_bank" ->
+            decodeBank
 
-        "fbi" ->
-            okayPack url FBI
+        "npc_store" ->
+            succeed Store
 
-        "news" ->
-            okayPack url News
+        "npc_btc" ->
+            succeed BTC
 
-        "bithub" ->
-            okayPack url Bithub
+        "npc_fbi" ->
+            succeed FBI
 
-        "missions" ->
-            okayPack url MissionCenter
+        "npc_news" ->
+            succeed News
+
+        "npc_bithub" ->
+            succeed Bithub
+
+        "npc_missions" ->
+            succeed MissionCenter
 
         _ ->
             fail "Unknown web page type"
 
 
-webServer : Url -> Decoder Response
-webServer url =
-    decode WebserverMetadata
-        |> required "nip" nip
-        |> optional "password" (maybe string) Nothing
+decodeSite : Url -> Type -> Decoder Site
+decodeSite url type_ =
+    decode (Site url type_)
+        |> required "meta" decodeMeta
+
+
+decodeMeta : Decoder Meta
+decodeMeta =
+    decode Meta
+        |> optional "password" (nullable string) Nothing
+        |> required "nip" Decoders.Network.nip
+
+
+decodeWeb : Decoder Type
+decodeWeb =
+    decode WebserverContent
         |> required "custom" string
-        |> andThen (Webserver >> okayPack url)
+        |> map Webserver
 
 
-noWebServer : Url -> Decoder Response
-noWebServer url =
-    decode NoWebserverMetadata
-        |> required "nip" nip
-        |> optional "password" (maybe string) Nothing
-        |> andThen (NoWebserver >> okayPack url)
-
-
-bank : Url -> Decoder Response
-bank url =
-    decode BankMetadata
+decodeBank : Decoder Type
+decodeBank =
+    decode BankContent
         |> required "title" string
-        |> required "location" bankCoords
-        |> andThen (Bank >> okayPack url)
+        |> map Bank
 
 
-bankCoords : Decoder ( Float, Float )
-bankCoords =
-    let
-        matchCoords lst =
-            case lst of
-                [ a, b ] ->
-                    succeed ( a, b )
+decodeDownloadCenter : Decoder Type
+decodeDownloadCenter =
+    decode DownloadCenterContent
+        |> required "title" string
+        |> map DownloadCenter
 
-                _ ->
-                    fail "Invalid coords format"
-    in
-        list float
-            |> andThen matchCoords
+
+decodeErrorMessage : Url -> String -> Decoder Response
+decodeErrorMessage url str =
+    case str of
+        "web_not_found" ->
+            succeed <| NotFounded url
+
+        _ ->
+            fail "Unexpected error"

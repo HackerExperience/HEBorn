@@ -7,7 +7,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
-import Game.Web.DNS exposing (..)
+import Game.Web.Requests.DNS as DNS
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -208,20 +208,20 @@ onGoNext =
     gotoNextPage >> Update.fromModel
 
 
-onFetched : Response -> Tab -> TabUpdateResponse
+onFetched : DNS.Response -> Tab -> TabUpdateResponse
 onFetched response tab =
     let
         ( url, pageModel ) =
             case response of
-                ConnectionError url ->
-                    -- TODO: Change to some "failed" page
-                    ( url, Pages.BlankModel )
+                DNS.Okay site ->
+                    ( site.url, Pages.initialModel site )
 
-                NotFounded url ->
+                DNS.NotFounded url ->
                     ( url, Pages.NotFoundModel { url = url } )
 
-                Okay site ->
-                    ( site.url, Pages.initialModel site )
+                DNS.ConnectionError url ->
+                    -- TODO: Change to some "failed" page
+                    ( url, Pages.BlankModel )
 
         isLoadingThisRequest =
             (Pages.isLoading <| getPage tab)
@@ -244,6 +244,12 @@ onGoAddress :
     -> TabUpdateResponse
 onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
+        networkId =
+            data
+                |> Game.getServer
+                |> Servers.getNIP
+                |> Tuple.first
+
         serverId =
             Game.getID data
 
@@ -255,7 +261,7 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Web.FetchUrl serverId url requester
+            Web.FetchUrl serverId url networkId requester
                 |> Dispatch.web
 
         tab_ =
