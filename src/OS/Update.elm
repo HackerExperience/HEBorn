@@ -1,21 +1,28 @@
 module OS.Update exposing (update)
 
+import Utils.Update as Update
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Data as Game
 import OS.Header.Messages as Header
 import OS.Header.Models as Header
 import OS.Header.Update as Header
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
-import Game.Data as GameData
 import OS.Menu.Messages as Menu
 import OS.Menu.Update as Menu
 import OS.Menu.Actions as Menu
-import OS.SessionManager.Update as SessionManager
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models as SessionManager
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import OS.SessionManager.Update as SessionManager
+import OS.Toasts.Messages as Toasts
+import OS.Toasts.Update as Toasts
 
 
-update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update : Game.Data -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
         SessionManagerMsg msg ->
@@ -30,6 +37,9 @@ update game msg model =
 
         MenuMsg (Menu.MenuClick action) ->
             Menu.actionHandler game action model
+
+        ToastsMsg msg ->
+            onToastsMsg game msg model
 
         MenuMsg msg ->
             let
@@ -53,7 +63,7 @@ update game msg model =
 
 
 sessionManager :
-    GameData.Data
+    Game.Data
     -> SessionManager.Msg
     -> Model
     -> ( SessionManager.Model, Cmd SessionManager.Msg, Dispatch )
@@ -62,7 +72,7 @@ sessionManager data msg model =
 
 
 header :
-    GameData.Data
+    Game.Data
     -> Header.Msg
     -> Model
     -> ( Header.Model, Cmd Header.Msg, Dispatch )
@@ -77,3 +87,15 @@ map :
     -> ( Model, Cmd Msg, Dispatch )
 map mapModel mapMsg ( model, msg, cmds ) =
     ( mapModel model, Cmd.map mapMsg msg, cmds )
+
+
+onToastsMsg : Game.Data -> Toasts.Msg -> Model -> UpdateResponse
+onToastsMsg game msg model =
+    Update.child
+        { get = .toasts
+        , set = (\toasts model -> { model | toasts = toasts })
+        , toMsg = ToastsMsg
+        , update = (Toasts.update game)
+        }
+        msg
+        model

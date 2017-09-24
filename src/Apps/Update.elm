@@ -17,6 +17,7 @@ import Apps.ServersGears.Update as ServersGears
 import Apps.LocationPicker.Update as LocationPicker
 import Apps.LanViewer.Update as LanViewer
 import Apps.Email.Update as Email
+import Apps.Bug.Update as Bug
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -68,6 +69,9 @@ update data msg model =
 
         ( EmailMsg msg, EmailModel model ) ->
             map EmailModel EmailMsg (Email.update data msg model)
+
+        ( BugMsg msg, BugModel model ) ->
+            map BugModel BugMsg (Bug.update data msg model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

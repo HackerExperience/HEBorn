@@ -17,6 +17,7 @@ import Apps.ServersGears.View as ServersGears
 import Apps.LocationPicker.View as LocationPicker
 import Apps.LanViewer.View as LanViewer
 import Apps.Email.View as Email
+import Apps.Bug.View as Bug
 import Game.Data as Game
 
 
@@ -64,3 +65,6 @@ view data model =
 
         EmailModel model ->
             Html.map EmailMsg (Email.view data model)
+
+        BugModel model ->
+            Html.map BugMsg (Bug.view data model)

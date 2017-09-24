@@ -1,9 +1,9 @@
 module Decoders.Notifications exposing (..)
 
 import Dict
-import Json.Decode exposing (Decoder, fail, field, andThen, dict, string, float, bool)
+import Json.Decode exposing (Decoder, succeed, fail, field, andThen, list, string, float, bool)
 import Json.Decode.Pipeline exposing (decode, optional, required)
-import Game.Notifications.Models as Notifications exposing (Notification)
+import Game.Notifications.Models exposing (..)
 
 
 {-
@@ -15,7 +15,7 @@ import Game.Notifications.Models as Notifications exposing (Notification)
 -}
 
 
-notification : Decoder Notification
+notification : Decoder ( ID, Notification )
 notification =
     field "type" string
         |> andThen notificationContent
@@ -23,17 +23,17 @@ notification =
 
 
 fromMeta :
-    Decoder Notifications.Content
-    -> Decoder Notifications.Content
+    Decoder Content
+    -> Decoder Content
 fromMeta =
     field "meta"
 
 
-notificationContent : String -> Decoder Notifications.Content
+notificationContent : String -> Decoder Content
 notificationContent type_ =
     case type_ of
         "simple" ->
-            decode (Notifications.Simple)
+            decode (Simple)
                 |> required "title" string
                 |> required "msg" string
                 |> fromMeta
@@ -42,20 +42,24 @@ notificationContent type_ =
             fail "Unknow notification type"
 
 
-notificationBase : Notifications.Content -> Decoder Notification
+notificationBase : Content -> Decoder ( ID, Notification )
 notificationBase content =
-    decode (Notification content)
+    decode
+        (\c r -> ( ( c, 0 ), Notification content r ))
         |> required "created" float
-        |> required "read" bool
+        |> optional "read" bool False
 
 
-notifications : Decoder Notifications.Model
+notifications : Decoder Model
 notifications =
-    (dict notification)
+    notification
+        |> list
+        |> andThen
+            (Dict.fromList >> succeed)
 
 
 notificationsField :
-    Decoder (Notifications.Model -> b)
+    Decoder (Model -> b)
     -> Decoder b
 notificationsField =
     optional "notifications" notifications Dict.empty

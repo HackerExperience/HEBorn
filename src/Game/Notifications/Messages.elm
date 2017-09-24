@@ -1,7 +1,7 @@
 module Game.Notifications.Messages exposing (..)
 
-import Game.Notifications.Types exposing (..)
+import Game.Notifications.Models exposing (..)
 
 
 type Msg
-    = Todo
+    = MarkRead ID

@@ -21,5 +21,6 @@ initialModel =
     , Apps.CtrlPanelApp
     , Apps.ServersGearsApp
     , Apps.LanViewerApp
-    , Apps.EmailApp
+    , Apps.EmailApp --TODO: Make campaign only
+    , Apps.BugApp -- TODO: Make dev only
     ]

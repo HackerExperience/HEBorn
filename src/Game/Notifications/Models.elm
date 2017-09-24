@@ -2,8 +2,6 @@ module Game.Notifications.Models exposing (..)
 
 import Time exposing (Time)
 import Dict exposing (Dict)
-import Random.Pcg as Random
-import Utils.Model.RandomUuid as RandomUuid
 
 
 -- TODO: add notification data
@@ -14,11 +12,11 @@ type alias Model =
 
 
 type alias ID =
-    RandomUuid.Uuid
+    ( Time, Int )
 
 
 type alias Notification =
-    { content : Content, created : Time, isRead : Bool }
+    { content : Content, isRead : Bool }
 
 
 type Content
@@ -29,14 +27,6 @@ type Content
 initialModel : Model
 initialModel =
     Dict.empty
-
-
-new : Time -> Content -> Notification
-new lastTick content =
-    { content = content
-    , created = lastTick
-    , isRead = False
-    }
 
 
 filterUnreaded : Model -> Model
@@ -61,9 +51,20 @@ get id =
     Dict.get id
 
 
-insert : ID -> Notification -> Model -> Model
-insert id value =
-    Dict.insert id value
+findId : ( Time, Int ) -> Model -> ID
+findId (( birth, from ) as pig) model =
+    model
+        |> Dict.get pig
+        |> Maybe.map (\twin -> findId ( birth, from + 1 ) model)
+        |> Maybe.withDefault pig
+
+
+insert : Time -> Notification -> Model -> Model
+insert created value model =
+    Dict.insert
+        (findId ( created, 0 ) model)
+        value
+        model
 
 
 markRead : Bool -> ID -> Model -> Model
@@ -72,12 +73,6 @@ markRead value_ id model =
         |> get id
         |> Maybe.map
             ((\n -> { n | isRead = value_ })
-                >> (flip (insert id) model)
+                >> (flip (Dict.insert id) model)
             )
         |> Maybe.withDefault model
-
-
-getSorted : Model -> List ( ID, Notification )
-getSorted =
-    Dict.toList
-        >> List.sortBy (\( _, { created } ) -> created)

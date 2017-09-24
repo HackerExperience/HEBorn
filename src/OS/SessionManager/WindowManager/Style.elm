@@ -101,6 +101,7 @@ css =
                                         , addIco "locpk" Icon.locpk
                                         , addIco "lanvw" Icon.lanvw
                                         , addIco "email" Icon.email
+                                        , addIco "bug" Icon.bug
                                         ]
                                     , class HeaderButtons
                                         [ flex (int 0)

@@ -117,6 +117,7 @@ css =
                     , addIco "locpk" Icon.locpk
                     , addIco "lanvw" Icon.lanvw
                     , addIco "email" Icon.email
+                    , addIco "bug" Icon.bug
                     , addGrad "explorer" Gradients.mangoPulp
                     , addGrad "logvw" Gradients.stellar
                     , addGrad "browser" Gradients.pinotNoir
@@ -131,6 +132,7 @@ css =
                     , addGrad "locpk" Gradients.loveAndLiberty
                     , addGrad "lanvw" Gradients.dusk
                     , addGrad "email" Gradients.darkSkies
+                    , addGrad "bug" Gradients.superman
                     ]
                 , class AppContext
                     [ display none

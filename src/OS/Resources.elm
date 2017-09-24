@@ -20,6 +20,8 @@ type Class
     | Notification
     | Account
     | Empty
+    | Toasts
+    | Fading
 
 
 type Id

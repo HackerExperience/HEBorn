@@ -21,6 +21,7 @@ import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker
 import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
+import Apps.Bug.Models as Bug
 
 
 launch : Game.Data -> Config -> App -> ( AppModel, Cmd Msg, Dispatch )
@@ -103,4 +104,9 @@ launch data ({ windowId } as config) app =
         EmailApp ->
             Email.initialModel
                 |> EmailModel
+                |> Update.fromModel
+
+        BugApp ->
+            Bug.initialModel
+                |> BugModel
                 |> Update.fromModel

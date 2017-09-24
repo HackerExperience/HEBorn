@@ -16,3 +16,4 @@ type App
     | LocationPickerApp
     | LanViewerApp
     | EmailApp
+    | BugApp

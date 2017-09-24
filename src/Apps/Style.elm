@@ -13,6 +13,7 @@ import Apps.Hebamp.Style as Hebamp
 import Apps.LocationPicker.Style as LocationPicker
 import Apps.LanViewer.Style as LanViewer
 import Apps.Email.Style as Email
+import Apps.Bug.Style as Bug
 
 
 cssList : List Stylesheet
@@ -29,4 +30,5 @@ cssList =
     , LocationPicker.css
     , LanViewer.css
     , Email.css
+    , Bug.css
     ]

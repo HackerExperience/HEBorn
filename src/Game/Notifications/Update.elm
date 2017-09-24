@@ -9,5 +9,5 @@ import Game.Notifications.Messages exposing (..)
 update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update data msg model =
     case msg of
-        Todo ->
+        MarkRead id ->
             Update.fromModel model

@@ -25,6 +25,7 @@ module Core.Dispatch
         , tunnels
         , meta
         , browser
+        , toasts
         )
 
 import Apps.Messages as Apps
@@ -50,6 +51,7 @@ import Game.Servers.Shared as Servers
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models exposing (WindowRef)
+import OS.Toasts.Messages as Toasts
 import Utils.Cmd as CmdUtils
 
 
@@ -265,6 +267,11 @@ os msg =
 sessionManager : SessionManager.Msg -> Dispatch
 sessionManager msg =
     os <| OS.SessionManagerMsg msg
+
+
+toasts : Toasts.Msg -> Dispatch
+toasts msg =
+    os <| OS.ToastsMsg msg
 
 
 sessionManagerAppMsg : WindowRef -> Context -> Apps.Msg -> Dispatch

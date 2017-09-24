@@ -24,6 +24,7 @@ import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker
 import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
+import Apps.Bug.Models as Bug
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
@@ -44,6 +45,7 @@ type AppModel
     | LocationPickerModel LocationPicker.Model
     | LanViewerModel LanViewer.Model
     | EmailModel Email.Model
+    | BugModel Bug.Model
 
 
 type Contexts
@@ -96,6 +98,9 @@ contexts app =
         EmailApp ->
             ContextlessApp
 
+        BugApp ->
+            ContextualApp
+
 
 name : App -> String
 name app =
@@ -141,6 +146,9 @@ name app =
 
         EmailApp ->
             Email.name
+
+        BugApp ->
+            Bug.name
 
 
 icon : App -> String
@@ -188,6 +196,9 @@ icon app =
         EmailApp ->
             Email.icon
 
+        BugApp ->
+            Bug.icon
+
 
 title : AppModel -> String
 title model =
@@ -233,6 +244,9 @@ title model =
 
         EmailModel model ->
             Email.title model
+
+        BugModel model ->
+            Bug.title model
 
 
 isDecorated : App -> Bool

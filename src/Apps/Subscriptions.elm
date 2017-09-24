@@ -17,6 +17,7 @@ import Apps.ServersGears.Subscriptions as ServersGears
 import Apps.LocationPicker.Subscriptions as LocationPicker
 import Apps.LanViewer.Subscriptions as LanViewer
 import Apps.Email.Subscriptions as Email
+import Apps.Bug.Subscriptions as Bug
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -77,3 +78,7 @@ subscriptions data model =
         EmailModel model ->
             Email.subscriptions data model
                 |> Sub.map EmailMsg
+
+        BugModel model ->
+            Bug.subscriptions data model
+                |> Sub.map BugMsg

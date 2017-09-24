@@ -292,3 +292,8 @@ email =
 accountMenu : Icon
 accountMenu =
     faIcon FA.cogs
+
+
+bug : Icon
+bug =
+    faIcon FA.bug

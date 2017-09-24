@@ -4,7 +4,6 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
-import Html.Attributes exposing (attribute)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Game.Account.Bounces.Models as Bounces
@@ -321,8 +320,12 @@ visibleNotifications uniqueClass activator title itens =
         itens_ =
             itens
                 |> Dict.foldl
-                    (\uid { content } acu ->
-                        li [] [ text uid, br [] [], text "TODO" ]
+                    (\id { content } acu ->
+                        li []
+                            [ text <| toString id
+                            , br [] []
+                            , text "TODO"
+                            ]
                             :: acu
                     )
                     []
