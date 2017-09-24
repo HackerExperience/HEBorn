@@ -152,6 +152,8 @@ merge src new =
         Maybe.withDefault src.bounces <| new.bounces
     , inventory =
         Maybe.withDefault src.inventory <| new.inventory
+    , notifications =
+        new.notifications
     , logout =
         src.logout
     }

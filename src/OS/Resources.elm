@@ -7,14 +7,18 @@ type Class
     | Dock
     | Version
     | AutoHide
+    | Connection
+    | Taskbar
     | SGateway
     | SBounce
     | SEndpoint
     | Context
     | Selected
     | Logo
-    | NAcc
-    | NChat
+    | ChatIco
+    | ServersIco
+    | Notification
+    | Account
 
 
 type Id
@@ -27,6 +31,6 @@ prefix =
     "os"
 
 
-notificationsNode : String
-notificationsNode =
-    "notifs"
+indicatorNode : String
+indicatorNode =
+    "indic"

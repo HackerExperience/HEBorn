@@ -287,3 +287,8 @@ chat =
 email : Icon
 email =
     faIcon FA.envelopeO
+
+
+accountMenu : Icon
+accountMenu =
+    faIcon FA.cogs

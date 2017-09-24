@@ -2,7 +2,7 @@ module OS.Header.Messages exposing (Msg(..))
 
 import UI.Widgets.CustomSelect as CustomSelect
 import Game.Meta.Types exposing (Context)
-import OS.Header.Models exposing (OpenMenu, TabNotifications)
+import OS.Header.Models exposing (OpenMenu)
 
 
 type Msg
@@ -14,5 +14,4 @@ type Msg
     | SelectEndpoint (Maybe String)
     | CheckMenus
     | ContextTo Context
-    | NotificationsTabGo TabNotifications
     | ToggleCampaign

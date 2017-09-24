@@ -104,13 +104,6 @@ update data msg ({ openMenu } as model) =
             in
                 Update.fromModel model_
 
-        NotificationsTabGo target ->
-            let
-                model_ =
-                    { model | activeNotificationsTab = target }
-            in
-                Update.fromModel model_
-
         ToggleCampaign ->
             let
                 dispatch =

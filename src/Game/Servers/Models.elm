@@ -8,6 +8,7 @@ import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Network.Types exposing (NIP)
+import Game.Notifications.Models as Notifications
 
 
 type alias Model =
@@ -35,6 +36,7 @@ type alias Server =
     , processes : Processes.Model
     , tunnels : Tunnels.Model
     , ownership : Ownership
+    , notifications : Notifications.Model
     }
 
 

@@ -25,10 +25,12 @@ import Json.Decode as Decode
         , maybe
         )
 import Json.Decode.Pipeline exposing (decode, required, optional)
+import Decoders.Notifications exposing (notificationsField)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Network.Types exposing (NIP)
+import Game.Notifications.Models as Notifications
 import Decoders.Network
 import Game.Servers.Messages
     exposing
@@ -65,6 +67,7 @@ type alias ServerData e =
         , tunnels : Maybe Value
         , filesystem : Maybe Value
         , processes : Maybe Value
+        , notifications : Notifications.Model
     }
 
 
@@ -130,6 +133,7 @@ gatewayDecoder =
             , filesystem = server.filesystem
             , processes = server.processes
             , endpoints = special.endpoints
+            , notifications = server.notifications
             }
     in
         Decode.map2 join genericDecoder specializedDecoder
@@ -156,6 +160,7 @@ endpointDecoder =
             , filesystem = server.filesystem
             , processes = server.processes
             , bounce = special.bounce
+            , notifications = server.notifications
             }
     in
         Decode.map2 join genericDecoder specializedDecoder
@@ -175,6 +180,7 @@ toServer server =
             , logs = Logs.initialModel
             , processes = Processes.initialModel
             , tunnels = Tunnels.initialModel
+            , notifications = data.notifications
             }
 
         toNip =
@@ -202,6 +208,7 @@ toServer server =
                     , logs = common.logs
                     , processes = common.processes
                     , tunnels = common.tunnels
+                    , notifications = common.notifications
                     }
 
             EndpointServer data ->
@@ -225,6 +232,7 @@ toServer server =
                     , logs = common.logs
                     , processes = common.processes
                     , tunnels = common.tunnels
+                    , notifications = common.notifications
                     }
 
 
@@ -235,7 +243,7 @@ toServer server =
 genericDecoder : Decoder (ServerData {})
 genericDecoder =
     let
-        constructor id name nips coords logs tunnels fs procs =
+        constructor id name nips coords logs tunnels fs procs notfs =
             { id = id
             , name = name
             , nips = nips
@@ -244,6 +252,7 @@ genericDecoder =
             , tunnels = tunnels
             , filesystem = fs
             , processes = procs
+            , notifications = notfs
             }
     in
         decode constructor
@@ -255,3 +264,4 @@ genericDecoder =
             |> optional "tunnels" (maybe value) Nothing
             |> optional "filesystem" (maybe value) Nothing
             |> optional "processes" (maybe value) Nothing
+            |> notificationsField

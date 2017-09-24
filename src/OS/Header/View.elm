@@ -11,19 +11,108 @@ import Game.Data as Game
 import Game.Meta.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Models as Game
-import Game.Network.Types exposing (NIP)
+import Game.Notifications.Models as Notifications
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
+import Game.Storyline.Models as Story
 import OS.Resources exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
-import OS.Header.Notifications.Models as Notifications
-import OS.Header.Notifications.Types as Notifications
-import UI.Widgets.HorizontalTabs exposing (hzTabs)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "os"
+    Html.CssHelpers.withNamespace prefix
+
+
+view : Game.Data -> Model -> Html Msg
+view data model =
+    div [ class [ Header ] ]
+        [ logo
+        , connection data model
+        , taskbar data model
+        ]
+
+
+bouncesGetter : Game.Model -> List (Maybe String)
+bouncesGetter game =
+    game
+        |> Game.getAccount
+        |> (.bounces)
+        |> Dict.keys
+        |> List.map Just
+        |> (::) Nothing
+
+
+endpointsGetter : Game.Model -> List (Maybe Servers.ID)
+endpointsGetter game =
+    let
+        filterFunc =
+            game
+                |> Game.getServers
+                |> flip Servers.mapNetwork
+                |> List.filterMap
+    in
+        game
+            |> Game.getAccount
+            -- TODO: add getters for database and servers
+            |> (.database)
+            |> (.servers)
+            |> Dict.keys
+            |> filterFunc
+            |> List.map Just
+            |> (::) Nothing
+
+
+logo : Html Msg
+logo =
+    div
+        [ class [ Logo ] ]
+        [ text "D'LayDOS" ]
+
+
+connection : Game.Data -> Model -> Html Msg
+connection ({ game } as data) { openMenu } =
+    let
+        account =
+            Game.getAccount game
+
+        gateway =
+            Just <| Game.getID data
+
+        gateways =
+            account
+                |> (.servers)
+                |> List.map Just
+
+        bounce =
+            data
+                |> Game.getServer
+                |> Servers.getBounce
+
+        endpoint =
+            game
+                |> Game.fromGateway
+                |> Maybe.map Game.getServer
+                |> Maybe.andThen Servers.getEndpoint
+
+        endpoints =
+            endpointsGetter game
+
+        bounces =
+            endpoint
+                |> Maybe.map (always [])
+                |> Maybe.withDefault (bouncesGetter game)
+
+        onGateway =
+            Gateway == Account.getContext account
+    in
+        div [ class [ Connection ] ]
+            [ contextToggler onGateway (ContextTo Gateway)
+            , gatewaySelector data openMenu gateway gateways
+            , bounceSelector data openMenu bounce bounces
+            , endpointSelector data openMenu endpoint endpoints
+            , contextToggler (not onGateway) (ContextTo Endpoint)
+            ]
 
 
 selector :
@@ -76,7 +165,7 @@ gatewaySelector data =
                 Nothing ->
                     Nothing
     in
-        selector [ SGateway ] SelectGateway OpenGateway renderGateway
+        selector [ SGateway ] SelectGateway GatewayOpen renderGateway
 
 
 bounceSelector :
@@ -95,7 +184,7 @@ bounceSelector data =
                 Nothing ->
                     Nothing
     in
-        selector [ SBounce ] SelectBounce OpenBounce renderBounce
+        selector [ SBounce ] SelectBounce BounceOpen renderBounce
 
 
 endpointSelector :
@@ -130,108 +219,7 @@ endpointSelector data =
                         Nothing ->
                             Nothing
     in
-        selector [ SEndpoint ] SelectEndpoint OpenEndpoint renderEndpoint
-
-
-view : Game.Data -> Model -> Html Msg
-view data ({ openMenu, notifications } as model) =
-    let
-        game =
-            Game.getGame data
-
-        account =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-
-        servers =
-            Game.getServers game
-
-        gateway =
-            Just <| Game.getID data
-
-        gateways =
-            account
-                |> (.servers)
-                |> List.map Just
-
-        bounce =
-            data
-                |> Game.getServer
-                |> Servers.getBounce
-
-        endpoint =
-            game
-                |> Game.fromGateway
-                |> Maybe.map Game.getServer
-                |> Maybe.andThen Servers.getEndpoint
-
-        endpoints =
-            -- TODO: add getters for database and servers
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> (.database)
-                |> (.servers)
-                |> Dict.keys
-                |> List.filterMap (flip Servers.mapNetwork servers)
-                |> List.map Just
-                |> (::) Nothing
-
-        bounces =
-            case endpoint of
-                Just _ ->
-                    []
-
-                Nothing ->
-                    game
-                        |> Game.getAccount
-                        |> (.bounces)
-                        |> Dict.keys
-                        |> List.map Just
-                        |> (::) Nothing
-
-        onGateway =
-            Gateway == Account.getContext account
-
-        chatNots =
-            Notifications.listChat notifications
-
-        logo =
-            span
-                [ class [ Logo ] ]
-                [ text "D'LayDOS" ]
-
-        toggleCampaignBtn =
-            button
-                [ onClick ToggleCampaign ]
-                [ text <|
-                    if game.story.enabled then
-                        "Go Multiplayer"
-                    else
-                        "Go Campaign"
-                ]
-
-        logoutBtn =
-            button
-                [ onClick Logout ]
-                [ text "Logout" ]
-    in
-        div [ class [ Header ] ]
-            [ logo
-            , spacer
-            , toggleCampaignBtn
-            , spacer
-            , contextToggler onGateway (ContextTo Gateway)
-            , gatewaySelector data openMenu gateway gateways
-            , bounceSelector data openMenu bounce bounces
-            , endpointSelector data openMenu endpoint endpoints
-            , contextToggler (not onGateway) (ContextTo Endpoint)
-            , spacer
-            , chatNotifications chatNots
-            , accNotifications model.activeNotificationsTab notifications
-            , logoutBtn
-            ]
+        selector [ SEndpoint ] SelectEndpoint EndpointOpen renderEndpoint
 
 
 contextToggler : Bool -> Msg -> Html Msg
@@ -246,79 +234,144 @@ contextToggler active handler =
         span [ onClick handler, class classes ] []
 
 
-chatNotifications : List ( Notifications.UserName, Notifications.Chat ) -> Html Msg
-chatNotifications chats =
+taskbar : Game.Data -> Model -> Html Msg
+taskbar { game } { openMenu } =
+    div [ class [ Taskbar ] ]
+        [ notifications openMenu
+            ChatOpen
+            ChatIco
+            "Chat"
+            Dict.empty
+        , notifications openMenu
+            ServersOpen
+            ServersIco
+            "This server"
+            Dict.empty
+        , accountGear openMenu game
+        ]
+
+
+indicator : List (Attribute a) -> List (Html a) -> Html a
+indicator =
+    node indicatorNode
+
+
+notifications :
+    OpenMenu
+    -> OpenMenu
+    -> Class
+    -> String
+    -> Notifications.Model
+    -> Html Msg
+notifications current activator uniqueClass title itens =
+    if (current == activator) then
+        visibleNotifications uniqueClass activator title itens
+    else
+        emptyNotifications uniqueClass activator
+
+
+visibleNotifications :
+    Class
+    -> OpenMenu
+    -> String
+    -> Notifications.Model
+    -> Html Msg
+visibleNotifications uniqueClass activator title itens =
     let
         firstItem =
             li []
-                [ div [] [ text "Chat Notifcations" ]
+                [ div [] [ text (title ++ " notifications") ]
                 , spacer
                 , div [] [ text "Mark All as Read" ]
                 ]
 
         lastItem =
-            li [] [ text "Send new message" ]
+            li [] [ text "..." ]
 
-        itens =
-            List.map
-                (\( uname, { content } ) ->
-                    li [] [ text uname, br [] [], text content ]
-                )
-                chats
-    in
-        node notificationsNode
-            [ class [ NChat ] ]
-            [ div [] [ ul [] (firstItem :: (itens ++ [ lastItem ])) ] ]
-
-
-accNotifications : TabNotifications -> Notifications.Model -> Html Msg
-accNotifications activeTab notifications =
-    let
-        tabs =
-            hzTabs
-                ((==) activeTab)
-                (\a me ->
-                    (case me of
-                        TabGame ->
-                            "Game"
-
-                        TabAccount ->
-                            "Account"
+        itens_ =
+            itens
+                |> Dict.foldl
+                    (\uid { content } acu ->
+                        li [] [ text uid, br [] [], text "TODO" ]
+                            :: acu
                     )
-                        |> text
-                        |> List.singleton
-                        |> (,) []
-                )
-                NotificationsTabGo
-                [ TabGame, TabAccount ]
+                    []
 
-        firstItem =
-            li []
-                [ div []
-                    [ if activeTab == TabGame then
-                        text "Game Notifcations"
-                      else
-                        text "Account Notifcations"
-                    ]
-                , spacer
-                , div [] [ text "Mark All as Read" ]
-                ]
+        contents =
+            (firstItem :: (itens_ ++ [ lastItem ]))
+                |> ul []
+                |> List.singleton
+                |> div []
+                |> List.singleton
 
-        lastItem =
-            li [] [ text "Open Log Viewer" ]
-
-        itens =
-            if activeTab == TabGame then
-                Notifications.listGame notifications
-                    |> List.map (\( id, { content } ) -> li [] [ text content ])
-            else
-                Notifications.listAccount notifications
-                    |> List.map (\( id, { content } ) -> li [] [ text content ])
-    in
-        node notificationsNode
-            [ class [ NAcc ] ]
-            [ div []
-                [ tabs
-                , ul [] (firstItem :: (itens ++ [ lastItem ]))
-                ]
+        attrs =
+            [ class [ Notification, uniqueClass ]
             ]
+    in
+        indicator attrs contents
+
+
+emptyNotifications : Class -> OpenMenu -> Html Msg
+emptyNotifications uniqueClass activator =
+    indicator
+        [ class [ Notification, uniqueClass ]
+        , onClick <| ToggleMenus activator
+        ]
+        []
+
+
+pLi : Html msg -> Html msg
+pLi elem =
+    li [] <| List.singleton <| elem
+
+
+accountGear : OpenMenu -> Game.Model -> Html Msg
+accountGear openMenu game =
+    if openMenu == AccountOpen then
+        visibleAccountGear game
+    else
+        invisibleAccountGear
+
+
+visibleAccountGear : Game.Model -> Html Msg
+visibleAccountGear { account, story } =
+    [ toggleCampaignBtn story
+    , logoutBtn
+    ]
+        |> List.map pLi
+        |> ul []
+        |> List.singleton
+        |> div []
+        |> List.singleton
+        |> indicator
+            [ class [ Account ]
+            ]
+
+
+invisibleAccountGear : Html Msg
+invisibleAccountGear =
+    indicator
+        [ class [ Account ]
+        , onClick <| ToggleMenus AccountOpen
+        ]
+        []
+
+
+toggleCampaignBtn : Story.Model -> Html Msg
+toggleCampaignBtn { enabled } =
+    button
+        [ onClick ToggleCampaign ]
+    <|
+        List.singleton <|
+            text <|
+                if enabled then
+                    "Go Multiplayer"
+                else
+                    "Go Campaign"
+
+
+logoutBtn : Html Msg
+logoutBtn =
+    button
+        [ onClick Logout ]
+        [ text "Logout" ]

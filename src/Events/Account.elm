@@ -14,6 +14,7 @@ import Json.Decode
         , value
         )
 import Json.Decode.Pipeline exposing (decode, optional)
+import Decoders.Notifications exposing (notificationsField)
 import Utils.Events exposing (Router, Handler, parse, notify)
 import Game.Servers.Shared as Servers
 import Game.Account.Models as Database exposing (Model, Email)
@@ -21,6 +22,7 @@ import Game.Account.Database.Models as Database
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
+import Game.Notifications.Models as Notifications
 import Events.Account.Bounces as Bounces
 import Events.Account.Database as Database
 import Events.Account.Dock as Dock
@@ -47,6 +49,7 @@ type alias AccountHolder =
     , activeGateway : Servers.ID
     , bounces : Maybe Bounces.Model
     , inventory : Maybe Inventory.Model
+    , notifications : Notifications.Model
     }
 
 
@@ -88,6 +91,7 @@ decoder =
         |> optional "active_gateway" string invalidGateway
         |> optional "bounces" (maybe Bounces.decoder) Nothing
         |> optional "inventory" (maybe Inventory.decoder) Nothing
+        |> notificationsField
         |> andThen requireActiveGateway
 
 

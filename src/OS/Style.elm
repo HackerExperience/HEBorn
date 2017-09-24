@@ -59,11 +59,9 @@ header =
         , padding (px 8)
         , globalShadow
         , children
-            [ customSelect
-            , popup
-            , contextSwitch
-            , notifications
-            , logo
+            [ logo
+            , connection
+            , taskbar
             ]
         ]
 
@@ -84,7 +82,7 @@ customSelect =
             [ Icons.fontFamily ]
         , children
             [ typeSelector "selector"
-                [ hoverMenu
+                [ menu
                 , children
                     [ typeSelector "customOption"
                         [ display block
@@ -100,8 +98,8 @@ customSelect =
         ]
 
 
-hoverMenu : Style
-hoverMenu =
+menu : Style
+menu =
     batch
         [ position absolute
         , border3 (px 1) solid (rgba 49 54 59 0.2)
@@ -150,22 +148,104 @@ contextSwitch =
         ]
 
 
-notifications : Snippet
-notifications =
-    typeSelector notificationsNode
+logo : Snippet
+logo =
+    class Logo
+        [ before [ Icons.fontFamily, Icons.osLogo ]
+        , flex (int 1)
+        ]
+
+
+connection : Snippet
+connection =
+    class Connection
+        [ children
+            [ customSelect
+            , popup
+            , contextSwitch
+            ]
+        , flexContainerHorz
+        , flex (int 0)
+        ]
+
+
+taskbar : Snippet
+taskbar =
+    class Taskbar
+        [ flex (int 1)
+        , display block
+        , children
+            [ indicator
+            , notifications
+            , account
+            ]
+        , textAlign right
+        ]
+
+
+indicator : Snippet
+indicator =
+    typeSelector indicatorNode
         [ position relative
+        , display inlineBlock
         , marginRight (px 16)
         , before
             [ Icons.fontFamily
             ]
+        , withClass ChatIco
+            [ before [ Icons.chat ] ]
+        , withClass ServersIco
+            [ before [ Icons.notifications ] ]
+        ]
+
+
+notifications : Snippet
+notifications =
+    class Notification
+        [ child div notificationMenu ]
+
+
+taskbarMenu : Style
+taskbarMenu =
+    batch
+        [ menu
+        , right (px 0)
+        , width (px 320)
+        , margin (px 0)
+        , backgroundColor Colors.white
+        , fontSize (px 12)
+        ]
+
+
+notificationMenu : List Style
+notificationMenu =
+    [ taskbarMenu
+    , child ul
+        [ listStyle none
+        , padding (px 0)
+        , margin (px 0)
+        , child li
+            [ borderBottom3 (px 1) solid Colors.separator
+            , padding2 (px 0) (px 8)
+            , firstChild
+                [ flexContainerHorz
+                , backgroundColor Colors.bgSelected
+                ]
+            , lastChild
+                [ borderBottom (px 0)
+                , textAlign center
+                ]
+            ]
+        ]
+    ]
+
+
+account : Snippet
+account =
+    class Account
+        [ before [ Icons.accountMenu ]
         , child div
-            [ hoverMenu
-            , display none
-            , right (px 0)
-            , width (px 320)
-            , margin (px 0)
-            , backgroundColor Colors.white
-            , fontSize (px 12)
+            [ taskbarMenu
             , child ul
                 [ listStyle none
                 , padding (px 0)
@@ -173,27 +253,7 @@ notifications =
                 , child li
                     [ borderBottom3 (px 1) solid Colors.separator
                     , padding2 (px 0) (px 8)
-                    , firstChild
-                        [ flexContainerHorz
-                        , backgroundColor Colors.bgSelected
-                        ]
-                    , lastChild
-                        [ borderBottom (px 0)
-                        , textAlign center
-                        ]
                     ]
                 ]
             ]
-        , nest [ hover, child div ]
-            [ display block ]
-        , withClass NChat
-            [ before [ Icons.chat ] ]
-        , withClass NAcc
-            [ before [ Icons.notifications ] ]
         ]
-
-
-logo : Snippet
-logo =
-    class Logo
-        [ before [ Icons.fontFamily, Icons.osLogo ] ]

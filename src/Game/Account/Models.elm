@@ -18,6 +18,7 @@ import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
+import Game.Notifications.Models as Notifications
 import Game.Meta.Types exposing (..)
 
 
@@ -53,6 +54,7 @@ type alias Model =
     , context : Context
     , bounces : Bounces.Model
     , inventory : Inventory.Model
+    , notifications : Notifications.Model
     , logout : Bool
     }
 
@@ -75,6 +77,7 @@ initialModel id username token =
     , context = Gateway
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
+    , notifications = Notifications.initialModel
     , logout = False
     }
 
