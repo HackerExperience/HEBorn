@@ -176,10 +176,29 @@ taskbar =
         , display block
         , children
             [ indicator
+            , bubble
             , notifications
             , account
             ]
         , textAlign right
+        ]
+
+
+bubble : Snippet
+bubble =
+    typeSelector bubbleNode
+        [ position absolute
+        , display inlineBlock
+        , width (px 15)
+        , height (px 15)
+        , textAlign center
+        , backgroundColor Colors.bgModal
+        , color Colors.white
+        , fontSize (px 10)
+        , lineHeight (px 15)
+        , margin4 (px -4) (px 0) (px 0) (px -22)
+        , borderRadius (pct 100)
+        , withClass Empty [ display none ]
         ]
 
 

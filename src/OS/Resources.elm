@@ -19,6 +19,7 @@ type Class
     | ServersIco
     | Notification
     | Account
+    | Empty
 
 
 type Id
@@ -34,3 +35,8 @@ prefix =
 indicatorNode : String
 indicatorNode =
     "indic"
+
+
+bubbleNode : String
+bubbleNode =
+    "bubble"

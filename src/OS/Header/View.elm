@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
+import Html.Attributes exposing (attribute)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Game.Account.Bounces.Models as Bounces
@@ -236,24 +237,53 @@ contextToggler active handler =
 
 taskbar : Game.Data -> Model -> Html Msg
 taskbar { game } { openMenu } =
-    div [ class [ Taskbar ] ]
-        [ notifications openMenu
-            ChatOpen
-            ChatIco
-            "Chat"
+    let
+        -- TODO
+        chatNotifications =
             Dict.empty
-        , notifications openMenu
-            ServersOpen
-            ServersIco
-            "This server"
+
+        serverNotificaions =
             Dict.empty
-        , accountGear openMenu game
-        ]
+    in
+        div [ class [ Taskbar ] ]
+            [ notifications openMenu
+                ChatOpen
+                ChatIco
+                "Chat"
+                chatNotifications
+            , notificationsBubble <|
+                Notifications.countUnreaded
+                    chatNotifications
+            , notifications openMenu
+                ServersOpen
+                ServersIco
+                "This server"
+                serverNotificaions
+            , notificationsBubble <|
+                Notifications.countUnreaded
+                    serverNotificaions
+            , accountGear openMenu game
+            , notificationsBubble 3
+            ]
 
 
 indicator : List (Attribute a) -> List (Html a) -> Html a
 indicator =
     node indicatorNode
+
+
+bubble : List (Attribute a) -> List (Html a) -> Html a
+bubble =
+    node bubbleNode
+
+
+notificationsBubble : Int -> Html Msg
+notificationsBubble num =
+    flip bubble [ text <| toString num ] <|
+        if num <= 0 then
+            [ class [ Empty ] ]
+        else
+            []
 
 
 notifications :
