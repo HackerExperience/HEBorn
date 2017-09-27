@@ -24,7 +24,7 @@ type alias Address =
 
 
 setPassword : String -> Model -> Model
-setPassword password state =
+setPassword password model =
     let
         newPassword =
             if password == "" then
@@ -32,4 +32,4 @@ setPassword password state =
             else
                 Just password
     in
-        { state | password = newPassword }
+        { model | password = newPassword }

@@ -26,11 +26,20 @@ update data msg model =
         UpdatePasswordField str ->
             onUpdatePasswordField str model
 
+        SetShowingPanel value ->
+            onTogglePanel value model
+
+
+onTogglePanel : Bool -> Model -> UpdateResponse
+onTogglePanel value model =
+    model
+        |> setShowingPanel value
+        |> Update.fromModel
+
 
 onUpdatePasswordField : String -> Model -> UpdateResponse
 onUpdatePasswordField newPassword model =
-    let
-        toolkit =
-            HackingToolkit.setPassword newPassword model.toolkit
-    in
-        Update.fromModel { model | toolkit = toolkit }
+    model.toolkit
+        |> HackingToolkit.setPassword newPassword
+        |> flip setToolkit model
+        |> Update.fromModel

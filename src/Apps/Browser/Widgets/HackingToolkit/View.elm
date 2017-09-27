@@ -8,7 +8,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
-import Game.Network.Types exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
@@ -17,6 +16,8 @@ import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
 type alias Config msg =
     { onInput : String -> msg
     , onCommonAction : CommonActions -> msg
+    , onEnterPanel : msg
+    , showPassword : Bool
     }
 
 
@@ -25,21 +26,29 @@ type alias Config msg =
 
 
 hackingToolkit : Config msg -> Model -> Html msg
-hackingToolkit config state =
+hackingToolkit config model =
     div []
-        [ loginForm config state
+        [ goPanelView config model
         , div [ class [ LoginPageFooter ] ]
-            [ crackBtn config state
-            , anyMapBtn config state
+            [ crackBtn config model
+            , anyMapBtn config model
             ]
         ]
 
 
+goPanelView : Config msg -> Model -> Html msg
+goPanelView config model =
+    if config.showPassword then
+        loginForm config model
+    else
+        togglePanel config
+
+
 loginForm : Config msg -> Model -> Html msg
-loginForm config state =
+loginForm config model =
     let
         inputText =
-            Maybe.withDefault "" state.password
+            Maybe.withDefault "" model.password
     in
         div [ class [ LoginPageForm ] ]
             [ div []
@@ -52,17 +61,25 @@ loginForm config state =
                 , div
                     [ onClick <|
                         config.onCommonAction <|
-                            Login state.target inputText
+                            Login model.target inputText
                     ]
                     [ text "E" ]
                 ]
             ]
 
 
+togglePanel : Config msg -> Html msg
+togglePanel { onEnterPanel } =
+    div [ onClick onEnterPanel ]
+        [ text "E" ]
+        |> List.singleton
+        |> div []
+
+
 crackBtn : Config msg -> Model -> Html msg
-crackBtn config state =
+crackBtn config model =
     div
-        [ onClick <| config.onCommonAction <| Crack state.target
+        [ onClick <| config.onCommonAction <| Crack model.target
         ]
         [ text "C"
         , br [] []
@@ -71,9 +88,9 @@ crackBtn config state =
 
 
 anyMapBtn : Config msg -> Model -> Html msg
-anyMapBtn config state =
+anyMapBtn config model =
     div
-        [ onClick <| config.onCommonAction <| AnyMap state.target
+        [ onClick <| config.onCommonAction <| AnyMap model.target
         ]
         [ text "M"
         , br [] []

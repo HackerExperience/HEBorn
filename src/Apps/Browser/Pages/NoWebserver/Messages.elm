@@ -6,3 +6,4 @@ import Apps.Browser.Pages.CommonActions exposing (..)
 type Msg
     = GlobalMsg CommonActions
     | UpdatePasswordField String
+    | SetShowingPanel Bool
