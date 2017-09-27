@@ -138,8 +138,8 @@ onSomeTabMsg data tabId msg model =
                 Fetched response ->
                     onFetched response tab
 
-                Crack _ ->
-                    Update.fromModel tab
+                Crack nip ->
+                    onCrack data nip tab
 
                 AnyMap _ ->
                     Update.fromModel tab
@@ -159,31 +159,6 @@ onSomeTabMsg data tabId msg model =
         result
             |> Update.mapModel setThisTab
             |> Update.mapCmd (SomeTabMsg tabId)
-
-
-onCrack : Game.Data -> NIP -> Model -> UpdateResponse
-onCrack data nip ({ me } as model) =
-    --Crack nip ->
-    --    onCrack data nip model
-    let
-        serverId =
-            Game.getID data
-
-        network =
-            data
-                |> Game.getServer
-                |> Servers.getNIP
-                |> Tuple.first
-
-        dispatch =
-            Processes.Start
-                Processes.Cracker
-                serverId
-                nip
-                ( Nothing, Nothing, "Palatura" )
-                |> Dispatch.processes serverId
-    in
-        ( model, Cmd.none, dispatch )
 
 
 
@@ -247,6 +222,19 @@ onFetched response tab =
                 |> Update.fromModel
         else
             Update.fromModel tab
+
+
+onCrack : Game.Data -> NIP -> Tab -> TabUpdateResponse
+onCrack data nip tab =
+    let
+        serverId =
+            Game.getID data
+
+        dispatch =
+            Dispatch.processes serverId <|
+                Processes.StartBruteforce nip
+    in
+        ( tab, Cmd.none, dispatch )
 
 
 onGoAddress :

@@ -490,3 +490,11 @@ newProcessFile ( id, version, name ) =
     , version = version
     , name = name
     }
+
+
+unknownProcessFile : ProcessFile
+unknownProcessFile =
+    { id = Nothing
+    , version = Nothing
+    , name = "..."
+    }

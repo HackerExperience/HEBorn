@@ -43,6 +43,13 @@ update game serverId msg model =
                 (newOptimistic type_ origin target <| newProcessFile file)
                 model
 
+        StartBruteforce target ->
+            onStart
+                game
+                serverId
+                (newOptimistic Cracker serverId target unknownProcessFile)
+                model
+
         Complete id ->
             onComplete game serverId id model
 

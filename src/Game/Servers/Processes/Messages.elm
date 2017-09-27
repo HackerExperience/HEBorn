@@ -10,8 +10,11 @@ type Msg
     = Pause ID
     | Resume ID
     | Remove ID
-    | Start Type ServerID NIP ( Maybe FileID, Maybe Version, FileName )
     | Complete ID
+    | StartBruteforce NIP
+      -- start may be removed if we provide a specific
+      -- function for every process type
+    | Start Type ServerID NIP ( Maybe FileID, Maybe Version, FileName )
     | Request RequestMsg
     | Event Events.Event
 
