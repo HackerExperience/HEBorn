@@ -20,6 +20,7 @@ import Game.Network.Types exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
+import Game.Notifications.Models as Notifications
 import Gen.Utils exposing (..)
 
 
@@ -113,6 +114,8 @@ genServer =
             , tunnels = Tunnels.initialModel
             , ownership =
                 ownership
+            , notifications =
+                Notifications.initialModel
             }
     in
         genIP
@@ -138,6 +141,8 @@ genGatewayServer =
             , tunnels = Tunnels.initialModel
             , ownership =
                 GatewayOwnership <| GatewayData Nothing []
+            , notifications =
+                Notifications.initialModel
             }
     in
         genIP
@@ -162,6 +167,8 @@ genEndpointServer =
             , tunnels = Tunnels.initialModel
             , ownership =
                 GatewayOwnership <| GatewayData Nothing []
+            , notifications =
+                Notifications.initialModel
             }
     in
         genIP
