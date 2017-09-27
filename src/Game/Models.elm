@@ -17,6 +17,7 @@ module Game.Models
         , setActiveServer
         , bounces
         , endpoints
+        , endpointMember
         )
 
 import Dict
@@ -25,6 +26,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
+import Game.Network.Types exposing (NIP)
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
 import Core.Config exposing (Config)
@@ -217,6 +219,15 @@ endpoints game =
             |> (.servers)
             |> Dict.keys
             |> filterFunc
+
+
+endpointMember : NIP -> Model -> Bool
+endpointMember nip game =
+    game
+        |> getAccount
+        |> (.database)
+        |> (.servers)
+        |> Dict.member nip
 
 
 
