@@ -35,32 +35,16 @@ view data model =
 
 bouncesGetter : Game.Model -> List (Maybe String)
 bouncesGetter game =
-    game
-        |> Game.getAccount
-        |> (.bounces)
-        |> Dict.keys
+    Game.bounces game
         |> List.map Just
         |> (::) Nothing
 
 
 endpointsGetter : Game.Model -> List (Maybe Servers.ID)
 endpointsGetter game =
-    let
-        filterFunc =
-            game
-                |> Game.getServers
-                |> flip Servers.mapNetwork
-                |> List.filterMap
-    in
-        game
-            |> Game.getAccount
-            -- TODO: add getters for database and servers
-            |> (.database)
-            |> (.servers)
-            |> Dict.keys
-            |> filterFunc
-            |> List.map Just
-            |> (::) Nothing
+    Game.endpoints game
+        |> List.map Just
+        |> (::) Nothing
 
 
 endpointGetter : Game.Model -> Maybe Servers.ID

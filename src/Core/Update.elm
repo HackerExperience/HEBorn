@@ -15,6 +15,7 @@ import Game.Messages as Game
 import Game.Models as Game
 import Game.Meta.Messages as Meta
 import Game.Update as Game
+import Setup.Messages as Setup
 import Setup.Update as Setup
 import OS.Messages as OS
 import OS.Update as OS
@@ -127,112 +128,170 @@ updateHome msg model stateModel =
 
 updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
 updateSetup msg model stateModel =
-    -- DONE
     case msg of
         WebsocketMsg (Ws.Broadcast event) ->
-            updateEvent event model
+            stateModel
+                |> updateSetupGame (Game.Event event)
+                |> finishSetupUpdate model
 
         WebsocketMsg msg ->
-            let
-                ( websocket, cmd, dispatch ) =
-                    updateWebsocket msg stateModel.websocket
-
-                stateModel_ =
-                    { stateModel | websocket = websocket }
-
-                model_ =
-                    { model | state = Setup stateModel_ }
-            in
-                dispatcher model_ cmd dispatch
+            updateSetupWS msg stateModel
+                |> finishSetupUpdate model
 
         SetupMsg msg ->
-            let
-                ( setup, cmd, dispatch ) =
-                    Setup.update stateModel.game msg stateModel.setup
-
-                stateModel_ =
-                    { stateModel | setup = setup }
-
-                model_ =
-                    { model | state = Setup stateModel_ }
-
-                cmd_ =
-                    Cmd.map SetupMsg cmd
-            in
-                dispatcher model_ cmd_ dispatch
+            updateSetupSetup msg stateModel
+                |> finishSetupUpdate model
 
         GameMsg msg ->
-            let
-                ( game, cmd, dispatch ) =
-                    updateGame msg stateModel.game
-
-                stateModel_ =
-                    { stateModel | game = game }
-
-                model_ =
-                    { model | state = Setup stateModel_ }
-            in
-                dispatcher model_ cmd dispatch
+            updateSetupGame msg stateModel
+                |> finishSetupUpdate model
 
         _ ->
             ( model, Cmd.none )
+
+
+updateSetupWS : Ws.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupWS msg stateModel =
+    let
+        ( websocket, cmd, dispatch ) =
+            updateWebsocket msg stateModel.websocket
+
+        stateModel_ =
+            { stateModel | websocket = websocket }
+    in
+        ( stateModel_, cmd, dispatch )
+
+
+updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupSetup msg stateModel =
+    let
+        ( setup, cmd, dispatch ) =
+            Setup.update stateModel.game msg stateModel.setup
+
+        stateModel_ =
+            { stateModel | setup = setup }
+
+        cmd_ =
+            Cmd.map SetupMsg cmd
+    in
+        ( stateModel_, cmd_, dispatch )
+
+
+updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupGame msg stateModel =
+    let
+        ( game, cmd, dispatch ) =
+            updateGame msg stateModel.game
+
+        stateModel_ =
+            { stateModel | game = game }
+    in
+        ( stateModel_, cmd, dispatch )
+
+
+finishSetupUpdate : Model -> ( SetupModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
+finishSetupUpdate model ( stateModel, cmd, dispatch ) =
+    let
+        model_ =
+            { model | state = Setup stateModel }
+    in
+        dispatcher model_ cmd dispatch
 
 
 updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
 updatePlay msg model stateModel =
     case msg of
         WebsocketMsg (Ws.Broadcast event) ->
-            updateEvent event model
+            stateModel
+                |> updatePlayGame (Game.Event event)
+                |> stateAndThen (updatePlayOS <| OS.Event event)
+                |> finishPlayUpdate model
 
         WebsocketMsg msg ->
-            let
-                ( websocket, cmd, dispatch ) =
-                    updateWebsocket msg stateModel.websocket
-
-                stateModel_ =
-                    { stateModel | websocket = websocket }
-
-                model_ =
-                    { model | state = Play stateModel_ }
-            in
-                dispatcher model_ cmd dispatch
+            updatePlayWS msg stateModel
+                |> finishPlayUpdate model
 
         OSMsg msg ->
-            case Game.fromGateway stateModel.game of
-                Just data ->
-                    let
-                        ( os, cmd, dispatch ) =
-                            OS.update data msg stateModel.os
-
-                        stateModel_ =
-                            { stateModel | os = os }
-
-                        model_ =
-                            { model | state = Play stateModel_ }
-
-                        cmd_ =
-                            Cmd.map OSMsg cmd
-                    in
-                        dispatcher model_ cmd_ dispatch
-
-                Nothing ->
-                    ( model, Cmd.none )
+            updatePlayOS msg stateModel
+                |> finishPlayUpdate model
 
         GameMsg msg ->
-            let
-                ( game, cmd, dispatch ) =
-                    updateGame msg stateModel.game
-
-                stateModel_ =
-                    { stateModel | game = game }
-
-                model_ =
-                    { model | state = Play stateModel_ }
-            in
-                dispatcher model_ cmd dispatch
+            updatePlayGame msg stateModel
+                |> finishPlayUpdate model
 
         _ ->
             ( model, Cmd.none )
+
+
+updatePlayWS : Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayWS msg stateModel =
+    let
+        ( websocket, cmd, dispatch ) =
+            updateWebsocket msg stateModel.websocket
+
+        stateModel_ =
+            { stateModel | websocket = websocket }
+    in
+        ( stateModel_, cmd, dispatch )
+
+
+updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayOS msg stateModel =
+    case Game.fromGateway stateModel.game of
+        Just data ->
+            let
+                ( os, cmd, dispatch ) =
+                    OS.update data msg stateModel.os
+
+                stateModel_ =
+                    { stateModel | os = os }
+
+                cmd_ =
+                    Cmd.map OSMsg cmd
+            in
+                ( stateModel_, cmd_, dispatch )
+
+        Nothing ->
+            ( stateModel, Cmd.none, Dispatch.none )
+
+
+updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayGame msg stateModel =
+    let
+        ( game, cmd, dispatch ) =
+            updateGame msg stateModel.game
+
+        stateModel_ =
+            { stateModel | game = game }
+    in
+        ( stateModel_, cmd, dispatch )
+
+
+finishPlayUpdate : Model -> ( PlayModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
+finishPlayUpdate model ( stateModel, cmd, dispatch ) =
+    let
+        model_ =
+            { model | state = Play stateModel }
+    in
+        dispatcher model_ cmd dispatch
+
+
+stateAndThen :
+    (a -> ( a, Cmd b, Dispatch ))
+    -> ( a, Cmd b, Dispatch )
+    -> ( a, Cmd b, Dispatch )
+stateAndThen apply ( stateModel, cmd0, dispatch0 ) =
+    let
+        ( stateModel_, cmd1, dispatch1 ) =
+            apply stateModel
+
+        cmd =
+            Cmd.batch [ cmd0, cmd1 ]
+
+        dispatch =
+            Dispatch.batch [ dispatch0, dispatch1 ]
+    in
+        ( stateModel_, cmd, dispatch )
 
 
 updateLanding :
@@ -255,50 +314,6 @@ updateLanding msg model ({ landing } as stateModel) =
             { model | state = Home stateModel_ }
     in
         dispatcher model_ cmd_ dispatch
-
-
-updateEvent : Events.Event -> Model -> ( Model, Cmd Msg )
-updateEvent event ({ state } as model) =
-    let
-        msg =
-            Game.Event event
-    in
-        case state of
-            Setup stateModel ->
-                let
-                    ( game, cmd, dispatch ) =
-                        updateGame msg stateModel.game
-
-                    stateModel_ =
-                        { stateModel | game = game }
-
-                    model_ =
-                        { model | state = Setup stateModel_ }
-                in
-                    dispatcher model_ cmd dispatch
-
-            Play stateModel ->
-                let
-                    ( game, cmd, dispatchGame ) =
-                        updateGame msg stateModel.game
-
-                    stateModel_ =
-                        { stateModel | game = game }
-
-                    model_ =
-                        { model | state = Play stateModel_ }
-
-                    dispatchOS =
-                        Dispatch.os <| OS.Event event
-
-                    dispatch =
-                        Dispatch.batch
-                            [ dispatchGame, dispatchOS ]
-                in
-                    dispatcher model_ cmd dispatch
-
-            _ ->
-                ( model, Cmd.none )
 
 
 updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )

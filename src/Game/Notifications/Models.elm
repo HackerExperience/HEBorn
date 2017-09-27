@@ -51,6 +51,8 @@ get id =
     Dict.get id
 
 
+{-| If there is another one born in the same time, increase the right counter, recursively |
+-}
 findId : ( Time, Int ) -> Model -> ID
 findId (( birth, from ) as pig) model =
     model

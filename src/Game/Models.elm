@@ -15,8 +15,11 @@ module Game.Models
         , setEndpoint
         , getActiveServer
         , setActiveServer
+        , bounces
+        , endpoints
         )
 
+import Dict
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
@@ -171,6 +174,36 @@ setActiveServer server model =
 
         Endpoint ->
             setEndpoint server model
+
+
+
+-- common helpers
+
+
+bounces : Model -> List String
+bounces game =
+    game
+        |> getAccount
+        |> (.bounces)
+        |> Dict.keys
+
+
+endpoints : Model -> List Servers.ID
+endpoints game =
+    let
+        filterFunc =
+            game
+                |> getServers
+                |> flip Servers.mapNetwork
+                |> List.filterMap
+    in
+        game
+            |> getAccount
+            -- TODO: add getters for database and servers
+            |> (.database)
+            |> (.servers)
+            |> Dict.keys
+            |> filterFunc
 
 
 

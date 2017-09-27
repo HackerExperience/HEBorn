@@ -6,15 +6,6 @@ import Json.Decode.Pipeline exposing (decode, optional, required)
 import Game.Notifications.Models exposing (..)
 
 
-{-
-   { "type": "simple"
-   , "content": {"title": "Hello", "msg": "World"}
-   , "created": 1506286664280
-   , "read": 0
-   }
--}
-
-
 notification : Decoder ( ID, Notification )
 notification =
     field "type" string
