@@ -1,0 +1,35 @@
+module Apps.Browser.Widgets.HackingToolkit.Model
+    exposing
+        ( Model
+        , Password
+        , Address
+        , setPassword
+        )
+
+import Game.Network.Types exposing (NIP)
+
+
+type alias Model =
+    { password : Maybe String
+    , target : NIP
+    }
+
+
+type alias Password =
+    Maybe String
+
+
+type alias Address =
+    String
+
+
+setPassword : String -> Model -> Model
+setPassword password state =
+    let
+        newPassword =
+            if password == "" then
+                Nothing
+            else
+                Just password
+    in
+        { state | password = newPassword }

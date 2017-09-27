@@ -10,7 +10,7 @@ import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(Crack))
 import Apps.Browser.Pages.NoWebserver.Messages exposing (Msg(..))
 import Apps.Browser.Pages.NoWebserver.Models exposing (Model)
-import Apps.Browser.Widgets.HackingToolkit as HackingToolkit exposing (hackingToolkit)
+import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 
 
 { id, class, classList } =

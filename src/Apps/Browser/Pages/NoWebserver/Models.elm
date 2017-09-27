@@ -8,11 +8,11 @@ module Apps.Browser.Pages.NoWebserver.Models
 import Game.Network.Types exposing (NIP)
 import Game.Web.Types exposing (Url)
 import Game.Web.Types as Web
-import Apps.Browser.Widgets.HackingToolkit as HackingToolkit
+import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 
 
 type alias Model =
-    { toolkit : HackingToolkit.State
+    { toolkit : HackingToolkit.Model
     }
 
 

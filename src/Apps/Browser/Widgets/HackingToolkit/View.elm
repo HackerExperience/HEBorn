@@ -1,11 +1,7 @@
-module Apps.Browser.Widgets.HackingToolkit
+module Apps.Browser.Widgets.HackingToolkit.View
     exposing
         ( Config
-        , Password
-        , Address
-        , State
         , hackingToolkit
-        , updateState
         )
 
 import Html exposing (..)
@@ -15,6 +11,7 @@ import Html.CssHelpers
 import Game.Network.Types exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
+import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
 
 
 type alias Config msg =
@@ -23,25 +20,11 @@ type alias Config msg =
     }
 
 
-type alias Password =
-    Maybe String
-
-
-type alias Address =
-    String
-
-
-type alias State =
-    { password : Maybe String
-    , target : NIP
-    }
-
-
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
-hackingToolkit : Config msg -> State -> Html msg
+hackingToolkit : Config msg -> Model -> Html msg
 hackingToolkit config state =
     div []
         [ loginForm config state
@@ -52,7 +35,7 @@ hackingToolkit config state =
         ]
 
 
-loginForm : Config msg -> State -> Html msg
+loginForm : Config msg -> Model -> Html msg
 loginForm config state =
     let
         inputText =
@@ -76,7 +59,7 @@ loginForm config state =
             ]
 
 
-crackBtn : Config msg -> State -> Html msg
+crackBtn : Config msg -> Model -> Html msg
 crackBtn config state =
     div
         [ onClick <| config.onCommonAction <| Crack state.target
@@ -87,7 +70,7 @@ crackBtn config state =
         ]
 
 
-anyMapBtn : Config msg -> State -> Html msg
+anyMapBtn : Config msg -> Model -> Html msg
 anyMapBtn config state =
     div
         [ onClick <| config.onCommonAction <| AnyMap state.target
@@ -96,15 +79,3 @@ anyMapBtn config state =
         , br [] []
         , text "AnyMap"
         ]
-
-
-updateState : String -> State -> State
-updateState password state =
-    let
-        newPassword =
-            if password == "" then
-                Nothing
-            else
-                Just password
-    in
-        { state | password = newPassword }
