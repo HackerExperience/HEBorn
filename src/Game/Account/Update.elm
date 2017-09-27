@@ -13,6 +13,8 @@ import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Update as Notifications
 import Game.Meta.Types exposing (..)
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
@@ -49,6 +51,9 @@ update game msg model =
 
         DatabaseMsg msg ->
             onDatabase game msg model
+
+        NotificationsMsg msg ->
+            onNotifications game msg model
 
         Event data ->
             onEvent game data model
@@ -113,9 +118,21 @@ onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
 onDatabase game msg model =
     Update.child
         { get = .database
-        , set = (\database game -> { game | database = database })
+        , set = (\database model -> { model | database = database })
         , toMsg = DatabaseMsg
         , update = (Database.update game)
+        }
+        msg
+        model
+
+
+onNotifications : Game.Model -> Notifications.Msg -> Model -> UpdateResponse
+onNotifications game msg model =
+    Update.child
+        { get = .notifications
+        , set = (\notifications model -> { model | notifications = notifications })
+        , toMsg = NotificationsMsg
+        , update = (Notifications.update game)
         }
         msg
         model

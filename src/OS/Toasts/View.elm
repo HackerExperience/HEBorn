@@ -38,11 +38,8 @@ toast id { notification, parent, state } =
             else
                 Nothing
 
-        mouseAttr =
-            Maybe.map (MarkRead >> onMouseEnter) parent
-
         attrs =
-            [ classAttr, mouseAttr ]
+            [ classAttr ]
                 |> List.filterMap identity
     in
         div attrs <|

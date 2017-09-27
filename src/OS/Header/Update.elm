@@ -11,6 +11,7 @@ import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers
+import Game.Notifications.Messages as Notifications
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
@@ -110,3 +111,19 @@ update data msg ({ openMenu } as model) =
                     Dispatch.story <| Story.Toggle
             in
                 ( model, Cmd.none, dispatch )
+
+        ServerReadAll serverId ->
+            let
+                dispatch =
+                    Dispatch.server serverId <|
+                        Servers.NotificationsMsg
+                            Notifications.ReadAll
+            in
+                ( model, Cmd.none, dispatch )
+
+        ChatReadAll ->
+            Update.fromModel model
+
+        AccountReadAll ->
+            -- TODO
+            Update.fromModel model

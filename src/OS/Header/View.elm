@@ -63,6 +63,14 @@ endpointsGetter game =
             |> (::) Nothing
 
 
+endpointGetter : Game.Model -> Maybe Servers.ID
+endpointGetter game =
+    game
+        |> Game.fromGateway
+        |> Maybe.map Game.getServer
+        |> Maybe.andThen Servers.getEndpoint
+
+
 logo : Html Msg
 logo =
     div
@@ -90,10 +98,7 @@ connection ({ game } as data) { openMenu } =
                 |> Servers.getBounce
 
         endpoint =
-            game
-                |> Game.fromGateway
-                |> Maybe.map Game.getServer
-                |> Maybe.andThen Servers.getEndpoint
+            endpointGetter game
 
         endpoints =
             endpointsGetter game
@@ -234,35 +239,66 @@ contextToggler active handler =
         span [ onClick handler, class classes ] []
 
 
+activeServerGetter : Game.Model -> Maybe Servers.ID
+activeServerGetter game =
+    game
+        |> Game.getAccount
+        |> (\z ->
+                case Account.getContext z of
+                    Gateway ->
+                        Just <| Account.getGateway z
+
+                    Endpoint ->
+                        endpointGetter game
+           )
+
+
 taskbar : Game.Data -> Model -> Html Msg
 taskbar { game } { openMenu } =
     let
-        -- TODO
         chatNotifications =
             Dict.empty
 
-        serverNotificaions =
-            Dict.empty
+        activeServer =
+            activeServerGetter game
+
+        serverNotifications =
+            activeServer
+                |> Maybe.andThen (flip Servers.get game.servers)
+                |> Maybe.map (.notifications)
+                |> Maybe.withDefault (Dict.empty)
+
+        accountNotifications =
+            game.account.notifications
+
+        serverReadAll =
+            case activeServer of
+                Just activeServer ->
+                    ServerReadAll activeServer
+
+                Nothing ->
+                    Debug.crash "The OS needs a server to run!"
     in
         div [ class [ Taskbar ] ]
             [ notifications openMenu
                 ChatOpen
                 ChatIco
                 "Chat"
+                ChatReadAll
                 chatNotifications
             , notificationsBubble <|
-                Notifications.countUnreaded
-                    chatNotifications
+                Notifications.countUnreaded chatNotifications
             , notifications openMenu
                 ServersOpen
                 ServersIco
                 "This server"
-                serverNotificaions
+                serverReadAll
+                serverNotifications
             , notificationsBubble <|
-                Notifications.countUnreaded
-                    serverNotificaions
+                Notifications.countUnreaded serverNotifications
             , accountGear openMenu game
-            , notificationsBubble 3
+            , notificationsBubble <|
+                Notifications.countUnreaded accountNotifications
             ]
 
 
@@ -290,11 +326,12 @@ notifications :
     -> OpenMenu
     -> Class
     -> String
+    -> Msg
     -> Notifications.Model
     -> Html Msg
-notifications current activator uniqueClass title itens =
+notifications current activator uniqueClass title readAll itens =
     if (current == activator) then
-        visibleNotifications uniqueClass activator title itens
+        visibleNotifications uniqueClass activator title readAll itens
     else
         emptyNotifications uniqueClass activator
 
@@ -303,15 +340,16 @@ visibleNotifications :
     Class
     -> OpenMenu
     -> String
+    -> Msg
     -> Notifications.Model
     -> Html Msg
-visibleNotifications uniqueClass activator title itens =
+visibleNotifications uniqueClass activator title readAll itens =
     let
         firstItem =
             li []
                 [ div [] [ text (title ++ " notifications") ]
                 , spacer
-                , div [] [ text "Mark All as Read" ]
+                , div [ onClick readAll ] [ text "Mark All as Read" ]
                 ]
 
         lastItem =

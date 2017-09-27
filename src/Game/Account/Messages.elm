@@ -2,11 +2,12 @@ module Game.Account.Messages exposing (Msg(..), RequestMsg(..))
 
 import Json.Decode exposing (Value)
 import Events.Events as Events
-import Game.Servers.Shared as Servers
 import Requests.Types exposing (ResponseType)
+import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
+import Game.Notifications.Messages as Notifications
 
 
 type Msg
@@ -16,6 +17,7 @@ type Msg
     | ContextTo Context
     | BouncesMsg Bounces.Msg
     | DatabaseMsg Database.Msg
+    | NotificationsMsg Notifications.Msg
     | Request RequestMsg
     | Event Events.Event
     | Bootstrap Value -- TODO: remove this Value

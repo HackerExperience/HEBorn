@@ -11,6 +11,7 @@ module Core.Dispatch
         , core
         , websocket
         , game
+        , os
         , account
         , servers
         , web

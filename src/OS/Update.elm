@@ -1,6 +1,7 @@
 module OS.Update exposing (update)
 
 import Utils.Update as Update
+import Events.Events as Events
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import OS.Header.Messages as Header
@@ -35,11 +36,14 @@ update game msg model =
                 |> header game msg
                 |> map (\m -> { model | header = m }) HeaderMsg
 
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler game action model
-
         ToastsMsg msg ->
             onToastsMsg game msg model
+
+        Event data ->
+            onEvent game data model
+
+        MenuMsg (Menu.MenuClick action) ->
+            Menu.actionHandler game action model
 
         MenuMsg msg ->
             let
@@ -99,3 +103,8 @@ onToastsMsg game msg model =
         }
         msg
         model
+
+
+onEvent : Game.Data -> Events.Event -> Model -> UpdateResponse
+onEvent game event model =
+    onToastsMsg game (Toasts.Event event) model

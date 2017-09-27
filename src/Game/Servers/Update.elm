@@ -26,6 +26,9 @@ import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Bootstrap as Bootstrap
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications
+import Game.Notifications.Update as Notifications
 import Game.Network.Types exposing (NIP)
 
 
@@ -163,6 +166,9 @@ updateServer game id msg server =
         ServerRequest data ->
             updateServerRequest game id (serverReceive data) server
 
+        NotificationsMsg msg ->
+            onNotificationsMsg game msg server
+
 
 onSetBounce :
     Game.Model
@@ -228,6 +234,16 @@ onTunnelsMsg game =
         , set = (\tunnels model -> { model | tunnels = tunnels })
         , toMsg = TunnelsMsg
         , update = (Tunnels.update game)
+        }
+
+
+onNotificationsMsg : Game.Model -> Notifications.Msg -> Server -> ServerUpdateResponse
+onNotificationsMsg game =
+    Update.child
+        { get = .notifications
+        , set = (\notifications model -> { model | notifications = notifications })
+        , toMsg = NotificationsMsg
+        , update = (Notifications.update game)
         }
 
 

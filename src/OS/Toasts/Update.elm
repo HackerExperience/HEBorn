@@ -26,10 +26,6 @@ update _ msg model =
                 |> insert new
                 |> uncurry waitFade
 
-        MarkRead ( src, id ) ->
-            -- TODO
-            Update.fromModel model
-
         Remove id ->
             onRemove id model
 
@@ -38,6 +34,9 @@ update _ msg model =
 
         Fade id ->
             onFade id model
+
+        Event _ ->
+            Update.fromModel model
 
 
 onRemove : Int -> Model -> UpdateResponse
