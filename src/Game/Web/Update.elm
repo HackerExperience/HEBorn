@@ -138,18 +138,8 @@ onJoined game serverId model =
                 Just { sessionId, windowId, context, tabId } ->
                     -- it may not be explicit, but sessionId
                     -- is always a gateway id
-                    let
-                        dispatch0 =
-                            Browser.ReportLogin
-                                |> Browser.SomeTabMsg tabId
-                                |> Dispatch.browser ( sessionId, windowId )
-                                    context
-
-                        dispatch1 =
-                            Dispatch.server sessionId <|
-                                Servers.SetEndpoint (Just serverId)
-                    in
-                        Dispatch.batch [ dispatch0, dispatch1 ]
+                    Dispatch.server sessionId <|
+                        Servers.SetEndpoint (Just serverId)
 
                 Nothing ->
                     Dispatch.none
@@ -168,7 +158,7 @@ onJoinFailed game serverId model =
         dispatch =
             case maybeRequester of
                 Just { sessionId, windowId, context, tabId } ->
-                    Browser.ReportLoginFailed
+                    Browser.LoginFailed
                         |> Browser.SomeTabMsg tabId
                         |> Dispatch.browser ( sessionId, windowId ) context
 

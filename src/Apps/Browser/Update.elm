@@ -148,10 +148,7 @@ updateSomeTabMsg data tabId msg model =
                 Login nip password ->
                     onLogin data nip password model.me tabId tab
 
-                ReportLogin ->
-                    Update.fromModel tab
-
-                ReportLoginFailed ->
+                LoginFailed ->
                     Update.fromModel tab
 
         setThisTab tab_ =

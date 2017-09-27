@@ -26,5 +26,4 @@ type TabMsg
     | Crack NIP
     | AnyMap NIP
     | Login NIP String
-    | ReportLogin
-    | ReportLoginFailed
+    | LoginFailed
