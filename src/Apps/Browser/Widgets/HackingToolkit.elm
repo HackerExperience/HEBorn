@@ -66,7 +66,12 @@ loginForm config state =
                     , onInput config.onInput
                     ]
                     []
-                , text "E"
+                , div
+                    [ onClick <|
+                        config.onCommonAction <|
+                            Login state.target inputText
+                    ]
+                    [ text "E" ]
                 ]
             ]
 

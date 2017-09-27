@@ -13,7 +13,7 @@ import Game.Network.Types exposing (NIP, IP)
 type Msg
     = Request RequestMsg
     | FetchUrl String String String Requester
-    | Login Servers.ID IP String Requester
+    | Login Servers.ID NIP String Requester
     | Event Events.Event
 
 

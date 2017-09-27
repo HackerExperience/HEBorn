@@ -12,7 +12,7 @@ import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import OS.SessionManager.WindowManager.Models as WM
 import Game.Meta.Types exposing (Context(..))
-import Game.Network.Types exposing (IP)
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
@@ -81,26 +81,33 @@ onDNS game { sessionId, windowId, context, tabId } response model =
 onLogin :
     Game.Model
     -> Servers.ID
-    -> IP
+    -> NIP
     -> String
     -> Requester
     -> Model
     -> UpdateResponse
-onLogin game serverId serverIp password requester model =
+onLogin game serverId nip password requester model =
     let
+        networkId =
+            Tuple.first nip
+
+        remoteIp =
+            Tuple.second nip
+
         payload =
             Encode.object
-                [ ( "server_id", Encode.string serverId )
-                , ( "server_ip", Encode.string serverIp )
+                [ ( "gateway_id", Encode.string serverId )
+                , ( "network_id", Encode.string networkId )
+                , ( "server_ip", Encode.string remoteIp )
                 , ( "password", Encode.string password )
                 ]
 
         dispatch =
             Dispatch.websocket <|
-                Ws.JoinChannel ServerChannel (Just serverId) (Just payload)
+                Ws.JoinChannel ServerChannel (Just remoteIp) (Just payload)
 
         model_ =
-            startLoading serverId requester model
+            startLoading remoteIp requester model
     in
         ( model_, Cmd.none, dispatch )
 

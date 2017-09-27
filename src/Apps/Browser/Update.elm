@@ -8,6 +8,7 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
+import Game.Network.Types exposing (NIP)
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -44,10 +45,10 @@ update data msg model =
 
         -- TabMsgs
         ActiveTabMsg msg ->
-            onSomeTabMsg data model.nowTab msg model
+            updateSomeTabMsg data model.nowTab msg model
 
         SomeTabMsg tabId msg ->
-            onSomeTabMsg data tabId msg model
+            updateSomeTabMsg data tabId msg model
 
         -- Browser
         NewTabIn url ->
@@ -107,13 +108,13 @@ onNewTabIn data url model =
         ( model_, cmd_, dispatch )
 
 
-onSomeTabMsg :
+updateSomeTabMsg :
     Game.Data
     -> Int
     -> TabMsg
     -> Model
     -> UpdateResponse
-onSomeTabMsg data tabId msg model =
+updateSomeTabMsg data tabId msg model =
     let
         tab =
             getTab tabId model.tabs
@@ -144,8 +145,8 @@ onSomeTabMsg data tabId msg model =
                 AnyMap _ ->
                     Update.fromModel tab
 
-                Login _ _ ->
-                    Update.fromModel tab
+                Login nip password ->
+                    onLogin data nip password model.me tabId tab
 
                 ReportLogin ->
                     Update.fromModel tab
@@ -270,3 +271,30 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             gotoPage url (Pages.LoadingModel url) tab
     in
         ( tab_, Cmd.none, dispatch )
+
+
+onLogin :
+    Game.Data
+    -> NIP
+    -> String
+    -> Config
+    -> Int
+    -> Tab
+    -> TabUpdateResponse
+onLogin data nip password { sessionId, windowId, context } tabId tab =
+    let
+        requester =
+            { sessionId = sessionId
+            , windowId = windowId
+            , context = context
+            , tabId = tabId
+            }
+
+        serverId =
+            Game.getID data
+
+        dispatch =
+            Dispatch.web <|
+                Web.Login serverId nip password requester
+    in
+        ( tab, Cmd.none, dispatch )
