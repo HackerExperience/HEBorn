@@ -4,4 +4,4 @@ import Game.Notifications.Models exposing (..)
 
 
 type Msg
-    = MarkRead ID
+    = ReadAll

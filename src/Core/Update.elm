@@ -279,7 +279,7 @@ updateEvent event ({ state } as model) =
 
             Play stateModel ->
                 let
-                    ( game, cmd, dispatch ) =
+                    ( game, cmd, dispatchGame ) =
                         updateGame msg stateModel.game
 
                     stateModel_ =
@@ -287,6 +287,13 @@ updateEvent event ({ state } as model) =
 
                     model_ =
                         { model | state = Play stateModel_ }
+
+                    dispatchOS =
+                        Dispatch.os <| OS.Event event
+
+                    dispatch =
+                        Dispatch.batch
+                            [ dispatchGame, dispatchOS ]
                 in
                     dispatcher model_ cmd dispatch
 
