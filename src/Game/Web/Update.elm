@@ -37,7 +37,7 @@ update game msg model =
         FetchUrl serverId url nid requester ->
             let
                 cmd =
-                    DNS.request serverId url nid requester game
+                    DNS.request serverId nid url requester game
             in
                 ( model, cmd, Dispatch.none )
 
