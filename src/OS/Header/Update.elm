@@ -39,14 +39,14 @@ update data msg ({ openMenu } as model) =
             in
                 Update.fromModel model_
 
-        CustomSelect CustomSelect.MouseEnter ->
+        MouseEnterDropdown ->
             let
                 model_ =
                     { model | mouseSomewhereInside = True }
             in
                 Update.fromModel model_
 
-        CustomSelect CustomSelect.MouseLeave ->
+        MouseLeavesDropdown ->
             let
                 model_ =
                     { model | mouseSomewhereInside = False }

@@ -53,6 +53,21 @@ dataDecorated =
     boolAttrYN "data-decorated"
 
 
+appAttr : String -> Attribute msg
+appAttr =
+    attribute "data-app"
+
+
+gameVersionAttr : String -> Attribute msg
+gameVersionAttr =
+    attribute "game-version"
+
+
+gameModeAttr : String -> Attribute msg
+gameModeAttr =
+    attribute "game-mode"
+
+
 openAttr : Bool -> Attribute msg
 openAttr open =
     attribute "data-open" <|
