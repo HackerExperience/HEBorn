@@ -125,7 +125,7 @@ selector classes wrapper kind render open active list =
     in
         customSelect
             [ class classes ]
-            CustomSelect
+            ( MouseEnterDropdown, MouseLeavesDropdown )
             wrapper
             (ToggleMenus kind)
             render_
@@ -356,7 +356,10 @@ visibleNotifications uniqueClass activator title readAll itens =
             (firstItem :: (itens_ ++ [ lastItem ]))
                 |> ul []
                 |> List.singleton
-                |> div []
+                |> div
+                    [ onMouseEnter MouseEnterDropdown
+                    , onMouseLeave MouseLeavesDropdown
+                    ]
                 |> List.singleton
 
         attrs =
@@ -396,7 +399,10 @@ visibleAccountGear { account, story } =
         |> List.map pLi
         |> ul []
         |> List.singleton
-        |> div []
+        |> div
+            [ onMouseEnter MouseEnterDropdown
+            , onMouseLeave MouseLeavesDropdown
+            ]
         |> List.singleton
         |> indicator
             [ class [ Account ]

@@ -19,6 +19,7 @@ type Easing
 
 type Condition
     = EQ String String
+    | NOT Condition
 
 
 easingToString : Easing -> String
@@ -52,13 +53,21 @@ conditionToString : Condition -> String
 conditionToString cond =
     case cond of
         EQ a b ->
-            a ++ "=\"" ++ b ++ "\""
+            "[" ++ a ++ "=\"" ++ b ++ "\"" ++ "]"
+
+        NOT cond ->
+            "not(" ++ conditionToString cond ++ ")"
 
 
 withAttribute : Condition -> List Style -> Style
 withAttribute cond =
-    pseudoClass
-        ("not(foo)[" ++ (conditionToString cond) ++ "]")
+    pseudoClass <|
+        case cond of
+            NOT _ ->
+                (conditionToString cond)
+
+            _ ->
+                "not(iMpOsSiBlE)" ++ (conditionToString cond)
 
 
 selectableText : Style

@@ -1,4 +1,4 @@
-module UI.Widgets.CustomSelect exposing (Msg(..), customSelect)
+module UI.Widgets.CustomSelect exposing (customSelect)
 
 import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
@@ -6,14 +6,9 @@ import Utils.Html.Attributes exposing (selectedAttr, openAttr)
 import Utils.Html.Events exposing (onClickMe)
 
 
-type Msg
-    = MouseEnter
-    | MouseLeave
-
-
 customSelect :
     List (Attribute msg)
-    -> (Msg -> msg)
+    -> ( msg, msg )
     -> (a -> msg)
     -> msg
     -> (Bool -> a -> Maybe (Html msg))
@@ -21,7 +16,7 @@ customSelect :
     -> a
     -> List a
     -> Html msg
-customSelect attrs wrap msg open render opened active list =
+customSelect attrs ( mouseEnter, mouseLeave ) msg open render opened active list =
     let
         mapper item =
             customOption msg render (item == active) item
@@ -32,8 +27,8 @@ customSelect attrs wrap msg open render opened active list =
         customNode =
             node selectorNode <|
                 (++) attrs
-                    [ onMouseEnter <| wrap MouseEnter
-                    , onMouseLeave <| wrap MouseLeave
+                    [ onMouseEnter mouseEnter
+                    , onMouseLeave mouseLeave
                     , onClickMe open
                     , openAttr opened
                     ]

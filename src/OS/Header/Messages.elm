@@ -8,7 +8,8 @@ import OS.Header.Models exposing (OpenMenu)
 type Msg
     = Logout
     | ToggleMenus OpenMenu
-    | CustomSelect CustomSelect.Msg
+    | MouseEnterDropdown
+    | MouseLeavesDropdown
     | SelectGateway (Maybe String)
     | SelectBounce (Maybe String)
     | SelectEndpoint (Maybe String)
