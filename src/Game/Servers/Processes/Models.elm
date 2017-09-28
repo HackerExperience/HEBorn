@@ -65,7 +65,7 @@ type alias FullAccess =
 
 
 type alias PartialAccess =
-    { originConnection : Maybe ( ServerID, ConnectionID )
+    { connection_id : Maybe ConnectionID
     }
 
 
@@ -334,9 +334,8 @@ getOrigin { access } =
         Full data ->
             Just data.origin
 
-        Partial { originConnection } ->
-            originConnection
-                |> Maybe.map Tuple.first
+        Partial _ ->
+            Nothing
 
 
 getVersion : Process -> Maybe Version
@@ -395,9 +394,8 @@ getConnectionId { access } =
         Full data ->
             data.connection
 
-        Partial { originConnection } ->
-            originConnection
-                |> Maybe.map Tuple.second
+        Partial { connection_id } ->
+            connection_id
 
 
 getName : Process -> String

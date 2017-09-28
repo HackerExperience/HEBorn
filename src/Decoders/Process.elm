@@ -83,22 +83,9 @@ access =
                 |> required "usage" resourcesUsage
                 |> optional "connection_id" (maybe string) Nothing
 
-        toOriginConnection data =
-            case data of
-                ( Just origin, Just connectionId ) ->
-                    ( origin, connectionId )
-                        |> Just
-                        |> PartialAccess
-                        |> succeed
-
-                _ ->
-                    succeed <| PartialAccess Nothing
-
         partial =
-            decode (,)
-                |> optional "origin_id" (maybe string) Nothing
+            decode PartialAccess
                 |> optional "connection_id" (maybe string) Nothing
-                |> andThen toOriginConnection
     in
         oneOf
             [ map Full full
