@@ -110,4 +110,4 @@ bruteforce =
 
 browse : Topic
 browse =
-    WebsocketTopic ServerChannel "network.browse"
+    WebsocketTopic ServerChannel "browse"
