@@ -10,6 +10,7 @@ import Game.Web.Types as Web
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.NoWebserver.Models as PageNoWebserver
+import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
 import Apps.Browser.Pages.Bank.Models as PageBank
 
 
@@ -20,7 +21,7 @@ type Model
     | NoWebserverModel PageNoWebserver.Model
     | ProfileModel
     | WhoisModel
-    | DownloadCenterModel
+    | DownloadCenterModel DownloadCenter.Model
     | ISPModel
     | BankModel PageBank.Model
     | StoreModel
@@ -56,7 +57,7 @@ initialModel ({ url, type_, meta } as site) =
             WhoisModel
 
         Web.DownloadCenter content ->
-            DownloadCenterModel
+            DownloadCenterModel <| DownloadCenter.initialModel meta
 
         Web.ISP ->
             ISPModel
@@ -104,7 +105,7 @@ getTitle model =
         WhoisModel ->
             "Whois"
 
-        DownloadCenterModel ->
+        DownloadCenterModel _ ->
             "Download Center"
 
         ISPModel ->
