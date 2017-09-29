@@ -69,21 +69,36 @@ eventTests =
                             { "origin" : "id"
                             , "priority" : 3
                             , "usage" :
-                                { "cpu" : [0.1, "1mb"]
-                                , "mem" : [0.1, "1mb"]
-                                , "down" : [0.1, "1mb"]
-                                , "up" : [0.1, "1mb"]
+                                { "cpu" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
+                                , "mem" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
+                                , "down" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
+                                , "up" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
                                 }
                             , "connection_id" : "id"
                             }
                         , "state" : "running"
                         , "file" :
                             { "id" : "id"
-                            , "version" : 1.0
+                            , "version" : 0.0
                             , "name" : "process"
                             }
-                        , "status" : ""
-                        , "progress" : [0.1, "1mb"]
+                        , "progress" :
+                            { "percentage" : 0.0
+                            , "creation_date" : 0.0
+                            , "completion_date" : 0.0
+                            }
                         , "network_id" : "id"
                         , "target_ip" : "id"
                         , "process_id" : "id"
@@ -221,7 +236,7 @@ eventTests =
                     |> Servers.getProcesses
                     |> get "id"
                     |> Maybe.map getState
-                    |> Expect.equal (Just <| Failed Nothing)
+                    |> Expect.equal (Just <| Failed Unknown)
     ]
 
 
@@ -269,21 +284,36 @@ requestTests =
                             { "origin" : "id"
                             , "priority" : 3
                             , "usage" :
-                                { "cpu" : [0.1, "1mb"]
-                                , "mem" : [0.1, "1mb"]
-                                , "down" : [0.1, "1mb"]
-                                , "up" : [0.1, "1mb"]
+                                { "cpu" :
+                                    { "percentage" : 0.1
+                                    , "absolute" : 1
+                                    }
+                                , "mem" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
+                                , "down" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
+                                , "up" :
+                                    { "percentage" : 0.0
+                                    , "absolute" : 1
+                                    }
                                 }
                             , "connection_id" : "id"
                             }
                         , "state" : "running"
                         , "file" :
                             { "id" : "id"
-                            , "version" : 1.0
+                            , "version" : 0.0
                             , "name" : "process"
                             }
-                        , "status" : ""
-                        , "progress" : [0.1, "1mb"]
+                        , "progress" :
+                            { "percentage" : 0.0
+                            , "creation_date" : 0.0
+                            , "completion_date" : 0.0
+                            }
                         , "network_id" : "id"
                         , "target_ip" : "id"
                         , "process_id" : "id"

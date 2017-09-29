@@ -79,7 +79,7 @@ viewState now proc =
         Processes.Running ->
             let
                 progress =
-                    Processes.getProgressPct proc
+                    Processes.getProgressPercentage proc
 
                 timeLeft =
                     proc
@@ -98,11 +98,10 @@ viewState now proc =
             text "Completed"
 
         Processes.Succeeded ->
-            -- TODO: match completion status
             text "Completed (success)"
 
         Processes.Failed _ ->
-            -- TODO: match completion status
+            -- TODO: match reason
             text "Completed (failure)"
 
 

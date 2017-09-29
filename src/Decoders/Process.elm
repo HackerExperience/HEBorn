@@ -1,9 +1,11 @@
 module Decoders.Process exposing (..)
 
 import Dict exposing (Dict)
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Processes.Models exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
+import Utils.Json.Decode exposing (optionalMaybe)
 
 
 processDict : Decoder (Dict ID Process)
@@ -18,59 +20,60 @@ processList =
 
 process : Decoder ( ID, Process )
 process =
-    let
-        constructor t a ste f stus p nid tip id =
-            { type_ = t
-            , access = a
-            , state = ste
-            , file = f
-            , status = stus
-            , progress = p
-            , networkId = nid
-            , targetIp = tip
-            , processId = id
-            }
+    decode Process
+        |> required "type" type_
+        |> required "access" access
+        |> required "state" state
+        |> optionalMaybe "file" file
+        |> optionalMaybe "progress" progress
+        |> custom network
+        |> andThen insertId
 
-        toProcess data =
-            let
-                process state_ =
-                    Process
-                        data.type_
-                        data.access
-                        state_
-                        data.file
-                        data.progress
-                        ( data.networkId, data.targetIp )
 
-                toPair state =
-                    state
-                        |> process
-                        |> (,) data.processId
-            in
-                map toPair <| state data.state data.status
-    in
-        decode constructor
-            |> required "type" type_
-            |> required "access" access
-            |> required "state" string
-            |> optional "file" (maybe file) Nothing
-            |> optional "status" (maybe string) Nothing
-            |> optional "progress" (maybe progress) Nothing
-            |> required "network_id" string
-            |> required "target_ip" string
-            |> required "process_id" string
-            |> andThen toProcess
+network : Decoder NIP
+network =
+    decode (,)
+        |> required "network_id" string
+        |> required "target_ip" string
+
+
+insertId : Process -> Decoder ( ID, Process )
+insertId process =
+    decode (flip (,) process)
+        |> required "process_id" string
 
 
 type_ : Decoder Type
 type_ =
     let
-        decoder str =
-            typeFromName str
-                |> Maybe.map succeed
-                |> Maybe.withDefault (fail ("Unknown process type" ++ str))
+        decodeEncryptor =
+            decode EncryptorContent
+                |> required "target_log_id" string
+
+        decodeData value =
+            field "data" value
+
+        decodeType value =
+            case value of
+                "Cracker" ->
+                    succeed Cracker
+
+                "Decryptor" ->
+                    succeed Decryptor
+
+                "Encryptor" ->
+                    map Encryptor <| decodeData decodeEncryptor
+
+                "File Transference" ->
+                    succeed FileTransference
+
+                "Passive Firewall" ->
+                    succeed PassiveFirewall
+
+                value ->
+                    fail ("Unknown process type `" ++ value ++ "'")
     in
-        string |> andThen decoder
+        andThen decodeType string
 
 
 access : Decoder Access
@@ -78,38 +81,41 @@ access =
     let
         full =
             decode FullAccess
-                |> required "origin" string
+                |> required "origin_id" string
                 |> required "priority" priority
                 |> required "usage" resourcesUsage
                 |> optional "connection_id" (maybe string) Nothing
+                |> map Full
 
         partial =
             decode PartialAccess
                 |> optional "connection_id" (maybe string) Nothing
+                |> map Partial
     in
-        oneOf
-            [ map Full full
-            , map Partial partial
-            ]
+        oneOf [ full, partial ]
 
 
-state : String -> Maybe String -> Decoder State
-state state status =
-    case ( state, status ) of
-        ( "running", _ ) ->
-            succeed Running
+state : Decoder State
+state =
+    let
+        decode value =
+            case value of
+                "running" ->
+                    succeed Running
 
-        ( "paused", _ ) ->
-            succeed Paused
+                "paused" ->
+                    succeed Paused
 
-        ( "succeeded", _ ) ->
-            succeed <| Succeeded
+                "succeeded" ->
+                    succeed Succeeded
 
-        ( "failed", status ) ->
-            succeed <| Failed status
+                "failed" ->
+                    succeed <| Failed Unknown
 
-        ( state, status ) ->
-            fail ("Invalid process state `" ++ state ++ "'")
+                value ->
+                    fail ("Invalid process state `" ++ value ++ "'")
+    in
+        andThen decode string
 
 
 priority : Decoder Priority
@@ -133,7 +139,7 @@ priority =
                     succeed Highest
 
                 n ->
-                    fail ("Unknown priority " ++ toString n)
+                    fail ("Unknown priority `" ++ (toString n) ++ "'")
     in
         andThen decode int
 
@@ -150,18 +156,21 @@ resourcesUsage =
 usage : Decoder Usage
 usage =
     decode (,)
-        |> custom (index 0 float)
-        |> custom (index 1 string)
+        |> required "percentage" float
+        |> required "absolute" int
 
 
 progress : Decoder Progress
 progress =
-    map2 (,) float (maybe float)
+    decode Progress
+        |> required "creation_date" float
+        |> optionalMaybe "percentage" float
+        |> optionalMaybe "completion_date" float
 
 
 file : Decoder ProcessFile
 file =
     decode ProcessFile
-        |> optional "id" (maybe string) Nothing
-        |> optional "version" (maybe float) Nothing
+        |> optionalMaybe "id" string
+        |> optionalMaybe "version" float
         |> required "name" string
