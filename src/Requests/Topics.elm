@@ -31,7 +31,7 @@ accountBootstrap =
 
 serverBootstrap : Topic
 serverBootstrap =
-    WebsocketTopic AccountChannel "server.bootstrap"
+    WebsocketTopic ServerChannel "bootstrap"
 
 
 

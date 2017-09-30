@@ -11,6 +11,7 @@ module Game.Servers.Requests.Bootstrap
         , gatewayDecoder
         , endpointDecoder
         , toServer
+        , toServerID
         )
 
 import Json.Decode as Decode
@@ -234,6 +235,16 @@ toServer server =
                     , tunnels = common.tunnels
                     , notifications = common.notifications
                     }
+
+
+toServerID : Server -> Model.ID
+toServerID server =
+    case server of
+        GatewayServer data ->
+            data.id
+
+        EndpointServer data ->
+            data.id
 
 
 

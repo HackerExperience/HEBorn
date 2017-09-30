@@ -7,6 +7,8 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
 import Events.Servers as ServersEvents
 import Requests.Requests as Requests
+import Driver.Websocket.Channels exposing (Channel(ServerChannel))
+import Driver.Websocket.Reports as Ws
 import Game.Models as Game
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -126,12 +128,45 @@ onRequest game response model =
 
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
-    Update.fromModel model
+    case event of
+        Events.Report (Ws.Joined ServerChannel (Just serverId) _) ->
+            onWsJoinedServer game serverId model
+
+        _ ->
+            Update.fromModel model
 
 
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
 updateRequest game data model =
-    Update.fromModel model
+    case data of
+        BootstrapServer (Bootstrap.Okay data) ->
+            let
+                server =
+                    Bootstrap.toServer data
+
+                serverId =
+                    Bootstrap.toServerID data
+
+                model_ =
+                    insert serverId server model
+            in
+                Update.fromModel model_
+
+
+onWsJoinedServer : Game.Model -> ID -> Model -> UpdateResponse
+onWsJoinedServer game serverId model =
+    case get serverId model of
+        Nothing ->
+            let
+                cmd =
+                    Bootstrap.request serverId game
+            in
+                ( model, cmd, Dispatch.none )
+
+        _ ->
+            --TODO: this will need to change once we adopt the new generic
+            -- bootstrap onJoin method
+            Update.fromModel model
 
 
 

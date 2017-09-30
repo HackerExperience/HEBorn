@@ -95,7 +95,7 @@ genIP =
 genOwnserhip : Generator Ownership
 genOwnserhip =
     choice
-        (GatewayOwnership <| GatewayData Nothing [])
+        (GatewayOwnership <| GatewayData [] Nothing)
         (EndpointOwnership <| EndpointData Nothing Nothing)
 
 
@@ -140,7 +140,7 @@ genGatewayServer =
             , processes = proc
             , tunnels = Tunnels.initialModel
             , ownership =
-                GatewayOwnership <| GatewayData Nothing []
+                GatewayOwnership <| GatewayData [] Nothing
             , notifications =
                 Notifications.initialModel
             }
@@ -166,7 +166,7 @@ genEndpointServer =
             , processes = proc
             , tunnels = Tunnels.initialModel
             , ownership =
-                GatewayOwnership <| GatewayData Nothing []
+                GatewayOwnership <| GatewayData [] Nothing
             , notifications =
                 Notifications.initialModel
             }

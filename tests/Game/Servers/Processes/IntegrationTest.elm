@@ -43,7 +43,7 @@ eventTests : List Test
 eventTests =
     [ fuzz
         GenGame.model
-        "event 'process.started' creates a new process"
+        "event 'processes.started' creates a new process"
       <|
         \game ->
             let
@@ -121,7 +121,7 @@ eventTests =
                     |> Expect.equal (Just Cracker)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "event 'process.conclusion' concludes a process"
+        "event 'processes.conclusion' concludes a process"
       <|
         \( game0, process0 ) ->
             let
@@ -179,7 +179,7 @@ eventTests =
                     |> Expect.equal (Just <| Succeeded)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "event 'process.bruteforce_failed' concludes a process"
+        "event 'processes.bruteforce_failed' concludes a process"
       <|
         \( game0, process0 ) ->
             let
