@@ -1,4 +1,4 @@
-module Decoders.Process exposing (..)
+module Decoders.Processes exposing (..)
 
 import Dict exposing (Dict)
 import Game.Network.Types exposing (NIP)
@@ -8,13 +8,30 @@ import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (optionalMaybe)
 
 
+model : Maybe Model -> Decoder Model
+model maybeModel =
+    let
+        model =
+            case maybeModel of
+                Just model ->
+                    model
+
+                Nothing ->
+                    initialModel
+
+        apply dict =
+            { model | processes = dict }
+    in
+        map apply processDict
+
+
 processDict : Decoder (Dict ID Process)
 processDict =
-    map Dict.fromList processList
+    map Dict.fromList processWithId
 
 
-processList : Decoder (List ( ID, Process ))
-processList =
+processWithId : Decoder (List ( ID, Process ))
+processWithId =
     list process
 
 

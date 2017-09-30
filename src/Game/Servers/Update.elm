@@ -44,9 +44,8 @@ type alias ServerUpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        Bootstrap json ->
-            onBootstrap game json model
-
+        --Bootstrap json ->
+        --    onBootstrap game json model
         ServerMsg id msg ->
             onServerMsg game id msg model
 
@@ -57,31 +56,27 @@ update game msg model =
             onRequest game (receive data) model
 
 
-bootstrap : Game.Model -> Value -> Model -> Model
-bootstrap game json model =
-    let
-        mapper data =
-            case data of
-                Bootstrap.GatewayServer { id } ->
-                    ( id, Bootstrap.toServer data )
 
-                Bootstrap.EndpointServer { id } ->
-                    ( id, Bootstrap.toServer data )
-    in
-        decodeValue (list Bootstrap.decoder) json
-            |> Requests.report
-            |> Maybe.withDefault []
-            |> List.map mapper
-            |> List.foldl (uncurry insert) model
-
-
-
+--bootstrap : Game.Model -> Value -> Model -> Model
+--bootstrap game json model =
+--    -- this function should die
+--    let
+--mapper data =
+--case data of
+--    Bootstrap.GatewayServer { id } ->
+--        ( id, Bootstrap.toServer data )
+--    Bootstrap.EndpointServer { id } ->
+--        ( id, Bootstrap.toServer data )
+--in
+--    decodeValue (list Bootstrap.decoder) json
+--        |> Requests.report
+--        |> Maybe.withDefault []
+--        |> List.map mapper
+--        |> List.foldl (uncurry insert) model
 -- collection message handlers
-
-
-onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
-onBootstrap game json model =
-    Update.fromModel <| bootstrap game json model
+--onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
+--onBootstrap game json model =
+--    Update.fromModel <| bootstrap game json model
 
 
 onServerMsg : Game.Model -> ID -> ServerMsg -> Model -> UpdateResponse
@@ -139,16 +134,10 @@ updateEvent game event model =
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
 updateRequest game data model =
     case data of
-        BootstrapServer (Bootstrap.Okay data) ->
+        BootstrapServer (Bootstrap.Okay ( id, server )) ->
             let
-                server =
-                    Bootstrap.toServer data
-
-                serverId =
-                    Bootstrap.toServerID data
-
                 model_ =
-                    insert serverId server model
+                    insert id server model
             in
                 Update.fromModel model_
 

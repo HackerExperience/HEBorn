@@ -25,6 +25,7 @@ import Game.Models exposing (..)
 import Game.Requests exposing (..)
 import Game.Requests.Bootstrap as Bootstrap
 import Game.Servers.Requests.Bootstrap as ServerBootstrap
+import Decoders.Bootstrap
 
 
 type alias UpdateResponse =
@@ -182,65 +183,37 @@ onWsJoinedAccount model =
         ( model, request, Dispatch.none )
 
 
-onBootstrapResponse : Bootstrap.Data -> Model -> UpdateResponse
-onBootstrapResponse data model =
+onBootstrapResponse : Decoders.Bootstrap.Bootstrap -> Model -> UpdateResponse
+onBootstrapResponse bootstrap model0 =
     let
-        gateways =
-            List.map .id data.servers.gateways
-
-        activeServer =
-            List.head gateways
+        model1 =
+            Decoders.Bootstrap.toModel model0 bootstrap
 
         account_ =
-            List.foldl Account.insertServer
-                model.account
-                gateways
+            bootstrap.serverIndex.player
+                |> List.foldl (Tuple.first >> Account.insertServer)
+                    model1.account
 
-        insertServer toServerUnion generic servers =
-            let
-                server =
-                    ServerBootstrap.toServer <| toServerUnion generic
-            in
-                Servers.insert generic.id server servers
-
-        serversWithGateways =
-            List.foldl (insertServer ServerBootstrap.GatewayServer)
-                model.servers
-                data.servers.gateways
-
-        servers_ =
-            List.foldl (insertServer ServerBootstrap.EndpointServer)
-                serversWithGateways
-                data.servers.endpoints
-
-        model_ =
-            { model
-                | account = account_
-                , servers = servers_
-                , story = data.story
-            }
-
-        joinServer gatewayId list =
-            -- TODO: include endpoint join
+        joinGateway id =
             let
                 context =
-                    Just gatewayId
+                    Just id
 
                 payload =
                     Just <|
                         Encode.object
-                            [ ( "gateway_id", Encode.string gatewayId )
+                            [ ( "gateway_id", Encode.string id )
                             ]
-
-                dispatch =
-                    Dispatch.websocket <|
-                        Ws.JoinChannel ServerChannel context payload
             in
-                dispatch :: list
+                Dispatch.websocket <|
+                    Ws.JoinChannel ServerChannel context payload
+
+        model_ =
+            { model1 | account = account_ }
 
         dispatch =
-            gateways
-                |> List.foldl joinServer []
+            bootstrap.serverIndex.player
+                |> List.map (Tuple.first >> joinGateway)
                 |> Dispatch.batch
     in
         ( model_, Cmd.none, dispatch )

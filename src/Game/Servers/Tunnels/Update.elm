@@ -11,6 +11,7 @@ import Utils.Update as Update
 import Game.Network.Types as Network
 import Game.Servers.Tunnels.Messages exposing (..)
 import Game.Servers.Tunnels.Models exposing (..)
+import Decoders.Tunnels
 
 
 type alias UpdateResponse =
@@ -29,9 +30,9 @@ update game msg model =
 
 bootstrap : Value -> Model -> Model
 bootstrap json model =
-    decodeValue Tunnels.decoder json
+    decodeValue Decoders.Tunnels.index json
         |> Result.mapError (Debug.log "Invalid Bootstrap for Tunnels")
-        |> Result.map toModel
+        |> Result.map Dict.fromList
         |> Result.withDefault model
 
 
@@ -39,39 +40,11 @@ bootstrap json model =
 -- internals
 
 
-toModel : Tunnels.Index -> Model
-toModel index =
-    let
-        model =
-            initialModel
-
-        insertConnections conn tunnel =
-            insertConnection conn.id (newConnection conn.type_) tunnel
-
-        insertTunnels tunn model =
-            let
-                id =
-                    toTunnelID tunn.bounce tunn.nip
-
-                tunnel =
-                    getTunnel id model
-
-                tunnel_ =
-                    List.foldl insertConnections tunnel tunn.connections
-
-                model_ =
-                    insertTunnel id tunnel_ model
-            in
-                model_
-    in
-        List.foldl insertTunnels model index
-
-
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
         ServersEvent (ServerEvent _ (TunnelsEvent (Tunnels.Changed data))) ->
-            Update.fromModel (toModel data)
+            Update.fromModel (Dict.fromList data)
 
         _ ->
             Update.fromModel model

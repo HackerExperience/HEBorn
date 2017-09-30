@@ -103,6 +103,11 @@ insert id server ({ servers, network } as model) =
             |> setNetwork network_
 
 
+keys : Model -> List ID
+keys { servers } =
+    Dict.keys servers
+
+
 remove : ID -> Model -> Model
 remove id ({ servers, network } as model) =
     let
