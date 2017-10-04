@@ -74,7 +74,7 @@ genModel =
 
                 account =
                     if isGateway then
-                        Account.insertServer id game.account
+                        Account.insertGateway id game.account
                     else
                         game.account
             in
