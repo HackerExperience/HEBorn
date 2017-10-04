@@ -76,6 +76,7 @@ customSelect =
         , margin2 (px 0) (px 8)
         , padding2 (px 0) (px 8)
         , minWidth (px 120)
+        , maxWidth (px 120)
         , overflow hidden
         , whiteSpace noWrap
         , textOverflow ellipsis

@@ -13,24 +13,4 @@ import Apps.Browser.Pages.Webserver.Models exposing (Model)
 
 view : Model -> Html Never
 view model =
-    div [ class [ AutoHeight ] ]
-        [ div [ class [ LoginPageHeader ] ] [ text "No web server running" ]
-        , div [ class [ LoginPageForm ] ]
-            [ div []
-                [ input [ placeholder "Password" ] []
-                , text "E"
-                ]
-            ]
-        , div [ class [ LoginPageFooter ] ]
-            [ div []
-                [ text "C"
-                , br [] []
-                , text "Crack"
-                ]
-            , div []
-                [ text "M"
-                , br [] []
-                , text "AnyMap"
-                ]
-            ]
-        ]
+    div [] [ text "TODO" ]

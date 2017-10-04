@@ -12,6 +12,7 @@ import Game.Meta.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Models as Game
 import Game.Notifications.Models as Notifications
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Storyline.Models as Story
@@ -33,26 +34,53 @@ view data model =
         ]
 
 
-bouncesGetter : Game.Model -> List (Maybe String)
-bouncesGetter game =
+headerBounces : Game.Model -> List (Maybe String)
+headerBounces game =
     Game.bounces game
         |> List.map Just
         |> (::) Nothing
 
 
-endpointsGetter : Game.Model -> List (Maybe Servers.ID)
-endpointsGetter game =
-    Game.endpoints game
-        |> List.map Just
+headerEndpoints : Game.Model -> List (Maybe ( NIP, Servers.ID ))
+headerEndpoints ({ account } as game) =
+    account.joinedEndpoints
+        |> List.map
+            (\nip ->
+                idByNip game nip
+                    |> Maybe.andThen
+                        (\id -> Just ( nip, id ))
+            )
+        |> List.filter ((/=) Nothing)
         |> (::) Nothing
 
 
-endpointGetter : Game.Model -> Maybe Servers.ID
-endpointGetter game =
+headerEndpoint : Game.Model -> Maybe ( NIP, Servers.ID )
+headerEndpoint game =
+    Maybe.andThen
+        (\id ->
+            serverById game id
+                |> Maybe.map
+                    (.nip >> flip (,) id)
+        )
+        (gameEndpointId game)
+
+
+gameEndpointId : Game.Model -> Maybe Servers.ID
+gameEndpointId game =
     game
         |> Game.fromGateway
         |> Maybe.map Game.getServer
         |> Maybe.andThen Servers.getEndpoint
+
+
+serverById : Game.Model -> Servers.ID -> Maybe Servers.Server
+serverById game =
+    flip Servers.get game.servers
+
+
+idByNip : Game.Model -> NIP -> Maybe Servers.ID
+idByNip game =
+    flip Servers.mapNetwork game.servers
 
 
 logo : Html Msg
@@ -73,7 +101,7 @@ connection ({ game } as data) { openMenu } =
 
         gateways =
             account
-                |> (.servers)
+                |> (.gateways)
                 |> List.map Just
 
         bounce =
@@ -81,16 +109,16 @@ connection ({ game } as data) { openMenu } =
                 |> Game.getServer
                 |> Servers.getBounce
 
-        endpoint =
-            endpointGetter game
+        endpointNip =
+            headerEndpoint game
 
         endpoints =
-            endpointsGetter game
+            headerEndpoints game
 
         bounces =
-            endpoint
+            gameEndpointId game
                 |> Maybe.map (always [])
-                |> Maybe.withDefault (bouncesGetter game)
+                |> Maybe.withDefault (headerBounces game)
 
         onGateway =
             Gateway == Account.getContext account
@@ -99,7 +127,7 @@ connection ({ game } as data) { openMenu } =
             [ contextToggler onGateway (ContextTo Gateway)
             , gatewaySelector data openMenu gateway gateways
             , bounceSelector data openMenu bounce bounces
-            , endpointSelector data openMenu endpoint endpoints
+            , endpointSelector data openMenu endpointNip endpoints
             , contextToggler (not onGateway) (ContextTo Endpoint)
             ]
 
@@ -176,39 +204,26 @@ bounceSelector data =
         selector [ SBounce ] SelectBounce BounceOpen renderBounce
 
 
+endpointSelectMsg : Maybe ( NIP, Servers.ID ) -> Msg
+endpointSelectMsg item =
+    item
+        |> Maybe.map Tuple.second
+        |> SelectEndpoint
+
+
 endpointSelector :
     Game.Data
     -> OpenMenu
-    -> Maybe Servers.ID
-    -> List (Maybe Servers.ID)
+    -> Maybe ( NIP, Servers.ID )
+    -> List (Maybe ( NIP, Servers.ID ))
     -> Html Msg
 endpointSelector data =
-    let
-        renderEndpoint id =
-            if id == "" then
-                Just <| text "None"
-            else
-                let
-                    servers =
-                        data
-                            |> Game.getGame
-                            |> Game.getServers
-
-                    server =
-                        Servers.get id servers
-                in
-                    case server of
-                        Just { name, nip } ->
-                            let
-                                ip =
-                                    Tuple.second nip
-                            in
-                                Just <| text (name ++ " (" ++ ip ++ ")")
-
-                        Nothing ->
-                            Nothing
-    in
-        selector [ SEndpoint ] SelectEndpoint EndpointOpen renderEndpoint
+    selector [ SEndpoint ]
+        endpointSelectMsg
+        EndpointOpen
+    <|
+        \( ( _, ip ), _ ) ->
+            Just <| text ip
 
 
 contextToggler : Bool -> Msg -> Html Msg
@@ -230,10 +245,10 @@ activeServerGetter game =
         |> (\z ->
                 case Account.getContext z of
                     Gateway ->
-                        Just <| Account.getGateway z
+                        Account.getGateway z
 
                     Endpoint ->
-                        endpointGetter game
+                        gameEndpointId game
            )
 
 

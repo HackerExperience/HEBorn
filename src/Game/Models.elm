@@ -16,7 +16,6 @@ module Game.Models
         , getActiveServer
         , setActiveServer
         , bounces
-        , endpoints
         )
 
 import Dict
@@ -25,6 +24,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
+import Game.Network.Types exposing (NIP)
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
 import Core.Config exposing (Config)
@@ -113,14 +113,16 @@ getConfig =
 
 getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
 getGateway model =
-    let
-        gatewayId =
-            Account.getGateway model.account
-    in
-        model
-            |> getServers
-            |> Servers.get gatewayId
-            |> Maybe.map ((,) gatewayId)
+    model
+        |> .account
+        |> Account.getGateway
+        |> Maybe.andThen
+            (\gatewayId ->
+                model
+                    |> getServers
+                    |> Servers.get gatewayId
+                    |> Maybe.map ((,) gatewayId)
+            )
 
 
 setGateway : Servers.Server -> Model -> Model
@@ -140,10 +142,8 @@ getEndpoint model =
             getServers model
 
         maybeGateway =
-            model
-                |> getAccount
-                |> Account.getGateway
-                |> flip Servers.get servers
+            getGateway model
+                |> Maybe.map Tuple.second
 
         maybeEndpointID =
             Maybe.andThen Servers.getEndpoint maybeGateway
@@ -199,24 +199,6 @@ bounces game =
         |> getAccount
         |> (.bounces)
         |> Dict.keys
-
-
-endpoints : Model -> List Servers.ID
-endpoints game =
-    let
-        filterFunc =
-            game
-                |> getServers
-                |> flip Servers.mapNetwork
-                |> List.filterMap
-    in
-        game
-            |> getAccount
-            -- TODO: add getters for database and servers
-            |> (.database)
-            |> (.servers)
-            |> Dict.keys
-            |> filterFunc
 
 
 
