@@ -9,13 +9,13 @@ import Game.Servers.Filesystem.Messages exposing (Msg(..), RequestMsg(..))
 import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
-import Events.Servers.Filesystem as FilesystemEvent
 import Game.Servers.Filesystem.Requests.Sync as Sync
 import Game.Servers.Filesystem.Requests.Delete as Delete
 import Game.Servers.Filesystem.Requests.Move as Move
 import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Decoders.Filesystem
 
 
 type alias UpdateResponse =
@@ -245,7 +245,7 @@ apply =
     let
         convEntry parentRef src filesystem =
             case src of
-                FilesystemEvent.FileEntry data ->
+                Decoders.Filesystem.LeafEntry data ->
                     let
                         entry =
                             FileEntry
@@ -260,7 +260,7 @@ apply =
                     in
                         addEntry entry filesystem
 
-                FilesystemEvent.FolderEntry data ->
+                Decoders.Filesystem.NodeEntry data ->
                     let
                         entry =
                             FolderEntry

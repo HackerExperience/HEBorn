@@ -19,6 +19,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Logs.Models as Logs
 import Gen.Network as GenNetwork
 import Gen.Utils exposing (..)
 import Gen.Logs as Logs
@@ -67,6 +68,11 @@ partialProcess =
 type_ : Fuzzer Type
 type_ =
     fuzzer genType
+
+
+encryptorContent : Fuzzer EncryptorContent
+encryptorContent =
+    fuzzer genEncryptorContent
 
 
 access : Fuzzer Access
@@ -129,9 +135,9 @@ percentage =
     fuzzer genPercentage
 
 
-completionDate : Fuzzer CompletionDate
-completionDate =
-    fuzzer genCompletionDate
+date : Fuzzer CompletionDate
+date =
+    fuzzer genDate
 
 
 fileID : Fuzzer FileID
@@ -142,6 +148,11 @@ fileID =
 serverID : Fuzzer ServerID
 serverID =
     fuzzer genServerID
+
+
+logID : Fuzzer Logs.ID
+logID =
+    fuzzer genLogID
 
 
 
@@ -206,14 +217,18 @@ genPartialProcess =
 
 genType : Generator Type
 genType =
-    [ Cracker
-    , Decryptor
-    , Encryptor
-    , FileTransference
-    , PassiveFirewall
-    ]
-        |> List.map constant
-        |> choices
+    choices
+        [ constant Cracker
+        , constant Decryptor
+        , map Encryptor genEncryptorContent
+        , constant FileTransference
+        , constant PassiveFirewall
+        ]
+
+
+genEncryptorContent : Generator EncryptorContent
+genEncryptorContent =
+    map EncryptorContent genLogID
 
 
 genAccess : Generator Access
@@ -235,7 +250,7 @@ genFullAccess =
 
 genPartialAccess : Generator PartialAccess
 genPartialAccess =
-    map PartialAccess (maybe genOriginConnection)
+    map PartialAccess (maybe genConnectionID)
 
 
 genPriority : Generator Priority
@@ -261,7 +276,7 @@ genResourcesUsage =
 
 genUsage : Generator Usage
 genUsage =
-    constant ( 0, "" )
+    constant ( 0, 0 )
 
 
 genConnectionID : Generator ConnectionID
@@ -281,7 +296,7 @@ genState =
         , constant Running
         , constant Paused
         , constant Succeeded
-        , constant <| Failed (Just "")
+        , constant <| Failed Unknown
         ]
 
 
@@ -310,7 +325,7 @@ genFileName =
 
 genProgress : Generator Progress
 genProgress =
-    map2 (,) genPercentage (maybe genCompletionDate)
+    map3 Progress genDate (maybe genDate) (maybe genPercentage)
 
 
 genPercentage : Generator Percentage
@@ -318,11 +333,16 @@ genPercentage =
     float 0.0 1.0
 
 
-genCompletionDate : Generator CompletionDate
-genCompletionDate =
+genDate : Generator CompletionDate
+genDate =
     float 1420070400 4102444799
 
 
 genServerID : Generator ServerID
 genServerID =
+    unique
+
+
+genLogID : Generator Logs.ID
+genLogID =
     unique

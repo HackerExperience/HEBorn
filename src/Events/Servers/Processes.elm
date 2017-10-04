@@ -17,7 +17,7 @@ import Json.Decode
         , string
         , int
         )
-import Decoders.Process
+import Decoders.Processes
 import Game.Servers.Processes.Models exposing (..)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Utils.Events exposing (Handler)
@@ -61,14 +61,14 @@ handler event json =
 
 onChanged : Handler Event
 onChanged json =
-    decodeValue Decoders.Process.processDict json
+    decodeValue Decoders.Processes.processDict json
         |> Result.map Changed
         |> notify
 
 
 onStarted : Handler Event
 onStarted json =
-    decodeValue Decoders.Process.process json
+    decodeValue Decoders.Processes.process json
         |> Result.map Started
         |> notify
 

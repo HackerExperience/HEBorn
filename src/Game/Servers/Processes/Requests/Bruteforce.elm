@@ -10,7 +10,7 @@ import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
-import Decoders.Process
+import Decoders.Processes
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Messages
@@ -44,7 +44,7 @@ receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
-            decodeValue Decoders.Process.process json
+            decodeValue Decoders.Processes.process json
                 |> Result.map (uncurry Okay)
                 |> Requests.report
 

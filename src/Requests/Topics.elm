@@ -31,7 +31,7 @@ accountBootstrap =
 
 serverBootstrap : Topic
 serverBootstrap =
-    WebsocketTopic AccountChannel "server.bootstrap"
+    WebsocketTopic ServerChannel "bootstrap"
 
 
 
@@ -110,4 +110,4 @@ bruteforce =
 
 browse : Topic
 browse =
-    WebsocketTopic ServerChannel "network.browse"
+    WebsocketTopic ServerChannel "browse"

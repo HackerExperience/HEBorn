@@ -69,13 +69,13 @@ whenIncompleteTests =
                     { process | state = Succeeded }
 
                 processSucceeded_ =
-                    conclude (Just False) Nothing processSucceeded
+                    conclude (Just False) processSucceeded
 
                 processFailed =
-                    { process | state = Failed Nothing }
+                    { process | state = Failed Unknown }
 
                 processFailed_ =
-                    conclude (Just True) Nothing processFailed
+                    conclude (Just True) processFailed
             in
                 batch
                     [ Expect.equal processSucceeded processSucceeded_
@@ -174,21 +174,21 @@ processStateChangeTests =
         Gen.process
         "conclude a process with no conclusion status"
       <|
-        conclude Nothing Nothing
+        conclude Nothing
             >> getState
             >> Expect.equal Concluded
     , fuzz
         Gen.process
         "conclude a process with failure"
       <|
-        conclude (Just False) (Just "failed")
+        conclude (Just False)
             >> getState
-            >> Expect.equal (Failed <| Just "failed")
+            >> Expect.equal (Failed Unknown)
     , fuzz
         Gen.process
         "conclude a process with success"
       <|
-        conclude (Just True) Nothing
+        conclude (Just True)
             >> getState
             >> Expect.equal Succeeded
     ]

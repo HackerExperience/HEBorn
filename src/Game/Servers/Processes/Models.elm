@@ -5,6 +5,7 @@ import Time exposing (Time)
 import Game.Shared
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
+import Game.Servers.Logs.Models as Logs
 import Utils.Dict as Dict
 import Utils.Model.RandomUuid as RandomUuid
 import Random.Pcg as Random
@@ -37,13 +38,18 @@ type
     -- TODO: add more data describing each process
     = Cracker
     | Decryptor
-    | Encryptor
+    | Encryptor EncryptorContent
     | FileTransference
     | PassiveFirewall
 
 
 type alias ServerID =
     Game.Shared.ID
+
+
+type alias EncryptorContent =
+    { targetLogId : Logs.ID
+    }
 
 
 
@@ -65,7 +71,7 @@ type alias FullAccess =
 
 
 type alias PartialAccess =
-    { originConnection : Maybe ( ServerID, ConnectionID )
+    { connection_id : Maybe ConnectionID
     }
 
 
@@ -77,7 +83,11 @@ type State
     | Paused
     | Concluded
     | Succeeded
-    | Failed (Maybe String)
+    | Failed Reason
+
+
+type Reason
+    = Unknown
 
 
 type alias ProcessFile =
@@ -115,8 +125,14 @@ type alias ResourcesUsage =
     }
 
 
+{-| completionDate and percentage are maybes to keep a progress bar for
+paused processes
+-}
 type alias Progress =
-    ( Percentage, Maybe CompletionDate )
+    { creationDate : Time
+    , completionDate : Maybe Time
+    , percentage : Maybe Percentage
+    }
 
 
 type alias Usage =
@@ -124,7 +140,7 @@ type alias Usage =
 
 
 type alias Unit =
-    String
+    Int
 
 
 type alias Percentage =
@@ -259,15 +275,15 @@ newOptimistic type_ origin target file =
             { origin = origin
             , priority = Normal
             , usage =
-                { cpu = ( 0.0, "" )
-                , mem = ( 0.0, "" )
-                , down = ( 0.0, "" )
-                , up = ( 0.0, "" )
+                { cpu = ( 0.0, 0 )
+                , mem = ( 0.0, 0 )
+                , down = ( 0.0, 0 )
+                , up = ( 0.0, 0 )
                 }
             , connection = Nothing
             }
     , state = Starting
-    , progress = Just ( 0.0, Nothing )
+    , progress = Nothing
     , file = Just file
     , target = target
     }
@@ -291,21 +307,26 @@ resume ({ access } as process) =
     { process | state = Running }
 
 
-conclude : Maybe Bool -> Maybe String -> Process -> Process
-conclude succeeded status ({ access } as process) =
+conclude : Maybe Bool -> Process -> Process
+conclude succeeded process =
     let
-        toState =
+        state =
             case succeeded of
                 Just True ->
-                    always Succeeded
+                    Succeeded
 
                 Just False ->
-                    Failed
+                    Failed Unknown
 
                 Nothing ->
-                    always Concluded
+                    Concluded
     in
-        { process | state = toState status }
+        { process | state = state }
+
+
+failWithReason : Reason -> Process -> Process
+failWithReason reason process =
+    { process | state = Failed reason }
 
 
 getState : Process -> State
@@ -334,9 +355,8 @@ getOrigin { access } =
         Full data ->
             Just data.origin
 
-        Partial { originConnection } ->
-            originConnection
-                |> Maybe.map Tuple.first
+        Partial _ ->
+            Nothing
 
 
 getVersion : Process -> Maybe Version
@@ -379,14 +399,14 @@ getProgress =
     .progress
 
 
-getProgressPct : Process -> Maybe Percentage
-getProgressPct =
-    getProgress >> Maybe.map Tuple.first
+getProgressPercentage : Process -> Maybe Percentage
+getProgressPercentage =
+    getProgress >> Maybe.andThen .percentage
 
 
 getCompletionDate : Process -> Maybe CompletionDate
 getCompletionDate =
-    getProgress >> Maybe.andThen Tuple.second
+    getProgress >> Maybe.andThen .completionDate
 
 
 getConnectionId : Process -> Maybe ConnectionID
@@ -395,9 +415,8 @@ getConnectionId { access } =
         Full data ->
             data.connection
 
-        Partial { originConnection } ->
-            originConnection
-                |> Maybe.map Tuple.second
+        Partial { connection_id } ->
+            connection_id
 
 
 getName : Process -> String
@@ -409,7 +428,7 @@ getName { type_ } =
         Decryptor ->
             "Decryptor"
 
-        Encryptor ->
+        Encryptor _ ->
             "Encryptor"
 
         FileTransference ->
@@ -424,7 +443,7 @@ getPercentUsage =
     Tuple.first
 
 
-getUnitUsage : Usage -> String
+getUnitUsage : Usage -> Int
 getUnitUsage =
     Tuple.second
 
@@ -432,29 +451,6 @@ getUnitUsage =
 setProcesses : Processes -> Model -> Model
 setProcesses processes model =
     { model | processes = processes }
-
-
-typeFromName : String -> Maybe Type
-typeFromName type_ =
-    -- this may change a little, to acomodate more data
-    case type_ of
-        "Cracker" ->
-            Just Cracker
-
-        "Decryptor" ->
-            Just Decryptor
-
-        "Encryptor" ->
-            Just Encryptor
-
-        "File Transference" ->
-            Just FileTransference
-
-        "Passive Firewall" ->
-            Just PassiveFirewall
-
-        _ ->
-            Nothing
 
 
 isRecurive : Process -> Bool

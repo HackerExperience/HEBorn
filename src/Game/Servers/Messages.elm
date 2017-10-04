@@ -22,8 +22,7 @@ import Game.Notifications.Messages as Notifications
 
 
 type Msg
-    = Bootstrap Value -- TODO: remove this Value
-    | ServerMsg ID ServerMsg
+    = ServerMsg ID ServerMsg
     | Request RequestMsg
     | Event Events.Event
 

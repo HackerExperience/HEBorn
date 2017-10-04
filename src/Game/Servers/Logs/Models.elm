@@ -1,33 +1,4 @@
-module Game.Servers.Logs.Models
-    exposing
-        ( Model
-        , ID
-        , Log
-        , Content(..)
-        , Data
-        , Status(..)
-        , Format(..)
-        , LocalLogin
-        , RemoteLogin
-        , Connection
-        , Download
-        , FileName
-        , ServerUser
-        , Render(..)
-        , initialModel
-        , new
-        , insert
-        , remove
-        , member
-        , get
-        , filter
-        , getTimestamp
-        , getContent
-        , setTimestamp
-        , setContent
-          -- TODO: Hide / UnHide
-        , render
-        )
+module Game.Servers.Logs.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
@@ -122,7 +93,7 @@ initialModel =
 new : Time -> Status -> Maybe String -> Log
 new timestamp status content =
     content
-        |> Maybe.map (parseData >> Uncrypted)
+        |> Maybe.map (dataFromString >> Uncrypted)
         |> Maybe.withDefault Encrypted
         |> Log timestamp status
 
@@ -173,7 +144,7 @@ setContent newContent log =
         content =
             case newContent of
                 Just raw ->
-                    Uncrypted <| parseData raw
+                    Uncrypted <| dataFromString raw
 
                 Nothing ->
                     Encrypted
@@ -226,12 +197,8 @@ render { format, raw } =
             [ TextE raw ]
 
 
-
--- internals
-
-
-parseData : String -> Data
-parseData raw =
+dataFromString : String -> Data
+dataFromString raw =
     case String.split " " raw of
         [ addr, "logged", "in", "as", user ] ->
             LocalLogin addr user

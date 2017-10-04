@@ -12,6 +12,7 @@ import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver
 import Apps.Browser.Pages.NoWebserver.View as NoWebserver
 import Apps.Browser.Pages.Profile.View as Profile
 import Apps.Browser.Pages.Whois.View as Whois
+import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
 import Apps.Browser.Pages.DownloadCenter.View as DownloadCenter
 import Apps.Browser.Pages.ISP.View as ISP
 import Apps.Browser.Pages.Bank.View as Bank
@@ -50,9 +51,9 @@ view data model =
             Whois.view
                 |> ignoreMsg
 
-        DownloadCenterModel ->
-            DownloadCenter.view
-                |> ignoreMsg
+        DownloadCenterModel model ->
+            DownloadCenter.view data model
+                |> Html.map handleDownloadCenter
 
         ISPModel ->
             ISP.view
@@ -101,6 +102,16 @@ handleNoWebserver msg =
 
         _ ->
             NoWebserverMsg msg
+
+
+handleDownloadCenter : DownloadCenter.Msg -> Msg
+handleDownloadCenter msg =
+    case msg of
+        DownloadCenter.GlobalMsg msg ->
+            GlobalMsg msg
+
+        _ ->
+            DownloadCenterMsg msg
 
 
 ignoreMsg : Html a -> Html Msg

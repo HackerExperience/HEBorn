@@ -7,7 +7,6 @@ module Game.Servers.Filesystem.Requests.Sync
         , decoder
         )
 
-import Events.Servers.Filesystem as Filesystem
 import Requests.Requests as Requests
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Requests.Topics as Topics
@@ -29,10 +28,11 @@ import Game.Servers.Filesystem.Messages
         ( Msg(Request)
         , RequestMsg(SyncRequest)
         )
+import Decoders.Filesystem
 
 
 type alias Index =
-    Filesystem.Index
+    Decoders.Filesystem.Index
 
 
 type alias ServerID =
@@ -63,15 +63,6 @@ receive code json =
             Nothing
 
 
-decoder : Decoder Filesystem.Index
+decoder : Decoder Decoders.Filesystem.Index
 decoder =
-    list <| lazy entry
-
-
-
---
-
-
-entry : () -> Decoder Filesystem.Entry
-entry _ =
-    Filesystem.decoder
+    list <| lazy Decoders.Filesystem.entry

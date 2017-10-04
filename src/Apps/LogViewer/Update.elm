@@ -87,7 +87,10 @@ update data msg ({ app } as model) =
 
                 dispatch =
                     Dispatch.processes data.id <|
-                        Processes.Start Processes.Encryptor
+                        Processes.Start
+                            (Processes.Encryptor <|
+                                Processes.EncryptorContent id
+                            )
                             data.id
                             target
                             ( Nothing, Nothing, "File Name" )

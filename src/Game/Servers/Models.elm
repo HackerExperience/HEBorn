@@ -28,8 +28,8 @@ type alias Servers =
 type alias Server =
     { name : String
     , type_ : ServerType
-    , nip : NIP
     , nips : List NIP
+    , nip : NIP
     , coordinates : Maybe Coordinates
     , filesystem : Filesystem
     , logs : Logs.Model
@@ -55,8 +55,8 @@ type Ownership
 
 
 type alias GatewayData =
-    { endpoint : Maybe ID
-    , endpoints : List ID
+    { endpoints : List ID
+    , endpoint : Maybe ID
     }
 
 
@@ -101,6 +101,11 @@ insert id server ({ servers, network } as model) =
         model
             |> setServers servers_
             |> setNetwork network_
+
+
+keys : Model -> List ID
+keys { servers } =
+    Dict.keys servers
 
 
 remove : ID -> Model -> Model

@@ -1,4 +1,4 @@
-module Game.Servers.Logs.Update exposing (update, bootstrap)
+module Game.Servers.Logs.Update exposing (update)
 
 import Json.Decode exposing (Value, decodeValue, list)
 import Dict
@@ -13,6 +13,7 @@ import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Decoders.Logs
 
 
 type alias UpdateResponse =
@@ -40,14 +41,6 @@ update game serverId msg model =
 
         Request data ->
             onRequest game serverId (receive data) model
-
-
-bootstrap : Value -> Model -> Model
-bootstrap json model =
-    decodeValue Logs.decoder json
-        |> Requests.report
-        |> Maybe.withDefault []
-        |> toModel
 
 
 
@@ -110,11 +103,11 @@ updateRequest game serverId response model =
 -- content message handlers
 
 
-toModel : Logs.Index -> Model
+toModel : Decoders.Logs.Index -> Model
 toModel index =
     let
-        mapper data =
-            ( data.id, new data.insertedAt Normal data.message )
+        mapper ( id, log ) =
+            ( id, log )
     in
         index
             |> List.map mapper

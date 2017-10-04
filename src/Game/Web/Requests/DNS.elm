@@ -32,6 +32,7 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network
+import Game.Network.Types as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Models exposing (Requester)
@@ -39,16 +40,16 @@ import Game.Web.Models exposing (Requester)
 
 request :
     String
-    -> String
+    -> Network.ID
     -> String
     -> Requester
     -> ConfigSource a
     -> Cmd Msg
-request serverId url networkId requester =
+request serverId networkId url requester =
     Requests.request Topics.browse
         (DNSRequest url requester >> Request)
         (Just serverId)
-        (encoder url)
+        (encoder networkId url)
 
 
 receive : String -> Code -> Value -> Maybe Response
@@ -72,10 +73,11 @@ receive url code json =
 -- internals
 
 
-encoder : Url -> Value
-encoder url =
+encoder : Network.ID -> Url -> Value
+encoder nid url =
     Encode.object
-        [ ( "url", Encode.string url )
+        [ ( "network_id", Encode.string nid )
+        , ( "address", Encode.string url )
         ]
 
 
@@ -105,7 +107,7 @@ decodeType typeStr =
         "npc_whois" ->
             succeed Whois
 
-        "npc_downcenter" ->
+        "npc_download_center" ->
             decodeDownloadCenter
 
         "npc_isp" ->

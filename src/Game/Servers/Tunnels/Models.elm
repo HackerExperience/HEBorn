@@ -1,28 +1,4 @@
-module Game.Servers.Tunnels.Models
-    exposing
-        ( Model
-        , ID
-        , Tunnel
-        , Connections
-        , ConnectionID
-        , Connection
-        , ConnectionType(..)
-        , initialModel
-        , newTunnel
-        , newConnection
-        , toTunnelID
-        , getTunnel
-        , getConnection
-        , insertConnection
-        , insertTunnel
-          --, get
-          --, insert
-          --, remove
-          --, getConnections
-          --, setConnections
-          --, insertConnection
-          --, removeConnection
-        )
+module Game.Servers.Tunnels.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
@@ -119,10 +95,6 @@ insertConnection id conn ({ connections } as tunnel) =
 insertTunnel : ID -> Tunnel -> Model -> Model
 insertTunnel =
     Dict.insert
-
-
-
----- internals
 
 
 toConnectionType : String -> ConnectionType

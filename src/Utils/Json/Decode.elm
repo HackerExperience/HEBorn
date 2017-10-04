@@ -1,7 +1,8 @@
-module Utils.Json.Decode exposing (date, exclusively)
+module Utils.Json.Decode exposing (date, exclusively, optionalMaybe)
 
 import Date exposing (Date)
-import Json.Decode exposing (Decoder, succeed, fail, andThen, string)
+import Json.Decode exposing (Decoder, succeed, fail, map, andThen, string)
+import Json.Decode.Pipeline exposing (optional)
 
 
 date : Decoder Date
@@ -12,6 +13,11 @@ date =
 exclusively : a -> Decoder a -> Decoder a
 exclusively val =
     andThen (decodeExclusively val)
+
+
+optionalMaybe : String -> Decoder a -> Decoder (Maybe a -> b) -> Decoder b
+optionalMaybe name decoder =
+    optional name (map Just decoder) Nothing
 
 
 
