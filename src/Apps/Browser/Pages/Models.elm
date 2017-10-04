@@ -57,7 +57,7 @@ initialModel ({ url, type_, meta } as site) =
             WhoisModel
 
         Web.DownloadCenter content ->
-            DownloadCenterModel <| DownloadCenter.initialModel meta
+            DownloadCenterModel <| DownloadCenter.initialModel meta content
 
         Web.ISP ->
             ISPModel

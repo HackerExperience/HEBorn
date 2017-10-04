@@ -8,9 +8,8 @@ type Classes
     | AddressBar
     | Client
     | PageContent
-    | LoginPageHeader
-    | LoginPageForm
-    | LoginPageFooter
+    | DummyTitle
+    | HackingToolkit
     | Btn
     | InactiveBtn
     | AutoHeight

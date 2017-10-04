@@ -27,9 +27,10 @@ type alias Config msg =
 
 hackingToolkit : Config msg -> Model -> Html msg
 hackingToolkit config model =
-    div []
+    div [ class [ HackingToolkit ] ]
         [ goPanelView config model
-        , div [ class [ LoginPageFooter ] ]
+        , node "actions"
+            []
             [ crackBtn config model
             , anyMapBtn config model
             ]
@@ -50,7 +51,8 @@ loginForm config model =
         inputText =
             Maybe.withDefault "" model.password
     in
-        div [ class [ LoginPageForm ] ]
+        node "portal"
+            []
             [ div []
                 [ input
                     [ placeholder "Password"
@@ -58,22 +60,29 @@ loginForm config model =
                     , onInput config.onInput
                     ]
                     []
-                , div
-                    [ onClick <|
-                        config.onCommonAction <|
-                            Login model.target inputText
+                , button
+                    [ inputText
+                        |> Login model.target
+                        |> config.onCommonAction
+                        |> onClick
                     ]
-                    [ text "E" ]
+                    [ text "Go" ]
                 ]
             ]
 
 
 togglePanel : Config msg -> Html msg
 togglePanel { onEnterPanel } =
-    div [ onClick onEnterPanel ]
-        [ text "E" ]
-        |> List.singleton
-        |> div []
+    node "portal"
+        []
+        [ div []
+            [ div []
+                [ text "Already logged!" ]
+            , button
+                [ onClick onEnterPanel ]
+                [ text "Go" ]
+            ]
+        ]
 
 
 crackBtn : Config msg -> Model -> Html msg
