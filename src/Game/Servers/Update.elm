@@ -1,35 +1,29 @@
 module Game.Servers.Update exposing (..)
 
 import Dict
-import Json.Decode as Decode exposing (Value, decodeValue, list)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
 import Events.Servers as ServersEvents
-import Requests.Requests as Requests
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Reports as Ws
 import Game.Models as Game
+import Game.Account.Messages as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
-import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Logs.Models as Logs
 import Game.Servers.Logs.Update as Logs
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Update as Processes
 import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
-import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Bootstrap as Bootstrap
 import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications
 import Game.Notifications.Update as Notifications
 
 
@@ -138,8 +132,16 @@ updateRequest game data model =
             let
                 model_ =
                     insert id server model
+
+                dispatch =
+                    if List.member id game.account.gateways then
+                        Dispatch.none
+                    else
+                        server.nip
+                            |> Account.InsertEndpoint
+                            |> Dispatch.account
             in
-                Update.fromModel model_
+                ( model_, Cmd.none, dispatch )
 
 
 onWsJoinedServer : Game.Model -> ID -> Model -> UpdateResponse

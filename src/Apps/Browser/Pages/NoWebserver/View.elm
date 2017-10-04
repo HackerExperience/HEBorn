@@ -31,9 +31,9 @@ view : Game.Data -> Model -> Html Msg
 view data model =
     let
         endpointMember =
-            Game.endpointMember
+            List.member
                 model.toolkit.target
-                data.game
+                data.game.account.joinedEndpoints
     in
         if (model.showingPanel && endpointMember) then
             viewPos data model

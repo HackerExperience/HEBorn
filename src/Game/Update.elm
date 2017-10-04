@@ -191,7 +191,7 @@ onBootstrapResponse bootstrap model0 =
 
         account_ =
             bootstrap.serverIndex.player
-                |> List.foldl (Tuple.first >> Account.insertServer)
+                |> List.foldl (Tuple.first >> Account.insertGateway)
                     model1.account
 
         joinGateway id =

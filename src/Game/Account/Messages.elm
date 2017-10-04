@@ -8,12 +8,14 @@ import Game.Meta.Types exposing (..)
 import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
+import Game.Network.Types exposing (NIP)
 
 
 type Msg
     = DoLogout
     | SetGateway Servers.ID
     | SetEndpoint (Maybe Servers.ID)
+    | InsertEndpoint NIP
     | ContextTo Context
     | BouncesMsg Bounces.Msg
     | DatabaseMsg Database.Msg

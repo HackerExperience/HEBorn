@@ -6,7 +6,8 @@ module Game.Account.Models
         , Username
         , Email
         , initialModel
-        , insertServer
+        , insertGateway
+        , insertEndpoint
         , getToken
         , getGateway
         , getContext
@@ -19,6 +20,7 @@ import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
 import Game.Notifications.Models as Notifications
+import Game.Network.Types exposing (NIP)
 import Game.Meta.Types exposing (..)
 
 
@@ -49,8 +51,9 @@ type alias Model =
     , email : Maybe Email
     , database : Database.Model
     , dock : Dock.Model
-    , servers : List Servers.ID
-    , activeGateway : Servers.ID
+    , gateways : List Servers.ID
+    , activeGateway : Maybe Servers.ID -- NEVER SET TO NOTHING EXCEPT ON INIT
+    , joinedEndpoints : List NIP
     , context : Context
     , bounces : Bounces.Model
     , inventory : Inventory.Model
@@ -72,8 +75,9 @@ initialModel id username token =
     , email = Nothing
     , database = Database.initialModel
     , dock = Dock.initialModel
-    , servers = []
-    , activeGateway = ""
+    , gateways = []
+    , activeGateway = Nothing
+    , joinedEndpoints = []
     , context = Gateway
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
@@ -87,7 +91,7 @@ getToken model =
     model.auth.token
 
 
-getGateway : Model -> Servers.ID
+getGateway : Model -> Maybe Servers.ID
 getGateway =
     .activeGateway
 
@@ -102,19 +106,31 @@ getDatabase =
     .database
 
 
-insertServer : Servers.ID -> Model -> Model
-insertServer id ({ servers } as model) =
+insertGateway : Servers.ID -> Model -> Model
+insertGateway id ({ gateways } as model) =
     let
         activeGateway =
-            if model.activeGateway == "" then
-                id
+            if model.activeGateway == Nothing then
+                Just id
             else
                 model.activeGateway
 
-        servers =
-            if not <| List.member id model.servers then
-                id :: model.servers
+        gateways =
+            if not <| List.member id model.gateways then
+                id :: model.gateways
             else
-                model.servers
+                model.gateways
     in
-        { model | activeGateway = activeGateway, servers = servers }
+        { model | activeGateway = activeGateway, gateways = gateways }
+
+
+insertEndpoint : NIP -> Model -> Model
+insertEndpoint nip ({ joinedEndpoints } as model) =
+    let
+        joinedEndpoints_ =
+            if List.member nip joinedEndpoints then
+                joinedEndpoints
+            else
+                nip :: joinedEndpoints
+    in
+        { model | joinedEndpoints = joinedEndpoints_ }

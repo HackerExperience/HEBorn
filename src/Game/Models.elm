@@ -16,8 +16,6 @@ module Game.Models
         , getActiveServer
         , setActiveServer
         , bounces
-        , endpoints
-        , endpointMember
         )
 
 import Dict
@@ -115,14 +113,16 @@ getConfig =
 
 getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
 getGateway model =
-    let
-        gatewayId =
-            Account.getGateway model.account
-    in
-        model
-            |> getServers
-            |> Servers.get gatewayId
-            |> Maybe.map ((,) gatewayId)
+    model
+        |> .account
+        |> Account.getGateway
+        |> Maybe.andThen
+            (\gatewayId ->
+                model
+                    |> getServers
+                    |> Servers.get gatewayId
+                    |> Maybe.map ((,) gatewayId)
+            )
 
 
 setGateway : Servers.Server -> Model -> Model
@@ -142,10 +142,8 @@ getEndpoint model =
             getServers model
 
         maybeGateway =
-            model
-                |> getAccount
-                |> Account.getGateway
-                |> flip Servers.get servers
+            getGateway model
+                |> Maybe.map Tuple.second
 
         maybeEndpointID =
             Maybe.andThen Servers.getEndpoint maybeGateway
@@ -201,33 +199,6 @@ bounces game =
         |> getAccount
         |> (.bounces)
         |> Dict.keys
-
-
-endpoints : Model -> List Servers.ID
-endpoints game =
-    let
-        filterFunc =
-            game
-                |> getServers
-                |> flip Servers.mapNetwork
-                |> List.filterMap
-    in
-        game
-            |> getAccount
-            -- TODO: add getters for database and servers
-            |> (.database)
-            |> (.servers)
-            |> Dict.keys
-            |> filterFunc
-
-
-endpointMember : NIP -> Model -> Bool
-endpointMember nip game =
-    game
-        |> getAccount
-        |> (.database)
-        |> (.servers)
-        |> Dict.member nip
 
 
 
