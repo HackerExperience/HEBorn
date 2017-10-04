@@ -1,14 +1,10 @@
 module Apps.Browser.Pages.DownloadCenter.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
-import Game.Models as Game
-import Game.Network.Types exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
-import Apps.Browser.Pages.CommonActions exposing (CommonActions(Crack))
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
@@ -42,12 +38,13 @@ view data model =
 
 
 viewPre : Game.Data -> Bool -> Model -> Html Msg
-viewPre data showPassword model =
-    div []
-        [ text "TODO"
+viewPre data showPassword { title, toolkit } =
+    div [ class [ AutoHeight ] ]
+        [ div [ class [ DummyTitle ] ]
+            [ text <| "Welcome to " ++ title ++ "!" ]
         , hackingToolkit
             (hackingToolkitConfig showPassword)
-            model.toolkit
+            toolkit
         ]
 
 

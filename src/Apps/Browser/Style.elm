@@ -2,7 +2,7 @@ module Apps.Browser.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Elements exposing (input, form)
+import Css.Elements exposing (input, button, form, typeSelector)
 import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
 import UI.Colors as Colors
 import Apps.Browser.Resources exposing (Classes(..), prefix)
@@ -63,30 +63,41 @@ css =
             , overflowY visible
             , minHeight (pct 100)
             ]
-        , class LoginPageHeader
+        , class DummyTitle
             [ lineHeight (int 3)
             , minHeight (px 48) -- CHROME HACK
             , flex (int 0)
             , textAlign center
+            , fontWeight bold
             ]
-        , class LoginPageForm
+        , class HackingToolkit
             [ flex (int 1)
-            , textAlign center
-            , borderTop3 (px 3) solid (hex "000")
-            , borderBottom3 (px 3) solid (hex "000")
             , flexContainerVert
-            , justifyContent center
-            ]
-        , class LoginPageFooter
-            [ lineHeight (int 2)
-            , minHeight (px 64) -- CHROME HACK
-            , flex (int 0)
-            , flexContainerHorz
-            , justifyContent center
             , children
-                [ everything
-                    [ textAlign center
-                    , margin2 (px 0) internalPaddingSz
+                [ typeSelector "portal"
+                    [ flex (int 1)
+                    , textAlign center
+                    , borderTop3 (px 3) solid (hex "000")
+                    , borderBottom3 (px 3) solid (hex "000")
+                    , flexContainerVert
+                    , justifyContent center
+                    , children
+                        [ each [ input, button ]
+                            [ display inlineBlock ]
+                        ]
+                    ]
+                , typeSelector "actions"
+                    [ lineHeight (int 2)
+                    , minHeight (px 64) -- CHROME HACK
+                    , flex (int 0)
+                    , flexContainerHorz
+                    , justifyContent center
+                    , children
+                        [ everything
+                            [ textAlign center
+                            , margin2 (px 0) internalPaddingSz
+                            ]
+                        ]
                     ]
                 ]
             ]
