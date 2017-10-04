@@ -15,6 +15,7 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
+import Game.Network.Types exposing (NIP)
 import Game.Meta.Types exposing (..)
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
@@ -42,6 +43,9 @@ update game msg model =
 
         SetEndpoint id ->
             onSetEndpoint game id model
+
+        InsertEndpoint nip ->
+            onInsertEndpoint nip model
 
         ContextTo context ->
             onContextTo game context model
@@ -79,27 +83,30 @@ bootstrap json model =
 
 onSetGateway : Game.Model -> Servers.ID -> Model -> UpdateResponse
 onSetGateway game serverId model =
-    Update.fromModel { model | activeGateway = serverId }
+    Update.fromModel { model | activeGateway = Just serverId }
 
 
 onSetEndpoint : Game.Model -> Maybe Servers.ID -> Model -> UpdateResponse
 onSetEndpoint game serverId model =
-    let
-        setEndpoint id =
-            Dispatch.server id <| Servers.SetEndpoint serverId
+    case getGateway model of
+        Just gateway ->
+            let
+                setEndpoint id =
+                    Dispatch.server id <| Servers.SetEndpoint serverId
 
-        dispatch =
-            model
-                |> getGateway
-                |> setEndpoint
+                dispatch =
+                    setEndpoint gateway
 
-        model_ =
-            if serverId == Nothing then
-                ensureValidContext game { model | context = Gateway }
-            else
-                ensureValidContext game model
-    in
-        ( model_, Cmd.none, dispatch )
+                model_ =
+                    if serverId == Nothing then
+                        ensureValidContext game { model | context = Gateway }
+                    else
+                        ensureValidContext game model
+            in
+                ( model_, Cmd.none, dispatch )
+
+        Nothing ->
+            Update.fromModel model
 
 
 onContextTo : Game.Model -> Context -> Model -> UpdateResponse
@@ -159,10 +166,16 @@ merge src new =
         src.database
     , dock =
         Maybe.withDefault src.dock <| new.dock
-    , servers =
+    , gateways =
         new.servers
     , activeGateway =
-        new.activeGateway
+        if new.activeGateway == "" then
+            -- TODO: Adapt new Account Bootstrap to use Maybe
+            Nothing
+        else
+            Just new.activeGateway
+    , joinedEndpoints =
+        []
     , context =
         src.context
     , bounces =
@@ -274,7 +287,7 @@ ensureValidContext game model =
         endpoint =
             model
                 |> getGateway
-                |> flip Servers.get servers
+                |> Maybe.andThen (flip Servers.get servers)
                 |> Maybe.andThen Servers.getEndpoint
                 |> Maybe.andThen (flip Servers.get servers)
     in
@@ -282,3 +295,10 @@ ensureValidContext game model =
             { model | context = Gateway }
         else
             model
+
+
+onInsertEndpoint : NIP -> Model -> UpdateResponse
+onInsertEndpoint nip model =
+    model
+        |> insertEndpoint nip
+        |> Update.fromModel
