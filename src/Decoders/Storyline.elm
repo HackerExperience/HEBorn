@@ -14,12 +14,12 @@ import Json.Decode as Decode
         , list
         , dict
         )
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Json.Decode.Pipeline exposing (decode, required, optional, resolve)
 import Utils.Json.Decode exposing (optionalMaybe)
 import Events.Storyline.Emails as Emails
 import Events.Storyline.Missions as Missions
 import Game.Storyline.Emails.Models as Emails
-import Game.Storyline.Missions.Models as Missions
+import Game.Storyline.Missions.Models as Missions exposing (Missions(..), Goals(..))
 import Game.Storyline.Missions.Actions as Missions
 import Game.Storyline.Models as Story
 
@@ -29,7 +29,7 @@ story =
     decode Story.Model
         |> optional "enabled" bool False
         |> required "missions" missions
-        |> required "emails" emails
+        |> required "email" emails
 
 
 
@@ -38,26 +38,36 @@ story =
 
 missions : Decoder Missions.Model
 missions =
-    let
-        toModel themall =
-            case themall of
-                ( Just "tutorial", Just "intro", Just current, Just next ) ->
-                    next
-                        |> Missions.Step current (Missions.fromStep current)
-                        |> Just
-                        |> Missions.Model
-                            Missions.Tutorial
-                            Missions.TutorialIntroduction
+    decode recognizeMission
+        |> optionalMaybe "mission" string
+        |> optionalMaybe "goals" string
+        |> optionalMaybe "current" string
+        |> optionalMaybe "next" string
+        |> resolve
 
-                _ ->
-                    Missions.Model Missions.NoMission Missions.NoGoal Nothing
-    in
-        decode (,,,)
-            |> optionalMaybe "mission" string
-            |> optionalMaybe "goals" string
-            |> optionalMaybe "current" string
-            |> optionalMaybe "next" string
-            |> map toModel
+
+recognizeMission :
+    Maybe String
+    -> Maybe String
+    -> Maybe String
+    -> Maybe String
+    -> Decoder Missions.Model
+recognizeMission mission goals current next =
+    case ( mission, goals, current, next ) of
+        ( Just "tutorial", Just "intro", Just current, Just next ) ->
+            next
+                |> Missions.Step current (Missions.fromStep current)
+                |> Just
+                |> Missions.Model
+                    Tutorial
+                    TutorialIntroduction
+                |> succeed
+
+        ( Nothing, Nothing, Nothing, Nothing ) ->
+            succeed <| Missions.Model NoMission NoGoal Nothing
+
+        _ ->
+            fail "Unrecgonized mission state"
 
 
 

@@ -5,6 +5,7 @@ import Json.Decode
     exposing
         ( Decoder
         , decodeValue
+        , map
         , andThen
         , dict
         , list
@@ -14,7 +15,7 @@ import Json.Decode
         , fail
         , maybe
         )
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Json.Decode.Pipeline exposing (decode, required, optional, resolve)
 import Utils.Events exposing (Handler, notify, commonError)
 import Game.Storyline.Emails.Models exposing (..)
 
@@ -51,8 +52,7 @@ onReceive json =
 
 decoder : Decoder Model
 decoder =
-    dict person
-        |> andThen (Dict.map initAbout >> succeed)
+    map (Dict.map initAbout) (dict person)
 
 
 person : Decoder Person
@@ -83,12 +83,11 @@ about =
 
 messages : Decoder Messages
 messages =
-    list message
-        |> andThen (Dict.fromList >> succeed)
+    map Dict.fromList <| list message
 
 
-toMessage : ( Float, String, String ) -> Decoder ( Float, Message )
-toMessage ( time, direction, phrase ) =
+toMessage : Float -> String -> String -> Decoder ( Float, Message )
+toMessage time direction phrase =
     case direction of
         "sended" ->
             succeed ( time, Sended phrase )
@@ -102,11 +101,11 @@ toMessage ( time, direction, phrase ) =
 
 message : Decoder ( Float, Message )
 message =
-    decode (,,)
+    decode toMessage
         |> required "time" float
         |> required "direction" string
         |> required "phrase" string
-        |> andThen toMessage
+        |> resolve
 
 
 responses : Decoder Responses

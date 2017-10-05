@@ -37,7 +37,7 @@ import Decoders.Filesystem
 serverWithId : Decoder ( ID, Server )
 serverWithId =
     decode (,)
-        |> required "server_id" string
+        |> required "id" string
         |> custom server
 
 

@@ -5,6 +5,7 @@ import Json.Decode
         ( Decoder
         , oneOf
         , map
+        , succeed
         , maybe
         , lazy
         , list
@@ -56,7 +57,16 @@ model maybeFilesytem =
                 Nothing ->
                     initialModel
     in
-        map (flip apply filesystem) (list (entry ()))
+        map (flip apply filesystem) index
+
+
+index : Decoder Index
+index =
+    oneOf
+        -- [α ONLY] TEMPORARY FALLBACK
+        [ list (entry ())
+        , succeed []
+        ]
 
 
 apply : Index -> Filesystem -> Filesystem

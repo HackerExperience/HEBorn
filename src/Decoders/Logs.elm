@@ -2,7 +2,7 @@ module Decoders.Logs exposing (..)
 
 import Dict exposing (Dict)
 import Game.Servers.Logs.Models exposing (..)
-import Json.Decode as Decode exposing (Decoder, map, string, float, list)
+import Json.Decode as Decode exposing (Decoder, map, oneOf, succeed, string, float, list)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Time exposing (Time)
 
@@ -13,7 +13,11 @@ type alias Index =
 
 model : Decoder Model
 model =
-    map Dict.fromList index
+    oneOf
+        -- [α ONLY] TEMPORARY FALLBACK
+        [ map Dict.fromList index
+        , succeed Dict.empty
+        ]
 
 
 index : Decoder Index
