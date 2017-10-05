@@ -63,4 +63,4 @@ serverIndex : Decoder ServerIndex
 serverIndex =
     decode ServerIndex
         |> required "player" (list Decoders.Servers.serverWithId)
-        |> required "remotes" (list Decoders.Servers.serverWithId)
+        |> required "remote" (list Decoders.Servers.serverWithId)

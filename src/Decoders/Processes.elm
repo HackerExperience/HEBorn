@@ -27,7 +27,11 @@ model maybeModel =
 
 processDict : Decoder (Dict ID Process)
 processDict =
-    map Dict.fromList processWithId
+    oneOf
+        -- [α ONLY] TEMPORARY FALLBACK
+        [ map Dict.fromList processWithId
+        , succeed Dict.empty
+        ]
 
 
 processWithId : Decoder (List ( ID, Process ))
