@@ -4,15 +4,11 @@ import Json.Decode exposing (Value)
 
 
 type alias Router a =
-    Context -> Name -> Value -> Maybe a
+    Name -> Value -> Maybe a
 
 
 type alias Handler a =
     Value -> Maybe a
-
-
-type alias Context =
-    Maybe String
 
 
 type alias Name =

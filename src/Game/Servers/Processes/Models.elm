@@ -3,7 +3,7 @@ module Game.Servers.Processes.Models exposing (..)
 import Dict exposing (Dict)
 import Time exposing (Time)
 import Game.Shared
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Logs.Models as Logs
 import Utils.Dict as Dict
@@ -29,7 +29,8 @@ type alias Process =
     , state : State
     , file : Maybe ProcessFile
     , progress : Maybe Progress
-    , target : NIP
+    , network : Network.ID
+    , target : Network.IP
     }
 
 
@@ -41,10 +42,6 @@ type
     | Encryptor EncryptorContent
     | FileTransference
     | PassiveFirewall
-
-
-type alias ServerID =
-    Game.Shared.ID
 
 
 type alias EncryptorContent =
@@ -63,7 +60,7 @@ type Access
 
 type alias FullAccess =
     -- version may be added to the main body
-    { origin : ServerID
+    { origin : Network.IP
     , priority : Priority
     , usage : ResourcesUsage
     , connection : Maybe ConnectionID
@@ -264,15 +261,15 @@ toList =
 
 newOptimistic :
     Type
-    -> ServerID
-    -> NIP
+    -> Network.NIP
+    -> Network.IP
     -> ProcessFile
     -> Process
-newOptimistic type_ origin target file =
+newOptimistic type_ nip target file =
     { type_ = type_
     , access =
         Full
-            { origin = origin
+            { origin = Network.getIp nip
             , priority = Normal
             , usage =
                 { cpu = ( 0.0, 0 )
@@ -285,6 +282,7 @@ newOptimistic type_ origin target file =
     , state = Starting
     , progress = Nothing
     , file = Just file
+    , network = Network.getId nip
     , target = target
     }
 
@@ -344,16 +342,16 @@ getAccess =
     .access
 
 
-getTarget : Process -> NIP
-getTarget =
-    .target
+getTarget : Process -> Network.NIP
+getTarget process =
+    Network.toNip process.network process.target
 
 
-getOrigin : Process -> Maybe ServerID
-getOrigin { access } =
-    case access of
+getOrigin : Process -> Maybe Network.NIP
+getOrigin process =
+    case process.access of
         Full data ->
-            Just data.origin
+            Just <| Network.toNip process.network data.origin
 
         Partial _ ->
             Nothing

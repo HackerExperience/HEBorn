@@ -113,16 +113,20 @@ getConfig =
 
 getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
 getGateway model =
-    model
-        |> .account
-        |> Account.getGateway
-        |> Maybe.andThen
-            (\gatewayId ->
-                model
-                    |> getServers
-                    |> Servers.get gatewayId
-                    |> Maybe.map ((,) gatewayId)
-            )
+    let
+        servers =
+            getServers model
+    in
+        model
+            |> getAccount
+            |> Account.getGateway
+            |> Maybe.andThen (flip Servers.mapNetwork servers)
+            |> Maybe.andThen
+                (\serverId ->
+                    servers
+                        |> Servers.get serverId
+                        |> Maybe.map ((,) serverId)
+                )
 
 
 setGateway : Servers.Server -> Model -> Model

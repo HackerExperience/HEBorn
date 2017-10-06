@@ -2,6 +2,7 @@ module Game.Servers.Update exposing (..)
 
 import Dict
 import Utils.Update as Update
+import Utils.Maybe as Maybe
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
 import Events.Servers as ServersEvents
@@ -25,6 +26,7 @@ import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Bootstrap as Bootstrap
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
+import Game.Network.Types exposing (NIP)
 
 
 type alias UpdateResponse =
@@ -38,8 +40,6 @@ type alias ServerUpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        --Bootstrap json ->
-        --    onBootstrap game json model
         ServerMsg id msg ->
             onServerMsg game id msg model
 
@@ -50,36 +50,13 @@ update game msg model =
             onRequest game (receive data) model
 
 
-
---bootstrap : Game.Model -> Value -> Model -> Model
---bootstrap game json model =
---    -- this function should die
---    let
---mapper data =
---case data of
---    Bootstrap.GatewayServer { id } ->
---        ( id, Bootstrap.toServer data )
---    Bootstrap.EndpointServer { id } ->
---        ( id, Bootstrap.toServer data )
---in
---    decodeValue (list Bootstrap.decoder) json
---        |> Requests.report
---        |> Maybe.withDefault []
---        |> List.map mapper
---        |> List.foldl (uncurry insert) model
--- collection message handlers
---onBootstrap : Game.Model -> Value -> Model -> UpdateResponse
---onBootstrap game json model =
---    Update.fromModel <| bootstrap game json model
-
-
 onServerMsg : Game.Model -> ID -> ServerMsg -> Model -> UpdateResponse
-onServerMsg game id msg ({ servers } as model) =
-    case Dict.get id servers of
+onServerMsg game id msg model =
+    case get id model of
         Just server ->
-            updateServer game id msg server
-                |> Update.mapModel (flip (Dict.insert id) servers)
-                |> Update.mapModel (\servers -> { model | servers = servers })
+            server
+                |> updateServer game server.nip msg
+                |> Update.mapModel (flip (insert id) model)
                 |> Update.mapCmd (ServerMsg id)
 
         Nothing ->
@@ -87,20 +64,20 @@ onServerMsg game id msg ({ servers } as model) =
 
 
 onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-onEvent game event ({ servers } as model) =
+onEvent game event model =
     let
         msg =
             ServerEvent event
 
         reducer id server ( servers, cmd, dispatch ) =
             Update.fromModel server
-                |> Update.andThen (updateServer game id msg)
+                |> Update.andThen (updateServer game server.nip msg)
                 |> Update.mapModel (flip (Dict.insert id) servers)
                 |> Update.mapCmd (ServerMsg id)
                 |> Update.addCmd cmd
                 |> Update.addDispatch dispatch
     in
-        Dict.foldl reducer (Update.fromModel servers) servers
+        Dict.foldl reducer (Update.fromModel model.servers) model.servers
             |> Update.mapModel (\servers -> { model | servers = servers })
             |> Update.andThen (updateEvent game event)
 
@@ -118,8 +95,8 @@ onRequest game response model =
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
-        Events.Report (Ws.Joined ServerChannel (Just serverId) _) ->
-            onWsJoinedServer game serverId model
+        Events.Report (Ws.Joined (ServerChannel nip) _) ->
+            onWsJoinedServer game nip model
 
         _ ->
             Update.fromModel model
@@ -134,7 +111,7 @@ updateRequest game data model =
                     insert id server model
 
                 dispatch =
-                    if List.member id game.account.gateways then
+                    if List.member server.nip game.account.gateways then
                         Dispatch.none
                     else
                         server.nip
@@ -144,13 +121,13 @@ updateRequest game data model =
                 ( model_, Cmd.none, dispatch )
 
 
-onWsJoinedServer : Game.Model -> ID -> Model -> UpdateResponse
-onWsJoinedServer game serverId model =
-    case get serverId model of
+onWsJoinedServer : Game.Model -> NIP -> Model -> UpdateResponse
+onWsJoinedServer game nip model =
+    case getByNIP nip model of
         Nothing ->
             let
                 cmd =
-                    Bootstrap.request serverId game
+                    Bootstrap.request nip game
             in
                 ( model, cmd, Dispatch.none )
 
@@ -164,14 +141,17 @@ onWsJoinedServer game serverId model =
 -- content message handlers
 
 
-updateServer : Game.Model -> ID -> ServerMsg -> Server -> ServerUpdateResponse
+updateServer : Game.Model -> NIP -> ServerMsg -> Server -> ServerUpdateResponse
 updateServer game id msg server =
     case msg of
         SetBounce maybeId ->
-            onSetBounce game id maybeId server
+            onSetBounce game
+                id
+                maybeId
+                server
 
-        SetEndpoint maybeID ->
-            onSetEndpoint game id maybeID server
+        SetEndpoint maybeNip ->
+            onSetEndpoint game maybeNip server
 
         FilesystemMsg msg ->
             onFilesystemMsg game id msg server
@@ -189,7 +169,7 @@ updateServer game id msg server =
             onServerEvent game id event server
 
         ServerRequest data ->
-            updateServerRequest game id (serverReceive data) server
+            updateServerRequest game (serverReceive data) server
 
         NotificationsMsg msg ->
             onNotificationsMsg game msg server
@@ -197,58 +177,71 @@ updateServer game id msg server =
 
 onSetBounce :
     Game.Model
-    -> ID
+    -> NIP
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse
-onSetBounce game id maybeId server =
+onSetBounce game nip maybeId server =
     setBounce maybeId server
         |> Update.fromModel
 
 
 onSetEndpoint :
     Game.Model
-    -> ID
-    -> Maybe ID
+    -> Maybe NIP
     -> Server
     -> ServerUpdateResponse
-onSetEndpoint game id maybeNip server =
-    setEndpoint maybeNip server
-        |> Update.fromModel
+onSetEndpoint game nip server =
+    let
+        serverId =
+            Maybe.andThen (flip mapNetwork <| Game.getServers game) nip
+    in
+        setEndpoint serverId server
+            |> Update.fromModel
 
 
 onFilesystemMsg :
     Game.Model
-    -> ID
+    -> NIP
     -> Filesystem.Msg
     -> Server
     -> ServerUpdateResponse
-onFilesystemMsg game id =
+onFilesystemMsg game nip =
     Update.child
         { get = .filesystem
         , set = (\fs model -> { model | filesystem = fs })
         , toMsg = FilesystemMsg
-        , update = (Filesystem.update game id)
+        , update = (Filesystem.update game nip)
         }
 
 
-onLogsMsg : Game.Model -> ID -> Logs.Msg -> Server -> ServerUpdateResponse
-onLogsMsg game id =
+onLogsMsg :
+    Game.Model
+    -> NIP
+    -> Logs.Msg
+    -> Server
+    -> ServerUpdateResponse
+onLogsMsg game nip =
     Update.child
         { get = .logs
         , set = (\logs model -> { model | logs = logs })
         , toMsg = LogsMsg
-        , update = (Logs.update game id)
+        , update = (Logs.update game nip)
         }
 
 
-onProcessesMsg : Game.Model -> ID -> Processes.Msg -> Server -> ServerUpdateResponse
-onProcessesMsg game id =
+onProcessesMsg :
+    Game.Model
+    -> NIP
+    -> Processes.Msg
+    -> Server
+    -> ServerUpdateResponse
+onProcessesMsg game nip =
     Update.child
         { get = .processes
         , set = (\processes model -> { model | processes = processes })
         , toMsg = ProcessesMsg
-        , update = (Processes.update game id)
+        , update = (Processes.update game nip)
         }
 
 
@@ -262,7 +255,11 @@ onTunnelsMsg game =
         }
 
 
-onNotificationsMsg : Game.Model -> Notifications.Msg -> Server -> ServerUpdateResponse
+onNotificationsMsg :
+    Game.Model
+    -> Notifications.Msg
+    -> Server
+    -> ServerUpdateResponse
 onNotificationsMsg game =
     Update.child
         { get = .notifications
@@ -274,28 +271,27 @@ onNotificationsMsg game =
 
 onServerEvent :
     Game.Model
-    -> ID
+    -> NIP
     -> Events.Event
     -> Server
     -> ServerUpdateResponse
-onServerEvent game id event server =
-    if shouldRouteEvent id event then
-        onLogsMsg game id (Logs.Event event) server
+onServerEvent game nip event server =
+    if shouldRouteEvent nip event then
+        onLogsMsg game nip (Logs.Event event) server
             -- |> Update.andThen (onFilesystemMsg game (Filesystem.Event event))
-            |> Update.andThen (onProcessesMsg game id (Processes.Event event))
-            -- |> Update.andThen (onTunnelsMsg game (Tunnels.Event event))
-            |> Update.andThen (updateServerEvent game id event)
+            |> Update.andThen (onProcessesMsg game nip (Processes.Event event))
+            |> Update.andThen (onTunnelsMsg game (Tunnels.Event event))
+            |> Update.andThen (updateServerEvent game event)
     else
         Update.fromModel server
 
 
 updateServerRequest :
     Game.Model
-    -> ID
     -> Maybe ServerResponse
     -> Server
     -> ServerUpdateResponse
-updateServerRequest game id response server =
+updateServerRequest game response server =
     case response of
         Just _ ->
             Update.fromModel server
@@ -306,21 +302,20 @@ updateServerRequest game id response server =
 
 updateServerEvent :
     Game.Model
-    -> ID
     -> Events.Event
     -> Server
     -> ServerUpdateResponse
-updateServerEvent game id event server =
+updateServerEvent game event server =
     Update.fromModel server
 
 
 {-| Only route server events when server IDs match.
 -}
-shouldRouteEvent : ID -> Events.Event -> Bool
-shouldRouteEvent id event =
+shouldRouteEvent : NIP -> Events.Event -> Bool
+shouldRouteEvent nip event =
     case event of
-        Events.ServersEvent (ServersEvents.ServerEvent id_ event) ->
-            id == id_
+        Events.ServersEvent (ServerChannel nip_) _ ->
+            nip == nip_
 
         _ ->
             True

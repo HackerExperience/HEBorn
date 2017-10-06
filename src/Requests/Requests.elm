@@ -1,4 +1,4 @@
-module Requests.Requests exposing (request, report, fake, decodeGenericError)
+module Requests.Requests exposing (request, report, decodeGenericError)
 
 import Http
 import Json.Decode as Decode
@@ -29,16 +29,15 @@ report result =
 request :
     Topic
     -> (ResponseType -> msg)
-    -> Context
     -> Encode.Value
     -> ConfigSource a
     -> Cmd msg
-request topic msg context data source =
+request topic msg data source =
     case topic of
         WebsocketTopic channel path ->
             WebsocketDriver.send (genericWs msg)
                 source.config.apiWsUrl
-                (WebsocketDriver.getAddress channel context)
+                (WebsocketDriver.getAddress channel)
                 path
                 data
 
@@ -47,18 +46,6 @@ request topic msg context data source =
                 source.config.apiHttpUrl
                 path
                 (Encode.encode 0 data)
-
-
-fake :
-    Topic
-    -> (ResponseType -> msg)
-    -> Context
-    -> Encode.Value
-    -> ResponseType
-    -> ConfigSource a
-    -> Cmd msg
-fake _ msg _ _ response _ =
-    Cmd.fromMsg (msg response)
 
 
 decodeGenericError :

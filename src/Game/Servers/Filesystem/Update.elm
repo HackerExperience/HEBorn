@@ -15,6 +15,7 @@ import Game.Servers.Filesystem.Requests.Move as Move
 import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Network.Types exposing (NIP)
 import Decoders.Filesystem
 
 
@@ -24,30 +25,30 @@ type alias UpdateResponse =
 
 update :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> Msg
     -> Filesystem
     -> UpdateResponse
-update game serverId msg model =
+update game nip msg model =
     case msg of
         Delete fileId ->
-            onDelete game serverId fileId model
+            onDelete game nip fileId model
 
         CreateTextFile path ->
             onCreateTextFile game
-                serverId
+                nip
                 (toString game.meta.lastTick)
                 path
                 model
 
         CreateEmptyDir path ->
-            onEmptyDir game serverId (toString game.meta.lastTick) path model
+            onEmptyDir game nip (toString game.meta.lastTick) path model
 
         Move fileId newLocation ->
-            onMove game serverId fileId newLocation model
+            onMove game nip fileId newLocation model
 
         Rename fileId newBaseName ->
-            onRename game serverId fileId newBaseName model
+            onRename game nip fileId newBaseName model
 
         Request request ->
             Update.fromModel model
@@ -65,8 +66,8 @@ bootstrap json model =
 -- internals
 
 
-onDelete : Game.Model -> Servers.ID -> FileID -> Filesystem -> UpdateResponse
-onDelete game serverId fileId model =
+onDelete : Game.Model -> NIP -> FileID -> Filesystem -> UpdateResponse
+onDelete game nip fileId model =
     let
         file =
             getEntry fileId model
@@ -80,19 +81,19 @@ onDelete game serverId fileId model =
                     model
 
         serverCmd =
-            Delete.request fileId serverId game
+            Delete.request fileId nip game
     in
         ( model_, serverCmd, Dispatch.none )
 
 
 onCreateTextFile :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> FileID
     -> FilePath
     -> Filesystem
     -> UpdateResponse
-onCreateTextFile game serverId fileId ( fileLocation, fileBaseName ) model =
+onCreateTextFile game nip fileId ( fileLocation, fileBaseName ) model =
     let
         toFileEntry path =
             FileEntry
@@ -122,7 +123,7 @@ onCreateTextFile game serverId fileId ( fileLocation, fileBaseName ) model =
                         Create.request "txt"
                             fileBaseName
                             fileLocation
-                            serverId
+                            nip
                             game
                 in
                     ( model_, cmd, Dispatch.none )
@@ -131,14 +132,18 @@ onCreateTextFile game serverId fileId ( fileLocation, fileBaseName ) model =
                 Update.fromModel model
 
 
+
+--Update.fromModel model
+
+
 onEmptyDir :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> FileID
     -> FilePath
     -> Filesystem
     -> UpdateResponse
-onEmptyDir game serverId fileId ( fileLocation, fileName ) model =
+onEmptyDir game nip fileId ( fileLocation, fileName ) model =
     -- TODO: rewrite to be more readable
     let
         model_ =
@@ -163,19 +168,19 @@ onEmptyDir game serverId fileId ( fileLocation, fileName ) model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            Create.request "/" fileName fileLocation serverId game
+            Create.request "/" fileName fileLocation nip game
     in
         ( model_, serverCmd, Dispatch.none )
 
 
 onMove :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> FileID
     -> Location
     -> Filesystem
     -> UpdateResponse
-onMove game serverId fileId newLocation model =
+onMove game nip fileId newLocation model =
     -- TODO: rewrite to be more readable
     let
         model_ =
@@ -191,19 +196,19 @@ onMove game serverId fileId newLocation model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            Move.request newLocation fileId serverId game
+            Move.request newLocation fileId nip game
     in
         ( model_, serverCmd, Dispatch.none )
 
 
 onRename :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> FileID
     -> String
     -> Filesystem
     -> UpdateResponse
-onRename game serverId fileId newBaseName model =
+onRename game nip fileId newBaseName model =
     -- TODO: rewrite to be more readable
     let
         model_ =
@@ -221,18 +226,18 @@ onRename game serverId fileId newBaseName model =
                 |> Maybe.withDefault model
 
         serverCmd =
-            Rename.request newBaseName fileId serverId game
+            Rename.request newBaseName fileId nip game
     in
         ( model_, serverCmd, Dispatch.none )
 
 
 onRequest :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> Maybe Response
     -> Filesystem
     -> UpdateResponse
-onRequest game serverId response model =
+onRequest game nip response model =
     Update.fromModel model
 
 

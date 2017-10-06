@@ -1,4 +1,4 @@
-module Game.Account.Update exposing (update, bootstrap)
+module Game.Account.Update exposing (update)
 
 import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
@@ -8,7 +8,6 @@ import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Events.Events as Events exposing (Event(Report, AccountEvent))
-import Events.Account as Account exposing (AccountHolder)
 import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
@@ -38,11 +37,11 @@ update game msg model =
         DoLogout ->
             onDoLogout game model
 
-        SetGateway id ->
-            onSetGateway game id model
+        SetGateway nip ->
+            onSetGateway game nip model
 
-        SetEndpoint id ->
-            onSetEndpoint game id model
+        SetEndpoint nip ->
+            onSetEndpoint game nip model
 
         InsertEndpoint nip ->
             onInsertEndpoint nip model
@@ -65,40 +64,33 @@ update game msg model =
         Request data ->
             onRequest game (receive data) model
 
-        Bootstrap json ->
-            onBootstrap json model
-
-
-bootstrap : Value -> Model -> Model
-bootstrap json model =
-    decodeValue Account.decoder json
-        |> Requests.report
-        |> Maybe.map (merge model)
-        |> Maybe.withDefault model
-
 
 
 -- internals
 
 
-onSetGateway : Game.Model -> Servers.ID -> Model -> UpdateResponse
-onSetGateway game serverId model =
-    Update.fromModel { model | activeGateway = Just serverId }
+onSetGateway : Game.Model -> NIP -> Model -> UpdateResponse
+onSetGateway game nip model =
+    Update.fromModel { model | activeGateway = Just nip }
 
 
-onSetEndpoint : Game.Model -> Maybe Servers.ID -> Model -> UpdateResponse
-onSetEndpoint game serverId model =
+onSetEndpoint : Game.Model -> Maybe NIP -> Model -> UpdateResponse
+onSetEndpoint game nip model =
     case getGateway model of
         Just gateway ->
             let
                 setEndpoint id =
-                    Dispatch.server id <| Servers.SetEndpoint serverId
+                    Dispatch.server id <| Servers.SetEndpoint nip
 
                 dispatch =
-                    setEndpoint gateway
+                    game
+                        |> Game.getServers
+                        |> Servers.mapNetwork gateway
+                        |> Maybe.map setEndpoint
+                        |> Maybe.withDefault Dispatch.none
 
                 model_ =
-                    if serverId == Nothing then
+                    if nip == Nothing then
                         ensureValidContext game { model | context = Gateway }
                     else
                         ensureValidContext game model
@@ -143,44 +135,6 @@ onNotifications game msg model =
         }
         msg
         model
-
-
-onBootstrap : Value -> Model -> UpdateResponse
-onBootstrap json model =
-    Update.fromModel <| bootstrap json model
-
-
-merge : Model -> AccountHolder -> Model
-merge src new =
-    { id =
-        src.id
-    , username =
-        src.username
-    , auth =
-        src.auth
-    , email =
-        src.email
-    , database =
-        src.database
-    , dock =
-        src.dock
-    , gateways =
-        src.gateways
-    , activeGateway =
-        src.activeGateway
-    , joinedEndpoints =
-        src.joinedEndpoints
-    , context =
-        src.context
-    , bounces =
-        src.bounces
-    , inventory =
-        src.inventory
-    , notifications =
-        src.notifications
-    , logout =
-        src.logout
-    }
 
 
 onDoLogout : Game.Model -> Model -> UpdateResponse
@@ -255,7 +209,7 @@ onWsConnected game model =
     let
         dispatch =
             Dispatch.websocket
-                (Ws.JoinChannel AccountChannel (Just model.id) Nothing)
+                (Ws.JoinChannel (AccountChannel model.id) Nothing)
     in
         ( model, Cmd.none, dispatch )
 
@@ -281,9 +235,10 @@ ensureValidContext game model =
         endpoint =
             model
                 |> getGateway
-                |> Maybe.andThen (flip Servers.get servers)
+                |> Maybe.andThen (flip Servers.getByNIP servers)
                 |> Maybe.andThen Servers.getEndpoint
                 |> Maybe.andThen (flip Servers.get servers)
+                |> Maybe.map Servers.getNIP
     in
         if getContext model == Endpoint && endpoint == Nothing then
             { model | context = Gateway }

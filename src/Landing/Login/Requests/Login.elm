@@ -23,7 +23,6 @@ request : String -> String -> ConfigSource a -> Cmd Msg
 request username password =
     Requests.request Topics.login
         (LoginRequest >> Request)
-        Nothing
         (encoder username password)
 
 

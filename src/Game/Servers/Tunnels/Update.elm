@@ -3,7 +3,7 @@ module Game.Servers.Tunnels.Update exposing (update, bootstrap)
 import Dict exposing (Dict)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ServerEvent), ServerEvent(TunnelsEvent))
+import Events.Servers exposing (Event(TunnelsEvent))
 import Events.Servers.Tunnels as Tunnels
 import Game.Models as Game
 import Json.Decode exposing (Value, decodeValue)
@@ -43,7 +43,7 @@ bootstrap json model =
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
-        ServersEvent (ServerEvent _ (TunnelsEvent (Tunnels.Changed data))) ->
+        ServersEvent _ (TunnelsEvent (Tunnels.Changed data)) ->
             Update.fromModel (Dict.fromList data)
 
         _ ->

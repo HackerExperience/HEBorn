@@ -21,9 +21,8 @@ type Response
 
 request : String -> String -> String -> ConfigSource a -> Cmd Msg
 request email username password =
-    Requests.request Topics.fsCreate
+    Requests.request Topics.register
         (SignUpRequest >> Request)
-        Nothing
         (encoder email username password)
 
 

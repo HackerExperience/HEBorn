@@ -10,7 +10,7 @@ import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
 import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ServerEvent), ServerEvent(ProcessesEvent))
+import Events.Servers exposing (Event(ProcessesEvent))
 import Events.Servers.Processes as ProcessesEvent
 import Game.Messages as Game
 import Game.Models as Game
@@ -53,10 +53,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel
-
-                context =
-                    Just serverId
+                    ServerChannel server.nip
 
                 name =
                     "processes.started"
@@ -66,7 +63,7 @@ eventTests =
                         """
                         { "type" : "Cracker"
                         , "access" :
-                            { "origin" : "id"
+                            { "origin_ip" : "id"
                             , "priority" : 3
                             , "usage" :
                                 { "cpu" :
@@ -106,7 +103,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel context name json
+                    Events.handler channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -149,10 +146,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel
-
-                context =
-                    Just serverId
+                    ServerChannel server1.nip
 
                 name =
                     "processes.conclusion"
@@ -164,7 +158,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel context name json
+                    Events.handler channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -207,10 +201,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel
-
-                context =
-                    Just serverId
+                    ServerChannel server1.nip
 
                 name =
                     "processes.bruteforce_failed"
@@ -224,7 +215,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel context name json
+                    Events.handler channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -281,7 +272,7 @@ requestTests =
                         """
                         { "type" : "Cracker"
                         , "access" :
-                            { "origin" : "id"
+                            { "origin_ip" : "id"
                             , "priority" : 3
                             , "usage" :
                                 { "cpu" :

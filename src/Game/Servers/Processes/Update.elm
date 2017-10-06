@@ -3,13 +3,14 @@ module Game.Servers.Processes.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ServerEvent), ServerEvent(ProcessesEvent))
+import Events.Servers exposing (Event(ProcessesEvent))
 import Events.Servers.Processes as Processes exposing (Event(..))
 import Game.Models as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
 import Game.Servers.Processes.Requests exposing (..)
+import Game.Network.Types as Network exposing (NIP)
 
 
 type alias UpdateResponse =
@@ -18,46 +19,41 @@ type alias UpdateResponse =
 
 update :
     Game.Model
-    -> ServerID
+    -> NIP
     -> Msg
     -> Model
     -> UpdateResponse
-update game serverId msg model =
+update game nip msg model =
     case msg of
         Pause id ->
-            onPause game
-                serverId
-                id
-                model
+            onPause game nip id model
 
         Resume id ->
-            onResume game serverId id model
+            onResume game nip id model
 
         Remove id ->
-            onRemove game serverId id model
+            onRemove game nip id model
 
-        Start type_ origin target file ->
-            onStart
-                game
-                serverId
-                (newOptimistic type_ origin target <| newProcessFile file)
+        Start type_ target file ->
+            onStart game
+                nip
+                (newOptimistic type_ nip target <| newProcessFile file)
                 model
 
         StartBruteforce target ->
-            onStart
-                game
-                serverId
-                (newOptimistic Cracker serverId target unknownProcessFile)
+            onStart game
+                nip
+                (newOptimistic Cracker nip target unknownProcessFile)
                 model
 
         Complete id ->
-            onComplete game serverId id model
+            onComplete game nip id model
 
         Request data ->
-            updateRequest game serverId (receive data) model
+            updateRequest game nip (receive data) model
 
         Event event ->
-            updateEvent game serverId event model
+            updateEvent game nip event model
 
 
 
@@ -86,8 +82,8 @@ updateOrSync func id model =
 -- processes messages
 
 
-onPause : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
-onPause game serverId id model =
+onPause : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onPause game nip id model =
     let
         update process =
             model
@@ -97,8 +93,8 @@ onPause game serverId id model =
         updateOrSync update id model
 
 
-onResume : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
-onResume game serverId id model =
+onResume : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onResume game nip id model =
     let
         update process =
             model
@@ -108,8 +104,8 @@ onResume game serverId id model =
         updateOrSync update id model
 
 
-onRemove : Game.Model -> ServerID -> ID -> Model -> UpdateResponse
-onRemove game serverId id model =
+onRemove : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onRemove game nip id model =
     let
         model_ =
             remove id model
@@ -117,8 +113,8 @@ onRemove game serverId id model =
         Update.fromModel model_
 
 
-onStart : Game.Model -> ServerID -> Process -> Model -> UpdateResponse
-onStart game serverId process model =
+onStart : Game.Model -> NIP -> Process -> Model -> UpdateResponse
+onStart game nip process model =
     let
         ( id, model_ ) =
             insertOptimistic process model
@@ -126,11 +122,13 @@ onStart game serverId process model =
         case getType process of
             Cracker ->
                 let
+                    targetIp =
+                        process
+                            |> getTarget
+                            |> Network.getIp
+
                     cmd =
-                        Bruteforce.request id
-                            (getTarget process)
-                            serverId
-                            game
+                        Bruteforce.request id nip targetIp game
                 in
                     ( model_, cmd, Dispatch.none )
 
@@ -140,11 +138,11 @@ onStart game serverId process model =
 
 onComplete :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Model
     -> UpdateResponse
-onComplete game serverId id model =
+onComplete game nip id model =
     let
         update process =
             model
@@ -160,13 +158,13 @@ onComplete game serverId id model =
 
 updateEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> Events.Event
     -> Model
     -> UpdateResponse
 updateEvent game serverId event model =
     case event of
-        ServersEvent (ServerEvent _ (ProcessesEvent event)) ->
+        ServersEvent _ (ProcessesEvent event) ->
             updateProcessesEvent game serverId event model
 
         _ ->
@@ -175,7 +173,7 @@ updateEvent game serverId event model =
 
 updateProcessesEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> Processes.Event
     -> Model
     -> UpdateResponse
@@ -208,12 +206,12 @@ onChangedEvent processes model =
 
 onStartedEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Process
     -> Model
     -> UpdateResponse
-onStartedEvent game serverId id process model =
+onStartedEvent game nip id process model =
     model
         |> insert id process
         |> Update.fromModel
@@ -221,11 +219,11 @@ onStartedEvent game serverId id process model =
 
 onPauseEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Model
     -> UpdateResponse
-onPauseEvent game serverId id model =
+onPauseEvent game nip id model =
     let
         update process =
             model
@@ -237,11 +235,11 @@ onPauseEvent game serverId id model =
 
 onResumeEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Model
     -> UpdateResponse
-onResumeEvent game serverId id model =
+onResumeEvent game nip id model =
     let
         update process =
             model
@@ -253,11 +251,11 @@ onResumeEvent game serverId id model =
 
 onCompleteEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Model
     -> UpdateResponse
-onCompleteEvent game serverId id model =
+onCompleteEvent game nip id model =
     let
         update process =
             model
@@ -269,11 +267,11 @@ onCompleteEvent game serverId id model =
 
 onRemoveEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Model
     -> UpdateResponse
-onRemoveEvent game serverId id model =
+onRemoveEvent game nip id model =
     model
         |> remove id
         |> Update.fromModel
@@ -281,11 +279,11 @@ onRemoveEvent game serverId id model =
 
 onBruteforceFailedEvent :
     Game.Model
-    -> ServerID
+    -> NIP
     -> Processes.BruteforceFailedData
     -> Model
     -> UpdateResponse
-onBruteforceFailedEvent game serverId response model =
+onBruteforceFailedEvent game nip response model =
     let
         update process =
             model
@@ -302,14 +300,14 @@ onBruteforceFailedEvent game serverId response model =
 
 updateRequest :
     Game.Model
-    -> ServerID
+    -> NIP
     -> Maybe Response
     -> Model
     -> UpdateResponse
-updateRequest game serverId response model =
+updateRequest game nip response model =
     case response of
         Just (Bruteforce oldId response) ->
-            onBruteforceRequest game serverId oldId response model
+            onBruteforceRequest game nip oldId response model
 
         Nothing ->
             Update.fromModel model
@@ -317,12 +315,12 @@ updateRequest game serverId response model =
 
 onBruteforceRequest :
     Game.Model
-    -> ServerID
+    -> NIP
     -> ID
     -> Bruteforce.Response
     -> Model
     -> UpdateResponse
-onBruteforceRequest game serverId oldId response model =
+onBruteforceRequest game nip oldId response model =
     case response of
         Bruteforce.Okay id process ->
             let

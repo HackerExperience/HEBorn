@@ -10,21 +10,21 @@ import Events.Servers as Servers
 
 type Event
     = AccountEvent Account.Event
-    | ServersEvent Servers.Event
+    | ServersEvent Ws.Channel Servers.Event
     | MetaEvent Meta.Event
     | Report Ws.Report
 
 
 handler : Ws.Channel -> Router Event
-handler channel context event json =
+handler channel event json =
     case channel of
         Ws.RequestsChannel ->
             Nothing
 
-        Ws.AccountChannel ->
-            Account.handler context event json
+        Ws.AccountChannel _ ->
+            Account.handler event json
                 |> Maybe.map AccountEvent
 
-        Ws.ServerChannel ->
-            Servers.handler context event json
-                |> Maybe.map ServersEvent
+        Ws.ServerChannel _ ->
+            Servers.handler event json
+                |> Maybe.map (ServersEvent channel)

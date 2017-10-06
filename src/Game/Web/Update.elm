@@ -19,6 +19,7 @@ import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Apps.Browser.Messages as Browser
+import Game.Network.Types as Network
 
 
 type alias UpdateResponse =
@@ -28,16 +29,16 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        Login id ip password data ->
-            onLogin game id ip password data model
+        Login nip ip password data ->
+            onLogin game nip ip password data model
 
         Request data ->
             updateRequest game (Requests.receive data) model
 
-        FetchUrl serverId url nid requester ->
+        FetchUrl url id ip requester ->
             let
                 cmd =
-                    DNS.request serverId nid url requester game
+                    DNS.request url id ip requester game
             in
                 ( model, cmd, Dispatch.none )
 
@@ -80,34 +81,32 @@ onDNS game { sessionId, windowId, context, tabId } response model =
 -}
 onLogin :
     Game.Model
-    -> Servers.ID
-    -> NIP
+    -> Network.NIP
+    -> Network.IP
     -> String
     -> Requester
     -> Model
     -> UpdateResponse
-onLogin game serverId nip password requester model =
+onLogin game nip remoteIp password requester model =
     let
-        networkId =
-            Tuple.first nip
+        gatewayIp =
+            Network.getIp nip
 
-        remoteIp =
-            Tuple.second nip
+        remoteNip =
+            Network.toNip (Network.getId nip) remoteIp
 
         payload =
             Encode.object
-                [ ( "gateway_id", Encode.string serverId )
-                , ( "network_id", Encode.string networkId )
-                , ( "server_ip", Encode.string remoteIp )
+                [ ( "gateway_ip", Encode.string gatewayIp )
                 , ( "password", Encode.string password )
                 ]
 
         dispatch =
             Dispatch.websocket <|
-                Ws.JoinChannel ServerChannel (Just remoteIp) (Just payload)
+                Ws.JoinChannel (ServerChannel remoteNip) (Just payload)
 
         model_ =
-            startLoading remoteIp requester model
+            startLoading remoteNip requester model
     in
         ( model_, Cmd.none, dispatch )
 
@@ -115,11 +114,11 @@ onLogin game serverId nip password requester model =
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
-        Events.Report (Ws.Joined ServerChannel (Just serverId) _) ->
-            onJoined game serverId model
+        Events.Report (Ws.Joined (ServerChannel nip) _) ->
+            onJoined game nip model
 
-        Events.Report (Ws.JoinFailed ServerChannel (Just serverId) _) ->
-            onJoinFailed game serverId model
+        Events.Report (Ws.JoinFailed (ServerChannel nip) _) ->
+            onJoinFailed game nip model
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -127,11 +126,11 @@ updateEvent game event model =
 
 {-| Reports success back to the loading page.
 -}
-onJoined : Game.Model -> Servers.ID -> Model -> UpdateResponse
-onJoined game serverId model =
+onJoined : Game.Model -> Network.NIP -> Model -> UpdateResponse
+onJoined game nip model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading serverId model
+            finishLoading nip model
 
         dispatch =
             case maybeRequester of
@@ -139,7 +138,7 @@ onJoined game serverId model =
                     -- it may not be explicit, but sessionId
                     -- is always a gateway id
                     Dispatch.server sessionId <|
-                        Servers.SetEndpoint (Just serverId)
+                        Servers.SetEndpoint (Just nip)
 
                 Nothing ->
                     Dispatch.none
@@ -149,11 +148,11 @@ onJoined game serverId model =
 
 {-| Reports failure back to the loading page.
 -}
-onJoinFailed : Game.Model -> Servers.ID -> Model -> UpdateResponse
-onJoinFailed game serverId model =
+onJoinFailed : Game.Model -> Network.NIP -> Model -> UpdateResponse
+onJoinFailed game nip model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading serverId model
+            finishLoading nip model
 
         dispatch =
             case maybeRequester of

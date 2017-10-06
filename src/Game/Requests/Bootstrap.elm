@@ -11,17 +11,17 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Messages exposing (..)
+import Game.Account.Models as Account
 
 
 type Response
     = Okay Decoders.Bootstrap.Bootstrap
 
 
-request : String -> ConfigSource a -> Cmd Msg
-request account =
-    Requests.request Topics.accountBootstrap
+request : Account.ID -> ConfigSource a -> Cmd Msg
+request id =
+    Requests.request (Topics.accountBootstrap id)
         (BootstrapRequest >> Request)
-        (Just account)
         emptyPayload
 
 
