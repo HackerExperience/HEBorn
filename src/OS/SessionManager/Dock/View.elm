@@ -84,7 +84,7 @@ icons apps wm =
                 result =
                     div
                         [ class [ Res.Item ]
-                        , appAttr (Apps.name app)
+                        , appAttr app
                         , hasInstance isNotEmpty
                         ]
                         content

@@ -2,11 +2,15 @@ module Game.Storyline.Missions.DynamicStyle exposing (dynCss)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (withAttribute)
+import Css.Utils as Css exposing (withAttribute, nest)
 import Utils.List as List
+import Utils.Html.Attributes exposing (activeContextValue)
 import Game.Storyline.Missions.Models exposing (..)
 import Game.Storyline.Missions.Actions exposing (Action(..))
+import OS.Resources as OS
 import OS.SessionManager.Dock.Resources as Dock
+import OS.SessionManager.WindowManager.Resources as WM
+import Apps.Apps as Apps
 import Apps.Models as Apps
 import Apps.Explorer.Resources as Explorer
 
@@ -23,16 +27,34 @@ highlights mission =
                     ]
                 ]
 
-        RunApp app ->
+        GoApp app context ->
             namespace Dock.prefix
                 [ class Dock.ItemIco
-                    [ withAttribute (Css.EQ "data-icon" (Apps.icon app))
+                    [ withAttribute (Css.EQ "icon" (Apps.icon app))
                         [ borderRadius (px 0) |> important
                         , backgroundImage none |> important
                         , backgroundColor (hex "F00")
                         ]
                     ]
                 ]
+                ++ namespace OS.prefix
+                    [ class OS.Context
+                        [ withAttribute (Css.EQ "active" "\"0\"")
+                            [ backgroundColor (hex "F00") ]
+                        ]
+                    ]
+                ++ namespace WM.prefix
+                    [ class WM.Window
+                        [ nest
+                            [ withAttribute (Css.EQ "app" (Apps.name app))
+                            , context
+                                |> activeContextValue
+                                |> Css.EQ "context"
+                                |> withAttribute
+                            ]
+                            [ backgroundColor (hex "F00") ]
+                        ]
+                    ]
 
 
 dynCss : Model -> Stylesheet

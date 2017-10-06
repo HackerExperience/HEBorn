@@ -48,12 +48,3 @@ notify result =
                     Debug.log ("▶ Event parse error " ++ str) ""
             in
                 Nothing
-
-
-commonError : String -> a -> String
-commonError type_ error =
-    "Trying to decode "
-        ++ type_
-        ++ ", but value "
-        ++ toString error
-        ++ " is not supported."

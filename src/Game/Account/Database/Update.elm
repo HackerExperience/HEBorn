@@ -37,9 +37,6 @@ updateEvent game event model =
                 EventsDatabase.PasswordAcquired data ->
                     onPasswordAcquired game data model
 
-                _ ->
-                    Update.fromModel model
-
         accountEvents event =
             case event of
                 EventsAccount.DatabaseEvent event ->

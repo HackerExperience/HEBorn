@@ -6,6 +6,7 @@ import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
+import Game.Storyline.Emails.Contents as Emails
 import Apps.Email.Messages exposing (Msg(..))
 import Apps.Email.Models exposing (..)
 import Apps.Email.Resources exposing (Classes(..), prefix)
@@ -46,7 +47,7 @@ mainChat active =
     active
         |> Maybe.map Emails.getAvailableResponses
         |> Maybe.withDefault []
-        |> List.map (text >> List.singleton >> span [])
+        |> List.map content
         |> div []
         |> List.singleton
         |> (::) (ul [] (mainChatMessages active))
@@ -61,7 +62,7 @@ mainChatMessages active =
         |> List.map
             (\v ->
                 case v of
-                    Emails.Sended msg ->
+                    Emails.Sent msg ->
                         baloon To msg
 
                     Emails.Received msg ->
@@ -69,9 +70,23 @@ mainChatMessages active =
             )
 
 
-baloon : Classes -> String -> Html Msg
-baloon dir msg =
-    li [ class [ dir ] ] [ span [] [ text msg ] ]
+baloon : Classes -> Emails.Content -> Html Msg
+baloon direction msg =
+    li
+        [ class [ direction ] ]
+        [ content msg ]
+
+
+content : Emails.Content -> Html Msg
+content msg =
+    case msg of
+        Emails.HelloWorld something ->
+            "Hello world"
+                ++ something
+                ++ "!"
+                |> text
+                |> List.singleton
+                |> span []
 
 
 contactProcessor :

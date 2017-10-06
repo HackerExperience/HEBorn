@@ -6,4 +6,4 @@ import Game.Storyline.Missions.Models exposing (ID)
 
 type Msg
     = ActionDone Action
-    | StepDone ( ID, ID ) ID
+    | StepProceed ID

@@ -1,4 +1,4 @@
-module Events.Account.Bounces exposing (Event(..), handler, decoder)
+module Events.Account.Bounces exposing (Event(..), handler)
 
 import Json.Decode
     exposing
@@ -10,6 +10,7 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required)
 import Utils.Events exposing (Handler, notify)
+import Decoders.Bounces exposing (..)
 import Game.Account.Bounces.Models exposing (..)
 
 
@@ -33,25 +34,6 @@ handler event json =
 
 onChanged : Handler Event
 onChanged json =
-    decodeValue decoder json
+    decodeValue bounces json
         |> Result.map Changed
         |> notify
-
-
-decoder : Decoder Model
-decoder =
-    dict bounce
-
-
-bounce : Decoder Bounce
-bounce =
-    decode Bounce
-        |> required "name" string
-        |> required "path" (list nip)
-
-
-nip : Decoder ( String, String )
-nip =
-    decode (,)
-        |> required "netid" string
-        |> required "ip" string

@@ -5,4 +5,4 @@ import Game.Storyline.Emails.Models exposing (..)
 
 type Msg
     = Changed Model
-    | Receive ID Messages Responses
+    | NewEmail ID ( Float, Message ) Responses

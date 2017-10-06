@@ -2,7 +2,9 @@ module Game.Storyline.Missions.Models exposing (..)
 
 import Apps.Apps exposing (App(..))
 import Game.Shared
-import Game.Storyline.Missions.Actions as Actions exposing (..)
+import Game.Storyline.Missions.Actions exposing (Action)
+import Game.Storyline.Missions.Missions exposing (Mission(NoMission))
+import Game.Storyline.Missions.StepGen as Actions
 
 
 type alias ID =
@@ -10,26 +12,14 @@ type alias ID =
 
 
 type alias Model =
-    { mission : Missions
-    , goal : Goals
+    { mission : Mission
     , step : Maybe Step
     }
 
 
-type Missions
-    = NoMission
-    | Tutorial
-
-
-type Goals
-    = NoGoal
-    | TutorialIntroduction
-
-
 type alias Step =
-    { current : ID
+    { id : ID
     , actions : List Action
-    , next : ID
     }
 
 
@@ -50,10 +40,10 @@ setActions actions model =
             model
 
 
-validateStep : ( ID, ID ) -> Model -> Bool
-validateStep ( current, next ) model =
+validateStep : ID -> Model -> Bool
+validateStep current model =
     model.step
-        |> Maybe.map (\s -> s.current == current && s.next == next)
+        |> Maybe.map (\s -> s.id == current)
         |> Maybe.withDefault False
 
 
@@ -62,14 +52,8 @@ setStep newStep model =
     { model | step = newStep }
 
 
-initStep : ID -> ID -> Maybe Step
-initStep from to =
-    Just (Step from (fromStep from) to)
-
-
 initialModel : Model
 initialModel =
     { mission = NoMission
-    , goal = NoGoal
     , step = Nothing
     }

@@ -37,9 +37,7 @@ resert data id serverID app ({ visible, hidden, windows } as model) =
         noOpened =
             noVisible && noHidden
     in
-        if noOpened then
-            insert data id serverID app model
-        else if noVisible then
+        if noVisible && (not noHidden) then
             let
                 model_ =
                     hidden
