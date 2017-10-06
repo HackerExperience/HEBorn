@@ -83,8 +83,7 @@ update data msg ({ app } as model) =
             let
                 targetIp =
                     data
-                        |> Game.getServer
-                        |> Servers.getNIP
+                        |> Game.getID
                         |> Network.getIp
 
                 dispatch =

@@ -124,7 +124,7 @@ updateEvent game event model =
             ( model, Cmd.none, Dispatch.none )
 
 
-{-| Reports success back to the loading page.
+{-| Sets endpoint
 -}
 onJoined : Game.Model -> Network.NIP -> Model -> UpdateResponse
 onJoined game nip model =
@@ -137,8 +137,9 @@ onJoined game nip model =
                 Just { sessionId, windowId, context, tabId } ->
                     -- it may not be explicit, but sessionId
                     -- is always a gateway id
-                    Dispatch.server sessionId <|
-                        Servers.SetEndpoint (Just nip)
+                    --Dispatch.server sessionId <|
+                    --    Servers.SetEndpoint (Just nip)
+                    Dispatch.none
 
                 Nothing ->
                     Dispatch.none

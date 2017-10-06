@@ -43,6 +43,9 @@ update game msg model =
         SetEndpoint nip ->
             onSetEndpoint game nip model
 
+        InsertGateway nip ->
+            onInsertGateway nip model
+
         InsertEndpoint nip ->
             onInsertEndpoint nip model
 
@@ -74,23 +77,27 @@ onSetGateway game nip model =
     Update.fromModel { model | activeGateway = Just nip }
 
 
-onSetEndpoint : Game.Model -> Maybe NIP -> Model -> UpdateResponse
-onSetEndpoint game nip model =
+onSetEndpoint :
+    Game.Model
+    -> Maybe Servers.ID
+    -> Model
+    -> UpdateResponse
+onSetEndpoint game endpointId model =
     case getGateway model of
         Just gateway ->
             let
-                setEndpoint id =
-                    Dispatch.server id <| Servers.SetEndpoint nip
+                setEndpoint gatewayId =
+                    Dispatch.server gatewayId <|
+                        Servers.SetEndpoint endpointId
 
                 dispatch =
-                    game
-                        |> Game.getServers
-                        |> Servers.mapNetwork gateway
+                    model
+                        |> getGateway
                         |> Maybe.map setEndpoint
                         |> Maybe.withDefault Dispatch.none
 
                 model_ =
-                    if nip == Nothing then
+                    if endpointId == Nothing then
                         ensureValidContext game { model | context = Gateway }
                     else
                         ensureValidContext game model
@@ -235,15 +242,20 @@ ensureValidContext game model =
         endpoint =
             model
                 |> getGateway
-                |> Maybe.andThen (flip Servers.getByNIP servers)
-                |> Maybe.andThen Servers.getEndpoint
                 |> Maybe.andThen (flip Servers.get servers)
-                |> Maybe.map Servers.getNIP
+                |> Maybe.andThen Servers.getEndpoint
     in
         if getContext model == Endpoint && endpoint == Nothing then
             { model | context = Gateway }
         else
             model
+
+
+onInsertGateway : NIP -> Model -> UpdateResponse
+onInsertGateway nip model =
+    model
+        |> insertGateway nip
+        |> Update.fromModel
 
 
 onInsertEndpoint : NIP -> Model -> UpdateResponse

@@ -111,11 +111,6 @@ connectionID =
     fuzzer genConnectionID
 
 
-originConnection : Fuzzer ( Servers.ID, ConnectionID )
-originConnection =
-    fuzzer genOriginConnection
-
-
 state : Fuzzer State
 state =
     fuzzer genState
@@ -144,11 +139,6 @@ date =
 fileID : Fuzzer FileID
 fileID =
     fuzzer genFileID
-
-
-serverID : Fuzzer Servers.ID
-serverID =
-    fuzzer genServersID
 
 
 logID : Fuzzer Logs.ID
@@ -288,11 +278,6 @@ genConnectionID =
     unique
 
 
-genOriginConnection : Generator ( Servers.ID, ConnectionID )
-genOriginConnection =
-    map2 (,) unique genConnectionID
-
-
 genState : Generator State
 genState =
     choices
@@ -340,11 +325,6 @@ genPercentage =
 genDate : Generator CompletionDate
 genDate =
     float 1420070400 4102444799
-
-
-genServersID : Generator Servers.ID
-genServersID =
-    unique
 
 
 genLogID : Generator Logs.ID
