@@ -10,3 +10,4 @@ type Msg
     | LeaveChannel Channel
     | NewEvent Channel Value
     | Broadcast Events.Event
+    | NoOp

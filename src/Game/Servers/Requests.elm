@@ -6,7 +6,7 @@ module Game.Servers.Requests
         , serverReceive
         )
 
-import Game.Servers.Requests.Bootstrap as Bootstrap
+import Game.Servers.Requests.Resync as Resync
 import Game.Servers.Messages
     exposing
         ( RequestMsg(..)
@@ -15,7 +15,7 @@ import Game.Servers.Messages
 
 
 type Response
-    = BootstrapServer Bootstrap.Response
+    = ResyncServer Resync.Response
 
 
 type ServerResponse
@@ -25,8 +25,9 @@ type ServerResponse
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        BootstrapRequest ( code, data ) ->
-            Maybe.map BootstrapServer <| Bootstrap.receive code data
+        ResyncRequest maybeServerUid id ( code, data ) ->
+            Maybe.map ResyncServer <|
+                Resync.receive maybeServerUid id code data
 
 
 serverReceive : ServerRequestMsg -> Maybe ServerResponse

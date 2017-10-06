@@ -120,7 +120,6 @@ getGateway model =
         model
             |> getAccount
             |> Account.getGateway
-            |> Maybe.andThen (flip Servers.mapNetwork servers)
             |> Maybe.andThen
                 (\serverId ->
                     servers

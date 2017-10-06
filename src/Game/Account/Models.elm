@@ -8,6 +8,7 @@ module Game.Account.Models
         , initialModel
         , insertGateway
         , insertEndpoint
+        , getId
         , getToken
         , getGateway
         , getContext
@@ -84,6 +85,11 @@ initialModel id username token =
     , notifications = Notifications.initialModel
     , logout = False
     }
+
+
+getId : Model -> ID
+getId model =
+    model.id
 
 
 getToken : Model -> Token

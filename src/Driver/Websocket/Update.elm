@@ -42,6 +42,9 @@ update msg model =
             -- ignore broadcasts
             Update.fromModel model
 
+        NoOp ->
+            Update.fromModel model
+
 
 
 -- internals
@@ -57,9 +60,30 @@ decodeEvent : Value -> Result String GenericEvent
 decodeEvent =
     let
         decoder =
+            -- TODO: add event_id
             decode GenericEvent
                 |> required "data" value
                 |> required "event" string
+    in
+        decodeValue decoder
+
+
+decodeJoined : Value -> Result String Value
+decodeJoined =
+    let
+        decoder =
+            decode identity
+                |> required "data" value
+    in
+        decodeValue decoder
+
+
+decodeJoinFailed : Value -> Result String Value
+decodeJoinFailed =
+    let
+        decoder =
+            decode identity
+                |> required "data" value
     in
         decodeValue decoder
 
@@ -75,7 +99,7 @@ join channel payload model =
                 channel__ =
                     channelAddress
                         |> Channel.init
-                        |> Channel.onJoin (reportJoin channel)
+                        |> Channel.onJoin (reportJoined channel)
                         |> Channel.onJoinError (reportJoinFailed channel)
                         |> Channel.on "event" (NewEvent channel)
             in
@@ -114,15 +138,33 @@ leave channel model =
 -- reports
 
 
-reportJoin : Channel -> Value -> Msg
-reportJoin channel json =
-    Joined channel json
-        |> Events.Report
-        |> Broadcast
+reportJoined : Channel -> Value -> Msg
+reportJoined channel value =
+    case decodeJoined value of
+        Ok value ->
+            Joined channel value
+                |> Events.Report
+                |> Broadcast
+
+        Err err ->
+            let
+                log =
+                    Debug.log "▶ Joined decode error" err
+            in
+                NoOp
 
 
 reportJoinFailed : Channel -> Value -> Msg
-reportJoinFailed channel json =
-    JoinFailed channel json
-        |> Events.Report
-        |> Broadcast
+reportJoinFailed channel value =
+    case decodeJoinFailed value of
+        Ok value ->
+            JoinFailed channel value
+                |> Events.Report
+                |> Broadcast
+
+        Err err ->
+            let
+                log =
+                    Debug.log "▶ JoinFailed decode error" err
+            in
+                NoOp

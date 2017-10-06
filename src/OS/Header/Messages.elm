@@ -17,6 +17,6 @@ type Msg
     | CheckMenus
     | ContextTo Context
     | ToggleCampaign
-    | ServerReadAll String
+    | ServerReadAll NIP
     | ChatReadAll
     | AccountReadAll

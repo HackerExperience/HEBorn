@@ -20,12 +20,9 @@ import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
+import Game.Network.Types as Network
 import Game.Models exposing (..)
-import Decoders.Servers
 import Decoders.Storyline
-
-
--- this is semi updated, player servers may also become network_id / ip
 
 
 type alias ServersToJoin =
@@ -33,13 +30,20 @@ type alias ServersToJoin =
 
 
 type ServerToJoin
-    = JoinPlayer Servers.ID
+    = JoinPlayer Player
     | JoinRemote Remote
+
+
+type alias Player =
+    { serverId : String
+    , networkId : String
+    , ip : String
+    }
 
 
 type alias Remote =
     { password : String
-    , network_id : String
+    , networkId : String
     , ip : String
     }
 
@@ -55,26 +59,55 @@ bootstrap game =
         |> hardcoded game.config
         |> map (,)
         |> andThen (\done -> map done <| servers)
+        |> map (uncurry insertServers)
 
 
 servers : Decoder ServersToJoin
 servers =
-    oneOf [ field "servers" (list serverToJoin), succeed [] ]
+    field "servers" serversToJoin
 
 
-serverToJoin : Decoder ServerToJoin
-serverToJoin =
+serversToJoin : Decoder ServersToJoin
+serversToJoin =
+    decode List.append
+        |> required "player" (list <| map JoinPlayer joinPlayer)
+        |> required "remote" (list <| map JoinRemote joinRemote)
+
+
+joinPlayer : Decoder Player
+joinPlayer =
+    decode Player
+        |> required "server_id" string
+        |> required "network_id" string
+        |> required "ip" string
+
+
+joinRemote : Decoder Remote
+joinRemote =
+    decode Remote
+        |> required "password" string
+        |> required "network_id" string
+        |> required "ip" string
+
+
+insertServers : Model -> ServersToJoin -> ( Model, ServersToJoin )
+insertServers model serversToJoin =
     let
-        remote =
-            decode Remote
-                |> required "password" string
-                |> required "network_id" string
-                |> required "ip" string
+        reduceServers server servers =
+            case server of
+                JoinPlayer data ->
+                    let
+                        id =
+                            Network.toNip data.networkId data.ip
+                    in
+                        Servers.insertGateway id data.serverId servers
 
-        joinPlayer =
-            map JoinPlayer string
+                JoinRemote data ->
+                    servers
 
-        joinRemote =
-            map JoinRemote remote
+        model_ =
+            serversToJoin
+                |> List.foldl reduceServers (getServers model)
+                |> (flip setServers model)
     in
-        oneOf [ joinPlayer, joinRemote ]
+        ( model_, serversToJoin )

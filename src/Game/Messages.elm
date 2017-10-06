@@ -16,10 +16,10 @@ type Msg
     | MetaMsg Meta.Msg
     | StoryMsg Story.Msg
     | WebMsg Web.Msg
+    | Resync
     | Request RequestMsg
     | Event Events.Event
-    | NoOp
 
 
 type RequestMsg
-    = BootstrapRequest ResponseType
+    = ResyncRequest ResponseType

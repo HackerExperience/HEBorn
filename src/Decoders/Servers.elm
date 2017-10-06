@@ -25,7 +25,7 @@ import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Notifications.Models as Notifications
 import Game.Servers.Shared exposing (..)
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network exposing (NIP)
 import Decoders.Network
 import Decoders.Processes
 import Decoders.Logs
@@ -34,25 +34,18 @@ import Decoders.Tunnels
 import Decoders.Filesystem
 
 
-serverWithId : Decoder ( ID, Server )
-serverWithId =
-    decode (,)
-        |> required "id" string
-        |> custom server
-
-
-server : Decoder Server
-server =
+server : Maybe ServerUid -> Decoder Server
+server serverUid =
     decode Server
         |> required "name" string
         |> optional "server_type" serverType Desktop
-        |> andThen network
+        |> required "nips" (list Decoders.Network.nip)
         |> optionalMaybe "coordinates" float
         |> filesystem
         |> logs
         |> processes
         |> tunnels
-        |> custom ownership
+        |> custom (ownership serverUid)
         |> notifications
 
 
@@ -73,38 +66,26 @@ serverType =
         andThen decodeType string
 
 
-network : (List NIP -> NIP -> b) -> Decoder b
-network func =
-    let
-        insertData nips =
-            case List.head nips of
-                Just nip ->
-                    succeed (func nips nip)
+ownership : Maybe ServerUid -> Decoder Ownership
+ownership serverUid =
+    case serverUid of
+        Just serverUid ->
+            map GatewayOwnership (gatewayOwnership serverUid)
 
-                Nothing ->
-                    fail "Servers requires a least one nip."
-    in
-        andThen insertData (field "nips" (list Decoders.Network.nip))
+        Nothing ->
+            map EndpointOwnership endpointOwnership
 
 
-ownership : Decoder Ownership
-ownership =
-    oneOf
-        [ map GatewayOwnership gatewayOwnership
-        , map EndpointOwnership endpointOwnership
-        ]
-
-
-gatewayOwnership : Decoder GatewayData
-gatewayOwnership =
+gatewayOwnership : ServerUid -> Decoder GatewayData
+gatewayOwnership serverUid =
     let
         toGatewayData endpoints =
             endpoints
                 |> List.head
-                |> GatewayData endpoints
+                |> GatewayData serverUid endpoints
                 |> succeed
     in
-        andThen toGatewayData (field "endpoints" (list string))
+        andThen toGatewayData (field "endpoints" (list Decoders.Network.nip))
 
 
 endpointOwnership : Decoder EndpointData

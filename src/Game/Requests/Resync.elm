@@ -1,36 +1,38 @@
-module Game.Requests.Bootstrap
+module Game.Requests.Resync
     exposing
         ( Response(..)
         , request
         , receive
         )
 
-import Decoders.Bootstrap
+import Decoders.Game
 import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
 import Game.Messages exposing (..)
+import Game.Models exposing (..)
 import Game.Account.Models as Account
+import Decoders.Game exposing (ServersToJoin)
 
 
 type Response
-    = Okay Decoders.Bootstrap.Bootstrap
+    = Okay ( Model, ServersToJoin )
 
 
 request : Account.ID -> ConfigSource a -> Cmd Msg
 request id =
-    Requests.request (Topics.accountBootstrap id)
-        (BootstrapRequest >> Request)
+    Requests.request (Topics.accountResync id)
+        (ResyncRequest >> Request)
         emptyPayload
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
+receive : Model -> Code -> Value -> Maybe Response
+receive model code json =
     case code of
         OkCode ->
             json
-                |> decodeValue Decoders.Bootstrap.bootstrap
+                |> decodeValue (Decoders.Game.bootstrap model)
                 |> Result.map Okay
                 |> Requests.report
 
