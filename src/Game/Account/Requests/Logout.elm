@@ -16,5 +16,4 @@ request token =
     in
         Requests.request Topics.logout
             (LogoutRequest >> Request)
-            Nothing
             payload

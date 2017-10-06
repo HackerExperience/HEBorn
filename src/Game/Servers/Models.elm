@@ -86,6 +86,13 @@ get id { servers } =
     Dict.get id servers
 
 
+getByNIP : NIP -> Model -> Maybe Server
+getByNIP nip model =
+    model
+        |> mapNetwork nip
+        |> Maybe.andThen (flip get model)
+
+
 insert : ID -> Server -> Model -> Model
 insert id server ({ servers, network } as model) =
     let

@@ -16,6 +16,7 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Notifications.Messages as Notifications
+import Game.Network.Types as Network
 
 
 -- messages and requests received by the server collection
@@ -37,7 +38,7 @@ type RequestMsg
 
 type ServerMsg
     = SetBounce (Maybe Bounces.ID)
-    | SetEndpoint (Maybe ID)
+    | SetEndpoint (Maybe Network.NIP)
     | FilesystemMsg Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

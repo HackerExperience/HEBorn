@@ -19,6 +19,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Shared as Servers
 import Game.Servers.Logs.Models as Logs
 import Gen.Network as GenNetwork
 import Gen.Utils exposing (..)
@@ -110,7 +111,7 @@ connectionID =
     fuzzer genConnectionID
 
 
-originConnection : Fuzzer ( ServerID, ConnectionID )
+originConnection : Fuzzer ( Servers.ID, ConnectionID )
 originConnection =
     fuzzer genOriginConnection
 
@@ -145,9 +146,9 @@ fileID =
     fuzzer genFileID
 
 
-serverID : Fuzzer ServerID
+serverID : Fuzzer Servers.ID
 serverID =
-    fuzzer genServerID
+    fuzzer genServersID
 
 
 logID : Fuzzer Logs.ID
@@ -190,7 +191,8 @@ genProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap GenNetwork.genNip
+        |> andMap GenNetwork.genId
+        |> andMap GenNetwork.genIp
 
 
 genFullProcess : Generator Process
@@ -201,7 +203,8 @@ genFullProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap GenNetwork.genNip
+        |> andMap GenNetwork.genId
+        |> andMap GenNetwork.genIp
 
 
 genPartialProcess : Generator Process
@@ -212,7 +215,8 @@ genPartialProcess =
         |> andMap genState
         |> andMap (maybe genProcessFile)
         |> andMap (maybe genProgress)
-        |> andMap GenNetwork.genNip
+        |> andMap GenNetwork.genId
+        |> andMap GenNetwork.genIp
 
 
 genType : Generator Type
@@ -284,7 +288,7 @@ genConnectionID =
     unique
 
 
-genOriginConnection : Generator ( ServerID, ConnectionID )
+genOriginConnection : Generator ( Servers.ID, ConnectionID )
 genOriginConnection =
     map2 (,) unique genConnectionID
 
@@ -338,8 +342,8 @@ genDate =
     float 1420070400 4102444799
 
 
-genServerID : Generator ServerID
-genServerID =
+genServersID : Generator Servers.ID
+genServersID =
     unique
 
 

@@ -7,10 +7,11 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
+import Game.Network.Types exposing (NIP)
 
 
-request : Location -> FileID -> ID -> ConfigSource a -> Cmd Msg
-request newLocation fileId serverId =
+request : Location -> FileID -> NIP -> ConfigSource a -> Cmd Msg
+request newLocation fileId nip =
     let
         destination =
             newLocation |> List.map Encode.string |> Encode.list
@@ -21,7 +22,6 @@ request newLocation fileId serverId =
                 , ( "destination", destination )
                 ]
     in
-        Requests.request Topics.fsMove
+        Requests.request (Topics.fsMove nip)
             (MoveRequest >> Request)
-            (Just serverId)
             payload

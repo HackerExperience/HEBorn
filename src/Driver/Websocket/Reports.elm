@@ -7,5 +7,5 @@ import Driver.Websocket.Channels exposing (..)
 type Report
     = Connected String
     | Disconnected
-    | Joined Channel (Maybe String) Value
-    | JoinFailed Channel (Maybe String) Value
+    | Joined Channel Value
+    | JoinFailed Channel Value

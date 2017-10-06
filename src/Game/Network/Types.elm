@@ -17,6 +17,21 @@ type alias StringifiedNIP =
     String
 
 
+toNip : ID -> IP -> NIP
+toNip =
+    (,)
+
+
+getId : NIP -> ID
+getId =
+    Tuple.first
+
+
+getIp : NIP -> IP
+getIp =
+    Tuple.second
+
+
 toString : NIP -> StringifiedNIP
 toString ( id, ip ) =
     id ++ "," ++ ip

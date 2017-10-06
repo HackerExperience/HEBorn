@@ -8,7 +8,7 @@ type Event
 
 
 handler : Router Event
-handler context event json =
+handler event json =
     case event of
         _ ->
             Nothing

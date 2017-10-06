@@ -36,20 +36,24 @@ import Game.Network.Types as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Models exposing (Requester)
+import Game.Network.Types exposing (NIP)
 
 
 request :
     String
     -> Network.ID
-    -> String
+    -> Network.IP
     -> Requester
     -> ConfigSource a
     -> Cmd Msg
-request serverId networkId url requester =
-    Requests.request Topics.browse
-        (DNSRequest url requester >> Request)
-        (Just serverId)
-        (encoder networkId url)
+request url networkId serverIp requester =
+    let
+        nip =
+            Network.toNip networkId serverIp
+    in
+        Requests.request (Topics.browse nip)
+            (DNSRequest url requester >> Request)
+            (encoder networkId url)
 
 
 receive : String -> Code -> Value -> Maybe Response

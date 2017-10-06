@@ -51,8 +51,8 @@ type alias Model =
     , email : Maybe Email
     , database : Database.Model
     , dock : Dock.Model
-    , gateways : List Servers.ID
-    , activeGateway : Maybe Servers.ID -- NEVER SET TO NOTHING EXCEPT ON INIT
+    , gateways : List NIP
+    , activeGateway : Maybe NIP -- NEVER SET TO NOTHING EXCEPT ON INIT
     , joinedEndpoints : List NIP
     , context : Context
     , bounces : Bounces.Model
@@ -91,7 +91,7 @@ getToken model =
     model.auth.token
 
 
-getGateway : Model -> Maybe Servers.ID
+getGateway : Model -> Maybe NIP
 getGateway =
     .activeGateway
 
@@ -106,7 +106,7 @@ getDatabase =
     .database
 
 
-insertGateway : Servers.ID -> Model -> Model
+insertGateway : NIP -> Model -> Model
 insertGateway id ({ gateways } as model) =
     let
         activeGateway =

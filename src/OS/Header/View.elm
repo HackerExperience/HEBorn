@@ -7,13 +7,14 @@ import Html.Events exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Utils.Html.Attributes exposing (boolAttr)
+import Utils.Maybe as Maybe
 import Game.Account.Bounces.Models as Bounces
 import Game.Data as Game
 import Game.Meta.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Models as Game
 import Game.Notifications.Models as Notifications
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Storyline.Models as Story
@@ -44,44 +45,49 @@ headerBounces game =
 
 headerEndpoints : Game.Model -> List (Maybe ( NIP, Servers.ID ))
 headerEndpoints ({ account } as game) =
-    account.joinedEndpoints
-        |> List.map
-            (\nip ->
-                idByNip game nip
-                    |> Maybe.andThen
-                        (\id -> Just ( nip, id ))
-            )
-        |> List.filter ((/=) Nothing)
-        |> (::) Nothing
+    let
+        servers =
+            Game.getServers game
+
+        nipAndName nip =
+            servers
+                |> Servers.getByNIP nip
+                |> Maybe.map (\server -> Just ( nip, Servers.getName server ))
+    in
+        account.joinedEndpoints
+            |> List.filterMap nipAndName
+            |> (::) Nothing
 
 
-headerEndpoint : Game.Model -> Maybe ( NIP, Servers.ID )
+headerEndpoint : Game.Model -> Maybe ( NIP, String )
 headerEndpoint game =
-    Maybe.andThen
-        (\id ->
-            serverById game id
-                |> Maybe.map
-                    (.nip >> flip (,) id)
-        )
-        (gameEndpointId game)
+    let
+        maybeEndpointNip =
+            gameEndpointNip game
+
+        servers =
+            Game.getServers game
+
+        maybeEndpoint =
+            maybeEndpointNip
+                |> Maybe.andThen (flip Servers.getByNIP servers)
+    in
+        case Maybe.uncurry maybeEndpointNip maybeEndpoint of
+            Just ( nip, endpoint ) ->
+                Just ( nip, Servers.getName endpoint )
+
+            Nothing ->
+                Nothing
 
 
-gameEndpointId : Game.Model -> Maybe Servers.ID
-gameEndpointId game =
+gameEndpointNip : Game.Model -> Maybe NIP
+gameEndpointNip game =
     game
         |> Game.fromGateway
         |> Maybe.map Game.getServer
         |> Maybe.andThen Servers.getEndpoint
-
-
-serverById : Game.Model -> Servers.ID -> Maybe Servers.Server
-serverById game =
-    flip Servers.get game.servers
-
-
-idByNip : Game.Model -> NIP -> Maybe Servers.ID
-idByNip game =
-    flip Servers.mapNetwork game.servers
+        |> Maybe.andThen (flip Servers.get <| Game.getServers game)
+        |> Maybe.map Servers.getNIP
 
 
 logo : Html Msg
@@ -98,7 +104,10 @@ connection ({ game } as data) { openMenu } =
             Game.getAccount game
 
         gateway =
-            Just <| Game.getID data
+            data
+                |> Game.getServer
+                |> Servers.getNIP
+                |> Just
 
         gateways =
             account
@@ -117,7 +126,7 @@ connection ({ game } as data) { openMenu } =
             headerEndpoints game
 
         bounces =
-            gameEndpointId game
+            gameEndpointNip game
                 |> Maybe.map (always [])
                 |> Maybe.withDefault (headerBounces game)
 
@@ -166,22 +175,23 @@ selector classes wrapper kind render open active list =
 gatewaySelector :
     Game.Data
     -> OpenMenu
-    -> Maybe String
-    -> List (Maybe String)
+    -> Maybe NIP
+    -> List (Maybe NIP)
     -> Html Msg
 gatewaySelector data =
     let
-        renderGateway id =
-            case Servers.get id data.game.servers of
-                Just { name, nip } ->
-                    let
-                        ip =
-                            Tuple.second nip
-                    in
-                        Just (text <| name ++ " (" ++ ip ++ ")")
+        servers =
+            data
+                |> Game.getGame
+                |> Game.getServers
 
-                Nothing ->
-                    Nothing
+        render nip server =
+            (Servers.getName server) ++ " (" ++ (Network.getIp nip) ++ ")"
+
+        renderGateway nip =
+            servers
+                |> Servers.getByNIP nip
+                |> Maybe.map (render nip >> text)
     in
         selector [ SGateway ] SelectGateway GatewayOpen renderGateway
 
@@ -208,7 +218,7 @@ bounceSelector data =
 endpointSelectMsg : Maybe ( NIP, Servers.ID ) -> Msg
 endpointSelectMsg item =
     item
-        |> Maybe.map Tuple.second
+        |> Maybe.map Tuple.first
         |> SelectEndpoint
 
 
@@ -244,7 +254,7 @@ contextToggler active handler =
             []
 
 
-activeServerGetter : Game.Model -> Maybe Servers.ID
+activeServerGetter : Game.Model -> Maybe NIP
 activeServerGetter game =
     game
         |> Game.getAccount
@@ -254,7 +264,7 @@ activeServerGetter game =
                         Account.getGateway z
 
                     Endpoint ->
-                        gameEndpointId game
+                        gameEndpointNip game
            )
 
 
@@ -264,22 +274,28 @@ taskbar { game } { openMenu } =
         chatNotifications =
             Dict.empty
 
+        servers =
+            Game.getServers game
+
         activeServer =
             activeServerGetter game
 
         serverNotifications =
             activeServer
-                |> Maybe.andThen (flip Servers.get game.servers)
+                |> Maybe.andThen (flip Servers.getByNIP servers)
                 |> Maybe.map (.notifications)
                 |> Maybe.withDefault (Dict.empty)
 
         accountNotifications =
             game.account.notifications
 
+        activeServerId =
+            Maybe.andThen (flip Servers.mapNetwork servers) activeServer
+
         serverReadAll =
-            case activeServer of
-                Just activeServer ->
-                    ServerReadAll activeServer
+            case activeServerId of
+                Just serverId ->
+                    ServerReadAll serverId
 
                 Nothing ->
                     Debug.crash "The OS needs a server to run!"

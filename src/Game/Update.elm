@@ -150,7 +150,7 @@ updateEvent event model =
         Events.Report (Ws.Connected _) ->
             onWsConnected model
 
-        Events.Report (Ws.Joined AccountChannel _ _) ->
+        Events.Report (Ws.Joined (AccountChannel _) _) ->
             onWsJoinedAccount model
 
         _ ->
@@ -168,7 +168,7 @@ onWsConnected : Model -> UpdateResponse
 onWsConnected model =
     let
         dispatch =
-            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing Nothing)
+            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
     in
         ( model, Cmd.none, dispatch )
 
@@ -189,31 +189,23 @@ onBootstrapResponse bootstrap model0 =
         model1 =
             Decoders.Bootstrap.toModel model0 bootstrap
 
+        getNip =
+            Tuple.second >> Servers.getNIP
+
         account_ =
             bootstrap.serverIndex.player
-                |> List.foldl (Tuple.first >> Account.insertGateway)
+                |> List.foldl (getNip >> Account.insertGateway)
                     model1.account
 
-        joinGateway id =
-            let
-                context =
-                    Just id
-
-                payload =
-                    Just <|
-                        Encode.object
-                            [ ( "gateway_id", Encode.string id )
-                            ]
-            in
-                Dispatch.websocket <|
-                    Ws.JoinChannel ServerChannel context payload
+        joinGateway nip =
+            Dispatch.websocket <| Ws.JoinChannel (ServerChannel nip) Nothing
 
         model_ =
             { model1 | account = account_ }
 
         dispatch =
             bootstrap.serverIndex.player
-                |> List.map (Tuple.first >> joinGateway)
+                |> List.map (getNip >> joinGateway)
                 |> Dispatch.batch
     in
         ( model_, Cmd.none, dispatch )

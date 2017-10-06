@@ -13,8 +13,8 @@ import Game.Network.Types exposing (NIP)
 
 type Msg
     = DoLogout
-    | SetGateway Servers.ID
-    | SetEndpoint (Maybe Servers.ID)
+    | SetGateway NIP
+    | SetEndpoint (Maybe NIP)
     | InsertEndpoint NIP
     | ContextTo Context
     | BouncesMsg Bounces.Msg
@@ -22,7 +22,6 @@ type Msg
     | NotificationsMsg Notifications.Msg
     | Request RequestMsg
     | Event Events.Event
-    | Bootstrap Value -- TODO: remove this Value
 
 
 type RequestMsg

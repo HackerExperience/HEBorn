@@ -17,18 +17,18 @@ import Events.Events as Events
 update : Msg -> Model -> ( Model, Cmd Msg, Dispatch )
 update msg model =
     case msg of
-        JoinChannel channel topic payload ->
-            join channel topic payload model
+        JoinChannel channel payload ->
+            join channel payload model
 
-        LeaveChannel channel topic ->
-            leave channel topic model
+        LeaveChannel channel ->
+            leave channel model
 
-        NewEvent channel topic value ->
+        NewEvent channel value ->
             case decodeEvent value of
                 Ok { event, data } ->
                     let
                         dispatch =
-                            Events.handler channel topic event data
+                            Events.handler channel event data
                                 |> Maybe.map Broadcast
                                 |> Maybe.map Dispatch.websocket
                                 |> Maybe.withDefault Dispatch.none
@@ -64,25 +64,20 @@ decodeEvent =
         decodeValue decoder
 
 
-join :
-    Channel
-    -> Maybe String
-    -> Maybe Value
-    -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-join channel topic payload model =
+join : Channel -> Maybe Value -> Model -> ( Model, Cmd Msg, Dispatch )
+join channel payload model =
     let
         channelAddress =
-            getAddress channel topic
+            getAddress channel
 
         channel_ =
             let
                 channel__ =
                     channelAddress
                         |> Channel.init
-                        |> Channel.onJoin (reportJoin channel topic)
-                        |> Channel.onJoinError (reportJoinFailed channel topic)
-                        |> Channel.on "event" (NewEvent channel topic)
+                        |> Channel.onJoin (reportJoin channel)
+                        |> Channel.onJoinError (reportJoinFailed channel)
+                        |> Channel.on "event" (NewEvent channel)
             in
                 case payload of
                     Just payload ->
@@ -100,11 +95,11 @@ join channel topic payload model =
         Update.fromModel model_
 
 
-leave : Channel -> Maybe String -> Model -> ( Model, Cmd Msg, Dispatch )
-leave channel topic model =
+leave : Channel -> Model -> ( Model, Cmd Msg, Dispatch )
+leave channel model =
     let
         channelAddress =
-            getAddress channel topic
+            getAddress channel
 
         channels =
             Dict.remove channelAddress model.channels
@@ -119,15 +114,15 @@ leave channel topic model =
 -- reports
 
 
-reportJoin : Channel -> Maybe String -> Value -> Msg
-reportJoin channel topic json =
-    Joined channel topic json
+reportJoin : Channel -> Value -> Msg
+reportJoin channel json =
+    Joined channel json
         |> Events.Report
         |> Broadcast
 
 
-reportJoinFailed : Channel -> Maybe String -> Value -> Msg
-reportJoinFailed channel topic json =
-    JoinFailed channel topic json
+reportJoinFailed : Channel -> Value -> Msg
+reportJoinFailed channel json =
+    JoinFailed channel json
         |> Events.Report
         |> Broadcast

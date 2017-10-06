@@ -53,12 +53,12 @@ update data msg ({ openMenu } as model) =
             in
                 Update.fromModel model_
 
-        SelectGateway id ->
+        SelectGateway nip ->
             let
                 dispatch =
-                    case id of
-                        Just id ->
-                            Dispatch.account <| Account.SetGateway id
+                    case nip of
+                        Just nip ->
+                            Dispatch.account <| Account.SetGateway nip
 
                         Nothing ->
                             Dispatch.none
@@ -78,10 +78,10 @@ update data msg ({ openMenu } as model) =
             in
                 ( model_, Cmd.none, dispatch )
 
-        SelectEndpoint serverId ->
+        SelectEndpoint nip ->
             let
                 dispatch =
-                    Dispatch.account <| Account.SetEndpoint serverId
+                    Dispatch.account <| Account.SetEndpoint nip
 
                 model_ =
                     { model | openMenu = NothingOpen }

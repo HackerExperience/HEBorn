@@ -39,7 +39,7 @@ type alias AccountHolder =
 
 
 handler : Router Event
-handler context event json =
+handler event json =
     case parse event of
         ( Just "bounce", event ) ->
             Maybe.map BouncesEvent <| Bounces.handler event json
