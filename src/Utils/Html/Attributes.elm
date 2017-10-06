@@ -2,6 +2,9 @@ module Utils.Html.Attributes exposing (..)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
+import Game.Meta.Types exposing (Context(..))
+import Apps.Apps as Apps
+import Apps.Models as Apps
 
 
 boolAttr : String -> Bool -> Attribute msg
@@ -30,32 +33,33 @@ boolAttrYN attr boolean =
 
 selectedAttr : Bool -> Attribute msg
 selectedAttr =
-    boolAttr "data-selected"
+    boolAttr "selected"
 
 
 hasInstance : Bool -> Attribute msg
 hasInstance =
-    boolAttrYN "data-hasinst"
+    boolAttrYN "hasinst"
 
 
 iconAttr : String -> Attribute msg
 iconAttr =
-    attribute "data-icon"
+    attribute "icon"
 
 
 idAttr : String -> Attribute msg
 idAttr =
-    attribute "data-id"
+    attribute "id"
 
 
-dataDecorated : Bool -> Attribute msg
-dataDecorated =
-    boolAttrYN "data-decorated"
+decoratedAttr : Bool -> Attribute msg
+decoratedAttr =
+    boolAttrYN "decorated"
 
 
-appAttr : String -> Attribute msg
+appAttr : Apps.App -> Attribute msg
 appAttr =
-    attribute "data-app"
+    Apps.name
+        >> attribute "app"
 
 
 gameVersionAttr : String -> Attribute msg
@@ -68,9 +72,25 @@ gameModeAttr =
     attribute "game-mode"
 
 
+activeContextAttr : Context -> Attribute msg
+activeContextAttr =
+    activeContextValue
+        >> attribute "context"
+
+
+activeContextValue : Context -> String
+activeContextValue c =
+    case c of
+        Gateway ->
+            "gate"
+
+        Endpoint ->
+            "end"
+
+
 openAttr : Bool -> Attribute msg
 openAttr open =
-    attribute "data-open" <|
+    attribute "open" <|
         if open then
             "open"
         else

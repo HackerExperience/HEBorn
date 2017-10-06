@@ -17,7 +17,7 @@ wmBorderRadius =
 
 addIco : String -> Style -> Style
 addIco cond style =
-    withAttribute (Css.EQ "data-icon" cond)
+    withAttribute (Css.EQ "icon" cond)
         [ before
             [ style ]
         ]
@@ -40,7 +40,7 @@ css =
             , borderRadius wmBorderRadius
             , flexDirection column
             , flex (int 0)
-            , withAttribute (Css.EQ "data-decorated" "N")
+            , withAttribute (Css.EQ "decorated" "N")
                 [ children
                     [ div
                         [ children
@@ -55,7 +55,7 @@ css =
                         ]
                     ]
                 ]
-            , withAttribute (Css.EQ "data-decorated" "Y")
+            , withAttribute (Css.EQ "decorated" "Y")
                 [ globalShadow
                 , backgroundColor Colors.bgWindow
                 , borderRadius wmBorderRadius
@@ -166,7 +166,7 @@ css =
                     , class WindowHeader
                         [ borderRadius (px 0) ]
                     ]
-                , withAttribute (Css.EQ "data-decorated" "Y")
+                , withAttribute (Css.EQ "decorated" "Y")
                     [ children
                         [ div
                             [ children

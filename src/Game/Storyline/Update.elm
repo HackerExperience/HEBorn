@@ -5,8 +5,8 @@ import Utils.Update as Update
 import Game.Models as Game
 import Events.Events exposing (Event(AccountEvent))
 import Events.Account exposing (Event(MissionsEvent, EmailsEvent))
-import Events.Storyline.Missions exposing (Event(StepDone))
-import Events.Storyline.Emails exposing (Event(Changed, Receive))
+import Events.Storyline.Missions exposing (Event(StepProceed))
+import Events.Storyline.Emails exposing (Event(NewEmail))
 import Game.Storyline.Models exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Missions.Messages as Missions
@@ -31,14 +31,11 @@ update game msg model =
         EmailsMsg msg ->
             onEmail game msg model
 
-        Event (AccountEvent (MissionsEvent (StepDone ( c, n, nn )))) ->
-            onMission game (Missions.StepDone ( c, n ) nn) model
+        Event (AccountEvent (MissionsEvent (StepProceed next))) ->
+            onMission game (Missions.StepProceed next) model
 
-        Event (AccountEvent (EmailsEvent (Changed newModel))) ->
-            onEmail game (Emails.Changed newModel) model
-
-        Event (AccountEvent (EmailsEvent (Receive ( personId, messages, responses )))) ->
-            onEmail game (Emails.Receive personId messages responses) model
+        Event (AccountEvent (EmailsEvent (NewEmail ( personId, newMsg, responses )))) ->
+            onEmail game (Emails.NewEmail personId newMsg responses) model
 
         Event _ ->
             Update.fromModel model

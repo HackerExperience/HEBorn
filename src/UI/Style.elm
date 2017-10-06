@@ -195,7 +195,7 @@ customSelect : Snippet
 customSelect =
     typeSelector "customSelect"
         [ children [ typeSelector "selector" [ display none ] ]
-        , withAttribute (Css.EQ "data-open" "open")
+        , withAttribute (Css.EQ "open" "open")
             [ children [ typeSelector "selector" [ display block ] ] ]
         ]
 
@@ -223,7 +223,7 @@ horizontalTabs =
                 , borderTop3 (px 1) solid Colors.separator
                 , borderTopLeftRadius (px 12)
                 , borderTopRightRadius (px 12)
-                , withAttribute (Css.EQ "data-selected" "1")
+                , withAttribute (Css.EQ "selected" "1")
                     [ backgroundColor Colors.bgSelected
                     ]
                 ]

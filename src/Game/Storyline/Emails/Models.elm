@@ -3,6 +3,7 @@ module Game.Storyline.Emails.Models exposing (..)
 import Time exposing (Time)
 import Dict exposing (Dict)
 import Game.Shared
+import Game.Storyline.Emails.Contents exposing (..)
 
 
 type alias Model =
@@ -28,8 +29,8 @@ type alias About =
 
 
 type Message
-    = Sended PhraseID
-    | Received PhraseID
+    = Sent Content
+    | Received Content
 
 
 type alias Messages =
@@ -37,11 +38,7 @@ type alias Messages =
 
 
 type alias Responses =
-    List PhraseID
-
-
-type alias PhraseID =
-    ID
+    List Content
 
 
 type alias ID =

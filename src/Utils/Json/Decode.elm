@@ -1,4 +1,10 @@
-module Utils.Json.Decode exposing (date, exclusively, optionalMaybe)
+module Utils.Json.Decode
+    exposing
+        ( date
+        , exclusively
+        , optionalMaybe
+        , commonError
+        )
 
 import Date exposing (Date)
 import Json.Decode exposing (Decoder, succeed, fail, map, andThen, string)
@@ -18,6 +24,15 @@ exclusively val =
 optionalMaybe : String -> Decoder a -> Decoder (Maybe a -> b) -> Decoder b
 optionalMaybe name decoder =
     optional name (map Just decoder) Nothing
+
+
+commonError : String -> a -> String
+commonError type_ error =
+    "Trying to decode "
+        ++ type_
+        ++ ", but value "
+        ++ toString error
+        ++ " is not supported."
 
 
 

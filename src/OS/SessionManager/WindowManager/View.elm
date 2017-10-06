@@ -8,7 +8,7 @@ import Html.CssHelpers
 import Html.Keyed
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
-import Utils.Html.Attributes exposing (dataDecorated, iconAttr)
+import Utils.Html.Attributes exposing (decoratedAttr, appAttr, iconAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe)
 import Apps.Models as Apps
 import Apps.View as Apps
@@ -68,7 +68,11 @@ windowWrapper id window view =
     div
         [ windowClasses window
         , windowStyle window
-        , dataDecorated <| isDecorated window
+        , decoratedAttr <| isDecorated window
+        , appAttr window.app
+        , window.context
+            |> Maybe.withDefault Gateway
+            |> activeContextAttr
         , onMouseDown (UpdateFocusTo (Just id))
         ]
         [ header id window

@@ -6,6 +6,7 @@ import Game.Models as Game
 import Game.Storyline.Missions.Actions exposing (..)
 import Game.Storyline.Missions.Models exposing (..)
 import Game.Storyline.Missions.Messages exposing (..)
+import Game.Storyline.Missions.StepGen exposing (..)
 
 
 type alias UpdateResponse =
@@ -18,8 +19,8 @@ update game msg model =
         ActionDone action ->
             onActionDone action model
 
-        StepDone current next ->
-            onStepDone current next model
+        StepProceed next ->
+            onStepProceed next model
 
 
 onActionDone : Action -> Model -> UpdateResponse
@@ -37,11 +38,8 @@ requestSync =
     Cmd.none
 
 
-onStepDone : ( ID, ID ) -> ID -> Model -> UpdateResponse
-onStepDone (( current, next ) as validate) nextCheckpoint model =
-    if (validateStep validate model) then
-        model
-            |> setStep (initStep next nextCheckpoint)
-            |> Update.fromModel
-    else
-        ( model, requestSync, Dispatch.none )
+onStepProceed : ID -> Model -> UpdateResponse
+onStepProceed stepId model =
+    model
+        |> setStep (Just (Step stepId (fromStep model.mission stepId)))
+        |> Update.fromModel

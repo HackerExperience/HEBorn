@@ -4,16 +4,22 @@ import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
+import Utils.Update as Update
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import Game.Data as Game
 import Game.Meta.Types exposing (Context(..))
 import Game.Servers.Models as Servers
+import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 
-update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update : Game.Data -> Msg -> Model -> UpdateResponse
 update data msg model =
     case msg of
         OnDragBy ( x, y ) ->
@@ -21,10 +27,10 @@ update data msg model =
                 Just id ->
                     model
                         |> move id x y
-                        |> wrapEmpty
+                        |> Update.fromModel
 
                 Nothing ->
-                    wrapEmpty model
+                    Update.fromModel model
 
         DragMsg dragMsg ->
             let
@@ -36,48 +42,48 @@ update data msg model =
         StartDragging id ->
             model
                 |> startDragging id
-                |> wrapEmpty
+                |> Update.fromModel
 
         StopDragging ->
             model
                 |> stopDragging
-                |> wrapEmpty
+                |> Update.fromModel
 
         UpdateFocusTo maybeID ->
             case maybeID of
                 Just id ->
                     model
                         |> focus id
-                        |> wrapEmpty
+                        |> wrapGoApp data id
 
                 Nothing ->
                     model
                         |> unfocus
-                        |> wrapEmpty
+                        |> Update.fromModel
 
         Close id ->
             model
                 |> remove id
                 |> unfocus
-                |> wrapEmpty
+                |> Update.fromModel
 
         ToggleMaximize id ->
             model
                 |> toggleMaximize id
                 |> unfocus
                 |> focus id
-                |> wrapEmpty
+                |> Update.fromModel
 
         Minimize id ->
             model
                 |> minimize id
                 |> unfocus
-                |> wrapEmpty
+                |> Update.fromModel
 
         SwitchContext id ->
             model
                 |> toggleContext id
-                |> wrapEmpty
+                |> wrapGoApp data id
 
         WindowMsg id msg ->
             let
@@ -143,7 +149,7 @@ updateApp data id msg ({ windows } as model0) =
                 ( model_, cmd, dispatch )
 
         Nothing ->
-            ( model0, Cmd.none, Dispatch.none )
+            Update.fromModel model0
 
 
 updateContext :
@@ -153,30 +159,49 @@ updateContext :
     -> Apps.Msg
     -> Model
     -> ( Model, Cmd Apps.Msg, Dispatch )
-updateContext data id targetContext msg ({ windows } as model0) =
+updateContext data id targetContext msg ({ windows } as model) =
     case Dict.get id windows of
-        Nothing ->
-            ( model0, Cmd.none, Dispatch.none )
-
-        Just window0 ->
-            case window0.context of
+        Just window ->
+            case window.context of
                 Just activeContext ->
                     if (targetContext == activeContext) then
-                        updateApp data id msg model0
+                        updateApp data id msg model
                     else
-                        -- TODO: Code this case (when nsg has to go to unactive context)
-                        ( model0, Cmd.none, Dispatch.none )
+                        model
+                            |> toggleContext id
+                            |> updateApp data id msg
+                            |> Update.mapModel (toggleContext id)
 
                 Nothing ->
-                    if (targetContext /= Gateway) then
-                        ( model0, Cmd.none, Dispatch.none )
-                    else
-                        updateApp data id msg model0
+                    updateApp data id msg model
+
+        Nothing ->
+            Update.fromModel model
 
 
-wrapEmpty : Model -> ( Model, Cmd Msg, Dispatch )
-wrapEmpty model =
-    ( model, Cmd.none, Dispatch.none )
+wrapGoApp :
+    Game.Data
+    -> ID
+    -> Model
+    -> UpdateResponse
+wrapGoApp data id ({ windows } as model) =
+    case Dict.get id windows of
+        Just { context, app } ->
+            let
+                dispatch =
+                    case context of
+                        Just context ->
+                            context
+                                |> GoApp app
+                                |> Dispatch.missionAction data
+
+                        Nothing ->
+                            Dispatch.none
+            in
+                ( model, Cmd.none, dispatch )
+
+        Nothing ->
+            Update.fromModel model
 
 
 dragConfig : Draggable.Config ID Msg

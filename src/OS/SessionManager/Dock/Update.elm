@@ -3,7 +3,6 @@ module OS.SessionManager.Dock.Update exposing (update)
 import Dict
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Storyline.Missions.Actions exposing (Action(RunApp))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Models exposing (..)
@@ -45,14 +44,8 @@ update data msg ({ sessions } as model) =
 
                     ( model_, cmd, dispatch ) =
                         openOrRestoreApp data id ip app model
-
-                    dispatch_ =
-                        Dispatch.batch
-                            [ dispatch
-                            , Dispatch.missionAction data <| RunApp app
-                            ]
                 in
-                    ( model_, cmd, dispatch_ )
+                    ( model_, cmd, dispatch )
 
             _ ->
                 case Dict.get id sessions of

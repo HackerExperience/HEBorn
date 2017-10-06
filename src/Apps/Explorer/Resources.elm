@@ -43,4 +43,4 @@ prefix =
 
 idAttrKey : String
 idAttrKey =
-    "data-id"
+    "id"

@@ -13,7 +13,7 @@ import OS.SessionManager.Dock.Resources exposing (Classes(..), prefix)
 addIco : String -> Style -> Style
 addIco cond style =
     withAttribute
-        (Css.EQ "data-icon" cond)
+        (Css.EQ "icon" cond)
         [ before
             [ style ]
         ]
@@ -22,7 +22,7 @@ addIco cond style =
 addGrad : String -> (AngleOrDirection {} -> Style) -> Style
 addGrad cond style =
     withAttribute
-        (Css.EQ "data-icon" cond)
+        (Css.EQ "icon" cond)
         [ style toBottom ]
 
 
@@ -76,7 +76,7 @@ css =
                 , marginLeft (px 21)
                 , transition 0.25 "margin" EaseOut
                 ]
-            , withAttribute (Css.EQ "data-hasinst" "Y")
+            , withAttribute (Css.EQ "hasinst" "Y")
                 [ after
                     [ padding (px 2)
                     , backgroundColor (hex "FFF")
@@ -193,7 +193,7 @@ conditionalApps =
         [ withAttribute (Css.NOT <| Css.EQ "game-version" "dev")
             [ descendants
                 [ class Item
-                    [ withAttribute (Css.EQ "data-app" "The bug")
+                    [ withAttribute (Css.EQ "app" "The bug")
                         [ display none
                         , opacity (int 0)
                         ]
@@ -203,7 +203,7 @@ conditionalApps =
         , withAttribute (Css.NOT <| Css.EQ "game-mode" "campaign")
             [ descendants
                 [ class Item
-                    [ withAttribute (Css.EQ "data-app" "Thunderpigeon")
+                    [ withAttribute (Css.EQ "app" "Thunderpigeon")
                         [ display none
                         , opacity (int 0)
                         ]

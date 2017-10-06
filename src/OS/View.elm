@@ -1,7 +1,7 @@
 module OS.View exposing (view)
 
 import Html exposing (Html, div, text)
-import Utils.Html.Attributes exposing (gameVersionAttr, gameModeAttr)
+import Utils.Html.Attributes exposing (gameVersionAttr, gameModeAttr, activeContextAttr)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Game.Data as Game
@@ -43,6 +43,7 @@ view data model =
             , menuEmpty
             , gameVersionAttr data.game.config.version
             , gameModeAttr gameMode
+            , activeContextAttr data.game.account.context
             ]
             (osContent ++ dynStyle)
 

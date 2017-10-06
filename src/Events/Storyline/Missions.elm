@@ -1,73 +1,40 @@
-module Events.Storyline.Missions exposing (Event(..), handler, decoder)
+module Events.Storyline.Missions exposing (Event(..), handler)
 
 import Json.Decode
     exposing
         ( Decoder
         , decodeValue
-        , andThen
-        , succeed
-        , maybe
+        , field
         , string
         )
-import Json.Decode.Pipeline exposing (decode, required, optional)
-import Utils.Events exposing (Handler, notify, commonError)
-import Game.Storyline.Missions.Actions exposing (fromStep)
-import Game.Storyline.Missions.Models exposing (..)
-
-
-type alias NowAfterLater =
-    ( ID, ID, ID )
+import Utils.Events exposing (Handler, notify)
 
 
 type Event
-    = StepDone NowAfterLater
+    = StepProceed String
 
 
 handler : String -> Handler Event
 handler event json =
     case event of
-        "stepdone" ->
-            onStepDone json
+        "story_step_proceeded" ->
+            onStepProceed json
 
         _ ->
             Nothing
-
-
-decoder : Decoder Model
-decoder =
-    decode (,,,)
-        |> optional "mission" (maybe string) Nothing
-        |> optional "goals" (maybe string) Nothing
-        |> optional "current" (maybe string) Nothing
-        |> optional "next" (maybe string) Nothing
-        |> andThen
-            (\themall ->
-                case themall of
-                    ( Just "tutorial", Just "intro", Just current, Just next ) ->
-                        Step current (fromStep current) next
-                            |> Just
-                            |> Model Tutorial TutorialIntroduction
-                            |> succeed
-
-                    _ ->
-                        succeed <| Model NoMission NoGoal Nothing
-            )
 
 
 
 -- internals
 
 
-onStepDone : Handler Event
-onStepDone json =
-    decodeValue stepDone json
-        |> Result.map StepDone
+onStepProceed : Handler Event
+onStepProceed json =
+    decodeValue stepProceed json
+        |> Result.map StepProceed
         |> notify
 
 
-stepDone : Decoder NowAfterLater
-stepDone =
-    decode (,,)
-        |> required "current" string
-        |> required "next" string
-        |> required "nextnext" string
+stepProceed : Decoder String
+stepProceed =
+    field "next_step" string

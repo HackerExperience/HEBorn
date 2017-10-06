@@ -18,8 +18,8 @@ update game msg model =
         Changed newModel ->
             onChanged newModel model
 
-        Receive personId messages responses ->
-            onReceive personId messages responses model
+        NewEmail personId newMsg responses ->
+            onNewEmail personId newMsg responses model
 
 
 onChanged : Model -> Model -> UpdateResponse
@@ -27,9 +27,9 @@ onChanged newModel oldModel =
     Update.fromModel newModel
 
 
-onReceive : ID -> Messages -> Responses -> Model -> UpdateResponse
-onReceive personId messages responses model =
-    -- Called when Helix send us chat updates
+onNewEmail : ID -> ( Float, Message ) -> Responses -> Model -> UpdateResponse
+onNewEmail personId ( time, msg ) responses model =
+    -- Called when Helix new email received
     -- Creates person chat when it doesn't exists yet
     -- Insert/Update messages to person chat
     let
@@ -37,7 +37,7 @@ onReceive personId messages responses model =
             let
                 messages_ =
                     getMessages person
-                        |> Dict.union messages
+                        |> Dict.insert time msg
 
                 person_ =
                     { person

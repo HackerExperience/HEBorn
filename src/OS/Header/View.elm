@@ -6,6 +6,7 @@ import Html.CssHelpers
 import Html.Events exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
+import Utils.Html.Attributes exposing (boolAttr)
 import Game.Account.Bounces.Models as Bounces
 import Game.Data as Game
 import Game.Meta.Types exposing (..)
@@ -235,7 +236,12 @@ contextToggler active handler =
             else
                 [ Context ]
     in
-        span [ onClick handler, class classes ] []
+        span
+            [ onClick handler
+            , class classes
+            , boolAttr "active" active
+            ]
+            []
 
 
 activeServerGetter : Game.Model -> Maybe Servers.ID

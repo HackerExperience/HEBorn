@@ -1,6 +1,7 @@
-module Game.Storyline.Missions.Actions exposing (Action(..), fromStep)
+module Game.Storyline.Missions.Actions exposing (Action(..))
 
-import Apps.Apps exposing (App(..))
+import Game.Meta.Types exposing (Context)
+import Apps.Apps exposing (App)
 
 
 type alias ID =
@@ -9,14 +10,4 @@ type alias ID =
 
 type Action
     = RunFile ID
-    | RunApp App
-
-
-fromStep : ID -> List Action
-fromStep id =
-    case id of
-        "001" ->
-            [ RunApp ExplorerApp, RunFile "003" ]
-
-        _ ->
-            []
+    | GoApp App Context

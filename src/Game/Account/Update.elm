@@ -159,31 +159,25 @@ merge src new =
     , auth =
         src.auth
     , email =
-        new.email
+        src.email
     , database =
-        -- TODO: remake bootstrap
-        --Maybe.withDefault src.database <| new.database
         src.database
     , dock =
-        Maybe.withDefault src.dock <| new.dock
+        src.dock
     , gateways =
-        new.servers
+        src.gateways
     , activeGateway =
-        if new.activeGateway == "" then
-            -- TODO: Adapt new Account Bootstrap to use Maybe
-            Nothing
-        else
-            Just new.activeGateway
+        src.activeGateway
     , joinedEndpoints =
-        []
+        src.joinedEndpoints
     , context =
         src.context
     , bounces =
-        Maybe.withDefault src.bounces <| new.bounces
+        src.bounces
     , inventory =
-        Maybe.withDefault src.inventory <| new.inventory
+        src.inventory
     , notifications =
-        new.notifications
+        src.notifications
     , logout =
         src.logout
     }
