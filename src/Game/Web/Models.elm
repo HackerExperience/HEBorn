@@ -12,6 +12,7 @@ import Dict exposing (Dict)
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (Context(..))
 import Game.Web.Types exposing (..)
+import Game.Network.Types as Network
 
 
 type alias Model =
@@ -20,7 +21,7 @@ type alias Model =
 
 
 type alias LoadingPages =
-    Dict Servers.ID Requester
+    Dict Network.NIP Requester
 
 
 type alias Requester =
@@ -36,7 +37,7 @@ initialModel =
     { loadingPages = Dict.empty }
 
 
-startLoading : Servers.ID -> Requester -> Model -> Model
+startLoading : Network.NIP -> Requester -> Model -> Model
 startLoading id requester model =
     let
         loadingPages =
@@ -45,13 +46,13 @@ startLoading id requester model =
         { model | loadingPages = loadingPages }
 
 
-finishLoading : Servers.ID -> Model -> ( Maybe Requester, Model )
-finishLoading id model =
+finishLoading : Network.NIP -> Model -> ( Maybe Requester, Model )
+finishLoading nip model =
     let
         request =
-            Dict.get id model.loadingPages
+            Dict.get nip model.loadingPages
 
         loadingPages =
-            Dict.remove id model.loadingPages
+            Dict.remove nip model.loadingPages
     in
         ( request, { model | loadingPages = loadingPages } )

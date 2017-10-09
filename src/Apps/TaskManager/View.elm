@@ -150,7 +150,7 @@ viewTaskRow data now (( _, process ) as entry) =
                 maybeFilesystem =
                     process
                         |> Processes.getOrigin
-                        |> Maybe.andThen (flip Servers.get servers)
+                        |> Maybe.andThen (flip Servers.getByNIP servers)
                         |> Maybe.map Servers.getFilesystem
 
                 fileInformation fileName =

@@ -2,13 +2,12 @@ module Apps.Browser.Update exposing (update)
 
 import Utils.Update as Update
 import Game.Data as Game
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -222,15 +221,18 @@ onFetched response tab =
             Update.fromModel tab
 
 
-onCrack : Game.Data -> NIP -> Tab -> TabUpdateResponse
+onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
 onCrack data nip tab =
     let
         serverId =
             Game.getID data
 
+        targetIp =
+            Network.getIp nip
+
         dispatch =
             Dispatch.processes serverId <|
-                Processes.StartBruteforce nip
+                Processes.StartBruteforce targetIp
     in
         ( tab, Cmd.none, dispatch )
 
@@ -244,14 +246,16 @@ onGoAddress :
     -> TabUpdateResponse
 onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
-        networkId =
+        nip =
             data
                 |> Game.getServer
                 |> Servers.getNIP
-                |> Tuple.first
 
-        serverId =
-            Game.getID data
+        networkId =
+            Network.getId nip
+
+        networkIp =
+            Network.getIp nip
 
         requester =
             { sessionId = sessionId
@@ -261,7 +265,7 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Web.FetchUrl serverId url networkId requester
+            Web.FetchUrl url networkId networkIp requester
                 |> Dispatch.web
 
         tab_ =
@@ -272,13 +276,13 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
 
 onLogin :
     Game.Data
-    -> NIP
+    -> Network.NIP
     -> String
     -> Config
     -> Int
     -> Tab
     -> TabUpdateResponse
-onLogin data nip password { sessionId, windowId, context } tabId tab =
+onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
     let
         requester =
             { sessionId = sessionId
@@ -287,11 +291,16 @@ onLogin data nip password { sessionId, windowId, context } tabId tab =
             , tabId = tabId
             }
 
-        serverId =
-            Game.getID data
+        gatewayNip =
+            data
+                |> Game.getServer
+                |> Servers.getNIP
+
+        remoteIp =
+            Network.getIp remoteNip
 
         dispatch =
             Dispatch.web <|
-                Web.Login serverId nip password requester
+                Web.Login gatewayNip remoteIp password requester
     in
         ( tab, Cmd.none, dispatch )

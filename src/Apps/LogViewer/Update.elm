@@ -12,6 +12,7 @@ import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
 import Apps.LogViewer.Menu.Update as Menu
 import Apps.LogViewer.Menu.Actions as Menu
+import Game.Network.Types as Network
 
 
 update :
@@ -80,10 +81,11 @@ update data msg ({ app } as model) =
 
         StartCrypting id ->
             let
-                target =
+                targetIp =
                     data
                         |> Game.getServer
                         |> Servers.getNIP
+                        |> Network.getIp
 
                 dispatch =
                     Dispatch.processes data.id <|
@@ -91,8 +93,7 @@ update data msg ({ app } as model) =
                             (Processes.Encryptor <|
                                 Processes.EncryptorContent id
                             )
-                            data.id
-                            target
+                            targetIp
                             ( Nothing, Nothing, "File Name" )
             in
                 ( model, Cmd.none, dispatch )

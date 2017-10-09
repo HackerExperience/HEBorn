@@ -28,6 +28,7 @@ import Game.Servers.Filesystem.Messages
         ( Msg(Request)
         , RequestMsg(SyncRequest)
         )
+import Game.Network.Types exposing (NIP)
 import Decoders.Filesystem
 
 
@@ -35,19 +36,14 @@ type alias Index =
     Decoders.Filesystem.Index
 
 
-type alias ServerID =
-    String
-
-
 type Response
     = Okay Index
 
 
-request : ServerID -> ConfigSource a -> Cmd Msg
-request id =
-    Requests.request Topics.fsSync
+request : NIP -> ConfigSource a -> Cmd Msg
+request nip =
+    Requests.request (Topics.fsSync nip)
         (SyncRequest >> Request)
-        (Just id)
         emptyPayload
 
 

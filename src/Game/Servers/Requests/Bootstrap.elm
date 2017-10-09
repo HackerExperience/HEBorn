@@ -17,18 +17,18 @@ import Game.Servers.Messages
         , RequestMsg(BootstrapRequest)
         )
 import Game.Servers.Shared exposing (..)
+import Game.Network.Types exposing (NIP)
 
 
 type Response
     = Okay ( ID, Server )
 
 
-request : ID -> ConfigSource a -> Cmd Msg
-request id =
+request : NIP -> ConfigSource a -> Cmd Msg
+request nip =
     -- this request is mainly used to fetch invaded computers
-    Requests.request Topics.serverBootstrap
+    Requests.request (Topics.serverBootstrap nip)
         (BootstrapRequest >> Request)
-        (Just id)
         emptyPayload
 
 

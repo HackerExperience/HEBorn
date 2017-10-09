@@ -3,7 +3,7 @@ module Game.Servers.Processes.Messages exposing (Msg(..), RequestMsg(..))
 import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Processes.Models exposing (..)
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network
 
 
 type Msg
@@ -11,10 +11,10 @@ type Msg
     | Resume ID
     | Remove ID
     | Complete ID
-    | StartBruteforce NIP
+    | StartBruteforce Network.IP
       -- start may be removed if we provide a specific
       -- function for every process type
-    | Start Type ServerID NIP ( Maybe FileID, Maybe Version, FileName )
+    | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )
     | Request RequestMsg
     | Event Events.Event
 

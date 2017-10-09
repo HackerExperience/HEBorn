@@ -16,6 +16,16 @@ nip =
     fuzzer genNip
 
 
+id : Fuzzer ID
+id =
+    fuzzer genId
+
+
+ip : Fuzzer IP
+ip =
+    fuzzer genIp
+
+
 
 --------------------------------------------------------------------------------
 -- Generators
@@ -24,4 +34,14 @@ nip =
 
 genNip : Generator NIP
 genNip =
-    map2 (,) unique unique
+    map2 (,) genId genIp
+
+
+genId : Generator ID
+genId =
+    unique
+
+
+genIp : Generator IP
+genIp =
+    unique

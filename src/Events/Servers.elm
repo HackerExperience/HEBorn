@@ -1,7 +1,6 @@
 module Events.Servers
     exposing
         ( Event(..)
-        , ServerEvent(..)
         , Server
         , ID
         , Name
@@ -48,10 +47,6 @@ type alias Coordinates =
 
 
 type Event
-    = ServerEvent String ServerEvent
-
-
-type ServerEvent
     = Changed Server
     | FilesystemEvent Filesystem.Event
     | HardwareEvent Hardware.Event
@@ -61,32 +56,7 @@ type ServerEvent
 
 
 handler : Router Event
-handler context event json =
-    case context of
-        Just id ->
-            Maybe.map (ServerEvent id) <| handleServer event json
-
-        Nothing ->
-            Nothing
-
-
-decoder : Decoder Server
-decoder =
-    -- this will only handle local server informations
-    decode Server
-        |> required "id" string
-        |> required "name" string
-        |> required "coordinates" float
-        |> required "nip" Decoders.Network.nip
-        |> required "nips" (list Decoders.Network.nip)
-
-
-
--- internals
-
-
-handleServer : String -> Handler ServerEvent
-handleServer event json =
+handler event json =
     case parse event of
         ( Just "filesystem", event ) ->
             Maybe.map FilesystemEvent <| Filesystem.handler event json
@@ -110,7 +80,22 @@ handleServer event json =
             Nothing
 
 
-onChanged : Handler ServerEvent
+decoder : Decoder Server
+decoder =
+    -- this will only handle local server informations
+    decode Server
+        |> required "id" string
+        |> required "name" string
+        |> required "coordinates" float
+        |> required "nip" Decoders.Network.nip
+        |> required "nips" (list Decoders.Network.nip)
+
+
+
+-- internals
+
+
+onChanged : Handler Event
 onChanged json =
     decodeValue decoder json
         |> Result.map Changed

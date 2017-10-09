@@ -7,12 +7,13 @@ import Game.Models as Game
 import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ServerEvent), ServerEvent(LogsEvent))
+import Events.Servers exposing (Event(LogsEvent))
 import Events.Servers.Logs as Logs
 import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Network.Types exposing (NIP)
 import Decoders.Logs
 
 
@@ -24,54 +25,54 @@ type alias LogUpdateResponse =
     ( Log, Cmd LogMsg, Dispatch )
 
 
-update : Game.Model -> Servers.ID -> Msg -> Model -> UpdateResponse
-update game serverId msg model =
+update : Game.Model -> NIP -> Msg -> Model -> UpdateResponse
+update game nip msg model =
     case msg of
         Delete id ->
-            onDelete game serverId id model
+            onDelete game nip id model
 
         Hide id ->
-            onHide game serverId id model
+            onHide game nip id model
 
         LogMsg id msg ->
-            onLogMsg game serverId id msg model
+            onLogMsg game nip id msg model
 
         Event event ->
-            updateEvent game serverId event model
+            updateEvent game nip event model
 
         Request data ->
-            onRequest game serverId (receive data) model
+            onRequest game nip (receive data) model
 
 
 
 -- collection message handlers
 
 
-onDelete : Game.Model -> Servers.ID -> ID -> Model -> UpdateResponse
-onDelete game serverId id model =
+onDelete : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onDelete game nip id model =
     Update.fromModel model
 
 
-onHide : Game.Model -> Servers.ID -> ID -> Model -> UpdateResponse
-onHide game serverId id model =
+onHide : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onHide game nip id model =
     Update.fromModel model
 
 
-onRequest : Game.Model -> Servers.ID -> Maybe Response -> Model -> UpdateResponse
-onRequest game serverId response model =
+onRequest : Game.Model -> NIP -> Maybe Response -> Model -> UpdateResponse
+onRequest game nip response model =
     case response of
         Just response ->
-            updateRequest game serverId response model
+            updateRequest game nip response model
 
         Nothing ->
             Update.fromModel model
 
 
-onLogMsg : Game.Model -> Servers.ID -> ID -> LogMsg -> Model -> UpdateResponse
-onLogMsg game serverId id msg model =
+onLogMsg : Game.Model -> NIP -> ID -> LogMsg -> Model -> UpdateResponse
+onLogMsg game nip id msg model =
     case get id model of
         Just log ->
-            updateLog game serverId id msg log
+            updateLog game nip id msg log
                 |> Update.mapModel (flip (insert id) model)
                 |> Update.mapCmd (LogMsg id)
 
@@ -81,21 +82,21 @@ onLogMsg game serverId id msg model =
 
 updateEvent :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> Events.Event
     -> Model
     -> UpdateResponse
-updateEvent game serverId event model =
+updateEvent game nip event model =
     case event of
-        ServersEvent (ServerEvent _ (LogsEvent (Logs.Changed data))) ->
+        ServersEvent _ (LogsEvent (Logs.Changed data)) ->
             Update.fromModel (toModel data)
 
         _ ->
             Update.fromModel model
 
 
-updateRequest : Game.Model -> Servers.ID -> Response -> Model -> UpdateResponse
-updateRequest game serverId response model =
+updateRequest : Game.Model -> NIP -> Response -> Model -> UpdateResponse
+updateRequest game nip response model =
     Update.fromModel model
 
 
@@ -114,51 +115,51 @@ toModel index =
             |> List.foldl (uncurry insert) initialModel
 
 
-updateLog : Game.Model -> Servers.ID -> ID -> LogMsg -> Log -> LogUpdateResponse
-updateLog game serverId id msg log =
+updateLog : Game.Model -> NIP -> ID -> LogMsg -> Log -> LogUpdateResponse
+updateLog game nip id msg log =
     case msg of
         UpdateContent content ->
-            onUpdateContent game serverId id content log
+            onUpdateContent game nip id content log
 
         Encrypt ->
-            onEncrypt game serverId id log
+            onEncrypt game nip id log
 
         Decrypt content ->
-            onDecrypt game serverId id content log
+            onDecrypt game nip id content log
 
         LogRequest data ->
-            onLogRequest game serverId id (logReceive data) log
+            onLogRequest game nip id (logReceive data) log
 
 
-onUpdateContent : Game.Model -> Servers.ID -> ID -> String -> Log -> LogUpdateResponse
-onUpdateContent game serverId id content log =
+onUpdateContent : Game.Model -> NIP -> ID -> String -> Log -> LogUpdateResponse
+onUpdateContent game nip id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-onEncrypt : Game.Model -> Servers.ID -> ID -> Log -> LogUpdateResponse
-onEncrypt game serverId id log =
+onEncrypt : Game.Model -> NIP -> ID -> Log -> LogUpdateResponse
+onEncrypt game nip id log =
     setContent Nothing log
         |> Update.fromModel
 
 
-onDecrypt : Game.Model -> Servers.ID -> ID -> String -> Log -> LogUpdateResponse
-onDecrypt game serverId id content log =
+onDecrypt : Game.Model -> NIP -> ID -> String -> Log -> LogUpdateResponse
+onDecrypt game nip id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
 onLogRequest :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> ID
     -> Maybe LogResponse
     -> Log
     -> LogUpdateResponse
-onLogRequest game serverId id response log =
+onLogRequest game nip id response log =
     case response of
         Just response ->
-            updateLogRequest game serverId id response log
+            updateLogRequest game nip id response log
 
         Nothing ->
             Update.fromModel log
@@ -166,11 +167,11 @@ onLogRequest game serverId id response log =
 
 updateLogRequest :
     Game.Model
-    -> Servers.ID
+    -> NIP
     -> ID
     -> LogResponse
     -> Log
     -> LogUpdateResponse
-updateLogRequest game serverId id resposne log =
+updateLogRequest game nip id resposne log =
     -- no log responses yet
     Update.fromModel log

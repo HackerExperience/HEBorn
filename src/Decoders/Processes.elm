@@ -47,15 +47,9 @@ process =
         |> required "state" state
         |> optionalMaybe "file" file
         |> optionalMaybe "progress" progress
-        |> custom network
-        |> andThen insertId
-
-
-network : Decoder NIP
-network =
-    decode (,)
         |> required "network_id" string
         |> required "target_ip" string
+        |> andThen insertId
 
 
 insertId : Process -> Decoder ( ID, Process )
@@ -102,7 +96,7 @@ access =
     let
         full =
             decode FullAccess
-                |> required "origin_id" string
+                |> required "origin_ip" string
                 |> required "priority" priority
                 |> required "usage" resourcesUsage
                 |> optional "connection_id" (maybe string) Nothing
