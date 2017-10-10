@@ -28,64 +28,49 @@ view : Game.Data -> Model -> Html Msg
 view data model =
     case model of
         NotFoundModel _ ->
-            NotFound.view
-                |> ignoreMsg
+            ignoreMsg <| NotFound.view
 
         HomeModel ->
-            Home.view
-                |> globalMsg
+            Html.map GlobalMsg Home.view
 
         WebserverModel model ->
-            Webserver.view model
-                |> ignoreMsg
+            ignoreMsg <| Webserver.view model
 
         NoWebserverModel model ->
-            NoWebserver.view data model
-                |> Html.map handleNoWebserver
+            Html.map NoWebserverMsg <| NoWebserver.view data model
 
         ProfileModel ->
-            Profile.view
-                |> ignoreMsg
+            ignoreMsg <| Profile.view
 
         WhoisModel ->
-            Whois.view
-                |> ignoreMsg
+            ignoreMsg <| Whois.view
 
         DownloadCenterModel model ->
-            DownloadCenter.view data model
-                |> Html.map handleDownloadCenter
+            Html.map DownloadCenterMsg <| DownloadCenter.view data model
 
         ISPModel ->
-            ISP.view
-                |> ignoreMsg
+            ignoreMsg <| ISP.view
 
         BankModel model ->
-            Bank.view model
-                |> ignoreMsg
+            ignoreMsg <| Bank.view model
 
         StoreModel ->
-            Store.view
-                |> ignoreMsg
+            ignoreMsg <| Store.view
 
         BTCModel ->
-            BTC.view
-                |> ignoreMsg
+            ignoreMsg <| BTC.view
 
         FBIModel ->
-            FBI.view
-                |> ignoreMsg
+            ignoreMsg <| FBI.view
 
         NewsModel ->
-            News.view
-                |> ignoreMsg
+            ignoreMsg <| News.view
 
         BithubModel ->
-            Bithub.view
-                |> ignoreMsg
+            ignoreMsg <| Bithub.view
 
         MissionCenterModel ->
-            MissionCenter.view
-                |> ignoreMsg
+            ignoreMsg <| MissionCenter.view
 
         LoadingModel _ ->
             div [] []
@@ -94,31 +79,26 @@ view data model =
             div [] []
 
 
-handleNoWebserver : NoWebserver.Msg -> Msg
-handleNoWebserver msg =
-    case msg of
-        NoWebserver.GlobalMsg msg ->
-            GlobalMsg msg
-
-        _ ->
-            NoWebserverMsg msg
-
-
-handleDownloadCenter : DownloadCenter.Msg -> Msg
-handleDownloadCenter msg =
-    case msg of
-        DownloadCenter.GlobalMsg msg ->
-            GlobalMsg msg
-
-        _ ->
-            DownloadCenterMsg msg
-
-
 ignoreMsg : Html a -> Html Msg
 ignoreMsg =
     Html.map (always Ignore)
 
 
-globalMsg : Html CommonActions -> Html Msg
-globalMsg =
-    Html.map GlobalMsg
+
+--globalMsg : Html CommonActions -> Html Msg
+--globalMsg =
+--
+--handleNoWebserver : NoWebserver.Msg -> Msg
+--handleNoWebserver msg =
+--    case msg of
+--        NoWebserver.GlobalMsg msg ->
+--            GlobalMsg msg
+--        _ ->
+--            NoWebserverMsg msg
+--handleDownloadCenter : DownloadCenter.Msg -> Msg
+--handleDownloadCenter msg =
+--    case msg of
+--        DownloadCenter.GlobalMsg msg ->
+--            GlobalMsg msg
+--        _ ->
+--            DownloadCenterMsg msg

@@ -7,7 +7,12 @@ module Apps.Browser.Widgets.HackingToolkit.View
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Utils.Maybe as Maybe
 import Html.CssHelpers
+import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
+import Game.Account.Database.Models as Database
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
@@ -25,10 +30,10 @@ type alias Config msg =
     Html.CssHelpers.withNamespace prefix
 
 
-hackingToolkit : Config msg -> Model -> Html msg
-hackingToolkit config model =
+hackingToolkit : Game.Data -> Config msg -> Model -> Html msg
+hackingToolkit data config model =
     div [ class [ HackingToolkit ] ]
-        [ goPanelView config model
+        [ goPanelView data config model
         , node "actions"
             []
             [ crackBtn config model
@@ -37,19 +42,30 @@ hackingToolkit config model =
         ]
 
 
-goPanelView : Config msg -> Model -> Html msg
-goPanelView config model =
+goPanelView : Game.Data -> Config msg -> Model -> Html msg
+goPanelView data config model =
     if config.showPassword then
-        loginForm config model
+        loginForm data config model
     else
         togglePanel config
 
 
-loginForm : Config msg -> Model -> Html msg
-loginForm config model =
+loginForm : Game.Data -> Config msg -> Model -> Html msg
+loginForm data config model =
     let
         inputText =
-            Maybe.withDefault "" model.password
+            case model.password of
+                Just password ->
+                    password
+
+                Nothing ->
+                    data
+                        |> Game.getGame
+                        |> Game.getAccount
+                        |> Account.getDatabase
+                        |> Database.getHackedServers
+                        |> Database.getHackedServer model.target
+                        |> Database.getPassword
     in
         node "portal"
             []

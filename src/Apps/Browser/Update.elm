@@ -9,6 +9,7 @@ import Game.Web.Messages as Web
 import Game.Web.Types as Web
 import Game.Network.Types as Network
 import Apps.Config exposing (..)
+import Apps.Browser.Pages.CommonActions as CommonActions exposing (CommonActions)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Pages.Messages as Pages
@@ -118,44 +119,82 @@ updateSomeTabMsg data tabId msg model =
         tab =
             getTab tabId model.tabs
 
-        result =
-            case msg of
-                UpdateAddress newAddr ->
-                    onUpdateAddress newAddr tab
-
-                GoPrevious ->
-                    onGoPrevious tab
-
-                GoNext ->
-                    onGoNext tab
-
-                PageMsg msg ->
-                    onPageMsg data msg tab
-
-                GoAddress url ->
-                    onGoAddress data url model.me tabId tab
-
-                Fetched response ->
-                    onFetched response tab
-
-                Crack nip ->
-                    onCrack data nip tab
-
-                AnyMap _ ->
-                    Update.fromModel tab
-
-                Login nip password ->
-                    onLogin data nip password model.me tabId tab
-
-                LoginFailed ->
-                    Update.fromModel tab
-
         setThisTab tab_ =
             { model | tabs = (setTab tabId tab_ model.tabs) }
+
+        toUpdateResponse result =
+            result
+                |> Update.mapModel setThisTab
+                |> Update.mapCmd (SomeTabMsg tabId)
     in
-        result
-            |> Update.mapModel setThisTab
-            |> Update.mapCmd (SomeTabMsg tabId)
+        case msg of
+            PageMsg msg ->
+                let
+                    ( updateResponse, maybeCA ) =
+                        onPageMsg data msg tab
+                in
+                    case maybeCA of
+                        Just action ->
+                            let
+                                ( model0, cmd0, dispatch0 ) =
+                                    toUpdateResponse updateResponse
+
+                                ( model_, cmd1, dispatch1 ) =
+                                    update data
+                                        (commonActionToMsg tabId action)
+                                        model0
+
+                                cmd_ =
+                                    Cmd.batch [ cmd0, cmd1 ]
+
+                                dispatch_ =
+                                    Dispatch.batch [ dispatch0, dispatch1 ]
+                            in
+                                ( model_, cmd_, dispatch_ )
+
+                        Nothing ->
+                            toUpdateResponse updateResponse
+
+            UpdateAddress newAddr ->
+                tab
+                    |> onUpdateAddress newAddr
+                    |> toUpdateResponse
+
+            GoPrevious ->
+                tab
+                    |> onGoPrevious
+                    |> toUpdateResponse
+
+            GoNext ->
+                tab
+                    |> onGoNext
+                    |> toUpdateResponse
+
+            GoAddress url ->
+                tab
+                    |> onGoAddress data url model.me tabId
+                    |> toUpdateResponse
+
+            Fetched response ->
+                tab
+                    |> onFetched response
+                    |> toUpdateResponse
+
+            Crack nip ->
+                tab
+                    |> onCrack data nip
+                    |> toUpdateResponse
+
+            AnyMap _ ->
+                Update.fromModel model
+
+            Login nip password ->
+                tab
+                    |> onLogin data nip password model.me tabId
+                    |> toUpdateResponse
+
+            LoginFailed ->
+                Update.fromModel model
 
 
 
@@ -166,16 +205,19 @@ onPageMsg :
     Game.Data
     -> Pages.Msg
     -> Tab
-    -> TabUpdateResponse
+    -> ( TabUpdateResponse, Maybe CommonActions )
 onPageMsg data msg tab =
-    Update.child
-        { get = .page
-        , set = (\page tab -> { tab | page = page })
-        , toMsg = PageMsg
-        , update = (Pages.update data)
-        }
-        msg
-        tab
+    let
+        ( ( page, cmd, dispatch ), maybeCommonAction ) =
+            Pages.update data msg tab.page
+
+        tab_ =
+            { tab | page = page }
+
+        cmd_ =
+            Cmd.map PageMsg cmd
+    in
+        ( ( tab_, cmd_, dispatch ), maybeCommonAction )
 
 
 onUpdateAddress : URL -> Tab -> TabUpdateResponse
@@ -300,3 +342,22 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
                 Web.Login gatewayNip remoteIp password requester
     in
         ( tab, Cmd.none, dispatch )
+
+
+commonActionToMsg : Int -> CommonActions -> Msg
+commonActionToMsg tabId action =
+    case action of
+        CommonActions.GoAddress a ->
+            SomeTabMsg tabId <| GoAddress a
+
+        CommonActions.NewTabIn a ->
+            NewTabIn a
+
+        CommonActions.Crack nip ->
+            SomeTabMsg tabId <| Crack nip
+
+        CommonActions.AnyMap nip ->
+            SomeTabMsg tabId <| AnyMap nip
+
+        CommonActions.Login nip a ->
+            SomeTabMsg tabId <| Login nip a

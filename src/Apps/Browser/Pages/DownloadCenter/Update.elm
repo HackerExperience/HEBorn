@@ -3,6 +3,7 @@ module Apps.Browser.Pages.DownloadCenter.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
+import Apps.Browser.Pages.CommonActions exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
@@ -18,7 +19,10 @@ update :
     -> Model
     -> UpdateResponse
 update data msg model =
-    case msg of
+    case Debug.log "WOOOOOOOOOOOOOOOOOOOOOOOW" msg of
+        GlobalMsg (Crack _) ->
+            onUpdatePasswordField "" model
+
         GlobalMsg _ ->
             -- Treated in Browser.Update
             Update.fromModel model
