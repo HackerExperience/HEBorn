@@ -61,6 +61,9 @@ genModel =
 
         insertServer ( id, server ) game =
             let
+                server_ =
+                    { server | nips = id :: server.nips }
+
                 isGateway =
                     case server.ownership of
                         Servers.GatewayOwnership _ ->
@@ -70,11 +73,11 @@ genModel =
                             False
 
                 servers =
-                    Servers.insert id server game.servers
+                    Servers.insert id server_ game.servers
 
                 account =
                     if isGateway then
-                        Account.insertGateway server.nip game.account
+                        Account.insertGateway id game.account
                     else
                         game.account
             in

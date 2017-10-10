@@ -15,6 +15,7 @@ type Msg
     = DoLogout
     | SetGateway NIP
     | SetEndpoint (Maybe NIP)
+    | InsertGateway NIP
     | InsertEndpoint NIP
     | ContextTo Context
     | BouncesMsg Bounces.Msg

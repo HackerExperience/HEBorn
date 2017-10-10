@@ -78,9 +78,7 @@ view data ({ app } as model) =
                 ]
 
         nip =
-            data
-                |> Game.getServer
-                |> Servers.getNIP
+            Game.getID data
 
         mainEntries =
             data

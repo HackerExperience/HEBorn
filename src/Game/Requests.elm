@@ -1,17 +1,18 @@
 module Game.Requests exposing (Response(..), receive)
 
-import Game.Requests.Bootstrap as Bootstrap
+import Game.Requests.Resync as Resync
 import Game.Messages exposing (..)
+import Game.Models exposing (..)
 
 
 type Response
-    = Bootstrap Bootstrap.Response
+    = Resync Resync.Response
 
 
-receive : RequestMsg -> Maybe Response
-receive response =
+receive : Model -> RequestMsg -> Maybe Response
+receive model response =
     case response of
-        BootstrapRequest ( code, data ) ->
+        ResyncRequest ( code, data ) ->
             data
-                |> Bootstrap.receive code
-                |> Maybe.map Bootstrap
+                |> Resync.receive model code
+                |> Maybe.map Resync

@@ -3,6 +3,7 @@ module Requests.Topics exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Requests.Types exposing (..)
 import Game.Account.Models as Account
+import Game.Servers.Shared as Servers
 import Game.Network.Types exposing (NIP)
 
 
@@ -26,30 +27,21 @@ logout =
     WebsocketTopic RequestsChannel "account.logout"
 
 
-accountBootstrap : Account.ID -> Topic
-accountBootstrap id =
+accountResync : Account.ID -> Topic
+accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
-serverBootstrap : NIP -> Topic
-serverBootstrap nip =
-    WebsocketTopic (ServerChannel nip) "bootstrap"
-
-
-
--- account
-
-
-accountSync : Account.ID -> Topic
-accountSync id =
-    WebsocketTopic (AccountChannel id) "account.sync"
+serverResync : Servers.ID -> Topic
+serverResync id =
+    WebsocketTopic (ServerChannel id) "bootstrap"
 
 
 
 -- logs
 
 
-logsSync : NIP -> Topic
+logsSync : Servers.ID -> Topic
 logsSync nip =
     WebsocketTopic (ServerChannel nip) "log.index"
 
@@ -58,7 +50,7 @@ logsSync nip =
 -- meta
 
 
-metaSync : NIP -> Topic
+metaSync : Servers.ID -> Topic
 metaSync nip =
     WebsocketTopic (ServerChannel nip) "meta.index"
 
@@ -67,7 +59,7 @@ metaSync nip =
 -- processes
 
 
-processesSync : NIP -> Topic
+processesSync : Servers.ID -> Topic
 processesSync nip =
     WebsocketTopic (ServerChannel nip) "processes.index"
 
@@ -76,27 +68,27 @@ processesSync nip =
 -- filesytem
 
 
-fsSync : NIP -> Topic
+fsSync : Servers.ID -> Topic
 fsSync nip =
     WebsocketTopic (ServerChannel nip) "file.index"
 
 
-fsDelete : NIP -> Topic
+fsDelete : Servers.ID -> Topic
 fsDelete nip =
     WebsocketTopic (ServerChannel nip) "file.delete"
 
 
-fsMove : NIP -> Topic
+fsMove : Servers.ID -> Topic
 fsMove nip =
     WebsocketTopic (ServerChannel nip) "file.move"
 
 
-fsRename : NIP -> Topic
+fsRename : Servers.ID -> Topic
 fsRename nip =
     WebsocketTopic (ServerChannel nip) "file.rename"
 
 
-fsCreate : NIP -> Topic
+fsCreate : Servers.ID -> Topic
 fsCreate nip =
     WebsocketTopic (ServerChannel nip) "file.create"
 
@@ -105,11 +97,11 @@ fsCreate nip =
 -- Player Actions
 
 
-bruteforce : NIP -> Topic
+bruteforce : Servers.ID -> Topic
 bruteforce nip =
     WebsocketTopic (ServerChannel nip) "bruteforce"
 
 
-browse : NIP -> Topic
+browse : Servers.ID -> Topic
 browse nip =
     WebsocketTopic (ServerChannel nip) "browse"

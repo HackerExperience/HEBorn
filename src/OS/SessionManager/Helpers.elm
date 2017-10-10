@@ -1,6 +1,7 @@
 module OS.SessionManager.Helpers exposing (toSessionID)
 
 import Game.Data as Game
+import Game.Models as Game
 import Game.Meta.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Models as Game
@@ -13,13 +14,32 @@ toSessionID data =
     let
         game =
             Game.getGame data
+
+        context =
+            game
+                |> Game.getAccount
+                |> Account.getContext
+
+        server =
+            Game.getServer data
+
+        servers =
+            Game.getServers game
     in
-        case Account.getContext <| Game.getAccount game of
+        case context of
             Gateway ->
-                data.id
+                Servers.toSessionId data.id servers
 
             Endpoint ->
-                data
-                    |> Game.getServer
-                    |> Servers.getEndpoint
-                    |> Maybe.withDefault data.id
+                let
+                    endpointSessionId =
+                        server
+                            |> Servers.getEndpoint
+                            |> Maybe.map (flip Servers.toSessionId servers)
+                in
+                    case endpointSessionId of
+                        Just endpointSessionId ->
+                            endpointSessionId
+
+                        Nothing ->
+                            Servers.toSessionId data.id servers

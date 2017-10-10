@@ -14,6 +14,7 @@ import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (..)
+import Game.Servers.Models exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Notifications.Messages as Notifications
 import Game.Network.Types as Network
@@ -24,12 +25,13 @@ import Game.Network.Types as Network
 
 type Msg
     = ServerMsg ID ServerMsg
+    | Resync ID
     | Request RequestMsg
     | Event Events.Event
 
 
 type RequestMsg
-    = BootstrapRequest ResponseType
+    = ResyncRequest (Maybe ServerUid) ID ResponseType
 
 
 

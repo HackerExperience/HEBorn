@@ -9,7 +9,7 @@ import Random.Pcg
         , constant
         , int
         , list
-        , choice
+        , choices
         , map
         , map2
         , andThen
@@ -32,11 +32,6 @@ import Gen.Utils exposing (..)
 serverID : Fuzzer ID
 serverID =
     fuzzer genServerID
-
-
-ip : Fuzzer IP
-ip =
-    fuzzer genIP
 
 
 serverData : Fuzzer Server
@@ -82,31 +77,54 @@ model =
 
 genServerID : Generator ID
 genServerID =
-    unique
+    map2 (,) unique unique
 
 
-{-| TODO: make a true IP generator
--}
-genIP : Generator IP
-genIP =
+genServerUid : Generator ServerUid
+genServerUid =
     unique
 
 
 genOwnserhip : Generator Ownership
 genOwnserhip =
-    choice
-        (GatewayOwnership <| GatewayData [] Nothing)
-        (EndpointOwnership <| EndpointData Nothing Nothing)
+    choices
+        [ map GatewayOwnership genGatewayOwnership
+        , map EndpointOwnership genEndpointOwnership
+        ]
+
+
+genGatewayOwnership : Generator GatewayData
+genGatewayOwnership =
+    map (\uid -> GatewayData uid [] Nothing) genServerUid
+
+
+genEndpointOwnership : Generator EndpointData
+genEndpointOwnership =
+    constant <| EndpointData Nothing Nothing
 
 
 genServer : Generator Server
 genServer =
+    genGenericServer genOwnserhip
+
+
+genGatewayServer : Generator Server
+genGatewayServer =
+    genGenericServer <| map GatewayOwnership genGatewayOwnership
+
+
+genEndpointServer : Generator Server
+genEndpointServer =
+    genGenericServer <| map EndpointOwnership genEndpointOwnership
+
+
+genGenericServer : Generator Ownership -> Generator Server
+genGenericServer gen =
     let
-        buildServerRecord ip ownership fs logs proc =
+        buildServerRecord ownership nip fs logs proc =
             { name = "Dummy"
             , type_ = Desktop
-            , nip = ( "::", ip )
-            , nips = [ ( "::", ip ) ]
+            , nips = [ nip ]
             , coordinates = Just 0
             , filesystem = fs
             , logs = logs
@@ -118,61 +136,9 @@ genServer =
                 Notifications.initialModel
             }
     in
-        genIP
+        gen
             |> map buildServerRecord
-            |> andMap genOwnserhip
-            |> andMap Gen.Filesystem.genModel
-            |> andMap Gen.Logs.genModel
-            |> andMap Gen.Processes.genModel
-
-
-genGatewayServer : Generator Server
-genGatewayServer =
-    let
-        buildServerRecord ip fs logs proc =
-            { name = "Dummy"
-            , type_ = Desktop
-            , nip = ( "::", ip )
-            , nips = [ ( "::", ip ) ]
-            , coordinates = Just 0
-            , filesystem = fs
-            , logs = logs
-            , processes = proc
-            , tunnels = Tunnels.initialModel
-            , ownership =
-                GatewayOwnership <| GatewayData [] Nothing
-            , notifications =
-                Notifications.initialModel
-            }
-    in
-        genIP
-            |> map buildServerRecord
-            |> andMap Gen.Filesystem.genModel
-            |> andMap Gen.Logs.genModel
-            |> andMap Gen.Processes.genModel
-
-
-genEndpointServer : Generator Server
-genEndpointServer =
-    let
-        buildServerRecord ip fs logs proc =
-            { name = "Dummy"
-            , type_ = Desktop
-            , nip = ( "::", ip )
-            , nips = [ ( "::", ip ) ]
-            , coordinates = Just 0
-            , filesystem = fs
-            , logs = logs
-            , processes = proc
-            , tunnels = Tunnels.initialModel
-            , ownership =
-                GatewayOwnership <| GatewayData [] Nothing
-            , notifications =
-                Notifications.initialModel
-            }
-    in
-        genIP
-            |> map buildServerRecord
+            |> andMap genServerID
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel

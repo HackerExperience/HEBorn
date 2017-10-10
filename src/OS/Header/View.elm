@@ -23,6 +23,9 @@ import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
 
+-- TODO: make proper use of Servers.toNip to get future proof
+
+
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
@@ -43,16 +46,19 @@ headerBounces game =
         |> (::) Nothing
 
 
-headerEndpoints : Game.Model -> List (Maybe ( NIP, Servers.ID ))
+headerEndpoints : Game.Model -> List (Maybe ( NIP, String ))
 headerEndpoints ({ account } as game) =
     let
         servers =
             Game.getServers game
 
-        nipAndName nip =
+        prerender id server =
+            Just ( Servers.toNip id, Servers.getName server )
+
+        nipAndName id =
             servers
-                |> Servers.getByNIP nip
-                |> Maybe.map (\server -> Just ( nip, Servers.getName server ))
+                |> Servers.get id
+                |> Maybe.map (prerender id)
     in
         account.joinedEndpoints
             |> List.filterMap nipAndName
@@ -62,32 +68,34 @@ headerEndpoints ({ account } as game) =
 headerEndpoint : Game.Model -> Maybe ( NIP, String )
 headerEndpoint game =
     let
-        maybeEndpointNip =
-            gameEndpointNip game
+        maybeEndpointId =
+            gameEndpointId game
 
         servers =
             Game.getServers game
 
         maybeEndpoint =
-            maybeEndpointNip
-                |> Maybe.andThen (flip Servers.getByNIP servers)
+            Maybe.andThen (flip Servers.get servers) maybeEndpointId
     in
-        case Maybe.uncurry maybeEndpointNip maybeEndpoint of
-            Just ( nip, endpoint ) ->
-                Just ( nip, Servers.getName endpoint )
+        case Maybe.uncurry maybeEndpointId maybeEndpoint of
+            Just ( id, endpoint ) ->
+                Just ( Servers.toNip id, Servers.getName endpoint )
 
             Nothing ->
                 Nothing
 
 
-gameEndpointNip : Game.Model -> Maybe NIP
-gameEndpointNip game =
+gameEndpointId : Game.Model -> Maybe NIP
+gameEndpointId game =
     game
         |> Game.fromGateway
         |> Maybe.map Game.getServer
         |> Maybe.andThen Servers.getEndpoint
-        |> Maybe.andThen (flip Servers.get <| Game.getServers game)
-        |> Maybe.map Servers.getNIP
+
+
+
+--|> Maybe.andThen (flip Servers.get <| Game.getServers game)
+--|> Maybe.map Servers.getNIP
 
 
 logo : Html Msg
@@ -105,8 +113,7 @@ connection ({ game } as data) { openMenu } =
 
         gateway =
             data
-                |> Game.getServer
-                |> Servers.getNIP
+                |> Game.getID
                 |> Just
 
         gateways =
@@ -119,14 +126,14 @@ connection ({ game } as data) { openMenu } =
                 |> Game.getServer
                 |> Servers.getBounce
 
-        endpointNip =
+        endpointId =
             headerEndpoint game
 
         endpoints =
             headerEndpoints game
 
         bounces =
-            gameEndpointNip game
+            gameEndpointId game
                 |> Maybe.map (always [])
                 |> Maybe.withDefault (headerBounces game)
 
@@ -137,7 +144,7 @@ connection ({ game } as data) { openMenu } =
             [ contextToggler onGateway (ContextTo Gateway)
             , gatewaySelector data openMenu gateway gateways
             , bounceSelector data openMenu bounce bounces
-            , endpointSelector data openMenu endpointNip endpoints
+            , endpointSelector data openMenu endpointId endpoints
             , contextToggler (not onGateway) (ContextTo Endpoint)
             ]
 
@@ -185,13 +192,15 @@ gatewaySelector data =
                 |> Game.getGame
                 |> Game.getServers
 
-        render nip server =
-            (Servers.getName server) ++ " (" ++ (Network.getIp nip) ++ ")"
+        render id server =
+            let
+                ip =
+                    Network.getIp <| Servers.toNip id
+            in
+                (Servers.getName server) ++ " (" ++ ip ++ ")"
 
-        renderGateway nip =
-            servers
-                |> Servers.getByNIP nip
-                |> Maybe.map (render nip >> text)
+        renderGateway id =
+            Maybe.map (render id >> text) (Servers.get id servers)
     in
         selector [ SGateway ] SelectGateway GatewayOpen renderGateway
 
@@ -215,7 +224,7 @@ bounceSelector data =
         selector [ SBounce ] SelectBounce BounceOpen renderBounce
 
 
-endpointSelectMsg : Maybe ( NIP, Servers.ID ) -> Msg
+endpointSelectMsg : Maybe ( NIP, String ) -> Msg
 endpointSelectMsg item =
     item
         |> Maybe.map Tuple.first
@@ -225,8 +234,8 @@ endpointSelectMsg item =
 endpointSelector :
     Game.Data
     -> OpenMenu
-    -> Maybe ( NIP, Servers.ID )
-    -> List (Maybe ( NIP, Servers.ID ))
+    -> Maybe ( NIP, String )
+    -> List (Maybe ( NIP, String ))
     -> Html Msg
 endpointSelector data =
     selector [ SEndpoint ]
@@ -264,7 +273,9 @@ activeServerGetter game =
                         Account.getGateway z
 
                     Endpoint ->
-                        gameEndpointNip game
+                        game
+                            |> gameEndpointId
+                            |> Maybe.map Servers.toNip
            )
 
 
@@ -277,20 +288,17 @@ taskbar { game } { openMenu } =
         servers =
             Game.getServers game
 
-        activeServer =
+        activeServerId =
             activeServerGetter game
 
         serverNotifications =
-            activeServer
-                |> Maybe.andThen (flip Servers.getByNIP servers)
+            activeServerId
+                |> Maybe.andThen (flip Servers.get servers)
                 |> Maybe.map (.notifications)
                 |> Maybe.withDefault (Dict.empty)
 
         accountNotifications =
             game.account.notifications
-
-        activeServerId =
-            Maybe.andThen (flip Servers.mapNetwork servers) activeServer
 
         serverReadAll =
             case activeServerId of
