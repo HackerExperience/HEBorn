@@ -3,6 +3,7 @@ module Game.Servers.Update exposing (..)
 import Dict
 import Utils.Update as Update
 import Utils.Maybe as Maybe
+import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events
 import Events.Servers as ServersEvents
@@ -23,10 +24,11 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Servers.Requests.Bootstrap as Bootstrap
+import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Requests.Resync as Resync
 
 
 type alias UpdateResponse =
@@ -43,6 +45,9 @@ update game msg model =
         ServerMsg id msg ->
             onServerMsg game id msg model
 
+        Resync id ->
+            onResync game id model
+
         Event event ->
             onEvent game event model
 
@@ -55,7 +60,7 @@ onServerMsg game id msg model =
     case get id model of
         Just server ->
             server
-                |> updateServer game server.nip msg
+                |> updateServer game model id msg
                 |> Update.mapModel (flip (insert id) model)
                 |> Update.mapCmd (ServerMsg id)
 
@@ -69,16 +74,30 @@ onEvent game event model =
         msg =
             ServerEvent event
 
-        reducer id server ( servers, cmd, dispatch ) =
-            Update.fromModel server
-                |> Update.andThen (updateServer game server.nip msg)
-                |> Update.mapModel (flip (Dict.insert id) servers)
-                |> Update.mapCmd (ServerMsg id)
-                |> Update.addCmd cmd
-                |> Update.addDispatch dispatch
+        reducer key server ( servers, cmd, dispatch ) =
+            let
+                serverId =
+                    unsafeFromKey key servers
+
+                ( server_, newCmd, newDispatch ) =
+                    updateServer game model serverId msg server
+
+                servers_ =
+                    insert serverId server_ servers
+
+                cmd_ =
+                    Cmd.batch
+                        [ Cmd.map (ServerMsg serverId) newCmd
+                        , cmd
+                        ]
+
+                dispatch_ =
+                    Dispatch.batch [ newDispatch, dispatch ]
+            in
+                ( servers_, cmd_, dispatch_ )
     in
-        Dict.foldl reducer (Update.fromModel model.servers) model.servers
-            |> Update.mapModel (\servers -> { model | servers = servers })
+        model.servers
+            |> Dict.foldl reducer ( model, Cmd.none, Dispatch.none )
             |> Update.andThen (updateEvent game event)
 
 
@@ -95,8 +114,8 @@ onRequest game response model =
 updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
 updateEvent game event model =
     case event of
-        Events.Report (Ws.Joined (ServerChannel nip) _) ->
-            onWsJoinedServer game nip model
+        Events.Report (Ws.Joined (ServerChannel id) value) ->
+            onWsJoinedServer game id value model
 
         _ ->
             Update.fromModel model
@@ -105,44 +124,61 @@ updateEvent game event model =
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
 updateRequest game data model =
     case data of
-        BootstrapServer (Bootstrap.Okay ( id, server )) ->
-            let
-                model_ =
-                    insert id server model
-
-                dispatch =
-                    if List.member server.nip game.account.gateways then
-                        Dispatch.none
-                    else
-                        server.nip
-                            |> Account.InsertEndpoint
-                            |> Dispatch.account
-            in
-                ( model_, Cmd.none, dispatch )
+        ResyncServer (Resync.Okay ( id, server )) ->
+            Update.fromModel <| insert id server model
 
 
-onWsJoinedServer : Game.Model -> NIP -> Model -> UpdateResponse
-onWsJoinedServer game nip model =
-    case getByNIP nip model of
-        Nothing ->
-            let
-                cmd =
-                    Bootstrap.request nip game
-            in
-                ( model, cmd, Dispatch.none )
+onWsJoinedServer : Game.Model -> ID -> Value -> Model -> UpdateResponse
+onWsJoinedServer game id value model =
+    let
+        decodeBootstrap =
+            Decoders.Servers.server <| getGateway id model
+    in
+        case Decode.decodeValue decodeBootstrap value of
+            Ok server ->
+                let
+                    nip =
+                        toNip id
 
-        _ ->
-            --TODO: this will need to change once we adopt the new generic
-            -- bootstrap onJoin method
-            Update.fromModel model
+                    accountMsg =
+                        if isGateway server then
+                            Account.InsertGateway nip
+                        else
+                            Account.InsertEndpoint nip
+
+                    dispatch =
+                        Dispatch.account accountMsg
+
+                    model_ =
+                        insert id server model
+                in
+                    ( model_, Cmd.none, dispatch )
+
+            Err reason ->
+                let
+                    log =
+                        Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
+                in
+                    Update.fromModel model
 
 
+onResync : Game.Model -> ID -> Model -> UpdateResponse
+onResync game id model =
+    let
+        cmd =
+            Resync.request (getGateway id model) id game
+    in
+        ( model, cmd, Dispatch.none )
 
--- content message handlers
 
-
-updateServer : Game.Model -> NIP -> ServerMsg -> Server -> ServerUpdateResponse
-updateServer game id msg server =
+updateServer :
+    Game.Model
+    -> Model
+    -> ID
+    -> ServerMsg
+    -> Server
+    -> ServerUpdateResponse
+updateServer game model id msg server =
     case msg of
         SetBounce maybeId ->
             onSetBounce game
@@ -192,12 +228,8 @@ onSetEndpoint :
     -> Server
     -> ServerUpdateResponse
 onSetEndpoint game nip server =
-    let
-        serverId =
-            Maybe.andThen (flip mapNetwork <| Game.getServers game) nip
-    in
-        setEndpoint serverId server
-            |> Update.fromModel
+    setEndpoint nip server
+        |> Update.fromModel
 
 
 onFilesystemMsg :

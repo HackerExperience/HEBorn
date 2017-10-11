@@ -45,3 +45,8 @@ fromString str =
 
         _ ->
             ( "::", "" )
+
+
+isFromInternet : NIP -> Bool
+isFromInternet ( id, _ ) =
+    id == "::"

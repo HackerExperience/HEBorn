@@ -53,7 +53,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel server.nip
+                    ServerChannel serverId
 
                 name =
                     "processes.started"
@@ -146,7 +146,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel server1.nip
+                    ServerChannel serverId
 
                 name =
                     "processes.conclusion"
@@ -201,7 +201,7 @@ eventTests =
 
                 -- building event
                 channel =
-                    ServerChannel server1.nip
+                    ServerChannel serverId
 
                 name =
                     "processes.bruteforce_failed"

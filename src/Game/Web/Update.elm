@@ -15,6 +15,7 @@ import Game.Meta.Types exposing (Context(..))
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
+import Game.Servers.Models as Servers
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
@@ -124,7 +125,7 @@ updateEvent game event model =
             ( model, Cmd.none, Dispatch.none )
 
 
-{-| Reports success back to the loading page.
+{-| Sets endpoint
 -}
 onJoined : Game.Model -> Network.NIP -> Model -> UpdateResponse
 onJoined game nip model =
@@ -132,12 +133,17 @@ onJoined game nip model =
         ( maybeRequester, model_ ) =
             finishLoading nip model
 
+        servers =
+            Game.getServers game
+
+        serverCid =
+            Maybe.andThen (.sessionId >> flip Servers.fromKey servers)
+                maybeRequester
+
         dispatch =
-            case maybeRequester of
-                Just { sessionId, windowId, context, tabId } ->
-                    -- it may not be explicit, but sessionId
-                    -- is always a gateway id
-                    Dispatch.server sessionId <|
+            case serverCid of
+                Just serverCid ->
+                    Dispatch.server serverCid <|
                         Servers.SetEndpoint (Just nip)
 
                 Nothing ->

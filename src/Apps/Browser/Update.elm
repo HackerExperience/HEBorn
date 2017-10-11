@@ -247,9 +247,7 @@ onGoAddress :
 onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
         nip =
-            data
-                |> Game.getServer
-                |> Servers.getNIP
+            Servers.toNip <| Game.getID data
 
         networkId =
             Network.getId nip
@@ -265,8 +263,8 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Web.FetchUrl url networkId networkIp requester
-                |> Dispatch.web
+            Dispatch.web <|
+                Web.FetchUrl url networkId networkIp requester
 
         tab_ =
             gotoPage url (Pages.LoadingModel url) tab
@@ -292,9 +290,7 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             }
 
         gatewayNip =
-            data
-                |> Game.getServer
-                |> Servers.getNIP
+            Game.getID data
 
         remoteIp =
             Network.getIp remoteNip

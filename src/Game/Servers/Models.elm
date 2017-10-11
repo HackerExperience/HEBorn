@@ -7,29 +7,41 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Network.Types exposing (NIP)
+import Game.Network.Types as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
 
 
 type alias Model =
-    { network : NetworkMap
+    { gateways : Gateways
+    , gatewayIds : GatewayIds
     , servers : Servers
     }
 
 
-type alias NetworkMap =
-    Dict NIP ID
+type alias ServerUid =
+    String
+
+
+type alias Gateways =
+    Dict ID ServerUid
+
+
+type alias GatewayIds =
+    Dict ServerUid ID
+
+
+type alias SessionId =
+    String
 
 
 type alias Servers =
-    Dict ID Server
+    Dict SessionId Server
 
 
 type alias Server =
     { name : String
     , type_ : ServerType
     , nips : List NIP
-    , nip : NIP
     , coordinates : Maybe Coordinates
     , filesystem : Filesystem
     , logs : Logs.Model
@@ -55,7 +67,8 @@ type Ownership
 
 
 type alias GatewayData =
-    { endpoints : List ID
+    { serverUid : ServerUid
+    , endpoints : List ID
     , endpoint : Maybe ID
     }
 
@@ -72,89 +85,170 @@ type alias AnalyzedEndpoint =
 
 initialModel : Model
 initialModel =
-    { servers = Dict.empty
-    , network = Dict.empty
+    { gateways = Dict.empty
+    , gatewayIds = Dict.empty
+    , servers = Dict.empty
     }
 
 
-
--- server crud
-
-
-get : ID -> Model -> Maybe Server
-get id { servers } =
-    Dict.get id servers
+toNip : ID -> NIP
+toNip =
+    -- do not remove this function, it'll be useful
+    -- once we include more data on id
+    identity
 
 
-getByNIP : NIP -> Model -> Maybe Server
-getByNIP nip model =
-    model
-        |> mapNetwork nip
-        |> Maybe.andThen (flip get model)
+
+-- gateway mapping information
 
 
-insert : ID -> Server -> Model -> Model
-insert id server ({ servers, network } as model) =
+insertGateway : ID -> ServerUid -> Model -> Model
+insertGateway id uid model =
     let
-        servers_ =
-            Dict.insert id server servers
+        gateways =
+            Dict.insert id uid model.gateways
 
-        network_ =
-            List.foldl
-                (flip Dict.insert id)
-                network
-                (server.nip :: server.nips)
+        gatewayIds =
+            Dict.insert uid id model.gatewayIds
     in
-        model
-            |> setServers servers_
-            |> setNetwork network_
+        { model | gateways = gateways, gatewayIds = gatewayIds }
 
 
-keys : Model -> List ID
-keys { servers } =
-    Dict.keys servers
+removeGateway : ID -> Model -> Model
+removeGateway id model =
+    case Dict.get id model.gateways of
+        Just uid ->
+            let
+                gateways =
+                    Dict.remove id model.gateways
 
-
-remove : ID -> Model -> Model
-remove id ({ servers, network } as model) =
-    let
-        nips =
-            servers
-                |> Dict.get id
-                |> Maybe.map (\server -> server.nip :: server.nips)
-                |> Maybe.withDefault []
-
-        servers_ =
-            Dict.remove id servers
-
-        network_ =
-            List.foldl Dict.remove network nips
-
-        model_ =
-            model
-                |> setServers servers_
-                |> setNetwork network_
-    in
-        model_
-
-
-safeUpdate : ID -> Server -> Model -> Model
-safeUpdate id server model =
-    case Dict.get id model.servers of
-        Just _ ->
-            insert id server model
+                gatewayIds =
+                    Dict.remove uid model.gatewayIds
+            in
+                { model | gateways = gateways, gatewayIds = gatewayIds }
 
         Nothing ->
             model
 
 
-mapNetwork : NIP -> Model -> Maybe ID
-mapNetwork nip { network } =
-    Dict.get nip network
+getGateway : ID -> Model -> Maybe ServerUid
+getGateway id model =
+    Dict.get id model.gateways
 
 
 
----- server getters/setters
+-- session id data
+
+
+toSessionId : ID -> Model -> SessionId
+toSessionId id model =
+    case getGateway id model of
+        Just uid ->
+            uid
+
+        Nothing ->
+            remoteSessionId id
+
+
+remoteSessionId : ID -> SessionId
+remoteSessionId id =
+    let
+        nip =
+            toNip id
+    in
+        (Network.getId nip) ++ "@" ++ (Network.getIp nip)
+
+
+getSessionId : ID -> Server -> SessionId
+getSessionId id server =
+    case server.ownership of
+        GatewayOwnership data ->
+            data.serverUid
+
+        EndpointOwnership _ ->
+            remoteSessionId id
+
+
+
+-- elm structure-like functions
+
+
+get : ID -> Model -> Maybe Server
+get id model =
+    Dict.get (toSessionId id model) model.servers
+
+
+insert : ID -> Server -> Model -> Model
+insert id server model0 =
+    let
+        model1 =
+            case server.ownership of
+                GatewayOwnership data ->
+                    insertGateway id data.serverUid model0
+
+                EndpointOwnership _ ->
+                    model0
+
+        servers =
+            Dict.insert (getSessionId id server) server model1.servers
+
+        model_ =
+            { model1 | servers = servers }
+    in
+        model_
+
+
+remove : ID -> Model -> Model
+remove id model0 =
+    let
+        model1 =
+            removeGateway id model0
+
+        servers =
+            Dict.remove (toSessionId id model0) model1.servers
+
+        model_ =
+            { model1 | servers = servers }
+    in
+        model_
+
+
+keys : Model -> List ID
+keys model =
+    let
+        toId model key =
+            fromKey key model
+    in
+        model.servers
+            |> Dict.keys
+            |> List.filterMap (toId model)
+
+
+fromKey : SessionId -> Model -> Maybe ID
+fromKey key model =
+    case String.split "@" key of
+        [ serverUid ] ->
+            Dict.get serverUid model.gatewayIds
+
+        [ nid, ip ] ->
+            Just ( nid, ip )
+
+        _ ->
+            Nothing
+
+
+unsafeFromKey : SessionId -> Model -> ID
+unsafeFromKey key model =
+    case fromKey key model of
+        Just id ->
+            id
+
+        _ ->
+            Debug.crash "Couldn't find the Server.ID for given SessionId."
+
+
+
+------ server getters/setters
 
 
 getName : Server -> String
@@ -165,16 +259,6 @@ getName =
 setName : String -> Server -> Server
 setName name server =
     { server | name = name }
-
-
-getNIP : Server -> NIP
-getNIP =
-    .nip
-
-
-setNIP : NIP -> Server -> Server
-setNIP nip server =
-    { server | nip = nip }
 
 
 getNIPs : Server -> List NIP
@@ -275,15 +359,11 @@ setBounce bounce ({ ownership } as server) =
         { server | ownership = ownership_ }
 
 
+isGateway : Server -> Bool
+isGateway { ownership } =
+    case ownership of
+        GatewayOwnership _ ->
+            True
 
----- internals
-
-
-setServers : Servers -> Model -> Model
-setServers servers model =
-    { model | servers = servers }
-
-
-setNetwork : NetworkMap -> Model -> Model
-setNetwork network model =
-    { model | network = network }
+        EndpointOwnership _ ->
+            False

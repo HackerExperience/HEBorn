@@ -1,13 +1,13 @@
-module Driver.Websocket.Channels exposing (Channel(..), getAddress)
+module Driver.Websocket.Channels exposing (..)
 
 import Game.Account.Models as Account
-import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared as Servers
 
 
 type Channel
     = AccountChannel Account.ID
     | RequestsChannel
-    | ServerChannel NIP
+    | ServerChannel Servers.ID
 
 
 getAddress : Channel -> String

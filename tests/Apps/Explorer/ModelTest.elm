@@ -1,6 +1,7 @@
 module Apps.Explorer.ModelTest exposing (all)
 
 import Expect
+import Dict as Dict
 import Gen.Filesystem
 import Helper.Playstate as Playstate
 import Fuzz exposing (tuple)
@@ -68,13 +69,19 @@ pathMoveAroundTests =
         "can't move to a non-existing folder"
       <|
         \( { game }, path ) ->
-            case Servers.get "localhost" game.servers of
-                Just server ->
-                    initialExplorer
-                        |> changePath path (Servers.getFilesystem server)
-                        |> Expect.equal initialExplorer
+            let
+                maybeServer =
+                    game.servers.servers
+                        |> Dict.toList
+                        |> List.head
+            in
+                case maybeServer of
+                    Just ( _, server ) ->
+                        initialExplorer
+                            |> changePath path (Servers.getFilesystem server)
+                            |> Expect.equal initialExplorer
 
-                Nothing ->
-                    -- FIXME: game state should provide Game.Data
-                    Expect.equal initialExplorer initialExplorer
+                    Nothing ->
+                        -- FIXME: game state should provide Game.Data
+                        Expect.equal initialExplorer initialExplorer
     ]

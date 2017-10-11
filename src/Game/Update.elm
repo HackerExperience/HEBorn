@@ -8,6 +8,7 @@ import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Reports as Ws
 import Events.Events as Events
 import Json.Encode as Encode
+import Json.Decode as Decode exposing (Value)
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Account.Update as Account
@@ -22,10 +23,10 @@ import Game.Web.Messages as Web
 import Game.Web.Update as Web
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
-import Game.Requests exposing (..)
-import Game.Requests.Bootstrap as Bootstrap
-import Game.Servers.Requests.Bootstrap as ServerBootstrap
-import Decoders.Bootstrap
+import Game.Requests as Request exposing (Response)
+import Game.Requests.Resync as Resync
+import Game.Network.Types as Network
+import Decoders.Game exposing (ServerToJoin(..))
 
 
 type alias UpdateResponse =
@@ -53,11 +54,11 @@ update msg model =
         Event data ->
             onEvent data model
 
-        Request data ->
-            onRequest (receive data) model
+        Resync ->
+            onResync model
 
-        _ ->
-            Update.fromModel model
+        Request data ->
+            onRequest (Request.receive model data) model
 
 
 
@@ -150,8 +151,8 @@ updateEvent event model =
         Events.Report (Ws.Connected _) ->
             onWsConnected model
 
-        Events.Report (Ws.Joined (AccountChannel _) _) ->
-            onWsJoinedAccount model
+        Events.Report (Ws.Joined (AccountChannel _) bootstrap) ->
+            onWsJoinedAccount bootstrap model
 
         _ ->
             Update.fromModel model
@@ -160,8 +161,8 @@ updateEvent event model =
 updateRequest : Response -> Model -> UpdateResponse
 updateRequest response model =
     case response of
-        Bootstrap (Bootstrap.Okay data) ->
-            onBootstrapResponse data model
+        Request.Resync (Resync.Okay data) ->
+            uncurry (flip onResyncResponse) data
 
 
 onWsConnected : Model -> UpdateResponse
@@ -173,39 +174,78 @@ onWsConnected model =
         ( model, Cmd.none, dispatch )
 
 
-onWsJoinedAccount : Model -> UpdateResponse
-onWsJoinedAccount model =
+onResync : Model -> UpdateResponse
+onResync model =
     let
-        request =
-            Bootstrap.request model.account.id model
+        accountId =
+            model
+                |> getAccount
+                |> Account.getId
+
+        cmd =
+            Resync.request accountId model
     in
-        -- replace Cmd.none to request to enable bootstrap
-        ( model, request, Dispatch.none )
+        ( model, cmd, Dispatch.none )
 
 
-onBootstrapResponse : Decoders.Bootstrap.Bootstrap -> Model -> UpdateResponse
-onBootstrapResponse bootstrap model0 =
+onWsJoinedAccount : Value -> Model -> UpdateResponse
+onWsJoinedAccount value model =
+    case Decode.decodeValue (Decoders.Game.bootstrap model) value of
+        Ok ( model_, servers ) ->
+            let
+                dispatch =
+                    joinChannel servers
+            in
+                ( model_, Cmd.none, dispatch )
+
+        Err reason ->
+            let
+                log =
+                    Debug.log ("▶ Bootstrap Error:\n" ++ reason) ""
+            in
+                Update.fromModel model
+
+
+joinChannel : Decoders.Game.ServersToJoin -> Dispatch
+joinChannel servers =
     let
-        model1 =
-            Decoders.Bootstrap.toModel model0 bootstrap
+        toId data =
+            Network.toNip data.networkId data.ip
 
-        getNip =
-            Tuple.second >> Servers.getNIP
+        encodeGateway data =
+            Encode.object
+                [ ( "gateway_ip", Encode.string data.ip )
+                ]
 
-        account_ =
-            bootstrap.serverIndex.player
-                |> List.foldl (getNip >> Account.insertGateway)
-                    model1.account
+        encodeEndpoint data =
+            Encode.object
+                [ ( "password", Encode.string data.password ) ]
 
-        joinGateway nip =
-            Dispatch.websocket <| Ws.JoinChannel (ServerChannel nip) Nothing
+        toDispatch server =
+            let
+                ( channel, payload ) =
+                    case server of
+                        JoinPlayer data ->
+                            ( ServerChannel <| toId data
+                            , encodeGateway data
+                            )
 
-        model_ =
-            { model1 | account = account_ }
+                        JoinRemote data ->
+                            ( ServerChannel <| toId data
+                            , encodeEndpoint data
+                            )
+            in
+                Dispatch.websocket <| Ws.JoinChannel channel <| Just payload
+    in
+        servers
+            |> List.map toDispatch
+            |> Dispatch.batch
 
+
+onResyncResponse : Decoders.Game.ServersToJoin -> Model -> UpdateResponse
+onResyncResponse servers model =
+    let
         dispatch =
-            bootstrap.serverIndex.player
-                |> List.map (getNip >> joinGateway)
-                |> Dispatch.batch
+            joinChannel servers
     in
-        ( model_, Cmd.none, dispatch )
+        ( model, Cmd.none, dispatch )
