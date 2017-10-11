@@ -214,7 +214,6 @@ updatePlay msg model stateModel =
         WebsocketMsg (Ws.Broadcast event) ->
             stateModel
                 |> updatePlayGame (Game.Event event)
-                |> stateAndThen (updatePlayOS <| OS.Event event)
                 |> finishPlayUpdate model
 
         WebsocketMsg msg ->

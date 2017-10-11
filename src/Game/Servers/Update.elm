@@ -5,8 +5,6 @@ import Utils.Update as Update
 import Utils.Maybe as Maybe
 import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Events.Events as Events
-import Events.Servers as ServersEvents
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Reports as Ws
 import Game.Models as Game
@@ -48,11 +46,11 @@ update game msg model =
         Resync id ->
             onResync game id model
 
-        Event event ->
-            onEvent game event model
-
         Request data ->
             onRequest game (receive data) model
+
+        HandleJoinedServer id value ->
+            handleJoinedServer id value model
 
 
 onServerMsg : Game.Model -> ID -> ServerMsg -> Model -> UpdateResponse
@@ -68,39 +66,6 @@ onServerMsg game id msg model =
             Update.fromModel model
 
 
-onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-onEvent game event model =
-    let
-        msg =
-            ServerEvent event
-
-        reducer key server ( servers, cmd, dispatch ) =
-            let
-                serverId =
-                    unsafeFromKey key servers
-
-                ( server_, newCmd, newDispatch ) =
-                    updateServer game model serverId msg server
-
-                servers_ =
-                    insert serverId server_ servers
-
-                cmd_ =
-                    Cmd.batch
-                        [ Cmd.map (ServerMsg serverId) newCmd
-                        , cmd
-                        ]
-
-                dispatch_ =
-                    Dispatch.batch [ newDispatch, dispatch ]
-            in
-                ( servers_, cmd_, dispatch_ )
-    in
-        model.servers
-            |> Dict.foldl reducer ( model, Cmd.none, Dispatch.none )
-            |> Update.andThen (updateEvent game event)
-
-
 onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
 onRequest game response model =
     case response of
@@ -111,55 +76,11 @@ onRequest game response model =
             Update.fromModel model
 
 
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    case event of
-        Events.Report (Ws.Joined (ServerChannel id) value) ->
-            onWsJoinedServer game id value model
-
-        _ ->
-            Update.fromModel model
-
-
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
 updateRequest game data model =
     case data of
         ResyncServer (Resync.Okay ( id, server )) ->
             Update.fromModel <| insert id server model
-
-
-onWsJoinedServer : Game.Model -> ID -> Value -> Model -> UpdateResponse
-onWsJoinedServer game id value model =
-    let
-        decodeBootstrap =
-            Decoders.Servers.server <| getGateway id model
-    in
-        case Decode.decodeValue decodeBootstrap value of
-            Ok server ->
-                let
-                    nip =
-                        toNip id
-
-                    accountMsg =
-                        if isGateway server then
-                            Account.InsertGateway nip
-                        else
-                            Account.InsertEndpoint nip
-
-                    dispatch =
-                        Dispatch.account accountMsg
-
-                    model_ =
-                        insert id server model
-                in
-                    ( model_, Cmd.none, dispatch )
-
-            Err reason ->
-                let
-                    log =
-                        Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
-                in
-                    Update.fromModel model
 
 
 onResync : Game.Model -> ID -> Model -> UpdateResponse
@@ -200,9 +121,6 @@ updateServer game model id msg server =
 
         TunnelsMsg msg ->
             onTunnelsMsg game msg server
-
-        ServerEvent event ->
-            onServerEvent game id event server
 
         ServerRequest data ->
             updateServerRequest game (serverReceive data) server
@@ -301,23 +219,6 @@ onNotificationsMsg game =
         }
 
 
-onServerEvent :
-    Game.Model
-    -> NIP
-    -> Events.Event
-    -> Server
-    -> ServerUpdateResponse
-onServerEvent game nip event server =
-    if shouldRouteEvent nip event then
-        onLogsMsg game nip (Logs.Event event) server
-            -- |> Update.andThen (onFilesystemMsg game (Filesystem.Event event))
-            |> Update.andThen (onProcessesMsg game nip (Processes.Event event))
-            |> Update.andThen (onTunnelsMsg game (Tunnels.Event event))
-            |> Update.andThen (updateServerEvent game event)
-    else
-        Update.fromModel server
-
-
 updateServerRequest :
     Game.Model
     -> Maybe ServerResponse
@@ -332,22 +233,35 @@ updateServerRequest game response server =
             Update.fromModel server
 
 
-updateServerEvent :
-    Game.Model
-    -> Events.Event
-    -> Server
-    -> ServerUpdateResponse
-updateServerEvent game event server =
-    Update.fromModel server
+handleJoinedServer : ID -> Value -> Model -> UpdateResponse
+handleJoinedServer id value model =
+    let
+        decodeBootstrap =
+            Decoders.Servers.server <| getGateway id model
+    in
+        case Decode.decodeValue decodeBootstrap value of
+            Ok server ->
+                let
+                    nip =
+                        toNip id
 
+                    accountMsg =
+                        if isGateway server then
+                            Account.InsertGateway nip
+                        else
+                            Account.InsertEndpoint nip
 
-{-| Only route server events when server IDs match.
--}
-shouldRouteEvent : NIP -> Events.Event -> Bool
-shouldRouteEvent nip event =
-    case event of
-        Events.ServersEvent (ServerChannel nip_) _ ->
-            nip == nip_
+                    dispatch =
+                        Dispatch.account accountMsg
 
-        _ ->
-            True
+                    model_ =
+                        insert id server model
+                in
+                    ( model_, Cmd.none, dispatch )
+
+            Err reason ->
+                let
+                    log =
+                        Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
+                in
+                    Update.fromModel model

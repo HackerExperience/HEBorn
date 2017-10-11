@@ -28,7 +28,7 @@ update msg model =
                 Ok { event, data } ->
                     let
                         dispatch =
-                            Events.handler channel event data
+                            Events.events channel event data
                                 |> Maybe.map Broadcast
                                 |> Maybe.map Dispatch.websocket
                                 |> Maybe.withDefault Dispatch.none

@@ -9,9 +9,7 @@ import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
-import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ProcessesEvent))
-import Events.Servers.Processes as ProcessesEvent
+import Events.Events as Events
 import Game.Messages as Game
 import Game.Models as Game
 import Game.Servers.Messages as Servers
@@ -43,12 +41,12 @@ eventTests : List Test
 eventTests =
     [ fuzz
         GenGame.model
-        "event 'processes.started' creates a new process"
+        "event 'process_started' creates a new process"
       <|
         \game ->
             let
                 ( serverId, server ) =
-                    fromJust "process.started fetching gateway" <|
+                    fromJust "process_started fetching gateway" <|
                         Game.getGateway game
 
                 -- building event
@@ -56,7 +54,7 @@ eventTests =
                     ServerChannel serverId
 
                 name =
-                    "processes.started"
+                    "process_started"
 
                 json =
                     toValue
@@ -103,7 +101,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel name json
+                    Events.events channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -118,12 +116,12 @@ eventTests =
                     |> Expect.equal (Just Cracker)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "event 'processes.conclusion' concludes a process"
+        "event 'process_conclusion' concludes a process"
       <|
         \( game0, process0 ) ->
             let
                 ( serverId, server0 ) =
-                    fromJust "process.conclusion fetching gateway" <|
+                    fromJust "process_conclusion fetching gateway" <|
                         Game.getGateway game0
 
                 process1 =
@@ -149,7 +147,7 @@ eventTests =
                     ServerChannel serverId
 
                 name =
-                    "processes.conclusion"
+                    "process_conclusion"
 
                 json =
                     toValue
@@ -158,7 +156,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel name json
+                    Events.events channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -173,12 +171,12 @@ eventTests =
                     |> Expect.equal (Just <| Succeeded)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "event 'processes.bruteforce_failed' concludes a process"
+        "event 'bruteforce_failed' concludes a process"
       <|
         \( game0, process0 ) ->
             let
                 ( serverId, server0 ) =
-                    fromJust "process.bruteforce_failed fetching gateway" <|
+                    fromJust "bruteforce_failed fetching gateway" <|
                         Game.getGateway game0
 
                 process1 =
@@ -204,7 +202,7 @@ eventTests =
                     ServerChannel serverId
 
                 name =
-                    "processes.bruteforce_failed"
+                    "bruteforce_failed"
 
                 json =
                     toValue
@@ -215,7 +213,7 @@ eventTests =
                         """
 
                 msg =
-                    Events.handler channel name json
+                    Events.events channel name json
                         |> fromJust ""
                         |> Game.Event
             in
@@ -223,7 +221,7 @@ eventTests =
                     |> updateGame msg
                     |> Game.getServers
                     |> Servers.get serverId
-                    |> fromJust "process.bruteforce_failed fetching serverId"
+                    |> fromJust "bruteforce_failed fetching serverId"
                     |> Servers.getProcesses
                     |> get "id"
                     |> Maybe.map getState
@@ -322,7 +320,7 @@ requestTests =
                     |> updateGame msg
                     |> Game.getServers
                     |> Servers.get serverId
-                    |> fromJust "process.bruteforce fetching serverId"
+                    |> fromJust "bruteforce fetching serverId"
                     |> Servers.getProcesses
                     |> get "id"
                     |> Maybe.map (getState)

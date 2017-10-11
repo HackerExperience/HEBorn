@@ -1,7 +1,6 @@
 module Game.Account.Messages exposing (Msg(..), RequestMsg(..))
 
 import Json.Decode exposing (Value)
-import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
@@ -23,7 +22,8 @@ type Msg
     | DatabaseMsg Database.Msg
     | NotificationsMsg Notifications.Msg
     | Request RequestMsg
-    | Event Events.Event
+    | HandleConnect
+    | HandleDisconnect
 
 
 type RequestMsg

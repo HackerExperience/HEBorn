@@ -74,9 +74,6 @@ update data msg model =
         ( BugMsg msg, BugModel model ) ->
             map BugModel BugMsg (Bug.update data msg model)
 
-        ( Event event, BrowserModel model ) ->
-            map BrowserModel BrowserMsg (Browser.update data (Browser.Event event) model)
-
         _ ->
             ( model, Cmd.none, Dispatch.none )
 

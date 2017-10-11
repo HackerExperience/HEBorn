@@ -13,10 +13,12 @@ module Core.Dispatch
         , game
         , os
         , account
+        , database
         , servers
         , web
         , mission
         , missionAction
+        , email
         , story
         , server
         , filesystem
@@ -40,7 +42,9 @@ import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Missions.Actions as Missions
+import Game.Storyline.Emails.Messages as Emails
 import Game.Account.Messages as Account
+import Game.Account.Database.Messages as Database
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
@@ -189,6 +193,11 @@ account msg =
     game <| Game.AccountMsg msg
 
 
+database : Database.Msg -> Dispatch
+database msg =
+    account <| Account.DatabaseMsg msg
+
+
 servers : Servers.Msg -> Dispatch
 servers msg =
     game <| Game.ServersMsg msg
@@ -207,6 +216,11 @@ story msg =
 mission : Missions.Msg -> Dispatch
 mission msg =
     story <| Story.MissionsMsg msg
+
+
+email : Emails.Msg -> Dispatch
+email msg =
+    story <| Story.EmailsMsg msg
 
 
 missionAction : Game.Data -> Missions.Action -> Dispatch

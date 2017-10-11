@@ -1,32 +1,29 @@
 module Game.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Dict
-import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Messages as Ws
-import Driver.Websocket.Reports as Ws
-import Events.Events as Events
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
+import Utils.Update as Update
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Driver.Websocket.Channels exposing (..)
+import Driver.Websocket.Messages as Ws
+import Decoders.Game exposing (ServerToJoin(..))
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Account.Update as Account
 import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Servers.Messages as Servers
-import Game.Servers.Models as Servers
 import Game.Servers.Update as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
-import Game.Messages exposing (..)
-import Game.Models exposing (..)
+import Game.Network.Types as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
-import Game.Network.Types as Network
-import Decoders.Game exposing (ServerToJoin(..))
+import Game.Models exposing (..)
+import Game.Messages exposing (..)
+import Game.Events as Events
 
 
 type alias UpdateResponse =
@@ -51,18 +48,44 @@ update msg model =
         WebMsg msg ->
             onWeb msg model
 
-        Event data ->
-            onEvent data model
+        Event event ->
+            ( model, Cmd.none, Events.dispatcher event model )
 
         Resync ->
             onResync model
 
         Request data ->
-            onRequest (Request.receive model data) model
+            Request.receive model data
+                |> Maybe.map (flip updateRequest model)
+                |> Maybe.withDefault (Update.fromModel model)
+
+        HandleConnected ->
+            handleConnected model
+
+        HandleJoinedAccount value ->
+            handleJoinedAccount value model
 
 
 
 -- internals
+
+
+onResync : Model -> UpdateResponse
+onResync model =
+    let
+        accountId =
+            model
+                |> getAccount
+                |> Account.getId
+
+        cmd =
+            Resync.request accountId model
+    in
+        ( model, cmd, Dispatch.none )
+
+
+
+-- childs
 
 
 onAccount : Account.Msg -> Model -> UpdateResponse
@@ -125,37 +148,8 @@ onServers msg game =
         game
 
 
-onEvent : Events.Event -> Model -> UpdateResponse
-onEvent event model =
-    onAccount (Account.Event event) model
-        |> Update.andThen (onMeta (Meta.Event event))
-        |> Update.andThen (onServers (Servers.Event event))
-        |> Update.andThen (onStory (Story.Event event))
-        |> Update.andThen (onWeb (Web.Event event))
-        |> Update.andThen (updateEvent event)
 
-
-onRequest : Maybe Response -> Model -> UpdateResponse
-onRequest response model =
-    case response of
-        Just response ->
-            updateRequest response model
-
-        Nothing ->
-            Update.fromModel model
-
-
-updateEvent : Events.Event -> Model -> UpdateResponse
-updateEvent event model =
-    case event of
-        Events.Report (Ws.Connected _) ->
-            onWsConnected model
-
-        Events.Report (Ws.Joined (AccountChannel _) bootstrap) ->
-            onWsJoinedAccount bootstrap model
-
-        _ ->
-            Update.fromModel model
+-- requests
 
 
 updateRequest : Response -> Model -> UpdateResponse
@@ -165,8 +159,21 @@ updateRequest response model =
             uncurry (flip onResyncResponse) data
 
 
-onWsConnected : Model -> UpdateResponse
-onWsConnected model =
+onResyncResponse : Decoders.Game.ServersToJoin -> Model -> UpdateResponse
+onResyncResponse servers model =
+    let
+        dispatch =
+            joinChannel servers
+    in
+        ( model, Cmd.none, dispatch )
+
+
+
+-- events
+
+
+handleConnected : Model -> UpdateResponse
+handleConnected model =
     let
         dispatch =
             Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
@@ -174,22 +181,8 @@ onWsConnected model =
         ( model, Cmd.none, dispatch )
 
 
-onResync : Model -> UpdateResponse
-onResync model =
-    let
-        accountId =
-            model
-                |> getAccount
-                |> Account.getId
-
-        cmd =
-            Resync.request accountId model
-    in
-        ( model, cmd, Dispatch.none )
-
-
-onWsJoinedAccount : Value -> Model -> UpdateResponse
-onWsJoinedAccount value model =
+handleJoinedAccount : Value -> Model -> UpdateResponse
+handleJoinedAccount value model =
     case Decode.decodeValue (Decoders.Game.bootstrap model) value of
         Ok ( model_, servers ) ->
             let
@@ -243,12 +236,3 @@ joinChannel servers =
         servers
             |> List.map toDispatch
             |> Dispatch.batch
-
-
-onResyncResponse : Decoders.Game.ServersToJoin -> Model -> UpdateResponse
-onResyncResponse servers model =
-    let
-        dispatch =
-            joinChannel servers
-    in
-        ( model, Cmd.none, dispatch )

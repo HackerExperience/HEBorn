@@ -7,7 +7,6 @@ module Game.Servers.Messages
         )
 
 import Json.Decode exposing (Value)
-import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -27,7 +26,7 @@ type Msg
     = ServerMsg ID ServerMsg
     | Resync ID
     | Request RequestMsg
-    | Event Events.Event
+    | HandleJoinedServer ID Value
 
 
 type RequestMsg
@@ -45,7 +44,6 @@ type ServerMsg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
     | TunnelsMsg Tunnels.Msg
-    | ServerEvent Events.Event
     | ServerRequest ServerRequestMsg
     | NotificationsMsg Notifications.Msg
 

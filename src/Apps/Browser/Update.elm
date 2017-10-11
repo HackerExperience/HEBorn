@@ -19,9 +19,6 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Events.Events exposing (Event(AccountEvent))
-import Events.Account exposing (Event(DatabaseEvent))
-import Events.Account.Database exposing (Event(PasswordAcquired))
 
 
 type alias UpdateResponse =
@@ -63,16 +60,6 @@ update data msg model =
         ChangeTab tabId ->
             goTab tabId model
                 |> Update.fromModel
-
-        Event (AccountEvent (DatabaseEvent (PasswordAcquired { nip, password }))) ->
-            onEveryTabMsg data (Cracked nip password) model
-
-        Event _ ->
-            Update.fromModel model
-
-
-
--- browser internals
 
 
 onMenuMsg :

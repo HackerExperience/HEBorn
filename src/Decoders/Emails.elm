@@ -85,8 +85,8 @@ direction msg =
         |> map (directionFromString msg)
 
 
-decodeContent : String -> Decoder Content
-decodeContent id =
+contentFromId : String -> Decoder Content
+contentFromId id =
     case id of
         "helloworld" ->
             decode HelloWorld
@@ -100,4 +100,4 @@ decodeContent id =
 content : Decoder Content
 content =
     field "id" string
-        |> andThen decodeContent
+        |> andThen contentFromId

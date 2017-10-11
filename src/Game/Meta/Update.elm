@@ -18,6 +18,3 @@ update game msg model =
                     { model | lastTick = time }
             in
                 ( model_, Cmd.none, Dispatch.none )
-
-        _ ->
-            ( model, Cmd.none, Dispatch.none )

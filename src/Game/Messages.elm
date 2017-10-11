@@ -1,5 +1,6 @@
 module Game.Messages exposing (Msg(..), RequestMsg(..))
 
+import Json.Decode exposing (Value)
 import Game.Account.Messages as Account
 import Game.Servers.Messages as Servers
 import Game.Meta.Messages as Meta
@@ -17,8 +18,10 @@ type Msg
     | StoryMsg Story.Msg
     | WebMsg Web.Msg
     | Resync
-    | Request RequestMsg
     | Event Events.Event
+    | Request RequestMsg
+    | HandleConnected
+    | HandleJoinedAccount Value
 
 
 type RequestMsg

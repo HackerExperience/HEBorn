@@ -1,30 +1,81 @@
-module Events.Events exposing (Event(..), handler)
+module Events.Events exposing (Event(..), events)
 
-import Utils.Events exposing (Router)
+import Json.Decode exposing (Value)
 import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Reports as Ws
+import Game.Servers.Shared as Servers
 import Events.Account as Account
-import Events.Meta as Meta
-import Events.Servers as Servers
+import Events.Server as Server
 
 
 type Event
-    = AccountEvent Account.Event
-    | ServersEvent Ws.Channel Servers.Event
-    | MetaEvent Meta.Event
+    = Account Account.Event
+    | Server Servers.ID Server.Event
     | Report Ws.Report
 
 
-handler : Ws.Channel -> Router Event
-handler channel event json =
+events : Ws.Channel -> String -> Value -> Maybe Event
+events channel event json =
+    case router channel event json of
+        Ok event ->
+            Just event
+
+        Err reason ->
+            let
+                report =
+                    if reason == "" then
+                        notFound
+                    else
+                        decodeError reason
+
+                channelName =
+                    Ws.getAddress channel
+            in
+                report channelName event
+
+
+router : Ws.Channel -> String -> Value -> Result String Event
+router channel event json =
     case channel of
         Ws.RequestsChannel ->
-            Nothing
+            Err ""
 
         Ws.AccountChannel _ ->
-            Account.handler event json
-                |> Maybe.map AccountEvent
+            Result.map Account <| Account.events event json
 
-        Ws.ServerChannel _ ->
-            Servers.handler event json
-                |> Maybe.map (ServersEvent channel)
+        Ws.ServerChannel id ->
+            Result.map (Server id) <| Server.events event json
+
+
+notFound : String -> String -> Maybe Event
+notFound channel event =
+    let
+        msg =
+            "no handler for event `"
+                ++ event
+                ++ "' (channel `"
+                ++ channel
+                ++ "')"
+    in
+        report msg
+
+
+decodeError : String -> String -> String -> Maybe Event
+decodeError error channel event =
+    let
+        msg =
+            "event `"
+                ++ event
+                ++ "' (channel `"
+                ++ channel
+                ++ "') gone wrong:"
+                ++ error
+    in
+        report msg
+
+
+report : String -> Maybe Event
+report msg =
+    ""
+        |> Debug.log ("▶ Event Error: " ++ msg)
+        |> always Nothing

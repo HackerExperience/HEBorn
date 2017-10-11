@@ -8,7 +8,6 @@ import Core.Messages as Core
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
-import Events.Events as Events exposing (Event(Report, AccountEvent))
 import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
@@ -65,11 +64,17 @@ update game msg model =
         NotificationsMsg msg ->
             onNotifications game msg model
 
-        Event data ->
-            onEvent game data model
-
         Request data ->
-            onRequest game (receive data) model
+            data
+                |> receive
+                |> Maybe.map (flip (updateRequest game) model)
+                |> Maybe.withDefault (Update.fromModel model)
+
+        HandleConnect ->
+            handleConnect model
+
+        HandleDisconnect ->
+            handleDisconnect model
 
 
 
@@ -193,68 +198,11 @@ onBounce game msg model =
         ( model_, cmd_, dispatch )
 
 
-onEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-onEvent game event model =
-    model
-        |> onDatabase game (Database.Event event)
-        |> Update.andThen (updateEvent game event)
-
-
-onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest game response model =
-    case response of
-        Just response ->
-            updateResponse game response model
-
-        Nothing ->
-            Update.fromModel model
-
-
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    case event of
-        Report (Ws.Connected _) ->
-            onWsConnected game model
-
-        Report Ws.Disconnected ->
-            onWsDisconnected game model
-
-        _ ->
-            Update.fromModel model
-
-
-updateResponse : Game.Model -> Response -> Model -> UpdateResponse
-updateResponse game response model =
+updateRequest : Game.Model -> Response -> Model -> UpdateResponse
+updateRequest game response model =
     case response of
         _ ->
             Update.fromModel model
-
-
-onWsConnected : Game.Model -> Model -> UpdateResponse
-onWsConnected game model =
-    let
-        dispatch =
-            Dispatch.websocket
-                (Ws.JoinChannel (AccountChannel model.id) Nothing)
-    in
-        ( model, Cmd.none, dispatch )
-
-
-onWsDisconnected : Game.Model -> Model -> UpdateResponse
-onWsDisconnected game model =
-    let
-        dispatch =
-            case model.logout of
-                ToLanding ->
-                    Dispatch.core Core.Shutdown
-
-                ToCrash code message ->
-                    Dispatch.core <| Core.Crash code message
-
-                _ ->
-                    Dispatch.none
-    in
-        ( model, Cmd.none, dispatch )
 
 
 ensureValidContext : Game.Model -> Model -> Model
@@ -287,3 +235,30 @@ onInsertEndpoint nip model =
     model
         |> insertEndpoint nip
         |> Update.fromModel
+
+
+handleConnect : Model -> UpdateResponse
+handleConnect model =
+    let
+        dispatch =
+            Dispatch.websocket
+                (Ws.JoinChannel (AccountChannel model.id) Nothing)
+    in
+        ( model, Cmd.none, dispatch )
+
+
+handleDisconnect : Model -> UpdateResponse
+handleDisconnect model =
+    let
+        dispatch =
+            case model.logout of
+                ToLanding ->
+                    Dispatch.core Core.Shutdown
+
+                ToCrash code message ->
+                    Dispatch.core <| Core.Crash code message
+
+                _ ->
+                    Dispatch.none
+    in
+        ( model, Cmd.none, dispatch )
