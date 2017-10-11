@@ -58,23 +58,11 @@ insert :
     -> ( Model, Cmd Msg, Dispatch )
 insert data id serverID app ({ windows, visible, parentSession } as model) =
     let
-        contexts =
-            case Apps.contexts app of
-                Apps.ContextualApp ->
-                    data
-                        |> Game.getGame
-                        |> Game.getAccount
-                        |> Account.getContext
-                        |> Just
-
-                Apps.ContextlessApp ->
-                    Nothing
-
         ( instance, cmd, dispatch ) =
             case Apps.contexts app of
                 Apps.ContextualApp ->
                     let
-                        ( model1, cmd1, dispatch1 ) =
+                        ( modelG, cmdG, dispatchG ) =
                             Apps.launch data
                                 { sessionId = parentSession
                                 , windowId = id
@@ -88,7 +76,7 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                                 |> Game.fromEndpoint
                                 |> Maybe.withDefault data
 
-                        ( model2, cmd2, dispatch2 ) =
+                        ( modelE, cmdE, dispatchE ) =
                             Apps.launch data_
                                 { sessionId = parentSession
                                 , windowId = id
@@ -97,20 +85,21 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                                 app
 
                         cmd =
-                            Cmd.batch [ cmd1, cmd2 ]
+                            Cmd.batch [ cmdG, cmdE ]
 
                         dispatch =
-                            Dispatch.batch [ dispatch1, dispatch2 ]
+                            Dispatch.batch [ dispatchG, dispatchE ]
 
-                        model3 =
-                            case contexts of
-                                Just Gateway ->
-                                    DoubleContext model1 model2
+                        context =
+                            data
+                                |> Game.getGame
+                                |> Game.getAccount
+                                |> Account.getContext
 
-                                _ ->
-                                    DoubleContext model2 model1
+                        model =
+                            DoubleContext context modelG modelE
                     in
-                        ( model3, cmd, dispatch )
+                        ( model, cmd, dispatch )
 
                 Apps.ContextlessApp ->
                     let
@@ -125,7 +114,7 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                         ( SingleContext model, cmd, dispatch )
 
         cmd_ =
-            Cmd.map (WindowMsg id) cmd
+            Cmd.map (AppMsg Active id) cmd
 
         window =
             Window
@@ -133,7 +122,6 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                 (Size 600 400)
                 False
                 app
-                contexts
                 instance
                 False
                 serverID

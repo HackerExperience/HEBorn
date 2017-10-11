@@ -52,6 +52,7 @@ import Game.Servers.Shared as Servers
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models exposing (WindowRef)
+import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.Toasts.Messages as Toasts
 import Utils.Cmd as CmdUtils
 
@@ -253,7 +254,7 @@ web msg =
 
 browser : WindowRef -> Context -> Browser.Msg -> Dispatch
 browser windowRef context msg =
-    sessionManagerAppMsg windowRef context <| Apps.BrowserMsg msg
+    app windowRef context <| Apps.BrowserMsg msg
 
 
 
@@ -275,9 +276,13 @@ toasts msg =
     os <| OS.ToastsMsg msg
 
 
-sessionManagerAppMsg : WindowRef -> Context -> Apps.Msg -> Dispatch
-sessionManagerAppMsg windowRef context msg =
-    sessionManager <| SessionManager.AppMsg windowRef context msg
+app : WindowRef -> Context -> Apps.Msg -> Dispatch
+app windowRef context msg =
+    sessionManager <|
+        SessionManager.AppMsg
+            windowRef
+            context
+            msg
 
 
 reducer : Dispatch -> List Msg -> List Msg

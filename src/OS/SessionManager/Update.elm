@@ -35,7 +35,7 @@ update data msg model =
             AppMsg ( sessionId, windowId ) context msg ->
                 windowManager data
                     sessionId
-                    (WM.AppMsg windowId context msg)
+                    (WM.AppMsg (WM.One context) windowId msg)
                     model
 
 

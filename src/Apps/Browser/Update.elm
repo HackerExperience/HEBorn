@@ -1,5 +1,6 @@
 module Apps.Browser.Update exposing (update)
 
+import Dict
 import Utils.Update as Update
 import Game.Data as Game
 import Game.Servers.Models as Servers
@@ -18,6 +19,9 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Events.Events exposing (Event(AccountEvent))
+import Events.Account exposing (Event(DatabaseEvent))
+import Events.Account.Database exposing (Event(PasswordAcquired))
 
 
 type alias UpdateResponse =
@@ -49,6 +53,9 @@ update data msg model =
         SomeTabMsg tabId msg ->
             updateSomeTabMsg data tabId msg model
 
+        EveryTabMsg msg ->
+            onEveryTabMsg data msg model
+
         -- Browser
         NewTabIn url ->
             onNewTabIn data url model
@@ -56,6 +63,12 @@ update data msg model =
         ChangeTab tabId ->
             goTab tabId model
                 |> Update.fromModel
+
+        Event (AccountEvent (DatabaseEvent (PasswordAcquired { nip, password }))) ->
+            onEveryTabMsg data (Cracked nip password) model
+
+        Event _ ->
+            Update.fromModel model
 
 
 
@@ -119,36 +132,7 @@ updateSomeTabMsg data tabId msg model =
             getTab tabId model.tabs
 
         result =
-            case msg of
-                UpdateAddress newAddr ->
-                    onUpdateAddress newAddr tab
-
-                GoPrevious ->
-                    onGoPrevious tab
-
-                GoNext ->
-                    onGoNext tab
-
-                PageMsg msg ->
-                    onPageMsg data msg tab
-
-                GoAddress url ->
-                    onGoAddress data url model.me tabId tab
-
-                Fetched response ->
-                    onFetched response tab
-
-                Crack nip ->
-                    onCrack data nip tab
-
-                AnyMap _ ->
-                    Update.fromModel tab
-
-                Login nip password ->
-                    onLogin data nip password model.me tabId tab
-
-                LoginFailed ->
-                    Update.fromModel tab
+            processTabMsg data tabId tab msg model
 
         setThisTab tab_ =
             { model | tabs = (setTab tabId tab_ model.tabs) }
@@ -156,6 +140,84 @@ updateSomeTabMsg data tabId msg model =
         result
             |> Update.mapModel setThisTab
             |> Update.mapCmd (SomeTabMsg tabId)
+
+
+onEveryTabMsg : Game.Data -> TabMsg -> Model -> UpdateResponse
+onEveryTabMsg data msg model =
+    model.tabs
+        |> Dict.foldl (reduceTabMsg data msg model) ( Dict.empty, Cmd.none, Dispatch.none )
+        |> Update.mapModel (\tabs_ -> { model | tabs = tabs_ })
+
+
+reduceTabMsg :
+    Game.Data
+    -> TabMsg
+    -> Model
+    -> Int
+    -> Tab
+    -> ( Tabs, Cmd Msg, Dispatch )
+    -> ( Tabs, Cmd Msg, Dispatch )
+reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
+    let
+        ( tab_, cmd1, dispatch1 ) =
+            processTabMsg data tabId tab msg model
+
+        tabs_ =
+            Dict.insert tabId tab tabs
+
+        cmd =
+            Cmd.batch
+                [ cmd0
+                , Cmd.map (SomeTabMsg tabId) cmd1
+                ]
+
+        dispatch =
+            Dispatch.batch [ dispatch0, dispatch1 ]
+    in
+        ( tabs_, cmd, dispatch )
+
+
+processTabMsg :
+    Game.Data
+    -> Int
+    -> Tab
+    -> TabMsg
+    -> Model
+    -> TabUpdateResponse
+processTabMsg data tabId tab msg model =
+    case msg of
+        UpdateAddress newAddr ->
+            onUpdateAddress newAddr tab
+
+        GoPrevious ->
+            onGoPrevious tab
+
+        GoNext ->
+            onGoNext tab
+
+        PageMsg msg ->
+            onPageMsg data msg tab
+
+        GoAddress url ->
+            onGoAddress data url model.me tabId tab
+
+        Fetched response ->
+            onFetched response tab
+
+        Crack nip ->
+            onCrack data nip tab
+
+        AnyMap _ ->
+            Update.fromModel tab
+
+        Login nip password ->
+            onLogin data nip password model.me tabId tab
+
+        LoginFailed ->
+            Update.fromModel tab
+
+        Cracked _ _ ->
+            Update.fromModel tab
 
 
 

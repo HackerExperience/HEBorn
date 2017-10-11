@@ -3,6 +3,7 @@ module Apps.Browser.Pages.NoWebserver.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
+import Apps.Browser.Pages.CommonActions exposing (..)
 import Apps.Browser.Pages.NoWebserver.Models exposing (..)
 import Apps.Browser.Pages.NoWebserver.Messages exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
@@ -19,6 +20,12 @@ update :
     -> UpdateResponse
 update data msg model =
     case msg of
+        GlobalMsg (Cracked target passwrd) ->
+            if (model.toolkit.target == target) then
+                onUpdatePasswordField passwrd model
+            else
+                Update.fromModel model
+
         GlobalMsg _ ->
             -- Treated in Browser.Update
             Update.fromModel model

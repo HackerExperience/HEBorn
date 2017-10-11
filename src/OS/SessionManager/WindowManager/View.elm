@@ -14,8 +14,6 @@ import Apps.Models as Apps
 import Apps.View as Apps
 import Game.Data as Game
 import Game.Meta.Types exposing (..)
-import OS.SessionManager.WindowManager.Context as Context
-import OS.SessionManager.WindowManager.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res
@@ -33,8 +31,8 @@ view data ({ windows, visible } as model) =
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.view (windowData data id window model)
-                        |> Html.map (WindowMsg id)
+                        |> Apps.view (windowData data Nothing id window model)
+                        |> Html.map (AppMsg Active id)
                         |> windowWrapper id window
                         |> (,) id
                         |> Just
@@ -70,9 +68,7 @@ windowWrapper id window view =
         , windowStyle window
         , decoratedAttr <| isDecorated window
         , appAttr window.app
-        , window.context
-            |> Maybe.withDefault Gateway
-            |> activeContextAttr
+        , activeContextAttr <| windowContext window
         , onMouseDown (UpdateFocusTo (Just id))
         ]
         [ header id window
@@ -102,7 +98,7 @@ header id window =
           <|
             if (isDecorated window) then
                 [ headerTitle (title window) (Apps.icon window.app)
-                , headerContext id window.context
+                , headerContext id <| realContext window
                 , headerButtons id
                 ]
             else
@@ -112,14 +108,25 @@ header id window =
 
 headerContext : ID -> Maybe Context -> Html Msg
 headerContext id context =
-    div []
-        [ span
-            [ class [ Res.HeaderContextSw ]
-            , onClickMe (SwitchContext id)
-            ]
-            [ text (Context.toString context)
-            ]
-        ]
+    div [] <|
+        case context of
+            Just context ->
+                [ span
+                    [ class [ Res.HeaderContextSw ]
+                    , onClickMe <|
+                        SetContext id <|
+                            case context of
+                                Gateway ->
+                                    Endpoint
+
+                                Endpoint ->
+                                    Gateway
+                    ]
+                    [ text <| contextToString context ]
+                ]
+
+            Nothing ->
+                []
 
 
 headerTitle : String -> String -> Html Msg
@@ -172,3 +179,13 @@ windowStyle window =
                 position
     in
         styles attrs
+
+
+contextToString : Context -> String
+contextToString context =
+    case context of
+        Gateway ->
+            "Gateway"
+
+        Endpoint ->
+            "Endpoint"
