@@ -24,8 +24,8 @@ appSubcriptions data ({ visible, windows } as model) =
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.subscriptions (windowData data id window model)
-                        |> Sub.map (WindowMsg id)
+                        |> Apps.subscriptions (windowData data Nothing id window model)
+                        |> Sub.map (AppMsg Active id)
                         |> Just
 
                 Nothing ->

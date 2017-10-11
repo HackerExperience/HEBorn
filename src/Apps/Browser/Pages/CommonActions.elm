@@ -10,3 +10,5 @@ type CommonActions
     | Crack NIP
     | AnyMap NIP
     | Login NIP String
+    | Cracked NIP String
+    | LoginFailed

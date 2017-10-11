@@ -20,8 +20,11 @@ update :
     -> UpdateResponse
 update data msg model =
     case msg of
-        GlobalMsg (Crack _) ->
-            onUpdatePasswordField "" model
+        GlobalMsg (Cracked target passwrd) ->
+            if (model.toolkit.target == target) then
+                onUpdatePasswordField passwrd model
+            else
+                Update.fromModel model
 
         GlobalMsg _ ->
             -- Treated in Browser.Update

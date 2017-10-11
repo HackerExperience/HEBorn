@@ -5,6 +5,7 @@ import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.Update as LogViewer
 import Apps.TaskManager.Update as TaskManager
+import Apps.Browser.Messages as Browser
 import Apps.Browser.Update as Browser
 import Apps.Explorer.Update as Explorer
 import Apps.DBAdmin.Update as Database
@@ -72,6 +73,9 @@ update data msg model =
 
         ( BugMsg msg, BugModel model ) ->
             map BugModel BugMsg (Bug.update data msg model)
+
+        ( Event event, BrowserModel model ) ->
+            map BrowserModel BrowserMsg (Browser.update data (Browser.Event event) model)
 
         _ ->
             ( model, Cmd.none, Dispatch.none )

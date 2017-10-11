@@ -7,12 +7,7 @@ module Apps.Browser.Widgets.HackingToolkit.View
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Utils.Maybe as Maybe
 import Html.CssHelpers
-import Game.Data as Game
-import Game.Models as Game
-import Game.Account.Models as Account
-import Game.Account.Database.Models as Database
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
@@ -30,10 +25,10 @@ type alias Config msg =
     Html.CssHelpers.withNamespace prefix
 
 
-hackingToolkit : Game.Data -> Config msg -> Model -> Html msg
-hackingToolkit data config model =
+hackingToolkit : Config msg -> Model -> Html msg
+hackingToolkit config model =
     div [ class [ HackingToolkit ] ]
-        [ goPanelView data config model
+        [ goPanelView config model
         , node "actions"
             []
             [ crackBtn config model
@@ -42,30 +37,19 @@ hackingToolkit data config model =
         ]
 
 
-goPanelView : Game.Data -> Config msg -> Model -> Html msg
-goPanelView data config model =
+goPanelView : Config msg -> Model -> Html msg
+goPanelView config model =
     if config.showPassword then
-        loginForm data config model
+        loginForm config model
     else
         togglePanel config
 
 
-loginForm : Game.Data -> Config msg -> Model -> Html msg
-loginForm data config model =
+loginForm : Config msg -> Model -> Html msg
+loginForm config model =
     let
         inputText =
-            case model.password of
-                Just password ->
-                    password
-
-                Nothing ->
-                    data
-                        |> Game.getGame
-                        |> Game.getAccount
-                        |> Account.getDatabase
-                        |> Database.getHackedServers
-                        |> Database.getHackedServer model.target
-                        |> Database.getPassword
+            Maybe.withDefault "" model.password
     in
         node "portal"
             []

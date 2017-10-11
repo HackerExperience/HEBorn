@@ -42,7 +42,7 @@ viewPre data showPassword { title, toolkit } =
     div [ class [ AutoHeight ] ]
         [ div [ class [ DummyTitle ] ]
             [ text <| "Welcome to " ++ title ++ "!" ]
-        , hackingToolkit data
+        , hackingToolkit
             (hackingToolkitConfig showPassword)
             toolkit
         ]

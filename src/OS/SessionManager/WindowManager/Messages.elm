@@ -3,23 +3,20 @@ module OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 import Draggable
 import Apps.Messages as Apps
 import Game.Meta.Types exposing (Context(..))
-
-
-type alias WindowID =
-    -- WM.ID creates a ciclic reference
-    String
+import OS.SessionManager.WindowManager.Models exposing (..)
 
 
 type Msg
-    = WindowMsg WindowID Apps.Msg
-    | AppMsg WindowID Context Apps.Msg
-    | Close WindowID
-    | Minimize WindowID
-    | ToggleMaximize WindowID
-    | SwitchContext WindowID
-    | UpdateFocusTo (Maybe WindowID)
+    = AppMsg TargetContext ID Apps.Msg
+    | EveryAppMsg Apps.Msg
+      -- WINDOW Actions
+    | Close ID
+    | Minimize ID
+    | ToggleMaximize ID
+    | SetContext ID Context
+    | UpdateFocusTo (Maybe ID)
       -- WINDOW DRAGGIN'
     | OnDragBy Draggable.Delta
-    | StartDragging WindowID
+    | StartDragging ID
     | StopDragging
-    | DragMsg (Draggable.Msg WindowID)
+    | DragMsg (Draggable.Msg ID)

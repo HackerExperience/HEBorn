@@ -19,9 +19,15 @@ update :
     -> Model
     -> UpdateResponse
 update data msg model =
-    case Debug.log "WOOOOOOOOOOOOOOOOOOOOOOOW" msg of
-        GlobalMsg (Crack _) ->
-            onUpdatePasswordField "" model
+    case msg of
+        GlobalMsg (Cracked target passwrd) ->
+            if (model.toolkit.target == target) then
+                onUpdatePasswordField passwrd model
+            else
+                Update.fromModel model
+
+        GlobalMsg LoginFailed ->
+            onLoginFailed model
 
         GlobalMsg _ ->
             -- Treated in Browser.Update
@@ -41,9 +47,17 @@ onTogglePanel value model =
         |> Update.fromModel
 
 
+onLoginFailed : Model -> UpdateResponse
+onLoginFailed model =
+    model
+        |> setLoginFailed True
+        |> Update.fromModel
+
+
 onUpdatePasswordField : String -> Model -> UpdateResponse
 onUpdatePasswordField newPassword model =
     model.toolkit
         |> HackingToolkit.setPassword newPassword
         |> flip setToolkit model
+        |> setLoginFailed False
         |> Update.fromModel

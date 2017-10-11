@@ -154,6 +154,12 @@ pageMsgIntersept msg =
                 Common.Login nip password ->
                     ActiveTabMsg <| Login nip password
 
+                Common.Cracked target password ->
+                    ActiveTabMsg <| Cracked target password
+
+                Common.LoginFailed ->
+                    ActiveTabMsg <| LoginFailed
+
         _ ->
             ActiveTabMsg <| PageMsg msg
 
