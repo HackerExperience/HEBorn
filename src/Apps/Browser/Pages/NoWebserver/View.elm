@@ -42,7 +42,7 @@ viewPre data showPassword model =
     div [ class [ AutoHeight ] ]
         [ div [ class [ DummyTitle ] ]
             [ text "No web server running" ]
-        , hackingToolkit data
+        , hackingToolkit
             (hackingToolkitConfig showPassword)
             model.toolkit
         ]

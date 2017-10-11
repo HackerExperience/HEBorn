@@ -8,6 +8,7 @@ module OS.SessionManager.WindowManager.Models
         , Position
         , Size
         , Instance(..)
+        , TargetContext(..)
         , GroupedWindows
         , initialModel
         , refresh
@@ -19,20 +20,22 @@ module OS.SessionManager.WindowManager.Models
         , restore
         , minimize
         , minimizeAll
-        , context
+        , getContext
         , move
         , resize
         , toggleMaximize
         , toggleLock
         , toggleContext
+        , setContext
         , startDragging
         , stopDragging
         , getAppModel
-        , setAppModel
         , getAppModelFromWindow
         , group
         , title
         , windowData
+        , windowContext
+        , realContext
         , initialPosition
         , filterApp
         , moveTail
@@ -45,7 +48,6 @@ import Apps.Models as Apps
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
-import OS.SessionManager.WindowManager.Messages exposing (..)
 import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
@@ -79,7 +81,6 @@ type alias Window =
     , size : Size
     , maximized : Bool
     , app : Apps.App
-    , context : Maybe Context
     , instance : Instance
     , locked : Bool
     , endpoint : Maybe Servers.ID
@@ -99,8 +100,14 @@ type alias Size =
 
 
 type Instance
-    = DoubleContext Apps.AppModel Apps.AppModel
+    = DoubleContext Context Apps.AppModel Apps.AppModel -- ACTIVE GATEWAY ENDPOINT
     | SingleContext Apps.AppModel
+
+
+type TargetContext
+    = All
+    | One Context
+    | Active
 
 
 type alias GroupedWindows =
@@ -267,11 +274,31 @@ minimizeAll app ({ visible, windows } as model) =
         model_
 
 
-context : ID -> Model -> Maybe Context
-context id model =
+windowContext : Window -> Context
+windowContext { instance } =
+    case instance of
+        SingleContext _ ->
+            Gateway
+
+        DoubleContext context _ _ ->
+            context
+
+
+realContext : Window -> Maybe Context
+realContext { instance } =
+    case instance of
+        SingleContext _ ->
+            Nothing
+
+        DoubleContext context _ _ ->
+            Just context
+
+
+getContext : ID -> Model -> Maybe Context
+getContext id model =
     model.windows
         |> Dict.get id
-        |> Maybe.andThen .context
+        |> Maybe.map windowContext
 
 
 move : String -> Float -> Float -> Model -> Model
@@ -331,7 +358,10 @@ toggleMaximize id ({ windows } as model) =
                     Dict.insert id window_ windows
 
                 model_ =
-                    { model | windows = windows_ }
+                    { model
+                        | windows = windows_
+                        , focusing = Just id
+                    }
             in
                 model_
 
@@ -362,28 +392,48 @@ toggleLock id ({ windows } as model) =
 toggleContext : ID -> Model -> Model
 toggleContext id ({ windows } as model) =
     case Dict.get id windows of
-        Just ({ context, instance } as window) ->
+        Just ({ instance } as window) ->
             case instance of
-                DoubleContext a b ->
+                DoubleContext context g e ->
                     let
-                        instance_ =
-                            DoubleContext b a
-
                         context_ =
                             case context of
-                                Just Gateway ->
-                                    Just Endpoint
+                                Gateway ->
+                                    Endpoint
 
-                                Just Endpoint ->
-                                    Just Gateway
-
-                                Nothing ->
-                                    Nothing
+                                Endpoint ->
+                                    Gateway
 
                         window_ =
                             { window
-                                | instance = instance_
-                                , context = context_
+                                | instance = DoubleContext context_ g e
+                            }
+
+                        windows_ =
+                            Dict.insert id window_ windows
+
+                        model_ =
+                            { model | windows = windows_ }
+                    in
+                        model_
+
+                SingleContext _ ->
+                    model
+
+        Nothing ->
+            model
+
+
+setContext : Context -> ID -> Model -> Model
+setContext context_ id ({ windows } as model) =
+    case Dict.get id windows of
+        Just ({ instance } as window) ->
+            case instance of
+                DoubleContext _ g e ->
+                    let
+                        window_ =
+                            { window
+                                | instance = DoubleContext context_ g e
                             }
 
                         windows_ =
@@ -421,46 +471,16 @@ getAppModel id model =
             Nothing
 
 
-setAppModel : ID -> Apps.AppModel -> Model -> Model
-setAppModel id app ({ windows } as model) =
-    case Dict.get id model.windows of
-        Just window ->
-            case window.instance of
-                DoubleContext left right ->
-                    let
-                        window_ =
-                            { window | instance = DoubleContext app right }
-
-                        windows_ =
-                            Dict.insert id window_ windows
-
-                        model_ =
-                            { model | windows = windows_ }
-                    in
-                        model_
-
-                SingleContext _ ->
-                    let
-                        window_ =
-                            { window | instance = SingleContext app }
-
-                        windows_ =
-                            Dict.insert id window_ windows
-
-                        model_ =
-                            { model | windows = windows_ }
-                    in
-                        model_
-
-        Nothing ->
-            model
-
-
 getAppModelFromWindow : Window -> Apps.AppModel
 getAppModelFromWindow window =
     case window.instance of
-        DoubleContext app _ ->
-            app
+        DoubleContext context gateway endpoint ->
+            case context of
+                Gateway ->
+                    gateway
+
+                Endpoint ->
+                    endpoint
 
         SingleContext app ->
             app
@@ -508,31 +528,32 @@ title window =
 
 windowData :
     Game.Data
+    -> Maybe Context
     -> ID
     -> Window
     -> Model
     -> Game.Data
-windowData data id window model =
+windowData data maybeContext id window model =
     let
         game =
             Game.getGame data
 
         servers =
             Game.getServers game
+
+        context =
+            Maybe.withDefault (windowContext window) maybeContext
     in
-        case context id model of
-            Just Gateway ->
+        case context of
+            Gateway ->
                 game
                     |> Game.fromGateway
                     |> Maybe.withDefault data
 
-            Just Endpoint ->
+            Endpoint ->
                 window.endpoint
                     |> Maybe.andThen (flip Game.fromServerID game)
                     |> Maybe.withDefault data
-
-            Nothing ->
-                data
 
 
 initialPosition : Model -> Position

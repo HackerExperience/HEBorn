@@ -18,7 +18,7 @@ import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
 
 
 type alias UpdateResponse =
-    ( ( Model, Cmd Msg, Dispatch ), Maybe CommonActions )
+    ( Model, Cmd Msg, Dispatch )
 
 
 update :
@@ -37,12 +37,9 @@ update data msg model =
         ( DownloadCenterModel page, DownloadCenterMsg msg ) ->
             handleDownloadCenter data msg page
 
-        ( _, Ignore ) ->
-            ( Update.fromModel model, Nothing )
-
         -- INVALIDS
         _ ->
-            ( Update.fromModel model, Nothing )
+            Update.fromModel model
 
 
 handleNoWebserver :
@@ -51,21 +48,9 @@ handleNoWebserver :
     -> NoWebserver.Model
     -> UpdateResponse
 handleNoWebserver data msg page =
-    let
-        updateFirst =
-            NoWebserver.update data msg page
-                |> Update.mapModel NoWebserverModel
-                |> Update.mapCmd NoWebserverMsg
-
-        updateSecond =
-            case msg of
-                NoWebserver.GlobalMsg msg ->
-                    Just msg
-
-                _ ->
-                    Nothing
-    in
-        ( updateFirst, updateSecond )
+    NoWebserver.update data msg page
+        |> Update.mapModel NoWebserverModel
+        |> Update.mapCmd NoWebserverMsg
 
 
 handleBank :
@@ -74,21 +59,9 @@ handleBank :
     -> Bank.Model
     -> UpdateResponse
 handleBank data msg page =
-    let
-        updateFirst =
-            Bank.update data msg page
-                |> Update.mapModel BankModel
-                |> Update.mapCmd BankMsg
-
-        updateSecond =
-            case msg of
-                Bank.GlobalMsg msg ->
-                    Just msg
-
-                _ ->
-                    Nothing
-    in
-        ( updateFirst, updateSecond )
+    Bank.update data msg page
+        |> Update.mapModel BankModel
+        |> Update.mapCmd BankMsg
 
 
 handleDownloadCenter :
@@ -97,18 +70,6 @@ handleDownloadCenter :
     -> DownloadCenter.Model
     -> UpdateResponse
 handleDownloadCenter data msg page =
-    let
-        updateFirst =
-            DownloadCenter.update data msg page
-                |> Update.mapModel DownloadCenterModel
-                |> Update.mapCmd DownloadCenterMsg
-
-        updateSecond =
-            case msg of
-                DownloadCenter.GlobalMsg msg ->
-                    Just msg
-
-                _ ->
-                    Nothing
-    in
-        ( updateFirst, updateSecond )
+    DownloadCenter.update data msg page
+        |> Update.mapModel DownloadCenterModel
+        |> Update.mapCmd DownloadCenterMsg
