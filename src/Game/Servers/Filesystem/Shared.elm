@@ -187,6 +187,10 @@ type alias AnymapModules =
     }
 
 
+
+-- Foreigners: These are not glued to a Filesystem
+
+
 type alias Foreigners =
     List Foreigner
 

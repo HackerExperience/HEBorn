@@ -8,6 +8,7 @@ import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
+import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
 
 
 { id, class, classList } =
@@ -38,13 +39,15 @@ view data model =
 
 
 viewPre : Game.Data -> Bool -> Model -> Html Msg
-viewPre data showPassword { title, toolkit } =
+viewPre data showPassword model =
     div [ class [ AutoHeight ] ]
         [ div [ class [ DummyTitle ] ]
-            [ text <| "Welcome to " ++ title ++ "!" ]
+            [ text <| "Welcome to " ++ model.title ++ "!" ]
+        , publicFiles
+            model.publicFiles
         , hackingToolkit
             (hackingToolkitConfig showPassword)
-            toolkit
+            model.toolkit
         ]
 
 
