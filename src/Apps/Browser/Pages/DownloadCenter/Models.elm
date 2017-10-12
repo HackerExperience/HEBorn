@@ -2,10 +2,12 @@ module Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 
 import Game.Web.Types as Web
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
+import Apps.Browser.Widgets.PublicFiles.Model as PublicFiles
 
 
 type alias Model =
     { toolkit : HackingToolkit.Model
+    , publicFiles : PublicFiles.Model
     , showingPanel : Bool
     , loginFailed : Bool
     , title : String
@@ -18,6 +20,7 @@ initialModel meta { title } =
         { password = meta.password
         , target = meta.nip
         }
+    , publicFiles = meta.publicFiles
     , showingPanel = True
     , loginFailed = False
     , title = title

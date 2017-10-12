@@ -103,6 +103,7 @@ genPage =
                     , meta =
                         { password = Nothing
                         , nip = ( "main", str )
+                        , publicFiles = []
                         }
                     }
             in

@@ -27,22 +27,26 @@ type alias Config msg =
 
 hackingToolkit : Config msg -> Model -> Html msg
 hackingToolkit config model =
-    div [ class [ HackingToolkit ] ]
-        [ goPanelView config model
-        , node "actions"
-            []
-            [ crackBtn config model
-            , anyMapBtn config model
+    div [ class [ HackingToolkit ] ] <|
+        if config.showPassword then
+            [ goPanelView config model
+            , node "actions"
+                []
+                [ crackBtn config model
+                , anyMapBtn config model
+                ]
             ]
-        ]
+        else
+            [ node "portal" [] [ text "Already logged!" ]
+            , node "actions"
+                []
+                [ toggleBtn config ]
+            ]
 
 
 goPanelView : Config msg -> Model -> Html msg
 goPanelView config model =
-    if config.showPassword then
-        loginForm config model
-    else
-        togglePanel config
+    loginForm config model
 
 
 loginForm : Config msg -> Model -> Html msg
@@ -71,17 +75,14 @@ loginForm config model =
             ]
 
 
-togglePanel : Config msg -> Html msg
-togglePanel { onEnterPanel } =
-    node "portal"
-        []
-        [ div []
-            [ div []
-                [ text "Already logged!" ]
-            , button
-                [ onClick onEnterPanel ]
-                [ text "Go" ]
-            ]
+toggleBtn : Config msg -> Html msg
+toggleBtn { onEnterPanel } =
+    div
+        [ onClick onEnterPanel
+        ]
+        [ text "A"
+        , br [] []
+        , text "Painel"
         ]
 
 

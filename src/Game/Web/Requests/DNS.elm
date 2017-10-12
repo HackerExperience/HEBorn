@@ -32,6 +32,7 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network
+import Decoders.Filesystem exposing (file)
 import Game.Network.Types as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
@@ -153,6 +154,7 @@ decodeMeta =
     decode Meta
         |> optional "password" (nullable string) Nothing
         |> required "nip" Decoders.Network.nip
+        |> optional "public" (list file) []
 
 
 decodeWeb : Decoder Type

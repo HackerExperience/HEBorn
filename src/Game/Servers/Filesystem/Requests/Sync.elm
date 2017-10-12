@@ -1,7 +1,6 @@
 module Game.Servers.Filesystem.Requests.Sync
     exposing
         ( Response(..)
-        , Index
         , request
         , receive
         , decoder
@@ -15,13 +14,8 @@ import Json.Decode
         ( Decoder
         , Value
         , decodeValue
-        , oneOf
-        , map
-        , maybe
         , lazy
         , list
-        , string
-        , int
         )
 import Game.Servers.Filesystem.Messages
     exposing
@@ -29,15 +23,12 @@ import Game.Servers.Filesystem.Messages
         , RequestMsg(SyncRequest)
         )
 import Game.Network.Types exposing (NIP)
-import Decoders.Filesystem
-
-
-type alias Index =
-    Decoders.Filesystem.Index
+import Game.Servers.Filesystem.Shared exposing (Foreigners)
+import Decoders.Filesystem exposing (entry)
 
 
 type Response
-    = Okay Index
+    = Okay Foreigners
 
 
 request : NIP -> ConfigSource a -> Cmd Msg
@@ -59,6 +50,6 @@ receive code json =
             Nothing
 
 
-decoder : Decoder Decoders.Filesystem.Index
+decoder : Decoder Foreigners
 decoder =
-    list <| lazy Decoders.Filesystem.entry
+    list <| lazy entry

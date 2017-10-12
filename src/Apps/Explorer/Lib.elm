@@ -1,6 +1,6 @@
 module Apps.Explorer.Lib exposing (..)
 
-import Game.Servers.Filesystem.Shared as Filesystem exposing (Location, FileSize, ModuleName, rootSymbol, pathSeparator)
+import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
 
 
 -- PATH
@@ -29,42 +29,21 @@ locationGoUp loc =
 -- FILESYSTEM
 
 
-type Mime
-    = GenericArchive
-    | Virus
-    | Firewall
-
-
-type KnownModule
-    = Active
-    | Passive
-
-
-extensionInterpret : String -> Mime
-extensionInterpret ext =
-    case ext of
-        "fwl" ->
-            Firewall
-
-        "spam" ->
-            Virus
-
-        _ ->
-            GenericArchive
-
-
-moduleInterpret : ModuleName -> KnownModule
-moduleInterpret name =
-    case name of
-        "Active" ->
-            Active
-
-        _ ->
-            Passive
-
-
 fileSizeToFloat : FileSize -> Float
 fileSizeToFloat fsize =
     fsize
         |> Maybe.map toFloat
         |> Maybe.withDefault 0
+
+
+hasModules : Mime -> Bool
+hasModules mime =
+    case mime of
+        Text ->
+            False
+
+        CryptoKey ->
+            False
+
+        _ ->
+            True

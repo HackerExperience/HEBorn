@@ -5,7 +5,7 @@ import Utils.Update as Update
 import Requests.Requests as Requests
 import Game.Models as Game
 import Game.Servers.Shared as Servers
-import Game.Servers.Filesystem.Messages exposing (Msg(..), RequestMsg(..))
+import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
@@ -16,7 +16,6 @@ import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Network.Types exposing (NIP)
-import Decoders.Filesystem
 
 
 type alias UpdateResponse =
@@ -108,7 +107,7 @@ onCreateTextFile game nip fileId ( fileLocation, fileBaseName ) model =
                 , version = Nothing
                 , size = Just 0
                 , parent = path
-                , modules = []
+                , mime = Text
                 }
 
         maybeModel =
@@ -245,12 +244,12 @@ onRequest game nip response model =
 -- sync/bootstrap internals
 
 
-apply : Filesystem -> Sync.Index -> Filesystem
+apply : Filesystem -> Foreigners -> Filesystem
 apply =
     let
         convEntry parentRef src filesystem =
             case src of
-                Decoders.Filesystem.LeafEntry data ->
+                ForeignFile data ->
                     let
                         entry =
                             FileEntry
@@ -260,12 +259,12 @@ apply =
                                 , extension = data.extension
                                 , version = data.version
                                 , size = data.size
-                                , modules = data.modules
+                                , mime = data.mime
                                 }
                     in
                         addEntry entry filesystem
 
-                Decoders.Filesystem.NodeEntry data ->
+                ForeignFolder data ->
                     let
                         entry =
                             FolderEntry
