@@ -5,6 +5,7 @@ module Game.Account.Models
         , Token
         , Username
         , Email
+        , Logout(..)
         , initialModel
         , insertGateway
         , insertEndpoint
@@ -45,6 +46,12 @@ type alias AuthData =
     { token : Token }
 
 
+type Logout
+    = StillLogged
+    | ToLanding
+    | ToCrash String String
+
+
 type alias Model =
     { id : ID
     , username : String
@@ -59,7 +66,7 @@ type alias Model =
     , bounces : Bounces.Model
     , inventory : Inventory.Model
     , notifications : Notifications.Model
-    , logout : Bool
+    , logout : Logout
     }
 
 
@@ -83,7 +90,7 @@ initialModel id username token =
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
     , notifications = Notifications.initialModel
-    , logout = False
+    , logout = StillLogged
     }
 
 

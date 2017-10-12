@@ -6,3 +6,5 @@ import Apps.Bug.Menu.Messages as Menu
 type Msg
     = MenuMsg Menu.Msg
     | DummyToast
+    | UnpoliteCrash
+    | PoliteCrash

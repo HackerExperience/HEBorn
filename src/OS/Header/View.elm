@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
+import Native.Panic
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Utils.Html exposing (spacer)
 import Utils.Html.Attributes exposing (boolAttr)
@@ -306,7 +307,7 @@ taskbar { game } { openMenu } =
                     ServerReadAll serverId
 
                 Nothing ->
-                    Debug.crash "The OS needs a server to run!"
+                    Native.Panic.crash "WTF_ASTRAL_PROJECTION" "The OS needs a server to run!"
     in
         div [ class [ Taskbar ] ]
             [ notifications openMenu

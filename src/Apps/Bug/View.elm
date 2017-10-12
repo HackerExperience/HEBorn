@@ -17,6 +17,10 @@ import Apps.Bug.Menu.View exposing (..)
 view : Game.Data -> Model -> Html Msg
 view data model =
     div [ menuForDummy ]
-        [ button [ onClick DummyToast ] [ text "Spawn useless toast" ]
+        [ ul []
+            [ li [] [ button [ onClick DummyToast ] [ text "Spawn useless toast" ] ]
+            , li [] [ button [ onClick UnpoliteCrash ] [ text "Test unpolite crash" ] ]
+            , li [] [ button [ onClick PoliteCrash ] [ text "Test polite crash" ] ]
+            ]
         , menuView model
         ]

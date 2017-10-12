@@ -3,5 +3,6 @@ elm-stuff/
 /*.html
 npm-debug.log
 build/
+vendor/
 release.tar.gz
 

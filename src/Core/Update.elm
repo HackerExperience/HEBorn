@@ -41,6 +41,13 @@ update msg model =
             in
                 ( model_, Cmd.none )
 
+        Crash code message ->
+            let
+                model_ =
+                    crash code message model
+            in
+                ( model_, Cmd.none )
+
         LoadingEnd z ->
             let
                 model_ =
@@ -77,6 +84,9 @@ updateState msg ({ state } as model) =
 
         Play stateModel ->
             updatePlay msg model stateModel
+
+        Panic _ _ ->
+            ( model, Cmd.none )
 
 
 updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
