@@ -18,3 +18,4 @@ type Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
     | LoadingEnd Int
+    | Crash String String

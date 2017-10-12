@@ -200,10 +200,13 @@ onWsJoinedAccount value model =
 
         Err reason ->
             let
-                log =
-                    Debug.log ("▶ Bootstrap Error:\n" ++ reason) ""
+                msg =
+                    Debug.log "▶ " ("Bootstrap Error:\n" ++ reason)
+
+                dispatch =
+                    Dispatch.account <| Account.DoCrash "ERR_PORRA_RENATO" msg
             in
-                Update.fromModel model
+                ( model, Cmd.none, dispatch )
 
 
 joinChannel : Decoders.Game.ServersToJoin -> Dispatch

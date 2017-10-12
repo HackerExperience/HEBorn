@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "Sample Elm Test",
-    "repository": "https://github.com/user/project.git",
+    "summary": "Tests for Hacker Experience 1",
+    "repository": "https://github.com/hackerexperience/heborn.git",
     "license": "BSD-3-Clause",
     "source-directories": [
         ".",
@@ -9,6 +9,7 @@
         "../vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],
+    "native-modules": true,
     "dependencies": {
         "NoRedInk/elm-decode-pipeline": "3.0.0 <= v < 4.0.0",
         "danyx23/elm-uuid": "2.0.2 <= v < 3.0.0",

@@ -27,6 +27,9 @@ subscriptions ({ state } as model) =
 
                 Play playModel ->
                     play playModel
+
+                Panic _ _ ->
+                    Sub.none
     in
         Sub.batch
             [ stateSub

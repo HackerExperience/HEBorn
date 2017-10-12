@@ -1,6 +1,7 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
+import Native.Panic
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Shared as Filesystem exposing (Filesystem)
 import Game.Servers.Logs.Models as Logs
@@ -244,7 +245,7 @@ unsafeFromKey key model =
             id
 
         _ ->
-            Debug.crash "Couldn't find the Server.ID for given SessionId."
+            Native.Panic.crash "WTF_WHERE_IS_IT" "Couldn't find the Server.ID for given SessionId."
 
 
 

@@ -5,6 +5,7 @@
     "license": "AGPLv3",
     "source-directories": [
         "src",
+        "src/_exclusive",
         "vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],
