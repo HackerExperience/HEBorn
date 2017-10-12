@@ -1,6 +1,7 @@
 module Game.Web.Types exposing (..)
 
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Filesystem.Shared exposing (ForeignFileBox)
 
 
 type alias Url =
@@ -17,6 +18,7 @@ type alias Site =
 type alias Meta =
     { password : Maybe String
     , nip : NIP
+    , publicFiles : List ForeignFileBox
     }
 
 

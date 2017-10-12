@@ -316,16 +316,6 @@ isValidFilename fName =
         True
 
 
-getFileModules : Entry -> Modules
-getFileModules entry =
-    case entry of
-        FileEntry file ->
-            file.modules
-
-        FolderEntry folder ->
-            []
-
-
 locationToParentRef : Location -> Filesystem -> Maybe ParentReference
 locationToParentRef loc filesystem =
     case (List.reverse loc) of

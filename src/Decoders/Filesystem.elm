@@ -1,49 +1,26 @@
 module Decoders.Filesystem exposing (..)
 
+import Dict exposing (Dict)
 import Json.Decode
     exposing
         ( Decoder
-        , oneOf
         , map
+        , andThen
+        , field
+        , oneOf
         , succeed
+        , fail
         , maybe
         , lazy
         , list
         , string
         , int
         )
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
-
-
-type alias Index =
-    List IndexEntry
-
-
-type IndexEntry
-    = LeafEntry FileBox
-    | NodeEntry FolderBox
-
-
-type alias FileBox =
-    EntryHeader FileData
-
-
-type alias FolderBox =
-    EntryHeader FolderWithChildrenData
-
-
-type alias EntryHeader ext =
-    { ext
-        | id : FileID
-        , name : FileName
-    }
-
-
-type alias FolderWithChildrenData =
-    { children : Index }
+import Utils.Json.Decode exposing (commonError)
 
 
 model : Maybe Filesystem.Filesystem -> Decoder Filesystem
@@ -60,7 +37,7 @@ model maybeFilesytem =
         map (flip apply filesystem) index
 
 
-index : Decoder Index
+index : Decoder Foreigners
 index =
     oneOf
         -- [α ONLY] TEMPORARY FALLBACK
@@ -69,12 +46,12 @@ index =
         ]
 
 
-apply : Index -> Filesystem -> Filesystem
+apply : Foreigners -> Filesystem -> Filesystem
 apply =
     let
         convEntry parentRef src filesystem =
             case src of
-                LeafEntry data ->
+                ForeignFile data ->
                     let
                         entry =
                             FileEntry
@@ -84,12 +61,12 @@ apply =
                                 , extension = data.extension
                                 , version = data.version
                                 , size = data.size
-                                , modules = data.modules
+                                , mime = data.mime
                                 }
                     in
                         addEntry entry filesystem
 
-                NodeEntry data ->
+                ForeignFolder data ->
                     let
                         entry =
                             FolderEntry
@@ -105,51 +82,44 @@ apply =
         flip (List.foldl (convEntry RootRef))
 
 
-entry : () -> Decoder IndexEntry
+entry : () -> Decoder Foreigner
 entry () =
     oneOf
-        [ file |> map LeafEntry
-        , (lazy folder) |> map NodeEntry
+        [ file |> map ForeignFile
+        , (lazy folder) |> map ForeignFolder
         ]
 
 
-file : Decoder FileBox
+file : Decoder ForeignFileBox
 file =
     decode fileConstructor
+        |> required "id" string
+        |> required "name" string
         |> required "extension" string
         |> optional "size" (maybe int) Nothing
         |> optional "version" (maybe int) Nothing
-        |> optional "modules" (list module_) []
-        |> required "name" string
-        |> required "id" string
-
-
-module_ : Decoder Module
-module_ =
-    decode Module
-        |> required "name" string
-        |> required "version" int
+        |> custom mime
 
 
 fileConstructor :
-    String
+    FileID
+    -> FileName
+    -> String
     -> FileSize
     -> FileVersion
-    -> List Module
-    -> FileName
-    -> FileID
-    -> FileBox
-fileConstructor ext sz ver mods name id =
+    -> Mime
+    -> ForeignFileBox
+fileConstructor id name ext sz ver mime =
     { id = id
     , name = name
     , extension = ext
     , size = sz
     , version = ver
-    , modules = mods
+    , mime = mime
     }
 
 
-folder : () -> Decoder FolderBox
+folder : () -> Decoder ForeignFolderBox
 folder () =
     decode folderConstructor
         |> required "children" (list <| lazy entry)
@@ -157,9 +127,75 @@ folder () =
         |> required "id" string
 
 
-folderConstructor : Index -> FileName -> FileID -> FolderBox
+folderConstructor : Foreigners -> FileName -> FileID -> ForeignFolderBox
 folderConstructor children name id =
     { id = id
     , name = name
     , children = children
     }
+
+
+mime : Decoder Mime
+mime =
+    field "type" string
+        |> andThen decodeMime
+
+
+decodeMime : String -> Decoder Mime
+decodeMime type_ =
+    case type_ of
+        "cracker" ->
+            modulesAssembler CrackerModules
+                |> module_ "bruteforce"
+                |> module_ "overflow"
+                |> modulesResolve Cracker
+
+        "firewall" ->
+            modulesAssembler FirewallModules
+                |> module_ "fwl_active"
+                |> module_ "fwl_passive"
+                |> modulesResolve Firewall
+
+        _ ->
+            fail <| commonError "file type" type_
+
+
+type alias Modules =
+    Dict String ModuleData
+
+
+modules : Decoder Modules
+modules =
+    decode (,)
+        |> required "module" string
+        |> required "version" (map (Just >> ModuleData) int)
+        |> list
+        |> map Dict.fromList
+
+
+modulesAssembler : (ModuleData -> b) -> Decoder ( Modules, ModuleData -> b )
+modulesAssembler mimeType =
+    field "modules" modules
+        |> map (flip (,) mimeType)
+
+
+module_ : String -> Decoder ( Modules, ModuleData -> b ) -> Decoder ( Modules, b )
+module_ name =
+    map <|
+        \( src, fn ) ->
+            case Dict.get name src of
+                Just mod ->
+                    ( src, fn mod )
+
+                Nothing ->
+                    ( src, fn <| ModuleData <| Nothing )
+
+
+modulesResolve : (a -> Mime) -> Decoder ( Modules, a ) -> Decoder Mime
+modulesResolve fn =
+    map (Tuple.second >> fn)
+
+
+moduleError : String -> Decoder Mime
+moduleError value =
+    fail <| commonError "file module" value

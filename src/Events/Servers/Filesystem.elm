@@ -1,15 +1,14 @@
 module Events.Servers.Filesystem exposing (Event(..), handler)
 
 import Utils.Events exposing (Handler, notify)
-import Json.Decode exposing (Decoder, decodeValue)
+import Json.Decode exposing (decodeValue, lazy)
 import Game.Servers.Shared exposing (..)
-import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-import Game.Servers.Filesystem.Models exposing (..)
-import Decoders.Filesystem
+import Game.Servers.Filesystem.Shared exposing (Foreigner)
+import Decoders.Filesystem exposing (entry)
 
 
 type Event
-    = Newfile Decoders.Filesystem.IndexEntry
+    = Newfile Foreigner
 
 
 handler : String -> Handler Event
@@ -28,6 +27,6 @@ handler event json =
 
 onNewFile : Handler Event
 onNewFile json =
-    decodeValue (Decoders.Filesystem.entry ()) json
+    decodeValue (lazy entry) json
         |> Result.map Newfile
         |> notify

@@ -47,35 +47,16 @@ entryIcon file =
             CasedDirIcon
 
         FileEntry prop ->
-            case (extensionInterpret prop.extension) of
-                Virus ->
+            case prop.mime of
+                Cracker _ ->
                     VirusIcon
 
-                Firewall ->
+                Firewall _ ->
                     FirewallIcon
 
-                GenericArchive ->
+                -- ADD ICONS HERE
+                _ ->
                     GenericArchiveIcon
-
-
-moduleIcon : KnownModule -> Classes
-moduleIcon modType =
-    case modType of
-        Active ->
-            ActiveIcon
-
-        Passive ->
-            PassiveIcon
-
-
-moduleMenu : FileID -> KnownModule -> Attribute Msg
-moduleMenu fileID modType =
-    case modType of
-        Active ->
-            menuActiveAction fileID
-
-        Passive ->
-            menuPassiveAction fileID
 
 
 fileVerToText : FileVersion -> Html Msg
@@ -86,7 +67,7 @@ fileVerToText ver =
         |> text
 
 
-moduleVerToText : ModuleVersion -> Html Msg
+moduleVerToText : Int -> Html Msg
 moduleVerToText ver =
     ver
         |> toString
@@ -101,23 +82,82 @@ sizeToText size =
         |> text
 
 
-module_ : FileID -> Module -> Html Msg
-module_ fileID act =
-    let
-        target =
-            moduleInterpret act.name
-    in
-        div [ moduleMenu fileID target ]
-            [ span [ class [ moduleIcon target ] ] []
-            , span [] [ text act.name ]
-            , span [] [ moduleVerToText act.version ]
-            , span [] []
-            ]
+module_ : FileID -> Mime -> ( String, Int, Classes ) -> Html Msg
+module_ fileID mime ( name, version, iconClass ) =
+    div [ menuActiveAction fileID ]
+        [ span [ class [ iconClass ] ] []
+        , span [] [ text name ]
+        , span [] [ moduleVerToText version ]
+        , span [] []
+        ]
 
 
-moduleList : FileID -> List Module -> List (Html Msg)
-moduleList fileID acts =
-    List.map (module_ fileID) acts
+moduleList : FileID -> Mime -> List (Html Msg)
+moduleList fileID mime =
+    List.map (module_ fileID mime) <|
+        mimeModules mime
+
+
+mimeModules : Mime -> List ( String, Int, Classes )
+mimeModules mime =
+    List.filterMap
+        (\( a, b, c ) ->
+            case b.version of
+                Just b ->
+                    Just ( a, b, c )
+
+                Nothing ->
+                    Nothing
+        )
+    <|
+        case mime of
+            Cracker { bruteForce, overFlow } ->
+                [ ( "Bruteforce", bruteForce, ActiveIcon )
+                , ( "Overflow", overFlow, ActiveIcon )
+                ]
+
+            Firewall { active, passive } ->
+                [ ( "Active", active, ActiveIcon )
+                , ( "Passive", passive, PassiveIcon )
+                ]
+
+            Exploit { ftp, ssh } ->
+                [ ( "FTP", ftp, ActiveIcon )
+                , ( "SSH", ssh, ActiveIcon )
+                ]
+
+            Hasher { password } ->
+                [ ( "Password", password, ActiveIcon ) ]
+
+            LogForger { create, edit } ->
+                [ ( "Create", create, ActiveIcon )
+                , ( "Edit", edit, ActiveIcon )
+                ]
+
+            LogRecover { recover } ->
+                [ ( "Recover", recover, ActiveIcon ) ]
+
+            Encryptor { file, log, connection, process } ->
+                [ ( "File", file, ActiveIcon )
+                , ( "Log", log, ActiveIcon )
+                , ( "Connections", connection, ActiveIcon )
+                , ( "Process", process, ActiveIcon )
+                ]
+
+            Decryptor { file, log, connection, process } ->
+                [ ( "File", file, ActiveIcon )
+                , ( "Log", log, ActiveIcon )
+                , ( "Connections", connection, ActiveIcon )
+                , ( "Process", process, ActiveIcon )
+                ]
+
+            Anymap { geo, net } ->
+                [ ( "Geo", geo, ActiveIcon )
+                , ( "Net", net, ActiveIcon )
+                ]
+
+            _ ->
+                []
 
 
 treeEntry : Server -> Entry -> Html Msg
@@ -195,8 +235,8 @@ detailedEntry server file =
                     ]
 
         FileEntry prop ->
-            (case (extensionInterpret prop.extension) of
-                GenericArchive ->
+            (case prop.mime of
+                Text ->
                     div
                         [ class [ CntListEntry, EntryArchive ]
                         , menuMainArchive prop.id
@@ -222,11 +262,11 @@ detailedEntry server file =
                                 , span [] [ sizeToText prop.size ]
                                 ]
                     in
-                        if (List.length prop.modules > 0) then
+                        if (hasModules prop.mime) then
                             div [ class [ CntListContainer ] ]
                                 [ baseEntry
                                 , div [ class [ CntListChilds ] ] <|
-                                    moduleList prop.id prop.modules
+                                    moduleList prop.id prop.mime
                                 ]
                         else
                             baseEntry

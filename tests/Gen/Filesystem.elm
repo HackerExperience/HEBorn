@@ -201,7 +201,7 @@ genFile =
                     , extension = extension
                     , version = version
                     , size = size
-                    , modules = []
+                    , mime = Text
                     }
     in
         genFileID

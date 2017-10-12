@@ -31,22 +31,8 @@ type alias FileVersion =
     Maybe Int
 
 
-type alias ModuleName =
-    String
-
-
-type alias ModuleVersion =
-    Int
-
-
-type alias Module =
-    { name : ModuleName
-    , version : ModuleVersion
-    }
-
-
-type alias Modules =
-    List Module
+type alias ModuleData =
+    { version : Maybe Int }
 
 
 type ParentReference
@@ -75,7 +61,7 @@ type alias FileData =
     { extension : String
     , size : FileSize
     , version : FileVersion
-    , modules : List Module
+    , mime : Mime
     }
 
 
@@ -129,3 +115,101 @@ pathSeparator =
 extensionSeparator : String
 extensionSeparator =
     "."
+
+
+type Mime
+    = Cracker CrackerModules
+    | Firewall FirewallModules
+    | Text
+    | Exploit ExploitModules
+    | Hasher HasherModules
+    | LogForger LogForgerModules
+    | LogRecover LogRecoverModules
+    | Encryptor EncryptorModules
+    | Decryptor DecryptorModules
+    | Anymap AnymapModules
+    | CryptoKey
+
+
+type alias CrackerModules =
+    { bruteForce : ModuleData
+    , overFlow : ModuleData
+    }
+
+
+type alias FirewallModules =
+    { active : ModuleData
+    , passive : ModuleData
+    }
+
+
+type alias ExploitModules =
+    { ftp : ModuleData
+    , ssh : ModuleData
+    }
+
+
+type alias HasherModules =
+    { password : ModuleData
+    }
+
+
+type alias LogForgerModules =
+    { create : ModuleData
+    , edit : ModuleData
+    }
+
+
+type alias LogRecoverModules =
+    { recover : ModuleData
+    }
+
+
+type alias EncryptorModules =
+    { file : ModuleData
+    , log : ModuleData
+    , connection : ModuleData
+    , process : ModuleData
+    }
+
+
+type alias DecryptorModules =
+    { file : ModuleData
+    , log : ModuleData
+    , connection : ModuleData
+    , process : ModuleData
+    }
+
+
+type alias AnymapModules =
+    { geo : ModuleData
+    , net : ModuleData
+    }
+
+
+type alias Foreigners =
+    List Foreigner
+
+
+type Foreigner
+    = ForeignFile ForeignFileBox
+    | ForeignFolder ForeignFolderBox
+
+
+type alias ForeignFileBox =
+    ForeignerHeader FileData
+
+
+type alias ForeignFolderBox =
+    ForeignerHeader FolderWithChildrenData
+
+
+type alias FolderWithChildrenData =
+    { children : Foreigners }
+
+
+type alias ForeignerHeader ext =
+    { ext
+        | id : FileID
+        , name : FileName
+    }
