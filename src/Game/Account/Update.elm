@@ -1,6 +1,7 @@
 module Game.Account.Update exposing (update)
 
 import Json.Decode exposing (Value, decodeValue)
+import Native.Panic
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
@@ -36,6 +37,9 @@ update game msg model =
     case msg of
         DoLogout ->
             onDoLogout game model
+
+        DoCrash code message ->
+            onDoCrash game code message model
 
         SetGateway nip ->
             onSetGateway game nip model
@@ -148,7 +152,22 @@ onDoLogout : Game.Model -> Model -> UpdateResponse
 onDoLogout game model =
     let
         model_ =
-            { model | logout = True }
+            { model | logout = ToLanding }
+
+        token =
+            getToken model
+
+        cmd =
+            Logout.request token game
+    in
+        ( model_, cmd, Dispatch.none )
+
+
+onDoCrash : Game.Model -> String -> String -> Model -> UpdateResponse
+onDoCrash game code message model =
+    let
+        model_ =
+            { model | logout = ToCrash code message }
 
         token =
             getToken model
@@ -225,10 +244,15 @@ onWsDisconnected : Game.Model -> Model -> UpdateResponse
 onWsDisconnected game model =
     let
         dispatch =
-            if model.logout then
-                Dispatch.core Core.Shutdown
-            else
-                Dispatch.none
+            case model.logout of
+                ToLanding ->
+                    Dispatch.core Core.Shutdown
+
+                ToCrash code message ->
+                    Dispatch.core <| Core.Crash code message
+
+                _ ->
+                    Dispatch.none
     in
         ( model, Cmd.none, dispatch )
 

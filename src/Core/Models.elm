@@ -10,6 +10,7 @@ module Core.Models
         , connect
         , login
         , logout
+        , crash
         , setupToPlay
         )
 
@@ -37,6 +38,7 @@ type State
     = Home HomeModel
     | Setup SetupModel
     | Play PlayModel
+    | Panic String String
 
 
 type alias HomeModel =
@@ -142,6 +144,11 @@ login ({ state, config } as model) =
 logout : Model -> Model
 logout model =
     { model | state = Home initialHome }
+
+
+crash : String -> String -> Model -> Model
+crash code message model =
+    { model | state = Panic code message }
 
 
 getConfig : Model -> Config

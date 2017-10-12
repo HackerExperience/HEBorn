@@ -5,6 +5,7 @@
     "license": "AGPLv3",
     "source-directories": [
         "src",
+        "static/js/game",
         "vendor/elm-phoenix/src"
     ],
     "exposed-modules": [],

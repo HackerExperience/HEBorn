@@ -7,6 +7,7 @@ import Game.Data as Game
 import OS.View as OS
 import Landing.View as Landing
 import Setup.View as Setup
+import Core.Panic as Panic
 
 
 view : Model -> Html Msg
@@ -25,3 +26,6 @@ view ({ state } as model) =
 
                 Nothing ->
                     div [] []
+
+        Panic code message ->
+            Panic.view code message

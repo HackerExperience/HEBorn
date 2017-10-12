@@ -13,6 +13,7 @@ import Game.Network.Types exposing (NIP)
 
 type Msg
     = DoLogout
+    | DoCrash String String
     | SetGateway NIP
     | SetEndpoint (Maybe NIP)
     | InsertGateway NIP
