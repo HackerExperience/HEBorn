@@ -1,8 +1,21 @@
 node_modules/
 elm-stuff/
+build/
+/vendor/
 /*.html
 npm-debug.log
-build/
-vendor/
 release.tar.gz
 
+# IntelliJ
+/.idea
+*.iml
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+.\#*
+
+# Macintosh
+*.DS_Store

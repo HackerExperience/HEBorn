@@ -307,7 +307,8 @@ taskbar { game } { openMenu } =
                     ServerReadAll serverId
 
                 Nothing ->
-                    Native.Panic.crash "WTF_ASTRAL_PROJECTION" "The OS needs a server to run!"
+                    Native.Panic.crash "WTF_ASTRAL_PROJECTION"
+                        "The OS needs a server to run!"
     in
         div [ class [ Taskbar ] ]
             [ notifications openMenu

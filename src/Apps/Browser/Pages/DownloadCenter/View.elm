@@ -24,6 +24,12 @@ hackingToolkitConfig showPassword =
     }
 
 
+publicFilesConfig : NIP -> PublicFiles.Config Msg
+publicFilesConfig ( _, sourceIp ) =
+    { reqDownload = ReqDownload sourceIp
+    }
+
+
 view : Game.Data -> Model -> Html Msg
 view data model =
     let
@@ -44,6 +50,7 @@ viewPre data showPassword model =
         [ div [ class [ DummyTitle ] ]
             [ text <| "Welcome to " ++ model.title ++ "!" ]
         , publicFiles
+            (publicFilesConfig model.toolkit.target)
             model.publicFiles
         , hackingToolkit
             (hackingToolkitConfig showPassword)

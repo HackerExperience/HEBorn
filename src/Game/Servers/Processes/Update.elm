@@ -47,6 +47,34 @@ update game nip msg model =
                 (newOptimistic Cracker nip target unknownProcessFile)
                 model
 
+        StartDownload source fileId storageId ->
+            onStart game
+                nip
+                (newOptimistic
+                    (Download False
+                        storageId
+                        fileId
+                    )
+                    source
+                    nip
+                    unknownProcessFile
+                )
+                model
+
+        StartPublicDownload source fileId storageId ->
+            onStart game
+                nip
+                (newOptimistic
+                    (Download True
+                        storageId
+                        fileId
+                    )
+                    source
+                    nip
+                    unknownProcessFile
+                )
+                model
+
         Complete id ->
             onComplete game nip id model
 
@@ -145,6 +173,16 @@ onStart game nip process model =
                 in
                     ( model_, cmd, Dispatch.none )
 
+            Download isPublic fileId storageId ->
+                let
+                    cmd =
+                        if isPublic then
+                            Download.requestPublic fileId storageId nip game
+                        else
+                            Download.request fileId storageId nip game
+                in
+                    ( model_, cmd, Dispatch.none )
+
             _ ->
                 Update.fromModel model_
 
@@ -180,6 +218,9 @@ updateRequest game nip response model =
         Just (Bruteforce oldId response) ->
             onBruteforceRequest game nip oldId response model
 
+        Just (DownloadingFile oldId response) ->
+            onDownloadRequest game nip oldId response model
+
         Nothing ->
             Update.fromModel model
 
@@ -199,6 +240,41 @@ onBruteforceRequest game nip oldId response model =
                     replace oldId id process model
             in
                 Update.fromModel model_
+
+
+onDownloadRequest :
+    Game.Model
+    -> NIP
+    -> ID
+    -> Bruteforce.Response
+    -> Model
+    -> UpdateResponse
+onDownloadRequest game nip oldId response model =
+    case response of
+        Download.Okay id process _ ->
+            let
+                model_ =
+                    replace oldId id process model
+            in
+                Update.fromModel model_
+
+        _ ->
+            let
+                message =
+                    "The king cannot walk more than one house"
+
+                dispatch =
+                    message
+                        |> Notifications.Simple "Invalid movement"
+                        |> flip Notifications.Notification False
+                        |> Notifications.Insert game.meta.lastTick
+                        |> Servers.NotificationsMsg
+                        |> Dispatch.server nip
+
+                model_ =
+                    remove oldId model
+            in
+                ( model_, Cmd.none, Dispatch.none )
 
 
 

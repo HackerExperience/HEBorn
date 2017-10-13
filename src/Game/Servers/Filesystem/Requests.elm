@@ -14,5 +14,20 @@ type Response
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        _ ->
+        SyncRequest response ->
+            Nothing
+
+        DeleteRequest response ->
+            Nothing
+
+        RenameRequest response ->
+            Nothing
+
+        MoveRequest response ->
+            Nothing
+
+        CreateRequest response ->
+            Nothing
+
+        IndexRequest response ->
             Nothing

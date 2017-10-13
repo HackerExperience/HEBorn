@@ -7,3 +7,4 @@ type Msg
     = GlobalMsg CommonActions
     | UpdatePasswordField String
     | SetShowingPanel Bool
+    | ReqDownload String String

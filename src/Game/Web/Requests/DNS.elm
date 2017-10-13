@@ -185,4 +185,4 @@ decodeErrorMessage url str =
             succeed <| PageNotFound url
 
         _ ->
-            fail "Unexpected error"
+            fail "Unknown dns request error message"

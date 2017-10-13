@@ -16,6 +16,8 @@ type Msg
     | Remove ID
     | Complete ID
     | StartBruteforce Network.IP
+    | StartDownload Network.IP String String
+    | StartPublicDownload Network.IP String String
       -- start may be removed if we provide a specific
       -- function for every process type
     | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )
@@ -29,3 +31,4 @@ type Msg
 
 type RequestMsg
     = BruteforceRequest ID ResponseType
+    | DownloadRequest ID ResponseType
