@@ -42,6 +42,7 @@ type
     | Encryptor EncryptorContent
     | FileTransference
     | PassiveFirewall
+    | Download Bool String String
 
 
 type alias EncryptorContent =
@@ -434,6 +435,9 @@ getName { type_ } =
 
         PassiveFirewall ->
             "Passive Firewall"
+
+        Download _ _ _ ->
+            "Download"
 
 
 getPercentUsage : Usage -> Float

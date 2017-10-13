@@ -4,6 +4,9 @@ import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
 import Game.Models as Game
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications
+import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
@@ -50,7 +53,7 @@ update game nip msg model =
             onRename game nip fileId newBaseName model
 
         Request request ->
-            Update.fromModel model
+            onRequest game nip (receive request) model
 
 
 bootstrap : Value -> Filesystem -> Filesystem
@@ -131,10 +134,6 @@ onCreateTextFile game nip fileId ( fileLocation, fileBaseName ) model =
                 Update.fromModel model
 
 
-
---Update.fromModel model
-
-
 onEmptyDir :
     Game.Model
     -> NIP
@@ -143,7 +142,6 @@ onEmptyDir :
     -> Filesystem
     -> UpdateResponse
 onEmptyDir game nip fileId ( fileLocation, fileName ) model =
-    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -180,7 +178,6 @@ onMove :
     -> Filesystem
     -> UpdateResponse
 onMove game nip fileId newLocation model =
-    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -208,7 +205,6 @@ onRename :
     -> Filesystem
     -> UpdateResponse
 onRename game nip fileId newBaseName model =
-    -- TODO: rewrite to be more readable
     let
         model_ =
             model
@@ -236,7 +232,22 @@ onRequest :
     -> Maybe Response
     -> Filesystem
     -> UpdateResponse
-onRequest game nip response model =
+onRequest nip game response model =
+    case response of
+        Just response ->
+            updateRequest nip game response model
+
+        Nothing ->
+            Update.fromModel model
+
+
+updateRequest :
+    Game.Model
+    -> NIP
+    -> Response
+    -> Filesystem
+    -> UpdateResponse
+updateRequest game nip data model =
     Update.fromModel model
 
 

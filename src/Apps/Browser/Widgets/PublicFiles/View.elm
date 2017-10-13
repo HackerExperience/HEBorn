@@ -2,7 +2,7 @@ module Apps.Browser.Widgets.PublicFiles.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Game.Servers.Filesystem.Shared exposing (ForeignFileBox, Mime(..))
 import Apps.Browser.Resources exposing (Classes(..), prefix)
@@ -10,12 +10,23 @@ import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.PublicFiles.Model exposing (..)
 
 
+type alias Config msg =
+    { reqDownload : String -> msg
+    }
+
+
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
-file : ForeignFileBox -> Html msg
-file me =
+publicFiles : Config msg -> Model -> Html msg
+publicFiles config model =
+    ul [] <|
+        List.map (file config) model
+
+
+file : Config msg -> ForeignFileBox -> Html msg
+file { reqDownload } me =
     me.mime
         |> mimeModules
         |> List.map
@@ -25,18 +36,12 @@ file me =
                     ++ toString ver
                     |> text
                     |> List.singleton
-                    |> li []
+                    |> li [ onClick <| reqDownload me.id ]
             )
         |> ul []
         |> List.singleton
         |> (::) (span [] [ text me.name ])
         |> li []
-
-
-publicFiles : Model -> Html msg
-publicFiles model =
-    ul [] <|
-        List.map file model
 
 
 mimeModules : Mime -> List ( String, Int )
