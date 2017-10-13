@@ -8,6 +8,7 @@ import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import Game.Servers.Shared as Servers
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
+import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Launch as WindowManager
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Messages as WindowManager
@@ -57,8 +58,8 @@ helper :
     -> Apps.App
     -> Model
     -> UpdateResponse
-helper action data id serverID app ({ sessions } as model0) =
-    case Dict.get id sessions of
+helper action data id serverID app model0 =
+    case get id model0 of
         Just wm ->
             let
                 ( model, uuid ) =
@@ -68,13 +69,10 @@ helper action data id serverID app ({ sessions } as model0) =
                     action data uuid serverID app wm
 
                 cmd_ =
-                    Cmd.map WindowManagerMsg cmd
-
-                sessions_ =
-                    Dict.insert id wm_ sessions
+                    Cmd.map (WindowManagerMsg id) cmd
 
                 model_ =
-                    { model | sessions = sessions_ }
+                    refresh id wm_ model
 
                 dispatch_ =
                     Dispatch.batch

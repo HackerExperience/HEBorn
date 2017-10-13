@@ -27,6 +27,9 @@ update game msg model =
             handlePasswordAcquired data model
 
 
+{-| Saves password for that server, inserts a new server entry
+if none is found.
+-}
 handlePasswordAcquired : PasswordAcquired.Data -> Model -> UpdateResponse
 handlePasswordAcquired data model =
     let

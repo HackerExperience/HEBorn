@@ -378,10 +378,10 @@ received msg =
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
             msg
 
-        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.OnDragBy _))) ->
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.OnDragBy _))) ->
             msg
 
-        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.DragMsg _))) ->
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.DragMsg _))) ->
             msg
 
         _ ->

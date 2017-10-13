@@ -1,21 +1,31 @@
 module Game.Events exposing (dispatcher)
 
 import Game.Models exposing (..)
-import Game.Messages exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Events as Events exposing (Event)
 import Events.Account as Account
 import Events.Server as Server
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Channels exposing (..)
+import Game.Messages exposing (..)
+
+
+-- game
+
 import Game.Account.Messages as Account
 import Game.Account.Database.Messages as Database
 import Game.Storyline.Emails.Messages as Emails
 import Game.Storyline.Missions.Messages as Missions
-import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
+import Game.Servers.Shared as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Web.Messages as Web
+
+
+-- apps
+
+import Apps.Messages as Apps
+import Apps.Browser.Messages as Browser
 
 
 type alias Dispatches =
@@ -110,6 +120,9 @@ fromAccount =
             -- dispatch to processes, do not let this note pass on
             -- review
             [ Dispatch.database <| Database.HandlePasswordAcquired data
+            , Dispatch.apps
+                [ Apps.BrowserMsg <| Browser.HandlePasswordAcquired data
+                ]
             ]
 
         handleStoryNewEmail data =

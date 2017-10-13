@@ -8,7 +8,7 @@ import OS.SessionManager.WindowManager.Models exposing (..)
 
 type Msg
     = AppMsg TargetContext ID Apps.Msg
-    | EveryAppMsg Apps.Msg
+    | EveryAppMsg TargetContext Apps.Msg
       -- WINDOW Actions
     | Close ID
     | Minimize ID

@@ -25,8 +25,8 @@ update data msg model =
         AppMsg targetContext id msg ->
             onAppMsg data targetContext id msg model
 
-        EveryAppMsg msg ->
-            onEveryAppMsg data msg model
+        EveryAppMsg context msg ->
+            onEveryAppMsg data context msg model
 
         SetContext wId context_ ->
             onSetContext data context_ wId model
@@ -156,15 +156,16 @@ appsMsg data msg targetContext wId window =
 
 reduceAppMsg :
     Game.Data
+    -> TargetContext
     -> Apps.Msg
     -> ID
     -> Window
     -> ( Windows, Cmd Msg, Dispatch )
     -> ( Windows, Cmd Msg, Dispatch )
-reduceAppMsg data msg wId window ( windows, cmd0, dispatch0 ) =
+reduceAppMsg data context msg wId window ( windows, cmd0, dispatch0 ) =
     let
         ( window_, cmd1, dispatch1 ) =
-            appsMsg data msg All wId window
+            appsMsg data msg context wId window
 
         windows_ =
             Dict.insert wId window windows
@@ -178,11 +179,16 @@ reduceAppMsg data msg wId window ( windows, cmd0, dispatch0 ) =
         ( windows_, cmd, dispatch )
 
 
-onEveryAppMsg : Game.Data -> Apps.Msg -> Model -> UpdateResponse
-onEveryAppMsg data msg model =
+onEveryAppMsg :
+    Game.Data
+    -> TargetContext
+    -> Apps.Msg
+    -> Model
+    -> UpdateResponse
+onEveryAppMsg data context msg model =
     model.windows
         |> Dict.foldl
-            (reduceAppMsg data msg)
+            (reduceAppMsg data context msg)
             ( Dict.empty, Cmd.none, Dispatch.none )
         |> Update.mapModel
             (\windows_ -> { model | windows = windows_ })

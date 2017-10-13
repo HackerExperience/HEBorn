@@ -61,6 +61,13 @@ update data msg model =
             goTab tabId model
                 |> Update.fromModel
 
+        HandlePasswordAcquired event ->
+            onEveryTabMsg data (Cracked event.nip event.password) model
+
+
+
+-- browser internals
+
 
 onMenuMsg :
     Game.Data

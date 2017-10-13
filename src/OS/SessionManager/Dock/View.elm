@@ -40,15 +40,13 @@ view game model =
 
 
 dock : GameData.Data -> Model -> Html Msg
-dock data ({ sessions } as model) =
+dock data model =
     let
         id =
             toSessionID data
 
         wm =
-            sessions
-                |> Dict.get id
-                |> Maybe.withDefault (WM.initialModel id)
+            Maybe.withDefault (WM.initialModel id) (get id model)
 
         content =
             icons data.game.account.dock wm

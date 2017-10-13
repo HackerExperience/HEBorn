@@ -27,6 +27,8 @@ module Core.Dispatch
         , log
         , tunnels
         , meta
+        , apps
+        , appsOfSession
         , browser
         , toasts
         )
@@ -57,6 +59,7 @@ import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models exposing (WindowRef)
 import OS.SessionManager.WindowManager.Models as WindowManager
+import OS.SessionManager.WindowManager.Messages as WindowManager
 import OS.Toasts.Messages as Toasts
 import Utils.Cmd as CmdUtils
 
@@ -269,6 +272,20 @@ web msg =
 browser : WindowRef -> Context -> Browser.Msg -> Dispatch
 browser windowRef context msg =
     app windowRef context <| Apps.BrowserMsg msg
+
+
+apps : List Apps.Msg -> Dispatch
+apps msgs =
+    sessionManager <| SessionManager.EveryAppMsg msgs
+
+
+appsOfSession :
+    Servers.ID
+    -> WindowManager.TargetContext
+    -> List Apps.Msg
+    -> Dispatch
+appsOfSession cid context msgs =
+    sessionManager <| SessionManager.TargetedAppMsg cid context msgs
 
 
 

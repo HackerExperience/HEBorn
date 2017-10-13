@@ -17,7 +17,7 @@ type alias Data =
     { nip : NIP
     , password : String
     , processId : String
-    , gatewayId : String
+    , gatewayIp : String
     }
 
 
@@ -36,7 +36,7 @@ passwordAcquired =
         |> custom nip
         |> required "password" string
         |> required "process_id" string
-        |> required "gateway_id" string
+        |> required "gateway_ip" string
 
 
 nip : Decoder NIP

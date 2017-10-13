@@ -271,5 +271,6 @@ handleProcessesChanged processes model =
 
 handleBruteforceSuccess : ID -> Model -> UpdateResponse
 handleBruteforceSuccess id model =
-    -- WIP
+    -- TODO: dispatch from password acquired after implementing "dispatch
+    -- to servers of following nip"
     Update.fromModel model
