@@ -33,6 +33,7 @@ import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network
 import Decoders.Filesystem exposing (file)
+import Game.Servers.Shared as Servers
 import Game.Network.Types as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
@@ -43,18 +44,14 @@ import Game.Network.Types exposing (NIP)
 request :
     String
     -> Network.ID
-    -> Network.IP
+    -> Servers.CId
     -> Requester
     -> ConfigSource a
     -> Cmd Msg
-request url networkId serverIp requester =
-    let
-        nip =
-            Network.toNip networkId serverIp
-    in
-        Requests.request (Topics.browse nip)
-            (DNSRequest url requester >> Request)
-            (encoder networkId url)
+request url networkId cid requester =
+    Requests.request (Topics.browse cid)
+        (DNSRequest url requester >> Request)
+        (encoder networkId url)
 
 
 receive : String -> Code -> Value -> Maybe Response

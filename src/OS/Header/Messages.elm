@@ -1,9 +1,9 @@
 module OS.Header.Messages exposing (Msg(..))
 
-import UI.Widgets.CustomSelect as CustomSelect
 import Game.Meta.Types exposing (Context)
+import Game.Servers.Shared as Servers
 import OS.Header.Models exposing (OpenMenu)
-import Game.Network.Types exposing (NIP)
+import UI.Widgets.CustomSelect as CustomSelect
 
 
 type Msg
@@ -11,12 +11,12 @@ type Msg
     | ToggleMenus OpenMenu
     | MouseEnterDropdown
     | MouseLeavesDropdown
-    | SelectGateway (Maybe NIP)
+    | SelectGateway (Maybe Servers.CId)
     | SelectBounce (Maybe String)
-    | SelectEndpoint (Maybe NIP)
+    | SelectEndpoint (Maybe Servers.CId)
     | CheckMenus
     | ContextTo Context
     | ToggleCampaign
-    | ServerReadAll NIP
+    | ServerReadAll Servers.CId
     | ChatReadAll
     | AccountReadAll

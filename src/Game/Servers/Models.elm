@@ -24,11 +24,11 @@ type alias ServerUid =
 
 
 type alias Gateways =
-    Dict ID ServerUid
+    Dict CId ServerUid
 
 
 type alias GatewayIds =
-    Dict ServerUid ID
+    Dict ServerUid CId
 
 
 type alias SessionId =
@@ -69,8 +69,8 @@ type Ownership
 
 type alias GatewayData =
     { serverUid : ServerUid
-    , endpoints : List ID
-    , endpoint : Maybe ID
+    , endpoints : List CId
+    , endpoint : Maybe CId
     }
 
 
@@ -92,36 +92,34 @@ initialModel =
     }
 
 
-toNip : ID -> NIP
-toNip =
-    -- do not remove this function, it'll be useful
-    -- once we include more data on id
-    identity
+getNIP : CId -> Model -> NIP
+getNIP cid model =
+    cid
 
 
 
 -- gateway mapping information
 
 
-insertGateway : ID -> ServerUid -> Model -> Model
-insertGateway id uid model =
+insertGateway : CId -> ServerUid -> Model -> Model
+insertGateway cid uid model =
     let
         gateways =
-            Dict.insert id uid model.gateways
+            Dict.insert cid uid model.gateways
 
         gatewayIds =
-            Dict.insert uid id model.gatewayIds
+            Dict.insert uid cid model.gatewayIds
     in
         { model | gateways = gateways, gatewayIds = gatewayIds }
 
 
-removeGateway : ID -> Model -> Model
-removeGateway id model =
-    case Dict.get id model.gateways of
+removeGateway : CId -> Model -> Model
+removeGateway cid model =
+    case Dict.get cid model.gateways of
         Just uid ->
             let
                 gateways =
-                    Dict.remove id model.gateways
+                    Dict.remove cid model.gateways
 
                 gatewayIds =
                     Dict.remove uid model.gatewayIds
@@ -132,66 +130,66 @@ removeGateway id model =
             model
 
 
-getGateway : ID -> Model -> Maybe ServerUid
-getGateway id model =
-    Dict.get id model.gateways
+getGateway : CId -> Model -> Maybe ServerUid
+getGateway cid model =
+    Dict.get cid model.gateways
 
 
 
--- session id data
+-- session cid data
 
 
-toSessionId : ID -> Model -> SessionId
-toSessionId id model =
-    case getGateway id model of
+toSessionId : CId -> Model -> SessionId
+toSessionId cid model =
+    case getGateway cid model of
         Just uid ->
             uid
 
         Nothing ->
-            remoteSessionId id
+            remoteSessionId cid model
 
 
-remoteSessionId : ID -> SessionId
-remoteSessionId id =
+remoteSessionId : CId -> Model -> SessionId
+remoteSessionId cid model =
     let
         nip =
-            toNip id
+            getNIP cid model
     in
         (Network.getId nip) ++ "@" ++ (Network.getIp nip)
 
 
-getSessionId : ID -> Server -> SessionId
-getSessionId id server =
+getSessionId : CId -> Server -> Model -> SessionId
+getSessionId cid server model =
     case server.ownership of
         GatewayOwnership data ->
             data.serverUid
 
         EndpointOwnership _ ->
-            remoteSessionId id
+            remoteSessionId cid model
 
 
 
 -- elm structure-like functions
 
 
-get : ID -> Model -> Maybe Server
-get id model =
-    Dict.get (toSessionId id model) model.servers
+get : CId -> Model -> Maybe Server
+get cid model =
+    Dict.get (toSessionId cid model) model.servers
 
 
-insert : ID -> Server -> Model -> Model
-insert id server model0 =
+insert : CId -> Server -> Model -> Model
+insert cid server model0 =
     let
         model1 =
             case server.ownership of
                 GatewayOwnership data ->
-                    insertGateway id data.serverUid model0
+                    insertGateway cid data.serverUid model0
 
                 EndpointOwnership _ ->
                     model0
 
         servers =
-            Dict.insert (getSessionId id server) server model1.servers
+            Dict.insert (getSessionId cid server model1) server model1.servers
 
         model_ =
             { model1 | servers = servers }
@@ -199,14 +197,14 @@ insert id server model0 =
         model_
 
 
-remove : ID -> Model -> Model
-remove id model0 =
+remove : CId -> Model -> Model
+remove cid model0 =
     let
         model1 =
-            removeGateway id model0
+            removeGateway cid model0
 
         servers =
-            Dict.remove (toSessionId id model0) model1.servers
+            Dict.remove (toSessionId cid model0) model1.servers
 
         model_ =
             { model1 | servers = servers }
@@ -214,7 +212,7 @@ remove id model0 =
         model_
 
 
-keys : Model -> List ID
+keys : Model -> List CId
 keys model =
     let
         toId model key =
@@ -225,7 +223,7 @@ keys model =
             |> List.filterMap (toId model)
 
 
-fromKey : SessionId -> Model -> Maybe ID
+fromKey : SessionId -> Model -> Maybe CId
 fromKey key model =
     case String.split "@" key of
         [ serverUid ] ->
@@ -238,14 +236,15 @@ fromKey key model =
             Nothing
 
 
-unsafeFromKey : SessionId -> Model -> ID
+unsafeFromKey : SessionId -> Model -> CId
 unsafeFromKey key model =
     case fromKey key model of
-        Just id ->
-            id
+        Just cid ->
+            cid
 
         _ ->
-            Native.Panic.crash "WTF_WHERE_IS_IT" "Couldn't find the Server.ID for given SessionId."
+            Native.Panic.crash "WTF_WHERE_IS_IT"
+                "Couldn't find the Server's CId for given SessionId."
 
 
 
@@ -302,8 +301,8 @@ setProcesses processes model =
     { model | processes = processes }
 
 
-getEndpoint : Server -> Maybe ID
-getEndpoint server =
+getEndpointCId : Server -> Maybe CId
+getEndpointCId server =
     case server.ownership of
         GatewayOwnership data ->
             data.endpoint
@@ -312,8 +311,8 @@ getEndpoint server =
             Nothing
 
 
-setEndpoint : Maybe ID -> Server -> Server
-setEndpoint endpoint ({ ownership } as server) =
+setEndpointCId : Maybe CId -> Server -> Server
+setEndpointCId endpoint ({ ownership } as server) =
     let
         ownership_ =
             case ownership of
@@ -326,7 +325,7 @@ setEndpoint endpoint ({ ownership } as server) =
         { server | ownership = ownership_ }
 
 
-getEndpoints : Server -> Maybe (List ID)
+getEndpoints : Server -> Maybe (List CId)
 getEndpoints server =
     case server.ownership of
         GatewayOwnership data ->

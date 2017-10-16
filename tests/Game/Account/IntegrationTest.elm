@@ -60,7 +60,7 @@ eventTests =
                         , "password": "asdfasdf"
                         , "network_id": "id"
                         , "process_id": "id"
-                        , "gateway_id": "id"
+                        , "gateway_ip": "ip"
                         }
                         """
 

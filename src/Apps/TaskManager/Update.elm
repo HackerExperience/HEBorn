@@ -20,8 +20,8 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-processComplete : Servers.ID -> Processes.Model -> Time -> Dispatch
-processComplete serverID processes now =
+processComplete : Servers.CId -> Processes.Model -> Time -> Dispatch
+processComplete cid processes now =
     let
         complete ( id, proc ) =
             let
@@ -36,7 +36,7 @@ processComplete serverID processes now =
                     Processes.Running ->
                         if isCompleted then
                             Just <|
-                                Dispatch.processes serverID <|
+                                Dispatch.processes cid <|
                                     Processes.Complete id
                         else
                             Nothing
@@ -82,6 +82,9 @@ update data msg ({ app } as model) =
                         app
 
                 completeMsgs =
-                    processComplete data.id (Servers.getProcesses data.server) now
+                    processComplete
+                        (Game.getActiveCId data)
+                        (Servers.getProcesses data.server)
+                        now
             in
                 ( { model | app = newApp }, Cmd.none, completeMsgs )

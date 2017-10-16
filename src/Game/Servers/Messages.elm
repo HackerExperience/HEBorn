@@ -23,14 +23,14 @@ import Game.Network.Types as Network
 
 
 type Msg
-    = ServerMsg ID ServerMsg
-    | Resync ID
+    = ServerMsg CId ServerMsg
+    | Resync CId
     | Request RequestMsg
-    | HandleJoinedServer ID Value
+    | HandleJoinedServer CId Value
 
 
 type RequestMsg
-    = ResyncRequest (Maybe ServerUid) ID ResponseType
+    = ResyncRequest (Maybe ServerUid) CId ResponseType
 
 
 
@@ -39,7 +39,7 @@ type RequestMsg
 
 type ServerMsg
     = SetBounce (Maybe Bounces.ID)
-    | SetEndpoint (Maybe Network.NIP)
+    | SetEndpoint (Maybe CId)
     | FilesystemMsg Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

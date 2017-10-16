@@ -29,7 +29,7 @@ view data model =
         endpointMember =
             List.member
                 model.toolkit.target
-                data.game.account.joinedEndpoints
+                (Game.getEndpoints data)
     in
         if (model.showingPanel && endpointMember) then
             viewPos data model

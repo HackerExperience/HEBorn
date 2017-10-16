@@ -88,7 +88,7 @@ onReqDownload data source fileId model =
         ( model, Cmd.none, dispatch )
 
 
-requireGateway : Game.Data -> Servers.ID
+requireGateway : Game.Data -> Servers.CId
 requireGateway data =
     case (Game.getGateway <| data.game) of
         Just ( id, _ ) ->

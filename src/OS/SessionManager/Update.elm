@@ -125,7 +125,7 @@ onEveryAppMsg data appMsgs model =
 -}
 onTargetedAppMsg :
     Game.Data
-    -> Servers.ID
+    -> Servers.CId
     -> WM.TargetContext
     -> List Apps.Msg
     -> Model
@@ -239,8 +239,8 @@ reduceSessions data appMsgs toWmMsg sid wm ( model, cmd, disp ) =
 {-| A filterer that keeps sessions of following gateway.
 -}
 filterGatewaySessions :
-    Servers.ID
-    -> Servers.ID
+    Servers.CId
+    -> Servers.CId
     -> WM.Model
     -> Bool
 filterGatewaySessions targetCid cid wm =
@@ -252,8 +252,8 @@ filterGatewaySessions targetCid cid wm =
 -}
 filterRelatedSessions :
     Servers.Model
-    -> Servers.ID
-    -> Servers.ID
+    -> Servers.CId
+    -> Servers.CId
     -> WM.Model
     -> Bool
 filterRelatedSessions servers targetCid cid wm =
@@ -273,8 +273,8 @@ filterRelatedSessions servers targetCid cid wm =
 -}
 filterEndpointRelatedSessions :
     Servers.Model
-    -> Servers.ID
-    -> Servers.ID
+    -> Servers.CId
+    -> Servers.CId
     -> WM.Model
     -> Bool
 filterEndpointRelatedSessions servers targetCid cid wm =

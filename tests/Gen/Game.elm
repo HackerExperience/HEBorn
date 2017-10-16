@@ -51,7 +51,7 @@ genModel =
             }
 
         genPairs =
-            map2 (,) Gen.Servers.genServerID
+            map2 (,) Gen.Servers.genServerCId
 
         genGatewayServer =
             genPairs Gen.Servers.genGatewayServer

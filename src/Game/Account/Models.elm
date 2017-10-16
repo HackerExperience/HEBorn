@@ -8,12 +8,12 @@ module Game.Account.Models
         , Logout(..)
         , initialModel
         , insertGateway
-        , insertEndpoint
         , getId
         , getToken
         , getGateway
         , getContext
         , getDatabase
+        , getBounces
         )
 
 import Game.Servers.Shared as Servers
@@ -22,7 +22,6 @@ import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
 import Game.Notifications.Models as Notifications
-import Game.Network.Types exposing (NIP)
 import Game.Meta.Types exposing (..)
 
 
@@ -59,9 +58,8 @@ type alias Model =
     , email : Maybe Email
     , database : Database.Model
     , dock : Dock.Model
-    , gateways : List NIP
-    , activeGateway : Maybe NIP -- NEVER SET TO NOTHING EXCEPT ON INIT
-    , joinedEndpoints : List NIP
+    , gateways : List Servers.CId
+    , activeGateway : Maybe Servers.CId -- NEVER SET TO "NOTHING" (EXCEPT ON INIT)
     , context : Context
     , bounces : Bounces.Model
     , inventory : Inventory.Model
@@ -85,7 +83,6 @@ initialModel id username token =
     , dock = Dock.initialModel
     , gateways = []
     , activeGateway = Nothing
-    , joinedEndpoints = []
     , context = Gateway
     , bounces = Bounces.initialModel
     , inventory = Inventory.initialModel
@@ -104,7 +101,7 @@ getToken model =
     model.auth.token
 
 
-getGateway : Model -> Maybe NIP
+getGateway : Model -> Maybe Servers.CId
 getGateway =
     .activeGateway
 
@@ -119,7 +116,12 @@ getDatabase =
     .database
 
 
-insertGateway : NIP -> Model -> Model
+getBounces : Model -> Bounces.Model
+getBounces =
+    .bounces
+
+
+insertGateway : Servers.CId -> Model -> Model
 insertGateway id ({ gateways } as model) =
     let
         activeGateway =
@@ -135,15 +137,3 @@ insertGateway id ({ gateways } as model) =
                 model.gateways
     in
         { model | activeGateway = activeGateway, gateways = gateways }
-
-
-insertEndpoint : NIP -> Model -> Model
-insertEndpoint nip ({ joinedEndpoints } as model) =
-    let
-        joinedEndpoints_ =
-            if List.member nip joinedEndpoints then
-                joinedEndpoints
-            else
-                nip :: joinedEndpoints
-    in
-        { model | joinedEndpoints = joinedEndpoints_ }

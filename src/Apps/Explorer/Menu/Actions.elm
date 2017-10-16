@@ -21,7 +21,7 @@ actionHandler data action ({ app } as model) =
             let
                 gameMsg =
                     Dispatch.filesystem
-                        data.id
+                        (Game.getActiveCId data)
                         (Filesystem.Delete fileID)
             in
                 ( model, Cmd.none, gameMsg )

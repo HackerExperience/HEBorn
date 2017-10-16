@@ -10,7 +10,7 @@ import Events.Server as Server
 
 type Event
     = Account Account.Event
-    | Server Servers.ID Server.Event
+    | Server Servers.CId Server.Event
     | Report Ws.Report
 
 

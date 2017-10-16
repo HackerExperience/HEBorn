@@ -11,7 +11,6 @@ import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import OS.SessionManager.WindowManager.Models as WM
 import Game.Meta.Types exposing (Context(..))
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
@@ -35,10 +34,10 @@ update game msg model =
         Request data ->
             updateRequest game (Requests.receive data) model
 
-        FetchUrl url id ip requester ->
+        FetchUrl url networkId cid requester ->
             let
                 cmd =
-                    DNS.request url id ip requester game
+                    DNS.request url networkId cid requester game
             in
                 ( model, cmd, Dispatch.none )
 
@@ -116,11 +115,11 @@ onLogin game nip remoteIp password requester model =
 
 {-| Sets endpoint
 -}
-handleJoined : Game.Model -> Servers.ID -> Model -> UpdateResponse
-handleJoined game nip model =
+handleJoined : Game.Model -> Servers.CId -> Model -> UpdateResponse
+handleJoined game cid model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading nip model
+            finishLoading cid model
 
         servers =
             Game.getServers game
@@ -133,7 +132,7 @@ handleJoined game nip model =
             case serverCid of
                 Just serverCid ->
                     Dispatch.server serverCid <|
-                        Servers.SetEndpoint (Just nip)
+                        Servers.SetEndpoint (Just cid)
 
                 Nothing ->
                     Dispatch.none
@@ -143,11 +142,11 @@ handleJoined game nip model =
 
 {-| Reports failure back to the loading page.
 -}
-handleJoinFailed : Servers.ID -> Model -> UpdateResponse
-handleJoinFailed nip model =
+handleJoinFailed : Servers.CId -> Model -> UpdateResponse
+handleJoinFailed cid model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading nip model
+            finishLoading cid model
 
         dispatch =
             case maybeRequester of

@@ -13,10 +13,10 @@ import OS.SessionManager.WindowManager.Models as WM
 
 type Msg
     = Request RequestMsg
-    | FetchUrl String String String Requester
+    | FetchUrl String Network.ID Servers.CId Requester
     | Login Network.NIP Network.IP String Requester
-    | HandleJoinedServer Servers.ID
-    | HandleJoinServerFailed Servers.ID
+    | HandleJoinedServer Servers.CId
+    | HandleJoinServerFailed Servers.CId
 
 
 type RequestMsg

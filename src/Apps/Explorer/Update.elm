@@ -72,7 +72,9 @@ update data msg ({ app } as model) =
         ApplyEdit ->
             let
                 gameMsg =
-                    Dispatch.filesystem data.id
+                    data
+                        |> Game.getActiveCId
+                        |> Dispatch.filesystem
 
                 msg =
                     case app.editing of

@@ -17,14 +17,13 @@ import Game.Servers.Messages
         , RequestMsg(ResyncRequest)
         )
 import Game.Servers.Shared exposing (..)
-import Game.Network.Types exposing (NIP)
 
 
 type Response
-    = Okay ( ID, Server )
+    = Okay ( CId, Server )
 
 
-request : Maybe ServerUid -> ID -> ConfigSource a -> Cmd Msg
+request : Maybe ServerUid -> CId -> ConfigSource a -> Cmd Msg
 request serverUid id =
     -- this request is mainly used to fetch invaded computers
     Requests.request (Topics.serverResync id)
@@ -32,7 +31,7 @@ request serverUid id =
         emptyPayload
 
 
-receive : Maybe ServerUid -> ID -> Code -> Value -> Maybe Response
+receive : Maybe ServerUid -> CId -> Code -> Value -> Maybe Response
 receive serverUid id code json =
     case code of
         OkCode ->

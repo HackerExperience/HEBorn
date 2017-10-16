@@ -71,17 +71,19 @@ update data msg ({ openMenu } as model) =
         SelectBounce id ->
             let
                 dispatch =
-                    Dispatch.server data.id <| Servers.SetBounce id
+                    Dispatch.server
+                        (Game.getActiveCId data)
+                        (Servers.SetBounce id)
 
                 model_ =
                     { model | openMenu = NothingOpen }
             in
                 ( model_, Cmd.none, dispatch )
 
-        SelectEndpoint nip ->
+        SelectEndpoint cid ->
             let
                 dispatch =
-                    Dispatch.account <| Account.SetEndpoint nip
+                    Dispatch.account <| Account.SetEndpoint cid
 
                 model_ =
                     { model | openMenu = NothingOpen }

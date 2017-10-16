@@ -18,11 +18,11 @@ import Apps.Launch as Apps
 resert :
     Game.Data
     -> String
-    -> Maybe Servers.ID
+    -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data id serverID app ({ visible, hidden, windows } as model) =
+resert data id serverCId app ({ visible, hidden, windows } as model) =
     let
         noVisible =
             visible
@@ -46,17 +46,17 @@ resert data id serverID app ({ visible, hidden, windows } as model) =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data id serverID app model
+            insert data id serverCId app model
 
 
 insert :
     Game.Data
     -> ID
-    -> Maybe Servers.ID
+    -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data id serverID app ({ windows, visible, parentSession } as model) =
+insert data id serverCId app ({ windows, visible, parentSession } as model) =
     let
         ( instance, cmd, dispatch ) =
             case Apps.contexts app of
@@ -124,7 +124,7 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
                 app
                 instance
                 False
-                serverID
+                serverCId
 
         windows_ =
             Dict.insert id window windows

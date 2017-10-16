@@ -14,7 +14,6 @@ import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
-import Game.Network.Types exposing (NIP)
 import Game.Meta.Types exposing (..)
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
@@ -40,17 +39,14 @@ update game msg model =
         DoCrash code message ->
             onDoCrash game code message model
 
-        SetGateway nip ->
-            onSetGateway game nip model
+        SetGateway cid ->
+            onSetGateway game cid model
 
-        SetEndpoint nip ->
-            onSetEndpoint game nip model
+        SetEndpoint cid ->
+            onSetEndpoint game cid model
 
-        InsertGateway nip ->
-            onInsertGateway nip model
-
-        InsertEndpoint nip ->
-            onInsertEndpoint nip model
+        InsertGateway cid ->
+            onInsertGateway cid model
 
         ContextTo context ->
             onContextTo game context model
@@ -81,14 +77,14 @@ update game msg model =
 -- internals
 
 
-onSetGateway : Game.Model -> NIP -> Model -> UpdateResponse
-onSetGateway game nip model =
-    Update.fromModel { model | activeGateway = Just nip }
+onSetGateway : Game.Model -> Servers.CId -> Model -> UpdateResponse
+onSetGateway game cid model =
+    Update.fromModel { model | activeGateway = Just cid }
 
 
 onSetEndpoint :
     Game.Model
-    -> Maybe Servers.ID
+    -> Maybe Servers.CId
     -> Model
     -> UpdateResponse
 onSetEndpoint game endpointId model =
@@ -215,7 +211,7 @@ ensureValidContext game model =
             model
                 |> getGateway
                 |> Maybe.andThen (flip Servers.get servers)
-                |> Maybe.andThen Servers.getEndpoint
+                |> Maybe.andThen Servers.getEndpointCId
     in
         if getContext model == Endpoint && endpoint == Nothing then
             { model | context = Gateway }
@@ -223,17 +219,10 @@ ensureValidContext game model =
             model
 
 
-onInsertGateway : NIP -> Model -> UpdateResponse
-onInsertGateway nip model =
+onInsertGateway : Servers.CId -> Model -> UpdateResponse
+onInsertGateway cid model =
     model
-        |> insertGateway nip
-        |> Update.fromModel
-
-
-onInsertEndpoint : NIP -> Model -> UpdateResponse
-onInsertEndpoint nip model =
-    model
-        |> insertEndpoint nip
+        |> insertGateway cid
         |> Update.fromModel
 
 
