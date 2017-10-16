@@ -4,6 +4,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
 import Game.Models as Game
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Shared as Servers
 import Game.Servers.Processes.Messages as Processes
 import Apps.Browser.Pages.CommonActions exposing (..)
@@ -42,8 +43,8 @@ update data msg model =
         SetShowingPanel value ->
             onTogglePanel value model
 
-        ReqDownload sourceIp fileId ->
-            onReqDownload data sourceIp fileId model
+        ReqDownload source fileId ->
+            onReqDownload data source fileId model
 
 
 onTogglePanel : Bool -> Model -> UpdateResponse
@@ -71,18 +72,18 @@ onUpdatePasswordField newPassword model =
 
 onReqDownload :
     Game.Data
-    -> String
+    -> NIP
     -> String
     -> Model
     -> UpdateResponse
-onReqDownload data sourceIp fileId model =
+onReqDownload data source fileId model =
     let
         me =
             requireGateway data
 
         dispatch =
             Dispatch.processes me <|
-                Processes.StartPublicDownload sourceIp fileId "storage id"
+                Processes.StartPublicDownload source fileId "storage id"
     in
         ( model, Cmd.none, dispatch )
 

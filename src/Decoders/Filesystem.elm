@@ -167,7 +167,7 @@ type alias Modules =
 modules : Decoder Modules
 modules =
     decode (,)
-        |> required "module" string
+        |> required "name" string
         |> required "version" (map (Just >> ModuleData) int)
         |> list
         |> map Dict.fromList

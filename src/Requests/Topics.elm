@@ -101,7 +101,7 @@ fsDownload nip =
 fsPublicDownload : Servers.ID -> Topic
 fsPublicDownload nip =
     -- CID NEEDS TO BE GATEWAY
-    WebsocketTopic (ServerChannel nip) "public.download"
+    WebsocketTopic (ServerChannel nip) "pftp.file.download"
 
 
 

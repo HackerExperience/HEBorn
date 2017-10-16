@@ -25,14 +25,15 @@ import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
-import Game.Servers.Shared exposing (..)
+import Decoders.Processes
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (FileID)
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Processes.Models exposing (ID, Process)
 
 
 type Response
-    = Okay ( FileID, String )
+    = Okay ID Process
     | SelfLoop
     | FileNotFound
     | StorageFull
@@ -40,44 +41,55 @@ type Response
     | BadRequest
 
 
-request : FileID -> String -> NIP -> ConfigSource a -> Cmd Msg
-request fileId storageId nip =
+request :
+    ID
+    -> FileID
+    -> String
+    -> NIP
+    -> ConfigSource a
+    -> Cmd Msg
+request optmistic fileId storageId nip =
     Requests.request (Topics.fsDownload nip)
-        (DownloadRequest >> Request)
+        (DownloadRequest optmistic >> Request)
     <|
         encoder fileId storageId
 
 
 requestPublic :
-    FileID
+    ID
+    -> FileID
     -> String
     -> NIP
     -> ConfigSource a
     -> Cmd Msg
-requestPublic fileId storageId nip =
+requestPublic optmistic fileId storageId nip =
     Requests.request (Topics.fsPublicDownload nip)
-        (DownloadRequest >> Request)
+        (DownloadRequest optmistic >> Request)
     <|
         encoder fileId storageId
 
 
 receive : Code -> Value -> Maybe Response
 receive code json =
-    case code of
-        OkCode ->
-            json
-                |> decodeValue decoder
-                |> Result.map Okay
-                |> Requests.report
-
-        ErrorCode ->
-            Requests.decodeGenericError
+    let
+        z =
+            Debug.log ">> Code: " code
+    in
+        case code of
+            OkCode ->
                 json
-                decodeErrorMessage
-                |> Requests.report
+                    |> decodeValue Decoders.Processes.process
+                    |> Result.map (uncurry Okay)
+                    |> Requests.report
 
-        _ ->
-            Nothing
+            ErrorCode ->
+                Requests.decodeGenericError
+                    json
+                    decodeErrorMessage
+                    |> Requests.report
+
+            _ ->
+                Nothing
 
 
 
@@ -91,13 +103,6 @@ encoder fileId storageId =
 
         --, ( "storage_id", Encode.string storageId )
         ]
-
-
-decoder : Decoder ( FileID, String )
-decoder =
-    decode (,)
-        |> required "file_id" string
-        |> required "storage_id" string
 
 
 decodeErrorMessage : String -> Decoder Response

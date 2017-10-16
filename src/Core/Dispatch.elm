@@ -24,6 +24,7 @@ module Core.Dispatch
         , logs
         , log
         , tunnels
+        , serverNotification
         , meta
         , browser
         , toasts
@@ -41,6 +42,7 @@ import Game.Storyline.Messages as Story
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Missions.Actions as Missions
 import Game.Account.Messages as Account
+import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
@@ -245,6 +247,11 @@ log serverId id msg =
 tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
 tunnels id msg =
     server id <| Servers.TunnelsMsg msg
+
+
+serverNotification : Servers.ID -> Notifications.Msg -> Dispatch
+serverNotification id msg =
+    server id <| Servers.NotificationsMsg msg
 
 
 web : Web.Msg -> Dispatch
