@@ -28,6 +28,7 @@ module Core.Dispatch
         , tunnels
         , serverNotification
         , meta
+        , openApp
         , apps
         , appsOfSession
         , browser
@@ -35,6 +36,7 @@ module Core.Dispatch
         )
 
 import Apps.Messages as Apps
+import Apps.Apps as Apps
 import Apps.Browser.Messages as Browser
 import Game.Messages as Game
 import Core.Messages exposing (..)
@@ -279,6 +281,11 @@ web msg =
 browser : WindowRef -> Context -> Browser.Msg -> Dispatch
 browser windowRef context msg =
     app windowRef context <| Apps.BrowserMsg msg
+
+
+openApp : Maybe Context -> Apps.App -> Dispatch
+openApp context app =
+    sessionManager <| SessionManager.OpenApp context app
 
 
 apps : List Apps.Msg -> Dispatch

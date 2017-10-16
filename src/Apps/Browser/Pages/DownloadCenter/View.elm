@@ -10,6 +10,7 @@ import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
+import Apps.Apps as Apps
 
 
 { id, class, classList } =
@@ -62,14 +63,30 @@ viewPre data showPassword model =
 viewPos : Game.Data -> Model -> Html Msg
 viewPos data model =
     ul []
-        [ li [] [ text "Open Task Manager" ]
-        , li [] [ text "Open Connection Manager" ]
-        , li [] [ text "Open Log Viewer" ]
-        , li [] [ text "Open File Explorer" ]
-        , li [] [ text "Open Remote Desktop" ]
-        , li [] [ text "Start AnyMap" ]
-        , li [] [ text "Logout" ]
-        , li [ onClick <| SetShowingPanel False ] [ text "Go back" ]
+        [ li
+            [ onClick <| OpenApp Apps.TaskManagerApp ]
+            [ text "Open Task Manager" ]
+        , li
+            [ onClick <| OpenApp Apps.ConnManagerApp ]
+            [ text "Open Connection Manager" ]
+        , li
+            [ onClick <| OpenApp Apps.LogViewerApp ]
+            [ text "Open Log Viewer" ]
+        , li
+            [ onClick <| OpenApp Apps.ExplorerApp ]
+            [ text "Open File Explorer" ]
+        , li
+            [ onClick <| SelectEndpoint ]
+            [ text "Open Remote Desktop" ]
+        , li
+            [ onClick StartAnyMap ]
+            [ text "Start AnyMap" ]
+        , li
+            [ onClick Logout ]
+            [ text "Logout" ]
+        , li
+            [ onClick <| SetShowingPanel False ]
+            [ text "Go back" ]
         ]
         |> List.singleton
         |> div []

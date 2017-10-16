@@ -17,13 +17,19 @@ import Apps.Launch as Apps
 
 resert :
     Game.Data
+    -> Context
     -> String
     -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data id serverID app ({ visible, hidden, windows } as model) =
+resert data context id serverID app model =
+    -- TODO: maybe check if the opened window has the current endpoint, focus
+    -- it if this is the case
     let
+        { visible, hidden, windows } =
+            model
+
         noVisible =
             visible
                 |> List.filter (filterApp app windows)
@@ -46,18 +52,22 @@ resert data id serverID app ({ visible, hidden, windows } as model) =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data id serverID app model
+            insert data context id serverID app model
 
 
 insert :
     Game.Data
+    -> Context
     -> ID
     -> Maybe Servers.ID
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data id serverID app ({ windows, visible, parentSession } as model) =
+insert data context id serverID app model =
     let
+        { windows, visible, parentSession } =
+            model
+
         ( instance, cmd, dispatch ) =
             case Apps.contexts app of
                 Apps.ContextualApp ->
@@ -89,12 +99,6 @@ insert data id serverID app ({ windows, visible, parentSession } as model) =
 
                         dispatch =
                             Dispatch.batch [ dispatchG, dispatchE ]
-
-                        context =
-                            data
-                                |> Game.getGame
-                                |> Game.getAccount
-                                |> Account.getContext
 
                         model =
                             DoubleContext context modelG modelE
