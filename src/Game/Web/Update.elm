@@ -1,7 +1,6 @@
 module Game.Web.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Events.Events as Events
 import Utils.Update as Update
 import Game.Models as Game
 import Game.Web.Messages exposing (..)
@@ -43,8 +42,11 @@ update game msg model =
             in
                 ( model, cmd, Dispatch.none )
 
-        Event data ->
-            updateEvent game data model
+        HandleJoinedServer cid ->
+            handleJoined game cid model
+
+        HandleJoinServerFailed cid ->
+            handleJoinFailed cid model
 
 
 
@@ -112,23 +114,10 @@ onLogin game nip remoteIp password requester model =
         ( model_, Cmd.none, dispatch )
 
 
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    case event of
-        Events.Report (Ws.Joined (ServerChannel nip) _) ->
-            onJoined game nip model
-
-        Events.Report (Ws.JoinFailed (ServerChannel nip) _) ->
-            onJoinFailed game nip model
-
-        _ ->
-            ( model, Cmd.none, Dispatch.none )
-
-
 {-| Sets endpoint
 -}
-onJoined : Game.Model -> Network.NIP -> Model -> UpdateResponse
-onJoined game nip model =
+handleJoined : Game.Model -> Servers.ID -> Model -> UpdateResponse
+handleJoined game nip model =
     let
         ( maybeRequester, model_ ) =
             finishLoading nip model
@@ -154,8 +143,8 @@ onJoined game nip model =
 
 {-| Reports failure back to the loading page.
 -}
-onJoinFailed : Game.Model -> Network.NIP -> Model -> UpdateResponse
-onJoinFailed game nip model =
+handleJoinFailed : Servers.ID -> Model -> UpdateResponse
+handleJoinFailed nip model =
     let
         ( maybeRequester, model_ ) =
             finishLoading nip model

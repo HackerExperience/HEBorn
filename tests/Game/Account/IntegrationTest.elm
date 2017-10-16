@@ -10,9 +10,7 @@ import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
-import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ProcessesEvent))
-import Events.Servers.Processes as ProcessesEvent
+import Events.Events as Events exposing (Event(..))
 import Game.Messages as Game
 import Game.Models as Game
 import Game.Account.Messages as Account
@@ -40,7 +38,7 @@ eventTests : List Test
 eventTests =
     [ fuzz
         GenGame.model
-        "event 'database.server_password_acquired' inserts the password"
+        "event 'server_password_acquired' inserts the password"
       <|
         \game ->
             let
@@ -53,21 +51,21 @@ eventTests =
                     AccountChannel ""
 
                 name =
-                    "database.server_password_acquired"
+                    "server_password_acquired"
 
                 json =
                     toValue
                         """
-                    { "server_ip": "phoebe"
-                    , "password": "asdfasdf"
-                    , "network_id": "id"
-                    , "process_id": "id"
-                    , "gateway_id": "id"
-                    }
-                    """
+                        { "server_ip": "phoebe"
+                        , "password": "asdfasdf"
+                        , "network_id": "id"
+                        , "process_id": "id"
+                        , "gateway_id": "id"
+                        }
+                        """
 
                 msg =
-                    Events.handler channel name json
+                    Events.events channel name json
                         |> fromJust ""
                         |> Game.Event
             in

@@ -1,7 +1,7 @@
 module Game.Account.Database.Messages exposing (Msg(..))
 
-import Events.Events as Events
+import Events.Account.PasswordAcquired as PasswordAcquired
 
 
 type Msg
-    = Event Events.Event
+    = HandlePasswordAcquired PasswordAcquired.Data

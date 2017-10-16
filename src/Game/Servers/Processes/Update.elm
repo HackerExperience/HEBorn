@@ -2,9 +2,10 @@ module Game.Servers.Processes.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(ProcessesEvent))
-import Events.Servers.Processes as Processes exposing (Event(..))
+import Events.Server.Processes.Started as ProcessStarted
+import Events.Server.Processes.Conclusion as ProcessConclusion
+import Events.Server.Processes.BruteforceFailed as BruteforceFailed
+import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Models as Game
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
@@ -52,8 +53,20 @@ update game nip msg model =
         Request data ->
             updateRequest game nip (receive data) model
 
-        Event event ->
-            updateEvent game nip event model
+        HandleProcessStarted data ->
+            handleProcessStarted data model
+
+        HandleProcessConclusion data ->
+            handleProcessConclusion data model
+
+        HandleBruteforceFailed data ->
+            handleBruteforceFailed data model
+
+        HandleProcessesChanged data ->
+            handleProcessesChanged data model
+
+        HandleBruteforceSuccess id ->
+            handleBruteforceSuccess id model
 
 
 
@@ -153,148 +166,6 @@ onComplete game nip id model =
 
 
 
--- process event routers
-
-
-updateEvent :
-    Game.Model
-    -> NIP
-    -> Events.Event
-    -> Model
-    -> UpdateResponse
-updateEvent game serverId event model =
-    case event of
-        ServersEvent _ (ProcessesEvent event) ->
-            updateProcessesEvent game serverId event model
-
-        _ ->
-            Update.fromModel model
-
-
-updateProcessesEvent :
-    Game.Model
-    -> NIP
-    -> Processes.Event
-    -> Model
-    -> UpdateResponse
-updateProcessesEvent game serverId event model =
-    case event of
-        Changed processes ->
-            onChangedEvent processes model
-
-        Started ( id, process ) ->
-            onStartedEvent game serverId id process model
-
-        Conclusion id ->
-            onCompleteEvent game serverId id model
-
-        BruteforceFailed data ->
-            onBruteforceFailedEvent game serverId data model
-
-
-
--- process event handlers
-
-
-onChangedEvent :
-    Processes
-    -> Model
-    -> UpdateResponse
-onChangedEvent processes model =
-    Update.fromModel { model | processes = processes }
-
-
-onStartedEvent :
-    Game.Model
-    -> NIP
-    -> ID
-    -> Process
-    -> Model
-    -> UpdateResponse
-onStartedEvent game nip id process model =
-    model
-        |> insert id process
-        |> Update.fromModel
-
-
-onPauseEvent :
-    Game.Model
-    -> NIP
-    -> ID
-    -> Model
-    -> UpdateResponse
-onPauseEvent game nip id model =
-    let
-        update process =
-            model
-                |> upsert id (pause process)
-                |> Update.fromModel
-    in
-        updateOrSync update id model
-
-
-onResumeEvent :
-    Game.Model
-    -> NIP
-    -> ID
-    -> Model
-    -> UpdateResponse
-onResumeEvent game nip id model =
-    let
-        update process =
-            model
-                |> upsert id (resume process)
-                |> Update.fromModel
-    in
-        updateOrSync update id model
-
-
-onCompleteEvent :
-    Game.Model
-    -> NIP
-    -> ID
-    -> Model
-    -> UpdateResponse
-onCompleteEvent game nip id model =
-    let
-        update process =
-            model
-                |> upsert id (conclude (Just True) process)
-                |> Update.fromModel
-    in
-        updateOrSync update id model
-
-
-onRemoveEvent :
-    Game.Model
-    -> NIP
-    -> ID
-    -> Model
-    -> UpdateResponse
-onRemoveEvent game nip id model =
-    model
-        |> remove id
-        |> Update.fromModel
-
-
-onBruteforceFailedEvent :
-    Game.Model
-    -> NIP
-    -> Processes.BruteforceFailedData
-    -> Model
-    -> UpdateResponse
-onBruteforceFailedEvent game nip response model =
-    let
-        update process =
-            model
-                |> upsert response.processId
-                    (conclude (Just False) process)
-                |> Update.fromModel
-    in
-        updateOrSync update response.processId model
-
-
-
 -- request handlers
 
 
@@ -328,3 +199,78 @@ onBruteforceRequest game nip oldId response model =
                     replace oldId id process model
             in
                 Update.fromModel model_
+
+
+
+-- event handlers
+
+
+handleProcessStarted : ProcessStarted.Data -> Model -> UpdateResponse
+handleProcessStarted ( id, process ) model =
+    model
+        |> insert id process
+        |> Update.fromModel
+
+
+handlePauseEvent : ID -> Model -> UpdateResponse
+handlePauseEvent id model =
+    let
+        update process =
+            model
+                |> upsert id (pause process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+handleResumeEvent : ID -> Model -> UpdateResponse
+handleResumeEvent id model =
+    let
+        update process =
+            model
+                |> upsert id (resume process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+handleRemoveEvent : ID -> Model -> UpdateResponse
+handleRemoveEvent id model =
+    model
+        |> remove id
+        |> Update.fromModel
+
+
+handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse
+handleProcessConclusion id model =
+    let
+        update process =
+            model
+                |> upsert id (conclude (Just True) process)
+                |> Update.fromModel
+    in
+        updateOrSync update id model
+
+
+handleBruteforceFailed : BruteforceFailed.Data -> Model -> UpdateResponse
+handleBruteforceFailed data model =
+    let
+        update process =
+            model
+                |> upsert data.processId
+                    (conclude (Just False) process)
+                |> Update.fromModel
+    in
+        updateOrSync update data.processId model
+
+
+handleProcessesChanged : ProcessesChanged.Data -> Model -> UpdateResponse
+handleProcessesChanged processes model =
+    Update.fromModel { model | processes = processes }
+
+
+handleBruteforceSuccess : ID -> Model -> UpdateResponse
+handleBruteforceSuccess id model =
+    -- TODO: dispatch from password acquired after implementing "dispatch
+    -- to servers of following nip"
+    Update.fromModel model

@@ -1,10 +1,10 @@
 module Apps.Browser.Messages exposing (..)
 
-import Events.Events as Events
 import Game.Web.Types exposing (Response)
 import Game.Network.Types as Network
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Pages.Messages as Page
+import Events.Account.PasswordAcquired as PasswordAcquired
 
 
 type Msg
@@ -16,7 +16,7 @@ type Msg
       -- Browser actions
     | NewTabIn String
     | ChangeTab Int
-    | Event Events.Event
+    | HandlePasswordAcquired PasswordAcquired.Data
 
 
 type TabMsg

@@ -1,12 +1,5 @@
-module Game.Servers.Logs.Messages
-    exposing
-        ( Msg(..)
-        , LogMsg(..)
-        , RequestMsg(..)
-        , LogRequestMsg(..)
-        )
+module Game.Servers.Logs.Messages exposing (..)
 
-import Events.Events as Events
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Logs.Models exposing (..)
 
@@ -16,7 +9,6 @@ type Msg
     | Hide ID
     | LogMsg ID LogMsg
     | Request RequestMsg
-    | Event Events.Event
 
 
 type LogMsg

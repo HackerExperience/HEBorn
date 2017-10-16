@@ -1,8 +1,9 @@
 module Game.Storyline.Emails.Messages exposing (Msg(..))
 
 import Game.Storyline.Emails.Models exposing (..)
+import Events.Account.Story.NewEmail as StoryNewEmail
 
 
 type Msg
     = Changed Model
-    | NewEmail ID ( Float, Message ) Responses
+    | HandleNewEmail StoryNewEmail.Data

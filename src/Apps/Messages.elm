@@ -1,6 +1,5 @@
 module Apps.Messages exposing (Msg(..))
 
-import Events.Events as Events
 import Apps.LogViewer.Messages as LogViewer
 import Apps.TaskManager.Messages as TaskManager
 import Apps.Browser.Messages as Browser
@@ -34,4 +33,3 @@ type Msg
     | LanViewerMsg LanViewer.Msg
     | EmailMsg Email.Msg
     | BugMsg Bug.Msg
-    | Event Events.Event

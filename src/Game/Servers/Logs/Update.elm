@@ -6,9 +6,6 @@ import Utils.Update as Update
 import Game.Models as Game
 import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
-import Events.Events as Events exposing (Event(ServersEvent))
-import Events.Servers exposing (Event(LogsEvent))
-import Events.Servers.Logs as Logs
 import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
@@ -36,9 +33,6 @@ update game nip msg model =
 
         LogMsg id msg ->
             onLogMsg game nip id msg model
-
-        Event event ->
-            updateEvent game nip event model
 
         Request data ->
             onRequest game nip (receive data) model
@@ -77,21 +71,6 @@ onLogMsg game nip id msg model =
                 |> Update.mapCmd (LogMsg id)
 
         Nothing ->
-            Update.fromModel model
-
-
-updateEvent :
-    Game.Model
-    -> NIP
-    -> Events.Event
-    -> Model
-    -> UpdateResponse
-updateEvent game nip event model =
-    case event of
-        ServersEvent _ (LogsEvent (Logs.Changed data)) ->
-            Update.fromModel (toModel data)
-
-        _ ->
             Update.fromModel model
 
 

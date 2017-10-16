@@ -53,7 +53,7 @@ viewWM data model =
             Just wm ->
                 wm
                     |> WM.view data
-                    |> Html.map WindowManagerMsg
+                    |> Html.map (WindowManagerMsg id)
 
             Nothing ->
                 div [ wmClass [ WmRes.Canvas ] ] []

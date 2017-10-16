@@ -9,10 +9,8 @@ import Utils.Update as Update
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
-import Events.Events as Events exposing (Event(Report, AccountEvent))
-import Events.Account as EventsAccount
-import Events.Account.Database as EventsDatabase
 import Requests.Requests as Requests
+import Events.Account.PasswordAcquired as PasswordAcquired
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
 import Game.Models as Game
@@ -25,43 +23,15 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        Event event ->
-            updateEvent game event model
-
-
-updateEvent : Game.Model -> Events.Event -> Model -> UpdateResponse
-updateEvent game event model =
-    let
-        databaseEvents event =
-            case event of
-                EventsDatabase.PasswordAcquired data ->
-                    onPasswordAcquired game data model
-
-        accountEvents event =
-            case event of
-                EventsAccount.DatabaseEvent event ->
-                    databaseEvents event
-
-                _ ->
-                    Update.fromModel model
-    in
-        case event of
-            AccountEvent event ->
-                accountEvents event
-
-            _ ->
-                Update.fromModel model
+        HandlePasswordAcquired data ->
+            handlePasswordAcquired data model
 
 
 {-| Saves password for that server, inserts a new server entry
 if none is found.
 -}
-onPasswordAcquired :
-    Game.Model
-    -> EventsDatabase.PasswordAcquiredData
-    -> Model
-    -> UpdateResponse
-onPasswordAcquired game data model =
+handlePasswordAcquired : PasswordAcquired.Data -> Model -> UpdateResponse
+handlePasswordAcquired data model =
     let
         servers =
             getHackedServers model
@@ -73,5 +43,4 @@ onPasswordAcquired game data model =
                 |> flip (insertServer data.nip) servers
                 |> flip setHackedServers model
     in
-        -- TODO: we need a new hacked server request here
         Update.fromModel model_

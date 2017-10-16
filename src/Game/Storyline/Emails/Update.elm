@@ -6,6 +6,7 @@ import Utils.Update as Update
 import Game.Models as Game
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
+import Events.Account.Story.NewEmail as StoryNewEmail
 
 
 type alias UpdateResponse =
@@ -18,8 +19,8 @@ update game msg model =
         Changed newModel ->
             onChanged newModel model
 
-        NewEmail personId newMsg responses ->
-            onNewEmail personId newMsg responses model
+        HandleNewEmail data ->
+            handleNewEmail data model
 
 
 onChanged : Model -> Model -> UpdateResponse
@@ -27,11 +28,8 @@ onChanged newModel oldModel =
     Update.fromModel newModel
 
 
-onNewEmail : ID -> ( Float, Message ) -> Responses -> Model -> UpdateResponse
-onNewEmail personId ( time, msg ) responses model =
-    -- Called when Helix new email received
-    -- Creates person chat when it doesn't exists yet
-    -- Insert/Update messages to person chat
+handleNewEmail : StoryNewEmail.Data -> Model -> UpdateResponse
+handleNewEmail ( personId, ( time, msg ), responses ) model =
     let
         apply person =
             let

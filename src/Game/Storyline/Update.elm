@@ -3,10 +3,6 @@ module Game.Storyline.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Models as Game
-import Events.Events exposing (Event(AccountEvent))
-import Events.Account exposing (Event(MissionsEvent, EmailsEvent))
-import Events.Storyline.Missions exposing (Event(StepProceed))
-import Events.Storyline.Emails exposing (Event(NewEmail))
 import Game.Storyline.Models exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Missions.Messages as Missions
@@ -30,15 +26,6 @@ update game msg model =
 
         EmailsMsg msg ->
             onEmail game msg model
-
-        Event (AccountEvent (MissionsEvent (StepProceed next))) ->
-            onMission game (Missions.StepProceed next) model
-
-        Event (AccountEvent (EmailsEvent (NewEmail ( personId, newMsg, responses )))) ->
-            onEmail game (Emails.NewEmail personId newMsg responses) model
-
-        Event _ ->
-            Update.fromModel model
 
 
 onToggle : Model -> UpdateResponse

@@ -3,6 +3,7 @@ module OS.SessionManager.Subscriptions exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
+import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
 import Game.Data as GameData
@@ -20,7 +21,7 @@ subscriptions data model =
         windowManagerSub =
             model
                 |> get id
-                |> Maybe.map (windowManager data)
+                |> Maybe.map (windowManager data id)
                 |> defaultNone
     in
         Sub.batch [ windowManagerSub ]
@@ -30,11 +31,11 @@ subscriptions data model =
 -- internals
 
 
-windowManager : GameData.Data -> WindowManager.Model -> Sub Msg
-windowManager data model =
+windowManager : GameData.Data -> ID -> WindowManager.Model -> Sub Msg
+windowManager data id model =
     model
         |> WindowManager.subscriptions data
-        |> Sub.map WindowManagerMsg
+        |> Sub.map (WindowManagerMsg id)
 
 
 defaultNone : Maybe (Sub Msg) -> Sub Msg

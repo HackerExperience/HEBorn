@@ -19,7 +19,7 @@ update game msg model =
         ActionDone action ->
             onActionDone action model
 
-        StepProceed next ->
+        HandleStepProceeded next ->
             onStepProceed next model
 
 

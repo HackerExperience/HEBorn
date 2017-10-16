@@ -3,7 +3,9 @@ module OS.SessionManager.Models exposing (..)
 import Dict exposing (Dict)
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
-import OS.SessionManager.WindowManager.Models as WindowManager
+import OS.SessionManager.WindowManager.Models as WM
+import OS.SessionManager.Types exposing (..)
+import Game.Meta.Types exposing (Context(..))
 
 
 type alias Model =
@@ -11,15 +13,11 @@ type alias Model =
 
 
 type alias Sessions =
-    Dict ID WindowManager.Model
-
-
-type alias ID =
-    String
+    Dict ID WM.Model
 
 
 type alias WindowRef =
-    ( ID, WindowManager.ID )
+    ( ID, WM.ID )
 
 
 initialModel : Model
@@ -30,7 +28,7 @@ initialModel =
     }
 
 
-get : ID -> Model -> Maybe WindowManager.Model
+get : ID -> Model -> Maybe WM.Model
 get session { sessions } =
     Dict.get session sessions
 
@@ -42,7 +40,7 @@ insert id ({ sessions } as model) =
             sessions_ =
                 Dict.insert
                     id
-                    (WindowManager.initialModel id)
+                    (WM.initialModel id)
                     sessions
         in
             { model | sessions = sessions_ }
@@ -50,12 +48,17 @@ insert id ({ sessions } as model) =
         model
 
 
+filterSessions : (ID -> WM.Model -> Bool) -> Model -> Sessions
+filterSessions func { sessions } =
+    Dict.filter func sessions
+
+
 getUID : Model -> ( Model, String )
 getUID =
     RandomUuid.newUuid
 
 
-refresh : ID -> WindowManager.Model -> Model -> Model
+refresh : ID -> WM.Model -> Model -> Model
 refresh id wm ({ sessions } as model) =
     case Dict.get id sessions of
         Just _ ->
@@ -78,6 +81,6 @@ remove id ({ sessions } as model) =
         { model | sessions = sessions_ }
 
 
-getWindowID : WindowRef -> WindowManager.ID
+getWindowID : WindowRef -> WM.ID
 getWindowID ( _, id ) =
     id

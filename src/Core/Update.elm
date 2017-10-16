@@ -214,7 +214,6 @@ updatePlay msg model stateModel =
         WebsocketMsg (Ws.Broadcast event) ->
             stateModel
                 |> updatePlayGame (Game.Event event)
-                |> stateAndThen (updatePlayOS <| OS.Event event)
                 |> finishPlayUpdate model
 
         WebsocketMsg msg ->
@@ -379,10 +378,10 @@ received msg =
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
             msg
 
-        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.OnDragBy _))) ->
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.OnDragBy _))) ->
             msg
 
-        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg (WM.DragMsg _))) ->
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.DragMsg _))) ->
             msg
 
         _ ->

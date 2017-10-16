@@ -37,9 +37,6 @@ update data msg model =
         ToastsMsg msg ->
             onToastsMsg data msg model
 
-        Event event ->
-            onEvent data event model
-
         MenuMsg (Menu.MenuClick action) ->
             Menu.actionHandler data action model
 
@@ -111,16 +108,3 @@ onMenuMsg data msg model =
             { modelHeader | menu = menu_ }
     in
         ( model_, cmd_, dispatch_ )
-
-
-onEvent : Game.Data -> Events.Event -> Model -> UpdateResponse
-onEvent data event model =
-    model
-        |> onToastsMsg data (Toasts.Event event)
-        |> Update.andThen
-            (event
-                |> Apps.Event
-                |> WindowManager.EveryAppMsg
-                |> SessionManager.WindowManagerMsg
-                |> onSessionManagerMsg data
-            )
