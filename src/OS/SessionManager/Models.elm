@@ -84,3 +84,13 @@ remove id ({ sessions } as model) =
 getWindowID : WindowRef -> WM.ID
 getWindowID ( _, id ) =
     id
+
+
+ensureSession : ID -> Model -> Model
+ensureSession id model =
+    case get id model of
+        Just _ ->
+            model
+
+        Nothing ->
+            insert id model
