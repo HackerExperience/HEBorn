@@ -247,6 +247,26 @@ unsafeFromKey key model =
                 "Couldn't find the Server's CId for given SessionId."
 
 
+activateEndpoint : Maybe CId -> GatewayData -> GatewayData
+activateEndpoint endpoint ({ endpoints } as data) =
+    case endpoint of
+        Just endpoint_ ->
+            let
+                endpoints_ =
+                    if List.member endpoint_ endpoints then
+                        endpoints
+                    else
+                        endpoint_ :: endpoints
+            in
+                { data
+                    | endpoint = endpoint
+                    , endpoints = endpoints_
+                }
+
+        Nothing ->
+            { data | endpoint = Nothing }
+
+
 
 ------ server getters/setters
 
@@ -317,7 +337,8 @@ setEndpointCId endpoint ({ ownership } as server) =
         ownership_ =
             case ownership of
                 GatewayOwnership data ->
-                    GatewayOwnership { data | endpoint = endpoint }
+                    GatewayOwnership <|
+                        activateEndpoint endpoint data
 
                 ownership ->
                     ownership
