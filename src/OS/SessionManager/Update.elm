@@ -77,7 +77,7 @@ windowManager data id msg model =
                     wm
 
                 Nothing ->
-                    Debug.crash "WTF"
+                    Debug.crash ""
 
         ( wm_, cmd, dispatch ) =
             WM.update data msg wm
@@ -101,61 +101,28 @@ ensureSession data id model =
             insert id model
 
 
+{-| Sends messages to every opened app on every session
+-}
 onEveryAppMsg :
     Game.Data
     -> List Apps.Msg
     -> Model
     -> UpdateResponse
-onEveryAppMsg data msgs model =
+onEveryAppMsg data appMsgs model =
     let
-        -- send messages to the window manager
-        reduceMessages sid wm message ( model, cmds, disps ) =
-            let
-                message_ =
-                    WM.EveryAppMsg WM.All message
+        toWmMsg =
+            WM.EveryAppMsg WM.All
 
-                ( wm_, cmd, disp ) =
-                    WM.update data message_ wm
-
-                model_ =
-                    refresh sid wm_ model
-
-                cmds_ =
-                    cmd :: cmds
-
-                disps_ =
-                    disp :: disps
-            in
-                ( model_, cmds_, disps_ )
-
-        -- route messages to related sessions
-        reduceSessions sid wm ( model, cmd, disp ) =
-            let
-                ( model_, cmds, disps ) =
-                    List.foldl (reduceMessages sid wm)
-                        ( model, [], [] )
-                        msgs
-
-                cmd_ =
-                    Cmd.batch
-                        [ Cmd.map (WindowManagerMsg sid) <| Cmd.batch cmds
-                        , cmd
-                        ]
-
-                disp_ =
-                    Dispatch.batch [ Dispatch.batch disps, disp ]
-            in
-                ( model_, cmd_, disp_ )
-
-        -- apply messages
         ( model_, cmd, dispatch ) =
-            Dict.foldl reduceSessions
+            Dict.foldl (reduceSessions data appMsgs toWmMsg)
                 ( model, Cmd.none, Dispatch.none )
                 model.sessions
     in
         ( model_, cmd, dispatch )
 
 
+{-| Sends messages to apps inside related sessions
+-}
 onTargetedAppMsg :
     Game.Data
     -> Servers.ID
@@ -163,130 +130,176 @@ onTargetedAppMsg :
     -> List Apps.Msg
     -> Model
     -> UpdateResponse
-onTargetedAppMsg data targetCid targetContext msgs model =
+onTargetedAppMsg data targetCid targetContext appMsgs model =
     let
         servers =
             data
                 |> Game.getGame
                 |> Game.getServers
 
-        -- a simple filter for gateway targets
-        filtererForGateway cid wm =
-            if targetCid == cid then
-                -- this is the session we want
-                True
-            else
-                -- this session is being accessed from the our gateway target
-                servers
-                    |> Servers.get targetCid
-                    |> Maybe.andThen Servers.getEndpoints
-                    |> Maybe.map (List.member cid)
-                    |> Maybe.withDefault False
-
-        -- a complex filter for endpoint targets
-        filtererForEndpoint cid wm =
-            if targetCid == cid then
-                -- this is the endpoint we want
-                True
-            else
-                -- this targeted endpoint is being accessed from this gateway
-                let
-                    maybeServer =
-                        Servers.get cid servers
-
-                    maybeIsGateway =
-                        Maybe.map Servers.isGateway maybeServer
-                in
-                    case Maybe.uncurry maybeServer maybeIsGateway of
-                        Just ( server, isGateway ) ->
-                            if isGateway then
-                                -- this server is a gateway that includes
-                                -- the targeted endpoint
-                                server
-                                    |> Servers.getEndpoints
-                                    |> Maybe.map (List.member targetCid)
-                                    |> Maybe.withDefault False
-                            else
-                                False
-
-                        Nothing ->
-                            False
-
-        -- select the desired session filter
         filterer =
             case targetContext of
                 WM.One Gateway ->
-                    (\cid wm -> targetCid == cid)
+                    filterGatewaySessions
 
                 WM.One Endpoint ->
-                    filtererForEndpoint
+                    filterEndpointRelatedSessions servers
 
-                _ ->
-                    -- accept *any* session related to our target
-                    (\cid wm ->
-                        if targetCid == cid then
-                            True
-                        else
-                            servers
-                                |> Servers.get cid
-                                |> Maybe.andThen Servers.getEndpoints
-                                |> Maybe.map (List.member targetCid)
-                                |> Maybe.withDefault False
-                    )
+                WM.All ->
+                    filterRelatedSessions servers
 
-        -- send messages to the window manager
-        reduceMessages sid wm message ( model, cmds, disps ) =
-            let
-                message_ =
-                    WM.EveryAppMsg targetContext message
+                WM.Active ->
+                    filterRelatedSessions servers
 
-                ( wm_, cmd, disp ) =
-                    WM.update data message_ wm
+        filter sid wm =
+            servers
+                |> Servers.fromKey sid
+                |> Maybe.map (flip (filterer targetCid) wm)
+                |> Maybe.withDefault False
 
-                model_ =
-                    refresh sid wm_ model
+        toWmMsg =
+            WM.EveryAppMsg targetContext
 
-                cmds_ =
-                    cmd :: cmds
-
-                disps_ =
-                    disp :: disps
-            in
-                ( model_, cmds_, disps_ )
-
-        -- route messages to related sessions
-        reduceSessions sid wm ( model, cmd, disp ) =
-            let
-                ( model_, cmds, disps ) =
-                    List.foldl (reduceMessages sid wm)
-                        ( model, [], [] )
-                        msgs
-
-                cmd_ =
-                    Cmd.batch
-                        [ Cmd.map (WindowManagerMsg sid) <| Cmd.batch cmds
-                        , cmd
-                        ]
-
-                disp_ =
-                    Dispatch.batch [ Dispatch.batch disps, disp ]
-            in
-                ( model_, cmd_, disp_ )
-
-        -- forward cid to the filter function
-        getCidForSid func sid wm =
-            case Servers.fromKey sid servers of
-                Just cid ->
-                    func cid wm
-
-                Nothing ->
-                    False
+        foldl =
+            Dict.foldl (reduceSessions data appMsgs toWmMsg)
+                ( model, Cmd.none, Dispatch.none )
 
         -- filter sessions and apply the messages
         ( model_, cmd, dispatch ) =
             model
-                |> filterSessions (getCidForSid filterer)
-                |> Dict.foldl reduceSessions
-                    ( model, Cmd.none, Dispatch.none )
+                |> filterSessions filter
+                |> foldl
     in
         ( model_, cmd, dispatch )
+
+
+
+-- helpers
+
+
+{-| A reduce helper that routes messages to apps.
+-}
+reduceMessages :
+    Game.Data
+    -> (Apps.Msg -> WM.Msg)
+    -> ID
+    -> WM.Model
+    -> Apps.Msg
+    -> ( Model, List (Cmd WM.Msg), List Dispatch )
+    -> ( Model, List (Cmd WM.Msg), List Dispatch )
+reduceMessages data toWmMsg sid wm msg ( model, cmds, disps ) =
+    let
+        msg_ =
+            toWmMsg msg
+
+        ( wm_, cmd, disp ) =
+            WM.update data msg_ wm
+
+        model_ =
+            refresh sid wm_ model
+
+        cmds_ =
+            cmd :: cmds
+
+        disps_ =
+            disp :: disps
+    in
+        ( model_, cmds_, disps_ )
+
+
+{-| A reduce helper that routes messages to sessions.
+-}
+reduceSessions :
+    Game.Data
+    -> List Apps.Msg
+    -> (Apps.Msg -> WM.Msg)
+    -> ID
+    -> WM.Model
+    -> ( Model, Cmd Msg, Dispatch )
+    -> ( Model, Cmd Msg, Dispatch )
+reduceSessions data appMsgs toWmMsg sid wm ( model, cmd, disp ) =
+    let
+        ( model_, cmds, disps ) =
+            List.foldl (reduceMessages data toWmMsg sid wm)
+                ( model, [], [] )
+                appMsgs
+
+        cmd_ =
+            Cmd.batch
+                [ Cmd.map (WindowManagerMsg sid) <| Cmd.batch cmds
+                , cmd
+                ]
+
+        disp_ =
+            Dispatch.batch [ Dispatch.batch disps, disp ]
+    in
+        ( model_, cmd_, disp_ )
+
+
+{-| A filterer that keeps sessions of following gateway.
+-}
+filterGatewaySessions :
+    Servers.ID
+    -> Servers.ID
+    -> WM.Model
+    -> Bool
+filterGatewaySessions targetCid cid wm =
+    -- this is the session of the targeted gateway
+    targetCid == cid
+
+
+{-| A filterer that keeps related sessions.
+-}
+filterRelatedSessions :
+    Servers.Model
+    -> Servers.ID
+    -> Servers.ID
+    -> WM.Model
+    -> Bool
+filterRelatedSessions servers targetCid cid wm =
+    if targetCid == cid then
+        -- this is the session of the target
+        True
+    else
+        -- this session is related to the target
+        servers
+            |> Servers.get cid
+            |> Maybe.andThen Servers.getEndpoints
+            |> Maybe.map (List.member targetCid)
+            |> Maybe.withDefault False
+
+
+{-| A filterer that keeps sessions related to the endpoint.
+-}
+filterEndpointRelatedSessions :
+    Servers.Model
+    -> Servers.ID
+    -> Servers.ID
+    -> WM.Model
+    -> Bool
+filterEndpointRelatedSessions servers targetCid cid wm =
+    if targetCid == cid then
+        -- this is the session of the targeted endpoint
+        True
+    else
+        -- this session is accessing the targeted endpoint
+        let
+            maybeServer =
+                Servers.get cid servers
+
+            maybeIsGateway =
+                Maybe.map Servers.isGateway maybeServer
+        in
+            case Maybe.uncurry maybeServer maybeIsGateway of
+                Just ( server, isGateway ) ->
+                    if isGateway then
+                        -- this server is a gateway accessing the target
+                        server
+                            |> Servers.getEndpoints
+                            |> Maybe.map (List.member targetCid)
+                            |> Maybe.withDefault False
+                    else
+                        False
+
+                Nothing ->
+                    False
