@@ -53,3 +53,8 @@ toast id { notification, parent, state } =
                     [ h6 [] [ text <| "New email from: " ++ from ]
                     , p [] [ text msg ]
                     ]
+
+                DownloadStarted ->
+                    [ h6 [] [ text <| "Download started" ]
+                    , p [] [ text "Some download has started!" ]
+                    ]

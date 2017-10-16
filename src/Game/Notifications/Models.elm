@@ -22,6 +22,7 @@ type alias Notification =
 type Content
     = Simple String String -- Title Message
     | NewEmail String String -- Person_ID Preview_Message
+    | DownloadStarted
 
 
 initialModel : Model
@@ -78,3 +79,10 @@ markRead value_ id model =
                 >> (flip (Dict.insert id) model)
             )
         |> Maybe.withDefault model
+
+
+create : Content -> Notification
+create content =
+    { content = content
+    , isRead = False
+    }

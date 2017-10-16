@@ -93,6 +93,17 @@ fsCreate nip =
     WebsocketTopic (ServerChannel nip) "file.create"
 
 
+fsDownload : Servers.ID -> Topic
+fsDownload nip =
+    WebsocketTopic (ServerChannel nip) "file.download"
+
+
+fsPublicDownload : Servers.ID -> Topic
+fsPublicDownload nip =
+    -- CID NEEDS TO BE GATEWAY
+    WebsocketTopic (ServerChannel nip) "pftp.file.download"
+
+
 
 -- Player Actions
 

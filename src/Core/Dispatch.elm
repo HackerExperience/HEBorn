@@ -26,6 +26,7 @@ module Core.Dispatch
         , logs
         , log
         , tunnels
+        , serverNotification
         , meta
         , apps
         , appsOfSession
@@ -47,6 +48,7 @@ import Game.Storyline.Missions.Actions as Missions
 import Game.Storyline.Emails.Messages as Emails
 import Game.Account.Messages as Account
 import Game.Account.Database.Messages as Database
+import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
@@ -262,6 +264,11 @@ log serverId id msg =
 tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
 tunnels id msg =
     server id <| Servers.TunnelsMsg msg
+
+
+serverNotification : Servers.ID -> Notifications.Msg -> Dispatch
+serverNotification id msg =
+    server id <| Servers.NotificationsMsg msg
 
 
 web : Web.Msg -> Dispatch

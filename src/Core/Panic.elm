@@ -60,7 +60,7 @@ view code message =
                 ]
             ]
             [ h1 [ style [ fontSize <| px 72, marginTop <| px 0 ] ]
-                [ text "(ノò_ó)ノ︵┻━━━┻" ]
+                [ text "(ノò_ó)ノ︵┻━┻" ]
             , h3 []
                 [ text "D'Lay'D OS ran into a problem that it couldn't (never)"
                 , br [] []

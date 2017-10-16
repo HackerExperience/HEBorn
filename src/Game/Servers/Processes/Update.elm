@@ -7,11 +7,15 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Models as Game
+import Game.Servers.Messages as Servers
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
+import Game.Servers.Processes.Requests.Download as Download
 import Game.Servers.Processes.Requests exposing (..)
 import Game.Network.Types as Network exposing (NIP)
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications
 
 
 type alias UpdateResponse =
@@ -45,6 +49,34 @@ update game nip msg model =
             onStart game
                 nip
                 (newOptimistic Cracker nip target unknownProcessFile)
+                model
+
+        StartDownload source fileId storageId ->
+            onStart game
+                nip
+                (newOptimistic
+                    (Download False
+                        storageId
+                        fileId
+                    )
+                    source
+                    (Tuple.second nip)
+                    unknownProcessFile
+                )
+                model
+
+        StartPublicDownload source fileId storageId ->
+            onStart game
+                nip
+                (newOptimistic
+                    (Download True
+                        storageId
+                        fileId
+                    )
+                    source
+                    (Tuple.second nip)
+                    unknownProcessFile
+                )
                 model
 
         Complete id ->
@@ -145,6 +177,16 @@ onStart game nip process model =
                 in
                     ( model_, cmd, Dispatch.none )
 
+            Download isPublic fileId storageId ->
+                let
+                    cmd =
+                        if isPublic then
+                            Download.requestPublic id fileId storageId nip game
+                        else
+                            Download.request id fileId storageId nip game
+                in
+                    ( model_, cmd, Dispatch.none )
+
             _ ->
                 Update.fromModel model_
 
@@ -180,6 +222,9 @@ updateRequest game nip response model =
         Just (Bruteforce oldId response) ->
             onBruteforceRequest game nip oldId response model
 
+        Just (DownloadingFile oldId response) ->
+            onDownloadRequest game nip oldId response model
+
         Nothing ->
             Update.fromModel model
 
@@ -199,6 +244,44 @@ onBruteforceRequest game nip oldId response model =
                     replace oldId id process model
             in
                 Update.fromModel model_
+
+
+onDownloadRequest :
+    Game.Model
+    -> NIP
+    -> ID
+    -> Download.Response
+    -> Model
+    -> UpdateResponse
+onDownloadRequest game nip oldId response model =
+    case response of
+        Download.Okay id process ->
+            okDownloadFile id
+                process
+                game.meta.lastTick
+                nip
+                oldId
+                model
+
+        Download.SelfLoop ->
+            failDownloadFile game.meta.lastTick nip oldId model <|
+                "Self download: use copy instead!"
+
+        Download.FileNotFound ->
+            failDownloadFile game.meta.lastTick nip oldId model <|
+                "The file you're trying to download no longer exists"
+
+        Download.StorageFull ->
+            failDownloadFile game.meta.lastTick nip oldId model <|
+                "Not enougth space!"
+
+        Download.StorageNotFound ->
+            failDownloadFile game.meta.lastTick nip oldId model <|
+                "The storage you're trying to access no longer exists"
+
+        Download.BadRequest ->
+            failDownloadFile game.meta.lastTick nip oldId model <|
+                "Shit happened!"
 
 
 
@@ -274,3 +357,34 @@ handleBruteforceSuccess id model =
     -- TODO: dispatch from password acquired after implementing "dispatch
     -- to servers of following nip"
     Update.fromModel model
+
+
+failDownloadFile : Float -> NIP -> ID -> Model -> String -> UpdateResponse
+failDownloadFile lastTick nip oldId model message =
+    let
+        dispatch =
+            message
+                |> Notifications.Simple "Impossible to start download"
+                |> Notifications.create
+                |> Notifications.Insert lastTick
+                |> Dispatch.serverNotification nip
+
+        model_ =
+            remove oldId model
+    in
+        ( model_, Cmd.none, dispatch )
+
+
+okDownloadFile : ID -> Process -> Float -> NIP -> ID -> Model -> UpdateResponse
+okDownloadFile id process lastTick nip oldId model =
+    let
+        dispatch =
+            Notifications.DownloadStarted
+                |> Notifications.create
+                |> Notifications.Insert lastTick
+                |> Dispatch.serverNotification nip
+
+        model_ =
+            replace oldId id process model
+    in
+        ( model_, Cmd.none, dispatch )
