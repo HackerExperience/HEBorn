@@ -35,7 +35,9 @@ request :
 request topic msg data source =
     case topic of
         WebsocketTopic channel path ->
-            WebsocketDriver.send (genericWs msg)
+            WebsocketDriver.send
+                (okWs msg)
+                (errorWs msg)
                 source.config.apiWsUrl
                 (WebsocketDriver.getAddress channel)
                 path
@@ -75,20 +77,40 @@ genericHttp msg result =
             msg ( UnknownErrorCode, emptyPayload )
 
 
-genericWs : (ResponseType -> msg) -> Encode.Value -> msg
-genericWs msg value =
+okWs : (ResponseType -> msg) -> Encode.Value -> msg
+okWs msg value =
     let
-        -- TODO: handle error messages
         decoder =
             decode WebsocketResponse
                 |> required "data" Decode.value
 
         result =
-            Decode.decodeValue decoder <| Debug.log "▶ Websocket" value
+            value
+                |> Debug.log "▶ Websocket (:ok)"
+                |> Decode.decodeValue decoder
     in
         case result of
             Ok response ->
                 msg ( OkCode, response.data )
+
+            Err str ->
+                msg ( Timeout, toValue str )
+
+
+errorWs : (ResponseType -> msg) -> Encode.Value -> msg
+errorWs msg value =
+    let
+        decoder =
+            Decode.field "message" Decode.string
+
+        result =
+            value
+                |> Debug.log "▶ Websocket (:error)"
+                |> Decode.decodeValue decoder
+    in
+        case result of
+            Ok response ->
+                msg ( ErrorCode, value )
 
             Err str ->
                 msg ( Timeout, toValue str )

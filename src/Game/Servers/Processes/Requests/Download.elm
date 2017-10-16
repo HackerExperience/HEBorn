@@ -22,17 +22,19 @@ import Json.Decode.Pipeline as Encode
         , required
         )
 import Json.Encode as Encode
+import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
-import Game.Servers.Shared exposing (..)
+import Decoders.Processes
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (FileID)
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Processes.Models exposing (ID, Process)
 
 
 type Response
-    = Okay ( FileID, String )
+    = Okay ID Process
     | SelfLoop
     | FileNotFound
     | StorageFull
@@ -40,23 +42,30 @@ type Response
     | BadRequest
 
 
-request : FileID -> String -> NIP -> ConfigSource a -> Cmd Msg
-request fileId storageId nip =
+request :
+    ID
+    -> FileID
+    -> String
+    -> NIP
+    -> ConfigSource a
+    -> Cmd Msg
+request optmistic fileId storageId nip =
     Requests.request (Topics.fsDownload nip)
-        (DownloadRequest >> Request)
+        (DownloadRequest optmistic >> Request)
     <|
         encoder fileId storageId
 
 
 requestPublic :
-    FileID
+    ID
+    -> FileID
     -> String
     -> NIP
     -> ConfigSource a
     -> Cmd Msg
-requestPublic fileId storageId nip =
+requestPublic optmistic fileId storageId nip =
     Requests.request (Topics.fsPublicDownload nip)
-        (DownloadRequest >> Request)
+        (DownloadRequest optmistic >> Request)
     <|
         encoder fileId storageId
 
@@ -66,8 +75,8 @@ receive code json =
     case code of
         OkCode ->
             json
-                |> decodeValue decoder
-                |> Result.map Okay
+                |> decodeValue Decoders.Processes.process
+                |> Result.map (uncurry Okay)
                 |> Requests.report
 
         ErrorCode ->
@@ -89,15 +98,10 @@ encoder fileId storageId =
     Encode.object
         [ ( "file_id", Encode.string fileId )
 
-        --, ( "storage_id", Encode.string storageId )
+        {- STORAGE ISN'T IMPLEMENTED YET
+           , ( "storage_id", Encode.string storageId )
+        -}
         ]
-
-
-decoder : Decoder ( FileID, String )
-decoder =
-    decode (,)
-        |> required "file_id" string
-        |> required "storage_id" string
 
 
 decodeErrorMessage : String -> Decoder Response
@@ -118,5 +122,5 @@ decodeErrorMessage str =
         "storage_not_found" ->
             succeed StorageNotFound
 
-        _ ->
-            fail "Unknown download request error message"
+        value ->
+            fail <| commonError "download error message" value

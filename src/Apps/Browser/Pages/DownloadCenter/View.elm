@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Network.Types exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
@@ -25,8 +26,8 @@ hackingToolkitConfig showPassword =
 
 
 publicFilesConfig : NIP -> PublicFiles.Config Msg
-publicFilesConfig ( _, sourceIp ) =
-    { reqDownload = ReqDownload sourceIp
+publicFilesConfig source =
+    { reqDownload = StartDownload source
     }
 
 
