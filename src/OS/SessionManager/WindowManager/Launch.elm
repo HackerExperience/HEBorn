@@ -15,15 +15,28 @@ import Apps.Models as Apps
 import Apps.Launch as Apps
 
 
+fallbackContext : Game.Data -> Maybe Context -> Context
+fallbackContext data maybeContext =
+    case maybeContext of
+        Just context ->
+            context
+
+        Nothing ->
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getContext
+
+
 resert :
     Game.Data
-    -> Context
+    -> Maybe Context
     -> String
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data context id serverCId app model =
+resert data maybeContext id serverCId app model =
     -- TODO: maybe check if the opened window has the current endpoint, focus
     -- it if this is the case
     let
@@ -52,18 +65,18 @@ resert data context id serverCId app model =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data context id serverCId app model
+            insert data maybeContext id serverCId app model
 
 
 insert :
     Game.Data
-    -> Context
+    -> Maybe Context
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data context id serverCId app model =
+insert data maybeContext id serverCId app model =
     let
         { windows, visible, parentSession } =
             model
@@ -93,6 +106,9 @@ insert data context id serverCId app model =
                                 , context = Endpoint
                                 }
                                 app
+
+                        context =
+                            fallbackContext data maybeContext
 
                         cmd =
                             Cmd.batch [ cmdG, cmdE ]

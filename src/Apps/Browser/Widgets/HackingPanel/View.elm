@@ -21,59 +21,69 @@ type alias Config msg =
     }
 
 
+logout : Config msg -> Html msg
+logout { onCommonAction } =
+    li
+        [ onClick <| onCommonAction Logout ]
+        [ text "Logout" ]
+
+
+goBack : Config msg -> Html msg
+goBack { onSetShowingPanel } =
+    li
+        [ onClick <| onSetShowingPanel False ]
+        [ text "Go back" ]
+
+
+baseOptions : Config msg -> List (Html msg)
+baseOptions config =
+    [ logout config
+    , goBack config
+    ]
+
+
+selectEndpoint : Config msg -> Html msg
+selectEndpoint { onCommonAction } =
+    li
+        [ onClick <| onCommonAction SelectEndpoint ]
+        [ text "Open Remote Desktop" ]
+
+
+anyMap : Config msg -> NIP -> Html msg
+anyMap { onCommonAction } nip =
+    li
+        [ onClick <| onCommonAction <| AnyMap nip ]
+        [ text "Start AnyMap" ]
+
+
 hackingPanel : Config msg -> NIP -> Html msg
 hackingPanel config nip =
     let
-        { onCommonAction, onSetShowingPanel } =
-            config
-
-        logout =
-            li
-                [ onClick <| onCommonAction Logout ]
-                [ text "Logout" ]
-
-        goBack =
-            li
-                [ onClick <| onSetShowingPanel False ]
-                [ text "Go back" ]
-
         options0 =
-            [ logout
-            , goBack
+            [ logout config
+            , goBack config
             ]
 
         options1 =
             if config.allowAnyMap then
-                let
-                    anyMap =
-                        li
-                            [ onClick <| onCommonAction <| AnyMap nip ]
-                            [ text "Start AnyMap" ]
-                in
-                    anyMap :: options0
+                anyMap config nip :: options0
             else
                 options0
 
         options2 =
             if config.allowSelectEndpoint then
-                let
-                    selectEndpoint =
-                        li
-                            [ onClick <| onCommonAction SelectEndpoint ]
-                            [ text "Open Remote Desktop" ]
-                in
-                    selectEndpoint :: options1
+                selectEndpoint config :: options1
             else
                 options1
 
         options3 =
-            List.foldl (openApp onCommonAction >> (::)) options2 config.apps
+            List.foldl (openApp config >> (::)) options2 config.apps
     in
         div [] [ ul [] options3 ]
 
 
-openApp : (CommonActions -> msg) -> Apps.App -> Html msg
-openApp onCommonAction app =
+openApp : Config msg -> Apps.App -> Html msg
+openApp { onCommonAction } app =
     li
         [ onClick <| onCommonAction <| OpenApp app ]
         [ text ("Open " ++ Apps.name app) ]

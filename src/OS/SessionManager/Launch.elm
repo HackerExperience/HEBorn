@@ -47,7 +47,7 @@ openOrRestoreApp =
 
 type alias Action =
     Game.Data
-    -> Context
+    -> Maybe Context
     -> String
     -> Maybe Servers.CId
     -> Apps.App
@@ -71,19 +71,8 @@ helper action data maybeContext id serverCId app model0 =
                 ( model, uuid ) =
                     getUID model0
 
-                context =
-                    case maybeContext of
-                        Just context ->
-                            context
-
-                        Nothing ->
-                            data
-                                |> Game.getGame
-                                |> Game.getAccount
-                                |> Account.getContext
-
                 ( wm_, cmd, dispatch ) =
-                    action data context uuid serverCId app wm
+                    action data maybeContext uuid serverCId app wm
 
                 cmd_ =
                     Cmd.map (WindowManagerMsg id) cmd
@@ -94,7 +83,10 @@ helper action data maybeContext id serverCId app model0 =
                 dispatch_ =
                     Dispatch.batch
                         [ dispatch
-                        , context
+                        , data
+                            |> Game.getGame
+                            |> Game.getAccount
+                            |> Account.getContext
                             |> GoApp app
                             |> Dispatch.missionAction data
                         ]
