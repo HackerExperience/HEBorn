@@ -14,6 +14,19 @@ type alias Model =
     }
 
 
+stepsOrder : Steps
+stepsOrder =
+    [ Welcome
+    , PickLocation
+    , Finish
+    ]
+
+
+remainingSteps : Steps -> Steps
+remainingSteps steps =
+    List.filter (flip List.member steps) stepsOrder
+
+
 mapId : String
 mapId =
     "map-setup"
