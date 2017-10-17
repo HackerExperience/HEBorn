@@ -23,6 +23,8 @@ import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
 import Game.Notifications.Models as Notifications
 import Game.Meta.Types exposing (..)
+import Game.Network.Types exposing (NIP)
+import Setup.Types as Setup
 
 
 type alias ID =
@@ -66,6 +68,7 @@ type alias Model =
     , notifications : Notifications.Model
     , logout : Logout
     , mainframe : Maybe Servers.CId
+    , setupSteps : Setup.Steps
     }
 
 
@@ -90,6 +93,7 @@ initialModel id username token =
     , notifications = Notifications.initialModel
     , logout = StillLogged
     , mainframe = Nothing
+    , setupSteps = []
     }
 
 

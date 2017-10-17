@@ -74,7 +74,11 @@ bootstrap game =
 
 account : Model -> Decoder (Account.Model -> b) -> Decoder b
 account game =
-    optional "account" (Decoders.Account.account game.account) game.account
+    let
+        account =
+            getAccount game
+    in
+        optional "account" (Decoders.Account.account account) account
 
 
 servers : Decoder ServersToJoin

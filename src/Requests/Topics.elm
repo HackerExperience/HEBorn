@@ -30,9 +30,27 @@ accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
+accountSetup : Account.ID -> Topic
+accountSetup id =
+    WebsocketTopic (AccountChannel id) "account.setup"
+
+
+
+-- server
+
+
 serverResync : Servers.CId -> Topic
 serverResync cid =
     WebsocketTopic (ServerChannel cid) "bootstrap"
+
+
+
+-- server
+
+
+locationCheck : Servers.CId -> Topic
+locationCheck cid =
+    WebsocketTopic (ServerChannel cid) "server.location.check"
 
 
 
