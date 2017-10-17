@@ -1,6 +1,6 @@
 module Core.Panic exposing (view)
 
-import Core.Messages exposing (Msg(Shutdown))
+import Regex exposing (HowMuch(All))
 import Html exposing (..)
 import Html.Attributes as Html
 import Html.Events exposing (onClick)
@@ -30,6 +30,7 @@ import Css
         )
 import Css.Colors exposing (white)
 import Css.Utils exposing (selectableText)
+import Core.Messages exposing (Msg(Shutdown))
 
 
 style : List Css.Style -> Attribute Msg
@@ -68,8 +69,16 @@ view code message =
                 ]
             , h5 []
                 [ text <| "You can ask on discord: " ++ code ]
-            , h5 [ style [ selectableText ] ]
-                [ text message ]
+            , message
+                |> Regex.replace All
+                    (regex "\"(\\d{1,3}\\.){3}\\d{1,3}\"")
+                    (\_ -> "$filtered_ip")
+                |> Regex.replace All
+                    (regex "\"password\"\\s*:\\s*\"\\w+\"")
+                    (\_ -> "$filtered_psw")
+                |> text
+                |> List.singleton
+                |> h5 [ style [ selectableText ] ]
             , br [] []
             , h4
                 [ onClick Shutdown
