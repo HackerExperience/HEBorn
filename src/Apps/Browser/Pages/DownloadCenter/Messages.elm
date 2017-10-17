@@ -10,7 +10,3 @@ type Msg
     | UpdatePasswordField String
     | SetShowingPanel Bool
     | StartDownload NIP String
-    | OpenApp Apps.App
-    | SelectEndpoint
-    | StartAnyMap
-    | Logout
