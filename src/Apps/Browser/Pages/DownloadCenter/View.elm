@@ -9,7 +9,9 @@ import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
+import Apps.Browser.Widgets.HackingPanel.View as HackingPanel exposing (hackingPanel)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
+import Game.Network.Types exposing (NIP)
 import Apps.Apps as Apps
 
 
@@ -32,6 +34,21 @@ publicFilesConfig source =
     }
 
 
+hackingPanelConfig : HackingPanel.Config Msg
+hackingPanelConfig =
+    { onCommonAction = GlobalMsg
+    , onSetShowingPanel = SetShowingPanel
+    , apps =
+        [ Apps.TaskManagerApp
+        , Apps.ConnManagerApp
+        , Apps.LogViewerApp
+        , Apps.ExplorerApp
+        ]
+    , allowAnyMap = True
+    , allowSelectEndpoint = True
+    }
+
+
 view : Game.Data -> Model -> Html Msg
 view data model =
     let
@@ -41,7 +58,7 @@ view data model =
                 data.game.account.joinedEndpoints
     in
         if (model.showingPanel && endpointMember) then
-            viewPos data model
+            viewPos model.toolkit.target
         else
             viewPre data (not endpointMember) model
 
@@ -60,33 +77,6 @@ viewPre data showPassword model =
         ]
 
 
-viewPos : Game.Data -> Model -> Html Msg
-viewPos data model =
-    ul []
-        [ li
-            [ onClick <| OpenApp Apps.TaskManagerApp ]
-            [ text "Open Task Manager" ]
-        , li
-            [ onClick <| OpenApp Apps.ConnManagerApp ]
-            [ text "Open Connection Manager" ]
-        , li
-            [ onClick <| OpenApp Apps.LogViewerApp ]
-            [ text "Open Log Viewer" ]
-        , li
-            [ onClick <| OpenApp Apps.ExplorerApp ]
-            [ text "Open File Explorer" ]
-        , li
-            [ onClick <| SelectEndpoint ]
-            [ text "Open Remote Desktop" ]
-        , li
-            [ onClick StartAnyMap ]
-            [ text "Start AnyMap" ]
-        , li
-            [ onClick Logout ]
-            [ text "Logout" ]
-        , li
-            [ onClick <| SetShowingPanel False ]
-            [ text "Go back" ]
-        ]
-        |> List.singleton
-        |> div []
+viewPos : NIP -> Html Msg
+viewPos nip =
+    hackingPanel hackingPanelConfig nip

@@ -160,6 +160,15 @@ pageMsgIntersept msg =
                 Common.LoginFailed ->
                     ActiveTabMsg <| LoginFailed
 
+                Common.OpenApp app ->
+                    OpenApp app
+
+                Common.SelectEndpoint ->
+                    SelectEndpoint
+
+                Common.Logout ->
+                    Logout
+
         _ ->
             ActiveTabMsg <| PageMsg msg
 

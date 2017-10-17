@@ -11,7 +11,6 @@ import Apps.Browser.Pages.CommonActions exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
-import Game.Meta.Types exposing (Context(Endpoint))
 
 
 type alias UpdateResponse =
@@ -46,25 +45,6 @@ update data msg model =
 
         StartDownload source fileId ->
             onReqDownload data source fileId model
-
-        OpenApp app ->
-            let
-                dispatch =
-                    Dispatch.openApp (Just Endpoint) app
-            in
-                ( model, Cmd.none, dispatch )
-
-        SelectEndpoint ->
-            -- TODO
-            Update.fromModel model
-
-        StartAnyMap ->
-            -- TODO
-            Update.fromModel model
-
-        Logout ->
-            -- TODO
-            Update.fromModel model
 
 
 onTogglePanel : Bool -> Model -> UpdateResponse
