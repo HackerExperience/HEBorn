@@ -21,13 +21,13 @@ type alias Bootstrap =
 
 
 type alias ServerIndex =
-    { player : List ( Servers.ID, Servers.Server )
-    , remotes : List ( Servers.ID, Servers.Server )
+    { player : List ( Servers.CId, Servers.Server )
+    , remotes : List ( Servers.CId, Servers.Server )
     }
 
 
 type alias GenericServers =
-    List ( Servers.ID, Servers.Server )
+    List ( Servers.CId, Servers.Server )
 
 
 toModel : Game.Model -> Bootstrap -> Game.Model

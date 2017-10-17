@@ -29,7 +29,8 @@ actionHandler data action ({ app } as model) =
                     case edited of
                         Just edited ->
                             Logs.UpdateContent edited
-                                |> Dispatch.log data.id logId
+                                |> Dispatch.log (Game.getActiveCId data)
+                                    logId
 
                         Nothing ->
                             Dispatch.none

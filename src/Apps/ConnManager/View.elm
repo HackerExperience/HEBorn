@@ -78,11 +78,11 @@ view data ({ app } as model) =
                 ]
 
         nip =
-            Game.getID data
+            Game.getActiveCId data
 
         mainEntries =
             data
-                |> Game.getServer
+                |> Game.getActiveServer
                 |> .tunnels
                 |> Dict.toList
                 |> List.map (tunnelView nip)

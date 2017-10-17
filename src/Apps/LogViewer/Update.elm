@@ -68,11 +68,14 @@ update data msg ({ app } as model) =
                 model_ =
                     { model | app = leaveEditing id app }
 
+                cid =
+                    Game.getActiveCId data
+
                 dispatch =
                     case edited of
                         Just edited ->
                             Logs.UpdateContent edited
-                                |> Dispatch.log data.id id
+                                |> Dispatch.log cid id
 
                         Nothing ->
                             Dispatch.none
@@ -81,19 +84,11 @@ update data msg ({ app } as model) =
 
         StartCrypting id ->
             let
-                targetIp =
-                    data
-                        |> Game.getID
-                        |> Network.getIp
-
                 dispatch =
-                    Dispatch.processes data.id <|
-                        Processes.Start
-                            (Processes.Encryptor <|
-                                Processes.EncryptorContent id
-                            )
-                            targetIp
-                            ( Nothing, Nothing, "File Name" )
+                    Logs.Encrypt
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            id
             in
                 ( model, Cmd.none, dispatch )
 
@@ -101,7 +96,9 @@ update data msg ({ app } as model) =
             let
                 dispatch =
                     Logs.Decrypt "NOT IMPLEMENTED YET"
-                        |> Dispatch.log data.id id
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            id
             in
                 ( model, Cmd.none, dispatch )
 
@@ -109,7 +106,8 @@ update data msg ({ app } as model) =
             let
                 dispatch =
                     Logs.Hide id
-                        |> Dispatch.logs data.id
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 
@@ -117,7 +115,8 @@ update data msg ({ app } as model) =
             let
                 dispatch =
                     Logs.Delete id
-                        |> Dispatch.logs data.id
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 

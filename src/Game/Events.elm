@@ -151,7 +151,7 @@ fromAccount =
 -- server channel events
 
 
-fromServer : Servers.ID -> Server.Event -> Model -> Dispatches
+fromServer : Servers.CId -> Server.Event -> Model -> Dispatches
 fromServer =
     let
         handleLogsChanged cid data =

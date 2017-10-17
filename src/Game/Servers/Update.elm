@@ -25,7 +25,6 @@ import Game.Servers.Tunnels.Update as Tunnels
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Requests.Resync as Resync
 
 
@@ -40,27 +39,27 @@ type alias ServerUpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        ServerMsg id msg ->
-            onServerMsg game id msg model
+        ServerMsg cid msg ->
+            onServerMsg game cid msg model
 
-        Resync id ->
-            onResync game id model
+        Resync cid ->
+            onResync game cid model
 
         Request data ->
             onRequest game (receive data) model
 
-        HandleJoinedServer id value ->
-            handleJoinedServer id value model
+        HandleJoinedServer cid value ->
+            handleJoinedServer cid value model
 
 
-onServerMsg : Game.Model -> ID -> ServerMsg -> Model -> UpdateResponse
-onServerMsg game id msg model =
-    case get id model of
+onServerMsg : Game.Model -> CId -> ServerMsg -> Model -> UpdateResponse
+onServerMsg game cid msg model =
+    case get cid model of
         Just server ->
             server
-                |> updateServer game model id msg
-                |> Update.mapModel (flip (insert id) model)
-                |> Update.mapCmd (ServerMsg id)
+                |> updateServer game model cid msg
+                |> Update.mapModel (flip (insert cid) model)
+                |> Update.mapCmd (ServerMsg cid)
 
         Nothing ->
             Update.fromModel model
@@ -79,15 +78,15 @@ onRequest game response model =
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
 updateRequest game data model =
     case data of
-        ResyncServer (Resync.Okay ( id, server )) ->
-            Update.fromModel <| insert id server model
+        ResyncServer (Resync.Okay ( cid, server )) ->
+            Update.fromModel <| insert cid server model
 
 
-onResync : Game.Model -> ID -> Model -> UpdateResponse
-onResync game id model =
+onResync : Game.Model -> CId -> Model -> UpdateResponse
+onResync game cid model =
     let
         cmd =
-            Resync.request (getGateway id model) id game
+            Resync.request (getGateway cid model) cid game
     in
         ( model, cmd, Dispatch.none )
 
@@ -95,29 +94,29 @@ onResync game id model =
 updateServer :
     Game.Model
     -> Model
-    -> ID
+    -> CId
     -> ServerMsg
     -> Server
     -> ServerUpdateResponse
-updateServer game model id msg server =
+updateServer game model cid msg server =
     case msg of
-        SetBounce maybeId ->
+        SetBounce maybeBounceId ->
             onSetBounce game
-                id
-                maybeId
+                cid
+                maybeBounceId
                 server
 
-        SetEndpoint maybeNip ->
-            onSetEndpoint game maybeNip server
+        SetEndpoint maybeCId ->
+            onSetEndpoint game maybeCId server
 
         FilesystemMsg msg ->
-            onFilesystemMsg game id msg server
+            onFilesystemMsg game cid msg server
 
         LogsMsg msg ->
-            onLogsMsg game id msg server
+            onLogsMsg game cid msg server
 
         ProcessesMsg msg ->
-            onProcessesMsg game id msg server
+            onProcessesMsg game cid msg server
 
         TunnelsMsg msg ->
             onTunnelsMsg game msg server
@@ -131,67 +130,67 @@ updateServer game model id msg server =
 
 onSetBounce :
     Game.Model
-    -> NIP
+    -> CId
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse
-onSetBounce game nip maybeId server =
-    setBounce maybeId server
+onSetBounce game cid maybeBounceId server =
+    setBounce maybeBounceId server
         |> Update.fromModel
 
 
 onSetEndpoint :
     Game.Model
-    -> Maybe NIP
+    -> Maybe CId
     -> Server
     -> ServerUpdateResponse
-onSetEndpoint game nip server =
-    setEndpoint nip server
+onSetEndpoint game cid server =
+    setEndpointCId cid server
         |> Update.fromModel
 
 
 onFilesystemMsg :
     Game.Model
-    -> NIP
+    -> CId
     -> Filesystem.Msg
     -> Server
     -> ServerUpdateResponse
-onFilesystemMsg game nip =
+onFilesystemMsg game cid =
     Update.child
         { get = .filesystem
         , set = (\fs model -> { model | filesystem = fs })
         , toMsg = FilesystemMsg
-        , update = (Filesystem.update game nip)
+        , update = (Filesystem.update game cid)
         }
 
 
 onLogsMsg :
     Game.Model
-    -> NIP
+    -> CId
     -> Logs.Msg
     -> Server
     -> ServerUpdateResponse
-onLogsMsg game nip =
+onLogsMsg game cid =
     Update.child
         { get = .logs
         , set = (\logs model -> { model | logs = logs })
         , toMsg = LogsMsg
-        , update = (Logs.update game nip)
+        , update = (Logs.update game cid)
         }
 
 
 onProcessesMsg :
     Game.Model
-    -> NIP
+    -> CId
     -> Processes.Msg
     -> Server
     -> ServerUpdateResponse
-onProcessesMsg game nip =
+onProcessesMsg game cid =
     Update.child
         { get = .processes
         , set = (\processes model -> { model | processes = processes })
         , toMsg = ProcessesMsg
-        , update = (Processes.update game nip)
+        , update = (Processes.update game cid)
         }
 
 
@@ -233,29 +232,25 @@ updateServerRequest game response server =
             Update.fromModel server
 
 
-handleJoinedServer : ID -> Value -> Model -> UpdateResponse
-handleJoinedServer id value model =
+handleJoinedServer : CId -> Value -> Model -> UpdateResponse
+handleJoinedServer cid value model =
     let
         decodeBootstrap =
-            Decoders.Servers.server <| getGateway id model
+            Decoders.Servers.server <| getGateway cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
                 let
-                    nip =
-                        toNip id
-
-                    accountMsg =
-                        if isGateway server then
-                            Account.InsertGateway nip
-                        else
-                            Account.InsertEndpoint nip
-
                     dispatch =
-                        Dispatch.account accountMsg
+                        if isGateway server then
+                            cid
+                                |> Account.InsertGateway
+                                |> Dispatch.account
+                        else
+                            Dispatch.none
 
                     model_ =
-                        insert id server model
+                        insert cid server model
                 in
                     ( model_, Cmd.none, dispatch )
 

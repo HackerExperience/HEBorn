@@ -83,7 +83,7 @@ type alias Window =
     , app : Apps.App
     , instance : Instance
     , locked : Bool
-    , endpoint : Maybe Servers.ID
+    , endpoint : Maybe Servers.CId
     }
 
 
@@ -552,7 +552,7 @@ windowData data maybeContext id window model =
 
             Endpoint ->
                 window.endpoint
-                    |> Maybe.andThen (flip Game.fromServerID game)
+                    |> Maybe.andThen (flip Game.fromServerCId game)
                     |> Maybe.withDefault data
 
 

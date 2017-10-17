@@ -15,18 +15,18 @@ type alias WindowRef =
 
 type alias Target =
     { context : Context
-    , cid : Servers.ID
+    , cid : Servers.CId
     }
 
 
-targetGateway : Servers.ID -> Target
+targetGateway : Servers.CId -> Target
 targetGateway cid =
     { context = Gateway
     , cid = cid
     }
 
 
-targetEndpoint : Servers.ID -> Target
+targetEndpoint : Servers.CId -> Target
 targetEndpoint cid =
     { context = Endpoint
     , cid = cid

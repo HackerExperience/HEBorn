@@ -85,7 +85,7 @@ genOne =
     in
         Gen.Game.genModel
             |> Random.map generateStateRecord
-            |> andMap Gen.Servers.genServerID
+            |> andMap Gen.Servers.genServerCId
             |> andMap Gen.Servers.genServer
             |> andMap Gen.Filesystem.genFile
             |> andMap Gen.Filesystem.genFile

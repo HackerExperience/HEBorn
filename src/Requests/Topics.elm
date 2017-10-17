@@ -4,7 +4,6 @@ import Driver.Websocket.Channels exposing (..)
 import Requests.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Shared as Servers
-import Game.Network.Types exposing (NIP)
 
 
 type Topic
@@ -32,87 +31,88 @@ accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
-serverResync : Servers.ID -> Topic
-serverResync id =
-    WebsocketTopic (ServerChannel id) "bootstrap"
+serverResync : Servers.CId -> Topic
+serverResync cid =
+    WebsocketTopic (ServerChannel cid) "bootstrap"
 
 
 
 -- logs
 
 
-logsSync : Servers.ID -> Topic
-logsSync nip =
-    WebsocketTopic (ServerChannel nip) "log.index"
+logsSync : Servers.CId -> Topic
+logsSync cid =
+    WebsocketTopic (ServerChannel cid) "log.index"
 
 
 
 -- meta
 
 
-metaSync : Servers.ID -> Topic
-metaSync nip =
-    WebsocketTopic (ServerChannel nip) "meta.index"
+metaSync : Servers.CId -> Topic
+metaSync cid =
+    WebsocketTopic (ServerChannel cid) "meta.index"
 
 
 
 -- processes
 
 
-processesSync : Servers.ID -> Topic
-processesSync nip =
-    WebsocketTopic (ServerChannel nip) "processes.index"
+processesSync : Servers.CId -> Topic
+processesSync cid =
+    WebsocketTopic (ServerChannel cid) "processes.index"
 
 
 
 -- filesytem
 
 
-fsSync : Servers.ID -> Topic
-fsSync nip =
-    WebsocketTopic (ServerChannel nip) "file.index"
+fsSync : Servers.CId -> Topic
+fsSync cid =
+    WebsocketTopic (ServerChannel cid) "file.index"
 
 
-fsDelete : Servers.ID -> Topic
-fsDelete nip =
-    WebsocketTopic (ServerChannel nip) "file.delete"
+fsDelete : Servers.CId -> Topic
+fsDelete cid =
+    WebsocketTopic (ServerChannel cid) "file.delete"
 
 
-fsMove : Servers.ID -> Topic
-fsMove nip =
-    WebsocketTopic (ServerChannel nip) "file.move"
+fsMove : Servers.CId -> Topic
+fsMove cid =
+    WebsocketTopic (ServerChannel cid) "file.move"
 
 
-fsRename : Servers.ID -> Topic
-fsRename nip =
-    WebsocketTopic (ServerChannel nip) "file.rename"
+fsRename : Servers.CId -> Topic
+fsRename cid =
+    WebsocketTopic (ServerChannel cid) "file.rename"
 
 
-fsCreate : Servers.ID -> Topic
-fsCreate nip =
-    WebsocketTopic (ServerChannel nip) "file.create"
+fsCreate : Servers.CId -> Topic
+fsCreate cid =
+    WebsocketTopic (ServerChannel cid) "file.create"
 
 
-fsDownload : Servers.ID -> Topic
-fsDownload nip =
-    WebsocketTopic (ServerChannel nip) "file.download"
+fsDownload : Servers.CId -> Topic
+fsDownload cid =
+    WebsocketTopic (ServerChannel cid) "file.download"
 
 
-fsPublicDownload : Servers.ID -> Topic
-fsPublicDownload nip =
-    -- CID NEEDS TO BE GATEWAY
-    WebsocketTopic (ServerChannel nip) "pftp.file.download"
+{-| for public downloads, should use always a Gateway CID
+-}
+fsPublicDownload : Servers.CId -> Topic
+fsPublicDownload cid =
+    WebsocketTopic (ServerChannel cid) "pftp.file.download"
 
 
 
 -- Player Actions
 
 
-bruteforce : Servers.ID -> Topic
-bruteforce nip =
-    WebsocketTopic (ServerChannel nip) "bruteforce"
+bruteforce : Servers.CId -> Topic
+bruteforce cid =
+    WebsocketTopic (ServerChannel cid) "bruteforce"
 
 
-browse : Servers.ID -> Topic
-browse nip =
-    WebsocketTopic (ServerChannel nip) "browse"
+browse : Servers.CId -> Topic
+browse cid =
+    WebsocketTopic (ServerChannel cid) "browse"

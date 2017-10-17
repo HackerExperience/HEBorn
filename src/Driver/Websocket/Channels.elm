@@ -7,7 +7,7 @@ import Game.Servers.Shared as Servers
 type Channel
     = AccountChannel Account.ID
     | RequestsChannel
-    | ServerChannel Servers.ID
+    | ServerChannel Servers.CId
 
 
 getAddress : Channel -> String

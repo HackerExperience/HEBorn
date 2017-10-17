@@ -1,12 +1,13 @@
 module Game.Data
     exposing
         ( Data
-        , getID
-        , getServer
+        , getActiveCId
+        , getActiveServer
         , getGame
+        , getEndpoints
         , fromGateway
         , fromEndpoint
-        , fromServerID
+        , fromServerCId
         )
 
 import Game.Models exposing (..)
@@ -15,20 +16,20 @@ import Game.Servers.Shared as Servers
 
 
 type alias Data =
-    { id : Servers.ID
+    { activeCId : Servers.CId
     , server : Servers.Server
     , online : Bool
     , game : Model
     }
 
 
-getID : Data -> Servers.ID
-getID =
-    .id
+getActiveCId : Data -> Servers.CId
+getActiveCId =
+    .activeCId
 
 
-getServer : Data -> Servers.Server
-getServer =
+getActiveServer : Data -> Servers.Server
+getActiveServer =
     .server
 
 
@@ -44,6 +45,13 @@ fromGateway model =
         |> Maybe.map (fromServer True model)
 
 
+getEndpoints : Data -> List Servers.CId
+getEndpoints =
+    (.server)
+        >> Servers.getEndpoints
+        >> Maybe.withDefault []
+
+
 fromEndpoint : Model -> Maybe Data
 fromEndpoint model =
     model
@@ -51,30 +59,30 @@ fromEndpoint model =
         |> Maybe.map (fromServer True model)
 
 
-fromServerID : Servers.ID -> Model -> Maybe Data
-fromServerID id model =
+fromServerCId : Servers.CId -> Model -> Maybe Data
+fromServerCId cid model =
     let
         servers =
             getServers model
 
-        ( gatewayID, gateway ) =
+        ( gatewayId, gateway ) =
             model
                 |> getGateway
                 |> Maybe.map (\( left, right ) -> ( Just left, Just right ))
                 |> Maybe.withDefault ( Nothing, Nothing )
 
-        endpointID =
-            Maybe.andThen Servers.getEndpoint gateway
+        endpointId =
+            Maybe.andThen Servers.getEndpointCId gateway
 
-        maybeID =
-            Just id
+        maybeCid =
+            Just cid
 
         online =
-            maybeID == gatewayID || maybeID == endpointID
+            maybeCid == gatewayId || maybeCid == endpointId
     in
-        case Servers.get id servers of
+        case Servers.get cid servers of
             Just server ->
-                Just <| fromServer online model ( id, server )
+                Just <| fromServer online model ( cid, server )
 
             Nothing ->
                 Nothing
@@ -84,9 +92,9 @@ fromServerID id model =
 -- internals
 
 
-fromServer : Bool -> Model -> ( Servers.ID, Servers.Server ) -> Data
-fromServer online model ( id, server ) =
-    { id = id
+fromServer : Bool -> Model -> ( Servers.CId, Servers.Server ) -> Data
+fromServer online model ( cid, server ) =
+    { activeCId = cid
     , server = server
     , online = online
     , game = model

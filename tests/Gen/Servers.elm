@@ -29,9 +29,9 @@ import Gen.Utils exposing (..)
 --------------------------------------------------------------------------------
 
 
-serverID : Fuzzer ID
-serverID =
-    fuzzer genServerID
+serverCId : Fuzzer CId
+serverCId =
+    fuzzer genServerCId
 
 
 serverData : Fuzzer Server
@@ -75,8 +75,8 @@ model =
 --------------------------------------------------------------------------------
 
 
-genServerID : Generator ID
-genServerID =
+genServerCId : Generator CId
+genServerCId =
     map2 (,) unique unique
 
 
@@ -138,7 +138,7 @@ genGenericServer gen =
     in
         gen
             |> map buildServerRecord
-            |> andMap genServerID
+            |> andMap genServerCId
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel
@@ -157,7 +157,7 @@ genEmptyModel =
 genNonEmptyModel : Generator Model
 genNonEmptyModel =
     map2 (\id -> List.foldl (insert id) initialModel)
-        genServerID
+        genServerCId
         genServerList
 
 

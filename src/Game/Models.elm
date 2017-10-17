@@ -15,7 +15,7 @@ module Game.Models
         , setEndpoint
         , getActiveServer
         , setActiveServer
-        , bounces
+        , getBounces
         )
 
 import Dict
@@ -24,7 +24,6 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
-import Game.Network.Types exposing (NIP)
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
 import Core.Config exposing (Config)
@@ -111,7 +110,7 @@ getConfig =
     .config
 
 
-getGateway : Model -> Maybe ( Servers.ID, Servers.Server )
+getGateway : Model -> Maybe ( Servers.CId, Servers.Server )
 getGateway model =
     let
         servers =
@@ -121,24 +120,24 @@ getGateway model =
             |> getAccount
             |> Account.getGateway
             |> Maybe.andThen
-                (\serverId ->
+                (\serverCId ->
                     servers
-                        |> Servers.get serverId
-                        |> Maybe.map ((,) serverId)
+                        |> Servers.get serverCId
+                        |> Maybe.map ((,) serverCId)
                 )
 
 
 setGateway : Servers.Server -> Model -> Model
 setGateway server model =
     case getGateway model of
-        Just ( id, _ ) ->
-            setServer id server model
+        Just ( cid, _ ) ->
+            setServer cid server model
 
         Nothing ->
             model
 
 
-getEndpoint : Model -> Maybe ( Servers.ID, Servers.Server )
+getEndpoint : Model -> Maybe ( Servers.CId, Servers.Server )
 getEndpoint model =
     let
         servers =
@@ -148,15 +147,15 @@ getEndpoint model =
             getGateway model
                 |> Maybe.map Tuple.second
 
-        maybeEndpointID =
-            Maybe.andThen Servers.getEndpoint maybeGateway
+        maybeEndpointCId =
+            Maybe.andThen Servers.getEndpointCId maybeGateway
 
         maybeEndpoint =
-            Maybe.andThen (flip Servers.get servers) maybeEndpointID
+            Maybe.andThen (flip Servers.get servers) maybeEndpointCId
     in
-        case ( maybeEndpointID, maybeEndpoint ) of
-            ( Just id, Just endpoint ) ->
-                Just ( id, endpoint )
+        case ( maybeEndpointCId, maybeEndpoint ) of
+            ( Just cid, Just endpoint ) ->
+                Just ( cid, endpoint )
 
             _ ->
                 Nothing
@@ -165,14 +164,14 @@ getEndpoint model =
 setEndpoint : Servers.Server -> Model -> Model
 setEndpoint server model =
     case getEndpoint model of
-        Just ( id, _ ) ->
-            setServer id server model
+        Just ( cid, _ ) ->
+            setServer cid server model
 
         Nothing ->
             model
 
 
-getActiveServer : Model -> Maybe ( Servers.ID, Servers.Server )
+getActiveServer : Model -> Maybe ( Servers.CId, Servers.Server )
 getActiveServer model =
     case Account.getContext <| getAccount model of
         Gateway ->
@@ -196,8 +195,8 @@ setActiveServer server model =
 -- common helpers
 
 
-bounces : Model -> List String
-bounces game =
+getBounces : Model -> List String
+getBounces game =
     game
         |> getAccount
         |> (.bounces)
@@ -208,8 +207,8 @@ bounces game =
 -- internals
 
 
-setServer : Servers.ID -> Servers.Server -> Model -> Model
-setServer id server model =
+setServer : Servers.CId -> Servers.Server -> Model -> Model
+setServer cid server model =
     let
         meta =
             getMeta model
@@ -218,7 +217,7 @@ setServer id server model =
             getServers model
 
         servers_ =
-            Servers.insert id server servers
+            Servers.insert cid server servers
 
         model_ =
             setServers servers_ model

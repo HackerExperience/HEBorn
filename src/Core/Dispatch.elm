@@ -236,39 +236,39 @@ missionAction data act =
         None
 
 
-server : Servers.ID -> Servers.ServerMsg -> Dispatch
-server id msg =
-    servers <| Servers.ServerMsg id msg
+server : Servers.CId -> Servers.ServerMsg -> Dispatch
+server cid msg =
+    servers <| Servers.ServerMsg cid msg
 
 
-filesystem : Servers.ID -> Filesystem.Msg -> Dispatch
-filesystem id msg =
-    server id <| Servers.FilesystemMsg msg
+filesystem : Servers.CId -> Filesystem.Msg -> Dispatch
+filesystem cid msg =
+    server cid <| Servers.FilesystemMsg msg
 
 
-processes : Servers.ID -> Processes.Msg -> Dispatch
-processes id msg =
-    server id <| Servers.ProcessesMsg msg
+processes : Servers.CId -> Processes.Msg -> Dispatch
+processes cid msg =
+    server cid <| Servers.ProcessesMsg msg
 
 
-logs : Servers.ID -> Logs.Msg -> Dispatch
-logs id msg =
-    server id <| Servers.LogsMsg msg
+logs : Servers.CId -> Logs.Msg -> Dispatch
+logs cid msg =
+    server cid <| Servers.LogsMsg msg
 
 
-log : Servers.ID -> Logs.ID -> Logs.LogMsg -> Dispatch
-log serverId id msg =
-    logs serverId <| Logs.LogMsg id msg
+log : Servers.CId -> Logs.ID -> Logs.LogMsg -> Dispatch
+log serverId cid msg =
+    logs serverId <| Logs.LogMsg cid msg
 
 
-tunnels : Servers.ID -> Tunnels.Msg -> Dispatch
-tunnels id msg =
-    server id <| Servers.TunnelsMsg msg
+tunnels : Servers.CId -> Tunnels.Msg -> Dispatch
+tunnels cid msg =
+    server cid <| Servers.TunnelsMsg msg
 
 
-serverNotification : Servers.ID -> Notifications.Msg -> Dispatch
-serverNotification id msg =
-    server id <| Servers.NotificationsMsg msg
+serverNotification : Servers.CId -> Notifications.Msg -> Dispatch
+serverNotification cid msg =
+    server cid <| Servers.NotificationsMsg msg
 
 
 web : Web.Msg -> Dispatch
@@ -287,7 +287,7 @@ apps msgs =
 
 
 appsOfSession :
-    Servers.ID
+    Servers.CId
     -> WindowManager.TargetContext
     -> List Apps.Msg
     -> Dispatch

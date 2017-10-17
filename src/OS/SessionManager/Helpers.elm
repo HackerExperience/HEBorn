@@ -1,6 +1,7 @@
 module OS.SessionManager.Helpers exposing (toSessionID)
 
-import Game.Data as Game
+import Native.Panic
+import Game.Data exposing (Data)
 import Game.Models as Game
 import Game.Meta.Types exposing (..)
 import Game.Account.Models as Account
@@ -10,37 +11,39 @@ import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Types exposing (..)
 
 
-toSessionID : Game.Data -> ID
-toSessionID data =
+toSessionID : Data -> ID
+toSessionID ({ game } as data) =
     let
-        game =
-            Game.getGame data
-
-        context =
+        activeContext =
             game
                 |> Game.getAccount
                 |> Account.getContext
 
-        server =
-            Game.getServer data
+        activeServer =
+            Game.Data.getActiveServer data
 
         servers =
             Game.getServers game
     in
-        case context of
+        case activeContext of
             Gateway ->
-                Servers.toSessionId data.id servers
+                Servers.toSessionId
+                    (Game.Data.getActiveCId data)
+                    servers
 
             Endpoint ->
                 let
                     endpointSessionId =
-                        server
-                            |> Servers.getEndpoint
-                            |> Maybe.map (flip Servers.toSessionId servers)
+                        activeServer
+                            |> Servers.getEndpointCId
+                            |> Maybe.map
+                                (flip Servers.toSessionId servers)
                 in
                     case endpointSessionId of
                         Just endpointSessionId ->
                             endpointSessionId
 
                         Nothing ->
-                            Servers.toSessionId data.id servers
+                            Native.Panic.crash
+                                "ERROR_NONEXISTINGENDPOINT_ISACTIVEENDPOINT"
+                                "U = {x}, ∄ x ⊂ U"

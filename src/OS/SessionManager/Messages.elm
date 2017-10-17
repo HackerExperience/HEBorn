@@ -11,7 +11,7 @@ import Apps.Messages as Apps
 
 type Msg
     = EveryAppMsg (List Apps.Msg)
-    | TargetedAppMsg Servers.ID WM.TargetContext (List Apps.Msg)
+    | TargetedAppMsg Servers.CId WM.TargetContext (List Apps.Msg)
     | AppMsg WindowRef Context Apps.Msg
     | WindowManagerMsg ID WM.Msg
     | DockMsg Dock.Msg

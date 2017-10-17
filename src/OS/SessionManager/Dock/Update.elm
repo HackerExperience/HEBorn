@@ -27,8 +27,8 @@ update data msg ({ sessions } as model) =
                 let
                     ip =
                         data
-                            |> Game.getServer
-                            |> Servers.getEndpoint
+                            |> Game.getActiveServer
+                            |> Servers.getEndpointCId
 
                     ( model_, cmd, dispatch ) =
                         openApp data id ip app model
@@ -39,8 +39,8 @@ update data msg ({ sessions } as model) =
                 let
                     ip =
                         data
-                            |> Game.getServer
-                            |> Servers.getEndpoint
+                            |> Game.getActiveServer
+                            |> Servers.getEndpointCId
 
                     ( model_, cmd, dispatch ) =
                         openOrRestoreApp data id ip app model

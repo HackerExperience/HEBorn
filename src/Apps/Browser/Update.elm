@@ -3,6 +3,7 @@ module Apps.Browser.Update exposing (update)
 import Dict
 import Utils.Update as Update
 import Game.Data as Game
+import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Models as Processes
@@ -281,7 +282,7 @@ onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
 onCrack data nip tab =
     let
         serverId =
-            Game.getID data
+            Game.getActiveCId data
 
         targetIp =
             Network.getIp nip
@@ -302,14 +303,18 @@ onGoAddress :
     -> TabUpdateResponse
 onGoAddress data url { sessionId, windowId, context } tabId tab =
     let
-        nip =
-            Servers.toNip <| Game.getID data
+        cid =
+            Game.getActiveCId data
+
+        servers =
+            data
+                |> Game.getGame
+                |> Game.Models.getServers
 
         networkId =
-            Network.getId nip
-
-        networkIp =
-            Network.getIp nip
+            servers
+                |> Servers.getNIP cid
+                |> Network.getId
 
         requester =
             { sessionId = sessionId
@@ -320,7 +325,7 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
 
         dispatch =
             Dispatch.web <|
-                Web.FetchUrl url networkId networkIp requester
+                Web.FetchUrl url networkId cid requester
 
         tab_ =
             gotoPage url (Pages.LoadingModel url) tab
@@ -346,7 +351,7 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             }
 
         gatewayNip =
-            Game.getID data
+            Game.getActiveCId data
 
         remoteIp =
             Network.getIp remoteNip
