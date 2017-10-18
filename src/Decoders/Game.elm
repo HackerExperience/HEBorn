@@ -108,24 +108,18 @@ insertServers : Model -> ServersToJoin -> ( Model, ServersToJoin )
 insertServers model serversToJoin =
     let
         reducePlayer server servers =
-            server.endpoints
-                |> Network.filterInternet
-                |> List.head
-                |> Maybe.map
-                    (\nip ->
-                        Servers.insertGateway
-                            nip
-                            server.serverId
-                            servers
-                    )
-                |> Maybe.withDefault servers
+            let
+                reduceInsertGateway nip servers =
+                    Servers.insertGateway nip server.serverId servers
+            in
+                List.foldl reduceInsertGateway servers server.nips
 
         model_ =
             serversToJoin.player
                 |> List.foldl reducePlayer (getServers model)
                 |> flip setServers model
     in
-        ( model, serversToJoin )
+        ( model_, serversToJoin )
 
 
 cids : Decoder (List Servers.CId)
