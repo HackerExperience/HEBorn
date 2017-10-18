@@ -70,12 +70,7 @@ view code message =
             , h5 []
                 [ text <| "You can ask on discord: " ++ code ]
             , message
-                |> Regex.replace All
-                    (regex "\"(\\d{1,3}\\.){3}\\d{1,3}\"")
-                    (\_ -> "$filtered_ip")
-                |> Regex.replace All
-                    (regex "\"password\"\\s*:\\s*\"\\w+\"")
-                    (\_ -> "$filtered_psw")
+                |> filterSensitveData
                 |> text
                 |> List.singleton
                 |> h5 [ style [ selectableText ] ]
@@ -90,3 +85,19 @@ view code message =
             ]
         , div [ style [ flex <| int 1 ] ] []
         ]
+
+
+redactedString : String
+redactedString =
+    "(redacted)"
+
+
+filterSensitveData : String -> String
+filterSensitveData message =
+    message
+        |> Regex.replace All
+            (regex "\"(\\d{1,3}\\.){3}\\d{1,3}\"")
+            (always redactedString)
+        |> Regex.replace All
+            (regex "\"password\"\\s*:\\s*\"\\w+\"")
+            (always redactedString)
