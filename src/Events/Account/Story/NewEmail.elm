@@ -4,48 +4,64 @@ import Json.Decode
     exposing
         ( Decoder
         , decodeValue
-        , string
-        , float
         , field
         , map
         , andThen
+        , list
+        , string
+        , float
+        , bool
         )
-import Json.Decode.Pipeline exposing (decode, required, custom)
+import Json.Decode.Pipeline exposing (decode, required, custom, optional)
 import Events.Types exposing (Handler)
-import Decoders.Emails
+import Decoders.Emails exposing (contentFromId)
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Contents exposing (..)
 
 
 type alias Data =
-    ( String, ( Float, Message ), List Content )
+    { personId : String
+    , messageNode : ( Float, Message )
+    , responses : List Content
+    , createNotification : Bool
+    }
 
 
 handler : Handler Data event
 handler event =
-    decodeValue newEmail >> Result.map (toData >> event)
+    decodeValue newEmail >> Result.map event
 
 
 
 -- internals
 
 
-{-| TODO: fix this
--}
-toData : ( Float, Message ) -> Data
-toData msg =
-    ( "TODO", msg, [] )
-
-
-newEmail : Decoder ( Float, Message )
+newEmail : Decoder Data
 newEmail =
+    decode Data
+        |> required "contact_id" string
+        |> custom messageNode
+        |> optional "responses" responses []
+        |> optional "notification" bool True
+
+
+messageNode : Decoder ( Float, Message )
+messageNode =
     decode (,)
         |> required "timestamp" float
         |> custom message
 
 
+responses : Decoder (List Content)
+responses =
+    string
+        |> andThen contentFromId
+        |> list
+
+
 message : Decoder Message
 message =
     field "email_id" string
-        |> andThen Decoders.Emails.contentFromId
+        |> andThen
+            contentFromId
         |> map Received

@@ -6,7 +6,6 @@ import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types exposing (Context(..))
-import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)

@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
-import Game.Notifications.Models as Notifications
+import Game.Notifications.Models as Notifications exposing (Content(..))
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -43,6 +43,8 @@ emptyNotifications uniqueClass activator =
         []
 
 
+{-| Gen a div with an ul with an header, all notifications and a footer
+-}
 visibleNotifications :
     Class
     -> OpenMenu
@@ -51,47 +53,67 @@ visibleNotifications :
     -> Notifications.Model
     -> Html Msg
 visibleNotifications uniqueClass activator title readAll itens =
-    let
-        firstItem =
-            li []
-                [ div [] [ text (title ++ " notifications") ]
-                , spacer
-                , div [ onClick readAll ] [ text "Mark All as Read" ]
-                ]
-
-        lastItem =
-            li [] [ text "..." ]
-
-        itens_ =
-            itens
-                |> Dict.foldl
-                    (\id { content } acu ->
-                        li []
-                            [ text <| toString id
-                            , br [] []
-                            , text "TODO"
-                            ]
-                            :: acu
-                    )
-                    []
-
-        contents =
-            (firstItem :: (itens_ ++ [ lastItem ]))
-                |> ul []
-                |> List.singleton
-                |> div
-                    [ onMouseEnter MouseEnterDropdown
-                    , onMouseLeave MouseLeavesDropdown
-                    ]
-                |> List.singleton
-
-        attrs =
-            [ class [ Notification, uniqueClass ]
+    footer
+        |> List.singleton
+        |> (++) (Dict.foldl notificationReduce [] itens)
+        |> (::) (header title readAll)
+        |> ul []
+        |> List.singleton
+        |> div
+            [ onMouseEnter MouseEnterDropdown
+            , onMouseLeave MouseLeavesDropdown
             ]
-    in
-        indicator attrs contents
+        |> List.singleton
+        |> indicator [ class [ Notification, uniqueClass ] ]
 
 
 indicator : List (Attribute a) -> List (Html a) -> Html a
 indicator =
     node indicatorNode
+
+
+header : String -> Msg -> Html Msg
+header title readAll =
+    li []
+        [ div [] [ text (title ++ " notifications") ]
+        , spacer
+        , div [ onClick readAll ] [ text "Mark All as Read" ]
+        ]
+
+
+footer : Html Msg
+footer =
+    li [] [ text "..." ]
+
+
+notificationReduce :
+    Notifications.ID
+    -> Notifications.Notification
+    -> List (Html Msg)
+    -> List (Html Msg)
+notificationReduce id { content } acu =
+    renderContent content
+        |> notification id
+        |> flip (::) acu
+
+
+renderContent : Content -> ( String, String )
+renderContent content =
+    case content of
+        Simple title body ->
+            ( title, body )
+
+        NewEmail from body ->
+            ( "New email from: " ++ from, body )
+
+        DownloadStarted ->
+            ( "New download started", "Check your task manager" )
+
+
+notification : Notifications.ID -> ( String, String ) -> Html Msg
+notification id ( title, body ) =
+    li []
+        [ text title
+        , br [] []
+        , text body
+        ]
