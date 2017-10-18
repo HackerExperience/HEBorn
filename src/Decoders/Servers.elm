@@ -78,14 +78,7 @@ ownership serverUid =
 
 gatewayOwnership : ServerUid -> Decoder GatewayData
 gatewayOwnership serverUid =
-    let
-        toGatewayData endpoints =
-            endpoints
-                |> List.head
-                |> GatewayData serverUid endpoints
-                |> succeed
-    in
-        andThen toGatewayData (field "endpoints" (list Decoders.Network.nip))
+    succeed <| GatewayData serverUid [] Nothing
 
 
 endpointOwnership : Decoder EndpointData

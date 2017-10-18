@@ -231,15 +231,9 @@ joinPlayer server =
             -- this code will break after including the counter
             ServerChannel cid
 
-        payload cid =
-            -- may not be needed at all
-            Encode.object
-                [ ( "gateway_ip", Encode.string <| Network.getIp cid )
-                ]
-
         toDispatch cid =
             Dispatch.websocket <|
-                Ws.JoinChannel (channel cid) (Just <| payload cid)
+                Ws.JoinChannel (channel cid) Nothing
     in
         server.nips
             |> List.map toDispatch
