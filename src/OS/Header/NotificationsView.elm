@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
-import Game.Notifications.Models as Notifications
+import Game.Notifications.Models as Notifications exposing (Content(..))
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -66,12 +66,9 @@ visibleNotifications uniqueClass activator title readAll itens =
             itens
                 |> Dict.foldl
                     (\id { content } acu ->
-                        li []
-                            [ text <| toString id
-                            , br [] []
-                            , text "TODO"
-                            ]
-                            :: acu
+                        renderContent content
+                            |> notification id
+                            |> flip (::) acu
                     )
                     []
 
@@ -95,3 +92,25 @@ visibleNotifications uniqueClass activator title readAll itens =
 indicator : List (Attribute a) -> List (Html a) -> Html a
 indicator =
     node indicatorNode
+
+
+renderContent : Content -> ( String, String )
+renderContent content =
+    case content of
+        Simple title body ->
+            ( title, body )
+
+        NewEmail from body ->
+            ( "New email from: " ++ from, body )
+
+        DownloadStarted ->
+            ( "New download started", "Check your task manager" )
+
+
+notification : Notifications.ID -> ( String, String ) -> Html Msg
+notification id ( title, body ) =
+    li []
+        [ text title
+        , br [] []
+        , text body
+        ]
