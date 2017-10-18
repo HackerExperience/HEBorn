@@ -1,134 +1,190 @@
 module OS.Header.Update exposing (update)
 
---TODO: Convert this entirely to Utils.Update
-
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Game.Data as Game
 import Game.Account.Messages as Account
+import Game.Meta.Types exposing (Context)
+import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers
-import Game.Notifications.Messages as Notifications
+import Game.Servers.Shared as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
 
-update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update data msg ({ openMenu } as model) =
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
+
+
+update : Game.Data -> Msg -> Model -> UpdateResponse
+update data msg model =
     case msg of
         Logout ->
-            let
-                dispatch =
-                    Dispatch.account Account.DoLogout
-            in
-                ( model, Cmd.none, dispatch )
+            onLogout model
 
         ToggleMenus next ->
-            let
-                openMenu_ =
-                    if (openMenu /= NothingOpen && openMenu == next) then
-                        NothingOpen
-                    else
-                        next
-
-                model_ =
-                    { model | openMenu = openMenu_ }
-            in
-                Update.fromModel model_
+            onToggleMenus next model
 
         MouseEnterDropdown ->
-            let
-                model_ =
-                    { model | mouseSomewhereInside = True }
-            in
-                Update.fromModel model_
+            onMouseEnterDropdown model
 
         MouseLeavesDropdown ->
-            let
-                model_ =
-                    { model | mouseSomewhereInside = False }
-            in
-                Update.fromModel model_
+            onMouseLeavesDropdown model
 
-        SelectGateway nip ->
-            let
-                dispatch =
-                    case nip of
-                        Just nip ->
-                            Dispatch.account <| Account.SetGateway nip
-
-                        Nothing ->
-                            Dispatch.none
-
-                model_ =
-                    { model | openMenu = NothingOpen }
-            in
-                ( model_, Cmd.none, dispatch )
+        SelectGateway cid ->
+            onSelectGateway cid model
 
         SelectBounce id ->
-            let
-                dispatch =
-                    Dispatch.server
-                        (Game.getActiveCId data)
-                        (Servers.SetBounce id)
-
-                model_ =
-                    { model | openMenu = NothingOpen }
-            in
-                ( model_, Cmd.none, dispatch )
+            onSelectBounce data id model
 
         SelectEndpoint cid ->
-            let
-                dispatch =
-                    Dispatch.account <| Account.SetEndpoint cid
-
-                model_ =
-                    { model | openMenu = NothingOpen }
-            in
-                ( model_, Cmd.none, dispatch )
+            onSelectEndpoint cid model
 
         ContextTo context ->
-            let
-                dispatch =
-                    Dispatch.account <| Account.ContextTo context
-            in
-                ( model, Cmd.none, dispatch )
+            onContextTo context model
 
         CheckMenus ->
-            let
-                model_ =
-                    if not model.mouseSomewhereInside then
-                        { model | openMenu = NothingOpen }
-                    else
-                        model
-            in
-                Update.fromModel model_
+            onCheckMenus model
 
         ToggleCampaign ->
-            let
-                dispatch =
-                    Dispatch.story <| Story.Toggle
-            in
-                ( model, Cmd.none, dispatch )
+            onTogglecampaign model
 
-        ServerReadAll serverId ->
-            let
-                dispatch =
-                    Dispatch.server serverId <|
-                        Servers.NotificationsMsg
-                            Notifications.ReadAll
-            in
-                ( model, Cmd.none, dispatch )
+        ServerReadAll cid ->
+            onServerReadAll cid model
 
         ChatReadAll ->
             Update.fromModel model
 
         AccountReadAll ->
-            let
-                dispatch =
-                    Dispatch.account <|
-                        Account.NotificationsMsg
-                            Notifications.ReadAll
-            in
-                ( model, Cmd.none, dispatch )
+            onAccountReadAll model
+
+
+onLogout : Model -> UpdateResponse
+onLogout model =
+    let
+        dispatch =
+            Dispatch.account Account.DoLogout
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onToggleMenus : OpenMenu -> Model -> UpdateResponse
+onToggleMenus next ({ openMenu } as model) =
+    let
+        openMenu_ =
+            if (openMenu /= NothingOpen && openMenu == next) then
+                NothingOpen
+            else
+                next
+    in
+        Update.fromModel
+            { model | openMenu = openMenu_ }
+
+
+onMouseEnterDropdown : Model -> UpdateResponse
+onMouseEnterDropdown model =
+    Update.fromModel
+        { model | mouseSomewhereInside = True }
+
+
+onMouseLeavesDropdown : Model -> UpdateResponse
+onMouseLeavesDropdown model =
+    Update.fromModel
+        { model | mouseSomewhereInside = False }
+
+
+onSelectGateway : Maybe Servers.CId -> Model -> UpdateResponse
+onSelectGateway cid model =
+    let
+        dispatch =
+            case cid of
+                Just cid ->
+                    Dispatch.account <| Account.SetGateway cid
+
+                Nothing ->
+                    Dispatch.none
+
+        model_ =
+            { model | openMenu = NothingOpen }
+    in
+        ( model_, Cmd.none, dispatch )
+
+
+onSelectBounce : Game.Data -> Maybe String -> Model -> UpdateResponse
+onSelectBounce data id model =
+    let
+        dispatch =
+            Dispatch.server
+                (Game.getActiveCId data)
+                (Servers.SetBounce id)
+
+        model_ =
+            { model | openMenu = NothingOpen }
+    in
+        ( model_, Cmd.none, dispatch )
+
+
+onSelectEndpoint : Maybe Servers.CId -> Model -> UpdateResponse
+onSelectEndpoint cid model =
+    let
+        dispatch =
+            Dispatch.account <| Account.SetEndpoint cid
+
+        model_ =
+            { model | openMenu = NothingOpen }
+    in
+        ( model_, Cmd.none, dispatch )
+
+
+onContextTo : Context -> Model -> UpdateResponse
+onContextTo context model =
+    let
+        dispatch =
+            Dispatch.account <| Account.ContextTo context
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onCheckMenus : Model -> UpdateResponse
+onCheckMenus ({ mouseSomewhereInside } as model) =
+    let
+        model_ =
+            if not mouseSomewhereInside then
+                { model | openMenu = NothingOpen }
+            else
+                model
+    in
+        Update.fromModel model_
+
+
+onTogglecampaign : Model -> UpdateResponse
+onTogglecampaign model =
+    let
+        dispatch =
+            Dispatch.story <| Story.Toggle
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onServerReadAll : Servers.CId -> Model -> UpdateResponse
+onServerReadAll cid model =
+    let
+        dispatch =
+            Dispatch.server cid <|
+                Servers.NotificationsMsg
+                    Notifications.ReadAll
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onAccountReadAll : Model -> UpdateResponse
+onAccountReadAll model =
+    let
+        dispatch =
+            Dispatch.account <|
+                Account.NotificationsMsg
+                    Notifications.ReadAll
+    in
+        ( model, Cmd.none, dispatch )
