@@ -1,7 +1,6 @@
 module Game.Web.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
 import Game.Models as Game
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)
@@ -9,13 +8,10 @@ import Game.Web.Requests as Requests
 import Game.Web.Requests.DNS as DNS
 import Game.Web.Models exposing (..)
 import Json.Encode as Encode
-import OS.SessionManager.WindowManager.Models as WM
-import Game.Meta.Types exposing (Context(..))
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
-import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
 import Apps.Browser.Messages as Browser
 import Game.Network.Types as Network

@@ -1,11 +1,9 @@
 module OS.Update exposing (update)
 
 import Utils.Update as Update
-import Events.Events as Events
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import OS.Header.Messages as Header
-import OS.Header.Models as Header
 import OS.Header.Update as Header
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
@@ -13,12 +11,9 @@ import OS.Menu.Messages as Menu
 import OS.Menu.Update as Menu
 import OS.Menu.Actions as Menu
 import OS.SessionManager.Messages as SessionManager
-import OS.SessionManager.Models as SessionManager
 import OS.SessionManager.Update as SessionManager
-import OS.SessionManager.WindowManager.Messages as WindowManager
 import OS.Toasts.Messages as Toasts
 import OS.Toasts.Update as Toasts
-import Apps.Messages as Apps
 
 
 type alias UpdateResponse =

@@ -4,10 +4,6 @@ import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
 import Game.Models as Game
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications
-import Game.Servers.Messages as Servers
-import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)

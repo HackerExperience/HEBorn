@@ -1,6 +1,5 @@
 module Apps.TaskManager.Update exposing (update)
 
-import Dict
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game

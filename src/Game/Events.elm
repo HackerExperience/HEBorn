@@ -116,9 +116,6 @@ fromAccount : Account.Event -> Model -> Dispatches
 fromAccount =
     let
         handlePasswordAcquired data =
-            -- TODO: discuss format change with renato to allow easy
-            -- dispatch to processes, do not let this note pass on
-            -- review
             [ Dispatch.database <| Database.HandlePasswordAcquired data
             , Dispatch.apps
                 [ Apps.BrowserMsg <| Browser.HandlePasswordAcquired data

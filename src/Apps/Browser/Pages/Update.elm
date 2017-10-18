@@ -3,7 +3,6 @@ module Apps.Browser.Pages.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
-import Apps.Browser.Pages.CommonActions exposing (..)
 import Apps.Browser.Pages.Messages exposing (..)
 import Apps.Browser.Pages.Models exposing (Model(..))
 import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver

@@ -9,7 +9,6 @@ import Apps.Update as Apps
 import Apps.Messages as Apps
 import Game.Data as Game
 import Game.Meta.Types exposing (Context(..))
-import Game.Servers.Models as Servers
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))

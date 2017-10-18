@@ -1,15 +1,8 @@
 module Game.Account.Database.Update exposing (update)
 
-import Dict exposing (Dict)
-import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Messages as Core
 import Utils.Update as Update
-import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Reports as Ws
-import Driver.Websocket.Messages as Ws
-import Requests.Requests as Requests
 import Events.Account.PasswordAcquired as PasswordAcquired
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)

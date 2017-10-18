@@ -4,7 +4,6 @@ import Dict exposing (Dict)
 import Json.Decode exposing (Value, decodeValue, value, string)
 import Json.Decode.Pipeline exposing (decode, required)
 import Phoenix.Channel as Channel
-import Utils.Cmd as Cmd
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Channels exposing (..)

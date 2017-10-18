@@ -1,14 +1,10 @@
 module Game.Account.Update exposing (update)
 
-import Json.Decode exposing (Value, decodeValue)
-import Native.Panic
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages as Core
 import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Messages as Ws
-import Requests.Requests as Requests
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers

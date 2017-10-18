@@ -7,7 +7,6 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Models as Game
-import Game.Servers.Messages as Servers
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
