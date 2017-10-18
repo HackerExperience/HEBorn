@@ -4,8 +4,11 @@ import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Models as Game
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
+import Game.Storyline.Emails.Contents as Contents
 import Events.Account.Story.NewEmail as StoryNewEmail
 
 
@@ -20,7 +23,7 @@ update game msg model =
             onChanged newModel model
 
         HandleNewEmail data ->
-            handleNewEmail data model
+            handleNewEmail game data model
 
 
 onChanged : Model -> Model -> UpdateResponse
@@ -28,9 +31,12 @@ onChanged newModel oldModel =
     Update.fromModel newModel
 
 
-handleNewEmail : StoryNewEmail.Data -> Model -> UpdateResponse
-handleNewEmail ( personId, ( time, msg ), responses ) model =
+handleNewEmail : Game.Model -> StoryNewEmail.Data -> Model -> UpdateResponse
+handleNewEmail game { personId, message, responses, createNotification } model =
     let
+        ( time, msg ) =
+            message
+
         apply person =
             let
                 messages_ =
@@ -54,5 +60,18 @@ handleNewEmail ( personId, ( time, msg ), responses ) model =
                     , responses = []
                     }
                 |> apply
+
+        dispatch =
+            case msg of
+                Received content ->
+                    content
+                        |> Contents.toString
+                        |> Notifications.NewEmail personId
+                        |> Notifications.create
+                        |> Notifications.Insert game.meta.lastTick
+                        |> Dispatch.accountNotification
+
+                Sent _ ->
+                    Dispatch.none
     in
-        Update.fromModel model_
+        ( model_, Cmd.none, dispatch )

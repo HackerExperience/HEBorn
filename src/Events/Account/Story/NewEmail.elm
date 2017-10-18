@@ -4,13 +4,14 @@ import Json.Decode
     exposing
         ( Decoder
         , decodeValue
-        , string
-        , float
         , field
         , map
         , andThen
+        , string
+        , float
+        , bool
         )
-import Json.Decode.Pipeline exposing (decode, required, custom)
+import Json.Decode.Pipeline exposing (decode, required, custom, optional)
 import Events.Types exposing (Handler)
 import Decoders.Emails
 import Game.Storyline.Emails.Models exposing (..)
@@ -18,30 +19,34 @@ import Game.Storyline.Emails.Contents exposing (..)
 
 
 type alias Data =
-    ( String, ( Float, Message ), List Content )
+    { personId : String
+    , message : ( Float, Message )
+    , responses : List Content
+    , createNotification : Bool
+    }
 
 
 handler : Handler Data event
 handler event =
-    decodeValue newEmail >> Result.map (toData >> event)
+    decodeValue newEmail >> Result.map event
 
 
 
 -- internals
 
 
-{-| TODO: fix this
--}
-toData : ( Float, Message ) -> Data
+toData : ( Float, Message ) -> (Bool -> Data)
 toData msg =
-    ( "TODO", msg, [] )
+    Data "someone@somehost.tld" msg []
 
 
-newEmail : Decoder ( Float, Message )
+newEmail : Decoder Data
 newEmail =
     decode (,)
         |> required "timestamp" float
         |> custom message
+        |> map toData
+        |> optional "notification" bool True
 
 
 message : Decoder Message
