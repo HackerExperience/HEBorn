@@ -358,6 +358,10 @@ handleBruteforceSuccess id model =
     Update.fromModel model
 
 
+
+-- request responses
+
+
 failDownloadFile : Float -> NIP -> ID -> Model -> String -> UpdateResponse
 failDownloadFile lastTick nip oldId model message =
     let

@@ -21,11 +21,12 @@ view ({ state } as model) =
 
         Play play ->
             case Game.fromGateway play.game of
-                Just data ->
-                    Html.map OSMsg (OS.view data play.os)
+                Just inBieber ->
+                    Html.map OSMsg (OS.view inBieber play.os)
 
                 Nothing ->
-                    div [] []
+                    Panic.view "WTF_ASTRAL_PROJECTION"
+                        "Player has no active gateway!"
 
         Panic code message ->
             Panic.view code message
