@@ -16,7 +16,6 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Notifications.Messages as Notifications
-import Game.Network.Types as Network
 
 
 -- messages and requests received by the server collection

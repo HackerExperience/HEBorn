@@ -32,34 +32,41 @@ onChanged newModel oldModel =
 
 
 handleNewEmail : Game.Model -> StoryNewEmail.Data -> Model -> UpdateResponse
-handleNewEmail game { personId, message, responses, createNotification } model =
+handleNewEmail game data model =
     let
+        { personId, messageNode, responses, createNotification } =
+            data
+
         ( time, msg ) =
-            message
+            messageNode
 
-        apply person =
-            let
-                messages_ =
-                    getMessages person
-                        |> Dict.insert time msg
-
-                person_ =
-                    { person
-                        | messages = messages_
-                        , responses = responses
+        person_ =
+            case getPerson personId model of
+                Nothing ->
+                    { about =
+                        personMetadata personId
+                    , messages =
+                        messageNode
+                            |> List.singleton
+                            |> Dict.fromList
+                    , responses =
+                        responses
                     }
-            in
-                setPerson personId person_ model
+
+                Just person ->
+                    let
+                        messages_ =
+                            person
+                                |> getMessages
+                                |> Dict.insert time msg
+                    in
+                        { person
+                            | messages = messages_
+                            , responses = responses
+                        }
 
         model_ =
-            model
-                |> getPerson personId
-                |> Maybe.withDefault
-                    { about = (personMetadata personId)
-                    , messages = Dict.empty
-                    , responses = []
-                    }
-                |> apply
+            setPerson personId person_ model
 
         dispatch =
             case msg of

@@ -16,11 +16,6 @@ import Json.Decode as Decode
         , fail
         , string
         )
-import Json.Decode.Pipeline as Encode
-    exposing
-        ( decode
-        , required
-        )
 import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests

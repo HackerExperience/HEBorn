@@ -3,7 +3,6 @@ module OS.Toasts.View exposing (view)
 import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
-import Html.Events exposing (onMouseEnter)
 import Game.Data as Game
 import Game.Notifications.Models exposing (Content(..))
 import OS.Resources as Res
