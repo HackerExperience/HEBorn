@@ -27,7 +27,6 @@ import Json.Decode.Pipeline as Encode
         , required
         )
 import Json.Encode as Encode
-import Utils.Json.Decode exposing (exclusively)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))

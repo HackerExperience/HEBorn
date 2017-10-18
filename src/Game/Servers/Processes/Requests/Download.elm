@@ -59,7 +59,7 @@ requestPublic :
     -> ConfigSource a
     -> Cmd Msg
 requestPublic optmistic fileId storageId nip =
-    Requests.request (Topics.fsPublicDownload nip)
+    Requests.request (Topics.pftpDownload nip)
         (DownloadRequest optmistic >> Request)
     <|
         encoder fileId storageId
