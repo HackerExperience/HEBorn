@@ -20,7 +20,7 @@ import Game.Storyline.Emails.Contents exposing (..)
 
 type alias Data =
     { personId : String
-    , message : ( Float, Message )
+    , messageNode : ( Float, Message )
     , responses : List Content
     , createNotification : Bool
     }
@@ -35,18 +35,20 @@ handler event =
 -- internals
 
 
-toData : ( Float, Message ) -> (Bool -> Data)
-toData msg =
-    Data "someone@somehost.tld" msg []
-
-
 newEmail : Decoder Data
 newEmail =
+    decode Data
+        |> required "contact_id" string
+        |> custom messageNode
+        |> optional "responses" (list string) []
+        |> optional "notification" bool True
+
+
+messageNode : Decoder ( Float, Message )
+messageNode =
     decode (,)
         |> required "timestamp" float
         |> custom message
-        |> map toData
-        |> optional "notification" bool True
 
 
 message : Decoder Message
