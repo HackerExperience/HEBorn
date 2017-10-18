@@ -50,3 +50,8 @@ fromString str =
 isFromInternet : NIP -> Bool
 isFromInternet ( id, _ ) =
     id == "::"
+
+
+filterInternet : List NIP -> List NIP
+filterInternet list =
+    List.filter isFromInternet list

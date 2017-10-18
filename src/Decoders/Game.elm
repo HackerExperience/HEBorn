@@ -1,6 +1,6 @@
 module Decoders.Game exposing (..)
 
-import Set exposing (Set)
+import Dict exposing (Dict)
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -20,31 +20,38 @@ import Game.Meta.Types exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
-import Game.Network.Types as Network
+import Game.Network.Types as Network exposing (NIP)
 import Game.Models exposing (..)
+import Utils.Json.Decode exposing (optionalMaybe)
 import Decoders.Storyline
 
 
 type alias ServersToJoin =
-    List ServerToJoin
+    { player : PlayerServers
+    , remote : RemoteServers
+    }
 
 
-type ServerToJoin
-    = JoinPlayer Player
-    | JoinRemote Remote
+type alias PlayerServers =
+    List Player
+
+
+type alias RemoteServers =
+    Dict Servers.CId Remote
 
 
 type alias Player =
     { serverId : String
-    , networkId : String
-    , ip : String
+    , nips : List NIP
+    , endpoints : List Servers.CId
     }
 
 
 type alias Remote =
-    { password : String
-    , networkId : String
+    { networkId : String
     , ip : String
+    , password : String
+    , bounce : Maybe String
     }
 
 
@@ -69,45 +76,75 @@ servers =
 
 serversToJoin : Decoder ServersToJoin
 serversToJoin =
-    decode List.append
-        |> required "player" (list <| map JoinPlayer joinPlayer)
-        |> required "remote" (list <| map JoinRemote joinRemote)
+    decode ServersToJoin
+        |> required "player" (list joinPlayer)
+        |> required "remote" (map Dict.fromList <| list joinRemote)
 
 
 joinPlayer : Decoder Player
 joinPlayer =
     decode Player
         |> required "server_id" string
-        |> required "network_id" string
-        |> required "ip" string
+        |> required "nips" nips
+        |> required "endpoints" cids
 
 
-joinRemote : Decoder Remote
+joinRemote : Decoder ( Servers.CId, Remote )
 joinRemote =
-    decode Remote
-        |> required "password" string
-        |> required "network_id" string
-        |> required "ip" string
+    let
+        decodeRemote =
+            decode Remote
+                |> required "network_id" string
+                |> required "ip" string
+                |> required "password" string
+                |> optionalMaybe "bounce" string
+    in
+        decode (,)
+            |> custom cid
+            |> custom decodeRemote
 
 
 insertServers : Model -> ServersToJoin -> ( Model, ServersToJoin )
 insertServers model serversToJoin =
     let
-        reduceServers server servers =
-            case server of
-                JoinPlayer data ->
-                    let
-                        id =
-                            Network.toNip data.networkId data.ip
-                    in
-                        Servers.insertGateway id data.serverId servers
-
-                JoinRemote data ->
-                    servers
+        reducePlayer server servers =
+            server.endpoints
+                |> Network.filterInternet
+                |> List.head
+                |> Maybe.map
+                    (\nip ->
+                        Servers.insertGateway
+                            nip
+                            server.serverId
+                            servers
+                    )
+                |> Maybe.withDefault servers
 
         model_ =
-            serversToJoin
-                |> List.foldl reduceServers (getServers model)
-                |> (flip setServers model)
+            serversToJoin.player
+                |> List.foldl reducePlayer (getServers model)
+                |> flip setServers model
     in
-        ( model_, serversToJoin )
+        ( model, serversToJoin )
+
+
+cids : Decoder (List Servers.CId)
+cids =
+    list cid
+
+
+cid : Decoder Servers.CId
+cid =
+    nip
+
+
+nips : Decoder (List NIP)
+nips =
+    list nip
+
+
+nip : Decoder NIP
+nip =
+    decode Network.toNip
+        |> required "network_id" string
+        |> required "ip" string

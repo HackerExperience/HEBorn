@@ -1,12 +1,13 @@
 module Game.Update exposing (update)
 
+import Dict exposing (Dict)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages as Ws
-import Decoders.Game exposing (ServerToJoin(..))
+import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Account.Update as Account
@@ -163,7 +164,9 @@ onResyncResponse : Decoders.Game.ServersToJoin -> Model -> UpdateResponse
 onResyncResponse servers model =
     let
         dispatch =
-            joinChannel servers
+            servers.player
+                |> List.map (bootstrapJoin servers.remote)
+                |> Dispatch.batch
     in
         ( model, Cmd.none, dispatch )
 
@@ -187,7 +190,9 @@ handleJoinedAccount value model =
         Ok ( model_, servers ) ->
             let
                 dispatch =
-                    joinChannel servers
+                    servers.player
+                        |> List.map (bootstrapJoin servers.remote)
+                        |> Dispatch.batch
             in
                 ( model_, Cmd.none, dispatch )
 
@@ -202,37 +207,75 @@ handleJoinedAccount value model =
                 ( model, Cmd.none, dispatch )
 
 
-joinChannel : Decoders.Game.ServersToJoin -> Dispatch
-joinChannel servers =
+bootstrapJoin :
+    Decoders.Game.RemoteServers
+    -> Decoders.Game.Player
+    -> Dispatch
+bootstrapJoin remoteServers playerServer =
     let
-        toId data =
-            Network.toNip data.networkId data.ip
+        myDispatch =
+            joinPlayer playerServer
 
-        encodeGateway data =
+        otherDispatches =
+            playerServer.endpoints
+                |> List.filterMap (flip Dict.get remoteServers)
+                |> List.map (joinRemote playerServer)
+    in
+        Dispatch.batch (myDispatch :: otherDispatches)
+
+
+joinPlayer : Decoders.Game.Player -> Dispatch
+joinPlayer server =
+    let
+        channel cid =
+            -- this code will break after including the counter
+            ServerChannel cid
+
+        payload cid =
+            -- may not be needed at all
             Encode.object
-                [ ( "gateway_ip", Encode.string data.ip )
+                [ ( "gateway_ip", Encode.string <| Network.getIp cid )
                 ]
 
-        encodeEndpoint data =
-            Encode.object
-                [ ( "password", Encode.string data.password ) ]
-
-        toDispatch server =
-            let
-                ( channel, payload ) =
-                    case server of
-                        JoinPlayer data ->
-                            ( ServerChannel <| toId data
-                            , encodeGateway data
-                            )
-
-                        JoinRemote data ->
-                            ( ServerChannel <| toId data
-                            , encodeEndpoint data
-                            )
-            in
-                Dispatch.websocket <| Ws.JoinChannel channel <| Just payload
+        toDispatch cid =
+            Dispatch.websocket <|
+                Ws.JoinChannel (channel cid) (Just <| payload cid)
     in
-        servers
+        server.nips
             |> List.map toDispatch
             |> Dispatch.batch
+
+
+joinRemote : Decoders.Game.Player -> Decoders.Game.Remote -> Dispatch
+joinRemote fromServer toServer =
+    let
+        maybeFromIp =
+            fromServer.nips
+                |> List.filter (Network.getId >> ((==) toServer.networkId))
+                |> List.head
+                |> Maybe.map Network.getIp
+    in
+        case maybeFromIp of
+            Just fromIp ->
+                let
+                    cid =
+                        -- this code might need to change one day
+                        Network.toNip toServer.networkId toServer.ip
+
+                    channel =
+                        ServerChannel cid
+
+                    payload =
+                        -- TODO: include bounce_id after settling
+                        -- it's field name
+                        Encode.object
+                            [ ( "gateway_ip", Encode.string fromIp )
+                            , ( "password", Encode.string toServer.password )
+                            ]
+                in
+                    Dispatch.websocket <|
+                        (Ws.JoinChannel channel)
+                            (Just payload)
+
+            Nothing ->
+                Dispatch.none
