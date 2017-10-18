@@ -24,8 +24,18 @@ account model =
         |> hardcoded model.notifications
         |> hardcoded model.logout
         |> mainframe model
+        |> setupSteps model
 
 
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
 mainframe model =
     optional "mainframe" (map Just Decoders.Servers.cid) model.mainframe
+
+
+setupSteps : Model -> Decoder (Setup.Steps -> a) -> Decoder a
+setupSteps model =
+    let
+        remainingSteps =
+            Setup.remainingSteps model.setupSteps
+    in
+        optional "setup" Decoders.Setup.remainingSteps remainingSteps

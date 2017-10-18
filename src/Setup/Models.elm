@@ -24,7 +24,7 @@ stepsOrder =
 
 remainingSteps : Steps -> Steps
 remainingSteps steps =
-    List.filter (flip List.member steps) stepsOrder
+    List.filter ((flip List.member steps) >> not) stepsOrder
 
 
 mapId : String

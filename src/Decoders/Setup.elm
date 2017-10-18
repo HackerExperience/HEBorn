@@ -4,33 +4,35 @@ import Json.Decode as Decode
     exposing
         ( Decoder
         , Value
-        , andThen
         , map
-        , oneOf
+        , andThen
         , succeed
         , fail
         , string
-        , float
-        , value
-        , field
         , list
         )
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (commonError)
-import Setup.Models exposing (..)
+import Setup.Types as Setup exposing (Step(..))
+import Setup.Models as Setup
 
 
-steps : Steps
+remainingSteps : Decoder Setup.Steps
+remainingSteps =
+    map Setup.remainingSteps steps
+
+
+steps : Decoder Setup.Steps
 steps =
     list step
 
 
-step : Decoder Step
+step : Decoder Setup.Step
 step =
-    andThen pageFromString string
+    andThen stepFromString string
 
 
-stepFromString : String -> Decoder Step
+stepFromString : String -> Decoder Setup.Step
 stepFromString str =
     case str of
         "welcome" ->
