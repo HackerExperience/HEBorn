@@ -1,11 +1,7 @@
 module Game.Servers.Logs.Update exposing (update)
 
-import Json.Decode exposing (Value, decodeValue, list)
-import Dict
 import Utils.Update as Update
 import Game.Models as Game
-import Requests.Requests as Requests
-import Game.Servers.Shared as Servers
 import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)

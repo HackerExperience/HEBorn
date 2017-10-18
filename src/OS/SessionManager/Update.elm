@@ -1,7 +1,6 @@
 module OS.SessionManager.Update exposing (update)
 
 import Dict exposing (Dict)
-import Utils.Update as Update
 import Utils.Maybe as Maybe
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)

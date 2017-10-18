@@ -3,11 +3,9 @@ module OS.Header.Update exposing (update)
 --TODO: Convert this entirely to Utils.Update
 
 import Utils.Update as Update
-import UI.Widgets.CustomSelect as CustomSelect
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Game.Data as Game
-import Game.Meta.Messages as Meta
 import Game.Account.Messages as Account
 import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers

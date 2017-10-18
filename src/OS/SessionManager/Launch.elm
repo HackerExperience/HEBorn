@@ -1,6 +1,5 @@
 module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
-import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Game.Models as Game

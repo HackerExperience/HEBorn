@@ -6,7 +6,6 @@ import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Processes.Models as Processes
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
 import Game.Network.Types as Network

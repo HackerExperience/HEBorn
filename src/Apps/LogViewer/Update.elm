@@ -3,16 +3,12 @@ module Apps.LogViewer.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
-import Game.Servers.Models as Servers
 import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
-import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Processes.Models as Processes
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
 import Apps.LogViewer.Menu.Update as Menu
 import Apps.LogViewer.Menu.Actions as Menu
-import Game.Network.Types as Network
 
 
 update :
