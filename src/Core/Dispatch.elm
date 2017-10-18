@@ -27,6 +27,7 @@ module Core.Dispatch
         , log
         , tunnels
         , serverNotification
+        , accountNotification
         , meta
         , openApp
         , apps
@@ -63,7 +64,6 @@ import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models exposing (WindowRef)
 import OS.SessionManager.WindowManager.Models as WindowManager
-import OS.SessionManager.WindowManager.Messages as WindowManager
 import OS.Toasts.Messages as Toasts
 import Utils.Cmd as CmdUtils
 
@@ -271,6 +271,11 @@ tunnels cid msg =
 serverNotification : Servers.CId -> Notifications.Msg -> Dispatch
 serverNotification cid msg =
     server cid <| Servers.NotificationsMsg msg
+
+
+accountNotification : Notifications.Msg -> Dispatch
+accountNotification msg =
+    account <| Account.NotificationsMsg msg
 
 
 web : Web.Msg -> Dispatch

@@ -7,3 +7,10 @@ import Game.Shared
 
 type Content
     = HelloWorld String
+
+
+toString : Content -> String
+toString content =
+    case content of
+        HelloWorld some ->
+            "hello world! " ++ some
