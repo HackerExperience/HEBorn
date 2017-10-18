@@ -15,10 +15,11 @@ import OS.SessionManager.WindowManager.Messages as WM
 import Game.Meta.Types exposing (Context(..))
 import OS.SessionManager.Types exposing (..)
 import Game.Data as Game
-import Game.Models as Game
+import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Apps.Messages as Apps
+import Apps.Apps as Apps
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -33,26 +34,29 @@ update data msg model =
             toSessionID data
 
         model_ =
-            ensureSession data id model
+            ensureSession id model
     in
         case msg of
-            EveryAppMsg msgs ->
-                onEveryAppMsg data msgs model_
-
-            TargetedAppMsg targetCid targetContext msgs ->
-                onTargetedAppMsg data targetCid targetContext msgs model_
+            OpenApp context app ->
+                onOpenApp data id context app model_
 
             WindowManagerMsg id msg ->
-                windowManager data id msg model_
+                onWindowManagerMsg data id msg model_
 
             DockMsg msg ->
                 Dock.update data msg model_
 
             AppMsg ( sessionId, windowId ) context msg ->
-                windowManager data
+                onWindowManagerMsg data
                     sessionId
                     (WM.AppMsg (WM.One context) windowId msg)
                     model
+
+            EveryAppMsg msgs ->
+                onEveryAppMsg data msgs model_
+
+            TargetedAppMsg targetCid targetContext msgs ->
+                onTargetedAppMsg data targetCid targetContext msgs model_
 
 
 
@@ -63,16 +67,36 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-windowManager :
+onOpenApp :
+    Game.Data
+    -> ID
+    -> Maybe Context
+    -> Apps.App
+    -> Model
+    -> UpdateResponse
+onOpenApp data id context app model =
+    let
+        ip =
+            data
+                |> Game.getActiveServer
+                |> Servers.getEndpointCId
+
+        ( model_, cmd, dispatch ) =
+            openApp data context id ip app model
+    in
+        ( model_, cmd, dispatch )
+
+
+onWindowManagerMsg :
     Game.Data
     -> ID
     -> WM.Msg
     -> Model
     -> UpdateResponse
-windowManager data id msg model =
+onWindowManagerMsg data id msg model =
     let
         wm =
-            case get id (ensureSession data id model) of
+            case get id (ensureSession id model) of
                 Just wm ->
                     wm
 
@@ -89,16 +113,6 @@ windowManager data id msg model =
             Cmd.map (WindowManagerMsg id) cmd
     in
         ( model_, cmd_, dispatch )
-
-
-ensureSession : Game.Data -> ID -> Model -> Model
-ensureSession data id model =
-    case get id model of
-        Just _ ->
-            model
-
-        Nothing ->
-            insert id model
 
 
 {-| Sends messages to every opened app on every session
@@ -135,7 +149,7 @@ onTargetedAppMsg data targetCid targetContext appMsgs model =
         servers =
             data
                 |> Game.getGame
-                |> Game.getServers
+                |> Game.Models.getServers
 
         filterer =
             case targetContext of

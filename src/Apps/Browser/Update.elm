@@ -19,6 +19,9 @@ import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
+import Apps.Apps as Apps
+import Game.Account.Messages as Account
+import Game.Meta.Types exposing (Context(Endpoint))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -61,6 +64,15 @@ update data msg model =
         ChangeTab tabId ->
             goTab tabId model
                 |> Update.fromModel
+
+        OpenApp app ->
+            onOpenApp app model
+
+        SelectEndpoint ->
+            onSelectEndpoint model
+
+        Logout ->
+            onLogout model
 
         HandlePasswordAcquired event ->
             onEveryTabMsg data (Cracked event.nip event.password) model
@@ -113,6 +125,31 @@ onNewTabIn data url model =
             Cmd.map (SomeTabMsg tabId) cmd
     in
         ( model_, cmd_, dispatch )
+
+
+onOpenApp : Apps.App -> Model -> UpdateResponse
+onOpenApp app model =
+    let
+        dispatch =
+            Dispatch.openApp (Just Endpoint) app
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onSelectEndpoint : Model -> UpdateResponse
+onSelectEndpoint model =
+    let
+        dispatch =
+            Dispatch.account <|
+                Account.ContextTo Endpoint
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onLogout : Model -> UpdateResponse
+onLogout model =
+    -- TODO #285
+    Update.fromModel model
 
 
 updateSomeTabMsg :

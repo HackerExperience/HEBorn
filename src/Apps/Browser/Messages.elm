@@ -2,6 +2,7 @@ module Apps.Browser.Messages exposing (..)
 
 import Game.Web.Types exposing (Response)
 import Game.Network.Types as Network
+import Apps.Apps as Apps
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Pages.Messages as Page
 import Events.Account.PasswordAcquired as PasswordAcquired
@@ -16,6 +17,9 @@ type Msg
       -- Browser actions
     | NewTabIn String
     | ChangeTab Int
+    | OpenApp Apps.App
+    | SelectEndpoint
+    | Logout
     | HandlePasswordAcquired PasswordAcquired.Data
 
 
