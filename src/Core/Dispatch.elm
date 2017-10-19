@@ -34,6 +34,7 @@ module Core.Dispatch
         , appsOfSession
         , browser
         , toasts
+        , politeCrash
         )
 
 import Apps.Messages as Apps
@@ -333,6 +334,11 @@ app windowRef context msg =
             windowRef
             context
             msg
+
+
+politeCrash : String -> String -> Dispatch
+politeCrash code details =
+    core <| Crash code details
 
 
 reducer : Dispatch -> List Msg -> List Msg

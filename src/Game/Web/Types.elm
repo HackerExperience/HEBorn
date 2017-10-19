@@ -26,7 +26,6 @@ type Type
     = NotFound
     | Home
     | Webserver WebserverContent
-    | NoWebserver
     | Profile
     | Whois
     | DownloadCenter DownloadCenterContent

@@ -9,7 +9,6 @@ module Apps.Browser.Pages.Models
 import Game.Web.Types as Web
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
-import Apps.Browser.Pages.NoWebserver.Models as PageNoWebserver
 import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
 import Apps.Browser.Pages.Bank.Models as PageBank
 
@@ -18,7 +17,6 @@ type Model
     = NotFoundModel PageNotFound.Model
     | HomeModel
     | WebserverModel PageWebserver.Model
-    | NoWebserverModel PageNoWebserver.Model
     | ProfileModel
     | WhoisModel
     | DownloadCenterModel DownloadCenter.Model
@@ -45,10 +43,7 @@ initialModel ({ url, type_, meta } as site) =
             HomeModel
 
         Web.Webserver content ->
-            WebserverModel <| PageWebserver.initialModel url meta content
-
-        Web.NoWebserver ->
-            NoWebserverModel <| PageNoWebserver.initialModel meta
+            WebserverModel <| PageWebserver.initialModel content meta
 
         Web.Profile ->
             ProfileModel
@@ -57,7 +52,7 @@ initialModel ({ url, type_, meta } as site) =
             WhoisModel
 
         Web.DownloadCenter content ->
-            DownloadCenterModel <| DownloadCenter.initialModel meta content
+            DownloadCenterModel <| DownloadCenter.initialModel content meta
 
         Web.ISP ->
             ISPModel
@@ -95,9 +90,6 @@ getTitle model =
 
         WebserverModel model ->
             PageWebserver.getTitle model
-
-        NoWebserverModel model ->
-            PageNoWebserver.getTitle model
 
         ProfileModel ->
             "Your Profile"
