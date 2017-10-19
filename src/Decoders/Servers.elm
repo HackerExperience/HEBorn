@@ -15,7 +15,14 @@ import Json.Decode as Decode
         , field
         , list
         )
-import Json.Decode.Pipeline exposing (decode, required, optional, custom)
+import Json.Decode.Pipeline
+    exposing
+        ( decode
+        , hardcoded
+        , required
+        , optional
+        , custom
+        )
 import Utils.Json.Decode exposing (optionalMaybe)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
@@ -39,7 +46,7 @@ server gatewayCache =
     decode Server
         |> required "name" string
         |> optional "server_type" serverType Desktop
-        |> required "nips" (list Decoders.Network.nip)
+        |> required "nips" (list Decoders.Network.nipTuple)
         |> optionalMaybe "coordinates" float
         |> filesystem
         |> logs
@@ -84,7 +91,7 @@ gatewayOwnership { serverId, endpoints } =
 endpointOwnership : Decoder EndpointData
 endpointOwnership =
     decode EndpointData
-        |> optionalMaybe "bounce" string
+        |> hardcoded (Just "")
         |> optionalMaybe "analyzed" analyzedEndpoint
 
 
@@ -138,3 +145,13 @@ notifications =
             Notifications.initialModel
     in
         optional "notifications" Decoders.Notifications.model default
+
+
+cids : Decoder (List CId)
+cids =
+    list cid
+
+
+cid : Decoder CId
+cid =
+    Decoders.Network.nip
