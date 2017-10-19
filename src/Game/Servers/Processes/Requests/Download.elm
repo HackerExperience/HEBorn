@@ -39,30 +39,32 @@ type Response
 
 request :
     ID
+    -> NIP
     -> FileID
     -> String
     -> NIP
     -> ConfigSource a
     -> Cmd Msg
-request optmistic fileId storageId nip =
+request optmistic target fileId storageId nip =
     Requests.request (Topics.fsDownload nip)
         (DownloadRequest optmistic >> Request)
     <|
-        encoder fileId storageId
+        encoder target fileId storageId
 
 
 requestPublic :
     ID
+    -> NIP
     -> FileID
     -> String
     -> NIP
     -> ConfigSource a
     -> Cmd Msg
-requestPublic optmistic fileId storageId nip =
+requestPublic optmistic target fileId storageId nip =
     Requests.request (Topics.pftpDownload nip)
         (DownloadRequest optmistic >> Request)
     <|
-        encoder fileId storageId
+        encoder target fileId storageId
 
 
 receive : Code -> Value -> Maybe Response
@@ -88,10 +90,12 @@ receive code json =
 -- INTERNALS
 
 
-encoder : FileID -> String -> Value
-encoder fileId storageId =
+encoder : NIP -> FileID -> String -> Value
+encoder ( netId, ip ) fileId storageId =
     Encode.object
-        [ ( "file_id", Encode.string fileId )
+        [ ( "network_id", Encode.string netId )
+        , ( "ip", Encode.string ip )
+        , ( "file_id", Encode.string fileId )
 
         {- STORAGE ISN'T IMPLEMENTED YET
            , ( "storage_id", Encode.string storageId )

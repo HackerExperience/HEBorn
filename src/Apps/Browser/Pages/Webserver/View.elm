@@ -80,19 +80,3 @@ viewPre data showPassword model =
             (hackingToolkitConfig showPassword)
             model.toolkit
         ]
-
-
-viewPos : Game.Data -> Model -> Html Msg
-viewPos data model =
-    ul []
-        [ li [] [ text "Open Task Manager" ]
-        , li [] [ text "Open Connection Manager" ]
-        , li [] [ text "Open Log Viewer" ]
-        , li [] [ text "Open File Explorer" ]
-        , li [] [ text "Open Remote Desktop" ]
-        , li [] [ text "Start AnyMap" ]
-        , li [] [ text "Logout" ]
-        , li [ onClick <| SetShowingPanel False ] [ text "Go back" ]
-        ]
-        |> List.singleton
-        |> div []
