@@ -34,8 +34,8 @@ import Decoders.Tunnels
 import Decoders.Filesystem
 
 
-server : Maybe ServerUid -> Decoder Server
-server serverUid =
+server : Maybe GatewayCache -> Decoder Server
+server gatewayCache =
     decode Server
         |> required "name" string
         |> optional "server_type" serverType Desktop
@@ -45,7 +45,7 @@ server serverUid =
         |> logs
         |> processes
         |> tunnels
-        |> custom (ownership serverUid)
+        |> custom (ownership gatewayCache)
         |> notifications
 
 
@@ -66,19 +66,19 @@ serverType =
         andThen decodeType string
 
 
-ownership : Maybe ServerUid -> Decoder Ownership
-ownership serverUid =
-    case serverUid of
-        Just serverUid ->
-            map GatewayOwnership (gatewayOwnership serverUid)
+ownership : Maybe GatewayCache -> Decoder Ownership
+ownership gatewayCache =
+    case gatewayCache of
+        Just gatewayCache ->
+            map GatewayOwnership (gatewayOwnership gatewayCache)
 
         Nothing ->
             map EndpointOwnership endpointOwnership
 
 
-gatewayOwnership : ServerUid -> Decoder GatewayData
-gatewayOwnership serverUid =
-    succeed <| GatewayData serverUid [] Nothing
+gatewayOwnership : GatewayCache -> Decoder GatewayData
+gatewayOwnership { serverId, endpoints } =
+    succeed <| GatewayData serverId endpoints Nothing
 
 
 endpointOwnership : Decoder EndpointData

@@ -19,16 +19,22 @@ type alias Model =
     }
 
 
-type alias ServerUid =
+type alias Gateways =
+    Dict CId GatewayCache
+
+
+type alias Id =
     String
 
 
-type alias Gateways =
-    Dict CId ServerUid
+type alias GatewayCache =
+    { serverId : Id
+    , endpoints : List NIP
+    }
 
 
 type alias GatewayIds =
-    Dict ServerUid CId
+    Dict Id CId
 
 
 type alias SessionId =
@@ -68,7 +74,7 @@ type Ownership
 
 
 type alias GatewayData =
-    { serverUid : ServerUid
+    { serverId : Id
     , endpoints : List CId
     , endpoint : Maybe CId
     }
@@ -101,14 +107,17 @@ getNIP cid model =
 -- gateway mapping information
 
 
-insertGateway : CId -> ServerUid -> Model -> Model
-insertGateway cid uid model =
+insertGateway : CId -> Id -> List NIP -> Model -> Model
+insertGateway cid id endpoints model =
     let
+        cache =
+            GatewayCache id endpoints
+
         gateways =
-            Dict.insert cid uid model.gateways
+            Dict.insert cid cache model.gateways
 
         gatewayIds =
-            Dict.insert uid cid model.gatewayIds
+            Dict.insert id cid model.gatewayIds
     in
         { model | gateways = gateways, gatewayIds = gatewayIds }
 
@@ -116,13 +125,13 @@ insertGateway cid uid model =
 removeGateway : CId -> Model -> Model
 removeGateway cid model =
     case Dict.get cid model.gateways of
-        Just uid ->
+        Just cache ->
             let
                 gateways =
                     Dict.remove cid model.gateways
 
                 gatewayIds =
-                    Dict.remove uid model.gatewayIds
+                    Dict.remove cache.serverId model.gatewayIds
             in
                 { model | gateways = gateways, gatewayIds = gatewayIds }
 
@@ -130,9 +139,16 @@ removeGateway cid model =
             model
 
 
-getGateway : CId -> Model -> Maybe ServerUid
-getGateway cid model =
+getGatewayCache : CId -> Model -> Maybe GatewayCache
+getGatewayCache cid model =
     Dict.get cid model.gateways
+
+
+getGatewayId : CId -> Model -> Maybe Id
+getGatewayId cid model =
+    model
+        |> getGatewayCache cid
+        |> Maybe.map .serverId
 
 
 
@@ -141,9 +157,9 @@ getGateway cid model =
 
 toSessionId : CId -> Model -> SessionId
 toSessionId cid model =
-    case getGateway cid model of
-        Just uid ->
-            uid
+    case getGatewayCache cid model of
+        Just cache ->
+            cache.serverId
 
         Nothing ->
             remoteSessionId cid model
@@ -162,7 +178,7 @@ getSessionId : CId -> Server -> Model -> SessionId
 getSessionId cid server model =
     case server.ownership of
         GatewayOwnership data ->
-            data.serverUid
+            data.serverId
 
         EndpointOwnership _ ->
             remoteSessionId cid model
@@ -183,7 +199,7 @@ insert cid server model0 =
         model1 =
             case server.ownership of
                 GatewayOwnership data ->
-                    insertGateway cid data.serverUid model0
+                    insertGateway cid data.serverId data.endpoints model0
 
                 EndpointOwnership _ ->
                     model0
@@ -226,8 +242,8 @@ keys model =
 fromKey : SessionId -> Model -> Maybe CId
 fromKey key model =
     case String.split "@" key of
-        [ serverUid ] ->
-            Dict.get serverUid model.gatewayIds
+        [ serverId ] ->
+            Dict.get serverId model.gatewayIds
 
         [ nid, ip ] ->
             Just ( nid, ip )
