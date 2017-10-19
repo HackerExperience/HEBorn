@@ -110,7 +110,10 @@ insertServers model serversToJoin =
         reducePlayer server servers =
             let
                 reduceInsertGateway nip servers =
-                    Servers.insertGateway nip server.serverId servers
+                    Servers.insertGateway nip
+                        server.serverId
+                        server.endpoints
+                        servers
             in
                 List.foldl reduceInsertGateway servers server.nips
 

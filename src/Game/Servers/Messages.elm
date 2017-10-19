@@ -29,7 +29,7 @@ type Msg
 
 
 type RequestMsg
-    = ResyncRequest (Maybe ServerUid) CId ResponseType
+    = ResyncRequest (Maybe GatewayCache) CId ResponseType
 
 
 
