@@ -9,6 +9,7 @@ module Core.Dispatch
         , toList
         , toCmd
         , core
+        , setup
         , websocket
         , game
         , os
@@ -61,6 +62,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Web.Messages as Web
 import Game.Servers.Shared as Servers
+import Setup.Messages as Setup
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Models exposing (WindowRef)
@@ -189,6 +191,11 @@ core msg =
 websocket : Ws.Msg -> Dispatch
 websocket msg =
     core <| WebsocketMsg msg
+
+
+setup : Setup.Msg -> Dispatch
+setup msg =
+    core <| SetupMsg msg
 
 
 game : Game.Msg -> Dispatch

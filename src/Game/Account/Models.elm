@@ -68,7 +68,6 @@ type alias Model =
     , notifications : Notifications.Model
     , logout : Logout
     , mainframe : Maybe Servers.CId
-    , setupSteps : Setup.Steps
     }
 
 
@@ -93,7 +92,6 @@ initialModel id username token =
     , notifications = Notifications.initialModel
     , logout = StillLogged
     , mainframe = Nothing
-    , setupSteps = []
     }
 
 
