@@ -14,8 +14,8 @@ type alias Model =
     }
 
 
-initialModel : Web.Meta -> Web.DownloadCenterContent -> Model
-initialModel meta { title } =
+initialModel : Web.DownloadCenterContent -> Web.Meta -> Model
+initialModel { title } meta =
     { toolkit =
         { password = meta.password
         , target = meta.nip

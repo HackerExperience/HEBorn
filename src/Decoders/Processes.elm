@@ -1,7 +1,6 @@
 module Decoders.Processes exposing (..)
 
 import Dict exposing (Dict)
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Processes.Models exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
@@ -42,7 +41,7 @@ processWithId =
 process : Decoder ( ID, Process )
 process =
     decode Process
-        |> required "type" type_
+        |> custom type_
         |> required "access" access
         |> required "state" state
         |> optionalMaybe "file" file
@@ -65,30 +64,19 @@ type_ =
             decode EncryptorContent
                 |> required "target_log_id" string
 
-        decodeData value =
-            field "data" value
-
         decodeType value =
             case value of
-                "Cracker" ->
+                "cracker" ->
                     succeed Cracker
 
-                "Decryptor" ->
-                    succeed Decryptor
-
-                "Encryptor" ->
-                    map Encryptor <| decodeData decodeEncryptor
-
-                "File Transference" ->
-                    succeed FileTransference
-
-                "Passive Firewall" ->
-                    succeed PassiveFirewall
+                "file_download" ->
+                    field "data" download
 
                 value ->
                     fail ("Unknown process type `" ++ value ++ "'")
     in
-        andThen decodeType string
+        field "type" string
+            |> andThen decodeType
 
 
 access : Decoder Access
@@ -189,3 +177,25 @@ file =
         |> optionalMaybe "id" string
         |> optionalMaybe "version" float
         |> required "name" string
+
+
+download : Decoder Type
+download =
+    decode DownloadContent
+        |> required "connection_type" connType
+        |> required "storage_id" string
+        |> map Download
+
+
+connType : Decoder TransferType
+connType =
+    let
+        match str =
+            case str of
+                "public_ftp" ->
+                    PublicFTP
+
+                _ ->
+                    PrivateFTP
+    in
+        map match string

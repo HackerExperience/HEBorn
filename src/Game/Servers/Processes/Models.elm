@@ -42,11 +42,22 @@ type
     | Encryptor EncryptorContent
     | FileTransference
     | PassiveFirewall
-    | Download Bool String String
+    | Download DownloadContent
 
 
 type alias EncryptorContent =
     { targetLogId : Logs.ID
+    }
+
+
+type TransferType
+    = PublicFTP
+    | PrivateFTP
+
+
+type alias DownloadContent =
+    { transferType : TransferType
+    , storageId : String
     }
 
 
@@ -436,7 +447,7 @@ getName { type_ } =
         PassiveFirewall ->
             "Passive Firewall"
 
-        Download _ _ _ ->
+        Download _ ->
             "Download"
 
 

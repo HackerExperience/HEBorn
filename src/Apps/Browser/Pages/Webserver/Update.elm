@@ -1,11 +1,15 @@
-module Apps.Browser.Pages.NoWebserver.Update exposing (update)
+module Apps.Browser.Pages.Webserver.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
+import Game.Models as Game
+import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared as Servers
+import Game.Servers.Processes.Messages as Processes
 import Apps.Browser.Pages.CommonActions exposing (..)
-import Apps.Browser.Pages.NoWebserver.Models exposing (..)
-import Apps.Browser.Pages.NoWebserver.Messages exposing (..)
+import Apps.Browser.Pages.Webserver.Models exposing (..)
+import Apps.Browser.Pages.Webserver.Messages exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 
 
@@ -26,6 +30,9 @@ update data msg model =
             else
                 Update.fromModel model
 
+        GlobalMsg LoginFailed ->
+            onLoginFailed model
+
         GlobalMsg _ ->
             -- Treated in Browser.Update
             Update.fromModel model
@@ -36,6 +43,9 @@ update data msg model =
         SetShowingPanel value ->
             onTogglePanel value model
 
+        StartDownload source fileId ->
+            onReqDownload data source fileId model
+
 
 onTogglePanel : Bool -> Model -> UpdateResponse
 onTogglePanel value model =
@@ -44,9 +54,38 @@ onTogglePanel value model =
         |> Update.fromModel
 
 
+onLoginFailed : Model -> UpdateResponse
+onLoginFailed model =
+    model
+        |> setLoginFailed True
+        |> Update.fromModel
+
+
 onUpdatePasswordField : String -> Model -> UpdateResponse
 onUpdatePasswordField newPassword model =
     model.toolkit
         |> HackingToolkit.setPassword newPassword
         |> flip setToolkit model
+        |> setLoginFailed False
         |> Update.fromModel
+
+
+onReqDownload :
+    Game.Data
+    -> NIP
+    -> String
+    -> Model
+    -> UpdateResponse
+onReqDownload data source fileId model =
+    let
+        dispatch =
+            case (Game.getGateway <| data.game) of
+                Just me ->
+                    Dispatch.processes (Tuple.first me) <|
+                        Processes.StartPublicDownload source fileId "storage id"
+
+                Nothing ->
+                    Dispatch.politeCrash "WTF_ASTRAL_PROJECTION"
+                        "There is no gateway server in this session!"
+    in
+        ( model, Cmd.none, dispatch )

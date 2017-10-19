@@ -7,7 +7,6 @@ import Json.Encode as Encode
 import Driver.Http.Http as HttpDriver
 import Driver.Websocket.Channels as WebsocketDriver
 import Driver.Websocket.Websocket as WebsocketDriver
-import Utils.Cmd as Cmd
 import Requests.Topics as Topics exposing (Topic(..))
 import Requests.Types exposing (..)
 

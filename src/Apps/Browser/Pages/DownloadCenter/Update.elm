@@ -78,22 +78,14 @@ onReqDownload :
     -> UpdateResponse
 onReqDownload data source fileId model =
     let
-        me =
-            requireGateway data
-
         dispatch =
-            Dispatch.processes me <|
-                Processes.StartPublicDownload source fileId "storage id"
+            case (Game.getGateway <| data.game) of
+                Just me ->
+                    Dispatch.processes (Tuple.first me) <|
+                        Processes.StartPublicDownload source fileId "storage id"
+
+                Nothing ->
+                    Dispatch.politeCrash "WTF_ASTRAL_PROJECTION"
+                        "There is no gateway server in this session!"
     in
         ( model, Cmd.none, dispatch )
-
-
-requireGateway : Game.Data -> Servers.CId
-requireGateway data =
-    case (Game.getGateway <| data.game) of
-        Just ( id, _ ) ->
-            id
-
-        Nothing ->
-            Native.Panic.crash "WTF_ASTRAL_PROJECTION"
-                "There is no gateway server in this session!"

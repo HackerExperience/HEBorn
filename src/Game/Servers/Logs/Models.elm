@@ -2,6 +2,7 @@ module Game.Servers.Logs.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
+import Regex exposing (HowMany(All), regex)
 import Game.Network.Types exposing (IP, NIP)
 
 
@@ -199,36 +200,53 @@ render { format, raw } =
 
 dataFromString : String -> Data
 dataFromString raw =
-    case String.split " " raw of
-        [ addr, "logged", "in", "as", user ] ->
-            LocalLogin addr user
-                |> LocalLoginFormat
-                |> Just
-                |> Data raw
+    Data raw <|
+        case String.split " " raw of
+            [ addr, "logged", "in", "as", user ] ->
+                if (ipValid addr) then
+                    LocalLogin addr user
+                        |> LocalLoginFormat
+                        |> Just
+                else
+                    Nothing
 
-        [ "Logged", "into", addr ] ->
-            RemoteLogin addr
-                |> RemoteLoginFormat
-                |> Just
-                |> Data raw
+            [ "Logged", "into", addr ] ->
+                if (ipValid addr) then
+                    RemoteLogin addr
+                        |> RemoteLoginFormat
+                        |> Just
+                else
+                    Nothing
 
-        [ subj, "bounced", "connection", "from", from, "to", to ] ->
-            Connection subj from to
-                |> ConnectionFormat
-                |> Just
-                |> Data raw
+            [ subj, "bounced", "connection", "from", from, "to", to ] ->
+                Connection subj from to
+                    |> ConnectionFormat
+                    |> Just
 
-        [ "File", file, "downloaded", "by", addr ] ->
-            Download file addr
-                |> DownloadByFormat
-                |> Just
-                |> Data raw
+            [ "File", file, "downloaded", "by", addr ] ->
+                if (ipValid addr) then
+                    Download file addr
+                        |> DownloadByFormat
+                        |> Just
+                else
+                    Nothing
 
-        [ "File", file, "downloaded", "from", addr ] ->
-            Download file addr
-                |> DownloadFromFormat
-                |> Just
-                |> Data raw
+            [ "File", file, "downloaded", "from", addr ] ->
+                if (ipValid addr) then
+                    Download file addr
+                        |> DownloadFromFormat
+                        |> Just
+                else
+                    Nothing
 
-        _ ->
-            Data raw Nothing
+            _ ->
+                Nothing
+
+
+ipValid : String -> Bool
+ipValid src =
+    Regex.find All
+        (regex "^((?:\\d{1,3}\\.){3}\\d{1,3})$")
+        src
+        |> List.length
+        |> flip (==) 1

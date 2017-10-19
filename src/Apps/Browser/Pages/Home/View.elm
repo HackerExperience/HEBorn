@@ -14,7 +14,7 @@ view =
         , ul
             []
             [ li
-                [ onClick <| NewTabIn "baixaki.dmy" ]
+                [ onClick <| NewTabIn "1.2.3.4" ]
                 [ text "Download Center" ]
             , li
                 [ onClick <| NewTabIn "profile.dmy" ]

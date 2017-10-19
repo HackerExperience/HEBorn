@@ -7,9 +7,8 @@ import Apps.Browser.Pages.Messages exposing (..)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions)
 import Apps.Browser.Pages.NotFound.View as NotFound
 import Apps.Browser.Pages.Home.View as Home
+import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.Webserver.View as Webserver
-import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver
-import Apps.Browser.Pages.NoWebserver.View as NoWebserver
 import Apps.Browser.Pages.Profile.View as Profile
 import Apps.Browser.Pages.Whois.View as Whois
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
@@ -36,12 +35,8 @@ view data model =
                 |> globalMsg
 
         WebserverModel model ->
-            Webserver.view model
-                |> ignoreMsg
-
-        NoWebserverModel model ->
-            NoWebserver.view data model
-                |> Html.map handleNoWebserver
+            Webserver.view data model
+                |> Html.map handleWebserver
 
         ProfileModel ->
             Profile.view
@@ -94,14 +89,14 @@ view data model =
             div [] []
 
 
-handleNoWebserver : NoWebserver.Msg -> Msg
-handleNoWebserver msg =
+handleWebserver : Webserver.Msg -> Msg
+handleWebserver msg =
     case msg of
-        NoWebserver.GlobalMsg msg ->
+        Webserver.GlobalMsg msg ->
             GlobalMsg msg
 
         _ ->
-            NoWebserverMsg msg
+            WebserverMsg msg
 
 
 handleDownloadCenter : DownloadCenter.Msg -> Msg

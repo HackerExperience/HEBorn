@@ -99,7 +99,7 @@ genPage =
             let
                 site =
                     { url = str
-                    , type_ = Web.NoWebserver
+                    , type_ = Web.Webserver { custom = "" }
                     , meta =
                         { password = Nothing
                         , nip = ( "main", str )

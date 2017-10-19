@@ -25,9 +25,9 @@ import Json.Decode.Pipeline as Encode
         ( decode
         , optional
         , required
+        , hardcoded
         )
 import Json.Encode as Encode
-import Utils.Json.Decode exposing (exclusively)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
@@ -100,11 +100,8 @@ decodeType typeStr =
         "profile" ->
             succeed Profile
 
-        "vpc_web" ->
+        "vpc" ->
             decodeWeb
-
-        "vpc_noweb" ->
-            succeed NoWebserver
 
         "npc_whois" ->
             succeed Whois
@@ -157,7 +154,7 @@ decodeMeta =
 decodeWeb : Decoder Type
 decodeWeb =
     decode WebserverContent
-        |> required "custom" string
+        |> hardcoded "TODO"
         |> map Webserver
 
 

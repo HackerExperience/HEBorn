@@ -5,9 +5,9 @@ import Utils.Update as Update
 import Game.Data as Game
 import Apps.Browser.Pages.Messages exposing (..)
 import Apps.Browser.Pages.Models exposing (Model(..))
-import Apps.Browser.Pages.NoWebserver.Messages as NoWebserver
-import Apps.Browser.Pages.NoWebserver.Models as NoWebserver
-import Apps.Browser.Pages.NoWebserver.Update as NoWebserver
+import Apps.Browser.Pages.Webserver.Messages as Webserver
+import Apps.Browser.Pages.Webserver.Models as Webserver
+import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Models as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
@@ -27,8 +27,8 @@ update :
     -> UpdateResponse
 update data msg model =
     case ( model, msg ) of
-        ( NoWebserverModel page, NoWebserverMsg msg ) ->
-            handleNoWebserver data msg page
+        ( WebserverModel page, WebserverMsg msg ) ->
+            handleWebserver data msg page
 
         ( BankModel page, BankMsg msg ) ->
             handleBank data msg page
@@ -41,15 +41,15 @@ update data msg model =
             Update.fromModel model
 
 
-handleNoWebserver :
+handleWebserver :
     Game.Data
-    -> NoWebserver.Msg
-    -> NoWebserver.Model
+    -> Webserver.Msg
+    -> Webserver.Model
     -> UpdateResponse
-handleNoWebserver data msg page =
-    NoWebserver.update data msg page
-        |> Update.mapModel NoWebserverModel
-        |> Update.mapCmd NoWebserverMsg
+handleWebserver data msg page =
+    Webserver.update data msg page
+        |> Update.mapModel WebserverModel
+        |> Update.mapCmd WebserverMsg
 
 
 handleBank :

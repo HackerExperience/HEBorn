@@ -1,7 +1,6 @@
 module Requests.Topics exposing (..)
 
 import Driver.Websocket.Channels exposing (..)
-import Requests.Types exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Shared as Servers
 
@@ -97,10 +96,29 @@ fsDownload cid =
     WebsocketTopic (ServerChannel cid) "file.download"
 
 
-{-| for public downloads, should use always a Gateway CID
+
+-- Public FTP
+
+
+pftpEnable : Servers.CId -> Topic
+pftpEnable cid =
+    WebsocketTopic (ServerChannel cid) "pftp.server.enable"
+
+
+pftpDisable : Servers.CId -> Topic
+pftpDisable cid =
+    WebsocketTopic (ServerChannel cid) "pftp.file.add"
+
+
+pftpFileRemove : Servers.CId -> Topic
+pftpFileRemove cid =
+    WebsocketTopic (ServerChannel cid) "pftp.file.remove"
+
+
+{-| For downloading from public ftp, always a Gateway CID
 -}
-fsPublicDownload : Servers.CId -> Topic
-fsPublicDownload cid =
+pftpDownload : Servers.CId -> Topic
+pftpDownload cid =
     WebsocketTopic (ServerChannel cid) "pftp.file.download"
 
 
@@ -110,9 +128,14 @@ fsPublicDownload cid =
 
 bruteforce : Servers.CId -> Topic
 bruteforce cid =
-    WebsocketTopic (ServerChannel cid) "bruteforce"
+    WebsocketTopic (ServerChannel cid) "cracker.bruteforce"
 
 
 browse : Servers.CId -> Topic
 browse cid =
-    WebsocketTopic (ServerChannel cid) "browse"
+    WebsocketTopic (ServerChannel cid) "network.browse"
+
+
+emailReply : Account.ID -> Topic
+emailReply id =
+    WebsocketTopic (AccountChannel id) "email.reply"

@@ -44,7 +44,7 @@ import Decoders.Filesystem
 server : Maybe GatewayCache -> Decoder Server
 server gatewayCache =
     decode Server
-        |> required "name" string
+        |> optional "name" string ""
         |> optional "server_type" serverType Desktop
         |> required "nips" (list Decoders.Network.nipTuple)
         |> optionalMaybe "coordinates" float
@@ -91,7 +91,7 @@ gatewayOwnership { serverId, endpoints } =
 endpointOwnership : Decoder EndpointData
 endpointOwnership =
     decode EndpointData
-        |> hardcoded (Just "")
+        |> hardcoded Nothing
         |> optionalMaybe "analyzed" analyzedEndpoint
 
 

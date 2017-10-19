@@ -105,7 +105,7 @@ joinRemote =
                 |> required "network_id" string
                 |> required "ip" string
                 |> required "password" string
-                |> optionalMaybe "bounce" string
+                |> hardcoded Nothing
     in
         decode (,)
             |> custom Decoders.Servers.cid

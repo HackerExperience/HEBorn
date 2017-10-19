@@ -50,32 +50,30 @@ update game nip msg model =
                 (newOptimistic Cracker nip target unknownProcessFile)
                 model
 
-        StartDownload source fileId storageId ->
-            onStart game
+        StartDownload origin fileId storageId ->
+            onDownload game
                 nip
                 (newOptimistic
-                    (Download False
-                        storageId
-                        fileId
-                    )
-                    source
+                    (Download (DownloadContent PrivateFTP storageId))
+                    nip
                     (Tuple.second nip)
                     unknownProcessFile
                 )
+                origin
+                fileId
                 model
 
-        StartPublicDownload source fileId storageId ->
-            onStart game
+        StartPublicDownload origin fileId storageId ->
+            onDownload game
                 nip
                 (newOptimistic
-                    (Download True
-                        storageId
-                        fileId
-                    )
-                    source
+                    (Download (DownloadContent PublicFTP storageId))
+                    nip
                     (Tuple.second nip)
                     unknownProcessFile
                 )
+                origin
+                fileId
                 model
 
         Complete id ->
@@ -176,13 +174,43 @@ onStart game nip process model =
                 in
                     ( model_, cmd, Dispatch.none )
 
-            Download isPublic fileId storageId ->
+            _ ->
+                Update.fromModel model_
+
+
+onDownload :
+    Game.Model
+    -> NIP
+    -> Process
+    -> NIP
+    -> String
+    -> Model
+    -> UpdateResponse
+onDownload game nip process origin fileId model =
+    let
+        ( id, model_ ) =
+            insertOptimistic process model
+    in
+        case getType process of
+            Download { transferType, storageId } ->
                 let
                     cmd =
-                        if isPublic then
-                            Download.requestPublic id fileId storageId nip game
-                        else
-                            Download.request id fileId storageId nip game
+                        case transferType of
+                            PublicFTP ->
+                                Download.requestPublic id
+                                    origin
+                                    fileId
+                                    storageId
+                                    nip
+                                    game
+
+                            PrivateFTP ->
+                                Download.request id
+                                    origin
+                                    fileId
+                                    storageId
+                                    nip
+                                    game
                 in
                     ( model_, cmd, Dispatch.none )
 
