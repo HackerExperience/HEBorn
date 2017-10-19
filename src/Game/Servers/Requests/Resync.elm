@@ -23,19 +23,19 @@ type Response
     = Okay ( CId, Server )
 
 
-request : Maybe ServerUid -> CId -> ConfigSource a -> Cmd Msg
-request serverUid id =
+request : Maybe GatewayCache -> CId -> ConfigSource a -> Cmd Msg
+request gatewayCache id =
     -- this request is mainly used to fetch invaded computers
     Requests.request (Topics.serverResync id)
-        (ResyncRequest serverUid id >> Request)
+        (ResyncRequest gatewayCache id >> Request)
         emptyPayload
 
 
-receive : Maybe ServerUid -> CId -> Code -> Value -> Maybe Response
-receive serverUid id code json =
+receive : Maybe GatewayCache -> CId -> Code -> Value -> Maybe Response
+receive gatewayCache id code json =
     case code of
         OkCode ->
-            decodeValue (Decoders.Servers.server serverUid) json
+            decodeValue (Decoders.Servers.server gatewayCache) json
                 |> Result.map ((,) id >> Okay)
                 |> Requests.report
 

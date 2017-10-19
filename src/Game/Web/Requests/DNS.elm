@@ -150,7 +150,7 @@ decodeMeta : Decoder Meta
 decodeMeta =
     decode Meta
         |> optional "password" (nullable string) Nothing
-        |> required "nip" Decoders.Network.nip
+        |> required "nip" Decoders.Network.nipTuple
         |> optional "public" (list file) []
 
 

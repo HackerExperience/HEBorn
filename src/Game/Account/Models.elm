@@ -65,6 +65,7 @@ type alias Model =
     , inventory : Inventory.Model
     , notifications : Notifications.Model
     , logout : Logout
+    , mainframe : Maybe Servers.CId
     }
 
 
@@ -88,6 +89,7 @@ initialModel id username token =
     , inventory = Inventory.initialModel
     , notifications = Notifications.initialModel
     , logout = StillLogged
+    , mainframe = Nothing
     }
 
 

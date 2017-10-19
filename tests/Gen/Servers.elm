@@ -80,8 +80,8 @@ genServerCId =
     map2 (,) unique unique
 
 
-genServerUid : Generator ServerUid
-genServerUid =
+genServerId : Generator Id
+genServerId =
     unique
 
 
@@ -95,7 +95,7 @@ genOwnserhip =
 
 genGatewayOwnership : Generator GatewayData
 genGatewayOwnership =
-    map (\uid -> GatewayData uid [] Nothing) genServerUid
+    map (\uid -> GatewayData uid [] Nothing) genServerId
 
 
 genEndpointOwnership : Generator EndpointData

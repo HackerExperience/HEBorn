@@ -82,7 +82,7 @@ onResync : Game.Model -> CId -> Model -> UpdateResponse
 onResync game cid model =
     let
         cmd =
-            Resync.request (getGateway cid model) cid game
+            Resync.request (getGatewayCache cid model) cid game
     in
         ( model, cmd, Dispatch.none )
 
@@ -232,7 +232,7 @@ handleJoinedServer : CId -> Value -> Model -> UpdateResponse
 handleJoinedServer cid value model =
     let
         decodeBootstrap =
-            Decoders.Servers.server <| getGateway cid model
+            Decoders.Servers.server <| getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->

@@ -24,6 +24,9 @@ import Game.Network.Types as Network exposing (NIP)
 import Game.Models exposing (..)
 import Utils.Json.Decode exposing (optionalMaybe)
 import Decoders.Storyline
+import Decoders.Account
+import Decoders.Servers
+import Decoders.Network
 
 
 type alias ServersToJoin =
@@ -58,7 +61,7 @@ type alias Remote =
 bootstrap : Model -> Decoder ( Model, ServersToJoin )
 bootstrap game =
     decode Model
-        |> hardcoded game.account
+        |> account game
         |> hardcoded game.servers
         |> hardcoded game.meta
         |> optional "story" Decoders.Storyline.story Story.initialModel
@@ -67,6 +70,11 @@ bootstrap game =
         |> map (,)
         |> andThen (\done -> map done <| servers)
         |> map (uncurry insertServers)
+
+
+account : Model -> Decoder (Account.Model -> b) -> Decoder b
+account game =
+    optional "account" (Decoders.Account.account game.account) game.account
 
 
 servers : Decoder ServersToJoin
@@ -85,8 +93,8 @@ joinPlayer : Decoder Player
 joinPlayer =
     decode Player
         |> required "server_id" string
-        |> required "nips" nips
-        |> required "endpoints" cids
+        |> required "nips" Decoders.Network.nips
+        |> required "endpoints" Decoders.Servers.cids
 
 
 joinRemote : Decoder ( Servers.CId, Remote )
@@ -100,7 +108,7 @@ joinRemote =
                 |> optionalMaybe "bounce" string
     in
         decode (,)
-            |> custom cid
+            |> custom Decoders.Servers.cid
             |> custom decodeRemote
 
 
@@ -110,7 +118,10 @@ insertServers model serversToJoin =
         reducePlayer server servers =
             let
                 reduceInsertGateway nip servers =
-                    Servers.insertGateway nip server.serverId servers
+                    Servers.insertGateway nip
+                        server.serverId
+                        server.endpoints
+                        servers
             in
                 List.foldl reduceInsertGateway servers server.nips
 
@@ -120,25 +131,3 @@ insertServers model serversToJoin =
                 |> flip setServers model
     in
         ( model_, serversToJoin )
-
-
-cids : Decoder (List Servers.CId)
-cids =
-    list cid
-
-
-cid : Decoder Servers.CId
-cid =
-    nip
-
-
-nips : Decoder (List NIP)
-nips =
-    list nip
-
-
-nip : Decoder NIP
-nip =
-    decode Network.toNip
-        |> required "network_id" string
-        |> required "ip" string

@@ -15,7 +15,14 @@ import Json.Decode as Decode
         , field
         , list
         )
-import Json.Decode.Pipeline exposing (decode, required, optional, custom)
+import Json.Decode.Pipeline
+    exposing
+        ( decode
+        , hardcoded
+        , required
+        , optional
+        , custom
+        )
 import Utils.Json.Decode exposing (optionalMaybe)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
@@ -34,18 +41,18 @@ import Decoders.Tunnels
 import Decoders.Filesystem
 
 
-server : Maybe ServerUid -> Decoder Server
-server serverUid =
+server : Maybe GatewayCache -> Decoder Server
+server gatewayCache =
     decode Server
         |> required "name" string
         |> optional "server_type" serverType Desktop
-        |> required "nips" (list Decoders.Network.nip)
+        |> required "nips" (list Decoders.Network.nipTuple)
         |> optionalMaybe "coordinates" float
         |> filesystem
         |> logs
         |> processes
         |> tunnels
-        |> custom (ownership serverUid)
+        |> custom (ownership gatewayCache)
         |> notifications
 
 
@@ -66,25 +73,25 @@ serverType =
         andThen decodeType string
 
 
-ownership : Maybe ServerUid -> Decoder Ownership
-ownership serverUid =
-    case serverUid of
-        Just serverUid ->
-            map GatewayOwnership (gatewayOwnership serverUid)
+ownership : Maybe GatewayCache -> Decoder Ownership
+ownership gatewayCache =
+    case gatewayCache of
+        Just gatewayCache ->
+            map GatewayOwnership (gatewayOwnership gatewayCache)
 
         Nothing ->
             map EndpointOwnership endpointOwnership
 
 
-gatewayOwnership : ServerUid -> Decoder GatewayData
-gatewayOwnership serverUid =
-    succeed <| GatewayData serverUid [] Nothing
+gatewayOwnership : GatewayCache -> Decoder GatewayData
+gatewayOwnership { serverId, endpoints } =
+    succeed <| GatewayData serverId endpoints Nothing
 
 
 endpointOwnership : Decoder EndpointData
 endpointOwnership =
     decode EndpointData
-        |> optionalMaybe "bounce" string
+        |> hardcoded (Just "")
         |> optionalMaybe "analyzed" analyzedEndpoint
 
 
@@ -138,3 +145,13 @@ notifications =
             Notifications.initialModel
     in
         optional "notifications" Decoders.Notifications.model default
+
+
+cids : Decoder (List CId)
+cids =
+    list cid
+
+
+cid : Decoder CId
+cid =
+    Decoders.Network.nip
