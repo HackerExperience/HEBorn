@@ -27,10 +27,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     -- DONE
     case (onDebug model received msg) of
-        Boot id username token firstRun ->
+        Boot id username token ->
             let
                 model_ =
-                    connect id username token firstRun model
+                    connect id username token model
             in
                 ( model_, Cmd.none )
 

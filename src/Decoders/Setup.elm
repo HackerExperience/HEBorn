@@ -13,27 +13,27 @@ import Json.Decode as Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (commonError)
-import Setup.Types as Setup exposing (Step(..))
+import Setup.Types as Setup exposing (Page(..))
 import Setup.Models as Setup
 
 
-remainingSteps : Decoder Setup.Steps
-remainingSteps =
-    map Setup.remainingSteps steps
+remainingPages : Decoder Setup.Pages
+remainingPages =
+    map Setup.remainingPages pages
 
 
-steps : Decoder Setup.Steps
-steps =
-    list step
+pages : Decoder Setup.Pages
+pages =
+    list page
 
 
-step : Decoder Setup.Step
-step =
-    andThen stepFromString string
+page : Decoder Setup.Page
+page =
+    andThen pageFromString string
 
 
-stepFromString : String -> Decoder Setup.Step
-stepFromString str =
+pageFromString : String -> Decoder Setup.Page
+pageFromString str =
     case str of
         "welcome" ->
             succeed Welcome
@@ -48,4 +48,4 @@ stepFromString str =
             succeed Finish
 
         _ ->
-            fail <| commonError "Step" str
+            fail <| commonError "Setup.Models.Page" str

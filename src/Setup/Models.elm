@@ -1,30 +1,32 @@
 module Setup.Models exposing (..)
 
 import Game.Models as Game
+import Json.Encode as Encode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Ports.Map exposing (Coordinates)
 import Setup.Types exposing (..)
 import Setup.Messages exposing (Msg)
+import Setup.Pages.PickLocation.Models as PickLocation
+import Setup.Pages.SetHostname.Models as SetHostname
 
 
 type alias Model =
-    { step : Step
-    , coordinates : Maybe Coordinates
-    , areaLabel : Maybe String
+    { page : Maybe PageModel
+    , pages : List String
+    , remaining : List PageModel
+    , done : List PageModel
+    , isLoading : Bool
     }
 
 
-stepsOrder : Steps
-stepsOrder =
-    [ Welcome
-    , PickLocation
-    , Finish
-    ]
-
-
-remainingSteps : Steps -> Steps
-remainingSteps steps =
-    List.filter ((flip List.member steps) >> not) stepsOrder
+type PageModel
+    = WelcomeModel
+    | CustomWelcomeModel
+    | SetHostnameModel SetHostname.Model
+    | PickLocationModel PickLocation.Model
+    | ChooseThemeModel
+    | FinishModel
+    | CustomFinishModel
 
 
 mapId : String
@@ -37,40 +39,229 @@ geoInstance =
     "setup"
 
 
+pageOrder : Pages
+pageOrder =
+    [ Welcome
+    , SetHostname
+    , PickLocation
+    , Finish
+    ]
+
+
+remainingPages : Pages -> Pages
+remainingPages pages =
+    let
+        newPages =
+            List.filter ((flip List.member pages) >> not) pageOrder
+    in
+        case List.head newPages of
+            Just Welcome ->
+                -- insert local greetings/farewells
+                newPages
+                    |> List.reverse
+                    |> (::) CustomFinish
+                    |> List.reverse
+                    |> (::) CustomWelcome
+
+            _ ->
+                newPages
+
+
+initializePages : Pages -> List PageModel
+initializePages =
+    let
+        mapper page =
+            case page of
+                Welcome ->
+                    WelcomeModel
+
+                CustomWelcome ->
+                    CustomWelcomeModel
+
+                SetHostname ->
+                    SetHostnameModel <| SetHostname.initialModel
+
+                PickLocation ->
+                    PickLocationModel <| PickLocation.initialModel
+
+                ChooseTheme ->
+                    ChooseThemeModel
+
+                Finish ->
+                    FinishModel
+
+                CustomFinish ->
+                    CustomFinishModel
+    in
+        List.map mapper
+
+
 initialModel : Game.Model -> ( Model, Cmd Msg, Dispatch )
 initialModel game =
     let
         model =
-            { step = Welcome
-            , coordinates = Nothing
-            , areaLabel = Nothing
+            { page = Nothing
+            , pages = []
+            , remaining = []
+            , done = []
+            , isLoading = False
             }
     in
         ( model, Cmd.none, Dispatch.none )
 
 
-setCoords : Maybe Coordinates -> Model -> Model
-setCoords coordinates model =
+doneLoading : Model -> Model
+doneLoading model =
+    { model | isLoading = False }
+
+
+doneSetup : Model -> Bool
+doneSetup model =
+    case model.page of
+        Just _ ->
+            False
+
+        Nothing ->
+            List.isEmpty model.remaining
+
+
+isLoading : Model -> Bool
+isLoading =
+    .isLoading
+
+
+hasPages : Model -> Bool
+hasPages =
+    .pages >> List.isEmpty
+
+
+setPages : Pages -> Model -> Model
+setPages pages model =
     let
+        models =
+            initializePages pages
+
+        remaining =
+            models
+                |> List.tail
+                |> Maybe.withDefault []
+    in
+        { model
+            | pages = List.map pageModelToString models
+            , page = List.head models
+            , remaining = remaining
+        }
+
+
+setPage : PageModel -> Model -> Model
+setPage page model =
+    { model | page = Just page }
+
+
+nextPage : Model -> Model
+nextPage model =
+    let
+        current =
+            List.head model.remaining
+
+        remaining =
+            model.remaining
+                |> List.tail
+                |> Maybe.withDefault []
+
+        done =
+            case model.page of
+                Just page ->
+                    page :: model.done
+
+                Nothing ->
+                    model.done
+
         model_ =
-            { model | coordinates = coordinates }
+            { model
+                | page = current
+                , remaining = remaining
+                , done = done
+            }
     in
         model_
 
 
-setAreaLabel : Maybe String -> Model -> Model
-setAreaLabel areaLabel model =
+previousPage : Model -> Model
+previousPage model =
     let
+        current =
+            List.head model.done
+
+        done =
+            model.done
+                |> List.tail
+                |> Maybe.withDefault []
+
+        remaining =
+            case model.page of
+                Just page ->
+                    page :: model.remaining
+
+                Nothing ->
+                    model.remaining
+
         model_ =
-            { model | areaLabel = areaLabel }
+            { model
+                | page = current
+                , remaining = remaining
+                , done = done
+            }
     in
         model_
 
 
-setStep : Step -> Model -> Model
-setStep step model =
-    let
-        model_ =
-            { model | step = step }
-    in
-        model_
+pageModelToString : PageModel -> String
+pageModelToString page =
+    case page of
+        WelcomeModel ->
+            "WELCOME"
+
+        CustomWelcomeModel ->
+            "WELCOME AGAIN"
+
+        SetHostnameModel _ ->
+            "HOSTNAME"
+
+        PickLocationModel _ ->
+            "LOCATION PICKER"
+
+        ChooseThemeModel ->
+            "CHOOSE THEME"
+
+        FinishModel ->
+            "FINISH"
+
+        CustomFinishModel ->
+            "FINISH"
+
+
+encodePageModel : PageModel -> Result String Value
+encodePageModel page =
+    case page of
+        WelcomeModel ->
+            Ok <| Encode.string "welcome"
+
+        SetHostnameModel _ ->
+            Ok <| Encode.string "hostname"
+
+        PickLocationModel _ ->
+            Ok <| Encode.string "location_picker"
+
+        ChooseThemeModel ->
+            Ok <| Encode.string "theme_selector"
+
+        FinishModel ->
+            Ok <| Encode.string "finish"
+
+        _ ->
+            Err
+                ("Can't convert page `"
+                    ++ (pageModelToString page)
+                    ++ "' to json, this is a local page."
+                )
