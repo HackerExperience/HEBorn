@@ -8,6 +8,7 @@ import Events.Server as Server
 import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Channels exposing (..)
 import Game.Messages exposing (..)
+import Setup.Messages as Setup
 
 
 -- game
@@ -74,6 +75,7 @@ fromReport =
 
                 AccountChannel id ->
                     [ Dispatch.game <| HandleJoinedAccount value
+                    , Dispatch.setup <| Setup.HandleJoinedAccount
                     ]
 
                 RequestsChannel ->

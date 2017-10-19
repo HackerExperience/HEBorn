@@ -24,7 +24,7 @@ account model =
         |> hardcoded model.notifications
         |> hardcoded model.logout
         |> mainframe model
-        |> setupSteps model
+        |> setupPages model
 
 
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
@@ -32,10 +32,10 @@ mainframe model =
     optional "mainframe" (map Just Decoders.Servers.cid) model.mainframe
 
 
-setupSteps : Model -> Decoder (Setup.Steps -> a) -> Decoder a
-setupSteps model =
+setupPages : Model -> Decoder (Setup.Pages -> a) -> Decoder a
+setupPages model =
     let
-        remainingSteps =
-            Setup.remainingSteps model.setupSteps
+        remainingPages =
+            Setup.remainingPages model.setupPages
     in
-        optional "setup" Decoders.Setup.remainingSteps remainingSteps
+        optional "setup" Decoders.Setup.remainingPages remainingPages

@@ -1,0 +1,19 @@
+--finish : Html Msg
+--finish =
+--    node contentNode
+--        [ class [ StepWelcome ] ]
+--        [ headerBanner
+--        , div []
+--            [ h2 [] [ text "Good bye!" ]
+--            , p []
+--                [ text "It was really good, wasn't it?" ]
+--            , p []
+--                [ text "Well.. You're ready to leave now." ]
+--            , p []
+--                [ text "Maybe you'll find someone else to help you... Maybe Black Mesa!" ]
+--            , p []
+--                [ text "What are you waiting fool? Run, Forrest, run!" ]
+--            , div []
+--                [ button [ onClick GoOS ] [ text "FINISH HIM" ] ]
+--            ]
+--        ]

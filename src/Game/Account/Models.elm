@@ -14,6 +14,8 @@ module Game.Account.Models
         , getContext
         , getDatabase
         , getBounces
+        , getSetupPages
+        , needsSetup
         )
 
 import Game.Servers.Shared as Servers
@@ -68,7 +70,7 @@ type alias Model =
     , notifications : Notifications.Model
     , logout : Logout
     , mainframe : Maybe Servers.CId
-    , setupSteps : Setup.Steps
+    , setupPages : Setup.Pages
     }
 
 
@@ -93,7 +95,7 @@ initialModel id username token =
     , notifications = Notifications.initialModel
     , logout = StillLogged
     , mainframe = Nothing
-    , setupSteps = []
+    , setupPages = []
     }
 
 
@@ -143,3 +145,13 @@ insertGateway id ({ gateways } as model) =
                 model.gateways
     in
         { model | activeGateway = activeGateway, gateways = gateways }
+
+
+getSetupPages : Model -> Setup.Pages
+getSetupPages =
+    .setupPages
+
+
+needsSetup : Model -> Bool
+needsSetup model =
+    not <| List.isEmpty model.setupPages

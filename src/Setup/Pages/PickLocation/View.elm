@@ -1,0 +1,44 @@
+--locPickerBox : Model -> Html Msg
+--locPickerBox model =
+--    let
+--        info =
+--            div [] <|
+--                case ( model.areaLabel, model.coordinates ) of
+--                    ( Just areaLabel, _ ) ->
+--                        [ text "YOU SELECTED: "
+--                        , text areaLabel
+--                        ]
+--                    ( _, Just coords ) ->
+--                        [ text "SELECTED COORDS: "
+--                        , br [] []
+--                        , text ">> LAT: "
+--                        , text (toString coords.lat)
+--                        , br [] []
+--                        , text ">> LON: "
+--                        , text (toString coords.lng)
+--                        , br [] []
+--                        , br [] []
+--                        , text "PROCESSING AREA INFO..."
+--                        ]
+--                    _ ->
+--                        [ text "PROCESSING LOCATION..."
+--                        ]
+--        btns =
+--            div []
+--                [ button [ onClick ResetLoc ] [ text "RESET" ]
+--                -- , span [] []
+--                , button [ onClick <| GoStep Finish ] [ text "NEXT" ]
+--                ]
+--    in
+--        div [] [ info, btns ]
+
+--locationPicker : Model -> Html Msg
+--locationPicker model =
+--    node contentNode
+--        [ class [ StepPickLocation ] ]
+--        [ headerBanner
+--        , div []
+--            [ h2 [] [ text "Pick your location" ] ]
+--        , Native.Untouchable.node "hemap" mapId
+--        , locPickerBox model
+--        ]

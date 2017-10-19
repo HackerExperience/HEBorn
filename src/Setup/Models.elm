@@ -8,23 +8,21 @@ import Setup.Messages exposing (Msg)
 
 
 type alias Model =
-    { step : Step
+    { page : Maybe PageModel
+    , pages : List PageModel
     , coordinates : Maybe Coordinates
     , areaLabel : Maybe String
+    , isLoading : Bool
     }
 
 
-stepsOrder : Steps
-stepsOrder =
-    [ Welcome
-    , PickLocation
-    , Finish
-    ]
-
-
-remainingSteps : Steps -> Steps
-remainingSteps steps =
-    List.filter ((flip List.member steps) >> not) stepsOrder
+type PageModel
+    = WelcomeModel
+    | CustomWelcomeModel
+    | SetHostnameModel String
+    | PickLocationModel
+    | ChooseThemeModel
+    | FinishModel
 
 
 mapId : String
@@ -37,13 +35,54 @@ geoInstance =
     "setup"
 
 
+pageOrder : Pages
+pageOrder =
+    [ Welcome
+    , PickLocation
+    , Finish
+    ]
+
+
+remainingPages : Pages -> Pages
+remainingPages pages =
+    List.filter ((flip List.member pages) >> not) pageOrder
+
+
+initializePages : Pages -> List PageModel
+initializePages =
+    let
+        mapper page =
+            case page of
+                Welcome ->
+                    WelcomeModel
+
+                CustomWelcome ->
+                    CustomWelcomeModel
+
+                SetHostname ->
+                    SetHostnameModel ""
+
+                PickLocation ->
+                    PickLocationModel
+
+                ChooseTheme ->
+                    ChooseThemeModel
+
+                Finish ->
+                    FinishModel
+    in
+        List.map mapper
+
+
 initialModel : Game.Model -> ( Model, Cmd Msg, Dispatch )
 initialModel game =
     let
         model =
-            { step = Welcome
+            { page = Nothing
+            , pages = []
             , coordinates = Nothing
             , areaLabel = Nothing
+            , isLoading = True
             }
     in
         ( model, Cmd.none, Dispatch.none )
@@ -67,10 +106,33 @@ setAreaLabel areaLabel model =
         model_
 
 
-setStep : Step -> Model -> Model
-setStep step model =
-    let
-        model_ =
-            { model | step = step }
-    in
-        model_
+setPage : PageModel -> Model -> Model
+setPage page model =
+    { model | page = Just page }
+
+
+isLoading : Model -> Bool
+isLoading =
+    .isLoading
+
+
+pageModelToString : PageModel -> String
+pageModelToString page =
+    case page of
+        WelcomeModel ->
+            "WELCOME"
+
+        CustomWelcomeModel ->
+            "NEW FEATURES"
+
+        SetHostnameModel _ ->
+            "HOSTNAME"
+
+        PickLocationModel ->
+            "LOCATION PICKER"
+
+        ChooseThemeModel ->
+            "CHOOSE THEME"
+
+        FinishModel ->
+            "FINISH"

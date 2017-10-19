@@ -8,8 +8,9 @@ import Setup.Messages exposing (..)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ mapClick MapClick
-        , geoLocResp GeoLocResp
-        , geoRevResp GeoRevResp
-        ]
+    --Sub.batch
+    --    [ mapClick MapClick
+    --    , geoLocResp GeoLocResp
+    --    , geoRevResp GeoRevResp
+    --    ]
+    Sub.none

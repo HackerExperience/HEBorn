@@ -2,12 +2,24 @@ module Setup.Messages exposing (..)
 
 import Json.Encode exposing (Value)
 import Setup.Types exposing (..)
+import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = MapClick Value
-    | GeoLocResp Value
-    | GeoRevResp Value
-    | ResetLoc
-    | GoStep Step
-    | GoOS
+    = Msg
+    | FinishLoading
+    | HandleJoinedAccount
+
+
+
+--= MapClick ValueValue
+--| GeoLocResp Value
+--| GeoRevResp Value
+--| ResetLoc
+--| GoPage Page
+--| GoOS
+--| Request RequestMsg
+
+
+type RequestMsg
+    = SetupRequest ResponseType
