@@ -1,12 +1,24 @@
 module Decoders.Network exposing (..)
 
-import Game.Network.Types exposing (NIP)
-import Json.Decode exposing (Decoder, index, string)
-import Json.Decode.Pipeline exposing (decode, custom)
+import Game.Network.Types as Network exposing (NIP)
+import Json.Decode exposing (Decoder, index, string, list)
+import Json.Decode.Pipeline exposing (decode, custom, required)
+
+
+nipTuple : Decoder NIP
+nipTuple =
+    decode (\network ip -> ( network, ip ))
+        |> custom (index 0 string)
+        |> custom (index 1 string)
+
+
+nips : Decoder (List NIP)
+nips =
+    list nip
 
 
 nip : Decoder NIP
 nip =
-    decode (\network ip -> ( network, ip ))
-        |> custom (index 0 string)
-        |> custom (index 1 string)
+    decode Network.toNip
+        |> required "network_id" string
+        |> required "ip" string
