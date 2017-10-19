@@ -59,7 +59,7 @@ eventTests =
                 json =
                     toValue
                         """
-                        { "type" : "Cracker"
+                        { "type" : "cracker"
                         , "access" :
                             { "origin_ip" : "id"
                             , "priority" : 3
@@ -268,7 +268,7 @@ requestTests =
                 json =
                     toValue
                         """
-                        { "type" : "Cracker"
+                        { "type" : "cracker"
                         , "access" :
                             { "origin_ip" : "id"
                             , "priority" : 3
