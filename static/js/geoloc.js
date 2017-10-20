@@ -34,6 +34,6 @@ app.ports.geoRevReq.subscribe(function(data) {
             });
         }
     }
-  conn.open('GET', `//search.mapzen.com/v1/reverse?api_key=${mk}&point.lat=${lat}&point.lon=${lng}`, true);
+  conn.open('GET', '//search.mapzen.com/v1/reverse?api_key=${mk}&point.lat=${lat}&point.lon=${lng}', true);
   conn.send();
 });
