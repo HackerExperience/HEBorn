@@ -63,9 +63,9 @@ receive url code json =
                 |> Requests.report
 
         ErrorCode ->
-            Requests.decodeGenericError json
+            Requests.decodeGenericError
+                json
                 (decodeErrorMessage url)
-                |> Requests.report
 
         _ ->
             Just <| ConnectionError url
