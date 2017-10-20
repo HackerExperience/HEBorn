@@ -1,24 +1,19 @@
 module Setup.Messages exposing (..)
 
 import Json.Encode exposing (Value)
-import Setup.Types exposing (..)
 import Requests.Types exposing (ResponseType)
+import Setup.Types exposing (..)
+import Setup.Pages.PickLocation.Messages as PickLocation
+import Setup.Pages.SetHostname.Messages as SetHostname
 
 
 type Msg
-    = Msg
-    | FinishLoading
-    | HandleJoinedAccount
-
-
-
---= MapClick ValueValue
---| GeoLocResp Value
---| GeoRevResp Value
---| ResetLoc
---| GoPage Page
---| GoOS
---| Request RequestMsg
+    = NextPage
+    | PreviousPage
+    | SetHostnameMsg SetHostname.Msg
+    | PickLocationMsg PickLocation.Msg
+    | Request RequestMsg
+    | HandleJoinedAccount Value
 
 
 type RequestMsg

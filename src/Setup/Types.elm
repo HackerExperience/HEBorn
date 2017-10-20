@@ -12,3 +12,4 @@ type Page
     | PickLocation
     | ChooseTheme
     | Finish
+    | CustomFinish

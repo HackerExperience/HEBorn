@@ -75,7 +75,7 @@ fromReport =
 
                 AccountChannel id ->
                     [ Dispatch.game <| HandleJoinedAccount value
-                    , Dispatch.setup <| Setup.HandleJoinedAccount
+                    , Dispatch.setup <| Setup.HandleJoinedAccount value
                     ]
 
                 RequestsChannel ->

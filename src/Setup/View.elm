@@ -1,14 +1,18 @@
 module Setup.View exposing (view)
 
 import Game.Models as Game
-import Native.Untouchable
 import Html exposing (..)
-import Html.Events exposing (onClick)
 import Html.CssHelpers
-import Setup.Types exposing (..)
 import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Setup.Resources exposing (..)
+import Setup.Pages.Configs as Configs
+import Setup.Pages.Welcome.View as Welcome
+import Setup.Pages.CustomWelcome.View as CustomWelcome
+import Setup.Pages.Finish.View as Finish
+import Setup.Pages.CustomFinish.View as CustomFinish
+import Setup.Pages.PickLocation.View as PickLocation
+import Setup.Pages.SetHostname.View as SetHostname
 
 
 { id, class, classList } =
@@ -21,11 +25,11 @@ view game model =
         loadingView
     else
         case model.page of
-            Nothing ->
-                loadingView
-
             Just page ->
                 setupView game page model
+
+            Nothing ->
+                loadingView
 
 
 loadingView : Html Msg
@@ -41,58 +45,52 @@ setupView game page model =
     node setupNode
         []
         [ leftBar page model.pages
-        , pageBase <| viewPage game page
+        , viewPage game page
         ]
 
 
-pageBase : Html Msg -> Html Msg
-pageBase content =
-    node contentNode
-        [ class [ StepWelcome ] ]
-        [ div [] [ h1 [] [ text " D'LayDOS" ] ]
-        , content
-        ]
-
-
-leftBar : PageModel -> List PageModel -> Html Msg
-leftBar =
+leftBar : PageModel -> List String -> Html Msg
+leftBar current others =
     let
-        mapMarker page step =
-            stepMarker page step
+        currentPageName =
+            pageModelToString current
 
-        view page pages =
-            node leftBarNode
-                []
-                [ ul [] <| List.map (mapMarker page) pages
-                ]
+        mapMarker =
+            stepMarker currentPageName
     in
-        view
+        node leftBarNode
+            []
+            [ ul [] <| List.map mapMarker others
+            ]
 
 
 viewPage : Game.Model -> PageModel -> Html Msg
 viewPage game page =
     case page of
         WelcomeModel ->
-            --Welcome.view
-            div [] []
+            Welcome.view { onNext = NextPage }
 
         CustomWelcomeModel ->
-            div [] []
+            CustomWelcome.view { onNext = NextPage }
 
-        SetHostnameModel _ ->
-            div [] []
+        SetHostnameModel model ->
+            SetHostname.view Configs.setHostname game model
 
-        PickLocationModel ->
-            div [] []
+        PickLocationModel model ->
+            PickLocation.view Configs.pickLocation game model
 
         ChooseThemeModel ->
+            -- TODO
             div [] []
 
         FinishModel ->
-            div [] []
+            Finish.view { onNext = NextPage }
+
+        CustomFinishModel ->
+            CustomFinish.view { onNext = NextPage }
 
 
-stepMarker : PageModel -> PageModel -> Html Msg
+stepMarker : String -> String -> Html Msg
 stepMarker active other =
     let
         isSelected =
@@ -101,4 +99,4 @@ stepMarker active other =
             else
                 []
     in
-        li isSelected [ text <| pageModelToString other ]
+        li isSelected [ text other ]

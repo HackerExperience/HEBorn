@@ -1,16 +1,18 @@
 module Setup.Subscriptions exposing (subscriptions)
 
-import Utils.Ports.Map exposing (mapClick)
-import Utils.Ports.Geolocation exposing (geoLocResp, geoRevResp)
+import Game.Models as Game
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
+import Setup.Models exposing (..)
+import Setup.Pages.Configs as Configs
+import Setup.Pages.PickLocation.Subscriptions as PickLocation
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    --Sub.batch
-    --    [ mapClick MapClick
-    --    , geoLocResp GeoLocResp
-    --    , geoRevResp GeoRevResp
-    --    ]
-    Sub.none
+    case model.page of
+        Just (PickLocationModel model) ->
+            PickLocation.subscriptions Configs.pickLocation model
+
+        _ ->
+            Sub.none
