@@ -39,4 +39,4 @@ isOkay =
 
 setOkay : Model -> Model
 setOkay model =
-    { model | okay = False }
+    { model | okay = True }
