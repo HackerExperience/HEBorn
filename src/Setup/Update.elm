@@ -31,8 +31,8 @@ update game msg model =
         PreviousPage ->
             onPreviousPage game model
 
-        SetHostname msg ->
-            onSetHostname game msg model
+        SetHostnameMsg msg ->
+            onSetHostnameMsg game msg model
 
         PickLocationMsg msg ->
             onPickLocationMsg game msg model
@@ -106,7 +106,7 @@ onSetHostnameMsg game msg model =
         Just (SetHostnameModel page) ->
             let
                 ( page_, cmd_, dispatch ) =
-                    SetHostname.update Configs.setHostname game msg page
+                    SetHostname.update game msg page
 
                 model_ =
                     setPage (SetHostnameModel page_) model
