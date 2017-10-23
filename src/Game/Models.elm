@@ -8,6 +8,8 @@ module Game.Models
         , setServers
         , getMeta
         , setMeta
+        , getStory
+        , setStory
         , getConfig
         , getGateway
         , setGateway

@@ -10,6 +10,7 @@ import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents
 import Events.Account.Story.NewEmail as StoryNewEmail
+import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
 
 
 type alias UpdateResponse =
@@ -24,6 +25,9 @@ update game msg model =
 
         HandleNewEmail data ->
             handleNewEmail game data model
+
+        HandleReplyUnlocked data ->
+            handleReplyUnlocked game data model
 
 
 onChanged : Model -> Model -> UpdateResponse
@@ -82,3 +86,38 @@ handleNewEmail game data model =
                     Dispatch.none
     in
         ( model_, Cmd.none, dispatch )
+
+
+handleReplyUnlocked :
+    Game.Model
+    -> StoryReplyUnlocked.Data
+    -> Model
+    -> UpdateResponse
+handleReplyUnlocked game { personId, responses } model =
+    let
+        person_ =
+            case getPerson personId model of
+                Nothing ->
+                    { about =
+                        personMetadata personId
+                    , messages =
+                        Dict.empty
+                    , responses =
+                        responses
+                    }
+
+                Just person ->
+                    let
+                        responses_ =
+                            person
+                                |> getAvailableResponses
+                                |> (++) responses
+                    in
+                        { person
+                            | responses = responses
+                        }
+
+        model_ =
+            setPerson personId person_ model
+    in
+        ( model_, Cmd.none, Dispatch.none )

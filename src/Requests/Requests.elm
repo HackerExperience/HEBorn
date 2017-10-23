@@ -108,6 +108,7 @@ errorWs msg value =
             Err str ->
                 msg ( Timeout, toValue str )
 
+
 response : Decode.Decoder WebsocketResponse
 response =
     decode WebsocketResponse

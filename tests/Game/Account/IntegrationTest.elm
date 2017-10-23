@@ -15,6 +15,9 @@ import Game.Messages as Game
 import Game.Models as Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
+import Game.Storyline.Models as Story
+import Game.Storyline.Emails.Models as Emails
+import Game.Storyline.Emails.Contents as Emails
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Game.Account.Database.Models exposing (..)
@@ -36,10 +39,17 @@ all =
 
 eventTests : List Test
 eventTests =
-    [ fuzz
+    [ passwordAcquired
+    , replyUnlocked
+    ]
+
+
+passwordAcquired : Test
+passwordAcquired =
+    fuzz
         GenGame.model
         "event 'server_password_acquired' inserts the password"
-      <|
+    <|
         \game ->
             let
                 ( serverId, server ) =
@@ -77,4 +87,51 @@ eventTests =
                     |> Dict.get ( "id", "phoebe" )
                     |> Maybe.map getPassword
                     |> Expect.equal (Just "asdfasdf")
-    ]
+
+
+replyUnlocked : Test
+replyUnlocked =
+    fuzz
+        GenGame.model
+        "event 'story_email_reply_unlocked' inserts the password"
+    <|
+        \game ->
+            let
+                ( serverId, server ) =
+                    fromJust "story_email_reply_unlocked fetching gateway" <|
+                        Game.getGateway game
+
+                -- building event
+                channel =
+                    AccountChannel ""
+
+                name =
+                    "story_email_reply_unlocked"
+
+                json =
+                    toValue
+                        """
+                        { "contact_id": "kress"
+                        , "responses":
+                            [ { "id": "helloworld"
+                              , "meta": { "something": "itriedsohardandgotsofar" }
+                            } ]
+                        }
+                        """
+
+                msg =
+                    Events.events channel name json
+                        |> fromJust ""
+                        |> Game.Event
+            in
+                game
+                    |> updateGame msg
+                    |> Game.getStory
+                    |> Story.getEmails
+                    |> Emails.getPerson ("kress")
+                    |> Maybe.map Emails.getAvailableResponses
+                    |> Expect.equal
+                        (Just
+                            [ Emails.HelloWorld "itriedsohardandgotsofar"
+                            ]
+                        )
