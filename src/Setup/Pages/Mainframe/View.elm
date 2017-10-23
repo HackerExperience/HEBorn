@@ -17,13 +17,15 @@ import Setup.Pages.Mainframe.Config exposing (..)
 
 
 view : Config msg -> Game.Model -> Model -> Html msg
-view { toMsg, onNext } game model =
-    withHeader [ class [ StepWelcome ] ] <|
-        div []
-            [ div [] [ h2 [] [ text "Initial server name:" ] ]
-            , hostnameInput toMsg model
-            , div [] [ nextBtn onNext model ]
+view { toMsg, onNext, onPrevious } game model =
+    withHeader [ class [ StepWelcome ] ]
+        [ div [] [ h2 [] [ text "Initial server name:" ] ]
+        , hostnameInput toMsg model
+        , div []
+            [ button [ onClick onPrevious ] [ text "BACK" ]
+            , nextBtn onNext model
             ]
+        ]
 
 
 hostnameInput : (Msg -> msg) -> Model -> Html msg
