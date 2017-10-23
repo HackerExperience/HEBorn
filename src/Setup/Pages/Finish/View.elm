@@ -12,22 +12,23 @@ import Setup.Pages.Helpers exposing (withHeader)
 
 
 type alias Config msg =
-    { onNext : msg }
+    { onNext : msg, onPrevious : msg }
 
 
 view : Config msg -> Html msg
-view { onNext } =
-    withHeader [ class [ StepWelcome ] ] <|
-        div []
-            [ h2 [] [ text "Good bye!" ]
-            , p []
-                [ text "It was really good, wasn't it?" ]
-            , p []
-                [ text "Well.. You're ready to leave now." ]
-            , p []
-                [ text "Maybe you'll find someone else to help you... Maybe Black Mesa!" ]
-            , p []
-                [ text "What are you waiting fool? Run, Forrest, run!" ]
-            , div []
-                [ button [ onClick onNext ] [ text "FINISH HIM" ] ]
+view { onNext, onPrevious } =
+    withHeader [ class [ StepWelcome ] ]
+        [ h2 [] [ text "Good bye!" ]
+        , p []
+            [ text "It was really good, wasn't it?" ]
+        , p []
+            [ text "Well.. You're ready to leave now." ]
+        , p []
+            [ text "Maybe you'll find someone else to help you... Maybe Black Mesa!" ]
+        , p []
+            [ text "What are you waiting fool? Run, Forrest, run!" ]
+        , div []
+            [ button [ onClick onPrevious ] [ text "BACK" ]
+            , button [ onClick onNext ] [ text "FINISH HIM" ]
             ]
+        ]

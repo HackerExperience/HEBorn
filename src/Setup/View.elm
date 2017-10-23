@@ -68,10 +68,10 @@ viewPage : Game.Model -> PageModel -> Html Msg
 viewPage game page =
     case page of
         WelcomeModel ->
-            Welcome.view { onNext = NextPage }
+            Welcome.view Configs.welcome
 
         CustomWelcomeModel ->
-            CustomWelcome.view { onNext = NextPage }
+            CustomWelcome.view Configs.welcome
 
         MainframeModel model ->
             Mainframe.view Configs.setMainframeName game model
@@ -84,10 +84,10 @@ viewPage game page =
             div [] []
 
         FinishModel ->
-            Finish.view { onNext = NextPage }
+            Finish.view Configs.finish
 
         CustomFinishModel ->
-            CustomFinish.view { onNext = NextPage }
+            CustomFinish.view Configs.finish
 
 
 stepMarker : String -> String -> Html Msg

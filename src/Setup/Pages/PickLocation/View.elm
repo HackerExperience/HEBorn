@@ -18,16 +18,15 @@ import Setup.Pages.PickLocation.Config exposing (..)
 
 view : Config msg -> Game.Model -> Model -> Html msg
 view config game model =
-    withHeader [ class [ StepPickLocation ] ] <|
-        div []
-            [ div [] [ h2 [] [ text "Pick your location" ] ]
-            , Native.Untouchable.node "hemap" mapId
-            , locPickerBox config model
-            ]
+    withHeader [ class [ StepPickLocation ] ]
+        [ div [] [ h2 [] [ text "Pick your location" ] ]
+        , Native.Untouchable.node "hemap" mapId
+        , locPickerBox config model
+        ]
 
 
 locPickerBox : Config msg -> Model -> Html msg
-locPickerBox { toMsg, onNext } model =
+locPickerBox { toMsg, onNext, onPrevious } model =
     let
         info =
             div [] <|
@@ -57,6 +56,7 @@ locPickerBox { toMsg, onNext } model =
         btns =
             div []
                 [ button [ onClick <| toMsg ResetLoc ] [ text "RESET" ]
+                , button [ onClick onPrevious ] [ text "BACK" ]
                 , button [ onClick onNext ] [ text "NEXT" ]
                 ]
     in

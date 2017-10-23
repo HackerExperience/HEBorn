@@ -17,11 +17,10 @@ type alias Config msg =
 
 view : Config msg -> Html msg
 view { onNext } =
-    withHeader [ class [ StepWelcome ] ] <|
-        div []
-            [ h2 [] [ text "Hello again!" ]
-            , p []
-                [ text "We've some new features for you, but you need to setup some things first." ]
-            , div []
-                [ button [ onClick onNext ] [ text "LET'S GO" ] ]
-            ]
+    withHeader [ class [ StepWelcome ] ]
+        [ h2 [] [ text "Hello again!" ]
+        , p []
+            [ text "We've some new features for you, but you need to setup some things first." ]
+        , div []
+            [ button [ onClick onNext ] [ text "LET'S GO" ] ]
+        ]
