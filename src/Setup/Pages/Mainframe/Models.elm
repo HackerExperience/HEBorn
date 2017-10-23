@@ -1,4 +1,4 @@
-module Setup.Pages.SetHostname.Models exposing (..)
+module Setup.Pages.Mainframe.Models exposing (..)
 
 
 type alias Model =
@@ -14,22 +14,17 @@ initialModel =
     }
 
 
-isHostnameSet : Model -> Bool
-isHostnameSet { hostname } =
-    case hostname of
-        Just _ ->
-            True
-
-        Nothing ->
-            False
-
-
-setHostname : String -> Model -> Model
-setHostname str model =
+setMainframeName : String -> Model -> Model
+setMainframeName str model =
     if str == "" then
         { model | hostname = Nothing, okay = False }
     else
         { model | hostname = Just str, okay = False }
+
+
+getHostname : Model -> Maybe String
+getHostname =
+    .hostname
 
 
 isOkay : Model -> Bool

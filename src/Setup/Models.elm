@@ -7,7 +7,7 @@ import Utils.Ports.Map exposing (Coordinates)
 import Setup.Types exposing (..)
 import Setup.Messages exposing (Msg)
 import Setup.Pages.PickLocation.Models as PickLocation
-import Setup.Pages.SetHostname.Models as SetHostname
+import Setup.Pages.Mainframe.Models as Mainframe
 
 
 type alias Model =
@@ -22,7 +22,7 @@ type alias Model =
 type PageModel
     = WelcomeModel
     | CustomWelcomeModel
-    | SetHostnameModel SetHostname.Model
+    | MainframeModel Mainframe.Model
     | PickLocationModel PickLocation.Model
     | ChooseThemeModel
     | FinishModel
@@ -42,7 +42,7 @@ geoInstance =
 pageOrder : Pages
 pageOrder =
     [ Welcome
-    , SetHostname
+    , Mainframe
     , PickLocation
     , Finish
     ]
@@ -78,8 +78,8 @@ initializePages =
                 CustomWelcome ->
                     CustomWelcomeModel
 
-                SetHostname ->
-                    SetHostnameModel <| SetHostname.initialModel
+                Mainframe ->
+                    MainframeModel <| Mainframe.initialModel
 
                 PickLocation ->
                     PickLocationModel <| PickLocation.initialModel
@@ -104,7 +104,7 @@ initialModel game =
             , pages = []
             , remaining = []
             , done = []
-            , isLoading = False
+            , isLoading = True
             }
     in
         ( model, Cmd.none, Dispatch.none )
@@ -225,8 +225,8 @@ pageModelToString page =
         CustomWelcomeModel ->
             "WELCOME AGAIN"
 
-        SetHostnameModel _ ->
-            "HOSTNAME"
+        MainframeModel _ ->
+            "MAINFRAME"
 
         PickLocationModel _ ->
             "LOCATION PICKER"
@@ -247,8 +247,8 @@ encodePageModel page =
         WelcomeModel ->
             Ok <| Encode.string "welcome"
 
-        SetHostnameModel _ ->
-            Ok <| Encode.string "hostname"
+        MainframeModel _ ->
+            Ok <| Encode.string "mainframe"
 
         PickLocationModel _ ->
             Ok <| Encode.string "location_picker"

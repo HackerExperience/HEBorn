@@ -8,7 +8,7 @@ type alias Pages =
 type Page
     = Welcome
     | CustomWelcome
-    | SetHostname
+    | Mainframe
     | PickLocation
     | ChooseTheme
     | Finish

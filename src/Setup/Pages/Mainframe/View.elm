@@ -1,4 +1,4 @@
-module Setup.Pages.SetHostname.View exposing (view)
+module Setup.Pages.Mainframe.View exposing (view)
 
 import Html exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
@@ -7,9 +7,9 @@ import Html.CssHelpers
 import Game.Models as Game
 import Setup.Resources exposing (..)
 import Setup.Pages.Helpers exposing (withHeader)
-import Setup.Pages.SetHostname.Models exposing (..)
-import Setup.Pages.SetHostname.Messages exposing (..)
-import Setup.Pages.SetHostname.Config exposing (..)
+import Setup.Pages.Mainframe.Models exposing (..)
+import Setup.Pages.Mainframe.Messages exposing (..)
+import Setup.Pages.Mainframe.Config exposing (..)
 
 
 { id, class, classList } =
@@ -29,7 +29,7 @@ view { toMsg, onNext } game model =
 hostnameInput : (Msg -> msg) -> Model -> Html msg
 hostnameInput toMsg model =
     input
-        [ onInput <| SetHostname >> toMsg
+        [ onInput <| Mainframe >> toMsg
         , onBlur <| toMsg Validate
         , placeholder "hostname"
         ]

@@ -12,7 +12,7 @@ import Setup.Pages.CustomWelcome.View as CustomWelcome
 import Setup.Pages.Finish.View as Finish
 import Setup.Pages.CustomFinish.View as CustomFinish
 import Setup.Pages.PickLocation.View as PickLocation
-import Setup.Pages.SetHostname.View as SetHostname
+import Setup.Pages.Mainframe.View as Mainframe
 
 
 { id, class, classList } =
@@ -73,8 +73,8 @@ viewPage game page =
         CustomWelcomeModel ->
             CustomWelcome.view { onNext = NextPage }
 
-        SetHostnameModel model ->
-            SetHostname.view Configs.setHostname game model
+        MainframeModel model ->
+            Mainframe.view Configs.setMainframeName game model
 
         PickLocationModel model ->
             PickLocation.view Configs.pickLocation game model

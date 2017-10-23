@@ -1,6 +1,7 @@
 module Setup.Pages.PickLocation.Messages exposing (..)
 
 import Json.Encode exposing (Value)
+import Requests.Types exposing (ResponseType)
 
 
 type Msg
@@ -8,3 +9,9 @@ type Msg
     | GeoLocResp Value
     | GeoRevResp Value
     | ResetLoc
+    | Request RequestMsg
+
+
+type RequestMsg
+    = CheckRequest ResponseType
+    | SetRequest ResponseType

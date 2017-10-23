@@ -38,6 +38,9 @@ pageFromString str =
         "welcome" ->
             succeed Welcome
 
+        "mainframe" ->
+            succeed Mainframe
+
         "pick_location" ->
             succeed PickLocation
 
