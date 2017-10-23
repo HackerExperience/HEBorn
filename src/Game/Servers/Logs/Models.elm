@@ -78,14 +78,6 @@ type alias ServerUser =
     String
 
 
-type
-    Render
-    -- TODO: this still's not as good as it should be
-    = TextE String
-    | NipE IP
-    | SpecialE String String
-
-
 initialModel : Model
 initialModel =
     Dict.empty
@@ -154,48 +146,6 @@ setContent newContent log =
             { log | content = content }
     in
         log_
-
-
-render : Data -> List Render
-render { format, raw } =
-    case format of
-        Just format ->
-            case format of
-                LocalLoginFormat { from, user } ->
-                    [ NipE from
-                    , TextE " logged in as "
-                    , SpecialE "user" user
-                    ]
-
-                RemoteLoginFormat { into } ->
-                    [ TextE "Logged into "
-                    , NipE into
-                    ]
-
-                ConnectionFormat { nip, from, to } ->
-                    [ NipE nip
-                    , TextE " bounced connection from "
-                    , NipE from
-                    , TextE " to "
-                    , NipE to
-                    ]
-
-                DownloadByFormat { filename, nip } ->
-                    [ TextE "File "
-                    , SpecialE "file" filename
-                    , TextE " downloaded by "
-                    , NipE nip
-                    ]
-
-                DownloadFromFormat { filename, nip } ->
-                    [ TextE "File "
-                    , SpecialE "file" filename
-                    , TextE " downloaded from "
-                    , NipE nip
-                    ]
-
-        Nothing ->
-            [ TextE raw ]
 
 
 dataFromString : String -> Data
