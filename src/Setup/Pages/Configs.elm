@@ -2,7 +2,7 @@ module Setup.Pages.Configs exposing (..)
 
 import Setup.Messages exposing (..)
 import Setup.Pages.PickLocation.Config as PickLocation
-import Setup.Pages.SetHostname.Config as SetHostname
+import Setup.Pages.Mainframe.Config as Mainframe
 
 
 pickLocation : PickLocation.Config Msg
@@ -13,9 +13,9 @@ pickLocation =
     }
 
 
-setHostname : SetHostname.Config Msg
-setHostname =
+setMainframeName : Mainframe.Config Msg
+setMainframeName =
     { onNext = NextPage
     , onPrevious = PreviousPage
-    , toMsg = SetHostnameMsg
+    , toMsg = MainframeMsg
     }

@@ -14,6 +14,7 @@ module Game.Account.Models
         , getContext
         , getDatabase
         , getBounces
+        , getMainframe
         )
 
 import Game.Servers.Shared as Servers
@@ -123,6 +124,11 @@ getDatabase =
 getBounces : Model -> Bounces.Model
 getBounces =
     .bounces
+
+
+getMainframe : Model -> Maybe Servers.CId
+getMainframe =
+    .mainframe
 
 
 insertGateway : Servers.CId -> Model -> Model

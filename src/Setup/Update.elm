@@ -13,8 +13,10 @@ import Setup.Messages exposing (..)
 import Setup.Pages.Configs as Configs
 import Setup.Pages.PickLocation.Update as PickLocation
 import Setup.Pages.PickLocation.Messages as PickLocation
-import Setup.Pages.SetHostname.Update as SetHostname
-import Setup.Pages.SetHostname.Messages as SetHostname
+import Setup.Pages.Mainframe.Update as Mainframe
+import Setup.Pages.Mainframe.Messages as Mainframe
+import Setup.Requests.Setup as Setup
+import Setup.Requests exposing (..)
 import Decoders.Account
 
 
@@ -31,17 +33,20 @@ update game msg model =
         PreviousPage ->
             onPreviousPage game model
 
-        SetHostnameMsg msg ->
-            onSetHostnameMsg game msg model
+        MainframeMsg msg ->
+            onMainframeMsg game msg model
 
         PickLocationMsg msg ->
             onPickLocationMsg game msg model
 
         HandleJoinedAccount value ->
-            handleJoinedAccount value model
+            if isLoading model then
+                handleJoinedAccount value model
+            else
+                Update.fromModel model
 
-        _ ->
-            Update.fromModel model
+        Request data ->
+            updateRequest game (receive data) model
 
 
 
@@ -66,11 +71,15 @@ onNextPage game model =
                 Dispatch.none
 
         cmd =
-            -- TODO: move to request
             case resultEncodedPage of
                 Ok pageNameValue ->
-                    -- TODO: perform request
-                    Cmd.none
+                    let
+                        accountId =
+                            game
+                                |> Game.getAccount
+                                |> Account.getId
+                    in
+                        Setup.request pageNameValue accountId game
 
                 Err _ ->
                     Cmd.none
@@ -100,16 +109,16 @@ onPreviousPage game model =
 -- child message handlers
 
 
-onSetHostnameMsg : Game.Model -> SetHostname.Msg -> Model -> UpdateResponse
-onSetHostnameMsg game msg model =
+onMainframeMsg : Game.Model -> Mainframe.Msg -> Model -> UpdateResponse
+onMainframeMsg game msg model =
     case model.page of
-        Just (SetHostnameModel page) ->
+        Just (MainframeModel page) ->
             let
                 ( page_, cmd_, dispatch ) =
-                    SetHostname.update game msg page
+                    Mainframe.update Configs.setMainframeName game msg page
 
                 model_ =
-                    setPage (SetHostnameModel page_) model
+                    setPage (MainframeModel page_) model
             in
                 ( model_, cmd_, dispatch )
 
@@ -130,6 +139,17 @@ onPickLocationMsg game msg model =
             in
                 ( model_, cmd_, dispatch )
 
+        _ ->
+            Update.fromModel model
+
+
+
+-- request handlers
+
+
+updateRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
+updateRequest game response model =
+    case response of
         _ ->
             Update.fromModel model
 

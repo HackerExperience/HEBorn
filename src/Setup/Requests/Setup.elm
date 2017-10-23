@@ -2,9 +2,10 @@ module Setup.Requests.Setup exposing (Response(..), request, receive)
 
 import Requests.Requests as Requests
 import Requests.Topics as Topics
+import Json.Encode as Encode exposing (Value)
 import Requests.Types exposing (ConfigSource, Code(..))
-import Game.Messages exposing (..)
-import Game.Models exposing (..)
+import Setup.Messages exposing (..)
+import Setup.Models exposing (..)
 import Game.Account.Models as Account
 import Decoders.Game exposing (ServersToJoin)
 
@@ -13,15 +14,19 @@ type Response
     = Okay
 
 
-request : Account.ID -> ConfigSource a -> Cmd Msg
-request id =
-    Requests.request (Topics.accountResync id)
-        (ResyncRequest >> Request)
-        emptyPayload
+request : Value -> Account.ID -> ConfigSource a -> Cmd Msg
+request name id =
+    let
+        payload =
+            Encode.object [ ( "page", name ) ]
+    in
+        Requests.request (Topics.accountSetup id)
+            (SetupRequest >> Request)
+            payload
 
 
-receive : Model -> Code -> Value -> Maybe Response
-receive model code json =
+receive : Code -> Value -> Maybe Response
+receive code json =
     case code of
         OkCode ->
             Just Okay

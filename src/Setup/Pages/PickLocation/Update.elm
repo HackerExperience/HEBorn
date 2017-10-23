@@ -1,14 +1,20 @@
 module Setup.Pages.PickLocation.Update exposing (update)
 
-import Json.Decode exposing (Value)
+import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Utils.Update as Update
 import Utils.Ports.Map as Map
+import Utils.Maybe as Maybe
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Pages.PickLocation.Config exposing (..)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)
+import Setup.Pages.PickLocation.Requests exposing (..)
+import Game.Servers.Settings.Check as Check
+import Game.Servers.Settings.Set as Set
+import Game.Servers.Settings.Types exposing (..)
+import Game.Account.Models as Account
 
 
 type alias UpdateResponse msg =
@@ -29,6 +35,9 @@ update config game msg model =
 
         ResetLoc ->
             ( model, geoLocReq geoInstance, Dispatch.none )
+
+        Request data ->
+            updateRequest config game (receive data) model
 
 
 onMapClick : Config msg -> Value -> Model -> UpdateResponse msg
@@ -86,3 +95,66 @@ onGeoRevResp config value model =
         |> Result.toMaybe
         |> flip setAreaLabel model
         |> Update.fromModel
+
+
+
+-- request handlers
+
+
+updateRequest :
+    Config msg
+    -> Game.Model
+    -> Maybe Response
+    -> Model
+    -> UpdateResponse msg
+updateRequest config game mResponse model =
+    case mResponse of
+        Just (Check (Check.Valid value)) ->
+            onCheckValid config game value model
+
+        Just (Check (Check.Invalid reason)) ->
+            Update.fromModel model
+
+        Just (Set (Set.Valid _)) ->
+            Update.fromModel <| setOkay model
+
+        Just (Set (Set.Invalid _)) ->
+            Update.fromModel model
+
+        Nothing ->
+            Update.fromModel model
+
+
+onCheckValid : Config msg -> Game.Model -> Value -> Model -> UpdateResponse msg
+onCheckValid config game value model =
+    case Decode.decodeValue decodeLocation value of
+        Ok address ->
+            let
+                coords =
+                    getCoords model
+
+                mainframe =
+                    game
+                        |> Game.getAccount
+                        |> Account.getMainframe
+
+                model_ =
+                    setAreaLabel (Just address) model
+
+                cmd =
+                    case Maybe.uncurry mainframe coords of
+                        Just ( cid, coords ) ->
+                            setRequest config (Location coords) cid game
+
+                        Nothing ->
+                            Cmd.none
+            in
+                ( model_, cmd, Dispatch.none )
+
+        Err reason ->
+            let
+                dispatch =
+                    Dispatch.politeCrash "ERR_PORRA_RENATO"
+                        ("Can't parse location response: " ++ reason)
+            in
+                ( model, Cmd.none, dispatch )
