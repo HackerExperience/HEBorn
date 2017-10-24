@@ -83,13 +83,13 @@ onSetEndpoint :
     -> Maybe Servers.CId
     -> Model
     -> UpdateResponse
-onSetEndpoint game endpointId model =
+onSetEndpoint game cid model =
     case getGateway model of
         Just gateway ->
             let
                 setEndpoint gatewayId =
                     Dispatch.server gatewayId <|
-                        Servers.SetEndpoint endpointId
+                        Servers.SetEndpoint cid
 
                 dispatch =
                     model
@@ -98,7 +98,7 @@ onSetEndpoint game endpointId model =
                         |> Maybe.withDefault Dispatch.none
 
                 model_ =
-                    if endpointId == Nothing then
+                    if cid == Nothing then
                         ensureValidContext game { model | context = Gateway }
                     else
                         ensureValidContext game model

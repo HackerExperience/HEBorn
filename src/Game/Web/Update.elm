@@ -37,11 +37,11 @@ update game msg model =
             in
                 ( model, cmd, Dispatch.none )
 
-        HandleJoinedServer cid ->
-            handleJoined game cid model
+        JoinedServer cid ->
+            onJoinedServer game cid model
 
         HandleJoinServerFailed cid ->
-            handleJoinFailed cid model
+            handleJoinFailed game cid model
 
 
 
@@ -93,6 +93,9 @@ onLogin game nip remoteIp password requester model =
         remoteNip =
             Network.toNip (Network.getId nip) remoteIp
 
+        remoteCid =
+            Servers.EndpointCId remoteNip
+
         payload =
             Encode.object
                 [ ( "gateway_ip", Encode.string gatewayIp )
@@ -101,7 +104,7 @@ onLogin game nip remoteIp password requester model =
 
         dispatch =
             Dispatch.websocket <|
-                Ws.JoinChannel (ServerChannel remoteNip) (Just payload)
+                Ws.JoinChannel (ServerChannel remoteCid) (Just payload)
 
         model_ =
             startLoading remoteNip requester model
@@ -111,18 +114,20 @@ onLogin game nip remoteIp password requester model =
 
 {-| Sets endpoint
 -}
-handleJoined : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleJoined game cid model =
+onJoinedServer : Game.Model -> Servers.CId -> Model -> UpdateResponse
+onJoinedServer game cid model =
     let
-        ( maybeRequester, model_ ) =
-            finishLoading cid model
-
         servers =
             Game.getServers game
 
+        nip =
+            Servers.getNIP cid servers
+
+        ( maybeRequester, model_ ) =
+            finishLoading nip model
+
         serverCid =
-            Maybe.andThen (.sessionId >> flip Servers.fromKey servers)
-                maybeRequester
+            Maybe.map (.sessionId >> Servers.fromKey) maybeRequester
 
         dispatch =
             case serverCid of
@@ -138,11 +143,16 @@ handleJoined game cid model =
 
 {-| Reports failure back to the loading page.
 -}
-handleJoinFailed : Servers.CId -> Model -> UpdateResponse
-handleJoinFailed cid model =
+handleJoinFailed : Game.Model -> Servers.CId -> Model -> UpdateResponse
+handleJoinFailed game cid model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading cid model
+            case Servers.getNIPSafe cid (Game.getServers game) of
+                Just nip ->
+                    finishLoading nip model
+
+                Nothing ->
+                    ( Nothing, model )
 
         dispatch =
             case maybeRequester of

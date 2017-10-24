@@ -27,17 +27,16 @@ toSessionID ({ game } as data) =
     in
         case activeContext of
             Gateway ->
-                Servers.toSessionId
-                    (Game.Data.getActiveCId data)
-                    servers
+                data
+                    |> Game.Data.getActiveCId
+                    |> Servers.toSessionId
 
             Endpoint ->
                 let
                     endpointSessionId =
                         activeServer
                             |> Servers.getEndpointCId
-                            |> Maybe.map
-                                (flip Servers.toSessionId servers)
+                            |> Maybe.map Servers.toSessionId
                 in
                     case endpointSessionId of
                         Just endpointSessionId ->

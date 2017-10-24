@@ -14,27 +14,19 @@ import Game.Notifications.Models as Notifications
 
 type alias Model =
     { gateways : Gateways
-    , gatewayIds : GatewayIds
     , servers : Servers
     }
 
 
 type alias Gateways =
-    Dict CId GatewayCache
-
-
-type alias Id =
-    String
+    Dict Id GatewayCache
 
 
 type alias GatewayCache =
-    { serverId : Id
-    , endpoints : List NIP
+    { activeNIP : NIP
+    , nips : List NIP
+    , endpoints : List CId
     }
-
-
-type alias GatewayIds =
-    Dict Id CId
 
 
 type alias SessionId =
@@ -74,7 +66,7 @@ type Ownership
 
 
 type alias GatewayData =
-    { serverId : Id
+    { activeNIP : NIP
     , endpoints : List CId
     , endpoint : Maybe CId
     }
@@ -93,95 +85,103 @@ type alias AnalyzedEndpoint =
 initialModel : Model
 initialModel =
     { gateways = Dict.empty
-    , gatewayIds = Dict.empty
     , servers = Dict.empty
     }
 
 
+getNIPSafe : CId -> Model -> Maybe NIP
+getNIPSafe cid model =
+    case cid of
+        GatewayCId id ->
+            let
+                withOwnership { ownership } =
+                    case ownership of
+                        GatewayOwnership { activeNIP } ->
+                            Just activeNIP
+
+                        _ ->
+                            Nothing
+            in
+                model.servers
+                    |> Dict.get id
+                    |> Maybe.andThen withOwnership
+
+        EndpointCId nip ->
+            Just nip
+
+
 getNIP : CId -> Model -> NIP
 getNIP cid model =
-    cid
+    case getNIPSafe cid model of
+        Just nip ->
+            nip
+
+        Nothing ->
+            Native.Panic.crash "WTF_IMPOSSIBLE"
+                "Bad usage of getNIP."
 
 
 
 -- gateway mapping information
 
 
-insertGateway : CId -> Id -> List NIP -> Model -> Model
-insertGateway cid id endpoints model =
+insertGateway : Id -> NIP -> List NIP -> List CId -> Model -> Model
+insertGateway id activeNIP nips endpoints model =
     let
         cache =
-            GatewayCache id endpoints
+            GatewayCache activeNIP nips endpoints
 
         gateways =
-            Dict.insert cid cache model.gateways
-
-        gatewayIds =
-            Dict.insert id cid model.gatewayIds
+            Dict.insert id cache model.gateways
     in
-        { model | gateways = gateways, gatewayIds = gatewayIds }
+        { model | gateways = gateways }
 
 
 removeGateway : CId -> Model -> Model
 removeGateway cid model =
-    case Dict.get cid model.gateways of
-        Just cache ->
-            let
-                gateways =
-                    Dict.remove cid model.gateways
+    let
+        sid =
+            toSessionId cid
+    in
+        case Dict.get sid model.gateways of
+            Just cache ->
+                let
+                    gateways =
+                        Dict.remove sid model.gateways
+                in
+                    { model | gateways = gateways }
 
-                gatewayIds =
-                    Dict.remove cache.serverId model.gatewayIds
-            in
-                { model | gateways = gateways, gatewayIds = gatewayIds }
-
-        Nothing ->
-            model
+            Nothing ->
+                model
 
 
 getGatewayCache : CId -> Model -> Maybe GatewayCache
 getGatewayCache cid model =
-    Dict.get cid model.gateways
+    Dict.get (toSessionId cid) model.gateways
 
 
-getGatewayId : CId -> Model -> Maybe Id
-getGatewayId cid model =
-    model
-        |> getGatewayCache cid
-        |> Maybe.map .serverId
+getServerId : CId -> Model -> Maybe Id
+getServerId cid model =
+    case cid of
+        GatewayCId id ->
+            Just id
+
+        EndpointCId _ ->
+            Nothing
 
 
 
 -- session cid data
 
 
-toSessionId : CId -> Model -> SessionId
-toSessionId cid model =
-    case getGatewayCache cid model of
-        Just cache ->
-            cache.serverId
+toSessionId : CId -> SessionId
+toSessionId cid =
+    case cid of
+        GatewayCId id ->
+            id
 
-        Nothing ->
-            remoteSessionId cid model
-
-
-remoteSessionId : CId -> Model -> SessionId
-remoteSessionId cid model =
-    let
-        nip =
-            getNIP cid model
-    in
-        (Network.getId nip) ++ "@" ++ (Network.getIp nip)
-
-
-getSessionId : CId -> Server -> Model -> SessionId
-getSessionId cid server model =
-    case server.ownership of
-        GatewayOwnership data ->
-            data.serverId
-
-        EndpointOwnership _ ->
-            remoteSessionId cid model
+        EndpointCId ( id, ip ) ->
+            id ++ "@" ++ ip
 
 
 
@@ -190,7 +190,7 @@ getSessionId cid server model =
 
 get : CId -> Model -> Maybe Server
 get cid model =
-    Dict.get (toSessionId cid model) model.servers
+    Dict.get (toSessionId cid) model.servers
 
 
 insert : CId -> Server -> Model -> Model
@@ -199,13 +199,22 @@ insert cid server model0 =
         model1 =
             case server.ownership of
                 GatewayOwnership data ->
-                    insertGateway cid data.serverId data.endpoints model0
+                    case cid of
+                        GatewayCId id ->
+                            insertGateway id
+                                data.activeNIP
+                                []
+                                data.endpoints
+                                model0
+
+                        EndpointCId _ ->
+                            model0
 
                 EndpointOwnership _ ->
                     model0
 
         servers =
-            Dict.insert (getSessionId cid server model1) server model1.servers
+            Dict.insert (toSessionId cid) server model1.servers
 
         model_ =
             { model1 | servers = servers }
@@ -220,7 +229,7 @@ remove cid model0 =
             removeGateway cid model0
 
         servers =
-            Dict.remove (toSessionId cid model0) model1.servers
+            Dict.remove (toSessionId cid) model1.servers
 
         model_ =
             { model1 | servers = servers }
@@ -230,37 +239,19 @@ remove cid model0 =
 
 keys : Model -> List CId
 keys model =
-    let
-        toId model key =
-            fromKey key model
-    in
-        model.servers
-            |> Dict.keys
-            |> List.filterMap (toId model)
+    model.servers
+        |> Dict.keys
+        |> List.map fromKey
 
 
-fromKey : SessionId -> Model -> Maybe CId
-fromKey key model =
+fromKey : SessionId -> CId
+fromKey key =
     case String.split "@" key of
-        [ serverId ] ->
-            Dict.get serverId model.gatewayIds
-
         [ nid, ip ] ->
-            Just ( nid, ip )
+            EndpointCId ( nid, ip )
 
         _ ->
-            Nothing
-
-
-unsafeFromKey : SessionId -> Model -> CId
-unsafeFromKey key model =
-    case fromKey key model of
-        Just cid ->
-            cid
-
-        _ ->
-            Native.Panic.crash "WTF_WHERE_IS_IT"
-                "Couldn't find the Server's CId for given SessionId."
+            GatewayCId key
 
 
 activateEndpoint : Maybe CId -> GatewayData -> GatewayData
@@ -348,13 +339,13 @@ getEndpointCId server =
 
 
 setEndpointCId : Maybe CId -> Server -> Server
-setEndpointCId endpoint ({ ownership } as server) =
+setEndpointCId cid ({ ownership } as server) =
     let
         ownership_ =
             case ownership of
                 GatewayOwnership data ->
                     GatewayOwnership <|
-                        activateEndpoint endpoint data
+                        activateEndpoint cid data
 
                 ownership ->
                     ownership

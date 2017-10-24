@@ -7,6 +7,7 @@ import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared exposing (CId)
 import Decoders.Logs
 
 
@@ -18,7 +19,7 @@ type alias LogUpdateResponse =
     ( Log, Cmd LogMsg, Dispatch )
 
 
-update : Game.Model -> NIP -> Msg -> Model -> UpdateResponse
+update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
 update game nip msg model =
     case msg of
         Delete id ->
@@ -38,17 +39,17 @@ update game nip msg model =
 -- collection message handlers
 
 
-onDelete : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onDelete : Game.Model -> CId -> ID -> Model -> UpdateResponse
 onDelete game nip id model =
     Update.fromModel model
 
 
-onHide : Game.Model -> NIP -> ID -> Model -> UpdateResponse
+onHide : Game.Model -> CId -> ID -> Model -> UpdateResponse
 onHide game nip id model =
     Update.fromModel model
 
 
-onRequest : Game.Model -> NIP -> Maybe Response -> Model -> UpdateResponse
+onRequest : Game.Model -> CId -> Maybe Response -> Model -> UpdateResponse
 onRequest game nip response model =
     case response of
         Just response ->
@@ -58,7 +59,7 @@ onRequest game nip response model =
             Update.fromModel model
 
 
-onLogMsg : Game.Model -> NIP -> ID -> LogMsg -> Model -> UpdateResponse
+onLogMsg : Game.Model -> CId -> ID -> LogMsg -> Model -> UpdateResponse
 onLogMsg game nip id msg model =
     case get id model of
         Just log ->
@@ -70,7 +71,7 @@ onLogMsg game nip id msg model =
             Update.fromModel model
 
 
-updateRequest : Game.Model -> NIP -> Response -> Model -> UpdateResponse
+updateRequest : Game.Model -> CId -> Response -> Model -> UpdateResponse
 updateRequest game nip response model =
     Update.fromModel model
 
@@ -90,7 +91,7 @@ toModel index =
             |> List.foldl (uncurry insert) initialModel
 
 
-updateLog : Game.Model -> NIP -> ID -> LogMsg -> Log -> LogUpdateResponse
+updateLog : Game.Model -> CId -> ID -> LogMsg -> Log -> LogUpdateResponse
 updateLog game nip id msg log =
     case msg of
         UpdateContent content ->
@@ -106,19 +107,19 @@ updateLog game nip id msg log =
             onLogRequest game nip id (logReceive data) log
 
 
-onUpdateContent : Game.Model -> NIP -> ID -> String -> Log -> LogUpdateResponse
+onUpdateContent : Game.Model -> CId -> ID -> String -> Log -> LogUpdateResponse
 onUpdateContent game nip id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-onEncrypt : Game.Model -> NIP -> ID -> Log -> LogUpdateResponse
+onEncrypt : Game.Model -> CId -> ID -> Log -> LogUpdateResponse
 onEncrypt game nip id log =
     setContent Nothing log
         |> Update.fromModel
 
 
-onDecrypt : Game.Model -> NIP -> ID -> String -> Log -> LogUpdateResponse
+onDecrypt : Game.Model -> CId -> ID -> String -> Log -> LogUpdateResponse
 onDecrypt game nip id content log =
     setContent (Just content) log
         |> Update.fromModel
@@ -126,7 +127,7 @@ onDecrypt game nip id content log =
 
 onLogRequest :
     Game.Model
-    -> NIP
+    -> CId
     -> ID
     -> Maybe LogResponse
     -> Log
@@ -142,7 +143,7 @@ onLogRequest game nip id response log =
 
 updateLogRequest :
     Game.Model
-    -> NIP
+    -> CId
     -> ID
     -> LogResponse
     -> Log

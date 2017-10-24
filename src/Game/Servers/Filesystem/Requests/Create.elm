@@ -7,14 +7,13 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-import Game.Network.Types exposing (NIP)
 
 
 -- FIXME: this API is weird
 
 
-request : String -> String -> Location -> NIP -> ConfigSource a -> Cmd Msg
-request what newBaseName newLocation nip =
+request : String -> String -> Location -> CId -> ConfigSource a -> Cmd Msg
+request what newBaseName newLocation cid =
     let
         destination =
             newLocation |> List.map Encode.string |> Encode.list
@@ -26,6 +25,6 @@ request what newBaseName newLocation nip =
                 , ( "what", Encode.string what )
                 ]
     in
-        Requests.request (Topics.fsCreate nip)
+        Requests.request (Topics.fsCreate cid)
             (CreateRequest >> Request)
             payload

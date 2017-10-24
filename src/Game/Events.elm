@@ -70,7 +70,6 @@ fromReport =
             case channel of
                 ServerChannel cid ->
                     [ Dispatch.servers <| Servers.HandleJoinedServer cid value
-                    , Dispatch.web <| Web.HandleJoinedServer cid
                     ]
 
                 AccountChannel id ->

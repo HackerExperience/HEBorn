@@ -15,6 +15,8 @@ import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Servers.Messages as Servers
 import Game.Servers.Update as Servers
+import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
@@ -218,7 +220,8 @@ bootstrapJoin remoteServers playerServer =
 
         otherDispatches =
             playerServer.endpoints
-                |> List.filterMap (flip Dict.get remoteServers)
+                |> List.filterMap
+                    (Servers.toSessionId >> flip Dict.get remoteServers)
                 |> List.map (joinRemote playerServer)
     in
         Dispatch.batch (myDispatch :: otherDispatches)
@@ -227,17 +230,10 @@ bootstrapJoin remoteServers playerServer =
 joinPlayer : Decoders.Game.Player -> Dispatch
 joinPlayer server =
     let
-        channel cid =
-            -- this code will break after including the counter
-            ServerChannel cid
-
-        toDispatch cid =
-            Dispatch.websocket <|
-                Ws.JoinChannel (channel cid) Nothing
+        cid =
+            Servers.GatewayCId server.serverId
     in
-        server.nips
-            |> List.map toDispatch
-            |> Dispatch.batch
+        Dispatch.websocket <| Ws.JoinChannel (ServerChannel cid) Nothing
 
 
 joinRemote : Decoders.Game.Player -> Decoders.Game.Remote -> Dispatch
@@ -252,12 +248,10 @@ joinRemote fromServer toServer =
         case maybeFromIp of
             Just fromIp ->
                 let
-                    cid =
-                        -- this code might need to change one day
-                        Network.toNip toServer.networkId toServer.ip
-
                     channel =
-                        ServerChannel cid
+                        ServerChannel <|
+                            Servers.EndpointCId <|
+                                Network.toNip toServer.networkId toServer.ip
 
                     payload =
                         -- TODO: include bounce_id after settling
