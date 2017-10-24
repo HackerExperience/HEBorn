@@ -45,13 +45,21 @@ view data model =
 mainChat : Maybe Person -> Html Msg
 mainChat active =
     active
-        |> Maybe.map Emails.getAvailableResponses
+        |> Maybe.map Emails.getAvailableReplies
         |> Maybe.withDefault []
-        |> List.map content
+        |> List.map reply
         |> div []
         |> List.singleton
         |> (::) (ul [] (mainChatMessages active))
         |> div [ class [ MainChat ] ]
+
+
+reply : Emails.Content -> Html Msg
+reply msg =
+    Emails.toString msg
+        |> text
+        |> List.singleton
+        |> span [ onClick <| Reply msg ]
 
 
 mainChatMessages : Maybe Person -> List (Html Msg)
@@ -79,14 +87,10 @@ baloon direction msg =
 
 content : Emails.Content -> Html Msg
 content msg =
-    case msg of
-        Emails.HelloWorld something ->
-            "Hello world"
-                ++ something
-                ++ "!"
-                |> text
-                |> List.singleton
-                |> span []
+    Emails.toString msg
+        |> text
+        |> List.singleton
+        |> span []
 
 
 contactProcessor :

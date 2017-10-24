@@ -7,6 +7,7 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Models as Game
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
@@ -50,30 +51,30 @@ update game nip msg model =
                 (newOptimistic Cracker nip target unknownProcessFile)
                 model
 
-        StartDownload origin fileId storageId ->
+        StartDownload origin file storageId ->
             onDownload game
                 nip
                 (newOptimistic
                     (Download (DownloadContent PrivateFTP storageId))
                     nip
-                    (Tuple.second nip)
+                    (Tuple.second origin)
                     unknownProcessFile
                 )
                 origin
-                fileId
+                file
                 model
 
-        StartPublicDownload origin fileId storageId ->
+        StartPublicDownload origin file storageId ->
             onDownload game
                 nip
                 (newOptimistic
                     (Download (DownloadContent PublicFTP storageId))
                     nip
-                    (Tuple.second nip)
+                    (Tuple.second origin)
                     unknownProcessFile
                 )
                 origin
-                fileId
+                file
                 model
 
         Complete id ->
@@ -183,10 +184,10 @@ onDownload :
     -> NIP
     -> Process
     -> NIP
-    -> String
+    -> Filesystem.ForeignFileBox
     -> Model
     -> UpdateResponse
-onDownload game nip process origin fileId model =
+onDownload game nip process origin file model =
     let
         ( id, model_ ) =
             insertOptimistic process model
@@ -199,7 +200,7 @@ onDownload game nip process origin fileId model =
                             PublicFTP ->
                                 Download.requestPublic id
                                     origin
-                                    fileId
+                                    file.id
                                     storageId
                                     nip
                                     game
@@ -207,12 +208,18 @@ onDownload game nip process origin fileId model =
                             PrivateFTP ->
                                 Download.request id
                                     origin
-                                    fileId
+                                    file.id
                                     storageId
                                     nip
                                     game
+
+                    dispatch =
+                        Notifications.DownloadStarted origin file
+                            |> Notifications.create
+                            |> Notifications.Insert game.meta.lastTick
+                            |> Dispatch.serverNotification nip
                 in
-                    ( model_, cmd, Dispatch.none )
+                    ( model_, cmd, dispatch )
 
             _ ->
                 Update.fromModel model_
@@ -285,7 +292,6 @@ onDownloadRequest game nip oldId response model =
         Download.Okay id process ->
             okDownloadFile id
                 process
-                game.meta.lastTick
                 nip
                 oldId
                 model
@@ -406,16 +412,8 @@ failDownloadFile lastTick nip oldId model message =
         ( model_, Cmd.none, dispatch )
 
 
-okDownloadFile : ID -> Process -> Float -> NIP -> ID -> Model -> UpdateResponse
-okDownloadFile id process lastTick nip oldId model =
-    let
-        dispatch =
-            Notifications.DownloadStarted
-                |> Notifications.create
-                |> Notifications.Insert lastTick
-                |> Dispatch.serverNotification nip
-
-        model_ =
-            replace oldId id process model
-    in
-        ( model_, Cmd.none, dispatch )
+okDownloadFile : ID -> Process -> NIP -> ID -> Model -> UpdateResponse
+okDownloadFile id process nip oldId model =
+    model
+        |> replace oldId id process
+        |> Update.fromModel

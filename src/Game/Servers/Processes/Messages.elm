@@ -3,6 +3,7 @@ module Game.Servers.Processes.Messages exposing (Msg(..), RequestMsg(..))
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Processes.Models exposing (..)
 import Game.Network.Types as Network
+import Game.Servers.Filesystem.Shared as Filesystem
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -15,8 +16,8 @@ type Msg
     | Remove ID
     | Complete ID
     | StartBruteforce Network.IP
-    | StartDownload Network.NIP String String
-    | StartPublicDownload Network.NIP String String
+    | StartDownload Network.NIP Filesystem.ForeignFileBox String
+    | StartPublicDownload Network.NIP Filesystem.ForeignFileBox String
       -- start may be removed if we provide a specific
       -- function for every process type
     | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )

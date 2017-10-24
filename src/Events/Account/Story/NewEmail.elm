@@ -22,7 +22,7 @@ import Game.Storyline.Emails.Contents exposing (..)
 type alias Data =
     { personId : String
     , messageNode : ( Float, Message )
-    , responses : List Content
+    , replies : Replies
     , createNotification : Bool
     }
 
@@ -41,7 +41,7 @@ newEmail =
     decode Data
         |> required "contact_id" string
         |> custom messageNode
-        |> optional "responses" responses []
+        |> optional "replies" replies []
         |> optional "notification" bool True
 
 
@@ -52,8 +52,8 @@ messageNode =
         |> custom message
 
 
-responses : Decoder (List Content)
-responses =
+replies : Decoder (List Content)
+replies =
     string
         |> andThen contentFromId
         |> list

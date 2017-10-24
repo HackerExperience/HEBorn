@@ -6,6 +6,7 @@ import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
 import Game.Network.Types as Network
@@ -75,6 +76,9 @@ update data msg model =
 
         HandlePasswordAcquired event ->
             onEveryTabMsg data (Cracked event.nip event.password) model
+
+        PublicDownload source file ->
+            onReqDownload data source file model
 
 
 
@@ -206,6 +210,27 @@ reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
             Dispatch.batch [ dispatch0, dispatch1 ]
     in
         ( tabs_, cmd, dispatch )
+
+
+onReqDownload :
+    Game.Data
+    -> Network.NIP
+    -> Filesystem.ForeignFileBox
+    -> Model
+    -> UpdateResponse
+onReqDownload data source file model =
+    let
+        dispatch =
+            case (Game.Models.getGateway <| data.game) of
+                Just me ->
+                    Dispatch.processes (Tuple.first me) <|
+                        Processes.StartPublicDownload source file "storage id"
+
+                Nothing ->
+                    Dispatch.politeCrash "WTF_ASTRAL_PROJECTION"
+                        "There is no gateway server in this session!"
+    in
+        ( model, Cmd.none, dispatch )
 
 
 processTabMsg :

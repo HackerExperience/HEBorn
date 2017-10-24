@@ -64,7 +64,7 @@ bootstrap game =
         |> account game
         |> hardcoded game.servers
         |> hardcoded game.meta
-        |> optional "story" Decoders.Storyline.story Story.initialModel
+        |> required "storyline" Decoders.Storyline.story
         |> hardcoded game.web
         |> hardcoded game.config
         |> map (,)

@@ -2,6 +2,7 @@ module Apps.Browser.Messages exposing (..)
 
 import Game.Web.Types exposing (Response)
 import Game.Network.Types as Network
+import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Apps as Apps
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Pages.Messages as Page
@@ -21,6 +22,7 @@ type Msg
     | SelectEndpoint
     | Logout
     | HandlePasswordAcquired PasswordAcquired.Data
+    | PublicDownload Network.NIP Filesystem.ForeignFileBox
 
 
 type TabMsg

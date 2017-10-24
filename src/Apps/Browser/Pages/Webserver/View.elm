@@ -29,7 +29,8 @@ hackingToolkitConfig showPassword =
 
 publicFilesConfig : NIP -> PublicFiles.Config Msg
 publicFilesConfig source =
-    { reqDownload = StartDownload source
+    { source = source
+    , onCommonAction = GlobalMsg
     }
 
 

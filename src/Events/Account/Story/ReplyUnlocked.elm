@@ -13,12 +13,13 @@ import Json.Decode
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Events.Types exposing (Handler)
 import Decoders.Emails exposing (contentFromId)
+import Game.Storyline.Emails.Models exposing (Replies)
 import Game.Storyline.Emails.Contents exposing (..)
 
 
 type alias Data =
     { personId : String
-    , responses : List Content
+    , replies : Replies
     }
 
 
@@ -35,11 +36,11 @@ newEmail : Decoder Data
 newEmail =
     decode Data
         |> required "contact_id" string
-        |> required "responses" responses
+        |> required "replies" replies
 
 
-responses : Decoder (List Content)
-responses =
+replies : Decoder Replies
+replies =
     field "id" string
         |> andThen contentFromId
         |> list
