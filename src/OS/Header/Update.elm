@@ -4,12 +4,14 @@ import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Account.Messages as Account
 import Game.Data as Game
+import Game.Models
 import Game.Account.Messages as Account
 import Game.Meta.Types exposing (Context)
 import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Story
 import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
@@ -40,7 +42,7 @@ update data msg model =
             onSelectBounce data id model
 
         SelectEndpoint cid ->
-            onSelectEndpoint cid model
+            onSelectEndpoint data cid model
 
         ContextTo context ->
             onContextTo context model
@@ -126,8 +128,8 @@ onSelectBounce data id model =
         ( model_, Cmd.none, dispatch )
 
 
-onSelectEndpoint : Maybe Servers.CId -> Model -> UpdateResponse
-onSelectEndpoint cid model =
+onSelectEndpoint : Game.Data -> Maybe Servers.CId -> Model -> UpdateResponse
+onSelectEndpoint data cid model =
     let
         dispatch =
             Dispatch.account <| Account.SetEndpoint cid

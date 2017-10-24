@@ -15,7 +15,7 @@ type Msg
     = Request RequestMsg
     | FetchUrl String Network.ID Servers.CId Requester
     | Login Network.NIP Network.IP String Requester
-    | HandleJoinedServer Servers.CId
+    | JoinedServer Servers.CId
     | HandleJoinServerFailed Servers.CId
 
 

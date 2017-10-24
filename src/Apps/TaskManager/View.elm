@@ -137,43 +137,46 @@ viewTaskRow data now (( _, process ) as entry) =
         maybeAnd ma mb =
             Maybe.andThen (\a -> Maybe.map (\b -> ( a, b )) mb) ma
 
-        fileInfo =
-            let
-                servers =
-                    data
-                        |> Game.getGame
-                        |> Game.getServers
+        {-
+           -- removing this code block because this data should already be
+           -- present on process
+           fileInfo =
+               let
+                   servers =
+                       data
+                           |> Game.getGame
+                           |> Game.getServers
 
-                maybeFileID =
-                    Processes.getFileID process
+                   maybeFileID =
+                       Processes.getFileID process
 
-                maybeFilesystem =
-                    process
-                        |> Processes.getOrigin
-                        |> Maybe.andThen (flip Servers.get servers)
-                        |> Maybe.map Servers.getFilesystem
+                   maybeFilesystem =
+                       process
+                           |> Processes.getOrigin
+                           |> Maybe.andThen (flip Servers.get servers)
+                           |> Maybe.map Servers.getFilesystem
 
-                fileInformation fileName =
-                    div []
-                        [ text "File:"
-                        , text fileName
-                        , process
-                            |> Processes.getVersion
-                            |> Maybe.map
-                                (toString
-                                    >> text
-                                    >> List.singleton
-                                    >> span []
-                                )
-                            |> maybe
-                        ]
-            in
-                maybeAnd maybeFileID maybeFilesystem
-                    |> Maybe.andThen (uncurry Filesystem.getEntry)
-                    |> Maybe.map Filesystem.getEntryName
-                    |> Maybe.map fileInformation
-                    |> maybe
-
+                   fileInformation fileName =
+                       div []
+                           [ text "File:"
+                           , text fileName
+                           , process
+                               |> Processes.getVersion
+                               |> Maybe.map
+                                   (toString
+                                       >> text
+                                       >> List.singleton
+                                       >> span []
+                                   )
+                               |> maybe
+                           ]
+               in
+                   maybeAnd maybeFileID maybeFilesystem
+                       |> Maybe.andThen (uncurry Filesystem.getEntry)
+                       |> Maybe.map Filesystem.getEntryName
+                       |> Maybe.map fileInformation
+                       |> maybe
+        -}
         usageView =
             process
                 |> Processes.getUsage
@@ -187,7 +190,6 @@ viewTaskRow data now (( _, process ) as entry) =
                 , text "Target: "
                 , text <| Tuple.second <| Processes.getTarget process
                 , br [] []
-                , fileInfo
                 ]
             , div []
                 [ viewState now process ]

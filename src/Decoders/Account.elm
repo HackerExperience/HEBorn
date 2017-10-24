@@ -28,4 +28,4 @@ account model =
 
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
 mainframe model =
-    optional "mainframe" (map Just Decoders.Servers.cid) model.mainframe
+    optional "mainframe" (map Just Decoders.Servers.playerCId) model.mainframe

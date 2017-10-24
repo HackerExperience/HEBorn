@@ -379,6 +379,11 @@ onLogin :
     -> TabUpdateResponse
 onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
     let
+        servers =
+            data
+                |> Game.getGame
+                |> Game.Models.getServers
+
         requester =
             { sessionId = sessionId
             , windowId = windowId
@@ -387,7 +392,7 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             }
 
         gatewayNip =
-            Game.getActiveCId data
+            Servers.getNIP (Game.getActiveCId data) servers
 
         remoteIp =
             Network.getIp remoteNip
