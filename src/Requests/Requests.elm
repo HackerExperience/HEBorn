@@ -52,11 +52,12 @@ request topic msg data source =
 decodeGenericError :
     Decode.Value
     -> (String -> Decode.Decoder a)
-    -> Result String a
+    -> Maybe a
 decodeGenericError value decodeMessage =
     Decode.field "message" Decode.string
         |> Decode.andThen decodeMessage
         |> flip Decode.decodeValue value
+        |> report
 
 
 
@@ -79,14 +80,10 @@ genericHttp msg result =
 okWs : (ResponseType -> msg) -> Encode.Value -> msg
 okWs msg value =
     let
-        decoder =
-            decode WebsocketResponse
-                |> required "data" Decode.value
-
         result =
             value
                 |> Debug.log "▶ Websocket (:ok)"
-                |> Decode.decodeValue decoder
+                |> Decode.decodeValue response
     in
         case result of
             Ok response ->
@@ -99,20 +96,23 @@ okWs msg value =
 errorWs : (ResponseType -> msg) -> Encode.Value -> msg
 errorWs msg value =
     let
-        decoder =
-            Decode.field "message" Decode.string
-
         result =
             value
                 |> Debug.log "▶ Websocket (:error)"
-                |> Decode.decodeValue decoder
+                |> Decode.decodeValue response
     in
         case result of
             Ok response ->
-                msg ( ErrorCode, value )
+                msg ( ErrorCode, response.data )
 
             Err str ->
                 msg ( Timeout, toValue str )
+
+
+response : Decode.Decoder WebsocketResponse
+response =
+    decode WebsocketResponse
+        |> required "data" Decode.value
 
 
 toValue : String -> Decode.Value

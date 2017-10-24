@@ -17,3 +17,18 @@ initialModel =
     , missions = Missions.initialModel
     , emails = Emails.initialModel
     }
+
+
+isActive : Model -> Bool
+isActive =
+    .enabled
+
+
+getMissions : Model -> Missions.Model
+getMissions =
+    .missions
+
+
+getEmails : Model -> Emails.Model
+getEmails =
+    .emails

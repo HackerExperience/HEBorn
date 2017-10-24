@@ -15,7 +15,7 @@ import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Servers.Logs.Models as Logs
+import Game.Servers.Logs.Models as Logs exposing (Format(..))
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
@@ -131,27 +131,10 @@ renderFlags =
 renderContent : Logs.Log -> Html Msg
 renderContent log =
     let
-        toHtml item =
-            case item of
-                Logs.NipE ip ->
-                    Inlines.addr ip
-
-                Logs.TextE str ->
-                    span [] [ text str ]
-
-                Logs.SpecialE "file" file ->
-                    Inlines.file file
-
-                Logs.SpecialE "user" user ->
-                    Inlines.user user
-
-                Logs.SpecialE _ str ->
-                    span [] [ text str ]
-
         rendered =
             case Logs.getContent log of
                 Logs.Uncrypted data ->
-                    List.map toHtml <| Logs.render data
+                    render data
 
                 Logs.Encrypted ->
                     [ span [] [ text encrypted ] ]
@@ -262,3 +245,45 @@ menuInclude app id log =
 
             Logs.Encrypted ->
                 []
+
+
+render : Logs.Data -> List (Html Msg)
+render { format, raw } =
+    case format of
+        Just format ->
+            case format of
+                LocalLoginFormat data ->
+                    [ addr data.from
+                    , text " logged in as "
+                    , user data.user
+                    ]
+
+                RemoteLoginFormat { into } ->
+                    [ text "Logged into "
+                    , addr into
+                    ]
+
+                ConnectionFormat { nip, from, to } ->
+                    [ addr nip
+                    , text " bounced connection from "
+                    , addr from
+                    , text " to "
+                    , addr to
+                    ]
+
+                DownloadByFormat { filename, nip } ->
+                    [ text "File "
+                    , file filename
+                    , text " downloaded by "
+                    , file nip
+                    ]
+
+                DownloadFromFormat { filename, nip } ->
+                    [ text "File "
+                    , file filename
+                    , text " downloaded from "
+                    , addr nip
+                    ]
+
+        Nothing ->
+            [ text raw ]

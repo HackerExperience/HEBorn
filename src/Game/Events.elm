@@ -126,6 +126,10 @@ fromAccount =
             [ Dispatch.email <| Emails.HandleNewEmail data
             ]
 
+        handleStoryReplyUnlocked data =
+            [ Dispatch.email <| Emails.HandleReplyUnlocked data
+            ]
+
         handleStoryStepProceeded data =
             [ Dispatch.mission <| Missions.HandleStepProceeded data
             ]
@@ -140,6 +144,9 @@ fromAccount =
 
                 Account.StoryStepProceeded data ->
                     handleStoryStepProceeded data
+
+                Account.StoryReplyUnlocked data ->
+                    handleStoryReplyUnlocked data
     in
         handler
 

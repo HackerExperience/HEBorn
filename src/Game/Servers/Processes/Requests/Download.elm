@@ -80,7 +80,6 @@ receive code json =
             Requests.decodeGenericError
                 json
                 decodeErrorMessage
-                |> Requests.report
 
         _ ->
             Nothing
