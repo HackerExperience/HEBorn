@@ -84,8 +84,8 @@ ownership gatewayCache =
 
 
 gatewayOwnership : GatewayCache -> Decoder GatewayData
-gatewayOwnership { serverId, endpoints } =
-    succeed <| GatewayData serverId endpoints Nothing
+gatewayOwnership { activeNIP, endpoints } =
+    succeed <| GatewayData activeNIP endpoints Nothing
 
 
 endpointOwnership : Decoder EndpointData
@@ -154,4 +154,14 @@ cids =
 
 cid : Decoder CId
 cid =
-    Decoders.Network.nip
+    oneOf [ playerCId, remoteCId ]
+
+
+playerCId : Decoder CId
+playerCId =
+    map GatewayCId <| field "server_id" string
+
+
+remoteCId : Decoder CId
+remoteCId =
+    map EndpointCId <| Decoders.Network.nip

@@ -16,8 +16,13 @@ getAddress channel =
         AccountChannel id ->
             "account:" ++ id
 
-        ServerChannel ( nid, ip ) ->
-            "server:" ++ nid ++ "@" ++ ip
+        ServerChannel cid ->
+            case cid of
+                Servers.GatewayCId id ->
+                    "server:" ++ id
+
+                Servers.EndpointCId ( id, ip ) ->
+                    "server:" ++ id ++ "@" ++ ip
 
         RequestsChannel ->
             "requests"

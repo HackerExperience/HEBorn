@@ -47,7 +47,7 @@ fromGateway model =
 
 getEndpoints : Data -> List Servers.CId
 getEndpoints =
-    (.server)
+    .server
         >> Servers.getEndpoints
         >> Maybe.withDefault []
 

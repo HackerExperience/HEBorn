@@ -11,8 +11,19 @@ import Json.Decode as Decode
         , string
         , field
         , list
+        , maybe
+        , fail
+        , succeed
         )
-import Json.Decode.Pipeline exposing (decode, required, hardcoded, optional, custom)
+import Json.Decode.Pipeline
+    exposing
+        ( decode
+        , required
+        , hardcoded
+        , optional
+        , custom
+        , resolve
+        )
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
@@ -40,12 +51,13 @@ type alias PlayerServers =
 
 
 type alias RemoteServers =
-    Dict Servers.CId Remote
+    Dict String Remote
 
 
 type alias Player =
     { serverId : String
     , nips : List NIP
+    , activeNIP : NIP
     , endpoints : List Servers.CId
     }
 
@@ -93,11 +105,39 @@ joinPlayer : Decoder Player
 joinPlayer =
     decode Player
         |> required "server_id" string
-        |> required "nips" Decoders.Network.nips
-        |> required "endpoints" Decoders.Servers.cids
+        |> andThen playerNetwork
+        |> required "endpoints" (list Decoders.Servers.remoteCId)
 
 
-joinRemote : Decoder ( Servers.CId, Remote )
+playerNetwork : (List NIP -> NIP -> a) -> Decoder a
+playerNetwork func =
+    let
+        apply nips maybeNip =
+            let
+                active =
+                    case maybeNip of
+                        Just nip ->
+                            Just nip
+
+                        Nothing ->
+                            nips
+                                |> Network.filterInternet
+                                |> List.head
+            in
+                case active of
+                    Just nip ->
+                        succeed <| func nips nip
+
+                    Nothing ->
+                        fail "Couldn't select an active nip for player server"
+    in
+        decode apply
+            |> required "nips" Decoders.Network.nips
+            |> custom (maybe Decoders.Network.nip)
+            |> resolve
+
+
+joinRemote : Decoder ( String, Remote )
 joinRemote =
     let
         decodeRemote =
@@ -108,7 +148,7 @@ joinRemote =
                 |> hardcoded Nothing
     in
         decode (,)
-            |> custom Decoders.Servers.cid
+            |> custom (map Servers.toSessionId Decoders.Servers.remoteCId)
             |> custom decodeRemote
 
 
@@ -116,14 +156,12 @@ insertServers : Model -> ServersToJoin -> ( Model, ServersToJoin )
 insertServers model serversToJoin =
     let
         reducePlayer server servers =
-            let
-                reduceInsertGateway nip servers =
-                    Servers.insertGateway nip
-                        server.serverId
-                        server.endpoints
-                        servers
-            in
-                List.foldl reduceInsertGateway servers server.nips
+            Servers.insertGateway
+                server.serverId
+                server.activeNIP
+                server.nips
+                server.endpoints
+                servers
 
         model_ =
             serversToJoin.player

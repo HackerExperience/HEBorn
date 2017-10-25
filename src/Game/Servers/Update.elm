@@ -18,6 +18,7 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
+import Game.Web.Messages as Web
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
@@ -102,8 +103,8 @@ updateServer game model cid msg server =
                 maybeBounceId
                 server
 
-        SetEndpoint maybeCId ->
-            onSetEndpoint game maybeCId server
+        SetEndpoint remote ->
+            onSetEndpoint game remote server
 
         FilesystemMsg msg ->
             onFilesystemMsg game cid msg server
@@ -247,8 +248,14 @@ handleJoinedServer cid value model =
 
                     model_ =
                         insert cid server model
+
+                    dispatch_ =
+                        Dispatch.batch
+                            [ dispatch
+                            , Dispatch.web <| Web.JoinedServer cid
+                            ]
                 in
-                    ( model_, Cmd.none, dispatch )
+                    ( model_, Cmd.none, dispatch_ )
 
             Err reason ->
                 let
