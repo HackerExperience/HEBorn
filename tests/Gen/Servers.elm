@@ -21,6 +21,7 @@ import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Notifications.Models as Notifications
+import Gen.Network exposing (..)
 import Gen.Utils exposing (..)
 
 
@@ -77,7 +78,20 @@ model =
 
 genServerCId : Generator CId
 genServerCId =
-    map2 (,) unique unique
+    choices
+        [ genGatewayCId
+        , genEndpointCId
+        ]
+
+
+genGatewayCId : Generator CId
+genGatewayCId =
+    map GatewayCId genServerId
+
+
+genEndpointCId : Generator CId
+genEndpointCId =
+    map EndpointCId genNip
 
 
 genServerId : Generator Id
@@ -95,7 +109,7 @@ genOwnserhip =
 
 genGatewayOwnership : Generator GatewayData
 genGatewayOwnership =
-    map (\uid -> GatewayData uid [] Nothing) genServerId
+    map (\nip -> GatewayData nip [] Nothing) genNip
 
 
 genEndpointOwnership : Generator EndpointData
@@ -138,7 +152,7 @@ genGenericServer gen =
     in
         gen
             |> map buildServerRecord
-            |> andMap genServerCId
+            |> andMap genNip
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel
