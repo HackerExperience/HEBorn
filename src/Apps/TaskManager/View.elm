@@ -134,9 +134,6 @@ viewTaskRow :
     -> Html Msg
 viewTaskRow data now (( _, process ) as entry) =
     let
-        maybeAnd ma mb =
-            Maybe.andThen (\a -> Maybe.map (\b -> ( a, b )) mb) ma
-
         {-
            -- removing this code block because this data should already be
            -- present on process
@@ -171,7 +168,8 @@ viewTaskRow data now (( _, process ) as entry) =
                                |> maybe
                            ]
                in
-                   maybeAnd maybeFileID maybeFilesystem
+                    maybeFilesystem
+                       |> Maybe.ucurry maybeFileID
                        |> Maybe.andThen (uncurry Filesystem.getEntry)
                        |> Maybe.map Filesystem.getEntryName
                        |> Maybe.map fileInformation
