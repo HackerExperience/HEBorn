@@ -59,11 +59,13 @@ genModel =
         genEndpointServer =
             genPairs Gen.Servers.genEndpointServer
 
+        genServers =
+            map2 (\gate end -> [ gate, end ])
+                genGatewayServer
+                genEndpointServer
+
         insertServer ( id, server ) game =
             let
-                server_ =
-                    { server | nips = id :: server.nips }
-
                 isGateway =
                     case server.ownership of
                         Servers.GatewayOwnership _ ->
@@ -73,7 +75,7 @@ genModel =
                             False
 
                 servers =
-                    Servers.insert id server_ game.servers
+                    Servers.insert id server game.servers
 
                 account =
                     if isGateway then
@@ -86,5 +88,4 @@ genModel =
                     , account = account
                 }
     in
-        map2 (\gate end -> [ gate, end ]) genGatewayServer genEndpointServer
-            |> map (List.foldl insertServer game)
+        map (List.foldl insertServer game) genServers
