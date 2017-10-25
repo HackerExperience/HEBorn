@@ -13,9 +13,9 @@ type Response
     | Invalid String
 
 
-request : (ResponseType -> msg) -> Configs -> CId -> ConfigSource a -> Cmd msg
-request msg config cid =
-    Requests.request (Topics.serverConfigSet cid) msg (encode config)
+request : (ResponseType -> msg) -> Settings -> CId -> ConfigSource a -> Cmd msg
+request msg settings cid =
+    Requests.request (Topics.serverConfigSet cid) msg (encode settings)
 
 
 receive : Code -> Decode.Value -> Maybe Response

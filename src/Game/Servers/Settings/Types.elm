@@ -5,12 +5,12 @@ import Json.Decode as Decode exposing (Decoder, Value)
 import Utils.Ports.Map exposing (Coordinates)
 
 
-type Configs
+type Settings
     = Location Coordinates
     | Name String
 
 
-encode : Configs -> Value
+encode : Settings -> Value
 encode config =
     case config of
         Location coord ->

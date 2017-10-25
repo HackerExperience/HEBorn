@@ -16,7 +16,7 @@ type Response
 
 checkRequest :
     Config msg
-    -> Configs
+    -> Settings
     -> Servers.CId
     -> ConfigSource a
     -> Cmd msg
@@ -24,7 +24,7 @@ checkRequest { toMsg } =
     Check.request (CheckRequest >> Request >> toMsg)
 
 
-setRequest : Config msg -> Configs -> Servers.CId -> ConfigSource a -> Cmd msg
+setRequest : Config msg -> Settings -> Servers.CId -> ConfigSource a -> Cmd msg
 setRequest { toMsg } =
     Set.request (SetRequest >> Request >> toMsg)
 

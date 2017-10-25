@@ -19,6 +19,7 @@ import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Dummy as Game
 import OS.Models as OS
+import Utils.Update as Update
 import Landing.Models as Landing
 import Setup.Models as Setup
 import Core.Config as Config exposing (Config)
@@ -122,7 +123,7 @@ login ({ state, config } as model) =
 
                         ( state_, cmd, dispatch ) =
                             initialSetup websocket_ game
-                                |> (\( a, b, c ) -> ( Setup a, b, c ))
+                                |> Update.mapModel Setup
 
                         model_ =
                             { model | state = state_ }

@@ -11,7 +11,6 @@ import Json.Decode as Decode
         , string
         , list
         )
-import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (commonError)
 import Setup.Types as Setup exposing (Page(..))
 import Setup.Models as Setup
