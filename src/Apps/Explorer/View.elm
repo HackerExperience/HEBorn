@@ -446,9 +446,12 @@ view data ({ app } as model) =
     let
         nowPath =
             app.path
+
+        activeServer =
+            Game.getActiveServer data
     in
         div [ class [ Window ] ]
-            [ explorerColumn [] data.server
-            , explorerMain app.editing nowPath data.server
+            [ explorerColumn [] activeServer
+            , explorerMain app.editing nowPath activeServer
             , menuView model
             ]

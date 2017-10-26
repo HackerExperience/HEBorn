@@ -57,7 +57,7 @@ update game nip msg model =
                 (newOptimistic
                     (Download (DownloadContent PrivateFTP storageId))
                     nip
-                    (Tuple.second origin)
+                    (Network.getIp origin)
                     unknownProcessFile
                 )
                 origin
@@ -70,7 +70,7 @@ update game nip msg model =
                 (newOptimistic
                     (Download (DownloadContent PublicFTP storageId))
                     nip
-                    (Tuple.second origin)
+                    (Network.getIp origin)
                     unknownProcessFile
                 )
                 origin

@@ -43,10 +43,12 @@ update data msg ({ app } as model) =
         --- Every update
         Tick now ->
             let
+                activeServer =
+                    Game.getActiveServer data
+
                 app_ =
                     updateTasks
-                        data.server
-                        --TODO: Recalculate limits
+                        activeServer
                         app.limits
                         app
             in

@@ -44,7 +44,8 @@ view data ({ app } as model) =
 
         mainEntries =
             verticalList
-                (data.server
+                (data
+                    |> Game.getActiveServer
                     |> Servers.getLogs
                     |> applyFilter app
                     |> renderEntries app
