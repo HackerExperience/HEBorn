@@ -220,15 +220,16 @@ onReqDownload :
     -> UpdateResponse
 onReqDownload data source file model =
     let
-        dispatch =
-            case (Game.Models.getGateway <| data.game) of
-                Just me ->
-                    Dispatch.processes (Tuple.first me) <|
-                        Processes.StartPublicDownload source file "storage id"
+        ( me, _ ) =
+            data
+                |> Game.getGame
+                |> Game.Models.unsafeGetGateway
 
-                Nothing ->
-                    Dispatch.politeCrash "WTF_ASTRAL_PROJECTION"
-                        "There is no gateway server in this session!"
+        startMsg =
+            Processes.StartPublicDownload source file "storage id"
+
+        dispatch =
+            Dispatch.processes me startMsg
     in
         ( model, Cmd.none, dispatch )
 
