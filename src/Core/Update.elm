@@ -2,6 +2,7 @@ module Core.Update exposing (update)
 
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
+import Core.Dispatcher as Dispatcher
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
@@ -25,7 +26,6 @@ import OS.SessionManager.Messages as SM
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    -- DONE
     case (onDebug model received msg) of
         Boot id username token ->
             let
@@ -397,20 +397,9 @@ sent =
 
 dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
 dispatcher model cmd dispatch =
-    if isDev model then
-        let
-            logged =
-                dispatch
-                    |> Dispatch.toList
-                    |> List.map sent
-
-            cmd_ =
-                Cmd.batch [ cmd, Dispatch.toCmd dispatch ]
-        in
-            ( model, cmd_ )
-    else
-        -- TODO: check if reversing is really needed
-        Dispatch.foldr reducer ( model, cmd ) dispatch
+    dispatch
+        |> Dispatcher.dispatch
+        |> List.foldl (sent >> reducer) ( model, cmd )
 
 
 reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
