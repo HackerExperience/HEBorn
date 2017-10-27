@@ -1,13 +1,14 @@
 module Core.Dispatch.Servers exposing (..)
 
+import Game.Servers.Shared exposing (CId)
+
+
 {-| Messages related to servers.
 -}
-
-
 type Dispatch
     = SetEndpoint
     | SetBounce
-    | Server Server
+    | Server CId Server
 
 
 {-| Messages related to a specific server.
@@ -19,7 +20,7 @@ type Server
     | FetchedUrl
     | Filesystem Filesystem
     | Logs Logs
-    | Procesess Procesess
+    | Processes Processes
 
 
 {-| Messages related to server's filesystem.
@@ -42,7 +43,7 @@ type Logs
 
 {-| Messages related to server's processes.
 -}
-type Procesess
+type Processes
     = PauseProcess
     | ResumeProcess
     | RemoveProcess

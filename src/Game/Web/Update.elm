@@ -1,6 +1,8 @@
 module Game.Web.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Websocket as Ws
+import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Game.Models as Game
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)
@@ -11,7 +13,6 @@ import Json.Encode as Encode
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
-import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Messages as Ws
 import Apps.Browser.Messages as Browser
 import Game.Network.Types as Network
@@ -104,7 +105,7 @@ onLogin game nip remoteIp password requester model =
 
         dispatch =
             Dispatch.websocket <|
-                Ws.JoinChannel (ServerChannel remoteCid) (Just payload)
+                Ws.Join (ServerChannel remoteCid) (Just payload)
 
         model_ =
             startLoading remoteNip requester model

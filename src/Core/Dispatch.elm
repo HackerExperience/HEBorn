@@ -6,17 +6,19 @@ module Core.Dispatch
         , batch
         , push
         , yield
-          -- dispatches
-        , boot
-        , shutdown
-        , play
-        , crash
-          -- to kill:
+        , account_
         , core
-        , setup
-        , websocket
-        , game
         , os
+        , servers_
+        , server_
+        , filesystem_
+        , logs_
+        , processes_
+        , storyline
+        , websocket
+          -- to kill:
+        , setup
+        , game
         , account
         , database
         , servers
@@ -30,17 +32,21 @@ module Core.Dispatch
         , processes
         , logs
         , log
-        , tunnels
         , serverNotification
         , accountNotification
-        , meta
         , openApp
         , apps
-        , appsOfSession
         , browser
         , toasts
         , politeCrash
         )
+
+{-| Dispatch types and syntax sugar for dispatching things.
+
+Dispatches are generic and defined by domain, so a PasswordAcquired dispatch
+is able to affect the OS instead of just Account.
+
+-}
 
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Core as Core
@@ -48,6 +54,7 @@ import Core.Dispatch.OS as OS
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Websocket as Websocket
+import Game.Servers.Shared exposing (CId)
 
 
 type Dispatch
@@ -85,41 +92,61 @@ yield (Dispatch list) =
 
 
 
--- account
--- core
+-- TODO: remove underlines after fixing conflicts
 
 
-boot : String -> String -> String -> Dispatch
-boot a b c =
-    core_ <| Core.Boot a b c
+account_ : Account.Dispatch -> Dispatch
+account_ =
+    Account >> dispatch
 
 
-shutdown : Dispatch
-shutdown =
-    core_ Core.Shutdown
+core : Core.Dispatch -> Dispatch
+core =
+    Core >> dispatch
 
 
-play : Dispatch
-play =
-    core_ Core.Play
+os : OS.Dispatch -> Dispatch
+os =
+    OS >> dispatch
 
 
-crash : String -> String -> Dispatch
-crash a b =
-    core_ <| Core.Crash a b
+servers_ : Servers.Dispatch -> Dispatch
+servers_ =
+    Servers >> dispatch
+
+
+server_ : CId -> Servers.Server -> Dispatch
+server_ id =
+    Servers.Server id >> Servers >> dispatch
+
+
+filesystem_ : CId -> Servers.Filesystem -> Dispatch
+filesystem_ id =
+    Servers.Filesystem >> server_ id
+
+
+logs_ : CId -> Servers.Logs -> Dispatch
+logs_ id =
+    Servers.Logs >> server_ id
+
+
+processes_ : CId -> Servers.Processes -> Dispatch
+processes_ id =
+    Servers.Processes >> server_ id
+
+
+storyline : Storyline.Dispatch -> Dispatch
+storyline =
+    Storyline >> dispatch
+
+
+websocket : Websocket.Dispatch -> Dispatch
+websocket =
+    Websocket >> dispatch
 
 
 
--- os
--- servers
--- storyline
--- websocket
--- dispatchables we should kill
-
-
-websocket : a -> Dispatch
-websocket msg =
-    dispatch NoOp
+-- compatibility layer we should eventually kill
 
 
 setup : a -> Dispatch
@@ -129,11 +156,6 @@ setup msg =
 
 game : a -> Dispatch
 game msg =
-    dispatch NoOp
-
-
-core : a -> Dispatch
-core msg =
     dispatch NoOp
 
 
@@ -149,11 +171,6 @@ database msg =
 
 servers : a -> Dispatch
 servers msg =
-    dispatch NoOp
-
-
-meta : a -> Dispatch
-meta msg =
     dispatch NoOp
 
 
@@ -202,11 +219,6 @@ log serverId cid msg =
     dispatch NoOp
 
 
-tunnels : a -> b -> Dispatch
-tunnels cid msg =
-    dispatch NoOp
-
-
 serverNotification : a -> b -> Dispatch
 serverNotification cid msg =
     dispatch NoOp
@@ -237,8 +249,13 @@ apps msgs =
     dispatch NoOp
 
 
-appsOfSession : a -> b -> c -> Dispatch
-appsOfSession cid context msgs =
+toasts : a -> Dispatch
+toasts msg =
+    dispatch NoOp
+
+
+politeCrash : a -> b -> Dispatch
+politeCrash code details =
     dispatch NoOp
 
 
@@ -249,62 +266,3 @@ appsOfSession cid context msgs =
 dispatch : Internal -> Dispatch
 dispatch =
     List.singleton >> Dispatch
-
-
-accountD : Account.Dispatch -> Dispatch
-accountD =
-    Account >> dispatch
-
-
-osD : OS.Dispatch -> Dispatch
-osD =
-    OS >> dispatch
-
-
-serversD : Servers.Dispatch -> Dispatch
-serversD =
-    Servers >> dispatch
-
-
-storylineD : Storyline.Dispatch -> Dispatch
-storylineD =
-    Storyline >> dispatch
-
-
-websocketD : Websocket.Dispatch -> Dispatch
-websocketD =
-    Websocket >> dispatch
-
-
-core_ : Core.Dispatch -> Dispatch
-core_ =
-    Core >> dispatch
-
-
-
--- internals we must kill
-
-
-os : a -> Dispatch
-os msg =
-    dispatch NoOp
-
-
-sessionManager : a -> Dispatch
-sessionManager msg =
-    dispatch NoOp
-
-
-toasts : a -> Dispatch
-toasts msg =
-    dispatch NoOp
-
-
-app : a -> b -> c -> Dispatch
-app windowRef context msg =
-    dispatch NoOp
-
-
-politeCrash : a -> b -> Dispatch
-politeCrash code details =
-    dispatch NoOp

@@ -9,7 +9,8 @@ import Driver.Websocket.Messages as Ws
 
 
 type Msg
-    = HandleBoot Account.ID Account.Username Account.Token
+    = HandleConnected
+    | HandleBoot Account.ID Account.Username Account.Token
     | HandleShutdown
     | HandleCrash String String
     | HandlePlay

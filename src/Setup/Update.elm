@@ -4,6 +4,7 @@ import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
 import Core.Messages as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Core as Core
 import Game.Models as Game
 import Game.Account.Models as Account
 import Utils.Ports.Map as Map
@@ -66,7 +67,7 @@ onNextPage game model =
 
         dispatch =
             if doneSetup model_ then
-                Dispatch.play
+                Dispatch.core Core.Play
             else
                 Dispatch.none
 
@@ -170,7 +171,7 @@ handleJoinedAccount value model =
 
                 dispatch =
                     if hasPages model_ then
-                        Dispatch.play
+                        Dispatch.core Core.Play
                     else
                         Dispatch.none
             in

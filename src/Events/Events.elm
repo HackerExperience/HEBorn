@@ -2,7 +2,6 @@ module Events.Events exposing (Event(..), events)
 
 import Json.Decode exposing (Value)
 import Driver.Websocket.Channels as Ws
-import Driver.Websocket.Reports as Ws
 import Game.Servers.Shared as Servers
 import Events.Account as Account
 import Events.Server as Server
@@ -11,7 +10,6 @@ import Events.Server as Server
 type Event
     = Account Account.Event
     | Server Servers.CId Server.Event
-    | Report Ws.Report
 
 
 events : Ws.Channel -> String -> Value -> Maybe Event

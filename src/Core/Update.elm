@@ -2,7 +2,7 @@ module Core.Update exposing (update)
 
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import Core.Dispatcher as Dispatcher
+import Core.Subscribers as Subscribers
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
@@ -92,14 +92,12 @@ updateState msg ({ state } as model) =
 updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
 updateHome msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
-            -- trap used for login
+        HandleConnected ->
             let
                 ( modelLogin, cmdLogin, dispatch ) =
                     login model
 
-                -- not tail recursive, but should
-                -- only do a single recursion
+                -- not tail recursive, but should only do a single recursion
                 ( modelLogin_, cmdLogin_ ) =
                     dispatcher modelLogin cmdLogin dispatch
 
@@ -139,11 +137,6 @@ updateHome msg model stateModel =
 updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
 updateSetup msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            stateModel
-                |> updateSetupGame (Game.Event event)
-                |> finishSetupUpdate model
-
         WebsocketMsg msg ->
             updateSetupWS msg stateModel
                 |> finishSetupUpdate model
@@ -211,11 +204,6 @@ finishSetupUpdate model ( stateModel, cmd, dispatch ) =
 updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
 updatePlay msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            stateModel
-                |> updatePlayGame (Game.Event event)
-                |> finishPlayUpdate model
-
         WebsocketMsg msg ->
             updatePlayWS msg stateModel
                 |> finishPlayUpdate model
@@ -398,7 +386,7 @@ sent =
 dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
 dispatcher model cmd dispatch =
     dispatch
-        |> Dispatcher.dispatch
+        |> Subscribers.dispatch
         |> List.foldl (sent >> reducer) ( model, cmd )
 
 

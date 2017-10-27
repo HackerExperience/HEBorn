@@ -6,8 +6,11 @@ import Json.Encode exposing (Value)
 
 
 type Msg
-    = JoinChannel Channel (Maybe Value)
-    | LeaveChannel Channel
-    | NewEvent Channel Value
-    | Broadcast Events.Event
-    | NoOp
+    = Connected String
+    | Disconnected
+    | Joined Channel Value
+    | JoinFailed Channel Value
+    | Leaved Channel Value
+    | Event Channel Value
+    | HandleJoin Channel (Maybe Value)
+    | HandleLeave Channel

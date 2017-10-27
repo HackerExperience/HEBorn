@@ -20,8 +20,8 @@ type Msg
     | DatabaseMsg Database.Msg
     | NotificationsMsg Notifications.Msg
     | Request RequestMsg
-    | HandleConnect
-    | HandleDisconnect
+    | HandleConnected
+    | HandleDisconnected
 
 
 type RequestMsg

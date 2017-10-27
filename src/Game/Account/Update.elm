@@ -2,9 +2,9 @@ module Game.Account.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Messages as Core
-import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Messages as Ws
+import Core.Dispatch.Core as Core
+import Core.Dispatch.Websocket as Ws
+import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
@@ -62,11 +62,11 @@ update game msg model =
                 |> Maybe.map (flip (updateRequest game) model)
                 |> Maybe.withDefault (Update.fromModel model)
 
-        HandleConnect ->
-            handleConnect model
+        HandleConnected ->
+            handleConnected model
 
-        HandleDisconnect ->
-            handleDisconnect model
+        HandleDisconnected ->
+            handleDisconnected model
 
 
 
@@ -222,26 +222,26 @@ onInsertGateway cid model =
         |> Update.fromModel
 
 
-handleConnect : Model -> UpdateResponse
-handleConnect model =
+handleConnected : Model -> UpdateResponse
+handleConnected model =
     let
         dispatch =
-            Dispatch.websocket
-                (Ws.JoinChannel (AccountChannel model.id) Nothing)
+            Dispatch.websocket <|
+                Ws.Join (AccountChannel model.id) Nothing
     in
         ( model, Cmd.none, dispatch )
 
 
-handleDisconnect : Model -> UpdateResponse
-handleDisconnect model =
+handleDisconnected : Model -> UpdateResponse
+handleDisconnected model =
     let
         dispatch =
             case model.logout of
                 ToLanding ->
-                    Dispatch.shutdown
+                    Dispatch.core <| Core.Shutdown
 
                 ToCrash code message ->
-                    Dispatch.crash code message
+                    Dispatch.core <| Core.Crash code message
 
                 _ ->
                     Dispatch.none

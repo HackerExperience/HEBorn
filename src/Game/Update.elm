@@ -5,8 +5,9 @@ import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Messages as Ws
+import Core.Dispatch.Websocket as Ws
+import Core.Dispatch.Core as Core
+import Driver.Websocket.Channels exposing (Channel(ServerChannel, RequestsChannel))
 import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
@@ -181,7 +182,8 @@ handleConnected : Model -> UpdateResponse
 handleConnected model =
     let
         dispatch =
-            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
+            Dispatch.websocket <|
+                Ws.Join RequestsChannel Nothing
     in
         ( model, Cmd.none, dispatch )
 
@@ -204,7 +206,8 @@ handleJoinedAccount value model =
                     Debug.log "▶ " ("Bootstrap Error:\n" ++ reason)
 
                 dispatch =
-                    Dispatch.account <| Account.DoCrash "ERR_PORRA_RENATO" msg
+                    Dispatch.core <|
+                        Core.Crash "ERR_PORRA_RENATO" msg
             in
                 ( model, Cmd.none, dispatch )
 
@@ -233,7 +236,8 @@ joinPlayer server =
         cid =
             Servers.GatewayCId server.serverId
     in
-        Dispatch.websocket <| Ws.JoinChannel (ServerChannel cid) Nothing
+        Dispatch.websocket <|
+            Ws.Join (ServerChannel cid) Nothing
 
 
 joinRemote : Decoders.Game.Player -> Decoders.Game.Remote -> Dispatch
@@ -262,8 +266,8 @@ joinRemote fromServer toServer =
                             ]
                 in
                     Dispatch.websocket <|
-                        (Ws.JoinChannel channel)
-                            (Just payload)
+                        Ws.Join channel <|
+                            Just payload
 
             Nothing ->
                 Dispatch.none

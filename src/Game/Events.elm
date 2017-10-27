@@ -38,9 +38,6 @@ dispatcher event model =
     let
         dispatches =
             case event of
-                Events.Report report ->
-                    fromReport report model
-
                 Events.Account event ->
                     fromAccount event model
 
@@ -48,65 +45,6 @@ dispatcher event model =
                     fromServer cid event model
     in
         Dispatch.batch dispatches
-
-
-
--- reports
-
-
-fromReport : Ws.Report -> Model -> Dispatches
-fromReport =
-    let
-        handleWsConnected token =
-            [ Dispatch.account Account.HandleConnect
-            , Dispatch.game HandleConnected
-            ]
-
-        handleWsDisconnected =
-            [ Dispatch.account Account.HandleDisconnect
-            ]
-
-        handleWsJoined channel value =
-            case channel of
-                ServerChannel cid ->
-                    [ Dispatch.servers <| Servers.HandleJoinedServer cid value
-                    ]
-
-                AccountChannel id ->
-                    [ Dispatch.game <| HandleJoinedAccount value
-                    , Dispatch.setup <| Setup.HandleJoinedAccount value
-                    ]
-
-                RequestsChannel ->
-                    []
-
-        handleWsJoinFailed channel value =
-            case channel of
-                ServerChannel cid ->
-                    [ Dispatch.web <| Web.HandleJoinServerFailed cid
-                    ]
-
-                AccountChannel id ->
-                    []
-
-                RequestsChannel ->
-                    []
-
-        handler report model =
-            case report of
-                Ws.Connected token ->
-                    handleWsConnected token
-
-                Ws.Disconnected ->
-                    handleWsDisconnected
-
-                Ws.Joined channel value ->
-                    handleWsJoined channel value
-
-                Ws.JoinFailed channel value ->
-                    handleWsJoinFailed channel value
-    in
-        handler
 
 
 
