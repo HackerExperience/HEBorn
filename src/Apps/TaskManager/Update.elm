@@ -19,36 +19,6 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-processComplete : Servers.CId -> Processes.Model -> Time -> Dispatch
-processComplete cid processes now =
-    let
-        complete ( id, proc ) =
-            let
-                completion =
-                    Processes.getCompletionDate proc
-
-                isCompleted =
-                    Maybe.map ((>) now) completion
-                        |> Maybe.withDefault False
-            in
-                case Processes.getState proc of
-                    Processes.Running ->
-                        if isCompleted then
-                            Just <|
-                                Dispatch.processes cid <|
-                                    Processes.Complete id
-                        else
-                            Nothing
-
-                    _ ->
-                        Nothing
-    in
-        processes
-            |> Processes.toList
-            |> List.filterMap complete
-            |> Dispatch.batch
-
-
 update :
     Game.Data
     -> TaskManager.Msg
@@ -73,17 +43,13 @@ update data msg ({ app } as model) =
         --- Every update
         Tick now ->
             let
-                newApp =
+                activeServer =
+                    Game.getActiveServer data
+
+                app_ =
                     updateTasks
-                        data.server
-                        --TODO: Recalculate limits
+                        activeServer
                         app.limits
                         app
-
-                completeMsgs =
-                    processComplete
-                        (Game.getActiveCId data)
-                        (Servers.getProcesses data.server)
-                        now
             in
-                ( { model | app = newApp }, Cmd.none, completeMsgs )
+                ( { model | app = app_ }, Cmd.none, Dispatch.none )

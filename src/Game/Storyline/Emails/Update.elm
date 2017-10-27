@@ -8,7 +8,9 @@ import Game.Notifications.Messages as Notifications
 import Game.Notifications.Models as Notifications
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
-import Game.Storyline.Emails.Contents as Contents
+import Game.Storyline.Emails.Contents as Contents exposing (Content)
+import Game.Storyline.Emails.Requests exposing (Response, receive)
+import Game.Storyline.Emails.Requests.Reply as Reply
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
 
@@ -23,11 +25,17 @@ update game msg model =
         Changed newModel ->
             onChanged newModel model
 
+        Reply content ->
+            onReply game content model
+
         HandleNewEmail data ->
             handleNewEmail game data model
 
         HandleReplyUnlocked data ->
             handleReplyUnlocked game data model
+
+        Request data ->
+            onRequest game (receive data) model
 
 
 onChanged : Model -> Model -> UpdateResponse
@@ -35,10 +43,30 @@ onChanged newModel oldModel =
     Update.fromModel newModel
 
 
+onReply : Game.Model -> Content -> Model -> UpdateResponse
+onReply game content model =
+    let
+        accountId =
+            Game.getAccount game
+                |> .id
+
+        contentId =
+            Contents.toId content
+
+        cmd =
+            Reply.request accountId contentId game
+    in
+        ( model, cmd, Dispatch.none )
+
+
+
+-- events
+
+
 handleNewEmail : Game.Model -> StoryNewEmail.Data -> Model -> UpdateResponse
 handleNewEmail game data model =
     let
-        { personId, messageNode, responses, createNotification } =
+        { personId, messageNode, replies, createNotification } =
             data
 
         ( time, msg ) =
@@ -53,8 +81,8 @@ handleNewEmail game data model =
                         messageNode
                             |> List.singleton
                             |> Dict.fromList
-                    , responses =
-                        responses
+                    , replies =
+                        replies
                     }
 
                 Just person ->
@@ -66,7 +94,7 @@ handleNewEmail game data model =
                     in
                         { person
                             | messages = messages_
-                            , responses = responses
+                            , replies = replies
                         }
 
         model_ =
@@ -93,7 +121,7 @@ handleReplyUnlocked :
     -> StoryReplyUnlocked.Data
     -> Model
     -> UpdateResponse
-handleReplyUnlocked game { personId, responses } model =
+handleReplyUnlocked game { personId, replies } model =
     let
         person_ =
             case getPerson personId model of
@@ -102,22 +130,41 @@ handleReplyUnlocked game { personId, responses } model =
                         personMetadata personId
                     , messages =
                         Dict.empty
-                    , responses =
-                        responses
+                    , replies =
+                        replies
                     }
 
                 Just person ->
                     let
-                        responses_ =
+                        replies_ =
                             person
-                                |> getAvailableResponses
-                                |> (++) responses
+                                |> getAvailableReplies
+                                |> (++) replies
                     in
                         { person
-                            | responses = responses
+                            | replies = replies
                         }
 
         model_ =
             setPerson personId person_ model
     in
         ( model_, Cmd.none, Dispatch.none )
+
+
+
+-- requests
+
+
+onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
+onRequest game response model =
+    case response of
+        Just response ->
+            updateRequest game response model
+
+        Nothing ->
+            Update.fromModel model
+
+
+updateRequest : Game.Model -> Response -> Model -> UpdateResponse
+updateRequest game response model =
+    Update.fromModel model

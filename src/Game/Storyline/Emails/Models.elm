@@ -17,7 +17,7 @@ type alias Email =
 type alias Person =
     { about : Maybe About
     , messages : Messages
-    , responses : Responses
+    , replies : Replies
     }
 
 
@@ -37,7 +37,7 @@ type alias Messages =
     Dict Time Message
 
 
-type alias Responses =
+type alias Replies =
     List Content
 
 
@@ -60,9 +60,9 @@ getMessages =
     .messages
 
 
-getAvailableResponses : Person -> Responses
-getAvailableResponses =
-    .responses
+getAvailableReplies : Person -> Replies
+getAvailableReplies =
+    .replies
 
 
 personMetadata : ID -> Maybe About

@@ -112,7 +112,7 @@ replyUnlocked =
                     toValue
                         """
                         { "contact_id": "kress"
-                        , "responses":
+                        , "replies":
                             [ { "id": "helloworld"
                               , "meta": { "something": "itriedsohardandgotsofar" }
                             } ]
@@ -129,7 +129,7 @@ replyUnlocked =
                     |> Game.getStory
                     |> Story.getEmails
                     |> Emails.getPerson ("kress")
-                    |> Maybe.map Emails.getAvailableResponses
+                    |> Maybe.map Emails.getAvailableReplies
                     |> Expect.equal
                         (Just
                             [ Emails.HelloWorld "itriedsohardandgotsofar"

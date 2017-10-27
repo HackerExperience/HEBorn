@@ -157,6 +157,9 @@ pageMsgIntersept msg =
                 Common.Cracked target password ->
                     ActiveTabMsg <| Cracked target password
 
+                Common.PublicDownload origin file ->
+                    PublicDownload origin file
+
                 Common.LoginFailed ->
                     ActiveTabMsg <| LoginFailed
 

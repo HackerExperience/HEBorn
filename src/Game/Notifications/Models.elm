@@ -2,6 +2,8 @@ module Game.Notifications.Models exposing (..)
 
 import Time exposing (Time)
 import Dict exposing (Dict)
+import Game.Network.Types exposing (NIP)
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 -- TODO: add notification data
@@ -22,7 +24,7 @@ type alias Notification =
 type Content
     = Simple String String -- Title Message
     | NewEmail String String -- Person_ID Preview_Message
-    | DownloadStarted
+    | DownloadStarted NIP Filesystem.ForeignFileBox
 
 
 initialModel : Model

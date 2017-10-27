@@ -11,6 +11,7 @@ module Game.Models
         , getStory
         , setStory
         , getConfig
+        , unsafeGetGateway
         , getGateway
         , setGateway
         , getEndpoint
@@ -21,6 +22,7 @@ module Game.Models
         )
 
 import Dict
+import Native.Panic
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
@@ -41,6 +43,10 @@ type alias Model =
     }
 
 
+
+-- Initializer
+
+
 initialModel :
     Account.ID
     -> Account.Username
@@ -55,6 +61,10 @@ initialModel id username token config =
     , web = Web.initialModel
     , config = config
     }
+
+
+
+-- Getters + Setters
 
 
 getAccount : Model -> Account.Model
@@ -112,6 +122,10 @@ getConfig =
     .config
 
 
+
+-- Gateway / Endpoint (Getter + Setter)
+
+
 getGateway : Model -> Maybe ( Servers.CId, Servers.Server )
 getGateway model =
     let
@@ -127,6 +141,18 @@ getGateway model =
                         |> Servers.get serverCId
                         |> Maybe.map ((,) serverCId)
                 )
+
+
+unsafeGetGateway : Model -> ( Servers.CId, Servers.Server )
+unsafeGetGateway model =
+    case getGateway model of
+        Just server ->
+            server
+
+        Nothing ->
+            Native.Panic.crash
+                "WTF_ASTRAL_PROJECTION"
+                "Player has no active gateway!"
 
 
 setGateway : Servers.Server -> Model -> Model

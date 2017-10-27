@@ -8,7 +8,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
-import Game.Models as Game
+import Game.Models
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Models as Servers
 import Game.Shared exposing (ID)
@@ -23,7 +23,8 @@ view : Game.Data -> Model -> Html Msg
 view data ({ app } as model) =
     let
         tasks =
-            data.server
+            data
+                |> Game.getActiveServer
                 |> Servers.getProcesses
                 |> Processes.toList
     in
@@ -142,7 +143,7 @@ viewTaskRow data now (( _, process ) as entry) =
                 servers =
                     data
                         |> Game.getGame
-                        |> Game.getServers
+                        |> Game.Models.getServers
 
                 maybeFileID =
                     Processes.getFileID process

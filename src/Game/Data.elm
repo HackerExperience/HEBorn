@@ -5,6 +5,7 @@ module Game.Data
         , getActiveServer
         , getGame
         , getEndpoints
+        , usanfeFromGateway
         , fromGateway
         , fromEndpoint
         , fromServerCId
@@ -16,26 +17,33 @@ import Game.Servers.Shared as Servers
 
 
 type alias Data =
-    { activeCId : Servers.CId
-    , server : Servers.Server
+    { server : ( Servers.CId, Servers.Server )
     , online : Bool
     , game : Model
     }
 
 
+
+-- Getters
+
+
 getActiveCId : Data -> Servers.CId
 getActiveCId =
-    .activeCId
+    .server >> Tuple.first
 
 
 getActiveServer : Data -> Servers.Server
 getActiveServer =
-    .server
+    .server >> Tuple.second
 
 
 getGame : Data -> Model
 getGame =
     .game
+
+
+
+-- Initializers
 
 
 fromGateway : Model -> Maybe Data
@@ -45,11 +53,11 @@ fromGateway model =
         |> Maybe.map (fromServer True model)
 
 
-getEndpoints : Data -> List Servers.CId
-getEndpoints =
-    (.server)
-        >> Servers.getEndpoints
-        >> Maybe.withDefault []
+usanfeFromGateway : Model -> Data
+usanfeFromGateway model =
+    model
+        |> unsafeGetGateway
+        |> fromServer True model
 
 
 fromEndpoint : Model -> Maybe Data
@@ -89,13 +97,23 @@ fromServerCId cid model =
 
 
 
--- internals
+-- Helpers
+
+
+getEndpoints : Data -> List Servers.CId
+getEndpoints =
+    getActiveServer
+        >> Servers.getEndpoints
+        >> Maybe.withDefault []
+
+
+
+-- Internals
 
 
 fromServer : Bool -> Model -> ( Servers.CId, Servers.Server ) -> Data
-fromServer online model ( cid, server ) =
-    { activeCId = cid
-    , server = server
+fromServer online model server =
+    { server = server
     , online = online
     , game = model
     }

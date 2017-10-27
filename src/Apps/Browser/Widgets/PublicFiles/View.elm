@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
+import Game.Network.Types exposing (NIP)
 import Game.Servers.Filesystem.Shared exposing (ForeignFileBox, Mime(..))
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
@@ -11,7 +12,8 @@ import Apps.Browser.Widgets.PublicFiles.Model exposing (..)
 
 
 type alias Config msg =
-    { reqDownload : String -> msg
+    { source : NIP
+    , onCommonAction : CommonActions -> msg
     }
 
 
@@ -26,7 +28,7 @@ publicFiles config model =
 
 
 file : Config msg -> ForeignFileBox -> Html msg
-file { reqDownload } me =
+file config me =
     me.mime
         |> mimeModules
         |> List.map
@@ -36,12 +38,17 @@ file { reqDownload } me =
                     ++ toString ver
                     |> text
                     |> List.singleton
-                    |> li [ onClick <| reqDownload me.id ]
+                    |> li []
             )
         |> ul []
         |> List.singleton
         |> (::) (span [] [ text me.name ])
-        |> li []
+        |> li
+            [ me
+                |> PublicDownload config.source
+                |> config.onCommonAction
+                |> onClick
+            ]
 
 
 mimeModules : Mime -> List ( String, Int )

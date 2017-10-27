@@ -53,7 +53,7 @@ toast id { notification, parent, state } =
                     , p [] [ text msg ]
                     ]
 
-                DownloadStarted ->
+                DownloadStarted origin file ->
                     [ h6 [] [ text <| "Download started" ]
-                    , p [] [ text "Some download has started!" ]
+                    , p [] [ text <| file.name ++ " download has started!" ]
                     ]

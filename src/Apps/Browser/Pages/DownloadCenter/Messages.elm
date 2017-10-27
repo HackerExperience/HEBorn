@@ -8,4 +8,3 @@ type Msg
     = GlobalMsg CommonActions
     | UpdatePasswordField String
     | SetShowingPanel Bool
-    | StartDownload NIP String

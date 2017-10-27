@@ -43,9 +43,6 @@ update data msg model =
         SetShowingPanel value ->
             onTogglePanel value model
 
-        StartDownload source fileId ->
-            onReqDownload data source fileId model
-
 
 onTogglePanel : Bool -> Model -> UpdateResponse
 onTogglePanel value model =
@@ -68,24 +65,3 @@ onUpdatePasswordField newPassword model =
         |> flip setToolkit model
         |> setLoginFailed False
         |> Update.fromModel
-
-
-onReqDownload :
-    Game.Data
-    -> NIP
-    -> String
-    -> Model
-    -> UpdateResponse
-onReqDownload data source fileId model =
-    let
-        dispatch =
-            case (Game.getGateway <| data.game) of
-                Just me ->
-                    Dispatch.processes (Tuple.first me) <|
-                        Processes.StartPublicDownload source fileId "storage id"
-
-                Nothing ->
-                    Dispatch.politeCrash "WTF_ASTRAL_PROJECTION"
-                        "There is no gateway server in this session!"
-    in
-        ( model, Cmd.none, dispatch )

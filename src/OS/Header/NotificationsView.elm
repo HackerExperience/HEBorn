@@ -106,8 +106,10 @@ renderContent content =
         NewEmail from body ->
             ( "New email from: " ++ from, body )
 
-        DownloadStarted ->
-            ( "New download started", "Check your task manager" )
+        DownloadStarted origin file ->
+            ( "New download started"
+            , (file.name ++ " download started!")
+            )
 
 
 notification : Notifications.ID -> ( String, String ) -> Html Msg

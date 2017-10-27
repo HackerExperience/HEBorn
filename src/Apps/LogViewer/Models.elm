@@ -120,7 +120,9 @@ enterEditing : Game.Data -> Logs.ID -> Model -> Model
 enterEditing data id ({ app } as model) =
     let
         logs =
-            Servers.getLogs data.server
+            data
+                |> Game.getActiveServer
+                |> Servers.getLogs
 
         app_ =
             case Dict.get id logs of
@@ -186,7 +188,8 @@ updateTextFilter data filter app =
                     False
 
         filterCache =
-            data.server
+            data
+                |> Game.getActiveServer
                 |> Servers.getLogs
                 |> Logs.filter filterer
                 |> Dict.keys

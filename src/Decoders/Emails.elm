@@ -4,6 +4,7 @@ import Dict
 import Json.Decode as Decode
     exposing
         ( Decoder
+        , succeed
         , andThen
         , map
         , field
@@ -20,69 +21,80 @@ import Game.Storyline.Emails.Contents exposing (..)
 
 emails : Decoder Model
 emails =
-    decode (,)
-        |> required "contact_id" string
-        |> custom person
-        |> map initAbout
+    email
+        |> map toPerson
         |> list
         |> map Dict.fromList
 
 
-person : Decoder Person
-person =
-    decode Person
-        |> optionalMaybe "about" about
-        |> optional "messages" messages Dict.empty
-        |> optional "responses" (list content) []
+toPerson : ( ID, Messages, Replies ) -> ( ID, Person )
+toPerson ( id, messages, replies ) =
+    { about =
+        personMetadata id
+    , messages =
+        messages
+    , replies =
+        replies
+    }
+        |> (,) id
 
 
-initAbout : ( ID, Person ) -> ( ID, Person )
-initAbout (( id, person ) as data) =
-    case person.about of
-        Nothing ->
-            ( id, { person | about = (personMetadata id) } )
-
-        _ ->
-            data
+email : Decoder ( ID, Messages, Replies )
+email =
+    decode (,,)
+        |> required "contact_id" string
+        |> custom messages
+        |> custom replies
 
 
-about : Decoder About
-about =
-    decode About
-        |> required "email" string
-        |> required "name" string
-        |> required "picture" string
+replies : Decoder Replies
+replies =
+    string
+        |> andThen contentFromId
+        |> list
+        |> field "replies"
 
 
 messages : Decoder Messages
 messages =
+    messageNode
+        |> list
+        |> map Dict.fromList
+        |> field "messages"
+
+
+messageNode : Decoder ( Float, Message )
+messageNode =
     decode (,)
         |> required "timestamp" float
         |> custom message
-        |> list
-        |> map Dict.fromList
 
 
 message : Decoder Message
 message =
-    content
-        |> andThen direction
-
-
-directionFromString : Content -> String -> Message
-directionFromString content str =
-    case str of
-        "player" ->
-            Sent content
-
-        _ ->
-            Received content
+    andThen direction content
 
 
 direction : Content -> Decoder Message
-direction msg =
-    field "sender" string
-        |> map (directionFromString msg)
+direction content =
+    let
+        decodeSender sender =
+            case sender of
+                "player" ->
+                    Sent content
+
+                _ ->
+                    Received content
+    in
+        string
+            |> field "sender"
+            |> map decodeSender
+
+
+content : Decoder Content
+content =
+    field "id" string
+        |> andThen contentFromId
 
 
 contentFromId : String -> Decoder Content
@@ -93,11 +105,11 @@ contentFromId id =
                 |> required "something" string
                 |> field "meta"
 
+        "welcome_pc_setup" ->
+            succeed WelcomePCSetup
+
+        "back_thanks" ->
+            succeed WelcomeBackThanks
+
         error ->
             fail <| commonError "email_type" error
-
-
-content : Decoder Content
-content =
-    field "id" string
-        |> andThen contentFromId

@@ -3,6 +3,8 @@ module Apps.Email.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Game.Storyline.Emails.Contents exposing (Content)
+import Game.Storyline.Emails.Messages as Emails
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.Email.Menu.Messages as Menu
@@ -31,6 +33,9 @@ update data msg model =
         SelectContact email ->
             onSelectContact email model
 
+        Reply content ->
+            onReply content model
+
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
 onMenuMsg data msg model =
@@ -49,3 +54,14 @@ onSelectContact email model =
     Update.mapModel
         (setActiveContact <| Just email)
         (Update.fromModel model)
+
+
+onReply : Content -> Model -> UpdateResponse
+onReply content model =
+    let
+        dispatch =
+            content
+                |> Emails.Reply
+                |> Dispatch.email
+    in
+        ( model, Cmd.none, dispatch )
