@@ -14,6 +14,7 @@ module Game.Account.Models
         , getContext
         , getDatabase
         , getBounces
+        , getMainframe
         )
 
 import Game.Servers.Shared as Servers
@@ -23,6 +24,8 @@ import Game.Account.Bounces.Models as Bounces
 import Game.Account.Inventory.Models as Inventory
 import Game.Notifications.Models as Notifications
 import Game.Meta.Types exposing (..)
+import Game.Network.Types exposing (NIP)
+import Setup.Types as Setup
 
 
 type alias ID =
@@ -121,6 +124,11 @@ getDatabase =
 getBounces : Model -> Bounces.Model
 getBounces =
     .bounces
+
+
+getMainframe : Model -> Maybe Servers.CId
+getMainframe =
+    .mainframe
 
 
 insertGateway : Servers.CId -> Model -> Model

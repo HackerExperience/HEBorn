@@ -1,8 +1,15 @@
 module Setup.Types exposing (..)
 
 
-type Step
+type alias Pages =
+    List Page
+
+
+type Page
     = Welcome
+    | CustomWelcome
+    | Mainframe
     | PickLocation
     | ChooseTheme
     | Finish
+    | CustomFinish

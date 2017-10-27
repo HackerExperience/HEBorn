@@ -25,14 +25,47 @@ logout =
     WebsocketTopic RequestsChannel "account.logout"
 
 
+
+-- account
+
+
 accountResync : Account.ID -> Topic
 accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
+accountSetup : Account.ID -> Topic
+accountSetup id =
+    WebsocketTopic (AccountChannel id) "account.setup"
+
+
+accountConfigCheck : Account.ID -> Topic
+accountConfigCheck id =
+    WebsocketTopic (AccountChannel id) "config.check"
+
+
+accountConfigSet : Account.ID -> Topic
+accountConfigSet id =
+    WebsocketTopic (AccountChannel id) "config.set"
+
+
+
+-- server
+
+
 serverResync : Servers.CId -> Topic
 serverResync cid =
     WebsocketTopic (ServerChannel cid) "bootstrap"
+
+
+serverConfigCheck : Servers.CId -> Topic
+serverConfigCheck cid =
+    WebsocketTopic (ServerChannel cid) "config.check"
+
+
+serverConfigSet : Servers.CId -> Topic
+serverConfigSet cid =
+    WebsocketTopic (ServerChannel cid) "config.set"
 
 
 

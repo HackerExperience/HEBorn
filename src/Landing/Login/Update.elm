@@ -68,7 +68,7 @@ onLoginOkay core token id model =
             { model | loginFailed = False }
 
         dispatch =
-            Dispatch.core (Core.Boot id model.username token True)
+            Dispatch.core (Core.Boot id model.username token)
     in
         ( model_, Cmd.none, dispatch )
 
