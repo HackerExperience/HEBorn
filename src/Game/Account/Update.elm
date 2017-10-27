@@ -238,10 +238,10 @@ handleDisconnect model =
         dispatch =
             case model.logout of
                 ToLanding ->
-                    Dispatch.core Core.Shutdown
+                    Dispatch.shutdown
 
                 ToCrash code message ->
-                    Dispatch.core <| Core.Crash code message
+                    Dispatch.crash code message
 
                 _ ->
                     Dispatch.none

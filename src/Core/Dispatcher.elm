@@ -73,6 +73,18 @@ fromCore =
 
         handler dispatch =
             case dispatch of
+                Core.Boot a b c ->
+                    [ HandleBoot a b c ]
+
+                Core.Crash a b ->
+                    [ HandleCrash a b ]
+
+                Core.Shutdown ->
+                    [ HandleShutdown ]
+
+                Core.Play ->
+                    [ HandlePlay ]
+
                 _ ->
                     handleNoOp
     in

@@ -27,35 +27,28 @@ import OS.SessionManager.Messages as SM
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        Boot id username token ->
+        HandleBoot id username token ->
             let
                 model_ =
                     connect id username token model
             in
                 ( model_, Cmd.none )
 
-        Shutdown ->
+        HandleShutdown ->
             let
                 model_ =
                     logout model
             in
                 ( model_, Cmd.none )
 
-        Crash code message ->
+        HandleCrash code message ->
             let
                 model_ =
                     crash code message model
             in
                 ( model_, Cmd.none )
 
-        LoadingEnd z ->
-            let
-                model_ =
-                    { model | windowLoaded = True }
-            in
-                ( model_, Cmd.none )
-
-        FinishSetup ->
+        HandlePlay ->
             let
                 ( state, cmd, dispatch ) =
                     setupToPlay model.state
@@ -64,6 +57,13 @@ update msg model =
                     { model | state = state }
             in
                 dispatcher model_ cmd dispatch
+
+        LoadingEnd z ->
+            let
+                model_ =
+                    { model | windowLoaded = True }
+            in
+                ( model_, Cmd.none )
 
         _ ->
             updateState msg model

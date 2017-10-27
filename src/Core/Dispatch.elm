@@ -6,6 +6,11 @@ module Core.Dispatch
         , batch
         , push
         , yield
+          -- dispatches
+        , boot
+        , shutdown
+        , play
+        , crash
           -- to kill:
         , core
         , setup
@@ -80,40 +85,35 @@ yield (Dispatch list) =
 
 
 
--- dispatchables
+-- account
+-- core
 
 
-accountD : Account.Dispatch -> Dispatch
-accountD =
-    Account >> dispatch
+boot : String -> String -> String -> Dispatch
+boot a b c =
+    core_ <| Core.Boot a b c
 
 
-coreD : Core.Dispatch -> Dispatch
-coreD =
-    Core >> dispatch
+shutdown : Dispatch
+shutdown =
+    core_ Core.Shutdown
 
 
-osD : OS.Dispatch -> Dispatch
-osD =
-    OS >> dispatch
+play : Dispatch
+play =
+    core_ Core.Play
 
 
-serversD : Servers.Dispatch -> Dispatch
-serversD =
-    Servers >> dispatch
-
-
-storylineD : Storyline.Dispatch -> Dispatch
-storylineD =
-    Storyline >> dispatch
-
-
-websocketD : Websocket.Dispatch -> Dispatch
-websocketD =
-    Websocket >> dispatch
+crash : String -> String -> Dispatch
+crash a b =
+    core_ <| Core.Crash a b
 
 
 
+-- os
+-- servers
+-- storyline
+-- websocket
 -- dispatchables we should kill
 
 
@@ -249,6 +249,36 @@ appsOfSession cid context msgs =
 dispatch : Internal -> Dispatch
 dispatch =
     List.singleton >> Dispatch
+
+
+accountD : Account.Dispatch -> Dispatch
+accountD =
+    Account >> dispatch
+
+
+osD : OS.Dispatch -> Dispatch
+osD =
+    OS >> dispatch
+
+
+serversD : Servers.Dispatch -> Dispatch
+serversD =
+    Servers >> dispatch
+
+
+storylineD : Storyline.Dispatch -> Dispatch
+storylineD =
+    Storyline >> dispatch
+
+
+websocketD : Websocket.Dispatch -> Dispatch
+websocketD =
+    Websocket >> dispatch
+
+
+core_ : Core.Dispatch -> Dispatch
+core_ =
+    Core >> dispatch
 
 
 

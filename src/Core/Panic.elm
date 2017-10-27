@@ -30,7 +30,7 @@ import Css
         )
 import Css.Colors exposing (white)
 import Css.Utils exposing (selectableText)
-import Core.Messages exposing (Msg(Shutdown))
+import Core.Messages exposing (Msg(HandleShutdown))
 
 
 style : List Css.Style -> Attribute Msg
@@ -76,7 +76,7 @@ view code message =
                 |> h5 [ style [ selectableText ] ]
             , br [] []
             , h4
-                [ onClick Shutdown
+                [ onClick HandleShutdown
                 , style [ textAlign center, cursor pointer ]
                 ]
                 [ text "Click here to logout." ]

@@ -66,7 +66,7 @@ onNextPage game model =
 
         dispatch =
             if doneSetup model_ then
-                Dispatch.core Core.FinishSetup
+                Dispatch.play
             else
                 Dispatch.none
 
@@ -170,7 +170,7 @@ handleJoinedAccount value model =
 
                 dispatch =
                     if hasPages model_ then
-                        Dispatch.core Core.FinishSetup
+                        Dispatch.play
                     else
                         Dispatch.none
             in

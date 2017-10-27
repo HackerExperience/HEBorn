@@ -9,13 +9,13 @@ import Driver.Websocket.Messages as Ws
 
 
 type Msg
-    = Boot Account.ID Account.Username Account.Token
-    | FinishSetup
-    | Shutdown
+    = HandleBoot Account.ID Account.Username Account.Token
+    | HandleShutdown
+    | HandleCrash String String
+    | HandlePlay
     | LandingMsg Landing.Msg
     | SetupMsg Setup.Msg
     | GameMsg Game.Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
     | LoadingEnd Int
-    | Crash String String
