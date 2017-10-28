@@ -35,9 +35,6 @@ update _ msg model =
         Fade id ->
             onFade id model
 
-        Event _ ->
-            Update.fromModel model
-
 
 onRemove : Int -> Model -> UpdateResponse
 onRemove id model =

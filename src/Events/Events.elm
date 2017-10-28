@@ -1,15 +1,11 @@
-module Events.Events exposing (Event(..), events)
+module Events.Events exposing (events)
 
 import Json.Decode exposing (Value)
 import Driver.Websocket.Channels as Ws
 import Game.Servers.Shared as Servers
+import Core.Dispatch.Websocket exposing (..)
 import Events.Account as Account
 import Events.Server as Server
-
-
-type Event
-    = Account Account.Event
-    | Server Servers.CId Server.Event
 
 
 events : Ws.Channel -> String -> Value -> Maybe Event
@@ -39,10 +35,10 @@ router channel event json =
             Err ""
 
         Ws.AccountChannel _ ->
-            Result.map Account <| Account.events event json
+            Result.map AccountEvent <| Account.events event json
 
         Ws.ServerChannel id ->
-            Result.map (Server id) <| Server.events event json
+            Result.map ServerEvent <| Server.events event json
 
 
 notFound : String -> String -> Maybe Event

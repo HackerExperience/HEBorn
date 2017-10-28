@@ -1,20 +1,14 @@
-module Events.Account exposing (Event(..), events)
+module Events.Account exposing (events)
 
 import Events.Types exposing (Router)
+import Core.Dispatch.Websocket exposing (..)
 import Events.Account.PasswordAcquired as PasswordAcquired
 import Events.Account.Story.StepProceeded as StoryStepProceeded
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
 
 
-type Event
-    = PasswordAcquired PasswordAcquired.Data
-    | StoryStepProceeded StoryStepProceeded.Data
-    | StoryNewEmail StoryNewEmail.Data
-    | StoryReplyUnlocked StoryReplyUnlocked.Data
-
-
-events : Router Event
+events : Router AccountEvent
 events name json =
     case name of
         "server_password_acquired" ->

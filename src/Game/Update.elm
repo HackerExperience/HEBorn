@@ -27,7 +27,6 @@ import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
 import Game.Models exposing (..)
 import Game.Messages exposing (..)
-import Game.Events as Events
 
 
 type alias UpdateResponse =
@@ -51,9 +50,6 @@ update msg model =
 
         WebMsg msg ->
             onWeb msg model
-
-        Event event ->
-            ( model, Cmd.none, Events.dispatcher event model )
 
         Resync ->
             onResync model
