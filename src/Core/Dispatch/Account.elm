@@ -2,6 +2,7 @@ module Core.Dispatch.Account exposing (..)
 
 import Game.Servers.Shared as Servers
 import Game.Meta.Types exposing (Context)
+import Events.Account.PasswordAcquired as PasswordAcquired
 
 
 {-| Messages related to player's account.
@@ -12,6 +13,6 @@ type Dispatch
     | SetContext Context
     | Notify
     | NewGateway Servers.CId
-    | PasswordAcquired Servers.CId String
+    | PasswordAcquired PasswordAcquired.Data
     | LogoutAndCrash ( String, String )
     | Logout

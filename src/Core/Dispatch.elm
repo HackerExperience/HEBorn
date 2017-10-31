@@ -15,6 +15,8 @@ module Core.Dispatch
         , logs_
         , processes_
         , storyline
+        , emails_
+        , missions_
         , websocket
           -- to kill:
         , setup
@@ -137,6 +139,16 @@ processes_ id =
 storyline : Storyline.Dispatch -> Dispatch
 storyline =
     Storyline >> dispatch
+
+
+emails_ : Storyline.Emails -> Dispatch
+emails_ =
+    Storyline.Emails >> storyline
+
+
+missions_ : Storyline.Missions -> Dispatch
+missions_ =
+    Storyline.Missions >> storyline
 
 
 websocket : Websocket.Dispatch -> Dispatch

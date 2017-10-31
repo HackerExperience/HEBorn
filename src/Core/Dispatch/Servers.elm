@@ -1,6 +1,12 @@
 module Core.Dispatch.Servers exposing (..)
 
 import Game.Servers.Shared exposing (CId)
+import Events.Server.Filesystem.NewFile as NewFile
+import Events.Server.Logs.Changed as LogsChanged
+import Events.Server.Processes.Started as ProcessStarted
+import Events.Server.Processes.Conclusion as ProcessConclusion
+import Events.Server.Processes.BruteforceFailed as BruteforceFailed
+import Events.Server.Processes.Changed as ProcessesChanged
 
 
 {-| Messages related to servers.
@@ -30,6 +36,7 @@ type Filesystem
     | RenameFile
     | NewFile
     | NewDir
+    | CreatedNewFile NewFile.Data
 
 
 {-| Messages related to server's logs.
@@ -39,6 +46,7 @@ type Logs
     | EncryptLog
     | HideLog
     | DeleteLog
+    | ChangedLogs LogsChanged.Data
 
 
 {-| Messages related to server's processes.
@@ -51,8 +59,7 @@ type Processes
     | NewBruteforceProcess
     | NewDownloadProcess
     | NewPublicDownloadProcess
-    | StartedProcess
-    | ConcludedProcess
-    | ChangedProcess
-    | FailedProcess
-    | SuccessProcess
+    | StartedProcess ProcessStarted.Data
+    | ConcludedProcess ProcessConclusion.Data
+    | ChangedProcesses ProcessesChanged.Data
+    | FailedBruteforceProcess BruteforceFailed.Data

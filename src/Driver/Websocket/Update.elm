@@ -92,8 +92,6 @@ onEvent channel value model =
                 dispatch =
                     data
                         |> Events.events channel event
-                        |> Maybe.map (Ws.Event channel)
-                        |> Maybe.map Dispatch.websocket
                         |> Maybe.withDefault Dispatch.none
             in
                 ( model, Cmd.none, dispatch )
