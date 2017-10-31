@@ -7,6 +7,8 @@ import Game.Servers.Logs.Models exposing (ID)
 type Menu
     = MenuNormalEntry ID
     | MenuEditingEntry ID
+    | MenuEncryptEntry ID
+    | MenuHiddenEntry ID
     | MenuFilter
 
 

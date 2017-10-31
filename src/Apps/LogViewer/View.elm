@@ -18,7 +18,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (Format(..))
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
-import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
+import Apps.LogViewer.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuEncryptEntry, menuHiddenEntry, menuFilter)
 import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 
@@ -245,7 +245,7 @@ menuInclude app id log =
                 [ menuNormalEntry id ]
 
             Logs.Encrypted ->
-                []
+                [ menuEncryptEntry id]
 
 
 render : Logs.Data -> List (Html Msg)

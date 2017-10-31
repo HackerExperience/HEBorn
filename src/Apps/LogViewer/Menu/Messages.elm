@@ -9,6 +9,10 @@ type MenuAction
     = NormalEntryEdit ID
     | EdittingEntryApply ID
     | EdittingEntryCancel ID
+    | EntryEncrypt ID
+    | EntryDecrypt ID
+    | EntryHide ID
+    | EntryDelete ID
 
 
 type Msg
