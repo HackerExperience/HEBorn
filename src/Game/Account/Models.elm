@@ -17,6 +17,7 @@ module Game.Account.Models
         , getMainframe
         )
 
+import Core.Error as Error exposing (Error)
 import Game.Servers.Shared as Servers
 import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
@@ -51,7 +52,7 @@ type alias AuthData =
 type Logout
     = StillLogged
     | ToLanding
-    | ToCrash String String
+    | ToCrash Error
 
 
 type alias Model =

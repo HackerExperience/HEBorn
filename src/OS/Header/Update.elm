@@ -2,7 +2,7 @@ module OS.Header.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Account.Messages as Account
+import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Game.Models
 import Game.Account.Messages as Account
@@ -67,7 +67,7 @@ onLogout : Model -> UpdateResponse
 onLogout model =
     let
         dispatch =
-            Dispatch.account Account.DoLogout
+            Dispatch.account Account.Logout
     in
         ( model, Cmd.none, dispatch )
 
@@ -144,7 +144,7 @@ onContextTo : Context -> Model -> UpdateResponse
 onContextTo context model =
     let
         dispatch =
-            Dispatch.account <| Account.ContextTo context
+            Dispatch.account <| Account.SetContext context
     in
         ( model, Cmd.none, dispatch )
 
@@ -173,10 +173,11 @@ onTogglecampaign model =
 onServerReadAll : Servers.CId -> Model -> UpdateResponse
 onServerReadAll cid model =
     let
+        --Dispatch.server cid <|
+        --Servers.NotificationsMsg
+        --Notifications.ReadAll
         dispatch =
-            Dispatch.server cid <|
-                Servers.NotificationsMsg
-                    Notifications.ReadAll
+            Dispatch.none
     in
         ( model, Cmd.none, dispatch )
 
@@ -184,9 +185,10 @@ onServerReadAll cid model =
 onAccountReadAll : Model -> UpdateResponse
 onAccountReadAll model =
     let
+        --Dispatch.account <|
+        --    Account.NotificationsMsg
+        --        Notifications.ReadAll
         dispatch =
-            Dispatch.account <|
-                Account.NotificationsMsg
-                    Notifications.ReadAll
+            Dispatch.none
     in
         ( model, Cmd.none, dispatch )

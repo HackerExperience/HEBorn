@@ -6,7 +6,7 @@ module Core.Dispatch
         , batch
         , push
         , yield
-        , account_
+        , account
         , core
         , os
         , servers_
@@ -19,7 +19,6 @@ module Core.Dispatch
           -- to kill:
         , setup
         , game
-        , account
         , database
         , servers
         , web
@@ -95,8 +94,8 @@ yield (Dispatch list) =
 -- TODO: remove underlines after fixing conflicts
 
 
-account_ : Account.Dispatch -> Dispatch
-account_ =
+account : Account.Dispatch -> Dispatch
+account =
     Account >> dispatch
 
 
@@ -156,11 +155,6 @@ setup msg =
 
 game : a -> Dispatch
 game msg =
-    dispatch NoOp
-
-
-account : a -> Dispatch
-account msg =
     dispatch NoOp
 
 

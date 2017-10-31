@@ -6,13 +6,14 @@ import OS.Messages as OS
 import Landing.Messages as Landing
 import Setup.Messages as Setup
 import Driver.Websocket.Messages as Ws
+import Core.Error as Error exposing (Error)
 
 
 type Msg
     = HandleConnected
     | HandleBoot Account.ID Account.Username Account.Token
     | HandleShutdown
-    | HandleCrash String String
+    | HandleCrash Error
     | HandlePlay
     | LandingMsg Landing.Msg
     | SetupMsg Setup.Msg

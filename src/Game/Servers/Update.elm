@@ -3,8 +3,8 @@ module Game.Servers.Update exposing (..)
 import Utils.Update as Update
 import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Account as Account
 import Game.Models as Game
-import Game.Account.Messages as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
@@ -241,7 +241,7 @@ handleJoinedServer cid value model =
                     dispatch =
                         if isGateway server then
                             cid
-                                |> Account.InsertGateway
+                                |> Account.NewGateway
                                 |> Dispatch.account
                         else
                             Dispatch.none
@@ -252,7 +252,8 @@ handleJoinedServer cid value model =
                     dispatch_ =
                         Dispatch.batch
                             [ dispatch
-                            , Dispatch.web <| Web.JoinedServer cid
+
+                            --, Dispatch.web <| Web.JoinedServer cid
                             ]
                 in
                     ( model_, Cmd.none, dispatch_ )

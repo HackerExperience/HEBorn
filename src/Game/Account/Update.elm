@@ -3,6 +3,7 @@ module Game.Account.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Core as Core
+import Core.Error as Error exposing (Error)
 import Core.Dispatch.Websocket as Ws
 import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
@@ -29,24 +30,6 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        DoLogout ->
-            onDoLogout game model
-
-        DoCrash code message ->
-            onDoCrash game code message model
-
-        SetGateway cid ->
-            onSetGateway game cid model
-
-        SetEndpoint cid ->
-            onSetEndpoint game cid model
-
-        InsertGateway cid ->
-            onInsertGateway cid model
-
-        ContextTo context ->
-            onContextTo game context model
-
         BouncesMsg msg ->
             onBounce game msg model
 
@@ -62,6 +45,24 @@ update game msg model =
                 |> Maybe.map (flip (updateRequest game) model)
                 |> Maybe.withDefault (Update.fromModel model)
 
+        HandleLogout ->
+            handleLogout game model
+
+        HandleSetGateway cid ->
+            handleSetGateway game cid model
+
+        HandleSetEndpoint mCid ->
+            handleSetEndpoint game mCid model
+
+        HandleSetContext context ->
+            handleSetContext game context model
+
+        HandleNewGateway cid ->
+            handleNewGateway cid model
+
+        HandleLogoutAndCrash error ->
+            handleLogoutAndCrash game error model
+
         HandleConnected ->
             handleConnected model
 
@@ -73,17 +74,17 @@ update game msg model =
 -- internals
 
 
-onSetGateway : Game.Model -> Servers.CId -> Model -> UpdateResponse
-onSetGateway game cid model =
+handleSetGateway : Game.Model -> Servers.CId -> Model -> UpdateResponse
+handleSetGateway game cid model =
     Update.fromModel { model | activeGateway = Just cid }
 
 
-onSetEndpoint :
+handleSetEndpoint :
     Game.Model
     -> Maybe Servers.CId
     -> Model
     -> UpdateResponse
-onSetEndpoint game cid model =
+handleSetEndpoint game cid model =
     case getGateway model of
         Just gateway ->
             let
@@ -109,8 +110,8 @@ onSetEndpoint game cid model =
             Update.fromModel model
 
 
-onContextTo : Game.Model -> Context -> Model -> UpdateResponse
-onContextTo game context model =
+handleSetContext : Game.Model -> Context -> Model -> UpdateResponse
+handleSetContext game context model =
     let
         model1 =
             { model | context = context }
@@ -145,8 +146,8 @@ onNotifications game msg model =
         model
 
 
-onDoLogout : Game.Model -> Model -> UpdateResponse
-onDoLogout game model =
+handleLogout : Game.Model -> Model -> UpdateResponse
+handleLogout game model =
     let
         model_ =
             { model | logout = ToLanding }
@@ -160,11 +161,11 @@ onDoLogout game model =
         ( model_, cmd, Dispatch.none )
 
 
-onDoCrash : Game.Model -> String -> String -> Model -> UpdateResponse
-onDoCrash game code message model =
+handleLogoutAndCrash : Game.Model -> Error -> Model -> UpdateResponse
+handleLogoutAndCrash game error model =
     let
         model_ =
-            { model | logout = ToCrash code message }
+            { model | logout = ToCrash error }
 
         token =
             getToken model
@@ -215,8 +216,8 @@ ensureValidContext game model =
             model
 
 
-onInsertGateway : Servers.CId -> Model -> UpdateResponse
-onInsertGateway cid model =
+handleNewGateway : Servers.CId -> Model -> UpdateResponse
+handleNewGateway cid model =
     model
         |> insertGateway cid
         |> Update.fromModel
@@ -240,8 +241,8 @@ handleDisconnected model =
                 ToLanding ->
                     Dispatch.core <| Core.Shutdown
 
-                ToCrash code message ->
-                    Dispatch.core <| Core.Crash code message
+                ToCrash error ->
+                    Dispatch.core <| Core.Crash error
 
                 _ ->
                     Dispatch.none

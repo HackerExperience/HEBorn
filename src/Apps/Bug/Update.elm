@@ -1,9 +1,10 @@
 module Apps.Bug.Update exposing (update)
 
+import Core.Error as Error
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Native.Panic
-import Game.Account.Messages as Account
 import OS.Toasts.Messages as Toasts
 import OS.Toasts.Models as Toasts
 import Apps.Bug.Models exposing (Model)
@@ -44,8 +45,11 @@ update data msg model =
         PoliteCrash ->
             ( model
             , Cmd.none
-            , Dispatch.account <| Account.DoCrash "FAKE_TEST" "This is a polite crash."
+            , Dispatch.account <|
+                Account.LogoutAndCrash <|
+                    Error.fakeTest "This is a polite crash."
             )
 
         UnpoliteCrash ->
-            Native.Panic.crash "FAKE_TEST" "This is an unpolite crash."
+            Native.Panic.crash <|
+                Error.fakeTest "This is an unpolite crash."

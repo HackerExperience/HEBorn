@@ -5,6 +5,7 @@ import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Error as Error
 import Core.Dispatch.Websocket as Ws
 import Core.Dispatch.Core as Core
 import Driver.Websocket.Channels exposing (Channel(ServerChannel, RequestsChannel))
@@ -203,7 +204,8 @@ handleJoinedAccount value model =
 
                 dispatch =
                     Dispatch.core <|
-                        Core.Crash "ERR_PORRA_RENATO" msg
+                        Core.Crash <|
+                            Error.porra msg
             in
                 ( model, Cmd.none, dispatch )
 

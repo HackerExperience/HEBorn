@@ -11,8 +11,8 @@ dispatch dispatch =
         Boot a b c ->
             [ Core.HandleBoot a b c ]
 
-        Crash a b ->
-            [ Core.HandleCrash a b ]
+        Crash a ->
+            [ Core.HandleCrash a ]
 
         Shutdown ->
             [ Core.HandleShutdown ]

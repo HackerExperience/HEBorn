@@ -41,7 +41,7 @@ update msg model =
             in
                 ( model_, Cmd.none )
 
-        HandleCrash code message ->
+        HandleCrash ( code, message ) ->
             let
                 model_ =
                     crash code message model

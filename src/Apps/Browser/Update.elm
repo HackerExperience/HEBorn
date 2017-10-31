@@ -2,6 +2,8 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.Update as Update
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
@@ -20,9 +22,7 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Apps.Apps as Apps
-import Game.Account.Messages as Account
 import Game.Meta.Types exposing (Context(Endpoint))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias UpdateResponse =
@@ -144,7 +144,7 @@ onSelectEndpoint model =
     let
         dispatch =
             Dispatch.account <|
-                Account.ContextTo Endpoint
+                Account.SetContext Endpoint
     in
         ( model, Cmd.none, dispatch )
 

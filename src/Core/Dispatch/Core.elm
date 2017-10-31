@@ -19,6 +19,6 @@ Crash:
 type Dispatch
     = Boot String String String
     | Shutdown
-    | Crash String String
+    | Crash ( String, String )
     | Play
     | Exit

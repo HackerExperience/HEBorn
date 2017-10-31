@@ -9,8 +9,9 @@ type alias Model =
 
 initialModel : Model
 initialModel =
+    -- REVIEWER PLS
     { hostname = Nothing
-    , okay = False
+    , okay = True
     }
 
 
