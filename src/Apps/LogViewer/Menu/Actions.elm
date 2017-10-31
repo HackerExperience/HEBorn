@@ -49,3 +49,38 @@ actionHandler data action ({ app } as model) =
                     { model | app = app_ }
             in
                 Update.fromModel model_
+
+        EntryEncrypt logId ->
+            let
+                dispatch =
+                    Logs.Encrypt
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            logId
+            in
+                ( model, Cmd.none, dispatch )
+        EntryDecrypt logId ->
+            let
+                dispatch =
+                    Logs.Decrypt "NOT IMPLEMENTED YET"
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            logId
+            in
+                ( model, Cmd.none, dispatch )
+        EntryHide logId ->
+            let
+                dispatch =
+                    Logs.Hide logId
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
+            in
+                ( model, Cmd.none, dispatch )
+        EntryDelete logId ->
+            let
+                dispatch =
+                    Logs.Delete logId
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
+            in
+                ( model, Cmd.none, dispatch )
