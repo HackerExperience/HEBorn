@@ -11,7 +11,6 @@ type Dispatch
     = SetGateway Servers.CId
     | SetEndpoint (Maybe Servers.CId)
     | SetContext Context
-    | Notify
     | NewGateway Servers.CId
     | PasswordAcquired PasswordAcquired.Data
     | LogoutAndCrash ( String, String )

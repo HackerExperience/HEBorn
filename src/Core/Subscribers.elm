@@ -51,6 +51,3 @@ fromInternal dispatch =
 
         Dispatch.Notifications dispatch ->
             Notifications.dispatch dispatch
-
-        Dispatch.NoOp ->
-            []

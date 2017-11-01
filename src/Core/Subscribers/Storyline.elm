@@ -3,7 +3,9 @@ module Core.Subscribers.Storyline exposing (dispatch)
 import Core.Dispatch.Storyline exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Core.Messages as Core
+import Events.Account.Story.NewEmail as StoryNewEmail
 import Game.Messages as Game
+import Game.Notifications.Models exposing (Content(NewEmail))
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Emails.Messages as Emails
 import Game.Storyline.Missions.Messages as Missions
@@ -32,8 +34,8 @@ fromEmails dispatch =
         ReplyEmail a ->
             [ emails <| Emails.HandleReply a ]
 
-        ReceivedEmail a ->
-            [ emails <| Emails.HandleNewEmail a ]
+        ReceivedEmail data ->
+            receivedEmail data
 
         UnlockedEmail a ->
             [ emails <| Emails.HandleReplyUnlocked a ]
@@ -50,3 +52,21 @@ fromMissions dispatch =
 
         _ ->
             []
+
+
+receivedEmail : StoryNewEmail.Data -> Subscribers
+receivedEmail data =
+    let
+        time =
+            Tuple.first data.messageNode
+
+        from =
+            data.personId
+
+        email =
+            emails <| Emails.HandleNewEmail data
+
+        notification =
+            notifyAccount time False <| NewEmail from
+    in
+        email :: notification

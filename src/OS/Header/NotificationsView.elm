@@ -103,8 +103,10 @@ renderContent content =
         Simple title body ->
             ( title, body )
 
-        NewEmail from body ->
-            ( "New email from: " ++ from, body )
+        NewEmail from ->
+            ( "New email from: " ++ from
+            , "Check on Thunderpigeon"
+            )
 
         DownloadStarted origin file ->
             ( "New download started"

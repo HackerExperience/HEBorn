@@ -95,21 +95,8 @@ handleNewEmail game data model =
 
         model_ =
             setPerson personId person_ model
-
-        dispatch =
-            case msg of
-                Received content ->
-                    content
-                        |> Contents.toString
-                        |> Notifications.NewEmail personId
-                        |> Notifications.create
-                        |> Notifications.Insert game.meta.lastTick
-                        |> Dispatch.accountNotification
-
-                Sent _ ->
-                    Dispatch.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, Cmd.none, Dispatch.none )
 
 
 handleReplyUnlocked :

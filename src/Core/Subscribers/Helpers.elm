@@ -1,14 +1,20 @@
 module Core.Subscribers.Helpers exposing (..)
 
+import Time exposing (Time)
 import Apps.Messages as Apps
 import Core.Messages as Core
 import Driver.Websocket.Messages as Ws
 import Setup.Messages as Setup
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
+import OS.Toasts.Models as Toasts exposing (Toast)
+import OS.Toasts.Messages as Toasts
 import Game.Messages as Game
 import Game.Account.Messages as Account
 import Game.Account.Database.Messages as Database
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications exposing (Notification)
+import Game.Notifications.Source as Notifications
 import Game.Servers.Messages as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
@@ -107,3 +113,60 @@ sessionManager =
 os : OS.Msg -> Core.Msg
 os =
     Core.OSMsg
+
+
+toast : Notifications.Content -> Core.Msg
+toast content =
+    os <|
+        OS.ToastsMsg <|
+            Toasts.Insert <|
+                Toast content Nothing Toasts.Alive
+
+
+browser windowRef context =
+    Apps.BrowserMsg
+        >> app windowRef context
+
+
+app windowRef context =
+    SessionManager.AppMsg windowRef context
+        >> sessionManager
+
+
+notifyServer :
+    CId
+    -> Time
+    -> Bool
+    -> Notifications.Content
+    -> Subscribers
+notifyServer cid time isRead content =
+    [ Notification content isRead
+        |> Notifications.Insert time
+        |> Servers.NotificationsMsg
+        |> server cid
+    , os <|
+        OS.ToastsMsg <|
+            Toasts.Insert <|
+                Toast content
+                    (Just (Notifications.Server cid))
+                    Toasts.Alive
+    ]
+
+
+notifyAccount :
+    Time
+    -> Bool
+    -> Notifications.Content
+    -> Subscribers
+notifyAccount time isRead content =
+    [ Notification content isRead
+        |> Notifications.Insert time
+        |> Account.NotificationsMsg
+        |> account
+    , os <|
+        OS.ToastsMsg <|
+            Toasts.Insert <|
+                Toast content
+                    (Just Notifications.Account)
+                    Toasts.Alive
+    ]

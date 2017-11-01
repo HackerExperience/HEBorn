@@ -2,6 +2,7 @@ module Game.Servers.Processes.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Notifications as Notifications
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -16,7 +17,6 @@ import Game.Servers.Processes.Requests exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
 import Game.Network.Types as Network exposing (NIP)
-import Game.Notifications.Messages as Notifications
 import Game.Notifications.Models as Notifications
 
 
@@ -226,14 +226,8 @@ handleDownload game cid process origin file model =
                                     storageId
                                     cid
                                     game
-
-                    dispatch =
-                        Notifications.DownloadStarted origin file
-                            |> Notifications.create
-                            |> Notifications.Insert game.meta.lastTick
-                            |> Dispatch.serverNotification cid
                 in
-                    ( model_, cmd, dispatch )
+                    ( model_, cmd, Dispatch.none )
 
             _ ->
                 Update.fromModel model_
@@ -411,9 +405,8 @@ failDownloadFile lastTick cid oldId model message =
         dispatch =
             message
                 |> Notifications.Simple "Impossible to start download"
-                |> Notifications.create
-                |> Notifications.Insert lastTick
-                |> Dispatch.serverNotification cid
+                |> Notifications.HandleInsert Nothing
+                |> Dispatch.notifications
 
         model_ =
             remove oldId model

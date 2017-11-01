@@ -22,9 +22,6 @@ dispatch dispatch =
         SetContext a ->
             [ account <| Account.HandleSetContext a ]
 
-        Notify ->
-            []
-
         NewGateway a ->
             [ account <| Account.HandleNewGateway a ]
 

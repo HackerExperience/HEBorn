@@ -48,9 +48,9 @@ toast id { notification, state } =
                     , p [] [ text msg ]
                     ]
 
-                NewEmail from msg ->
+                NewEmail from ->
                     [ h6 [] [ text <| "New email from: " ++ from ]
-                    , p [] [ text msg ]
+                    , p [] [ text "Click to open Thunderpigeon" ]
                     ]
 
                 DownloadStarted origin file ->

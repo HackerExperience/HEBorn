@@ -5,6 +5,7 @@ import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Account as Account
+import Core.Dispatch.OS as OS
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
@@ -134,7 +135,7 @@ onOpenApp : Apps.App -> Model -> UpdateResponse
 onOpenApp app model =
     let
         dispatch =
-            Dispatch.openApp (Just Endpoint) app
+            Dispatch.os <| OS.OpenApp (Just Endpoint) app
     in
         ( model, Cmd.none, dispatch )
 
@@ -225,8 +226,11 @@ onReqDownload data source file model =
                 |> Game.getGame
                 |> Game.Models.unsafeGetGateway
 
+        lastTick =
+            data.game.meta.lastTick
+
         startMsg =
-            Servers.NewPublicDownloadProcess source file "storage id"
+            Servers.NewPublicDownloadProcess lastTick source file "storage id"
 
         dispatch =
             Dispatch.processes me startMsg
@@ -349,9 +353,12 @@ onCrack data nip tab =
         targetIp =
             Network.getIp nip
 
+        lastTick =
+            data.game.meta.lastTick
+
         dispatch =
             Dispatch.processes serverId <|
-                Servers.NewBruteforceProcess targetIp
+                Servers.NewBruteforceProcess lastTick targetIp
     in
         ( tab, Cmd.none, dispatch )
 
@@ -386,8 +393,10 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Dispatch.web <|
-                Web.FetchUrl url networkId cid requester
+            Dispatch.server cid <|
+                Servers.FetchUrl url
+                    networkId
+                    requester
 
         tab_ =
             gotoPage url (Pages.LoadingModel url) tab
@@ -424,7 +433,7 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             Network.getIp remoteNip
 
         dispatch =
-            Dispatch.web <|
-                Web.Login gatewayNip remoteIp password requester
+            Dispatch.servers <|
+                Servers.Login gatewayNip remoteIp password requester
     in
         ( tab, Cmd.none, dispatch )

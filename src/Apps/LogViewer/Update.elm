@@ -89,13 +89,7 @@ update data msg ({ app } as model) =
                 ( model, Cmd.none, dispatch )
 
         StartDecrypting id ->
-            let
-                dispatch =
-                    id
-                        |> Servers.DecryptLog
-                        |> Dispatch.logs (Game.getActiveCId data)
-            in
-                ( model, Cmd.none, dispatch )
+            ( model, Cmd.none, Dispatch.none )
 
         StartHiding id ->
             let

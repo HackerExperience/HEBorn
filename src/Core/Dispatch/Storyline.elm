@@ -1,5 +1,6 @@
 module Core.Dispatch.Storyline exposing (..)
 
+import Time exposing (Time)
 import Events.Account.Story.StepProceeded as StoryStepProceeded
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked

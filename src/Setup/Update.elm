@@ -5,6 +5,7 @@ import Utils.Update as Update
 import Core.Messages as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Core as Core
+import Core.Error as Error
 import Game.Models as Game
 import Game.Account.Models as Account
 import Utils.Ports.Map as Map
@@ -180,8 +181,10 @@ handleJoinedAccount value model =
         Err reason ->
             let
                 dispatch =
-                    Dispatch.politeCrash "ERR_PORRA_RENATO"
-                        ("Can't decide setup pages: " ++ reason)
+                    ("Can't decide setup pages: " ++ reason)
+                        |> Error.porra
+                        |> Core.Crash
+                        |> Dispatch.core
             in
                 ( model, Cmd.none, dispatch )
 
