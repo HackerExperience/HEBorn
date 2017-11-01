@@ -9,5 +9,5 @@ import OS.Messages as OS
 dispatch : Dispatch -> Subscribers
 dispatch dispatch =
     case dispatch of
-        _ ->
+        OpenApp ->
             []

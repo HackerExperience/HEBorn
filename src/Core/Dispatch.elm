@@ -18,6 +18,7 @@ module Core.Dispatch
         , emails
         , missions_
         , websocket
+        , notifications
           -- to kill:
         , web
         , mission
@@ -39,6 +40,7 @@ is able to affect the OS instead of just Account.
 
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Core as Core
+import Core.Dispatch.Notifications as Notifications
 import Core.Dispatch.OS as OS
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Storyline as Storyline
@@ -57,6 +59,7 @@ type Internal
     | Servers Servers.Dispatch
     | Storyline Storyline.Dispatch
     | Websocket Websocket.Dispatch
+    | Notifications Notifications.Dispatch
     | NoOp
 
 
@@ -142,6 +145,11 @@ missions_ =
 websocket : Websocket.Dispatch -> Dispatch
 websocket =
     Websocket >> dispatch
+
+
+notifications : Notifications.Dispatch -> Dispatch
+notifications =
+    Notifications >> dispatch
 
 
 

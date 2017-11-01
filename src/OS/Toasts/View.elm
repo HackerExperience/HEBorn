@@ -29,7 +29,7 @@ view _ model =
 
 
 toast : Int -> Toast -> Html Msg
-toast id { notification, parent, state } =
+toast id { notification, state } =
     let
         classAttr =
             if state == Fading then

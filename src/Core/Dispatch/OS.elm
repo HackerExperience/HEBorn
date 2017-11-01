@@ -6,10 +6,4 @@ enough to be used by other operational systems.
 
 
 type Dispatch
-    = ToggleCampaign
-    | NotifyAccount
-    | ReadAccount
-    | NotifyServer
-    | ReadServer
-    | GotoApp
-    | OpenAPp
+    = OpenApp
