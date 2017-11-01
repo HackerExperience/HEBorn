@@ -9,7 +9,7 @@ import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
 
 type Msg
     = Changed Model
-    | Reply Content
+    | HandleReply Content
     | HandleNewEmail StoryNewEmail.Data
     | HandleReplyUnlocked StoryReplyUnlocked.Data
     | Request RequestMsg

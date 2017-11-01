@@ -16,15 +16,15 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        ActionDone action ->
-            onActionDone action model
+        HandleActionDone action ->
+            handleActionDone action model
 
         HandleStepProceeded next ->
             onStepProceed next model
 
 
-onActionDone : Action -> Model -> UpdateResponse
-onActionDone action model =
+handleActionDone : Action -> Model -> UpdateResponse
+handleActionDone action model =
     model
         |> getActions
         |> List.filter ((/=) action)

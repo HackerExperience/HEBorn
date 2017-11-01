@@ -2,14 +2,15 @@ module OS.Header.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Account as Account
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Models
 import Game.Account.Messages as Account
 import Game.Meta.Types exposing (Context)
 import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Story
-import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
@@ -165,7 +166,7 @@ onTogglecampaign : Model -> UpdateResponse
 onTogglecampaign model =
     let
         dispatch =
-            Dispatch.story <| Story.Toggle
+            Dispatch.storyline <| Storyline.Toggle
     in
         ( model, Cmd.none, dispatch )
 

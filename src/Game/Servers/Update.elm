@@ -97,14 +97,14 @@ updateServer :
     -> ServerUpdateResponse
 updateServer game model cid msg server =
     case msg of
-        SetBounce maybeBounceId ->
-            onSetBounce game
+        HandleSetBounce maybeBounceId ->
+            handleSetBounce game
                 cid
                 maybeBounceId
                 server
 
-        SetEndpoint remote ->
-            onSetEndpoint game remote server
+        HandleSetEndpoint remote ->
+            handleSetEndpoint game remote server
 
         FilesystemMsg msg ->
             onFilesystemMsg game cid msg server
@@ -125,23 +125,23 @@ updateServer game model cid msg server =
             onNotificationsMsg game msg server
 
 
-onSetBounce :
+handleSetBounce :
     Game.Model
     -> CId
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse
-onSetBounce game cid maybeBounceId server =
+handleSetBounce game cid maybeBounceId server =
     setBounce maybeBounceId server
         |> Update.fromModel
 
 
-onSetEndpoint :
+handleSetEndpoint :
     Game.Model
     -> Maybe CId
     -> Server
     -> ServerUpdateResponse
-onSetEndpoint game cid server =
+handleSetEndpoint game cid server =
     setEndpointCId cid server
         |> Update.fromModel
 

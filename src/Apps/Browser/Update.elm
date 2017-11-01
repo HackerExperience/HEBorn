@@ -3,11 +3,11 @@ module Apps.Browser.Update exposing (update)
 import Dict
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
-import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
@@ -226,7 +226,7 @@ onReqDownload data source file model =
                 |> Game.Models.unsafeGetGateway
 
         startMsg =
-            Processes.StartPublicDownload source file "storage id"
+            Servers.NewPublicDownloadProcess source file "storage id"
 
         dispatch =
             Dispatch.processes me startMsg
@@ -351,7 +351,7 @@ onCrack data nip tab =
 
         dispatch =
             Dispatch.processes serverId <|
-                Processes.StartBruteforce targetIp
+                Servers.NewBruteforceProcess targetIp
     in
         ( tab, Cmd.none, dispatch )
 

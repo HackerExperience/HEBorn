@@ -45,9 +45,9 @@ onStoryStepProceeded =
 
 onStoryNewEmail : StoryNewEmail.Data -> Dispatch
 onStoryNewEmail =
-    Storyline.ReceivedEmail >> Dispatch.emails_
+    Storyline.ReceivedEmail >> Dispatch.emails
 
 
 onStoryReplyUnlocked : StoryReplyUnlocked.Data -> Dispatch
 onStoryReplyUnlocked =
-    Storyline.UnlockedEmail >> Dispatch.emails_
+    Storyline.UnlockedEmail >> Dispatch.emails

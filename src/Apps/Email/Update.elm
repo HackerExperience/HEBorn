@@ -2,9 +2,9 @@ module Apps.Email.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Storyline as Storyline
 import Game.Data as Game
 import Game.Storyline.Emails.Contents exposing (Content)
-import Game.Storyline.Emails.Messages as Emails
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.Email.Menu.Messages as Menu
@@ -61,7 +61,7 @@ onReply content model =
     let
         dispatch =
             content
-                |> Emails.Reply
-                |> Dispatch.email
+                |> Storyline.ReplyEmail
+                |> Dispatch.emails
     in
         ( model, Cmd.none, dispatch )

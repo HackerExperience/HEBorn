@@ -43,29 +43,29 @@ events cid name json =
 
 onNewFile : CId -> NewFile.Data -> Dispatch
 onNewFile id =
-    Servers.CreatedNewFile >> Dispatch.filesystem_ id
+    Servers.CreatedFile >> Dispatch.filesystem id
 
 
 onLogsChanged : CId -> LogsChanged.Data -> Dispatch
 onLogsChanged id =
-    Servers.ChangedLogs >> Dispatch.logs_ id
+    Servers.ChangedLogs >> Dispatch.logs id
 
 
 onProcessStarted : CId -> ProcessStarted.Data -> Dispatch
 onProcessStarted id =
-    Servers.StartedProcess >> Dispatch.processes_ id
+    Servers.StartedProcess >> Dispatch.processes id
 
 
 onProcessConclusion : CId -> ProcessConclusion.Data -> Dispatch
 onProcessConclusion id =
-    Servers.ConcludedProcess >> Dispatch.processes_ id
+    Servers.ConcludedProcess >> Dispatch.processes id
 
 
 onProcessesChanged : CId -> ProcessesChanged.Data -> Dispatch
 onProcessesChanged id =
-    Servers.ChangedProcesses >> Dispatch.processes_ id
+    Servers.ChangedProcesses >> Dispatch.processes id
 
 
 onBruteforceFailed : CId -> BruteforceFailed.Data -> Dispatch
 onBruteforceFailed id =
-    Servers.FailedBruteforceProcess >> Dispatch.processes_ id
+    Servers.FailedBruteforceProcess >> Dispatch.processes id

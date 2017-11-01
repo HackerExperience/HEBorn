@@ -5,6 +5,6 @@ import Game.Storyline.Emails.Messages as Emails
 
 
 type Msg
-    = Toggle
+    = HandleToggle
     | MissionsMsg Missions.Msg
     | EmailsMsg Emails.Msg

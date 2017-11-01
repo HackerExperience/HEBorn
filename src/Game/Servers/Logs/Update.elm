@@ -22,11 +22,11 @@ type alias LogUpdateResponse =
 update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
 update game nip msg model =
     case msg of
-        Delete id ->
-            onDelete game nip id model
+        HandleDelete id ->
+            handleDelete game nip id model
 
-        Hide id ->
-            onHide game nip id model
+        HandleHide id ->
+            handleHide game nip id model
 
         LogMsg id msg ->
             onLogMsg game nip id msg model
@@ -39,13 +39,13 @@ update game nip msg model =
 -- collection message handlers
 
 
-onDelete : Game.Model -> CId -> ID -> Model -> UpdateResponse
-onDelete game nip id model =
+handleDelete : Game.Model -> CId -> ID -> Model -> UpdateResponse
+handleDelete game nip id model =
     Update.fromModel model
 
 
-onHide : Game.Model -> CId -> ID -> Model -> UpdateResponse
-onHide game nip id model =
+handleHide : Game.Model -> CId -> ID -> Model -> UpdateResponse
+handleHide game nip id model =
     Update.fromModel model
 
 
@@ -94,11 +94,11 @@ toModel index =
 updateLog : Game.Model -> CId -> ID -> LogMsg -> Log -> LogUpdateResponse
 updateLog game nip id msg log =
     case msg of
-        UpdateContent content ->
-            onUpdateContent game nip id content log
+        HandleUpdateContent content ->
+            handleUpdateContent game nip id content log
 
-        Encrypt ->
-            onEncrypt game nip id log
+        HandleEncrypt ->
+            handleEncrypt game nip id log
 
         Decrypt content ->
             onDecrypt game nip id content log
@@ -107,14 +107,20 @@ updateLog game nip id msg log =
             onLogRequest game nip id (logReceive data) log
 
 
-onUpdateContent : Game.Model -> CId -> ID -> String -> Log -> LogUpdateResponse
-onUpdateContent game nip id content log =
+handleUpdateContent :
+    Game.Model
+    -> CId
+    -> ID
+    -> String
+    -> Log
+    -> LogUpdateResponse
+handleUpdateContent game nip id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-onEncrypt : Game.Model -> CId -> ID -> Log -> LogUpdateResponse
-onEncrypt game nip id log =
+handleEncrypt : Game.Model -> CId -> ID -> Log -> LogUpdateResponse
+handleEncrypt game nip id log =
     setContent Nothing log
         |> Update.fromModel
 

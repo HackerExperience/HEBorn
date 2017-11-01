@@ -30,24 +30,24 @@ update :
     -> UpdateResponse
 update game cid msg model =
     case msg of
-        Delete fileId ->
-            onDelete game cid fileId model
+        HandleDelete fileId ->
+            handleDelete game cid fileId model
 
-        CreateTextFile path ->
-            onCreateTextFile game
+        HandleMove fileId newLocation ->
+            handleMove game cid fileId newLocation model
+
+        HandleRename fileId newBaseName ->
+            handleRename game cid fileId newBaseName model
+
+        HandleNewTextFile path ->
+            handleNewTextFile game
                 cid
                 (toString game.meta.lastTick)
                 path
                 model
 
-        CreateEmptyDir path ->
-            onEmptyDir game cid (toString game.meta.lastTick) path model
-
-        Move fileId newLocation ->
-            onMove game cid fileId newLocation model
-
-        Rename fileId newBaseName ->
-            onRename game cid fileId newBaseName model
+        HandleNewDir path ->
+            handleNewDir game cid (toString game.meta.lastTick) path model
 
         Request request ->
             onRequest game cid (receive request) model
@@ -65,8 +65,8 @@ bootstrap json model =
 -- internals
 
 
-onDelete : Game.Model -> CId -> FileID -> Filesystem -> UpdateResponse
-onDelete game cid fileId model =
+handleDelete : Game.Model -> CId -> FileID -> Filesystem -> UpdateResponse
+handleDelete game cid fileId model =
     let
         file =
             getEntry fileId model
@@ -85,14 +85,70 @@ onDelete game cid fileId model =
         ( model_, serverCmd, Dispatch.none )
 
 
-onCreateTextFile :
+handleMove :
+    Game.Model
+    -> CId
+    -> FileID
+    -> Location
+    -> Filesystem
+    -> UpdateResponse
+handleMove game cid fileId newLocation model =
+    let
+        model_ =
+            model
+                |> getEntry fileId
+                |> Maybe.map
+                    (\e ->
+                        moveEntry
+                            ( newLocation, getEntryBasename e )
+                            e
+                            model
+                    )
+                |> Maybe.withDefault model
+
+        serverCmd =
+            Move.request newLocation fileId cid game
+    in
+        ( model_, serverCmd, Dispatch.none )
+
+
+handleRename :
+    Game.Model
+    -> CId
+    -> FileID
+    -> String
+    -> Filesystem
+    -> UpdateResponse
+handleRename game cid fileId newBaseName model =
+    let
+        model_ =
+            model
+                |> getEntry fileId
+                |> Maybe.map
+                    (\e ->
+                        moveEntry
+                            ( getEntryLocation e model
+                            , newBaseName
+                            )
+                            e
+                            model
+                    )
+                |> Maybe.withDefault model
+
+        serverCmd =
+            Rename.request newBaseName fileId cid game
+    in
+        ( model_, serverCmd, Dispatch.none )
+
+
+handleNewTextFile :
     Game.Model
     -> CId
     -> FileID
     -> FilePath
     -> Filesystem
     -> UpdateResponse
-onCreateTextFile game cid fileId ( fileLocation, fileBaseName ) model =
+handleNewTextFile game cid fileId ( fileLocation, fileBaseName ) model =
     let
         toFileEntry path =
             FileEntry
@@ -131,14 +187,14 @@ onCreateTextFile game cid fileId ( fileLocation, fileBaseName ) model =
                 Update.fromModel model
 
 
-onEmptyDir :
+handleNewDir :
     Game.Model
     -> CId
     -> FileID
     -> FilePath
     -> Filesystem
     -> UpdateResponse
-onEmptyDir game cid fileId ( fileLocation, fileName ) model =
+handleNewDir game cid fileId ( fileLocation, fileName ) model =
     let
         model_ =
             model
@@ -163,62 +219,6 @@ onEmptyDir game cid fileId ( fileLocation, fileName ) model =
 
         serverCmd =
             Create.request "/" fileName fileLocation cid game
-    in
-        ( model_, serverCmd, Dispatch.none )
-
-
-onMove :
-    Game.Model
-    -> CId
-    -> FileID
-    -> Location
-    -> Filesystem
-    -> UpdateResponse
-onMove game cid fileId newLocation model =
-    let
-        model_ =
-            model
-                |> getEntry fileId
-                |> Maybe.map
-                    (\e ->
-                        moveEntry
-                            ( newLocation, getEntryBasename e )
-                            e
-                            model
-                    )
-                |> Maybe.withDefault model
-
-        serverCmd =
-            Move.request newLocation fileId cid game
-    in
-        ( model_, serverCmd, Dispatch.none )
-
-
-onRename :
-    Game.Model
-    -> CId
-    -> FileID
-    -> String
-    -> Filesystem
-    -> UpdateResponse
-onRename game cid fileId newBaseName model =
-    let
-        model_ =
-            model
-                |> getEntry fileId
-                |> Maybe.map
-                    (\e ->
-                        moveEntry
-                            ( getEntryLocation e model
-                            , newBaseName
-                            )
-                            e
-                            model
-                    )
-                |> Maybe.withDefault model
-
-        serverCmd =
-            Rename.request newBaseName fileId cid game
     in
         ( model_, serverCmd, Dispatch.none )
 

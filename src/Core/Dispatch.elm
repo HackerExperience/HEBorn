@@ -9,34 +9,22 @@ module Core.Dispatch
         , account
         , core
         , os
-        , servers_
-        , server_
-        , filesystem_
-        , logs_
-        , processes_
+        , servers
+        , server
+        , filesystem
+        , logs
+        , processes
         , storyline
-        , emails_
+        , emails
         , missions_
         , websocket
           -- to kill:
-        , setup
-        , game
-        , database
-        , servers
         , web
         , mission
         , missionAction
-        , email
-        , story
-        , server
-        , filesystem
-        , processes
-        , logs
-        , log
         , serverNotification
         , accountNotification
         , openApp
-        , apps
         , browser
         , toasts
         , politeCrash
@@ -111,29 +99,29 @@ os =
     OS >> dispatch
 
 
-servers_ : Servers.Dispatch -> Dispatch
-servers_ =
+servers : Servers.Dispatch -> Dispatch
+servers =
     Servers >> dispatch
 
 
-server_ : CId -> Servers.Server -> Dispatch
-server_ id =
+server : CId -> Servers.Server -> Dispatch
+server id =
     Servers.Server id >> Servers >> dispatch
 
 
-filesystem_ : CId -> Servers.Filesystem -> Dispatch
-filesystem_ id =
-    Servers.Filesystem >> server_ id
+filesystem : CId -> Servers.Filesystem -> Dispatch
+filesystem id =
+    Servers.Filesystem >> server id
 
 
-logs_ : CId -> Servers.Logs -> Dispatch
-logs_ id =
-    Servers.Logs >> server_ id
+logs : CId -> Servers.Logs -> Dispatch
+logs id =
+    Servers.Logs >> server id
 
 
-processes_ : CId -> Servers.Processes -> Dispatch
-processes_ id =
-    Servers.Processes >> server_ id
+processes : CId -> Servers.Processes -> Dispatch
+processes id =
+    Servers.Processes >> server id
 
 
 storyline : Storyline.Dispatch -> Dispatch
@@ -141,8 +129,8 @@ storyline =
     Storyline >> dispatch
 
 
-emails_ : Storyline.Emails -> Dispatch
-emails_ =
+emails : Storyline.Emails -> Dispatch
+emails =
     Storyline.Emails >> storyline
 
 
@@ -160,28 +148,8 @@ websocket =
 -- compatibility layer we should eventually kill
 
 
-setup : a -> Dispatch
-setup msg =
-    dispatch NoOp
-
-
 game : a -> Dispatch
 game msg =
-    dispatch NoOp
-
-
-database : a -> Dispatch
-database msg =
-    dispatch NoOp
-
-
-servers : a -> Dispatch
-servers msg =
-    dispatch NoOp
-
-
-story : a -> Dispatch
-story msg =
     dispatch NoOp
 
 
@@ -190,38 +158,8 @@ mission msg =
     dispatch NoOp
 
 
-email : a -> Dispatch
-email msg =
-    dispatch NoOp
-
-
 missionAction : a -> b -> Dispatch
 missionAction data act =
-    dispatch NoOp
-
-
-server : a -> b -> Dispatch
-server cid msg =
-    dispatch NoOp
-
-
-filesystem : a -> b -> Dispatch
-filesystem cid msg =
-    dispatch NoOp
-
-
-processes : a -> b -> Dispatch
-processes cid msg =
-    dispatch NoOp
-
-
-logs : a -> b -> Dispatch
-logs cid msg =
-    dispatch NoOp
-
-
-log : a -> b -> c -> Dispatch
-log serverId cid msg =
     dispatch NoOp
 
 

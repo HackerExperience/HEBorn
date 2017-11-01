@@ -12,6 +12,9 @@ import Game.Storyline.Missions.Messages as Missions
 dispatch : Dispatch -> Subscribers
 dispatch dispatch =
     case dispatch of
+        Toggle ->
+            [ storyline Storyline.HandleToggle ]
+
         Emails dispatch ->
             fromEmails dispatch
 
@@ -26,6 +29,9 @@ dispatch dispatch =
 fromEmails : Emails -> Subscribers
 fromEmails dispatch =
     case dispatch of
+        ReplyEmail a ->
+            [ emails <| Emails.HandleReply a ]
+
         ReceivedEmail a ->
             [ emails <| Emails.HandleNewEmail a ]
 
@@ -36,6 +42,9 @@ fromEmails dispatch =
 fromMissions : Missions -> Subscribers
 fromMissions dispatch =
     case dispatch of
+        ActionDone a ->
+            [ missions <| Missions.HandleActionDone a ]
+
         ProceededMission a ->
             [ missions <| Missions.HandleStepProceeded a ]
 

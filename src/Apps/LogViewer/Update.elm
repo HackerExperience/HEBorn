@@ -1,9 +1,9 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Utils.Update as Update
 import Game.Data as Game
-import Game.Servers.Logs.Messages as Logs exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
@@ -70,8 +70,9 @@ update data msg ({ app } as model) =
                 dispatch =
                     case edited of
                         Just edited ->
-                            Logs.UpdateContent edited
-                                |> Dispatch.log cid id
+                            edited
+                                |> Servers.UpdateLog id
+                                |> Dispatch.logs cid
 
                         Nothing ->
                             Dispatch.none
@@ -81,38 +82,36 @@ update data msg ({ app } as model) =
         StartCrypting id ->
             let
                 dispatch =
-                    Logs.Encrypt
-                        |> Dispatch.log
-                            (Game.getActiveCId data)
-                            id
+                    id
+                        |> Servers.EncryptLog
+                        |> Dispatch.logs (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 
         StartDecrypting id ->
             let
                 dispatch =
-                    Logs.Decrypt "NOT IMPLEMENTED YET"
-                        |> Dispatch.log
-                            (Game.getActiveCId data)
-                            id
+                    id
+                        |> Servers.DecryptLog
+                        |> Dispatch.logs (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 
         StartHiding id ->
             let
                 dispatch =
-                    Logs.Hide id
-                        |> Dispatch.logs
-                            (Game.getActiveCId data)
+                    id
+                        |> Servers.HideLog
+                        |> Dispatch.logs (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 
         StartDeleting id ->
             let
                 dispatch =
-                    Logs.Delete id
-                        |> Dispatch.logs
-                            (Game.getActiveCId data)
+                    id
+                        |> Servers.DeleteLog
+                        |> Dispatch.logs (Game.getActiveCId data)
             in
                 ( model, Cmd.none, dispatch )
 

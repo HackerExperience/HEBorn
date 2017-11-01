@@ -5,11 +5,11 @@ import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = Delete FileID
-    | CreateTextFile FilePath
-    | CreateEmptyDir FilePath
-    | Move FileID Location
-    | Rename FileID String
+    = HandleDelete FileID
+    | HandleRename FileID String
+    | HandleNewTextFile FilePath
+    | HandleNewDir FilePath
+    | HandleMove FileID Location
     | Request RequestMsg
 
 

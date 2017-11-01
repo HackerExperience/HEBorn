@@ -3,11 +3,11 @@ module Game.Account.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Core as Core
+import Core.Dispatch.Servers as Servers
 import Core.Error as Error exposing (Error)
 import Core.Dispatch.Websocket as Ws
 import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
-import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications

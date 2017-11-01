@@ -11,13 +11,13 @@ import Events.Server.Processes.Changed as ProcessesChanged
 
 
 type Msg
-    = Pause ID
-    | Resume ID
-    | Remove ID
-    | Complete ID
-    | StartBruteforce Network.IP
-    | StartDownload Network.NIP Filesystem.ForeignFileBox String
-    | StartPublicDownload Network.NIP Filesystem.ForeignFileBox String
+    = HandlePause ID
+    | HandleResume ID
+    | HandleRemove ID
+    | HandleComplete ID -- may be removed
+    | HandleStartBruteforce Network.IP
+    | HandleStartDownload Network.NIP Filesystem.ForeignFileBox String
+    | HandleStartPublicDownload Network.NIP Filesystem.ForeignFileBox String
       -- start may be removed if we provide a specific
       -- function for every process type
     | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )

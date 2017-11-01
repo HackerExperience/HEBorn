@@ -38,29 +38,29 @@ update game cid msg model =
                 |> Servers.getNIP cid
     in
         case msg of
-            Pause id ->
-                onPause game id model
+            HandlePause id ->
+                handlePause game id model
 
-            Resume id ->
-                onResume game id model
+            HandleResume id ->
+                handleResume game id model
 
-            Remove id ->
-                onRemove game id model
+            HandleRemove id ->
+                handleRemove game id model
 
             Start type_ target file ->
-                onStart game
+                handleStart game
                     cid
                     (newOptimistic type_ nip target (newProcessFile file))
                     model
 
-            StartBruteforce target ->
-                onStart game
+            HandleStartBruteforce target ->
+                handleStart game
                     cid
                     (newOptimistic Cracker nip target unknownProcessFile)
                     model
 
-            StartDownload origin fileId storageId ->
-                onDownload game
+            HandleStartDownload origin fileId storageId ->
+                handleDownload game
                     cid
                     (newOptimistic
                         (Download (DownloadContent PrivateFTP storageId))
@@ -72,8 +72,8 @@ update game cid msg model =
                     fileId
                     model
 
-            StartPublicDownload origin fileId storageId ->
-                onDownload game
+            HandleStartPublicDownload origin fileId storageId ->
+                handleDownload game
                     cid
                     (newOptimistic
                         (Download (DownloadContent PublicFTP storageId))
@@ -85,11 +85,8 @@ update game cid msg model =
                     fileId
                     model
 
-            Complete id ->
+            HandleComplete id ->
                 onComplete game id model
-
-            Request data ->
-                updateRequest game cid (receive data) model
 
             HandleProcessStarted data ->
                 handleProcessStarted data model
@@ -105,6 +102,9 @@ update game cid msg model =
 
             HandleBruteforceSuccess id ->
                 handleBruteforceSuccess id model
+
+            Request data ->
+                updateRequest game cid (receive data) model
 
 
 
@@ -134,8 +134,8 @@ updateOrSync func id model =
 -- processes messages
 
 
-onPause : Game.Model -> ID -> Model -> UpdateResponse
-onPause game id model =
+handlePause : Game.Model -> ID -> Model -> UpdateResponse
+handlePause game id model =
     let
         update process =
             model
@@ -145,8 +145,8 @@ onPause game id model =
         updateOrSync update id model
 
 
-onResume : Game.Model -> ID -> Model -> UpdateResponse
-onResume game id model =
+handleResume : Game.Model -> ID -> Model -> UpdateResponse
+handleResume game id model =
     let
         update process =
             model
@@ -156,8 +156,8 @@ onResume game id model =
         updateOrSync update id model
 
 
-onRemove : Game.Model -> ID -> Model -> UpdateResponse
-onRemove game id model =
+handleRemove : Game.Model -> ID -> Model -> UpdateResponse
+handleRemove game id model =
     let
         model_ =
             remove id model
@@ -165,8 +165,8 @@ onRemove game id model =
         Update.fromModel model_
 
 
-onStart : Game.Model -> CId -> Process -> Model -> UpdateResponse
-onStart game cid process model =
+handleStart : Game.Model -> CId -> Process -> Model -> UpdateResponse
+handleStart game cid process model =
     let
         ( id, model_ ) =
             insertOptimistic process model
@@ -193,7 +193,7 @@ onStart game cid process model =
                 Update.fromModel model_
 
 
-onDownload :
+handleDownload :
     Game.Model
     -> CId
     -> Process
@@ -201,7 +201,7 @@ onDownload :
     -> Filesystem.ForeignFileBox
     -> Model
     -> UpdateResponse
-onDownload game cid process origin file model =
+handleDownload game cid process origin file model =
     let
         ( id, model_ ) =
             insertOptimistic process model

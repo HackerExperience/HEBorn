@@ -10,7 +10,9 @@ import Game.Messages as Game
 import Game.Account.Messages as Account
 import Game.Account.Database.Messages as Database
 import Game.Servers.Messages as Servers
+import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Logs.Messages as Logs
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Emails.Messages as Emails
@@ -53,13 +55,23 @@ servers =
 
 
 server : CId -> Servers.ServerMsg -> Core.Msg
-server cid =
-    Servers.ServerMsg cid >> servers
+server id =
+    Servers.ServerMsg id >> servers
+
+
+filesystem : CId -> Filesystem.Msg -> Core.Msg
+filesystem id =
+    Servers.FilesystemMsg >> server id
 
 
 processes : CId -> Processes.Msg -> Core.Msg
-processes cid =
-    Servers.ProcessesMsg >> server cid
+processes id =
+    Servers.ProcessesMsg >> server id
+
+
+logs : CId -> Logs.Msg -> Core.Msg
+logs id =
+    Servers.LogsMsg >> server id
 
 
 web : Web.Msg -> Core.Msg
@@ -67,19 +79,19 @@ web =
     Game.WebMsg >> game
 
 
-story : Storyline.Msg -> Core.Msg
-story =
+storyline : Storyline.Msg -> Core.Msg
+storyline =
     Game.StoryMsg >> game
 
 
 missions : Missions.Msg -> Core.Msg
 missions =
-    Storyline.MissionsMsg >> story
+    Storyline.MissionsMsg >> storyline
 
 
 emails : Emails.Msg -> Core.Msg
 emails =
-    Storyline.EmailsMsg >> story
+    Storyline.EmailsMsg >> storyline
 
 
 apps : List Apps.Msg -> Core.Msg
