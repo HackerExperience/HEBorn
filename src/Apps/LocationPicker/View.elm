@@ -15,14 +15,15 @@ import Apps.LocationPicker.Menu.View exposing (..)
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     div
         [ menuForDummy
         , class [ Super ]
         ]
-        [ div [ class [ Map ] ] [ Native.Untouchable.node "hemap" app.mapEId ]
+        [ div [ class [ Map ] ]
+            [ Native.Untouchable.node "hemap" model.mapEId ]
         , div [ class [ Interactive ] ] <|
-            case app.coordinates of
+            case model.coordinates of
                 Just coord ->
                     [ text "COORDENADAS"
                     , br [] []

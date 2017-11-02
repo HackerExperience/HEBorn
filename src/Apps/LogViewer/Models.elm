@@ -11,8 +11,9 @@ type Sorting
     = DefaultSort
 
 
-type alias LogViewer =
-    { filterText : String
+type alias Model =
+    { menu : Menu.Model
+    , filterText : String
     , filterFlags : List Never
     , filterCache : List Logs.ID
     , sorting : Sorting
@@ -21,26 +22,16 @@ type alias LogViewer =
     }
 
 
-type alias Model =
-    { app : LogViewer
-    , menu : Menu.Model
-    }
-
-
-
--- TODO: rewrite this model's functions
-
-
 name : String
 name =
     "Log Viewer"
 
 
 title : Model -> String
-title ({ app } as model) =
+title model =
     let
         filter =
-            app.filterText
+            model.filterText
 
         posfix =
             if String.length filter > 12 then
@@ -62,14 +53,8 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialLogViewer
-    , menu = Menu.initialMenu
-    }
-
-
-initialLogViewer : LogViewer
-initialLogViewer =
-    { filterText = ""
+    { menu = Menu.initialMenu
+    , filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort
@@ -78,19 +63,19 @@ initialLogViewer =
     }
 
 
-isEntryExpanded : Logs.ID -> LogViewer -> Bool
-isEntryExpanded log app =
-    List.member log app.expanded
+isEntryExpanded : Logs.ID -> Model -> Bool
+isEntryExpanded log model =
+    List.member log model.expanded
 
 
-toggleExpanded : Logs.ID -> LogViewer -> LogViewer
-toggleExpanded id app =
-    { app
+toggleExpanded : Logs.ID -> Model -> Model
+toggleExpanded id model =
+    { model
         | expanded =
-            if isEntryExpanded id app then
-                List.filter ((/=) id) app.expanded
+            if isEntryExpanded id model then
+                List.filter ((/=) id) model.expanded
             else
-                id :: app.expanded
+                id :: model.expanded
     }
 
 
@@ -102,12 +87,12 @@ catchDataWhenFiltering filterCache log =
         Nothing
 
 
-applyFilter : LogViewer -> Logs.Model -> Dict Logs.ID Logs.Log
-applyFilter app =
+applyFilter : Model -> Logs.Model -> Dict Logs.ID Logs.Log
+applyFilter model =
     let
         filterer id log =
-            if String.length app.filterText > 0 then
-                catchDataWhenFiltering app.filterCache id
+            if String.length model.filterText > 0 then
+                catchDataWhenFiltering model.filterCache id
                     |> Maybe.map (always True)
                     |> Maybe.withDefault False
             else
@@ -117,19 +102,19 @@ applyFilter app =
 
 
 enterEditing : Game.Data -> Logs.ID -> Model -> Model
-enterEditing data id ({ app } as model) =
+enterEditing data id model =
     let
         logs =
             data
                 |> Game.getActiveServer
                 |> Servers.getLogs
 
-        app_ =
+        model_ =
             case Dict.get id logs of
                 Just log ->
                     case Logs.getContent log of
                         Logs.Uncrypted data ->
-                            Just <| updateEditing id data.raw app
+                            Just <| updateEditing id data.raw model
 
                         Logs.Encrypted ->
                             Nothing
@@ -137,47 +122,45 @@ enterEditing data id ({ app } as model) =
                 _ ->
                     Nothing
     in
-        app_
-            |> Maybe.andThen (\v -> Just { model | app = v })
-            |> Maybe.withDefault model
+        Maybe.withDefault model model_
 
 
-updateEditing : Logs.ID -> String -> LogViewer -> LogViewer
-updateEditing id value app =
+updateEditing : Logs.ID -> String -> Model -> Model
+updateEditing id value model =
     let
         editing_ =
-            Dict.insert id value app.editing
+            Dict.insert id value model.editing
     in
-        { app | editing = editing_ }
+        { model | editing = editing_ }
 
 
-toggleExpand : Logs.ID -> LogViewer -> LogViewer
-toggleExpand id app =
-    { app
+toggleExpand : Logs.ID -> Model -> Model
+toggleExpand id model =
+    { model
         | expanded =
-            if List.member id app.expanded then
-                List.filter ((/=) id) app.expanded
+            if List.member id model.expanded then
+                List.filter ((/=) id) model.expanded
             else
-                id :: app.expanded
+                id :: model.expanded
     }
 
 
-leaveEditing : Logs.ID -> LogViewer -> LogViewer
-leaveEditing id app =
+leaveEditing : Logs.ID -> Model -> Model
+leaveEditing id model =
     let
         editing_ =
-            Dict.filter (\k _ -> k /= id) app.editing
+            Dict.filter (\k _ -> k /= id) model.editing
     in
-        { app | editing = editing_ }
+        { model | editing = editing_ }
 
 
-getEdit : Logs.ID -> LogViewer -> Maybe Logs.ID
-getEdit id app =
-    Dict.get id app.editing
+getEdit : Logs.ID -> Model -> Maybe Logs.ID
+getEdit id model =
+    Dict.get id model.editing
 
 
-updateTextFilter : Game.Data -> String -> LogViewer -> LogViewer
-updateTextFilter data filter app =
+updateTextFilter : Game.Data -> String -> Model -> Model
+updateTextFilter data filter model =
     let
         filterer id log =
             case Logs.getContent log of
@@ -194,7 +177,7 @@ updateTextFilter data filter app =
                 |> Logs.filter filterer
                 |> Dict.keys
     in
-        { app
+        { model
             | filterText = filter
             , filterCache = filterCache
         }

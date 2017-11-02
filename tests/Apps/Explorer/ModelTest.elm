@@ -61,7 +61,7 @@ pathMoveAroundTests =
                 explorer =
                     changePath destination
                         (Servers.getFilesystem newServerWithFile)
-                        initialExplorer
+                        Explorer.initialModel
             in
                 Expect.equal destination <| getPath explorer
     , fuzz
@@ -77,11 +77,11 @@ pathMoveAroundTests =
             in
                 case maybeServer of
                     Just ( _, server ) ->
-                        initialExplorer
+                        Explorer.initialModel
                             |> changePath path (Servers.getFilesystem server)
-                            |> Expect.equal initialExplorer
+                            |> Expect.equal Explorer.initialModel
 
                     Nothing ->
                         -- FIXME: game state should provide Game.Data
-                        Expect.equal initialExplorer initialExplorer
+                        Expect.equal Explorer.initialModel Explorer.initialModel
     ]

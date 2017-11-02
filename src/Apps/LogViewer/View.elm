@@ -27,7 +27,7 @@ import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     let
         filterHeaderLayout =
             verticalList
@@ -37,7 +37,7 @@ view data ({ app } as model) =
                     , ( class [ BtnHide ], DummyNoOp, False )
                     ]
                     []
-                    app.filterText
+                    model.filterText
                     "Search..."
                     UpdateTextFilter
                 ]
@@ -47,8 +47,8 @@ view data ({ app } as model) =
                 (data
                     |> Game.getActiveServer
                     |> Servers.getLogs
-                    |> applyFilter app
-                    |> renderEntries app
+                    |> applyFilter model
+                    |> renderEntries model
                 )
     in
         verticalSticked
@@ -68,21 +68,21 @@ encrypted =
     "⠽⠕⠥ ⠚⠥⠎⠞ ⠇⠕⠎⠞ ⠠⠠⠞⠓⠑ ⠠⠠⠛⠁⠍⠑"
 
 
-renderEntries : LogViewer -> Dict Logs.ID Logs.Log -> List (Html Msg)
-renderEntries app logs =
+renderEntries : Model -> Dict Logs.ID Logs.Log -> List (Html Msg)
+renderEntries model logs =
     logs
         |> Dict.toList
-        |> List.map (uncurry <| renderEntry app)
+        |> List.map (uncurry <| renderEntry model)
 
 
-renderEntry : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
-renderEntry app id log =
+renderEntry : Model -> Logs.ID -> Logs.Log -> Html Msg
+renderEntry model id log =
     let
         expandedState =
-            isEntryExpanded app id
+            isEntryExpanded model id
 
         editingState =
-            isEntryEditing app id
+            isEntryEditing model id
 
         etop =
             [ div [] [ log.timestamp |> timestampToFullData |> text ]
@@ -92,26 +92,26 @@ renderEntry app id log =
 
         data =
             [ div [ class [ ETop ] ] etop
-            , renderData app id log
-            , renderBottom app id log
+            , renderData model id log
+            , renderBottom model id log
             ]
     in
         toogableEntry
             (not editingState)
-            (menuInclude app id log)
+            (menuInclude model id log)
             (ToogleExpand id)
             expandedState
             data
 
 
-isEntryExpanded : LogViewer -> Logs.ID -> Bool
-isEntryExpanded app id =
-    List.member id app.expanded
+isEntryExpanded : Model -> Logs.ID -> Bool
+isEntryExpanded model id =
+    List.member id model.expanded
 
 
-isEntryEditing : LogViewer -> Logs.ID -> Bool
-isEntryEditing app id =
-    Dict.member id app.editing
+isEntryEditing : Model -> Logs.ID -> Bool
+isEntryEditing model id =
+    Dict.member id model.editing
 
 
 renderFlag : Classes -> List (Html Msg)
@@ -187,13 +187,13 @@ btnsCryptographed logID =
     ]
 
 
-renderBottomActions : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
-renderBottomActions app id log =
+renderBottomActions : Model -> Logs.ID -> Logs.Log -> Html Msg
+renderBottomActions model id log =
     let
         btns =
-            if (isEntryEditing app id) then
+            if (isEntryEditing model id) then
                 btnsEditing id
-            else if (isEntryExpanded app id) then
+            else if (isEntryExpanded model id) then
                 case log.content of
                     Logs.Uncrypted _ ->
                         btnsNormal id
@@ -206,27 +206,27 @@ renderBottomActions app id log =
         horizontalBtnPanel btns
 
 
-renderData : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
-renderData app id log =
-    case (Dict.get id app.editing) of
+renderData : Model -> Logs.ID -> Logs.Log -> Html Msg
+renderData model id log =
+    case (Dict.get id model.editing) of
         Just x ->
             renderEditing id x
 
         Nothing ->
-            if (isEntryExpanded app id) then
+            if (isEntryExpanded model id) then
                 renderContent log
             else
                 renderMiniContent log
 
 
-renderBottom : LogViewer -> Logs.ID -> Logs.Log -> Html Msg
-renderBottom app id log =
+renderBottom : Model -> Logs.ID -> Logs.Log -> Html Msg
+renderBottom model id log =
     let
         data =
-            if (isEntryEditing app id) then
-                [ renderBottomActions app id log ]
-            else if (isEntryExpanded app id) then
-                [ renderBottomActions app id log ]
+            if (isEntryEditing model id) then
+                [ renderBottomActions model id log ]
+            else if (isEntryExpanded model id) then
+                [ renderBottomActions model id log ]
             else
                 []
     in
@@ -235,9 +235,9 @@ renderBottom app id log =
             data
 
 
-menuInclude : LogViewer -> Logs.ID -> Logs.Log -> List (Attribute Msg)
-menuInclude app id log =
-    if (isEntryEditing app id) then
+menuInclude : Model -> Logs.ID -> Logs.Log -> List (Attribute Msg)
+menuInclude model id log =
+    if (isEntryEditing model id) then
         [ menuEditingEntry id ]
     else
         case log.content of

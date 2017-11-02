@@ -24,7 +24,7 @@ update :
     -> TaskManager.Msg
     -> Model
     -> ( Model, Cmd TaskManager.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
@@ -46,10 +46,10 @@ update data msg ({ app } as model) =
                 activeServer =
                     Game.getActiveServer data
 
-                app_ =
+                model_ =
                     updateTasks
                         activeServer
-                        app.limits
-                        app
+                        model.limits
+                        model
             in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+                ( model_, Cmd.none, Dispatch.none )

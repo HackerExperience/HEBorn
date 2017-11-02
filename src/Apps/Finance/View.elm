@@ -49,7 +49,7 @@ entryView ( src, val ) =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     [ ( BTCWallet "deadbeef", BTC 8.351 )
     , ( BankAccount 1337, USD 89 )
     , ( BankAccount 1337, USD 12.85 )

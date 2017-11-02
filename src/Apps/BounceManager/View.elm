@@ -88,11 +88,8 @@ viewTabCreate servers =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data ({ selected } as model) =
     let
-        { selected } =
-            app
-
         contentStc =
             data.game.account.bounces
 

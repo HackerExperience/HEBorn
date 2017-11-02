@@ -11,36 +11,36 @@ catchDataWhenFiltering filterCache nip value =
     List.member (Network.toString nip) filterCache
 
 
-applyFilter : DBAdmin -> Database.HackedServers -> Database.HackedServers
-applyFilter app itens =
-    if ((String.length app.servers.filterText) > 0) then
+applyFilter : Model -> Database.HackedServers -> Database.HackedServers
+applyFilter model itens =
+    if ((String.length model.servers.filterText) > 0) then
         Dict.filter
-            (catchDataWhenFiltering app.servers.filterCache)
+            (catchDataWhenFiltering model.servers.filterCache)
             itens
     else
         itens
 
 
-toggleExpand : String -> DBAdmin -> DBAdmin
-toggleExpand itemId app =
+toggleExpand : String -> Model -> Model
+toggleExpand itemId model =
     let
         servers =
-            app.servers
+            model.servers
 
         servers_ =
             { servers
                 | expanded =
-                    if (isEntryExpanded app itemId) then
+                    if (isEntryExpanded model itemId) then
                         List.filter ((/=) itemId) servers.expanded
                     else
                         itemId :: servers.expanded
             }
     in
-        { app | servers = servers_ }
+        { model | servers = servers_ }
 
 
-enterEditing : String -> Database.Model -> DBAdmin -> DBAdmin
-enterEditing itemId database app =
+enterEditing : String -> Database.Model -> Model -> Model
+enterEditing itemId database model =
     let
         items =
             database.servers
@@ -54,7 +54,7 @@ enterEditing itemId database app =
         start =
             Maybe.withDefault ""
 
-        app_ =
+        model_ =
             item
                 |> Maybe.map
                     (\( nip, item ) ->
@@ -62,14 +62,14 @@ enterEditing itemId database app =
                             edit_ =
                                 EditingTexts ( start item.label, start item.notes )
                         in
-                            updateEditing (Network.toString nip) edit_ app
+                            updateEditing (Network.toString nip) edit_ model
                     )
     in
-        Maybe.withDefault app app_
+        Maybe.withDefault model model_
 
 
-enterSelectingVirus : String -> Database.Model -> DBAdmin -> DBAdmin
-enterSelectingVirus itemId database app =
+enterSelectingVirus : String -> Database.Model -> Model -> Model
+enterSelectingVirus itemId database model =
     let
         items =
             database.servers
@@ -80,7 +80,7 @@ enterSelectingVirus itemId database app =
                 |> Dict.toList
                 |> List.head
 
-        app_ =
+        model_ =
             item
                 |> Maybe.map
                     (\( nip, item ) ->
@@ -90,41 +90,41 @@ enterSelectingVirus itemId database app =
                                     |> Maybe.map Tuple.first
                                     |> SelectingVirus
                         in
-                            updateEditing (Network.toString nip) edit_ app
+                            updateEditing (Network.toString nip) edit_ model
                     )
     in
-        Maybe.withDefault app app_
+        Maybe.withDefault model model_
 
 
-updateEditing : String -> EditingServers -> DBAdmin -> DBAdmin
-updateEditing itemId value app =
+updateEditing : String -> EditingServers -> Model -> Model
+updateEditing itemId value model =
     let
         editing_ =
-            Dict.insert itemId value app.serversEditing
+            Dict.insert itemId value model.serversEditing
     in
-        { app | serversEditing = editing_ }
+        { model | serversEditing = editing_ }
 
 
-updateSelectingVirus : String -> String -> DBAdmin -> DBAdmin
-updateSelectingVirus virusId itemId app =
+updateSelectingVirus : String -> String -> Model -> Model
+updateSelectingVirus virusId itemId model =
     let
         edit_ =
             SelectingVirus (Just virusId)
     in
-        updateEditing itemId edit_ app
+        updateEditing itemId edit_ model
 
 
-leaveEditing : String -> DBAdmin -> DBAdmin
-leaveEditing itemId app =
+leaveEditing : String -> Model -> Model
+leaveEditing itemId model =
     let
         editing_ =
-            Dict.filter (\k _ -> k /= itemId) app.serversEditing
+            Dict.filter (\k _ -> k /= itemId) model.serversEditing
     in
-        { app | serversEditing = editing_ }
+        { model | serversEditing = editing_ }
 
 
-updateTextFilter : String -> Database.Model -> DBAdmin -> DBAdmin
-updateTextFilter newFilter database app =
+updateTextFilter : String -> Database.Model -> Model -> Model
+updateTextFilter newFilter database model =
     let
         filterMapFunc nip item =
             [ Tuple.second nip
@@ -143,7 +143,7 @@ updateTextFilter newFilter database app =
                 |> List.map Network.toString
 
         servers =
-            app.servers
+            model.servers
 
         servers_ =
             { servers
@@ -151,4 +151,4 @@ updateTextFilter newFilter database app =
                 , filterCache = newFilterCache
             }
     in
-        { app | servers = servers_ }
+        { model | servers = servers_ }

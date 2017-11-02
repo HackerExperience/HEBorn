@@ -1,5 +1,6 @@
 module Apps.DBAdmin.Update exposing (update)
 
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Apps.DBAdmin.Models exposing (..)
@@ -16,7 +17,7 @@ update :
     -> DBAdmin.Msg
     -> Model
     -> ( Model, Cmd DBAdmin.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
@@ -34,67 +35,48 @@ update data msg ({ app } as model) =
 
         -- -- Real acts
         ToogleExpand tab itemId ->
-            let
-                app_ =
-                    toggleExpand itemId tab app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> toggleExpand itemId tab
+                |> Update.fromModel
 
         EnterEditing tab itemId ->
-            let
-                app_ =
-                    enterEditing
-                        itemId
-                        tab
-                        data.game.account.database
-                        app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> enterEditing
+                    itemId
+                    tab
+                    data.game.account.database
+                |> Update.fromModel
 
         LeaveEditing tab itemId ->
-            let
-                app_ =
-                    leaveEditing itemId tab app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> leaveEditing itemId tab
+                |> Update.fromModel
 
         UpdateTextFilter tab filter ->
-            let
-                app_ =
-                    updateTextFilter
-                        filter
-                        tab
-                        data.game.account.database
-                        app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> updateTextFilter
+                    filter
+                    tab
+                    data.game.account.database
+                |> Update.fromModel
 
         EnterSelectingVirus serverIp ->
-            let
-                app_ =
-                    Servers.enterSelectingVirus
-                        serverIp
-                        data.game.account.database
-                        app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> Servers.enterSelectingVirus
+                    serverIp
+                    data.game.account.database
+                |> Update.fromModel
 
         UpdateServersSelectVirus serverIp virusId ->
-            let
-                app_ =
-                    Servers.updateSelectingVirus
-                        virusId
-                        serverIp
-                        app
-            in
-                ( { model | app = app_ }, Cmd.none, Dispatch.none )
+            model
+                |> Servers.updateSelectingVirus
+                    virusId
+                    serverIp
+                |> Update.fromModel
 
         GoTab tab ->
-            let
-                model_ =
-                    { model | app = { app | selected = tab } }
-            in
-                ( model_, Cmd.none, Dispatch.none )
+            { model | selected = tab }
+                |> Update.fromModel
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            Update.fromModel model

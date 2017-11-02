@@ -64,7 +64,7 @@ connTypeToString src =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     let
         filterHeaderLayout =
             verticalList
@@ -73,7 +73,7 @@ view data ({ app } as model) =
                     , ( class [ IcoDown ], DummyNoOp, False )
                     ]
                     []
-                    app.filterText
+                    model.filterText
                     "Search..."
                     UpdateTextFilter
                 ]

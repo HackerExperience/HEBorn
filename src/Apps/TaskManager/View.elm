@@ -20,7 +20,7 @@ import Apps.TaskManager.Menu.View exposing (..)
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     let
         tasks =
             data
@@ -30,7 +30,7 @@ view data ({ app } as model) =
     in
         div [ class [ MainLayout ] ]
             [ viewTasksTable data tasks data.game.meta.lastTick
-            , viewTotalResources app
+            , viewTotalResources model
             , menuView model
             ]
 
@@ -135,47 +135,6 @@ viewTaskRow :
     -> Html Msg
 viewTaskRow data now (( _, process ) as entry) =
     let
-        {-
-           -- removing this code block because this data should already be
-           -- present on process
-           fileInfo =
-               let
-                   servers =
-                       data
-                           |> Game.getGame
-                           |> Game.getServers
-
-                   maybeFileID =
-                       Processes.getFileID process
-
-                   maybeFilesystem =
-                       process
-                           |> Processes.getOrigin
-                           |> Maybe.andThen (flip Servers.get servers)
-                           |> Maybe.map Servers.getFilesystem
-
-                   fileInformation fileName =
-                       div []
-                           [ text "File:"
-                           , text fileName
-                           , process
-                               |> Processes.getVersion
-                               |> Maybe.map
-                                   (toString
-                                       >> text
-                                       >> List.singleton
-                                       >> span []
-                                   )
-                               |> maybe
-                           ]
-               in
-                    maybeFilesystem
-                       |> Maybe.ucurry maybeFileID
-                       |> Maybe.andThen (uncurry Filesystem.getEntry)
-                       |> Maybe.map Filesystem.getEntryName
-                       |> Maybe.map fileInformation
-                       |> maybe
-        -}
         usageView =
             process
                 |> Processes.getUsage
@@ -230,7 +189,7 @@ viewGraphUsage title color history limit =
         lineGraph points color 50 True ( 3, 1 )
 
 
-viewTotalResources : TaskManager -> Html Msg
+viewTotalResources : Model -> Html Msg
 viewTotalResources model =
     let
         { historyCPU, historyMem, historyDown, historyUp, limits } =

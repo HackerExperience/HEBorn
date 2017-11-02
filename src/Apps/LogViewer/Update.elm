@@ -16,7 +16,7 @@ update :
     -> LogViewer.Msg
     -> Model
     -> ( Model, Cmd LogViewer.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- Context
         MenuMsg (Menu.MenuClick action) ->
@@ -37,32 +37,37 @@ update data msg ({ app } as model) =
 
         -- -- Real acts
         ToogleExpand id ->
-            { model | app = toggleExpand id app }
+            model
+                |> toggleExpand id
                 |> Update.fromModel
 
         UpdateTextFilter filter ->
-            { model | app = updateTextFilter data filter app }
+            model
+                |> updateTextFilter data filter
                 |> Update.fromModel
 
         EnterEditing id ->
-            enterEditing data id model
+            model
+                |> enterEditing data id
                 |> Update.fromModel
 
         UpdateEditing id input ->
-            { model | app = updateEditing id input app }
+            model
+                |> updateEditing id input
                 |> Update.fromModel
 
         LeaveEditing id ->
-            { model | app = leaveEditing id app }
+            model
+                |> leaveEditing id
                 |> Update.fromModel
 
         ApplyEditing id ->
             let
                 edited =
-                    getEdit id app
+                    getEdit id model
 
                 model_ =
-                    { model | app = leaveEditing id app }
+                    leaveEditing id model
 
                 cid =
                     Game.getActiveCId data

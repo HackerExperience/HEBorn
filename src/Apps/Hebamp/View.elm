@@ -110,13 +110,13 @@ nativeAudio playerId audioData =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     div
         [ class [ Container ] ]
         [ div [ class [ Header ] ] [ text ":" ]
         , div [ class [ Player ] ]
-            [ div [ class [ Vis ] ] [ text <| viewableTime app.currentTime ]
-            , div [ class [ Vis, Title ] ] [ songTitle app.now ]
+            [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
+            , div [ class [ Vis, Title ] ] [ songTitle model.now ]
             , div [ class [ Inf ] ] []
             , div [ class [ Inf, KHz ] ] []
             , div [ class [ MonoStereo ] ] [ text "mono" ]
@@ -127,7 +127,7 @@ view data ({ app } as model) =
             , div [ class [ Slidebar ] ]
                 [ span
                     [ class [ Pointer ]
-                    , sliderStyle app.now app.currentTime
+                    , sliderStyle model.now model.currentTime
                     ]
                     []
                 ]
@@ -140,6 +140,6 @@ view data ({ app } as model) =
             , div [ class [ Btn, Ext, Left ] ] [ text "SHUFFLE" ]
             , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
             ]
-        , nativeAudio app.playerId app.now
+        , nativeAudio model.playerId model.now
         , menuView model
         ]
