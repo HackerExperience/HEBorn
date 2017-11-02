@@ -21,17 +21,17 @@ actionHandler :
     -> UpdateResponse
 actionHandler data action model =
     case action of
-        Menu.Delete fileId ->
-            onDelete data fileId model
+        Menu.Delete id ->
+            onDelete data id model
 
-        Menu.GoPath newPathId ->
-            onGoPath data newPathId model
+        Menu.GoPath path ->
+            onGoPath data path model
 
-        Menu.UpdateEditing newState ->
-            onUpdateEditing newState model
+        Menu.UpdateEditing state ->
+            onUpdateEditing state model
 
-        Menu.EnterRename fileId ->
-            onEnterRename data fileId model
+        Menu.EnterRename id ->
+            onEnterRename data id model
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
@@ -42,10 +42,10 @@ onDelete :
     -> String
     -> Model
     -> UpdateResponse
-onDelete data fileId model =
+onDelete data id model =
     let
         gameMsg =
-            fileId
+            id
                 |> Servers.DeleteFile
                 |> Dispatch.filesystem (Game.getActiveCId data)
     in
@@ -54,37 +54,23 @@ onDelete data fileId model =
 
 onGoPath :
     Game.Data
-    -> String
+    -> Filesystem.Path
     -> Model
     -> UpdateResponse
-onGoPath data pathId model =
+onGoPath data path model =
     let
         fs =
             data
                 |> Game.getActiveServer
                 |> Servers.getFilesystem
-
-        getEntry =
-            (flip Filesystem.getEntry) fs
-
-        getEntryLink =
-            (flip Filesystem.getEntryLink) fs
-
-        model_ =
-            pathId
-                |> getEntry
-                |> Maybe.map
-                    (getEntryLink
-                        >> (\( loc, last ) ->
-                                changePath
-                                    (loc ++ [ last ])
-                                    fs
-                                    model
-                           )
-                    )
-                |> Maybe.withDefault model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        if Filesystem.isFolder path fs then
+            ( changePath path fs model
+            , Cmd.none
+            , Dispatch.none
+            )
+        else
+            ( model, Cmd.none, Dispatch.none )
 
 
 onUpdateEditing :
@@ -92,38 +78,31 @@ onUpdateEditing :
     -> Model
     -> UpdateResponse
 onUpdateEditing state_ model =
-    let
-        model_ =
-            setEditing
-                state_
-                model
-    in
-        ( model_, Cmd.none, Dispatch.none )
+    ( setEditing state_ model, Cmd.none, Dispatch.none )
 
 
 onEnterRename :
     Game.Data
-    -> String
+    -> Filesystem.Id
     -> Model
     -> UpdateResponse
-onEnterRename data fileId model =
+onEnterRename data id model =
     let
         fs =
             data
                 |> Game.getActiveServer
                 |> Servers.getFilesystem
-
-        getEntry =
-            (flip Filesystem.getEntry) fs
-
-        model_ =
-            fileId
-                |> getEntry
-                |> Maybe.map
-                    (Filesystem.getEntryBasename
-                        >> Renaming fileId
-                        >> ((flip setEditing) model)
-                    )
-                |> Maybe.withDefault model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        case Filesystem.getFile id fs of
+            Just file ->
+                let
+                    model_ =
+                        file
+                            |> Filesystem.getName
+                            |> Renaming id
+                            |> ((flip setEditing) model)
+                in
+                    ( model, Cmd.none, Dispatch.none )
+
+            Nothing ->
+                ( model, Cmd.none, Dispatch.none )

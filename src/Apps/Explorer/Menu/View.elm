@@ -12,7 +12,7 @@ module Apps.Explorer.Menu.View
 
 import Html exposing (Html)
 import ContextMenu exposing (ContextMenu)
-import Game.Servers.Filesystem.Shared exposing (FileID)
+import Game.Servers.Filesystem.Models as Filesystem
 import OS.SessionManager.WindowManager.MenuHandler.View
     exposing
         ( menuForCreator
@@ -42,28 +42,28 @@ menuFor context =
 menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
 menu model context =
     case context of
-        MenuMainDir fileID ->
+        MenuMainDir path ->
             [ [ ( ContextMenu.item "Enter"
-                , MenuClick <| GoPath fileID
+                , MenuClick <| GoPath path
                 )
               , ( ContextMenu.item "Rename"
-                , MenuClick <| EnterRename fileID
+                , MenuClick <| EnterRenameDir path
                 )
               , ( ContextMenu.item "Move"
-                , MenuClick <| UpdateEditing <| Moving fileID
+                , MenuClick <| UpdateEditing <| MovingDir path
                 )
               , ( ContextMenu.item "Delete"
-                , MenuClick <| Delete fileID
+                , MenuClick <| DeleteDir path
                 )
               ]
             ]
 
-        MenuTreeDir fileID ->
+        MenuTreeDir path ->
             [ [ ( ContextMenu.item "Toogle expansion"
                 , MenuClick Dummy
                 )
               , ( ContextMenu.item "Rename"
-                , MenuClick <| EnterRename fileID
+                , MenuClick <| EnterRenameDir path
                 )
               , ( ContextMenu.item "Delete Link"
                 , MenuClick Dummy
@@ -131,36 +131,36 @@ menu model context =
             ]
 
 
-menuMainDir : FileID -> Html.Attribute ExplorerMsg.Msg
-menuMainDir fileID =
-    menuFor (MenuMainDir fileID)
+menuMainDir : Filesystem.Path -> Html.Attribute ExplorerMsg.Msg
+menuMainDir path =
+    menuFor (MenuMainDir path)
 
 
-menuTreeDir : FileID -> Html.Attribute ExplorerMsg.Msg
-menuTreeDir fileID =
-    menuFor (MenuTreeDir fileID)
+menuTreeDir : Filesystem.Path -> Html.Attribute ExplorerMsg.Msg
+menuTreeDir path =
+    menuFor (MenuTreeDir path)
 
 
-menuMainArchive : FileID -> Html.Attribute ExplorerMsg.Msg
-menuMainArchive fileID =
-    menuFor (MenuMainArchive fileID)
+menuMainArchive : Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuMainArchive id =
+    menuFor (MenuMainArchive id)
 
 
-menuTreeArchive : FileID -> Html.Attribute ExplorerMsg.Msg
-menuTreeArchive fileID =
-    menuFor (MenuTreeArchive fileID)
+menuTreeArchive : Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuTreeArchive id =
+    menuFor (MenuTreeArchive id)
 
 
-menuExecutable : FileID -> Html.Attribute ExplorerMsg.Msg
-menuExecutable fileID =
-    menuFor (MenuExecutable fileID)
+menuExecutable : Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuExecutable id =
+    menuFor (MenuExecutable id)
 
 
-menuPassiveAction : FileID -> Html.Attribute ExplorerMsg.Msg
-menuPassiveAction fileID =
-    menuFor (MenuPassiveAction fileID)
+menuPassiveAction : Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuPassiveAction id =
+    menuFor (MenuPassiveAction id)
 
 
-menuActiveAction : FileID -> Html.Attribute ExplorerMsg.Msg
-menuActiveAction fileID =
-    menuFor (MenuActiveAction fileID)
+menuActiveAction : Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuActiveAction id =
+    menuFor (MenuActiveAction id)

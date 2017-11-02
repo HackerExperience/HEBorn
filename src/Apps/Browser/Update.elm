@@ -9,7 +9,7 @@ import Core.Dispatch.OS as OS
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
-import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
 import Game.Network.Types as Network
@@ -216,7 +216,7 @@ reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
 onReqDownload :
     Game.Data
     -> Network.NIP
-    -> Filesystem.ForeignFileBox
+    -> Filesystem.FileEntry
     -> Model
     -> UpdateResponse
 onReqDownload data source file model =

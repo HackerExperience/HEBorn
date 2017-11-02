@@ -3,13 +3,14 @@ module Apps.Explorer.ModelTest exposing (all)
 import Expect
 import Dict as Dict
 import Gen.Filesystem
+import Helper.Filesystem as Helper exposing (mkdirp)
 import Helper.Playstate as Playstate
 import Fuzz exposing (tuple)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, once)
-import Apps.Explorer.Models as Explorer exposing (..)
+import Apps.Explorer.Models exposing (..)
 import Game.Servers.Models as Servers
-import Game.Servers.Filesystem.Models as Filesystem exposing (..)
+import Game.Servers.Filesystem.Models as Filesystem
 
 
 all : Test
@@ -44,32 +45,37 @@ pathMoveAroundTests =
                 { folder } =
                     valid
 
+                ( path, name ) =
+                    folder
+
+                folder_ =
+                    Filesystem.appendPath name path
+
                 filesystem =
                     server
                         |> Servers.getFilesystem
-                        |> addEntry folder
+                        |> mkdirp folder_
 
                 newServerWithFile =
                     Servers.setFilesystem filesystem server
 
-                ( destGrandpa, destParent ) =
-                    getEntryLink folder filesystem
-
-                destination =
-                    destGrandpa ++ [ destParent ]
-
                 explorer =
-                    changePath destination
+                    changePath folder_
                         (Servers.getFilesystem newServerWithFile)
-                        Explorer.initialModel
+                        initialModel
             in
-                Expect.equal destination <| getPath explorer
+                explorer
+                    |> getPath
+                    |> Expect.equal folder_
     , fuzz
-        (tuple ( Playstate.one, Gen.Filesystem.location ))
+        (tuple ( Playstate.one, Gen.Filesystem.folder ))
         "can't move to a non-existing folder"
       <|
-        \( { game }, path ) ->
+        \( { game }, ( path, name ) ) ->
             let
+                folder_ =
+                    Filesystem.appendPath name path
+
                 maybeServer =
                     game.servers.servers
                         |> Dict.toList
@@ -77,11 +83,12 @@ pathMoveAroundTests =
             in
                 case maybeServer of
                     Just ( _, server ) ->
-                        Explorer.initialModel
-                            |> changePath path (Servers.getFilesystem server)
-                            |> Expect.equal Explorer.initialModel
+                        initialModel
+                            |> changePath folder_
+                                (Servers.getFilesystem server)
+                            |> Expect.equal initialModel
 
                     Nothing ->
                         -- FIXME: game state should provide Game.Data
-                        Expect.equal Explorer.initialModel Explorer.initialModel
+                        Expect.equal initialModel initialModel
     ]

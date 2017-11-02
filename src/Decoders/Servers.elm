@@ -26,7 +26,6 @@ import Json.Decode.Pipeline
 import Utils.Json.Decode exposing (optionalMaybe)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
@@ -109,7 +108,7 @@ processes =
         optional "processes" (Decoders.Processes.model <| Just default) default
 
 
-filesystem : Decoder (Filesystem.Filesystem -> a) -> Decoder a
+filesystem : Decoder (Filesystem.Model -> a) -> Decoder a
 filesystem =
     let
         default =

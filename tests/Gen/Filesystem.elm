@@ -1,23 +1,22 @@
 module Gen.Filesystem exposing (..)
 
--- !important
--- TODO: Update this to generate files and folders outside of Root
-
 import Fuzz exposing (Fuzzer)
 import Random.Pcg
     exposing
         ( Generator
         , constant
-        , int
-        , list
-        , choices
         , map
+        , map2
         , andThen
+        , sample
+        , choices
+        , list
+        , int
+        , float
         )
 import Random.Pcg.Extra exposing (andMap)
 import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
 import Game.Servers.Filesystem.Models exposing (..)
-import Game.Servers.Filesystem.Shared exposing (..)
 import Helper.Filesystem exposing (..)
 
 
@@ -26,94 +25,109 @@ import Helper.Filesystem exposing (..)
 --------------------------------------------------------------------------------
 
 
-fileID : Fuzzer FileID
-fileID =
-    fuzzer genFileID
+model : Fuzzer Model
+model =
+    fuzzer genModel
 
 
-name : Fuzzer String
-name =
-    fuzzer genName
+nonEmptyModel : Fuzzer Model
+nonEmptyModel =
+    fuzzer genNonEmptyModel
 
 
-location : Fuzzer Location
-location =
-    fuzzer genLocation
+fileEntry : Fuzzer FileEntry
+fileEntry =
+    fuzzer genFileEntry
 
 
-extension : Fuzzer String
-extension =
-    fuzzer genExtension
-
-
-noSize : Fuzzer FileSize
-noSize =
-    fuzzer genNoSize
-
-
-fileSizeNumber : Fuzzer FileSize
-fileSizeNumber =
-    fuzzer genFileSizeNumber
-
-
-fileSize : Fuzzer FileSize
-fileSize =
-    fuzzer genFileSize
-
-
-noVersion : Fuzzer FileVersion
-noVersion =
-    fuzzer genNoVersion
-
-
-fileVersionNumber : Fuzzer FileVersion
-fileVersionNumber =
-    fuzzer genFileVersionNumber
-
-
-fileVersion : Fuzzer FileVersion
-fileVersion =
-    fuzzer genFileVersion
-
-
-folder : Fuzzer Entry
-folder =
-    fuzzer genFolder
-
-
-file : Fuzzer Entry
+file : Fuzzer File
 file =
     fuzzer genFile
 
 
-entry : Fuzzer Entry
-entry =
-    fuzzer genEntry
+folder : Fuzzer ( Path, Name )
+folder =
+    fuzzer genFolder
 
 
-entryList : Fuzzer (List Entry)
-entryList =
-    fuzzer genEntryList
+id : Fuzzer Id
+id =
+    fuzzer genId
 
 
-emptyFilesystem : Fuzzer Filesystem
-emptyFilesystem =
-    fuzzer genEmptyFilesystem
+name : Fuzzer Name
+name =
+    fuzzer genName
 
 
-nonEmptyFilesystem : Fuzzer Filesystem
-nonEmptyFilesystem =
-    fuzzer genNonEmptyFilesystem
+path : Fuzzer Path
+path =
+    fuzzer genPath
 
 
-filesystem : Fuzzer Filesystem
-filesystem =
-    fuzzer genFilesystem
+extension : Fuzzer Extension
+extension =
+    fuzzer genExtension
 
 
-model : Fuzzer Filesystem
-model =
-    fuzzer genModel
+size : Fuzzer Size
+size =
+    fuzzer genSize
+
+
+crackerModules : Fuzzer CrackerModules
+crackerModules =
+    fuzzer genCrackerModules
+
+
+firewallModules : Fuzzer FirewallModules
+firewallModules =
+    fuzzer genFirewallModules
+
+
+exploitModules : Fuzzer ExploitModules
+exploitModules =
+    fuzzer genExploitModules
+
+
+hasherModules : Fuzzer HasherModules
+hasherModules =
+    fuzzer genHasherModules
+
+
+logForgerModules : Fuzzer LogForgerModules
+logForgerModules =
+    fuzzer genLogForgerModules
+
+
+logRecoverModules : Fuzzer LogRecoverModules
+logRecoverModules =
+    fuzzer genLogRecoverModules
+
+
+encryptorModules : Fuzzer EncryptorModules
+encryptorModules =
+    fuzzer genEncryptorModules
+
+
+decryptorModules : Fuzzer DecryptorModules
+decryptorModules =
+    fuzzer genDecryptorModules
+
+
+anyMapModules : Fuzzer AnyMapModules
+anyMapModules =
+    fuzzer genAnyMapModules
+
+
+simpleModule : Fuzzer { version : Float }
+simpleModule =
+    fuzzer genSimpleModule
+
+
+version : Fuzzer Version
+version =
+    fuzzer genVersion
 
 
 
@@ -122,136 +136,186 @@ model =
 --------------------------------------------------------------------------------
 
 
-genFileID : Generator FileID
-genFileID =
+genModel : Generator Model
+genModel =
+    choices
+        [ constant initialModel
+        , genNonEmptyModel
+        ]
+
+
+genNonEmptyModel : Generator Model
+genNonEmptyModel =
+    genFileEntry
+        |> listRange 1 10
+        |> map applyModel
+
+
+genFileEntry : Generator FileEntry
+genFileEntry =
+    map2 (,) genId genFile
+
+
+genFile : Generator File
+genFile =
+    -- TODO: Update this to generate files and folders outside of Root
+    let
+        keepMap f e =
+            map ((,) e) <| f e
+    in
+        constant File
+            |> andMap genName
+            |> map flip
+            |> andMap (constant [ "" ])
+            |> map flip
+            |> andMap genSize
+            |> map uncurry
+            |> andMap (andThen (keepMap genType) genExtension)
+
+
+genFolder : Generator ( Path, Name )
+genFolder =
+    map ((,) [ "" ]) unique
+
+
+genId : Generator Id
+genId =
     unique
 
 
-genName : Generator String
+genName : Generator Name
 genName =
-    stringRange 1 24
+    unique
 
 
-genLocation : Generator Location
-genLocation =
+genPath : Generator Path
+genPath =
     stringRange 3 16
         |> listRange 1 10
 
 
-genExtension : Generator String
+genExtension : Generator Extension
 genExtension =
-    stringRange 1 8
+    choices <|
+        List.map constant
+            [ "exe"
+            , "txt"
+            , "key"
+            ]
 
 
-genNoSize : Generator FileSize
-genNoSize =
-    constant Nothing
+genSize : Generator Size
+genSize =
+    int 0 1000
 
 
-genFileSizeNumber : Generator FileSize
-genFileSizeNumber =
-    map Just (int 1 32768)
+genType : Extension -> Generator Type
+genType ext =
+    case ext of
+        "exe" ->
+            choices
+                [ map Cracker genCrackerModules
+                , map Firewall genFirewallModules
+                , map Exploit genExploitModules
+                , map Hasher genHasherModules
+                , map LogForger genLogForgerModules
+                , map LogRecover genLogRecoverModules
+                , map Encryptor genEncryptorModules
+                , map Decryptor genDecryptorModules
+                , map AnyMap genAnyMapModules
+                ]
+
+        "txt" ->
+            constant Text
+
+        "key" ->
+            constant CryptoKey
+
+        _ ->
+            Debug.crash
+                ("Can't generate a Filesystem.Type for \""
+                    ++ ext
+                    ++ "\" extension."
+                )
 
 
-genFileSize : Generator FileSize
-genFileSize =
-    choices [ genNoSize, genFileSizeNumber ]
+genCrackerModules : Generator CrackerModules
+genCrackerModules =
+    constant CrackerModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genNoVersion : Generator FileVersion
-genNoVersion =
-    constant Nothing
+genFirewallModules : Generator FirewallModules
+genFirewallModules =
+    constant FirewallModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genFileVersionNumber : Generator FileVersion
-genFileVersionNumber =
-    map Just (int 1 999)
+genExploitModules : Generator ExploitModules
+genExploitModules =
+    constant ExploitModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genFileVersion : Generator FileVersion
-genFileVersion =
-    choices [ genNoVersion, genFileVersionNumber ]
+genHasherModules : Generator HasherModules
+genHasherModules =
+    map HasherModules genSimpleModule
 
 
-genFolder : Generator Entry
-genFolder =
-    let
-        buildFolderRecord =
-            \id name ->
-                FolderEntry
-                    { id = id
-                    , name = name
-                    , parent = RootRef
-                    }
-    in
-        genFileID
-            |> map buildFolderRecord
-            |> andMap genName
+genLogForgerModules : Generator LogForgerModules
+genLogForgerModules =
+    constant LogForgerModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genFile : Generator Entry
-genFile =
-    let
-        buildStdFileRecord =
-            \id name extension version size ->
-                FileEntry
-                    { id = id
-                    , name = name
-                    , parent = RootRef
-                    , extension = extension
-                    , version = version
-                    , size = size
-                    , mime = Text
-                    }
-    in
-        genFileID
-            |> map buildStdFileRecord
-            |> andMap genName
-            |> andMap genExtension
-            |> andMap genFileVersion
-            |> andMap genFileSize
+genLogRecoverModules : Generator LogRecoverModules
+genLogRecoverModules =
+    map LogRecoverModules genSimpleModule
 
 
-genEntry : Generator Entry
-genEntry =
-    choices [ genFolder, genFile ]
+genEncryptorModules : Generator EncryptorModules
+genEncryptorModules =
+    constant EncryptorModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genEntryList : Generator (List Entry)
-genEntryList =
-    andThen ((flip list) (genEntry)) (int 1 32)
+genDecryptorModules : Generator DecryptorModules
+genDecryptorModules =
+    constant DecryptorModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genEmptyFilesystem : Generator Filesystem
-genEmptyFilesystem =
-    constant initialModel
+genAnyMapModules : Generator AnyMapModules
+genAnyMapModules =
+    constant AnyMapModules
+        |> andMap genSimpleModule
+        |> andMap genSimpleModule
 
 
-genNonEmptyFilesystem : Generator Filesystem
-genNonEmptyFilesystem =
-    genFileID
-        |> map
-            (\fileID location entryList ->
-                List.foldl
-                    (\f fs ->
-                        fs
-                            |> addEntry f
-                            |> moveEntry ( location, getEntryBasename f ) f
-                    )
-                    (initialModel
-                        |> createLocation fileID location
-                    )
-                    entryList
-            )
-        |> andMap genLocation
-        |> andMap genEntryList
+genSimpleModule : Generator { version : Float }
+genSimpleModule =
+    map (\version -> { version = version }) genVersion
 
 
-genFilesystem : Generator Filesystem
-genFilesystem =
-    choices [ genEmptyFilesystem, genNonEmptyFilesystem ]
+genVersion : Generator Version
+genVersion =
+    float 0 999
 
 
-genModel : Generator Filesystem
-genModel =
-    genFilesystem
+
+-- Helpers
+
+
+applyModel : List ( Id, File ) -> Model
+applyModel =
+    List.foldl (uncurry insertFile) initialModel

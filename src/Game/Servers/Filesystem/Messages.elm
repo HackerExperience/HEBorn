@@ -1,21 +1,20 @@
 module Game.Servers.Filesystem.Messages exposing (..)
 
-import Game.Servers.Filesystem.Shared exposing (FileID, FilePath, Location)
+import Game.Servers.Filesystem.Models exposing (..)
 import Requests.Types exposing (ResponseType)
 
 
 type Msg
-    = HandleDelete FileID
-    | HandleRename FileID String
-    | HandleNewTextFile FilePath
-    | HandleNewDir FilePath
-    | HandleMove FileID Location
+    = HandleDelete Id
+    | HandleRename Id String
+    | HandleNewTextFile Path Name
+    | HandleNewDir Path Name
+    | HandleMove Id Path
     | Request RequestMsg
 
 
 type RequestMsg
-    = SyncRequest ResponseType
-    | DeleteRequest ResponseType
+    = DeleteRequest ResponseType
     | RenameRequest ResponseType
     | MoveRequest ResponseType
     | CreateRequest ResponseType
