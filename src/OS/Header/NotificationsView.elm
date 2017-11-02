@@ -6,6 +6,7 @@ import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
 import Game.Notifications.Models as Notifications exposing (Content(..))
+import Game.Servers.Filesystem.Models as Filesystem
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -110,7 +111,9 @@ renderContent content =
 
         DownloadStarted origin file ->
             ( "New download started"
-            , (file.name ++ " download started!")
+            , ((Filesystem.getName <| Tuple.second file)
+                ++ " download started!"
+              )
             )
 
 

@@ -1,23 +1,22 @@
 module Apps.Explorer.Models exposing (..)
 
 import Game.Servers.Models as Servers exposing (Server)
-import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
-import Apps.Explorer.Lib exposing (locationToString)
 
 
 type EditingStatus
     = NotEditing
     | CreatingFile String
     | CreatingPath String
-    | Moving Filesystem.FileID
-    | Renaming Filesystem.FileID String
+    | Moving Filesystem.Id
+    | MovingDir Filesystem.Path
+    | Renaming Filesystem.Id String
 
 
 type alias Model =
     { menu : Menu.Model
-    , path : Filesystem.Location
+    , path : Filesystem.Path
     , editing : EditingStatus
     }
 
@@ -28,27 +27,21 @@ name =
 
 
 title : Model -> String
-title model =
+title { path } =
     let
-        path =
-            locationToString model.path
+        location =
+            Filesystem.joinPath path
 
-        posfix =
-            if String.length path > 12 then
-                Just <|
-                    ": \""
-                        ++ (String.left 5 path)
-                        ++ "[...]"
-                        ++ (String.right 5 path)
-                        ++ "\""
-            else if String.length path > 0 then
-                Just <| ": \"" ++ path ++ "\""
+        prefix str =
+            if str /= location then
+                "[...]" ++ str
             else
-                Nothing
+                str
     in
-        posfix
-            |> Maybe.map ((++) name)
-            |> Maybe.withDefault name
+        location
+            |> String.right 10
+            |> prefix
+            |> (++) (name ++ " - ")
 
 
 icon : String
@@ -59,24 +52,24 @@ icon =
 initialModel : Model
 initialModel =
     { menu = Menu.initialMenu
-    , path = []
+    , path = [ "" ]
     , editing = NotEditing
     }
 
 
-getPath : Model -> Filesystem.Location
-getPath explorer =
-    explorer.path
+getPath : Model -> Filesystem.Path
+getPath =
+    .path
 
 
-setPath : Filesystem.Location -> Model -> Model
-setPath loc explorer =
-    { explorer
-        | path = loc
+setPath : Filesystem.Path -> Model -> Model
+setPath path model =
+    { model
+        | path = path
         , editing =
-            case explorer.editing of
+            case model.editing of
                 Moving _ ->
-                    explorer.editing
+                    model.editing
 
                 _ ->
                     NotEditing
@@ -84,22 +77,22 @@ setPath loc explorer =
 
 
 changePath :
-    Filesystem.Location
-    -> Filesystem.Filesystem
+    Filesystem.Path
+    -> Filesystem.Model
     -> Model
     -> Model
-changePath path filesystem explorer =
-    if Filesystem.isLocationValid path filesystem then
-        setPath path explorer
+changePath path fs model =
+    if Filesystem.isFolder path fs then
+        setPath path model
     else
-        explorer
-
-
-resolvePath : Server -> Filesystem.Location -> List Filesystem.Entry
-resolvePath server path =
-    Filesystem.findChildren path (Servers.getFilesystem server)
+        model
 
 
 setEditing : EditingStatus -> Model -> Model
 setEditing val src =
     { src | editing = val }
+
+
+resolvePath : Server -> Filesystem.Path -> List Filesystem.Entry
+resolvePath server path =
+    Filesystem.list path (Servers.getFilesystem server)

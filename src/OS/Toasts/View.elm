@@ -5,6 +5,7 @@ import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Notifications.Models exposing (Content(..))
+import Game.Servers.Filesystem.Models as Filesystem
 import OS.Resources as Res
 import OS.Toasts.Messages exposing (..)
 import OS.Toasts.Models exposing (..)
@@ -54,6 +55,12 @@ toast id { notification, state } =
                     ]
 
                 DownloadStarted origin file ->
-                    [ h6 [] [ text <| "Download started" ]
-                    , p [] [ text <| file.name ++ " download has started!" ]
+                    [ h6
+                        []
+                        [ text <| "Download started" ]
+                    , p []
+                        [ text <|
+                            (Filesystem.getName <| Tuple.second file)
+                                ++ " download has started!"
+                        ]
                     ]

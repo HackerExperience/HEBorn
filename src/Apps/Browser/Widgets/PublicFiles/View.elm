@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Game.Network.Types exposing (NIP)
-import Game.Servers.Filesystem.Shared exposing (ForeignFileBox, Mime(..))
+import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.PublicFiles.Model exposing (..)
@@ -27,10 +27,12 @@ publicFiles config model =
         List.map (file config) model
 
 
-file : Config msg -> ForeignFileBox -> Html msg
-file config me =
-    me.mime
-        |> mimeModules
+file : Config msg -> Filesystem.FileEntry -> Html msg
+file config fileEntry =
+    fileEntry
+        |> Filesystem.toFile
+        |> Filesystem.getType
+        |> fileModules
         |> List.map
             (\( name, ver ) ->
                 name
@@ -42,69 +44,63 @@ file config me =
             )
         |> ul []
         |> List.singleton
-        |> (::) (span [] [ text me.name ])
+        |> (::)
+            (span []
+                [ text <| Filesystem.getName <| Filesystem.toFile fileEntry ]
+            )
         |> li
-            [ me
+            [ fileEntry
                 |> PublicDownload config.source
                 |> config.onCommonAction
                 |> onClick
             ]
 
 
-mimeModules : Mime -> List ( String, Int )
-mimeModules mime =
-    List.filterMap
-        (\( a, b ) ->
-            case b.version of
-                Just b ->
-                    Just ( a, b )
-
-                Nothing ->
-                    Nothing
-        )
-    <|
-        case mime of
-            Cracker { bruteForce, overFlow } ->
+fileModules : Filesystem.Type -> List ( String, Filesystem.Version )
+fileModules filesystem =
+    List.map (\( a, b ) -> ( a, Filesystem.getModuleVersion b )) <|
+        case filesystem of
+            Filesystem.Cracker { bruteForce, overFlow } ->
                 [ ( "Bruteforce", bruteForce )
                 , ( "Overflow", overFlow )
                 ]
 
-            Firewall { active, passive } ->
+            Filesystem.Firewall { active, passive } ->
                 [ ( "Active", active )
                 , ( "Passive", passive )
                 ]
 
-            Exploit { ftp, ssh } ->
+            Filesystem.Exploit { ftp, ssh } ->
                 [ ( "FTP", ftp )
                 , ( "SSH", ssh )
                 ]
 
-            Hasher { password } ->
+            Filesystem.Hasher { password } ->
                 [ ( "Password", password ) ]
 
-            LogForger { create, edit } ->
+            Filesystem.LogForger { create, edit } ->
                 [ ( "Create", create )
                 , ( "Edit", edit )
                 ]
 
-            LogRecover { recover } ->
+            Filesystem.LogRecover { recover } ->
                 [ ( "Recover", recover ) ]
 
-            Encryptor { file, log, connection, process } ->
+            Filesystem.Encryptor { file, log, connection, process } ->
                 [ ( "File", file )
                 , ( "Log", log )
                 , ( "Connections", connection )
                 , ( "Process", process )
                 ]
 
-            Decryptor { file, log, connection, process } ->
+            Filesystem.Decryptor { file, log, connection, process } ->
                 [ ( "File", file )
                 , ( "Log", log )
                 , ( "Connections", connection )
                 , ( "Process", process )
                 ]
 
-            Anymap { geo, net } ->
+            Filesystem.AnyMap { geo, net } ->
                 [ ( "Geo", geo )
                 , ( "Net", net )
                 ]

@@ -1,17 +1,17 @@
 module Apps.Explorer.Menu.Models exposing (..)
 
-import Game.Servers.Filesystem.Shared exposing (FileID)
+import Game.Servers.Filesystem.Models exposing (Id, Path)
 import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 
 
 type Menu
-    = MenuMainDir FileID
-    | MenuTreeDir FileID
-    | MenuMainArchive FileID
-    | MenuTreeArchive FileID
-    | MenuExecutable FileID
-    | MenuActiveAction FileID
-    | MenuPassiveAction FileID
+    = MenuMainDir Path
+    | MenuTreeDir Path
+    | MenuMainArchive Id
+    | MenuTreeArchive Id
+    | MenuExecutable Id
+    | MenuActiveAction Id
+    | MenuPassiveAction Id
 
 
 type alias Model =

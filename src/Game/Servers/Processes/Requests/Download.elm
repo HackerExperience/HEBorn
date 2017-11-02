@@ -23,7 +23,7 @@ import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Processes
 import Game.Servers.Processes.Messages exposing (..)
-import Game.Servers.Filesystem.Shared exposing (FileID)
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models exposing (ID, Process)
 import Game.Network.Types exposing (NIP)
 import Game.Servers.Shared exposing (CId)
@@ -41,7 +41,7 @@ type Response
 request :
     ID
     -> NIP
-    -> FileID
+    -> Filesystem.Id
     -> String
     -> CId
     -> ConfigSource a
@@ -56,7 +56,7 @@ request optmistic target fileId storageId cid =
 requestPublic :
     ID
     -> NIP
-    -> FileID
+    -> Filesystem.Id
     -> String
     -> CId
     -> ConfigSource a
@@ -90,7 +90,7 @@ receive code json =
 -- INTERNALS
 
 
-encoder : NIP -> FileID -> String -> Value
+encoder : NIP -> Filesystem.Id -> String -> Value
 encoder ( netId, ip ) fileId storageId =
     Encode.object
         [ ( "network_id", Encode.string netId )

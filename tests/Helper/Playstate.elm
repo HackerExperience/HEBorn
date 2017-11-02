@@ -5,9 +5,7 @@ import Gen.Game
 import Gen.Servers
 import Fuzz exposing (Fuzzer)
 import Game.Models as Game
-import Game.Servers.Filesystem.Shared exposing (Entry)
-import Game.Servers.Filesystem.Models exposing (addEntry)
-import Helper.Filesystem exposing (createLocation)
+import Game.Servers.Filesystem.Models exposing (..)
 import Random.Pcg as Random exposing (Generator)
 import Random.Pcg.Extra as RandomExtra exposing (andMap)
 import Game.Servers.Models as Servers exposing (..)
@@ -15,14 +13,14 @@ import Gen.Utils exposing (..)
 
 
 type alias ValidState =
-    { file : Entry
-    , folder : Entry
+    { file : FileEntry
+    , folder : ( Path, Name )
     }
 
 
 type alias InvalidState =
-    { file : Entry
-    , folder : Entry
+    { file : FileEntry
+    , folder : ( Path, Name )
     }
 
 
@@ -59,8 +57,8 @@ genOne =
                 servers =
                     server
                         |> getFilesystem
-                        |> addEntry file1
-                        |> addEntry folder1
+                        |> uncurry insertFile file1
+                        |> uncurry insertFolder folder1
                         |> flip setFilesystem server
                         |> flip (Servers.insert id) game.servers
 
@@ -87,7 +85,7 @@ genOne =
             |> Random.map generateStateRecord
             |> andMap Gen.Servers.genServerCId
             |> andMap Gen.Servers.genServer
-            |> andMap Gen.Filesystem.genFile
-            |> andMap Gen.Filesystem.genFile
+            |> andMap Gen.Filesystem.genFileEntry
+            |> andMap Gen.Filesystem.genFileEntry
             |> andMap Gen.Filesystem.genFolder
             |> andMap Gen.Filesystem.genFolder

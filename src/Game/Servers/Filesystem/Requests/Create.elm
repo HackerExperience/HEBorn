@@ -4,19 +4,28 @@ import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
-import Game.Servers.Shared exposing (..)
+import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Messages exposing (..)
-import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
+import Game.Servers.Filesystem.Models exposing (..)
 
 
 -- FIXME: this API is weird
 
 
-request : String -> String -> Location -> CId -> ConfigSource a -> Cmd Msg
-request what newBaseName newLocation cid =
+request :
+    String
+    -> String
+    -> Path
+    -> CId
+    -> ConfigSource a
+    -> Cmd Msg
+request what newBaseName newPath cid =
     let
         destination =
-            newLocation |> List.map Encode.string |> Encode.list
+            -- TODO: sending a flat string may be better
+            newPath
+                |> List.map Encode.string
+                |> Encode.list
 
         payload =
             Encode.object

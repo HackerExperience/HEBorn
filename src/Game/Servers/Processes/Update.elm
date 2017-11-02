@@ -8,7 +8,7 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Models as Game
-import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Messages exposing (Msg(..))
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
@@ -198,7 +198,7 @@ handleDownload :
     -> CId
     -> Process
     -> NIP
-    -> Filesystem.ForeignFileBox
+    -> Filesystem.FileEntry
     -> Model
     -> UpdateResponse
 handleDownload game cid process origin file model =
@@ -214,7 +214,7 @@ handleDownload game cid process origin file model =
                             PublicFTP ->
                                 Download.requestPublic id
                                     origin
-                                    file.id
+                                    (Filesystem.toId file)
                                     storageId
                                     cid
                                     game
@@ -222,7 +222,7 @@ handleDownload game cid process origin file model =
                             PrivateFTP ->
                                 Download.request id
                                     origin
-                                    file.id
+                                    (Filesystem.toId file)
                                     storageId
                                     cid
                                     game

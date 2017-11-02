@@ -6,7 +6,6 @@ import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -35,11 +34,15 @@ update data msg model =
         UpdateEditing newState ->
             onUpdateEditing newState model
 
-        EnterRename fileId ->
-            onEnterRename data fileId model
+        EnterRename id ->
+            onEnterRename data id model
 
         ApplyEdit ->
             onApplyEdit data model
+
+        _ ->
+            -- TODO: implement folder operation requests
+            Update.fromModel model
 
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
@@ -54,7 +57,7 @@ onMenuMsg data msg model =
         ( { model | menu = menu_ }, cmd_, coreMsg )
 
 
-onGoPath : Game.Data -> Filesystem.Location -> Model -> UpdateResponse
+onGoPath : Game.Data -> Filesystem.Path -> Model -> UpdateResponse
 onGoPath data newPath model =
     let
         fs =
@@ -75,8 +78,8 @@ onUpdateEditing newState model =
         Update.fromModel model_
 
 
-onEnterRename : Game.Data -> String -> Model -> UpdateResponse
-onEnterRename data fileId model =
+onEnterRename : Game.Data -> Filesystem.Id -> Model -> UpdateResponse
+onEnterRename data id model =
     let
         fs =
             data
@@ -84,12 +87,12 @@ onEnterRename data fileId model =
                 |> Servers.getFilesystem
 
         file =
-            Filesystem.getEntry fileId fs
+            Filesystem.getFile id fs
 
         editing_ =
             file
                 |> Maybe.map
-                    (Filesystem.getEntryBasename >> Renaming fileId)
+                    (Filesystem.getName >> Renaming id)
                 |> Maybe.withDefault NotEditing
 
         model_ =
@@ -115,13 +118,13 @@ onApplyEdit data model =
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <| Servers.NewTextFile ( model.path, fName )
+                        fsMsg <| Servers.NewTextFile model.path fName
 
                 CreatingPath fName ->
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <| Servers.NewDir ( model.path, fName )
+                        fsMsg <| Servers.NewDir model.path fName
 
                 Moving fID ->
                     fsMsg <| Servers.MoveFile fID model.path
@@ -131,6 +134,10 @@ onApplyEdit data model =
                         Dispatch.none
                     else
                         fsMsg <| Servers.RenameFile fID fName
+
+                _ ->
+                    -- TODO: implement folder operation requests
+                    Dispatch.none
 
         model_ =
             setEditing NotEditing model

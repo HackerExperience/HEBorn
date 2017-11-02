@@ -1,48 +1,24 @@
 module Apps.Explorer.Lib exposing (..)
 
-import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-
-
--- PATH
-
-
-locationToString : Location -> String
-locationToString loc =
-    let
-        join =
-            String.join pathSeparator
-    in
-        rootSymbol ++ (join loc)
-
-
-dropRight : Int -> List a -> List a
-dropRight num list =
-    (List.take ((List.length list) - num) list)
-
-
-locationGoUp : Location -> Location
-locationGoUp loc =
-    dropRight 1 loc
-
+import Game.Servers.Filesystem.Models as Filesystem
+import Utils.List as List
 
 
 -- FILESYSTEM
 
 
-fileSizeToFloat : FileSize -> Float
-fileSizeToFloat fsize =
-    fsize
-        |> Maybe.map toFloat
-        |> Maybe.withDefault 0
+fileSizeToFloat : Filesystem.Size -> Float
+fileSizeToFloat =
+    toFloat
 
 
-hasModules : Mime -> Bool
-hasModules mime =
-    case mime of
-        Text ->
+hasModules : Filesystem.Type -> Bool
+hasModules type_ =
+    case type_ of
+        Filesystem.Text ->
             False
 
-        CryptoKey ->
+        Filesystem.CryptoKey ->
             False
 
         _ ->
