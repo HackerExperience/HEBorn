@@ -1,6 +1,7 @@
 module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Storyline as Storyline
 import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
@@ -87,7 +88,9 @@ helper action data maybeContext id serverCId app model0 =
                             |> Game.getAccount
                             |> Account.getContext
                             |> GoApp app
-                            |> Dispatch.missionAction data
+                            |> Storyline.ActionDone
+                            |> Storyline.Missions
+                            |> Dispatch.storyline
                         ]
             in
                 ( model_, cmd_, dispatch_ )

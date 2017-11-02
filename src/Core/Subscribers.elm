@@ -12,6 +12,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch, Internal)
 import Core.Subscribers.Helpers exposing (..)
 import Core.Subscribers.Account as Account
 import Core.Subscribers.Core as Core
+import Core.Subscribers.Notifications as Notifications
 import Core.Subscribers.OS as OS
 import Core.Subscribers.Servers as Servers
 import Core.Subscribers.Storyline as Storyline
@@ -48,5 +49,5 @@ fromInternal dispatch =
         Dispatch.Websocket dispatch ->
             Websocket.dispatch dispatch
 
-        Dispatch.NoOp ->
-            []
+        Dispatch.Notifications dispatch ->
+            Notifications.dispatch dispatch

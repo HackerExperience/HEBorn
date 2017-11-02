@@ -203,9 +203,9 @@ handleJoinedAccount value model =
                     Debug.log "▶ " ("Bootstrap Error:\n" ++ reason)
 
                 dispatch =
-                    Dispatch.core <|
-                        Core.Crash <|
-                            Error.porra msg
+                    Error.porra msg
+                        |> Core.Crash
+                        |> Dispatch.core
             in
                 ( model, Cmd.none, dispatch )
 

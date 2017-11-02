@@ -16,18 +16,9 @@ module Core.Dispatch
         , processes
         , storyline
         , emails
-        , missions_
+        , missions
         , websocket
-          -- to kill:
-        , web
-        , mission
-        , missionAction
-        , serverNotification
-        , accountNotification
-        , openApp
-        , browser
-        , toasts
-        , politeCrash
+        , notifications
         )
 
 {-| Dispatch types and syntax sugar for dispatching things.
@@ -39,6 +30,7 @@ is able to affect the OS instead of just Account.
 
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Core as Core
+import Core.Dispatch.Notifications as Notifications
 import Core.Dispatch.OS as OS
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Storyline as Storyline
@@ -57,7 +49,7 @@ type Internal
     | Servers Servers.Dispatch
     | Storyline Storyline.Dispatch
     | Websocket Websocket.Dispatch
-    | NoOp
+    | Notifications Notifications.Dispatch
 
 
 none : Dispatch
@@ -78,10 +70,6 @@ push (Dispatch left) (Dispatch right) =
 yield : Dispatch -> List Internal
 yield (Dispatch list) =
     list
-
-
-
--- TODO: remove underlines after fixing conflicts
 
 
 account : Account.Dispatch -> Dispatch
@@ -134,8 +122,8 @@ emails =
     Storyline.Emails >> storyline
 
 
-missions_ : Storyline.Missions -> Dispatch
-missions_ =
+missions : Storyline.Missions -> Dispatch
+missions =
     Storyline.Missions >> storyline
 
 
@@ -144,63 +132,9 @@ websocket =
     Websocket >> dispatch
 
 
-
--- compatibility layer we should eventually kill
-
-
-game : a -> Dispatch
-game msg =
-    dispatch NoOp
-
-
-mission : a -> Dispatch
-mission msg =
-    dispatch NoOp
-
-
-missionAction : a -> b -> Dispatch
-missionAction data act =
-    dispatch NoOp
-
-
-serverNotification : a -> b -> Dispatch
-serverNotification cid msg =
-    dispatch NoOp
-
-
-accountNotification : a -> Dispatch
-accountNotification msg =
-    dispatch NoOp
-
-
-web : a -> Dispatch
-web msg =
-    dispatch NoOp
-
-
-browser : a -> b -> c -> Dispatch
-browser windowRef context msg =
-    dispatch NoOp
-
-
-openApp : a -> b -> Dispatch
-openApp context app =
-    dispatch NoOp
-
-
-apps : a -> Dispatch
-apps msgs =
-    dispatch NoOp
-
-
-toasts : a -> Dispatch
-toasts msg =
-    dispatch NoOp
-
-
-politeCrash : a -> b -> Dispatch
-politeCrash code details =
-    dispatch NoOp
+notifications : Notifications.Dispatch -> Dispatch
+notifications =
+    Notifications >> dispatch
 
 
 

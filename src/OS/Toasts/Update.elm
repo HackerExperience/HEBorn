@@ -21,7 +21,7 @@ update :
     -> UpdateResponse
 update _ msg model =
     case msg of
-        Append new ->
+        Insert new ->
             model
                 |> insert new
                 |> uncurry waitFade

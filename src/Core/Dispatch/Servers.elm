@@ -1,5 +1,6 @@
 module Core.Dispatch.Servers exposing (..)
 
+import Time exposing (Time)
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Logs.Models as Logs
@@ -7,17 +8,21 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Network.Types as Network
 import Events.Server.Filesystem.NewFile as NewFile
-import Events.Server.Logs.Changed as LogsChanged
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
+import Game.Web.Models as Web
+import Game.Web.Types as Web
 
 
 {-| Messages related to servers.
 -}
 type Dispatch
     = Server CId Server
+    | Login Network.NIP Network.IP String Web.Requester
+    | FetchedUrl Web.Requester Web.Response
+    | FailLogin Web.Requester
 
 
 {-| Messages related to a specific server.
@@ -25,13 +30,11 @@ type Dispatch
 type Server
     = SetBounce (Maybe Bounces.ID)
     | SetEndpoint (Maybe CId)
-    | LoginServer
-    | LogoutServer
-    | FetchUrl
-    | FetchedUrl
     | Filesystem Filesystem
     | Logs Logs
     | Processes Processes
+    | LogoutServer
+    | FetchUrl String Network.ID Web.Requester
 
 
 {-| Messages related to server's filesystem.
@@ -50,10 +53,8 @@ type Filesystem
 type Logs
     = UpdateLog Logs.ID String
     | EncryptLog Logs.ID
-    | DecryptLog Logs.ID
     | HideLog Logs.ID
     | DeleteLog Logs.ID
-    | ChangedLogs LogsChanged.Data
 
 
 {-| Messages related to server's processes.
@@ -63,9 +64,9 @@ type Processes
     | ResumeProcess Processes.ID
     | RemoveProcess Processes.ID
     | CompleteProcess Processes.ID
-    | NewBruteforceProcess Network.IP
-    | NewDownloadProcess Network.NIP Filesystem.ForeignFileBox String
-    | NewPublicDownloadProcess Network.NIP Filesystem.ForeignFileBox String
+    | NewBruteforceProcess Time Network.IP
+    | NewDownloadProcess Time Network.NIP Filesystem.ForeignFileBox String
+    | NewPublicDownloadProcess Time Network.NIP Filesystem.ForeignFileBox String
     | StartedProcess ProcessStarted.Data
     | ConcludedProcess ProcessConclusion.Data
     | ChangedProcesses ProcessesChanged.Data

@@ -2,6 +2,8 @@ module Setup.Pages.PickLocation.Update exposing (update)
 
 import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Core as Core
+import Core.Error as Error
 import Game.Models as Game
 import Utils.Update as Update
 import Utils.Ports.Map as Map
@@ -154,7 +156,9 @@ onCheckValid config game value model =
         Err reason ->
             let
                 dispatch =
-                    Dispatch.politeCrash "ERR_PORRA_RENATO"
-                        ("Can't parse location response: " ++ reason)
+                    ("Can't parse location response: " ++ reason)
+                        |> Error.porra
+                        |> Core.Crash
+                        |> Dispatch.core
             in
                 ( model, Cmd.none, dispatch )

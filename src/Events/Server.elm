@@ -18,9 +18,6 @@ events cid name json =
         "new_file" ->
             NewFile.handler (onNewFile cid) json
 
-        "log_changed" ->
-            LogsChanged.handler (onLogsChanged cid) json
-
         "process_started" ->
             ProcessStarted.handler (onProcessStarted cid) json
 
@@ -44,11 +41,6 @@ events cid name json =
 onNewFile : CId -> NewFile.Data -> Dispatch
 onNewFile id =
     Servers.CreatedFile >> Dispatch.filesystem id
-
-
-onLogsChanged : CId -> LogsChanged.Data -> Dispatch
-onLogsChanged id =
-    Servers.ChangedLogs >> Dispatch.logs id
 
 
 onProcessStarted : CId -> ProcessStarted.Data -> Dispatch

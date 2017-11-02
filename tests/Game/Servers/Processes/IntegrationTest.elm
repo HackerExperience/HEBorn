@@ -4,7 +4,7 @@ import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
 import Json.Decode as Decode
-import TestUtils exposing (fuzz, updateGame, fromJust, fromOk, toValue)
+import TestUtils exposing (fuzz, updateGame, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
@@ -100,13 +100,13 @@ eventTests =
                         }
                         """
 
-                msg =
+                dispatch =
                     Events.events channel name json
-                        |> fromJust ""
-                        |> Game.Event
+                        |> fromJust ("Testing " ++ name)
             in
-                game
-                    |> updateGame msg
+                dispatch
+                    |> gameDispatcher game Cmd.none
+                    |> Tuple.first
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.started fetching serverId"
@@ -155,13 +155,13 @@ eventTests =
                         { "process_id": "id" }
                         """
 
-                msg =
+                dispatch =
                     Events.events channel name json
-                        |> fromJust ""
-                        |> Game.Event
+                        |> fromJust ("Testing " ++ name)
             in
-                game1
-                    |> updateGame msg
+                dispatch
+                    |> gameDispatcher game1 Cmd.none
+                    |> Tuple.first
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.conclusion fetching serverId"
@@ -212,13 +212,13 @@ eventTests =
                         }
                         """
 
-                msg =
+                dispatch =
                     Events.events channel name json
-                        |> fromJust ""
-                        |> Game.Event
+                        |> fromJust ("Testing " ++ name)
             in
-                game1
-                    |> updateGame msg
+                dispatch
+                    |> gameDispatcher game1 Cmd.none
+                    |> Tuple.first
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "bruteforce_failed fetching serverId"

@@ -66,12 +66,12 @@ updateRequest game response model =
 {-| Reports back the site information to the page.
 -}
 onDNS : Game.Model -> Requester -> Response -> Model -> UpdateResponse
-onDNS game { sessionId, windowId, context, tabId } response model =
+onDNS game requester response model =
     let
         dispatch =
-            Browser.Fetched response
-                |> Browser.SomeTabMsg tabId
-                |> Dispatch.browser ( sessionId, windowId ) context
+            response
+                |> Servers.FetchedUrl requester
+                |> Dispatch.servers
     in
         ( model, Cmd.none, dispatch )
 
@@ -157,10 +157,9 @@ handleJoinFailed game cid model =
 
         dispatch =
             case maybeRequester of
-                Just { sessionId, windowId, context, tabId } ->
-                    Browser.LoginFailed
-                        |> Browser.SomeTabMsg tabId
-                        |> Dispatch.browser ( sessionId, windowId ) context
+                Just requester ->
+                    Servers.FailLogin requester
+                        |> Dispatch.servers
 
                 Nothing ->
                     Dispatch.none

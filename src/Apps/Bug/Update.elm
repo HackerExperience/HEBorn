@@ -3,7 +3,9 @@ module Apps.Bug.Update exposing (update)
 import Core.Error as Error
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
+import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
+import Game.Notifications.Models as Notifications
 import Native.Panic
 import OS.Toasts.Messages as Toasts
 import OS.Toasts.Models as Toasts
@@ -38,18 +40,21 @@ update data msg model =
         DummyToast ->
             ( model
             , Cmd.none
-            , Dispatch.toasts <|
-                Toasts.Append Toasts.dummy
+            , Notifications.Simple "Hi" "Hello"
+                |> Notifications.HandleInsert Nothing
+                |> Dispatch.notifications
             )
 
         PoliteCrash ->
             ( model
             , Cmd.none
-            , Dispatch.account <|
-                Account.LogoutAndCrash <|
-                    Error.fakeTest "This is a polite crash."
+            , "This is a polite crash."
+                |> Error.fakeTest
+                |> Account.LogoutAndCrash
+                |> Dispatch.account
             )
 
         UnpoliteCrash ->
-            Native.Panic.crash <|
-                Error.fakeTest "This is an unpolite crash."
+            "This is an unpolite crash."
+                |> Error.fakeTest
+                |> Native.Panic.crash

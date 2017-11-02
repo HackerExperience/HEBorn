@@ -40,7 +40,7 @@ onPasswordAcquired =
 
 onStoryStepProceeded : StoryStepProceeded.Data -> Dispatch
 onStoryStepProceeded =
-    Storyline.ProceededMission >> Dispatch.missions_
+    Storyline.ProceededMission >> Dispatch.missions
 
 
 onStoryNewEmail : StoryNewEmail.Data -> Dispatch

@@ -4,11 +4,14 @@ import Core.Dispatch.Servers exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Core.Messages as Core
 import Game.Messages as Game
+import Game.Notifications.Models exposing (Content(DownloadStarted))
 import Game.Servers.Messages as Servers
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared exposing (CId)
+import Game.Web.Messages as Web
+import Apps.Browser.Messages as Browser
 
 
 dispatch : Dispatch -> Subscribers
@@ -16,6 +19,21 @@ dispatch dispatch =
     case dispatch of
         Server id dispatch ->
             fromServer id dispatch
+
+        Login gatewayNIP endpointIP password requester ->
+            [ web <| Web.Login gatewayNIP endpointIP password requester ]
+
+        FailLogin { sessionId, windowId, context, tabId } ->
+            [ Browser.LoginFailed
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        FetchedUrl { sessionId, windowId, context, tabId } response ->
+            [ Browser.Fetched response
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
 
 
 
@@ -40,8 +58,11 @@ fromServer id dispatch =
         Processes dispatch ->
             fromProcesses id dispatch
 
-        _ ->
+        LogoutServer ->
             []
+
+        FetchUrl url nId requester ->
+            [ web <| Web.FetchUrl url nId id requester ]
 
 
 fromFilesystem : CId -> Filesystem -> Subscribers
@@ -81,9 +102,6 @@ fromLogs id dispatch =
         DeleteLog a ->
             [ logs id <| Logs.HandleDelete a ]
 
-        _ ->
-            []
-
 
 fromProcesses : CId -> Processes -> Subscribers
 fromProcesses id dispatch =
@@ -100,14 +118,16 @@ fromProcesses id dispatch =
         CompleteProcess a ->
             [ processes id <| Processes.HandleComplete a ]
 
-        NewBruteforceProcess a ->
+        NewBruteforceProcess time a ->
             [ processes id <| Processes.HandleStartBruteforce a ]
 
-        NewDownloadProcess a b c ->
-            [ processes id <| Processes.HandleStartDownload a b c ]
+        NewDownloadProcess time a b c ->
+            (processes id <| Processes.HandleStartDownload a b c)
+                :: (notifyServer id time False <| DownloadStarted a b)
 
-        NewPublicDownloadProcess a b c ->
-            [ processes id <| Processes.HandleStartPublicDownload a b c ]
+        NewPublicDownloadProcess time a b c ->
+            (processes id <| Processes.HandleStartPublicDownload a b c)
+                :: (notifyServer id time False <| DownloadStarted a b)
 
         StartedProcess a ->
             [ processes id <| Processes.HandleProcessStarted a ]
