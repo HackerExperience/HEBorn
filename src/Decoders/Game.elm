@@ -116,28 +116,16 @@ joinPlayer =
 playerNetwork : (List NIP -> NIP -> a) -> Decoder a
 playerNetwork func =
     let
-        apply nips maybeNip =
-            let
-                active =
-                    case maybeNip of
-                        Just nip ->
-                            Just nip
+        apply nips =
+            case List.head <| Network.filterInternet nips of
+                Just nip ->
+                    succeed <| func nips nip
 
-                        Nothing ->
-                            nips
-                                |> Network.filterInternet
-                                |> List.head
-            in
-                case active of
-                    Just nip ->
-                        succeed <| func nips nip
-
-                    Nothing ->
-                        fail "Couldn't select an active nip for player server"
+                Nothing ->
+                    fail "Couldn't find an active nip for player server"
     in
         decode apply
             |> required "nips" Decoders.Network.nips
-            |> custom (maybe Decoders.Network.nip)
             |> resolve
 
 
