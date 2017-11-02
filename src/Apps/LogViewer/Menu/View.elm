@@ -3,6 +3,8 @@ module Apps.LogViewer.Menu.View
         ( menuView
         , menuNormalEntry
         , menuEditingEntry
+        , menuEncryptedEntry
+        , menuHiddenEntry
         , menuFilter
         )
 
@@ -40,6 +42,9 @@ menu model context =
     case context of
         MenuNormalEntry logID ->
             [ [ ( ContextMenu.item "Edit", MenuClick (NormalEntryEdit logID) )
+              , ( ContextMenu.item "Encrypt", MenuClick (EncryptEntry logID) )
+              , ( ContextMenu.item "Hide", MenuClick (HideEntry logID) )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteEntry logID) )
               ]
             ]
 
@@ -48,6 +53,16 @@ menu model context =
               , ( ContextMenu.item "Cancel", MenuClick (EdittingEntryCancel logID) )
               ]
             ]
+
+        MenuEncryptedEntry logID ->
+            [ [ ( ContextMenu.item "Decrypt", MenuClick (DecryptEntry logID) )
+              , ( ContextMenu.item "Hide", MenuClick (HideEntry logID) )
+              , ( ContextMenu.item "Delete", MenuClick (DeleteEntry logID) )
+              ]
+            ]
+
+        MenuHiddenEntry logID ->
+            []
 
         MenuFilter ->
             -- TODO: Filter by flags
@@ -62,6 +77,16 @@ menuNormalEntry logID =
 menuEditingEntry : Logs.ID -> Html.Attribute LogViewer.Msg
 menuEditingEntry logID =
     menuFor (MenuEditingEntry logID)
+
+
+menuEncryptedEntry : Logs.ID -> Html.Attribute LogViewer.Msg
+menuEncryptedEntry logID =
+    menuFor (MenuEncryptedEntry logID)
+
+
+menuHiddenEntry : Logs.ID -> Html.Attribute LogViewer.Msg
+menuHiddenEntry logID =
+    menuFor (MenuHiddenEntry logID)
 
 
 menuFilter : Html.Attribute LogViewer.Msg
