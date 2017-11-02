@@ -12,6 +12,7 @@ import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Processes
 import Game.Network.Types as Network
+import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Messages
     exposing
@@ -26,15 +27,13 @@ type Response
 
 request :
     ID
-    -> Network.NIP
+    -> Network.ID
     -> Network.IP
+    -> CId
     -> ConfigSource a
     -> Cmd Msg
-request optimistic nip targetIp =
+request optimistic network targetIp cid =
     let
-        network =
-            Network.getId nip
-
         payload =
             Encode.object
                 [ ( "network_id", Encode.string <| network )
@@ -42,7 +41,7 @@ request optimistic nip targetIp =
                 , ( "bounces", Encode.list [] )
                 ]
     in
-        Requests.request (Topics.bruteforce nip)
+        Requests.request (Topics.bruteforce cid)
             (BruteforceRequest optimistic >> Request)
             payload
 

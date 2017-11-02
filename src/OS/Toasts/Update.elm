@@ -21,7 +21,7 @@ update :
     -> UpdateResponse
 update _ msg model =
     case msg of
-        Append new ->
+        Insert new ->
             model
                 |> insert new
                 |> uncurry waitFade
@@ -34,9 +34,6 @@ update _ msg model =
 
         Fade id ->
             onFade id model
-
-        Event _ ->
-            Update.fromModel model
 
 
 onRemove : Int -> Model -> UpdateResponse

@@ -24,8 +24,9 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Processes
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (FileID)
-import Game.Network.Types exposing (NIP)
 import Game.Servers.Processes.Models exposing (ID, Process)
+import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared exposing (CId)
 
 
 type Response
@@ -42,11 +43,11 @@ request :
     -> NIP
     -> FileID
     -> String
-    -> NIP
+    -> CId
     -> ConfigSource a
     -> Cmd Msg
-request optmistic target fileId storageId nip =
-    Requests.request (Topics.fsDownload nip)
+request optmistic target fileId storageId cid =
+    Requests.request (Topics.fsDownload cid)
         (DownloadRequest optmistic >> Request)
     <|
         encoder target fileId storageId
@@ -57,11 +58,11 @@ requestPublic :
     -> NIP
     -> FileID
     -> String
-    -> NIP
+    -> CId
     -> ConfigSource a
     -> Cmd Msg
-requestPublic optmistic target fileId storageId nip =
-    Requests.request (Topics.pftpDownload nip)
+requestPublic optmistic target fileId storageId cid =
+    Requests.request (Topics.pftpDownload cid)
         (DownloadRequest optmistic >> Request)
     <|
         encoder target fileId storageId

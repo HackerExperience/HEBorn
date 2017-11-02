@@ -1,8 +1,8 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
-import Game.Servers.Processes.Messages as Processes exposing (Msg(..))
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)
 import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
@@ -18,26 +18,26 @@ actionHandler data action ({ app } as model) =
         PauseProcess pID ->
             let
                 gameMsg =
-                    Dispatch.processes
-                        (Game.getActiveCId data)
-                        (Processes.Pause pID)
+                    pID
+                        |> Servers.PauseProcess
+                        |> Dispatch.processes (Game.getActiveCId data)
             in
                 ( model, Cmd.none, gameMsg )
 
         ResumeProcess pID ->
             let
                 gameMsg =
-                    Dispatch.processes
-                        (Game.getActiveCId data)
-                        (Processes.Resume pID)
+                    pID
+                        |> Servers.ResumeProcess
+                        |> Dispatch.processes (Game.getActiveCId data)
             in
                 ( model, Cmd.none, gameMsg )
 
         RemoveProcess pID ->
             let
                 gameMsg =
-                    Dispatch.processes
-                        (Game.getActiveCId data)
-                        (Processes.Remove pID)
+                    pID
+                        |> Servers.RemoveProcess
+                        |> Dispatch.processes (Game.getActiveCId data)
             in
                 ( model, Cmd.none, gameMsg )

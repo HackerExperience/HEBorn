@@ -21,16 +21,6 @@ update data msg model =
                 |> Update.fromModel
 
         Insert created notif ->
-            let
-                model_ =
-                    insert created notif model
-
-                dispatch_ =
-                    Toasts.Toast
-                        notif.content
-                        Nothing
-                        Toasts.Alive
-                        |> Toasts.Append
-                        |> Dispatch.toasts
-            in
-                ( model_, Cmd.none, dispatch_ )
+            model
+                |> insert created notif
+                |> Update.fromModel

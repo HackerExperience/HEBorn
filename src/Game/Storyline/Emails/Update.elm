@@ -25,8 +25,8 @@ update game msg model =
         Changed newModel ->
             onChanged newModel model
 
-        Reply content ->
-            onReply game content model
+        HandleReply content ->
+            handleReply game content model
 
         HandleNewEmail data ->
             handleNewEmail game data model
@@ -43,8 +43,8 @@ onChanged newModel oldModel =
     Update.fromModel newModel
 
 
-onReply : Game.Model -> Content -> Model -> UpdateResponse
-onReply game content model =
+handleReply : Game.Model -> Content -> Model -> UpdateResponse
+handleReply game content model =
     let
         accountId =
             Game.getAccount game
@@ -57,10 +57,6 @@ onReply game content model =
             Reply.request accountId contentId game
     in
         ( model, cmd, Dispatch.none )
-
-
-
--- events
 
 
 handleNewEmail : Game.Model -> StoryNewEmail.Data -> Model -> UpdateResponse
@@ -99,21 +95,8 @@ handleNewEmail game data model =
 
         model_ =
             setPerson personId person_ model
-
-        dispatch =
-            case msg of
-                Received content ->
-                    content
-                        |> Contents.toString
-                        |> Notifications.NewEmail personId
-                        |> Notifications.create
-                        |> Notifications.Insert game.meta.lastTick
-                        |> Dispatch.accountNotification
-
-                Sent _ ->
-                    Dispatch.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, Cmd.none, Dispatch.none )
 
 
 handleReplyUnlocked :

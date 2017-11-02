@@ -5,12 +5,12 @@ import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
 import Json.Decode as Decode
-import TestUtils exposing (fuzz, updateGame, fromJust, fromOk, toValue)
+import TestUtils exposing (fuzz, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
-import Events.Events as Events exposing (Event(..))
+import Events.Events as Events
 import Game.Messages as Game
 import Game.Models as Game
 import Game.Account.Messages as Account
@@ -74,13 +74,13 @@ passwordAcquired =
                         }
                         """
 
-                msg =
+                dispatch =
                     Events.events channel name json
-                        |> fromJust ""
-                        |> Game.Event
+                        |> fromJust ("Testing " ++ name)
             in
-                game
-                    |> updateGame msg
+                dispatch
+                    |> gameDispatcher game Cmd.none
+                    |> Tuple.first
                     |> Game.getAccount
                     |> Account.getDatabase
                     |> getHackedServers
@@ -119,13 +119,13 @@ replyUnlocked =
                         }
                         """
 
-                msg =
+                dispatch =
                     Events.events channel name json
-                        |> fromJust ""
-                        |> Game.Event
+                        |> fromJust ("Testing " ++ name)
             in
-                game
-                    |> updateGame msg
+                dispatch
+                    |> gameDispatcher game Cmd.none
+                    |> Tuple.first
                     |> Game.getStory
                     |> Story.getEmails
                     |> Emails.getPerson ("kress")

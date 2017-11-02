@@ -5,9 +5,9 @@ import Landing.Login.Messages exposing (Msg(..))
 import Landing.Login.Models exposing (Model)
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
-import Core.Messages as Core
 import Core.Models as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Core as Core
 
 
 type alias UpdateResponse =
@@ -68,7 +68,7 @@ onLoginOkay core token id model =
             { model | loginFailed = False }
 
         dispatch =
-            Dispatch.core (Core.Boot id model.username token True)
+            Dispatch.core <| Core.Boot id model.username token
     in
         ( model_, Cmd.none, dispatch )
 

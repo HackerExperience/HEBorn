@@ -2,6 +2,7 @@ module TestUtils exposing (..)
 
 import Expect exposing (Expectation)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Subscribers as Subscribers
 import Core.Messages as Core
 import Game.Messages as Game
 import Game.Models as Game
@@ -46,26 +47,13 @@ ensureDifferentSeed seed =
 updateGame : Game.Msg -> Game.Model -> Game.Model
 updateGame msg0 model0 =
     let
-        ( model1, _, dispatch ) =
+        ( model1, cmd, dispatch ) =
             Game.update msg0 model0
 
-        keepGameMsg msg =
-            case msg of
-                Core.GameMsg msg ->
-                    Just msg
-
-                _ ->
-                    Nothing
-
-        msgs =
-            dispatch
-                |> Dispatch.toList
-                |> List.filterMap keepGameMsg
-
-        reduce msg model =
-            updateGame msg model
+        ( model2, _ ) =
+            gameDispatcher model1 cmd dispatch
     in
-        List.foldl reduce model1 msgs
+        model2
 
 
 fromJust : String -> Maybe a -> a
@@ -99,3 +87,28 @@ hint str =
         ""
     else
         " (" ++ str ++ ")"
+
+
+
+-- REPLICANTS FROM CORE.UPDATE MODIFIED TO USE GAME.MODEL
+
+
+gameDispatcher : Game.Model -> Cmd Game.Msg -> Dispatch -> ( Game.Model, Cmd Game.Msg )
+gameDispatcher model cmd dispatch =
+    dispatch
+        |> Subscribers.dispatch
+        |> List.foldl gameReducer ( model, cmd )
+
+
+gameReducer : Core.Msg -> ( Game.Model, Cmd Game.Msg ) -> ( Game.Model, Cmd Game.Msg )
+gameReducer msg ( model, cmd ) =
+    let
+        ( model_, cmd_, _ ) =
+            case msg of
+                Core.GameMsg msg ->
+                    Game.update msg model
+
+                _ ->
+                    ( model, cmd, Dispatch.none )
+    in
+        ( model_, Cmd.batch [ cmd, cmd_ ] )

@@ -2,6 +2,7 @@ module OS.Toasts.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
+import Game.Notifications.Source exposing (Source)
 import Game.Notifications.Models as Notifications
 
 
@@ -11,34 +12,15 @@ type alias Model =
 
 type alias Toast =
     { notification : Notifications.Content
-    , parent : Maybe Parent
+    , parent : Maybe Source
     , state : State
     }
-
-
-type alias Parent =
-    ( Source, Notifications.ID )
 
 
 type State
     = Alive
     | Fading
     | Garbage
-
-
-type Source
-    = Server ID
-    | Account
-    | Chat
-
-
-type alias ID =
-    String
-
-
-dummy : Toast
-dummy =
-    Toast (Notifications.Simple "Hi" "Hello") Nothing Alive
 
 
 initialModel : Model

@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Servers.Shared as Servers
 import Game.Network.Types exposing (NIP)
 import Apps.Apps as Apps
 import Apps.Browser.Resources exposing (Classes(..), prefix)
@@ -52,10 +53,12 @@ hackingPanelConfig =
 view : Game.Data -> Model -> Html Msg
 view data model =
     let
+        -- this is cheating:
+        cid =
+            Servers.EndpointCId model.toolkit.target
+
         endpointMember =
-            List.member
-                model.toolkit.target
-                (Game.getEndpoints data)
+            List.member cid (Game.getEndpoints data)
     in
         if (model.showingPanel && endpointMember) then
             hackingPanel hackingPanelConfig model.toolkit.target

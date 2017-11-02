@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Network.Types exposing (NIP)
@@ -78,7 +79,10 @@ view data ({ app } as model) =
                 ]
 
         nip =
-            Game.getActiveCId data
+            data
+                |> Game.getGame
+                |> Game.Models.getServers
+                |> Servers.getNIP (Game.getActiveCId data)
 
         mainEntries =
             data

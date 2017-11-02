@@ -1,20 +1,13 @@
-module Events.Events exposing (Event(..), events)
+module Events.Events exposing (events)
 
 import Json.Decode exposing (Value)
 import Driver.Websocket.Channels as Ws
-import Driver.Websocket.Reports as Ws
-import Game.Servers.Shared as Servers
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Account as Account
 import Events.Server as Server
 
 
-type Event
-    = Account Account.Event
-    | Server Servers.CId Server.Event
-    | Report Ws.Report
-
-
-events : Ws.Channel -> String -> Value -> Maybe Event
+events : Ws.Channel -> String -> Value -> Maybe Dispatch
 events channel event json =
     case router channel event json of
         Ok event ->
@@ -34,20 +27,20 @@ events channel event json =
                 report channelName event
 
 
-router : Ws.Channel -> String -> Value -> Result String Event
+router : Ws.Channel -> String -> Value -> Result String Dispatch
 router channel event json =
     case channel of
         Ws.RequestsChannel ->
             Err ""
 
         Ws.AccountChannel _ ->
-            Result.map Account <| Account.events event json
+            Account.events event json
 
         Ws.ServerChannel id ->
-            Result.map (Server id) <| Server.events event json
+            Server.events id event json
 
 
-notFound : String -> String -> Maybe Event
+notFound : String -> String -> Maybe Dispatch
 notFound channel event =
     let
         msg =
@@ -60,7 +53,7 @@ notFound channel event =
         report msg
 
 
-decodeError : String -> String -> String -> Maybe Event
+decodeError : String -> String -> String -> Maybe Dispatch
 decodeError error channel event =
     let
         msg =
@@ -74,7 +67,7 @@ decodeError error channel event =
         report msg
 
 
-report : String -> Maybe Event
+report : String -> Maybe Dispatch
 report msg =
     ""
         |> Debug.log ("▶ Event Error: " ++ msg)

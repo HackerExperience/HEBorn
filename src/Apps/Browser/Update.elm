@@ -2,10 +2,13 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.Update as Update
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
+import Core.Dispatch.Account as Account
+import Core.Dispatch.OS as OS
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
-import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
@@ -20,9 +23,7 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Apps.Apps as Apps
-import Game.Account.Messages as Account
 import Game.Meta.Types exposing (Context(Endpoint))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias UpdateResponse =
@@ -134,7 +135,7 @@ onOpenApp : Apps.App -> Model -> UpdateResponse
 onOpenApp app model =
     let
         dispatch =
-            Dispatch.openApp (Just Endpoint) app
+            Dispatch.os <| OS.OpenApp (Just Endpoint) app
     in
         ( model, Cmd.none, dispatch )
 
@@ -144,7 +145,7 @@ onSelectEndpoint model =
     let
         dispatch =
             Dispatch.account <|
-                Account.ContextTo Endpoint
+                Account.SetContext Endpoint
     in
         ( model, Cmd.none, dispatch )
 
@@ -225,8 +226,11 @@ onReqDownload data source file model =
                 |> Game.getGame
                 |> Game.Models.unsafeGetGateway
 
+        lastTick =
+            data.game.meta.lastTick
+
         startMsg =
-            Processes.StartPublicDownload source file "storage id"
+            Servers.NewPublicDownloadProcess lastTick source file "storage id"
 
         dispatch =
             Dispatch.processes me startMsg
@@ -349,9 +353,12 @@ onCrack data nip tab =
         targetIp =
             Network.getIp nip
 
+        lastTick =
+            data.game.meta.lastTick
+
         dispatch =
             Dispatch.processes serverId <|
-                Processes.StartBruteforce targetIp
+                Servers.NewBruteforceProcess lastTick targetIp
     in
         ( tab, Cmd.none, dispatch )
 
@@ -386,8 +393,10 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             }
 
         dispatch =
-            Dispatch.web <|
-                Web.FetchUrl url networkId cid requester
+            Dispatch.server cid <|
+                Servers.FetchUrl url
+                    networkId
+                    requester
 
         tab_ =
             gotoPage url (Pages.LoadingModel url) tab
@@ -405,6 +414,11 @@ onLogin :
     -> TabUpdateResponse
 onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
     let
+        servers =
+            data
+                |> Game.getGame
+                |> Game.Models.getServers
+
         requester =
             { sessionId = sessionId
             , windowId = windowId
@@ -413,13 +427,13 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             }
 
         gatewayNip =
-            Game.getActiveCId data
+            Servers.getNIP (Game.getActiveCId data) servers
 
         remoteIp =
             Network.getIp remoteNip
 
         dispatch =
-            Dispatch.web <|
-                Web.Login gatewayNip remoteIp password requester
+            Dispatch.servers <|
+                Servers.Login gatewayNip remoteIp password requester
     in
         ( tab, Cmd.none, dispatch )

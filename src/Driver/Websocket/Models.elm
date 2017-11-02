@@ -1,9 +1,8 @@
-module Driver.Websocket.Models exposing (Model, initialModel)
+module Driver.Websocket.Models exposing (Model, EventBase, initialModel)
 
 import Dict exposing (Dict)
+import Json.Decode exposing (Value)
 import Driver.Websocket.Messages exposing (..)
-import Driver.Websocket.Reports exposing (..)
-import Events.Events as Events exposing (Event(..))
 import Phoenix.Socket as Socket
 import Phoenix.Channel as Channel
 
@@ -18,13 +17,19 @@ type alias Channels =
     Dict String (Channel.Channel Msg)
 
 
+type alias EventBase =
+    { data : Value
+    , event : String
+    }
+
+
 initialSocket : String -> String -> Socket.Socket Msg
 initialSocket apiWsUrl token =
     apiWsUrl
         |> Socket.init
         |> Socket.withParams [ ( "token", token ) ]
-        |> Socket.onOpen (Connected token |> Events.Report |> Broadcast)
-        |> Socket.onClose (\_ -> Disconnected |> Events.Report |> Broadcast)
+        |> Socket.onOpen (Connected token)
+        |> Socket.onClose (\_ -> Disconnected)
 
 
 initialModel : String -> String -> Model

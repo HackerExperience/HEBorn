@@ -7,11 +7,10 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-import Game.Network.Types exposing (NIP)
 
 
-request : String -> FileID -> NIP -> ConfigSource a -> Cmd Msg
-request newBaseName fileId nip =
+request : String -> FileID -> CId -> ConfigSource a -> Cmd Msg
+request newBaseName fileId cid =
     let
         payload =
             Encode.object
@@ -19,6 +18,6 @@ request newBaseName fileId nip =
                 , ( "basename", Encode.string newBaseName )
                 ]
     in
-        Requests.request (Topics.fsRename nip)
+        Requests.request (Topics.fsRename cid)
             (RenameRequest >> Request)
             payload

@@ -1,354 +1,146 @@
 module Core.Dispatch
     exposing
         ( Dispatch
-        , batch
+        , Internal(..)
         , none
-        , foldl
-        , foldr
-        , fromList
-        , toList
-        , toCmd
-        , core
-        , websocket
-        , game
-        , os
+        , batch
+        , push
+        , yield
         , account
-        , database
+        , core
+        , os
         , servers
-        , web
-        , mission
-        , missionAction
-        , email
-        , story
         , server
         , filesystem
-        , processes
         , logs
-        , log
-        , tunnels
-        , serverNotification
-        , accountNotification
-        , meta
-        , openApp
-        , apps
-        , appsOfSession
-        , browser
-        , toasts
-        , politeCrash
+        , processes
+        , storyline
+        , emails
+        , missions
+        , websocket
+        , notifications
         )
 
-import Apps.Messages as Apps
-import Apps.Apps as Apps
-import Apps.Browser.Messages as Browser
-import Game.Messages as Game
-import Core.Messages exposing (..)
-import Driver.Websocket.Messages as Ws
-import Game.Data as Game
-import Game.Meta.Types exposing (Context(..))
-import Game.Meta.Messages as Meta
-import Game.Storyline.Messages as Story
-import Game.Storyline.Missions.Messages as Missions
-import Game.Storyline.Missions.Actions as Missions
-import Game.Storyline.Emails.Messages as Emails
-import Game.Account.Messages as Account
-import Game.Account.Database.Messages as Database
-import Game.Notifications.Messages as Notifications
-import Game.Servers.Messages as Servers
-import Game.Servers.Filesystem.Messages as Filesystem
-import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Logs.Models as Logs
-import Game.Servers.Tunnels.Messages as Tunnels
-import Game.Web.Messages as Web
-import Game.Servers.Shared as Servers
-import OS.Messages as OS
-import OS.SessionManager.Messages as SessionManager
-import OS.SessionManager.Models exposing (WindowRef)
-import OS.SessionManager.WindowManager.Models as WindowManager
-import OS.Toasts.Messages as Toasts
-import Utils.Cmd as CmdUtils
+{-| Dispatch types and syntax sugar for dispatching things.
 
+Dispatches are generic and defined by domain, so a PasswordAcquired dispatch
+is able to affect the OS instead of just Account.
 
--- opaque type to hide the dispatch magic
+-}
+
+import Core.Dispatch.Account as Account
+import Core.Dispatch.Core as Core
+import Core.Dispatch.Notifications as Notifications
+import Core.Dispatch.OS as OS
+import Core.Dispatch.Servers as Servers
+import Core.Dispatch.Storyline as Storyline
+import Core.Dispatch.Websocket as Websocket
+import Game.Servers.Shared exposing (CId)
 
 
 type Dispatch
-    = Many (List Msg)
-    | One Msg
-    | None
+    = Dispatch (List Internal)
 
 
-
--- cmd/sub like interface
-
-
-batch : List Dispatch -> Dispatch
-batch list =
-    -- tried to make it as fast a possible
-    case List.head list of
-        Just accum ->
-            case List.tail list of
-                Just iter ->
-                    -- this function **may** need to change into a foldr
-                    fromList <| List.foldl reducer (toList accum) iter
-
-                Nothing ->
-                    accum
-
-        Nothing ->
-            None
+type Internal
+    = Account Account.Dispatch
+    | Core Core.Dispatch
+    | OS OS.Dispatch
+    | Servers Servers.Dispatch
+    | Storyline Storyline.Dispatch
+    | Websocket Websocket.Dispatch
+    | Notifications Notifications.Dispatch
 
 
 none : Dispatch
 none =
-    None
+    Dispatch []
 
 
+batch : List Dispatch -> Dispatch
+batch =
+    List.concatMap (\(Dispatch list) -> list) >> Dispatch
 
--- reducers
 
+push : Dispatch -> Dispatch -> Dispatch
+push (Dispatch left) (Dispatch right) =
+    Dispatch <| List.foldl (::) right left
 
-foldl : (Msg -> acc -> acc) -> acc -> Dispatch -> acc
-foldl fun init dispatch =
-    case dispatch of
-        Many list ->
-            List.foldl fun init list
 
-        One msg ->
-            fun msg init
+yield : Dispatch -> List Internal
+yield (Dispatch list) =
+    list
 
-        None ->
-            init
 
+account : Account.Dispatch -> Dispatch
+account =
+    Account >> dispatch
 
-foldr : (Msg -> acc -> acc) -> acc -> Dispatch -> acc
-foldr fun init dispatch =
-    case dispatch of
-        Many list ->
-            List.foldr fun init list
 
-        One msg ->
-            fun msg init
+core : Core.Dispatch -> Dispatch
+core =
+    Core >> dispatch
 
-        None ->
-            init
 
+os : OS.Dispatch -> Dispatch
+os =
+    OS >> dispatch
 
 
--- reveals some of the magic (try not using this a lot)
+servers : Servers.Dispatch -> Dispatch
+servers =
+    Servers >> dispatch
 
 
-fromList : List Msg -> Dispatch
-fromList list =
-    case List.head list of
-        Just item ->
-            case List.tail list of
-                Just _ ->
-                    Many list
+server : CId -> Servers.Server -> Dispatch
+server id =
+    Servers.Server id >> Servers >> dispatch
 
-                Nothing ->
-                    One item
 
-        Nothing ->
-            None
+filesystem : CId -> Servers.Filesystem -> Dispatch
+filesystem id =
+    Servers.Filesystem >> server id
 
 
-toList : Dispatch -> List Msg
-toList dispatch =
-    case dispatch of
-        Many list ->
-            list
+logs : CId -> Servers.Logs -> Dispatch
+logs id =
+    Servers.Logs >> server id
 
-        One msg ->
-            [ msg ]
 
-        None ->
-            []
+processes : CId -> Servers.Processes -> Dispatch
+processes id =
+    Servers.Processes >> server id
 
 
-toCmd : Dispatch -> Cmd Msg
-toCmd dispatch =
-    -- TODO: check if reversing is really needed, ordering
-    -- must never be a problem
-    dispatch
-        |> toList
-        |> List.reverse
-        |> List.map CmdUtils.fromMsg
-        |> Cmd.batch
+storyline : Storyline.Dispatch -> Dispatch
+storyline =
+    Storyline >> dispatch
 
 
+emails : Storyline.Emails -> Dispatch
+emails =
+    Storyline.Emails >> storyline
 
--- dispatchers
 
+missions : Storyline.Missions -> Dispatch
+missions =
+    Storyline.Missions >> storyline
 
-core : Msg -> Dispatch
-core msg =
-    One msg
 
+websocket : Websocket.Dispatch -> Dispatch
+websocket =
+    Websocket >> dispatch
 
-websocket : Ws.Msg -> Dispatch
-websocket msg =
-    core <| WebsocketMsg msg
 
-
-game : Game.Msg -> Dispatch
-game msg =
-    core <| GameMsg msg
-
-
-account : Account.Msg -> Dispatch
-account msg =
-    game <| Game.AccountMsg msg
-
-
-database : Database.Msg -> Dispatch
-database msg =
-    account <| Account.DatabaseMsg msg
-
-
-servers : Servers.Msg -> Dispatch
-servers msg =
-    game <| Game.ServersMsg msg
-
-
-meta : Meta.Msg -> Dispatch
-meta msg =
-    game <| Game.MetaMsg msg
-
-
-story : Story.Msg -> Dispatch
-story msg =
-    game <| Game.StoryMsg msg
-
-
-mission : Missions.Msg -> Dispatch
-mission msg =
-    story <| Story.MissionsMsg msg
-
-
-email : Emails.Msg -> Dispatch
-email msg =
-    story <| Story.EmailsMsg msg
-
-
-missionAction : Game.Data -> Missions.Action -> Dispatch
-missionAction data act =
-    if data.game.story.enabled then
-        mission <| Missions.ActionDone act
-    else
-        None
-
-
-server : Servers.CId -> Servers.ServerMsg -> Dispatch
-server cid msg =
-    servers <| Servers.ServerMsg cid msg
-
-
-filesystem : Servers.CId -> Filesystem.Msg -> Dispatch
-filesystem cid msg =
-    server cid <| Servers.FilesystemMsg msg
-
-
-processes : Servers.CId -> Processes.Msg -> Dispatch
-processes cid msg =
-    server cid <| Servers.ProcessesMsg msg
-
-
-logs : Servers.CId -> Logs.Msg -> Dispatch
-logs cid msg =
-    server cid <| Servers.LogsMsg msg
-
-
-log : Servers.CId -> Logs.ID -> Logs.LogMsg -> Dispatch
-log serverId cid msg =
-    logs serverId <| Logs.LogMsg cid msg
-
-
-tunnels : Servers.CId -> Tunnels.Msg -> Dispatch
-tunnels cid msg =
-    server cid <| Servers.TunnelsMsg msg
-
-
-serverNotification : Servers.CId -> Notifications.Msg -> Dispatch
-serverNotification cid msg =
-    server cid <| Servers.NotificationsMsg msg
-
-
-accountNotification : Notifications.Msg -> Dispatch
-accountNotification msg =
-    account <| Account.NotificationsMsg msg
-
-
-web : Web.Msg -> Dispatch
-web msg =
-    game <| Game.WebMsg msg
-
-
-browser : WindowRef -> Context -> Browser.Msg -> Dispatch
-browser windowRef context msg =
-    app windowRef context <| Apps.BrowserMsg msg
-
-
-openApp : Maybe Context -> Apps.App -> Dispatch
-openApp context app =
-    sessionManager <| SessionManager.OpenApp context app
-
-
-apps : List Apps.Msg -> Dispatch
-apps msgs =
-    sessionManager <| SessionManager.EveryAppMsg msgs
-
-
-appsOfSession :
-    Servers.CId
-    -> WindowManager.TargetContext
-    -> List Apps.Msg
-    -> Dispatch
-appsOfSession cid context msgs =
-    sessionManager <| SessionManager.TargetedAppMsg cid context msgs
+notifications : Notifications.Dispatch -> Dispatch
+notifications =
+    Notifications >> dispatch
 
 
 
 -- internals
 
 
-os : OS.Msg -> Dispatch
-os msg =
-    core <| OSMsg msg
-
-
-sessionManager : SessionManager.Msg -> Dispatch
-sessionManager msg =
-    os <| OS.SessionManagerMsg msg
-
-
-toasts : Toasts.Msg -> Dispatch
-toasts msg =
-    os <| OS.ToastsMsg msg
-
-
-app : WindowRef -> Context -> Apps.Msg -> Dispatch
-app windowRef context msg =
-    sessionManager <|
-        SessionManager.AppMsg
-            windowRef
-            context
-            msg
-
-
-politeCrash : String -> String -> Dispatch
-politeCrash code details =
-    core <| Crash code details
-
-
-reducer : Dispatch -> List Msg -> List Msg
-reducer next acc =
-    case next of
-        Many list ->
-            List.foldl (::) acc list
-
-        One msg ->
-            msg :: acc
-
-        None ->
-            acc
+dispatch : Internal -> Dispatch
+dispatch =
+    List.singleton >> Dispatch

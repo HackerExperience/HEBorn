@@ -3,5 +3,14 @@ module Game.Servers.Shared exposing (..)
 import Game.Network.Types exposing (NIP)
 
 
-type alias CId =
+type alias Id =
+    String
+
+
+type alias EndpointAddress =
     NIP
+
+
+type CId
+    = GatewayCId Id
+    | EndpointCId EndpointAddress

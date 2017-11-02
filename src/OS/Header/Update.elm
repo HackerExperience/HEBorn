@@ -2,14 +2,17 @@ module OS.Header.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Account.Messages as Account
+import Core.Dispatch.Storyline as Storyline
+import Core.Dispatch.Account as Account
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
+import Game.Models
 import Game.Account.Messages as Account
 import Game.Meta.Types exposing (Context)
 import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Story
-import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
@@ -40,7 +43,7 @@ update data msg model =
             onSelectBounce data id model
 
         SelectEndpoint cid ->
-            onSelectEndpoint cid model
+            onSelectEndpoint data cid model
 
         ContextTo context ->
             onContextTo context model
@@ -65,7 +68,7 @@ onLogout : Model -> UpdateResponse
 onLogout model =
     let
         dispatch =
-            Dispatch.account Account.DoLogout
+            Dispatch.account Account.Logout
     in
         ( model, Cmd.none, dispatch )
 
@@ -126,8 +129,8 @@ onSelectBounce data id model =
         ( model_, Cmd.none, dispatch )
 
 
-onSelectEndpoint : Maybe Servers.CId -> Model -> UpdateResponse
-onSelectEndpoint cid model =
+onSelectEndpoint : Game.Data -> Maybe Servers.CId -> Model -> UpdateResponse
+onSelectEndpoint data cid model =
     let
         dispatch =
             Dispatch.account <| Account.SetEndpoint cid
@@ -142,7 +145,7 @@ onContextTo : Context -> Model -> UpdateResponse
 onContextTo context model =
     let
         dispatch =
-            Dispatch.account <| Account.ContextTo context
+            Dispatch.account <| Account.SetContext context
     in
         ( model, Cmd.none, dispatch )
 
@@ -163,7 +166,7 @@ onTogglecampaign : Model -> UpdateResponse
 onTogglecampaign model =
     let
         dispatch =
-            Dispatch.story <| Story.Toggle
+            Dispatch.storyline <| Storyline.Toggle
     in
         ( model, Cmd.none, dispatch )
 
@@ -171,10 +174,11 @@ onTogglecampaign model =
 onServerReadAll : Servers.CId -> Model -> UpdateResponse
 onServerReadAll cid model =
     let
+        --Dispatch.server cid <|
+        --Servers.NotificationsMsg
+        --Notifications.ReadAll
         dispatch =
-            Dispatch.server cid <|
-                Servers.NotificationsMsg
-                    Notifications.ReadAll
+            Dispatch.none
     in
         ( model, Cmd.none, dispatch )
 
@@ -182,9 +186,10 @@ onServerReadAll cid model =
 onAccountReadAll : Model -> UpdateResponse
 onAccountReadAll model =
     let
+        --Dispatch.account <|
+        --    Account.NotificationsMsg
+        --        Notifications.ReadAll
         dispatch =
-            Dispatch.account <|
-                Account.NotificationsMsg
-                    Notifications.ReadAll
+            Dispatch.none
     in
         ( model, Cmd.none, dispatch )

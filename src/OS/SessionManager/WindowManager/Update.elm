@@ -2,6 +2,7 @@ module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Storyline as Storyline
 import Draggable
 import Draggable.Events as Draggable
 import Utils.Update as Update
@@ -212,7 +213,9 @@ onSetContext data context_ wId ({ windows } as model) =
                         dispatch =
                             context_
                                 |> GoApp app
-                                |> Dispatch.missionAction data
+                                |> Storyline.ActionDone
+                                |> Storyline.Missions
+                                |> Dispatch.storyline
                     in
                         ( model_, Cmd.none, dispatch )
 
@@ -237,7 +240,9 @@ onUpdateFocustTo data maybeWId model =
                             window
                                 |> windowContext
                                 |> GoApp window.app
-                                |> Dispatch.missionAction data
+                                |> Storyline.ActionDone
+                                |> Storyline.Missions
+                                |> Dispatch.storyline
                     in
                         ( model_, Cmd.none, dispatch )
 

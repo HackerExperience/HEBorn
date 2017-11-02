@@ -2,11 +2,11 @@ module Apps.Explorer.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Filesystem.Messages as Filesystem
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -61,10 +61,7 @@ onGoPath data newPath ({ app } as model) =
             (Servers.getFilesystem <| Game.getActiveServer <| data)
 
         app_ =
-            changePath
-                newPath
-                fs
-                app
+            changePath newPath fs app
     in
         Update.fromModel { model | app = app_ }
 
@@ -73,9 +70,7 @@ onUpdateEditing : EditingStatus -> Model -> UpdateResponse
 onUpdateEditing newState ({ app } as model) =
     let
         app_ =
-            setEditing
-                newState
-                app
+            setEditing newState app
     in
         Update.fromModel { model | app = app_ }
 
@@ -98,9 +93,7 @@ onEnterRename data fileId ({ app } as model) =
                 |> Maybe.withDefault NotEditing
 
         app_ =
-            setEditing
-                editing_
-                app
+            setEditing editing_ app
     in
         Update.fromModel { model | app = app_ }
 
@@ -122,30 +115,25 @@ onApplyEdit data ({ app } as model) =
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <|
-                            Filesystem.CreateTextFile ( app.path, fName )
+                        fsMsg <| Servers.NewTextFile ( app.path, fName )
 
                 CreatingPath fName ->
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <|
-                            Filesystem.CreateEmptyDir ( app.path, fName )
+                        fsMsg <| Servers.NewDir ( app.path, fName )
 
                 Moving fID ->
-                    fsMsg <| Filesystem.Move fID app.path
+                    fsMsg <| Servers.MoveFile fID app.path
 
                 Renaming fID fName ->
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <|
-                            Filesystem.Rename fID fName
+                        fsMsg <| Servers.RenameFile fID fName
 
         app_ =
-            setEditing
-                NotEditing
-                app
+            setEditing NotEditing app
 
         model_ =
             { model | app = app_ }

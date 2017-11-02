@@ -10,18 +10,18 @@ import Game.Notifications.Messages as Notifications
 
 
 type Msg
-    = DoLogout
-    | DoCrash String String
-    | SetGateway Servers.CId
-    | SetEndpoint (Maybe Servers.CId)
-    | InsertGateway Servers.CId
-    | ContextTo Context
-    | BouncesMsg Bounces.Msg
+    = BouncesMsg Bounces.Msg
     | DatabaseMsg Database.Msg
     | NotificationsMsg Notifications.Msg
     | Request RequestMsg
-    | HandleConnect
-    | HandleDisconnect
+    | HandleLogout
+    | HandleSetGateway Servers.CId
+    | HandleSetEndpoint (Maybe Servers.CId)
+    | HandleSetContext Context
+    | HandleNewGateway Servers.CId
+    | HandleLogoutAndCrash ( String, String )
+    | HandleConnected
+    | HandleDisconnected
 
 
 type RequestMsg

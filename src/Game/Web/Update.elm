@@ -1,6 +1,9 @@
 module Game.Web.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Websocket as Ws
+import Core.Dispatch.Servers as Servers
+import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Game.Models as Game
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)
@@ -9,9 +12,7 @@ import Game.Web.Requests.DNS as DNS
 import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import Game.Servers.Shared as Servers
-import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
-import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Driver.Websocket.Messages as Ws
 import Apps.Browser.Messages as Browser
 import Game.Network.Types as Network
@@ -37,11 +38,11 @@ update game msg model =
             in
                 ( model, cmd, Dispatch.none )
 
-        HandleJoinedServer cid ->
-            handleJoined game cid model
+        JoinedServer cid ->
+            onJoinedServer game cid model
 
         HandleJoinServerFailed cid ->
-            handleJoinFailed cid model
+            handleJoinFailed game cid model
 
 
 
@@ -65,12 +66,12 @@ updateRequest game response model =
 {-| Reports back the site information to the page.
 -}
 onDNS : Game.Model -> Requester -> Response -> Model -> UpdateResponse
-onDNS game { sessionId, windowId, context, tabId } response model =
+onDNS game requester response model =
     let
         dispatch =
-            Browser.Fetched response
-                |> Browser.SomeTabMsg tabId
-                |> Dispatch.browser ( sessionId, windowId ) context
+            response
+                |> Servers.FetchedUrl requester
+                |> Dispatch.servers
     in
         ( model, Cmd.none, dispatch )
 
@@ -93,6 +94,9 @@ onLogin game nip remoteIp password requester model =
         remoteNip =
             Network.toNip (Network.getId nip) remoteIp
 
+        remoteCid =
+            Servers.EndpointCId remoteNip
+
         payload =
             Encode.object
                 [ ( "gateway_ip", Encode.string gatewayIp )
@@ -101,7 +105,7 @@ onLogin game nip remoteIp password requester model =
 
         dispatch =
             Dispatch.websocket <|
-                Ws.JoinChannel (ServerChannel remoteNip) (Just payload)
+                Ws.Join (ServerChannel remoteCid) (Just payload)
 
         model_ =
             startLoading remoteNip requester model
@@ -111,18 +115,20 @@ onLogin game nip remoteIp password requester model =
 
 {-| Sets endpoint
 -}
-handleJoined : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleJoined game cid model =
+onJoinedServer : Game.Model -> Servers.CId -> Model -> UpdateResponse
+onJoinedServer game cid model =
     let
-        ( maybeRequester, model_ ) =
-            finishLoading cid model
-
         servers =
             Game.getServers game
 
+        nip =
+            Servers.getNIP cid servers
+
+        ( maybeRequester, model_ ) =
+            finishLoading nip model
+
         serverCid =
-            Maybe.andThen (.sessionId >> flip Servers.fromKey servers)
-                maybeRequester
+            Maybe.map (.sessionId >> Servers.fromKey) maybeRequester
 
         dispatch =
             case serverCid of
@@ -138,18 +144,22 @@ handleJoined game cid model =
 
 {-| Reports failure back to the loading page.
 -}
-handleJoinFailed : Servers.CId -> Model -> UpdateResponse
-handleJoinFailed cid model =
+handleJoinFailed : Game.Model -> Servers.CId -> Model -> UpdateResponse
+handleJoinFailed game cid model =
     let
         ( maybeRequester, model_ ) =
-            finishLoading cid model
+            case Servers.getNIPSafe cid (Game.getServers game) of
+                Just nip ->
+                    finishLoading nip model
+
+                Nothing ->
+                    ( Nothing, model )
 
         dispatch =
             case maybeRequester of
-                Just { sessionId, windowId, context, tabId } ->
-                    Browser.LoginFailed
-                        |> Browser.SomeTabMsg tabId
-                        |> Dispatch.browser ( sessionId, windowId ) context
+                Just requester ->
+                    Servers.FailLogin requester
+                        |> Dispatch.servers
 
                 Nothing ->
                     Dispatch.none

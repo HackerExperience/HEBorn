@@ -23,7 +23,7 @@ type alias Notification =
 
 type Content
     = Simple String String -- Title Message
-    | NewEmail String String -- Person_ID Preview_Message
+    | NewEmail String -- Person_ID
     | DownloadStarted NIP Filesystem.ForeignFileBox
 
 

@@ -3,8 +3,8 @@ module Game.Servers.Update exposing (..)
 import Utils.Update as Update
 import Json.Decode as Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Account as Account
 import Game.Models as Game
-import Game.Account.Messages as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
@@ -18,6 +18,7 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
+import Game.Web.Messages as Web
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
@@ -96,14 +97,14 @@ updateServer :
     -> ServerUpdateResponse
 updateServer game model cid msg server =
     case msg of
-        SetBounce maybeBounceId ->
-            onSetBounce game
+        HandleSetBounce maybeBounceId ->
+            handleSetBounce game
                 cid
                 maybeBounceId
                 server
 
-        SetEndpoint maybeCId ->
-            onSetEndpoint game maybeCId server
+        HandleSetEndpoint remote ->
+            handleSetEndpoint game remote server
 
         FilesystemMsg msg ->
             onFilesystemMsg game cid msg server
@@ -124,23 +125,23 @@ updateServer game model cid msg server =
             onNotificationsMsg game msg server
 
 
-onSetBounce :
+handleSetBounce :
     Game.Model
     -> CId
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse
-onSetBounce game cid maybeBounceId server =
+handleSetBounce game cid maybeBounceId server =
     setBounce maybeBounceId server
         |> Update.fromModel
 
 
-onSetEndpoint :
+handleSetEndpoint :
     Game.Model
     -> Maybe CId
     -> Server
     -> ServerUpdateResponse
-onSetEndpoint game cid server =
+handleSetEndpoint game cid server =
     setEndpointCId cid server
         |> Update.fromModel
 
@@ -240,15 +241,22 @@ handleJoinedServer cid value model =
                     dispatch =
                         if isGateway server then
                             cid
-                                |> Account.InsertGateway
+                                |> Account.NewGateway
                                 |> Dispatch.account
                         else
                             Dispatch.none
 
                     model_ =
                         insert cid server model
+
+                    dispatch_ =
+                        Dispatch.batch
+                            [ dispatch
+
+                            --, Dispatch.web <| Web.JoinedServer cid
+                            ]
                 in
-                    ( model_, Cmd.none, dispatch )
+                    ( model_, Cmd.none, dispatch_ )
 
             Err reason ->
                 let

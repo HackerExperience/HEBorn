@@ -2,6 +2,7 @@ module Core.Update exposing (update)
 
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
+import Core.Subscribers as Subscribers
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
@@ -25,37 +26,29 @@ import OS.SessionManager.Messages as SM
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    -- DONE
     case (onDebug model received msg) of
-        Boot id username token firstRun ->
+        HandleBoot id username token ->
             let
                 model_ =
-                    connect id username token firstRun model
+                    connect id username token model
             in
                 ( model_, Cmd.none )
 
-        Shutdown ->
+        HandleShutdown ->
             let
                 model_ =
                     logout model
             in
                 ( model_, Cmd.none )
 
-        Crash code message ->
+        HandleCrash ( code, message ) ->
             let
                 model_ =
                     crash code message model
             in
                 ( model_, Cmd.none )
 
-        LoadingEnd z ->
-            let
-                model_ =
-                    { model | windowLoaded = True }
-            in
-                ( model_, Cmd.none )
-
-        FinishSetup ->
+        HandlePlay ->
             let
                 ( state, cmd, dispatch ) =
                     setupToPlay model.state
@@ -64,6 +57,13 @@ update msg model =
                     { model | state = state }
             in
                 dispatcher model_ cmd dispatch
+
+        LoadingEnd z ->
+            let
+                model_ =
+                    { model | windowLoaded = True }
+            in
+                ( model_, Cmd.none )
 
         _ ->
             updateState msg model
@@ -92,14 +92,12 @@ updateState msg ({ state } as model) =
 updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
 updateHome msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast (Report (Connected _))) ->
-            -- trap used for login
+        HandleConnected ->
             let
                 ( modelLogin, cmdLogin, dispatch ) =
                     login model
 
-                -- not tail recursive, but should
-                -- only do a single recursion
+                -- not tail recursive, but should only do a single recursion
                 ( modelLogin_, cmdLogin_ ) =
                     dispatcher modelLogin cmdLogin dispatch
 
@@ -139,11 +137,6 @@ updateHome msg model stateModel =
 updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
 updateSetup msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            stateModel
-                |> updateSetupGame (Game.Event event)
-                |> finishSetupUpdate model
-
         WebsocketMsg msg ->
             updateSetupWS msg stateModel
                 |> finishSetupUpdate model
@@ -211,11 +204,6 @@ finishSetupUpdate model ( stateModel, cmd, dispatch ) =
 updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
 updatePlay msg model stateModel =
     case msg of
-        WebsocketMsg (Ws.Broadcast event) ->
-            stateModel
-                |> updatePlayGame (Game.Event event)
-                |> finishPlayUpdate model
-
         WebsocketMsg msg ->
             updatePlayWS msg stateModel
                 |> finishPlayUpdate model
@@ -397,20 +385,9 @@ sent =
 
 dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
 dispatcher model cmd dispatch =
-    if isDev model then
-        let
-            logged =
-                dispatch
-                    |> Dispatch.toList
-                    |> List.map sent
-
-            cmd_ =
-                Cmd.batch [ cmd, Dispatch.toCmd dispatch ]
-        in
-            ( model, cmd_ )
-    else
-        -- TODO: check if reversing is really needed
-        Dispatch.foldr reducer ( model, cmd ) dispatch
+    dispatch
+        |> Subscribers.dispatch
+        |> List.foldl (sent >> reducer) ( model, cmd )
 
 
 reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )

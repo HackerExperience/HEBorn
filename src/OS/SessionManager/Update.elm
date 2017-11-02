@@ -165,10 +165,9 @@ onTargetedAppMsg data targetCid targetContext appMsgs model =
                     filterRelatedSessions servers
 
         filter sid wm =
-            servers
-                |> Servers.fromKey sid
-                |> Maybe.map (flip (filterer targetCid) wm)
-                |> Maybe.withDefault False
+            sid
+                |> Servers.fromKey
+                |> flip (filterer targetCid) wm
 
         toWmMsg =
             WM.EveryAppMsg targetContext

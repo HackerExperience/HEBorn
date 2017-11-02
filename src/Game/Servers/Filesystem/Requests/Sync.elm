@@ -22,7 +22,7 @@ import Game.Servers.Filesystem.Messages
         ( Msg(Request)
         , RequestMsg(SyncRequest)
         )
-import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (Foreigners)
 import Decoders.Filesystem exposing (entry)
 
@@ -31,9 +31,9 @@ type Response
     = Okay Foreigners
 
 
-request : NIP -> ConfigSource a -> Cmd Msg
-request nip =
-    Requests.request (Topics.fsSync nip)
+request : CId -> ConfigSource a -> Cmd Msg
+request cid =
+    Requests.request (Topics.fsSync cid)
         (SyncRequest >> Request)
         emptyPayload
 

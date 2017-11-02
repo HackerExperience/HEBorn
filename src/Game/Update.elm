@@ -5,8 +5,10 @@ import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Driver.Websocket.Channels exposing (..)
-import Driver.Websocket.Messages as Ws
+import Core.Error as Error
+import Core.Dispatch.Websocket as Ws
+import Core.Dispatch.Core as Core
+import Driver.Websocket.Channels exposing (Channel(ServerChannel, RequestsChannel))
 import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
@@ -15,6 +17,8 @@ import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Servers.Messages as Servers
 import Game.Servers.Update as Servers
+import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
@@ -24,7 +28,6 @@ import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
 import Game.Models exposing (..)
 import Game.Messages exposing (..)
-import Game.Events as Events
 
 
 type alias UpdateResponse =
@@ -48,9 +51,6 @@ update msg model =
 
         WebMsg msg ->
             onWeb msg model
-
-        Event event ->
-            ( model, Cmd.none, Events.dispatcher event model )
 
         Resync ->
             onResync model
@@ -179,7 +179,8 @@ handleConnected : Model -> UpdateResponse
 handleConnected model =
     let
         dispatch =
-            Dispatch.websocket (Ws.JoinChannel RequestsChannel Nothing)
+            Dispatch.websocket <|
+                Ws.Join RequestsChannel Nothing
     in
         ( model, Cmd.none, dispatch )
 
@@ -202,7 +203,9 @@ handleJoinedAccount value model =
                     Debug.log "▶ " ("Bootstrap Error:\n" ++ reason)
 
                 dispatch =
-                    Dispatch.account <| Account.DoCrash "ERR_PORRA_RENATO" msg
+                    Error.porra msg
+                        |> Core.Crash
+                        |> Dispatch.core
             in
                 ( model, Cmd.none, dispatch )
 
@@ -218,7 +221,8 @@ bootstrapJoin remoteServers playerServer =
 
         otherDispatches =
             playerServer.endpoints
-                |> List.filterMap (flip Dict.get remoteServers)
+                |> List.filterMap
+                    (Servers.toSessionId >> flip Dict.get remoteServers)
                 |> List.map (joinRemote playerServer)
     in
         Dispatch.batch (myDispatch :: otherDispatches)
@@ -227,17 +231,11 @@ bootstrapJoin remoteServers playerServer =
 joinPlayer : Decoders.Game.Player -> Dispatch
 joinPlayer server =
     let
-        channel cid =
-            -- this code will break after including the counter
-            ServerChannel cid
-
-        toDispatch cid =
-            Dispatch.websocket <|
-                Ws.JoinChannel (channel cid) Nothing
+        cid =
+            Servers.GatewayCId server.serverId
     in
-        server.nips
-            |> List.map toDispatch
-            |> Dispatch.batch
+        Dispatch.websocket <|
+            Ws.Join (ServerChannel cid) Nothing
 
 
 joinRemote : Decoders.Game.Player -> Decoders.Game.Remote -> Dispatch
@@ -252,12 +250,10 @@ joinRemote fromServer toServer =
         case maybeFromIp of
             Just fromIp ->
                 let
-                    cid =
-                        -- this code might need to change one day
-                        Network.toNip toServer.networkId toServer.ip
-
                     channel =
-                        ServerChannel cid
+                        ServerChannel <|
+                            Servers.EndpointCId <|
+                                Network.toNip toServer.networkId toServer.ip
 
                     payload =
                         -- TODO: include bounce_id after settling
@@ -268,8 +264,8 @@ joinRemote fromServer toServer =
                             ]
                 in
                     Dispatch.websocket <|
-                        (Ws.JoinChannel channel)
-                            (Just payload)
+                        Ws.Join channel <|
+                            Just payload
 
             Nothing ->
                 Dispatch.none

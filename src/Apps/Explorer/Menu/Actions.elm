@@ -1,17 +1,17 @@
 module Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Filesystem.Messages as Filesystem
 import Apps.Explorer.Models exposing (..)
-import Apps.Explorer.Messages as Explorer exposing (Msg)
+import Apps.Explorer.Messages exposing (..)
 import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)
 
 
 type alias UpdateResponse =
-    ( Model, Cmd Explorer.Msg, Dispatch )
+    ( Model, Cmd Msg, Dispatch )
 
 
 actionHandler :
@@ -45,9 +45,9 @@ onDelete :
 onDelete data fileId model =
     let
         gameMsg =
-            Dispatch.filesystem
-                (Game.getActiveCId data)
-                (Filesystem.Delete fileId)
+            fileId
+                |> Servers.DeleteFile
+                |> Dispatch.filesystem (Game.getActiveCId data)
     in
         ( model, Cmd.none, gameMsg )
 

@@ -18,8 +18,8 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        Toggle ->
-            onToggle model
+        HandleToggle ->
+            handleToggle model
 
         MissionsMsg msg ->
             onMission game msg model
@@ -28,8 +28,8 @@ update game msg model =
             onEmail game msg model
 
 
-onToggle : Model -> UpdateResponse
-onToggle model =
+handleToggle : Model -> UpdateResponse
+handleToggle model =
     let
         model_ =
             { model | enabled = (not model.enabled) }

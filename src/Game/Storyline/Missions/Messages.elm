@@ -6,5 +6,5 @@ import Events.Account.Story.StepProceeded as StoryStepProceeded
 
 
 type Msg
-    = ActionDone Action
+    = HandleActionDone Action
     | HandleStepProceeded StoryStepProceeded.Data

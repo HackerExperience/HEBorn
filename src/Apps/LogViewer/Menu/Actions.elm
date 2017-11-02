@@ -1,9 +1,9 @@
 module Apps.LogViewer.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Utils.Update as Update
-import Game.Servers.Logs.Messages as Logs
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
@@ -28,9 +28,9 @@ actionHandler data action ({ app } as model) =
                 dispatch =
                     case edited of
                         Just edited ->
-                            Logs.UpdateContent edited
-                                |> Dispatch.log (Game.getActiveCId data)
-                                    logId
+                            edited
+                                |> Servers.UpdateLog logId
+                                |> Dispatch.logs (Game.getActiveCId data)
 
                         Nothing ->
                             Dispatch.none

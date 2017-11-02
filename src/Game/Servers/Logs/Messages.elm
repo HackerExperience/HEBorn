@@ -5,15 +5,15 @@ import Game.Servers.Logs.Models exposing (..)
 
 
 type Msg
-    = Delete ID
-    | Hide ID
+    = HandleDelete ID
+    | HandleHide ID
     | LogMsg ID LogMsg
     | Request RequestMsg
 
 
 type LogMsg
-    = UpdateContent String
-    | Encrypt
+    = HandleUpdateContent String
+    | HandleEncrypt
     | Decrypt String
     | LogRequest LogRequestMsg
 

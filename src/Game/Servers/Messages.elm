@@ -37,8 +37,8 @@ type RequestMsg
 
 
 type ServerMsg
-    = SetBounce (Maybe Bounces.ID)
-    | SetEndpoint (Maybe CId)
+    = HandleSetBounce (Maybe Bounces.ID)
+    | HandleSetEndpoint (Maybe CId)
     | FilesystemMsg Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
