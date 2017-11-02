@@ -24,12 +24,12 @@ import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-isEntryExpanded : DBAdmin -> ( NIP, Database.HackedServer ) -> Bool
+isEntryExpanded : Model -> ( NIP, Database.HackedServer ) -> Bool
 isEntryExpanded app ( nip, _ ) =
     List.member (Network.toString nip) app.servers.expanded
 
 
-isEntryEditing : DBAdmin -> ( NIP, Database.HackedServer ) -> Bool
+isEntryEditing : Model -> ( NIP, Database.HackedServer ) -> Bool
 isEntryEditing app ( nip, _ ) =
     Dict.member (Network.toString nip) app.serversEditing
 
@@ -139,7 +139,7 @@ btnsNormal itemId =
     ]
 
 
-renderBottomActions : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
+renderBottomActions : Model -> ( NIP, Database.HackedServer ) -> Html Msg
 renderBottomActions app (( nip, _ ) as entry) =
     let
         btns =
@@ -153,7 +153,7 @@ renderBottomActions app (( nip, _ ) as entry) =
         horizontalBtnPanel btns
 
 
-renderAnyData : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
+renderAnyData : Model -> ( NIP, Database.HackedServer ) -> Html Msg
 renderAnyData app (( nip, _ ) as entry) =
     case (Dict.get (Network.toString nip) app.serversEditing) of
         Just x ->
@@ -166,7 +166,7 @@ renderAnyData app (( nip, _ ) as entry) =
                 renderMiniData entry
 
 
-renderBottom : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
+renderBottom : Model -> ( NIP, Database.HackedServer ) -> Html Msg
 renderBottom app entry =
     let
         data =
@@ -180,7 +180,7 @@ renderBottom app entry =
             data
 
 
-menuInclude : DBAdmin -> ( NIP, Database.HackedServer ) -> List (Attribute Msg)
+menuInclude : Model -> ( NIP, Database.HackedServer ) -> List (Attribute Msg)
 menuInclude app (( nip, _ ) as entry) =
     if (isEntryEditing app entry) then
         [ menuEditingEntry <| Network.toString nip ]
@@ -188,7 +188,7 @@ menuInclude app (( nip, _ ) as entry) =
         [ menuNormalEntry <| Network.toString nip ]
 
 
-renderEntry : DBAdmin -> ( NIP, Database.HackedServer ) -> Html Msg
+renderEntry : Model -> ( NIP, Database.HackedServer ) -> Html Msg
 renderEntry app (( nip, _ ) as entry) =
     let
         expandedState =
@@ -217,14 +217,14 @@ renderEntry app (( nip, _ ) as entry) =
             data
 
 
-renderEntryList : DBAdmin -> Database.HackedServers -> List (Html Msg)
+renderEntryList : Model -> Database.HackedServers -> List (Html Msg)
 renderEntryList app entries =
     entries
         |> Dict.toList
         |> List.map (renderEntry app)
 
 
-view : Database.Model -> Model -> DBAdmin -> Html Msg
+view : Database.Model -> Model -> Model -> Html Msg
 view database model app =
     verticalList
         ([ menuView model

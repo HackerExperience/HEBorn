@@ -12,7 +12,7 @@ actionHandler :
     -> MenuAction
     -> Model
     -> ( Model, Cmd Finance.Msg, Dispatch )
-actionHandler data action ({ app } as model) =
+actionHandler data action model =
     case action of
         Dummy ->
             ( model, Cmd.none, Dispatch.none )

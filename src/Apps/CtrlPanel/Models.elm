@@ -3,13 +3,8 @@ module Apps.CtrlPanel.Models exposing (..)
 import Apps.CtrlPanel.Menu.Models as Menu
 
 
-type alias CtrlPanel =
-    {}
-
-
 type alias Model =
-    { app : CtrlPanel
-    , menu : Menu.Model
+    { menu : Menu.Model
     }
 
 
@@ -30,11 +25,5 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialTemplate
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
     }
-
-
-initialTemplate : CtrlPanel
-initialTemplate =
-    {}

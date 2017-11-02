@@ -55,28 +55,28 @@ onMenuMsg data msg model =
 
 
 onGoPath : Game.Data -> Filesystem.Location -> Model -> UpdateResponse
-onGoPath data newPath ({ app } as model) =
+onGoPath data newPath model =
     let
         fs =
             (Servers.getFilesystem <| Game.getActiveServer <| data)
 
-        app_ =
-            changePath newPath fs app
+        model_ =
+            changePath newPath fs model
     in
-        Update.fromModel { model | app = app_ }
+        Update.fromModel model_
 
 
 onUpdateEditing : EditingStatus -> Model -> UpdateResponse
-onUpdateEditing newState ({ app } as model) =
+onUpdateEditing newState model =
     let
-        app_ =
-            setEditing newState app
+        model_ =
+            setEditing newState model
     in
-        Update.fromModel { model | app = app_ }
+        Update.fromModel model_
 
 
 onEnterRename : Game.Data -> String -> Model -> UpdateResponse
-onEnterRename data fileId ({ app } as model) =
+onEnterRename data fileId model =
     let
         fs =
             data
@@ -92,14 +92,14 @@ onEnterRename data fileId ({ app } as model) =
                     (Filesystem.getEntryBasename >> Renaming fileId)
                 |> Maybe.withDefault NotEditing
 
-        app_ =
-            setEditing editing_ app
+        model_ =
+            setEditing editing_ model
     in
-        Update.fromModel { model | app = app_ }
+        Update.fromModel model_
 
 
 onApplyEdit : Game.Data -> Model -> UpdateResponse
-onApplyEdit data ({ app } as model) =
+onApplyEdit data model =
     let
         fsMsg =
             data
@@ -107,7 +107,7 @@ onApplyEdit data ({ app } as model) =
                 |> Dispatch.filesystem
 
         gameMsg =
-            case app.editing of
+            case model.editing of
                 NotEditing ->
                     Dispatch.none
 
@@ -115,16 +115,16 @@ onApplyEdit data ({ app } as model) =
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <| Servers.NewTextFile ( app.path, fName )
+                        fsMsg <| Servers.NewTextFile ( model.path, fName )
 
                 CreatingPath fName ->
                     if Filesystem.isValidFilename fName then
                         Dispatch.none
                     else
-                        fsMsg <| Servers.NewDir ( app.path, fName )
+                        fsMsg <| Servers.NewDir ( model.path, fName )
 
                 Moving fID ->
-                    fsMsg <| Servers.MoveFile fID app.path
+                    fsMsg <| Servers.MoveFile fID model.path
 
                 Renaming fID fName ->
                     if Filesystem.isValidFilename fName then
@@ -132,10 +132,7 @@ onApplyEdit data ({ app } as model) =
                     else
                         fsMsg <| Servers.RenameFile fID fName
 
-        app_ =
-            setEditing NotEditing app
-
         model_ =
-            { model | app = app_ }
+            setEditing NotEditing model
     in
         ( model_, Cmd.none, gameMsg )

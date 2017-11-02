@@ -442,16 +442,13 @@ explorerMain editing path server =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data ({ editing, path } as model) =
     let
-        nowPath =
-            app.path
-
         activeServer =
             Game.getActiveServer data
     in
         div [ class [ Window ] ]
             [ explorerColumn [] activeServer
-            , explorerMain app.editing nowPath activeServer
+            , explorerMain editing path activeServer
             , menuView model
             ]

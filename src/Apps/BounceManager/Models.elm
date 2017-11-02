@@ -8,13 +8,9 @@ type MainTab
     | TabCreate
 
 
-type alias BounceManager =
-    { selected : MainTab }
-
-
 type alias Model =
-    { app : BounceManager
-    , menu : Menu.Model
+    { menu : Menu.Model
+    , selected : MainTab
     }
 
 
@@ -35,14 +31,9 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialBounceManager
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
+    , selected = TabManage
     }
-
-
-initialBounceManager : BounceManager
-initialBounceManager =
-    { selected = TabManage }
 
 
 tabToString : MainTab -> String

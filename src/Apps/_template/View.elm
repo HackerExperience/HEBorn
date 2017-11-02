@@ -14,5 +14,5 @@ import Apps.Template.Menu.View exposing (..)
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data model =
     div [ menuForDummy ] [ menuView model ]

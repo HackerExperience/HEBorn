@@ -20,18 +20,13 @@ type alias Entries =
     List ( ID, Processes.Process )
 
 
-type alias TaskManager =
-    { limits : ResourceUsage
+type alias Model =
+    { menu : Menu.Model
+    , limits : ResourceUsage
     , historyCPU : List Float
     , historyMem : List Float
     , historyDown : List Float
     , historyUp : List Float
-    }
-
-
-type alias Model =
-    { app : TaskManager
-    , menu : Menu.Model
     }
 
 
@@ -52,25 +47,18 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialTaskManager
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
+    , limits = (ResourceUsage 1 1 1 1)
+    , historyCPU = []
+    , historyMem = []
+    , historyDown = []
+    , historyUp = []
     }
 
 
 increaseHistory : a -> List a -> List a
 increaseHistory new old =
     new :: (List.take 19 old)
-
-
-initialTaskManager : TaskManager
-initialTaskManager =
-    TaskManager
-        --TODO: Remove DUMMY limits
-        (ResourceUsage 2100000000 4096000000 1024000 512000)
-        []
-        []
-        []
-        []
 
 
 packUsage : Processes.ResourcesUsage -> ResourceUsage
@@ -100,7 +88,7 @@ onlyLocalTasks processes =
     Processes.values processes
 
 
-updateTasks : Servers.Server -> ResourceUsage -> TaskManager -> TaskManager
+updateTasks : Servers.Server -> ResourceUsage -> Model -> Model
 updateTasks server limit old =
     let
         tasks =
@@ -129,7 +117,8 @@ updateTasks server limit old =
         historyUp =
             (increaseHistory up old.historyUp)
     in
-        TaskManager
+        Model
+            old.menu
             limit
             historyCPU
             historyMem

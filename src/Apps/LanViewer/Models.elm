@@ -3,13 +3,8 @@ module Apps.LanViewer.Models exposing (..)
 import Apps.LanViewer.Menu.Models as Menu
 
 
-type alias LanViewer =
-    {}
-
-
 type alias Model =
-    { app : LanViewer
-    , menu : Menu.Model
+    { menu : Menu.Model
     }
 
 
@@ -30,11 +25,5 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialLanViewer
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
     }
-
-
-initialLanViewer : LanViewer
-initialLanViewer =
-    {}

@@ -15,7 +15,7 @@ update :
     -> Hebamp.Msg
     -> Model
     -> ( Model, Cmd Hebamp.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
@@ -35,21 +35,18 @@ update data msg ({ app } as model) =
         TimeUpdate playerId time ->
             let
                 model_ =
-                    if playerId == app.playerId then
-                        { model
-                            | app =
-                                { app | currentTime = time }
-                        }
+                    if playerId == model.playerId then
+                        { model | currentTime = time }
                     else
                         model
             in
                 ( model_, Cmd.none, Dispatch.none )
 
         Play ->
-            ( model, play app.playerId, Dispatch.none )
+            ( model, play model.playerId, Dispatch.none )
 
         Pause ->
-            ( model, pause app.playerId, Dispatch.none )
+            ( model, pause model.playerId, Dispatch.none )
 
         SetCurrentTime time ->
-            ( model, setCurrentTime ( app.playerId, time ), Dispatch.none )
+            ( model, setCurrentTime ( model.playerId, time ), Dispatch.none )

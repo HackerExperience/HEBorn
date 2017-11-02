@@ -3,13 +3,8 @@ module Apps.Template.Models exposing (..)
 import Apps.Template.Menu.Models as Menu
 
 
-type alias Template =
-    {}
-
-
 type alias Model =
-    { app : Template
-    , menu : Menu.Model
+    { menu : Menu.Model
     }
 
 
@@ -30,11 +25,5 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialTemplate
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
     }
-
-
-initialTemplate : Template
-initialTemplate =
-    {}

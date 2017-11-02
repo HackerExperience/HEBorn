@@ -32,15 +32,12 @@ viewTabLabel _ tab =
 
 
 view : Game.Data -> Model -> Html Msg
-view data ({ app } as model) =
+view data ({ selected } as model) =
     let
-        { selected } =
-            app
-
         viewData =
             case selected of
                 TabServers ->
-                    (Servers.view data.game.account.database model app)
+                    (Servers.view data.game.account.database model model)
 
                 TabBankAccs ->
                     (div [] [ text "SOON" ])
