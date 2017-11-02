@@ -44,3 +44,42 @@ actionHandler data action model =
             model
                 |> leaveEditing logId
                 |> Update.fromModel
+
+        EncryptEntry logId ->
+            let
+                dispatch =
+                    Logs.Encrypt
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            logId
+            in
+                model
+                ( model, Cmd.none, dispatch )
+
+        DecryptEntry logId ->
+            let
+                dispatch =
+                    Logs.Decrypt "NOT IMPLEMENTED YET"
+                        |> Dispatch.log
+                            (Game.getActiveCId data)
+                            logId
+            in
+                ( model, Cmd.none, dispatch )
+
+        HideEntry logId ->
+            let
+                dispatch =
+                    Logs.Hide logId
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
+            in
+                ( model, Cmd.none, dispatch )
+
+        DeleteEntry logId ->
+            let
+                dispatch =
+                    Logs.Delete logId
+                        |> Dispatch.logs
+                            (Game.getActiveCId data)
+            in
+                ( model, Cmd.none, dispatch )
