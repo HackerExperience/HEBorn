@@ -30,7 +30,7 @@ toggleExpand itemId model =
         servers_ =
             { servers
                 | expanded =
-                    if (isEntryExpanded model itemId) then
+                    if (isEntryExpanded itemId model) then
                         List.filter ((/=) itemId) servers.expanded
                     else
                         itemId :: servers.expanded
