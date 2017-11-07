@@ -79,10 +79,10 @@ renderEntry : Model -> Logs.ID -> Logs.Log -> Html Msg
 renderEntry model id log =
     let
         expandedState =
-            isEntryExpanded model id
+            isEntryExpanded id model
 
         editingState =
-            isEntryEditing model id
+            isEntryEditing id model
 
         etop =
             [ div [] [ log.timestamp |> timestampToFullData |> text ]
@@ -92,25 +92,25 @@ renderEntry model id log =
 
         data =
             [ div [ class [ ETop ] ] etop
-            , renderData model id log
-            , renderBottom model id log
+            , renderData id log model
+            , renderBottom id log model
             ]
     in
         toogableEntry
             (not editingState)
-            (menuInclude model id log)
+            (menuInclude id log model)
             (ToogleExpand id)
             expandedState
             data
 
 
-isEntryExpanded : Model -> Logs.ID -> Bool
-isEntryExpanded model id =
+isEntryExpanded : Logs.ID -> Model -> Bool
+isEntryExpanded id model =
     List.member id model.expanded
 
 
-isEntryEditing : Model -> Logs.ID -> Bool
-isEntryEditing model id =
+isEntryEditing : Logs.ID -> Model -> Bool
+isEntryEditing id model =
     Dict.member id model.editing
 
 
@@ -187,13 +187,13 @@ btnsCryptographed logID =
     ]
 
 
-renderBottomActions : Model -> Logs.ID -> Logs.Log -> Html Msg
-renderBottomActions model id log =
+renderBottomActions : Logs.ID -> Logs.Log -> Model -> Html Msg
+renderBottomActions id log model =
     let
         btns =
-            if (isEntryEditing model id) then
+            if (isEntryEditing id model) then
                 btnsEditing id
-            else if (isEntryExpanded model id) then
+            else if (isEntryExpanded id model) then
                 case log.content of
                     Logs.Uncrypted _ ->
                         btnsNormal id
@@ -206,27 +206,27 @@ renderBottomActions model id log =
         horizontalBtnPanel btns
 
 
-renderData : Model -> Logs.ID -> Logs.Log -> Html Msg
-renderData model id log =
+renderData : Logs.ID -> Logs.Log -> Model -> Html Msg
+renderData id log model =
     case (Dict.get id model.editing) of
         Just x ->
             renderEditing id x
 
         Nothing ->
-            if (isEntryExpanded model id) then
+            if (isEntryExpanded id model) then
                 renderContent log
             else
                 renderMiniContent log
 
 
-renderBottom : Model -> Logs.ID -> Logs.Log -> Html Msg
-renderBottom model id log =
+renderBottom : Logs.ID -> Logs.Log -> Model -> Html Msg
+renderBottom id log model =
     let
         data =
-            if (isEntryEditing model id) then
-                [ renderBottomActions model id log ]
-            else if (isEntryExpanded model id) then
-                [ renderBottomActions model id log ]
+            if (isEntryEditing id model) then
+                [ renderBottomActions id log model ]
+            else if (isEntryExpanded id model) then
+                [ renderBottomActions id log model ]
             else
                 []
     in
@@ -235,9 +235,9 @@ renderBottom model id log =
             data
 
 
-menuInclude : Model -> Logs.ID -> Logs.Log -> List (Attribute Msg)
-menuInclude model id log =
-    if (isEntryEditing model id) then
+menuInclude : Logs.ID -> Logs.Log -> Model -> List (Attribute Msg)
+menuInclude id log model =
+    if (isEntryEditing id model) then
         [ menuEditingEntry id ]
     else
         case log.content of

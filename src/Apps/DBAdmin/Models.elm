@@ -102,22 +102,22 @@ initialTab =
     }
 
 
-isEntryExpanded : Model -> String -> Bool
-isEntryExpanded app itemId =
-    List.member itemId <| (.expanded) <| getTab app
+isEntryExpanded : String -> Model -> Bool
+isEntryExpanded itemId model =
+    List.member itemId <| (.expanded) <| getTab model
 
 
-isEntryEditing : Model -> String -> Bool
-isEntryEditing app itemId =
-    case app.selected of
+isEntryEditing : String -> Model -> Bool
+isEntryEditing itemId model =
+    case model.selected of
         TabServers ->
-            Dict.member itemId app.serversEditing
+            Dict.member itemId model.serversEditing
 
         TabBankAccs ->
-            Dict.member itemId app.bankAccsEditing
+            Dict.member itemId model.bankAccsEditing
 
         TabWallets ->
-            Dict.member itemId app.walletsEditing
+            Dict.member itemId model.walletsEditing
 
 
 tabToString : MainTab -> String
