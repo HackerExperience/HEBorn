@@ -22,7 +22,7 @@ import Game.Servers.Processes.Messages
 
 
 type Response
-    = Okay ID Process
+    = Okay
 
 
 request :
@@ -50,9 +50,7 @@ receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
-            decodeValue Decoders.Processes.process json
-                |> Result.map (uncurry Okay)
-                |> Requests.report
+            Just Okay
 
         _ ->
             Nothing
