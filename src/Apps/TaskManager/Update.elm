@@ -10,7 +10,6 @@ import Game.Servers.Processes.Messages as Processes
 import Apps.TaskManager.Models
     exposing
         ( Model
-        , onlyLocalTasks
         , updateTasks
         )
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
@@ -49,7 +48,6 @@ update data msg model =
                 model_ =
                     updateTasks
                         activeServer
-                        model.limits
                         model
             in
                 ( model_, Cmd.none, Dispatch.none )

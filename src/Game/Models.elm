@@ -23,6 +23,7 @@ module Game.Models
 
 import Dict
 import Native.Panic
+import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
@@ -150,9 +151,9 @@ unsafeGetGateway model =
             server
 
         Nothing ->
-            Native.Panic.crash
-                "WTF_ASTRAL_PROJECTION"
-                "Player has no active gateway!"
+            "Player has no active gateway!"
+                |> Error.astralProj
+                |> uncurry Native.Panic.crash
 
 
 setGateway : Servers.Server -> Model -> Model
