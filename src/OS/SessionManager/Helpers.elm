@@ -1,6 +1,7 @@
 module OS.SessionManager.Helpers exposing (toSessionID)
 
 import Native.Panic
+import Core.Error as Error
 import Game.Data exposing (Data)
 import Game.Models as Game
 import Game.Meta.Types exposing (..)
@@ -43,6 +44,6 @@ toSessionID ({ game } as data) =
                             endpointSessionId
 
                         Nothing ->
-                            Native.Panic.crash
-                                "ERROR_NONEXISTINGENDPOINT_ISACTIVEENDPOINT"
-                                "U = {x}, ∄ x ⊂ U"
+                            "U = {x}, ∄ x ⊂ U"
+                                |> Error.neeiae
+                                |> uncurry Native.Panic.crash

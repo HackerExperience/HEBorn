@@ -279,12 +279,8 @@ onBruteforceRequest :
     -> UpdateResponse
 onBruteforceRequest game cid oldId response model =
     case response of
-        Bruteforce.Okay id process ->
-            let
-                model_ =
-                    replace oldId id process model
-            in
-                Update.fromModel model_
+        Bruteforce.Okay ->
+            Update.fromModel model
 
 
 onDownloadRequest :
@@ -296,8 +292,8 @@ onDownloadRequest :
     -> UpdateResponse
 onDownloadRequest game cid oldId response model =
     case response of
-        Download.Okay id process ->
-            okDownloadFile id oldId process cid model
+        Download.Okay ->
+            Update.fromModel model
 
         Download.SelfLoop ->
             failDownloadFile game.meta.lastTick cid oldId model <|

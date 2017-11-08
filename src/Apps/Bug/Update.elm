@@ -57,4 +57,4 @@ update data msg model =
         UnpoliteCrash ->
             "This is an unpolite crash."
                 |> Error.fakeTest
-                |> Native.Panic.crash
+                |> uncurry Native.Panic.crash

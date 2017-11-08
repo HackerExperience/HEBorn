@@ -52,14 +52,18 @@ maybe =
     Maybe.withDefault <| text ""
 
 
-viewTaskRowUsage : ResourceUsage -> Html Msg
+viewTaskRowUsage : Processes.ResourcesUsage -> Html Msg
 viewTaskRowUsage usage =
-    div []
-        [ div [] [ text (frequencyToString usage.cpu) ]
-        , div [] [ text (bibytesToString usage.mem) ]
-        , div [] [ text (bitsPerSecondToString usage.down) ]
-        , div [] [ text (bitsPerSecondToString usage.up) ]
-        ]
+    let
+        un =
+            Processes.getUnitUsage >> toFloat
+    in
+        div []
+            [ div [] [ text (frequencyToString <| un usage.cpu) ]
+            , div [] [ text (bibytesToString <| un usage.mem) ]
+            , div [] [ text (bitsPerSecondToString <| un usage.down) ]
+            , div [] [ text (bitsPerSecondToString <| un usage.up) ]
+            ]
 
 
 etaBar : Time -> Float -> Html Msg
@@ -138,7 +142,7 @@ viewTaskRow data now (( _, process ) as entry) =
         usageView =
             process
                 |> Processes.getUsage
-                |> Maybe.map (packUsage >> viewTaskRowUsage)
+                |> Maybe.map (viewTaskRowUsage)
                 |> maybe
     in
         div [ class [ EntryDivision ], (processMenu entry) ]
@@ -170,8 +174,8 @@ viewTasksTable data entries now =
         )
 
 
-viewGraphUsage : String -> String -> List Float -> Float -> Html Msg
-viewGraphUsage title color history limit =
+viewGraphUsage : String -> String -> List Float -> Html Msg
+viewGraphUsage title color history =
     let
         sz =
             toFloat ((List.length history) - 1)
@@ -180,7 +184,7 @@ viewGraphUsage title color history limit =
             (List.indexedMap
                 (\i x ->
                     ( (1 - toFloat (i) / sz)
-                    , (1 - x / limit)
+                    , (1 - x)
                     )
                 )
                 history
@@ -190,14 +194,10 @@ viewGraphUsage title color history limit =
 
 
 viewTotalResources : Model -> Html Msg
-viewTotalResources model =
-    let
-        { historyCPU, historyMem, historyDown, historyUp, limits } =
-            model
-    in
-        div [ class [ BottomGraphsRow ] ]
-            [ viewGraphUsage "CPU" "green" historyCPU limits.cpu
-            , viewGraphUsage "Memory" "blue" historyMem limits.mem
-            , viewGraphUsage "Downlink" "red" historyDown limits.down
-            , viewGraphUsage "Uplink" "yellow" historyUp limits.up
-            ]
+viewTotalResources { historyCPU, historyMem, historyDown, historyUp } =
+    div [ class [ BottomGraphsRow ] ]
+        [ viewGraphUsage "CPU" "green" historyCPU
+        , viewGraphUsage "Memory" "blue" historyMem
+        , viewGraphUsage "Downlink" "red" historyDown
+        , viewGraphUsage "Uplink" "yellow" historyUp
+        ]

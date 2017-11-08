@@ -18,13 +18,13 @@ events cid name json =
         "file_added" ->
             FileAdded.handler (onFileAdded cid) json
 
-        "process_started" ->
+        "process_created" ->
             ProcessStarted.handler (onProcessStarted cid) json
 
         "process_conclusion" ->
             ProcessConclusion.handler (onProcessConclusion cid) json
 
-        "processes_changed" ->
+        "top_recalcado" ->
             ProcessesChanged.handler (onProcessesChanged cid) json
 
         "bruteforce_failed" ->
