@@ -5,7 +5,7 @@ import Game.Account.Database.Models as Database
 import Apps.DBAdmin.Tabs.Servers.Helpers as Servers exposing (..)
 
 
-toggleExpand : String -> MainTab -> DBAdmin -> DBAdmin
+toggleExpand : String -> MainTab -> Model -> Model
 toggleExpand itemId tab app =
     case tab of
         TabServers ->
@@ -15,7 +15,7 @@ toggleExpand itemId tab app =
             app
 
 
-enterEditing : String -> MainTab -> Database.Model -> DBAdmin -> DBAdmin
+enterEditing : String -> MainTab -> Database.Model -> Model -> Model
 enterEditing itemId tab database app =
     case tab of
         TabServers ->
@@ -25,7 +25,7 @@ enterEditing itemId tab database app =
             app
 
 
-leaveEditing : String -> MainTab -> DBAdmin -> DBAdmin
+leaveEditing : String -> MainTab -> Model -> Model
 leaveEditing itemId tab app =
     case tab of
         TabServers ->
@@ -35,7 +35,7 @@ leaveEditing itemId tab app =
             app
 
 
-updateTextFilter : String -> MainTab -> Database.Model -> DBAdmin -> DBAdmin
+updateTextFilter : String -> MainTab -> Database.Model -> Model -> Model
 updateTextFilter newFilter tab database app =
     case tab of
         TabServers ->

@@ -14,7 +14,7 @@ update :
     -> BounceManager.Msg
     -> Model
     -> ( Model, Cmd BounceManager.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
@@ -33,6 +33,6 @@ update data msg ({ app } as model) =
         GoTab tab ->
             let
                 model_ =
-                    { model | app = { app | selected = tab } }
+                    { model | selected = tab }
             in
                 ( model_, Cmd.none, Dispatch.none )

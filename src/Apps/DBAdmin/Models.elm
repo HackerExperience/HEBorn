@@ -28,8 +28,9 @@ type alias Tab =
     }
 
 
-type alias DBAdmin =
-    { selected : MainTab
+type alias Model =
+    { menu : Menu.Model
+    , selected : MainTab
     , servers : Tab
     , serversEditing : Dict String EditingServers
     , bankAccs : Tab
@@ -39,22 +40,16 @@ type alias DBAdmin =
     }
 
 
-type alias Model =
-    { app : DBAdmin
-    , menu : Menu.Model
-    }
-
-
 name : String
 name =
     "Database Admin"
 
 
 title : Model -> String
-title ({ app } as model) =
+title model =
     let
         filter =
-            (getTab app).filterText
+            (.filterText) <| getTab model
 
         posfix =
             Nothing
@@ -71,7 +66,7 @@ icon =
     "udb"
 
 
-getTab : DBAdmin -> Tab
+getTab : Model -> Tab
 getTab app =
     case app.selected of
         TabServers ->
@@ -86,8 +81,14 @@ getTab app =
 
 initialModel : Model
 initialModel =
-    { app = initialDBAdmin
-    , menu = Menu.initialMenu
+    { menu = Menu.initialMenu
+    , selected = TabServers
+    , servers = initialTab
+    , serversEditing = Dict.empty
+    , bankAccs = initialTab
+    , bankAccsEditing = Dict.empty
+    , wallets = initialTab
+    , walletsEditing = Dict.empty
     }
 
 
@@ -101,34 +102,22 @@ initialTab =
     }
 
 
-initialDBAdmin : DBAdmin
-initialDBAdmin =
-    { selected = TabServers
-    , servers = initialTab
-    , serversEditing = Dict.empty
-    , bankAccs = initialTab
-    , bankAccsEditing = Dict.empty
-    , wallets = initialTab
-    , walletsEditing = Dict.empty
-    }
+isEntryExpanded : String -> Model -> Bool
+isEntryExpanded itemId model =
+    List.member itemId <| (.expanded) <| getTab model
 
 
-isEntryExpanded : DBAdmin -> String -> Bool
-isEntryExpanded app itemId =
-    List.member itemId (getTab app).expanded
-
-
-isEntryEditing : DBAdmin -> String -> Bool
-isEntryEditing app itemId =
-    case app.selected of
+isEntryEditing : String -> Model -> Bool
+isEntryEditing itemId model =
+    case model.selected of
         TabServers ->
-            Dict.member itemId app.serversEditing
+            Dict.member itemId model.serversEditing
 
         TabBankAccs ->
-            Dict.member itemId app.bankAccsEditing
+            Dict.member itemId model.bankAccsEditing
 
         TabWallets ->
-            Dict.member itemId app.walletsEditing
+            Dict.member itemId model.walletsEditing
 
 
 tabToString : MainTab -> String

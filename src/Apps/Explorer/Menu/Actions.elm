@@ -57,7 +57,7 @@ onGoPath :
     -> String
     -> Model
     -> UpdateResponse
-onGoPath data pathId ({ app } as model) =
+onGoPath data pathId model =
     let
         fs =
             data
@@ -79,9 +79,8 @@ onGoPath data pathId ({ app } as model) =
                                 changePath
                                     (loc ++ [ last ])
                                     fs
-                                    app
+                                    model
                            )
-                        >> (\newApp -> { model | app = newApp })
                     )
                 |> Maybe.withDefault model
     in
@@ -92,15 +91,12 @@ onUpdateEditing :
     EditingStatus
     -> Model
     -> UpdateResponse
-onUpdateEditing state_ ({ app } as model) =
+onUpdateEditing state_ model =
     let
-        newApp =
+        model_ =
             setEditing
                 state_
-                app
-
-        model_ =
-            { model | app = newApp }
+                model
     in
         ( model_, Cmd.none, Dispatch.none )
 
@@ -110,7 +106,7 @@ onEnterRename :
     -> String
     -> Model
     -> UpdateResponse
-onEnterRename data fileId ({ app } as model) =
+onEnterRename data fileId model =
     let
         fs =
             data
@@ -126,8 +122,7 @@ onEnterRename data fileId ({ app } as model) =
                 |> Maybe.map
                     (Filesystem.getEntryBasename
                         >> Renaming fileId
-                        >> ((flip setEditing) app)
-                        >> (\newApp -> { model | app = newApp })
+                        >> ((flip setEditing) model)
                     )
                 |> Maybe.withDefault model
     in

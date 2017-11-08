@@ -14,7 +14,7 @@ update :
     -> CtrlPanel.Msg
     -> Model
     -> ( Model, Cmd CtrlPanel.Msg, Dispatch )
-update data msg ({ app } as model) =
+update data msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->

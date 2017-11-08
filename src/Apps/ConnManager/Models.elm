@@ -7,17 +7,12 @@ type Sorting
     = DefaultSort
 
 
-type alias ConnManager =
-    { filterText : String
+type alias Model =
+    { menu : Menu.Model
+    , filterText : String
     , filterFlags : List Never
     , filterCache : List String
     , sorting : Sorting
-    }
-
-
-type alias Model =
-    { app : ConnManager
-    , menu : Menu.Model
     }
 
 
@@ -38,14 +33,8 @@ icon =
 
 initialModel : Model
 initialModel =
-    { app = initialConnManager
-    , menu = Menu.initialMenu
-    }
-
-
-initialConnManager : ConnManager
-initialConnManager =
-    { filterText = ""
+    { menu = Menu.initialMenu
+    , filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort

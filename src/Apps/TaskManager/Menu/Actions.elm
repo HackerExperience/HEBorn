@@ -13,7 +13,7 @@ actionHandler :
     -> MenuAction
     -> Model
     -> ( Model, Cmd TaskManager.Msg, Dispatch )
-actionHandler data action ({ app } as model) =
+actionHandler data action model =
     case action of
         PauseProcess pID ->
             let

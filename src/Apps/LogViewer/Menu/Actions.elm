@@ -14,7 +14,7 @@ actionHandler :
     -> MenuAction
     -> Model
     -> ( Model, Cmd LogViewer.Msg, Dispatch )
-actionHandler data action ({ app } as model) =
+actionHandler data action model =
     case action of
         NormalEntryEdit logId ->
             enterEditing data logId model
@@ -23,7 +23,7 @@ actionHandler data action ({ app } as model) =
         EdittingEntryApply logId ->
             let
                 edited =
-                    getEdit logId app
+                    getEdit logId model
 
                 dispatch =
                     case edited of
@@ -36,16 +36,11 @@ actionHandler data action ({ app } as model) =
                             Dispatch.none
 
                 model_ =
-                    { model | app = leaveEditing logId app }
+                    leaveEditing logId model
             in
                 ( model_, Cmd.none, dispatch )
 
         EdittingEntryCancel logId ->
-            let
-                app_ =
-                    leaveEditing logId app
-
-                model_ =
-                    { model | app = app_ }
-            in
-                Update.fromModel model_
+            model
+                |> leaveEditing logId
+                |> Update.fromModel

@@ -3,18 +3,13 @@ module Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Menu.Models as Menu
 
 
-type alias Hebamp =
-    { playerId : String
+type alias Model =
+    { menu : Menu.Model
+    , playerId : String
     , now : Maybe AudioData
     , prev : List AudioData
     , next : List AudioData
     , currentTime : Float
-    }
-
-
-type alias Model =
-    { app : Hebamp
-    , menu : Menu.Model
     }
 
 
@@ -27,7 +22,7 @@ title : Model -> String
 title model =
     let
         musicTitle =
-            model.app.now
+            model.now
                 |> Maybe.map .label
                 |> Maybe.withDefault ""
 
@@ -51,14 +46,8 @@ icon =
 
 initialModel : String -> Model
 initialModel id =
-    { app = initialHebamp id
-    , menu = Menu.initialMenu
-    }
-
-
-initialHebamp : String -> Hebamp
-initialHebamp id =
-    { playerId = "audio-" ++ id
+    { menu = Menu.initialMenu
+    , playerId = "audio-" ++ id
     , now =
         Just
             { mediaUrl = "//upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"

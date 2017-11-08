@@ -15,15 +15,10 @@ type EditingStatus
     | Renaming Filesystem.FileID String
 
 
-type alias Explorer =
-    { path : Filesystem.Location
-    , editing : EditingStatus
-    }
-
-
 type alias Model =
-    { app : Explorer
-    , menu : Menu.Model
+    { menu : Menu.Model
+    , path : Filesystem.Location
+    , editing : EditingStatus
     }
 
 
@@ -33,10 +28,10 @@ name =
 
 
 title : Model -> String
-title ({ app } as model) =
+title model =
     let
         path =
-            locationToString app.path
+            locationToString model.path
 
         posfix =
             if String.length path > 12 then
@@ -61,26 +56,20 @@ icon =
     "explorer"
 
 
-initialExplorer : Explorer
-initialExplorer =
-    { path = []
+initialModel : Model
+initialModel =
+    { menu = Menu.initialMenu
+    , path = []
     , editing = NotEditing
     }
 
 
-initialModel : Model
-initialModel =
-    { app = initialExplorer
-    , menu = Menu.initialMenu
-    }
-
-
-getPath : Explorer -> Filesystem.Location
+getPath : Model -> Filesystem.Location
 getPath explorer =
     explorer.path
 
 
-setPath : Filesystem.Location -> Explorer -> Explorer
+setPath : Filesystem.Location -> Model -> Model
 setPath loc explorer =
     { explorer
         | path = loc
@@ -97,8 +86,8 @@ setPath loc explorer =
 changePath :
     Filesystem.Location
     -> Filesystem.Filesystem
-    -> Explorer
-    -> Explorer
+    -> Model
+    -> Model
 changePath path filesystem explorer =
     if Filesystem.isLocationValid path filesystem then
         setPath path explorer
@@ -111,6 +100,6 @@ resolvePath server path =
     Filesystem.findChildren path (Servers.getFilesystem server)
 
 
-setEditing : EditingStatus -> Explorer -> Explorer
+setEditing : EditingStatus -> Model -> Model
 setEditing val src =
     { src | editing = val }

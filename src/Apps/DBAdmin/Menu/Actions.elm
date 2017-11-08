@@ -12,7 +12,7 @@ actionHandler :
     -> MenuAction
     -> Model
     -> ( Model, Cmd DBAdmin.Msg, Dispatch )
-actionHandler data action ({ app } as model) =
+actionHandler data action model =
     case action of
         NormalEntryEdit logId ->
             ( model, Cmd.none, Dispatch.none )
