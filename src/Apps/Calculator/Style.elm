@@ -60,7 +60,7 @@ css =
                     , height (pct 20)
                     ]
                 , class ApplyBtn
-                    [ height (pct 41.25)
+                    [ height (pct 40.25)
                     , width (pct 25)
                     ]
                 , class DoubleWidthBtn
