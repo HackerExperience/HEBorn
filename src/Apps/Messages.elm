@@ -15,6 +15,7 @@ import Apps.LocationPicker.Messages as LocationPicker
 import Apps.LanViewer.Messages as LanViewer
 import Apps.Email.Messages as Email
 import Apps.Bug.Messages as Bug
+import Apps.Calculator.Messages as Calculator
 
 
 type Msg
@@ -33,3 +34,4 @@ type Msg
     | LanViewerMsg LanViewer.Msg
     | EmailMsg Email.Msg
     | BugMsg Bug.Msg
+    | CalculatorMsg Calculator.Msg

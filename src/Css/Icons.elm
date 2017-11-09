@@ -297,3 +297,8 @@ accountMenu =
 bug : Icon
 bug =
     faIcon FA.bug
+
+
+calculator : Icon
+calculator =
+    faIcon FA.calculator
