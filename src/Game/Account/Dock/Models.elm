@@ -23,4 +23,5 @@ initialModel =
     , Apps.LanViewerApp
     , Apps.EmailApp --TODO: Make campaign only
     , Apps.BugApp -- TODO: Make dev only
+    , Apps.CalculatorApp
     ]

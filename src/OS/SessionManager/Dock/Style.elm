@@ -169,6 +169,7 @@ itemIco =
         , addIco "lanvw" Icon.lanvw
         , addIco "email" Icon.email
         , addIco "bug" Icon.bug
+        , addIco "calculator" Icon.calculator
         , addGrad "explorer" Gradients.mangoPulp
         , addGrad "logvw" Gradients.stellar
         , addGrad "browser" Gradients.pinotNoir
@@ -184,6 +185,7 @@ itemIco =
         , addGrad "lanvw" Gradients.dusk
         , addGrad "email" Gradients.darkSkies
         , addGrad "bug" Gradients.superman
+        , addGrad "calculator" Gradients.mangoPulp
         ]
 
 

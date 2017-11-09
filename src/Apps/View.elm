@@ -24,6 +24,7 @@ import Apps.LocationPicker.View as LocationPicker
 import Apps.LanViewer.View as LanViewer
 import Apps.Email.View as Email
 import Apps.Bug.View as Bug
+import Apps.Calculator.View as Calculator
 import Game.Data as Game
 
 
@@ -74,6 +75,9 @@ view data model =
 
         BugModel model ->
             Html.map BugMsg (Bug.view data model)
+
+        CalculatorModel model ->
+            Html.map CalculatorMsg (Calculator.view data model)
 
 
 isDecorated : App -> Bool
