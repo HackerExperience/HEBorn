@@ -176,6 +176,13 @@ update data msg model =
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
 
+        CalculatorMsg msg ->
+            case model of
+                CalculatorModel model ->
+                    map CalculatorModel
+                        CalculatorMsg
+                        (Calculator.update data msg model)
+
 
 
 --case ( msg, model ) of
