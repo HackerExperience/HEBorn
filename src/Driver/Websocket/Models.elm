@@ -7,6 +7,10 @@ import Phoenix.Socket as Socket
 import Phoenix.Channel as Channel
 
 
+type alias ApiUrl =
+    String
+
+
 type alias Model =
     { socket : Socket.Socket Msg
     , channels : Channels
@@ -23,17 +27,17 @@ type alias EventBase =
     }
 
 
-initialSocket : String -> String -> Socket.Socket Msg
-initialSocket apiWsUrl token =
+initialSocket : ApiUrl -> Token -> ClientName -> Socket.Socket Msg
+initialSocket apiWsUrl token client =
     apiWsUrl
         |> Socket.init
-        |> Socket.withParams [ ( "token", token ) ]
-        |> Socket.onOpen (Connected token)
+        |> Socket.withParams [ ( "token", token ), ( "client", client ) ]
+        |> Socket.onOpen (Connected token client)
         |> Socket.onClose (\_ -> Disconnected)
 
 
-initialModel : String -> String -> Model
-initialModel apiWsUrl token =
-    { socket = initialSocket apiWsUrl token
+initialModel : ApiUrl -> Token -> ClientName -> Model
+initialModel apiWsUrl token client =
+    { socket = initialSocket apiWsUrl token client
     , channels = Dict.empty
     }
