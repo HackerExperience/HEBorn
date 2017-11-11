@@ -32,15 +32,3 @@ account model =
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
 mainframe model =
     optional "mainframe" (map Just Decoders.Servers.playerCId) model.mainframe
-
-
-setupPages : Decoder Setup.Pages
-setupPages =
-    -- TODO: remove this fallback after getting helix support
-    oneOf
-        [ succeed Setup.pageOrder
-        , Decoders.Setup.remainingPages
-            |> field "pages"
-            |> field "setup"
-            |> field "account"
-        ]

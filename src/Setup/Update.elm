@@ -19,7 +19,7 @@ import Setup.Pages.Mainframe.Update as Mainframe
 import Setup.Pages.Mainframe.Messages as Mainframe
 import Setup.Requests.Setup as Setup
 import Setup.Requests exposing (..)
-import Decoders.Account
+import Decoders.Client
 
 
 type alias UpdateResponse =
@@ -162,7 +162,7 @@ updateRequest game response model =
 
 handleJoinedAccount : Value -> Model -> UpdateResponse
 handleJoinedAccount value model =
-    case Decode.decodeValue Decoders.Account.setupPages value of
+    case Decode.decodeValue Decoders.Client.setupPages value of
         Ok pages ->
             let
                 model_ =
