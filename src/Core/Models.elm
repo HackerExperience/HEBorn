@@ -88,7 +88,7 @@ connect id username token ({ state, config } as model) =
                     Just <| Connecting id username token
 
                 websocket =
-                    Just <| Ws.initialModel config.apiWsUrl token
+                    Just <| Ws.initialModel config.apiWsUrl token "web1"
 
                 home_ =
                     { home | websocket = websocket, connecting = connecting }
@@ -115,7 +115,7 @@ login ({ state, config } as model) =
                     let
                         websocket_ =
                             Maybe.withDefault
-                                (Ws.initialModel config.apiWsUrl token)
+                                (Ws.initialModel config.apiWsUrl token "web1")
                                 websocket
 
                         game =

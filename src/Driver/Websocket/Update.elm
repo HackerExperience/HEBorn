@@ -20,7 +20,7 @@ type alias UpdateResponse =
 update : Msg -> Model -> UpdateResponse
 update msg model =
     case msg of
-        Connected token ->
+        Connected token _ ->
             ( model, Cmd.none, Dispatch.websocket <| Ws.Connected token )
 
         Disconnected ->
