@@ -23,7 +23,7 @@ view { toMsg, onNext, onPrevious } game model =
         , hostnameInput toMsg model
         , div []
             [ button [ onClick onPrevious ] [ text "BACK" ]
-            , nextBtn onNext model
+            , nextBtn (onNext settings model) model
             ]
         ]
 

@@ -241,6 +241,31 @@ pageModelToString page =
             "FINISH"
 
 
+encodeDone : Model -> Result String (List Value)
+encodeDone =
+    let
+        skipEmpty model =
+            if List.isEmpty model.done then
+                Err "No setup pages to encode."
+            else
+                Ok model.done
+
+        encodePages page list =
+            case list of
+                Ok list ->
+                    case encodePageModel page of
+                        Ok page ->
+                            Ok <| page :: list
+
+                        Err msg ->
+                            Err msg
+
+                Err _ ->
+                    list
+    in
+        skipEmpty >> Result.andThen (List.foldl encodePages (Ok []))
+
+
 encodePageModel : PageModel -> Result String Value
 encodePageModel page =
     case page of

@@ -34,9 +34,9 @@ accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
-accountSetup : Account.ID -> Topic
-accountSetup id =
-    WebsocketTopic (AccountChannel id) "account.setup"
+clientSetup : Account.ID -> Topic
+clientSetup id =
+    WebsocketTopic (AccountChannel id) "client.setup"
 
 
 accountConfigCheck : Account.ID -> Topic

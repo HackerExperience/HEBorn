@@ -1,10 +1,17 @@
 module Setup.Pages.Mainframe.Models exposing (..)
 
+import Game.Servers.Settings.Types as Settings exposing (Settings)
+
 
 type alias Model =
     { hostname : Maybe String
     , okay : Bool
     }
+
+
+settings : Model -> List Settings
+settings =
+    .hostname >> Settings.Name
 
 
 initialModel : Model
