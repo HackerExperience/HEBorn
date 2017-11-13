@@ -5,8 +5,8 @@ import Html.Events exposing (onClick, onInput, onBlur)
 import Html.Attributes exposing (placeholder, disabled)
 import Html.CssHelpers
 import Game.Models as Game
-import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Setup.Resources exposing (..)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Helpers exposing (withHeader)
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)

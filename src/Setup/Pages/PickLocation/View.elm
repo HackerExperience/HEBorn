@@ -6,8 +6,8 @@ import Html.Attributes exposing (disabled)
 import Html.CssHelpers
 import Native.Untouchable
 import Game.Models as Game
-import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Setup.Resources exposing (..)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Helpers exposing (withHeader)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)
