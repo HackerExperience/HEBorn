@@ -55,24 +55,6 @@ renderTyping op =
             "Error"
 
 
-
---renderStoredNum : Operator -> String
---renderStoredNum model =
---    case model of
---        Add x (Typing y z) ->
---            toString x
---        Sub x (Typing y z) ->
---            toString x
---        Div x (Typing y z) ->
---            toString x
---        Mul x (Typing y z) ->
---            toString x
---        Pow x (Typing y z) ->
---            toString x
---        _ ->
---            ""
-
-
 render : Model -> Html Msg
 render model =
     let
