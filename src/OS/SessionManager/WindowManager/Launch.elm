@@ -138,7 +138,7 @@ insert data maybeContext id serverCId app model =
         window =
             Window
                 (initialPosition model)
-                (Size 600 400)
+                (uncurry Size <| Apps.windowInitSize app)
                 False
                 app
                 instance
