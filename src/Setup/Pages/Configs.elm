@@ -1,16 +1,17 @@
 module Setup.Pages.Configs exposing (..)
 
 import Setup.Messages exposing (..)
+import Game.Servers.Settings.Types exposing (Settings)
 import Setup.Pages.PickLocation.Config as PickLocation
 import Setup.Pages.Mainframe.Config as Mainframe
 
 
-welcome : { onNext : Msg }
+welcome : { onNext : List Settings -> Msg }
 welcome =
     { onNext = NextPage }
 
 
-finish : { onPrevious : Msg, onNext : Msg }
+finish : { onPrevious : Msg, onNext : List Settings -> Msg }
 finish =
     { onNext = NextPage, onPrevious = PreviousPage }
 

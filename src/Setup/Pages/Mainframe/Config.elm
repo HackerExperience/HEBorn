@@ -1,10 +1,11 @@
 module Setup.Pages.Mainframe.Config exposing (Config)
 
+import Game.Servers.Settings.Types exposing (Settings)
 import Setup.Pages.Mainframe.Messages exposing (..)
 
 
 type alias Config msg =
-    { onNext : msg
+    { onNext : List Settings -> msg
     , onPrevious : msg
     , toMsg : Msg -> msg
     }
