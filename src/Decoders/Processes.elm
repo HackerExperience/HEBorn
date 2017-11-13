@@ -26,11 +26,7 @@ model maybeModel =
 
 processDict : Decoder (Dict ID Process)
 processDict =
-    oneOf
-        -- [α ONLY] TEMPORARY FALLBACK
-        [ map Dict.fromList processWithId
-        , succeed Dict.empty
-        ]
+    map Dict.fromList processWithId
 
 
 processWithId : Decoder (List ( ID, Process ))
@@ -167,8 +163,8 @@ progress : Decoder Progress
 progress =
     decode Progress
         |> required "creation_date" float
-        |> optionalMaybe "percentage" float
         |> optionalMaybe "completion_date" float
+        |> optionalMaybe "percentage" float
 
 
 file : Decoder ProcessFile

@@ -22,6 +22,8 @@ import OS.Messages as OS
 import OS.Update as OS
 import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.Messages as SM
+import Apps.Messages as Apps
+import Apps.TaskManager.Messages as TaskManager
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -370,6 +372,9 @@ received msg =
             msg
 
         OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.DragMsg _))) ->
+            msg
+
+        OSMsg (OS.SessionManagerMsg (SM.WindowManagerMsg _ (WM.AppMsg _ _ (Apps.TaskManagerMsg (TaskManager.Tick _))))) ->
             msg
 
         _ ->
