@@ -30,6 +30,9 @@ events cid name json =
         "bruteforce_failed" ->
             BruteforceFailed.handler (onBruteforceFailed cid) json
 
+        "log_created" ->
+            Err "Pedro didn't implemented this yet"
+
         _ ->
             Err ""
 
