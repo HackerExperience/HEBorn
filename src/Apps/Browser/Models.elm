@@ -72,6 +72,11 @@ icon =
     "browser"
 
 
+windowInitSize : ( Float, Float )
+windowInitSize =
+    ( 900, 550 )
+
+
 initTab : Tab
 initTab =
     { addressBar = "about:home"

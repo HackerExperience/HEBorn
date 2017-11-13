@@ -7,6 +7,7 @@ module Apps.Models
         , title
         , icon
         , isDecorated
+        , windowInitSize
         )
 
 import Apps.Messages exposing (..)
@@ -257,3 +258,13 @@ isDecorated app =
 
         _ ->
             True
+
+
+windowInitSize : App -> ( Float, Float )
+windowInitSize app =
+    case app of
+        BrowserApp ->
+            Browser.windowInitSize
+
+        _ ->
+            ( 600, 400 )
