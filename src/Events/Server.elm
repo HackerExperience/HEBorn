@@ -18,17 +18,20 @@ events cid name json =
         "new_file" ->
             NewFile.handler (onNewFile cid) json
 
-        "process_started" ->
+        "process_created" ->
             ProcessStarted.handler (onProcessStarted cid) json
 
         "process_conclusion" ->
             ProcessConclusion.handler (onProcessConclusion cid) json
 
-        "processes_changed" ->
+        "top_recalcado" ->
             ProcessesChanged.handler (onProcessesChanged cid) json
 
         "bruteforce_failed" ->
             BruteforceFailed.handler (onBruteforceFailed cid) json
+
+        "log_created" ->
+            Err "Pedro didn't implemented this yet"
 
         _ ->
             Err ""

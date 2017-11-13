@@ -30,7 +30,7 @@ import Game.Servers.Shared exposing (CId)
 
 
 type Response
-    = Okay ID Process
+    = Okay
     | SelfLoop
     | FileNotFound
     | StorageFull
@@ -72,10 +72,7 @@ receive : Code -> Value -> Maybe Response
 receive code json =
     case code of
         OkCode ->
-            json
-                |> decodeValue Decoders.Processes.process
-                |> Result.map (uncurry Okay)
-                |> Requests.report
+            Just Okay
 
         ErrorCode ->
             Requests.decodeGenericError
