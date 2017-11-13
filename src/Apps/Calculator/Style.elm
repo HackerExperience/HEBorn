@@ -20,16 +20,21 @@ css =
         [ class MainContainer
             [ displayFlex
             , flexDirection column
-            , width (px 170)
-            , height (px 200)
+            , width (px 175)
+            , height (px 206)
             , padding (px 10)
             ]
+        , button [
+            focus
+                [outline zero |> important]
+          ]
         , class DisplayContainer
             [ displayFlex
             , border3 (px 1) solid (hex "000000")
             , backgroundColor (hex "ffffff")
             , flex (int 1)
             , padding (px 4)
+            , overflow hidden
             ]
         , class ButtonsContainer
             [ displayFlex
