@@ -1,4 +1,4 @@
-module Events.Server.Filesystem.NewFile exposing (..)
+module Events.Server.Filesystem.Added exposing (..)
 
 import Json.Decode exposing (decodeValue)
 import Events.Types exposing (Handler)

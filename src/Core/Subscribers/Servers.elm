@@ -83,7 +83,7 @@ fromFilesystem id dispatch =
         NewDir a b ->
             [ filesystem id <| Filesystem.HandleNewDir a b ]
 
-        CreatedFile _ ->
+        FileAdded _ ->
             []
 
 
