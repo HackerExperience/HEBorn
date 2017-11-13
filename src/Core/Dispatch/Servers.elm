@@ -7,7 +7,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Network.Types as Network
-import Events.Server.Filesystem.NewFile as NewFile
+import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -45,7 +45,7 @@ type Filesystem
     | RenameFile Filesystem.Id String
     | NewTextFile Filesystem.Path Filesystem.Name
     | NewDir Filesystem.Path Filesystem.Name
-    | CreatedFile NewFile.Data
+    | FileAdded FileAdded.Data
 
 
 {-| Messages related to server's logs.
