@@ -9,6 +9,12 @@ import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
 import Apps.LogViewer.Menu.Update as Menu
 import Apps.LogViewer.Menu.Actions as Menu
+    exposing
+        ( startCrypting
+        , startDecrypting
+        , startHiding
+        , startDeleting
+        )
 
 
 update :
@@ -87,30 +93,28 @@ update data msg model =
         StartCrypting id ->
             let
                 dispatch =
-                    id
-                        |> Servers.EncryptLog
-                        |> Dispatch.logs (Game.getActiveCId data)
+                    startCrypting id data model
             in
                 ( model, Cmd.none, dispatch )
 
         StartDecrypting id ->
-            ( model, Cmd.none, Dispatch.none )
+            let
+                dispatch =
+                    startDecrypting id model
+            in
+                ( model, Cmd.none, dispatch )
 
         StartHiding id ->
             let
                 dispatch =
-                    id
-                        |> Servers.HideLog
-                        |> Dispatch.logs (Game.getActiveCId data)
+                    startHiding id data model
             in
                 ( model, Cmd.none, dispatch )
 
         StartDeleting id ->
             let
                 dispatch =
-                    id
-                        |> Servers.DeleteLog
-                        |> Dispatch.logs (Game.getActiveCId data)
+                    startDeleting id data model
             in
                 ( model, Cmd.none, dispatch )
 
