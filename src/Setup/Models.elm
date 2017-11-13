@@ -1,12 +1,12 @@
 module Setup.Models exposing (..)
 
+import Dict as Dict
 import Game.Models as Game
-import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Json.Encode as Encode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Ports.Map exposing (Coordinates)
 import Setup.Types exposing (..)
 import Setup.Messages exposing (Msg)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Models as PickLocation
 import Setup.Pages.Mainframe.Models as Mainframe
 
@@ -14,9 +14,11 @@ import Setup.Pages.Mainframe.Models as Mainframe
 type alias Model =
     { page : Maybe PageModel
     , pages : List String
+    , badPages : List String
     , remaining : List PageModel
     , done : PagesDone
     , isLoading : Bool
+    , topicsDone : TopicsDone
     }
 
 
@@ -32,6 +34,11 @@ type PageModel
 
 type alias PagesDone =
     List ( PageModel, List Settings )
+
+
+type alias TopicsDone =
+    { server : Bool
+    }
 
 
 mapId : String
@@ -107,12 +114,20 @@ initialModel game =
         model =
             { page = Nothing
             , pages = []
+            , badPages = []
             , remaining = []
             , done = []
             , isLoading = True
+            , topicsDone = initialTopicsDone
             }
     in
         ( model, Cmd.none, Dispatch.none )
+
+
+initialTopicsDone : TopicsDone
+initialTopicsDone =
+    { server = True
+    }
 
 
 doneLoading : Model -> Model
@@ -158,9 +173,29 @@ setPages pages model =
         }
 
 
+setBadPages : List String -> Model -> Model
+setBadPages pages model =
+    { model | badPages = pages }
+
+
 setPage : PageModel -> Model -> Model
 setPage page model =
     { model | page = Just page }
+
+
+getDone : Model -> PagesDone
+getDone =
+    .done
+
+
+setTopicsDone : Settings.SettingTopic -> Bool -> Model -> Model
+setTopicsDone setting value ({ topicsDone } as model) =
+    case setting of
+        Settings.ServerTopic ->
+            { model | topicsDone = { topicsDone | server = value } }
+
+        _ ->
+            model
 
 
 nextPage : List Settings -> Model -> Model
@@ -195,13 +230,16 @@ nextPage settings model =
 previousPage : Model -> Model
 previousPage model =
     let
+        pagesDone =
+            getDone model
+
         current =
-            model.done
+            pagesDone
                 |> List.head
                 |> Maybe.map Tuple.first
 
         done =
-            model.done
+            pagesDone
                 |> List.tail
                 |> Maybe.withDefault []
 
@@ -221,6 +259,21 @@ previousPage model =
             }
     in
         model_
+
+
+undoPages : Model -> Model
+undoPages model =
+    let
+        pages =
+            getDone model
+                |> List.map Tuple.first
+                |> List.reverse
+    in
+        { model
+            | done = []
+            , page = List.head pages
+            , remaining = List.drop 1 pages
+        }
 
 
 pageModelToString : PageModel -> String
@@ -248,29 +301,18 @@ pageModelToString page =
             "FINISH"
 
 
-encodeDone : Model -> Result String (List Value)
+encodeDone : List PageModel -> List Value
 encodeDone =
     let
-        skipEmpty model =
-            if List.isEmpty model.done then
-                Err "No setup pages to encode."
-            else
-                Ok model.done
+        encodePages page list =
+            case encodePageModel page of
+                Ok page ->
+                    page :: list
 
-        encodePages ( page, _ ) list =
-            case list of
-                Ok list ->
-                    case encodePageModel page of
-                        Ok page ->
-                            Ok <| page :: list
-
-                        Err msg ->
-                            Err msg
-
-                Err _ ->
+                Err msg ->
                     list
     in
-        skipEmpty >> Result.andThen (List.foldl encodePages (Ok []))
+        List.foldl encodePages []
 
 
 encodePageModel : PageModel -> Result String Value
@@ -297,3 +339,8 @@ encodePageModel page =
                     ++ (pageModelToString page)
                     ++ "' to json, this is a local page."
                 )
+
+
+noTopicsRemaining : Model -> Bool
+noTopicsRemaining { topicsDone } =
+    topicsDone.server

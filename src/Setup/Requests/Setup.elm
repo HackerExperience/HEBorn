@@ -12,14 +12,15 @@ import Decoders.Game exposing (ServersToJoin)
 
 type Response
     = Okay
+    | Error
 
 
-request : List Value -> Account.ID -> ConfigSource a -> Cmd Msg
+request : List PageModel -> Account.ID -> ConfigSource a -> Cmd Msg
 request pages id =
     let
         payload =
             Encode.object
-                [ ( "pages", Encode.list pages ) ]
+                [ ( "pages", Encode.list <| encodeDone pages ) ]
     in
         Requests.request (Topics.clientSetup id)
             (SetupRequest >> Request)
@@ -33,8 +34,9 @@ receive code json =
             Just Okay
 
         _ ->
+            -- TODO: add better error handling
             let
                 _ =
                     Debug.log "▶ Setup Error Code:" code
             in
-                Nothing
+                Just Error
