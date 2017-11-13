@@ -13,5 +13,4 @@ type Msg
 
 
 type RequestMsg
-    = CheckRequest ResponseType
-    | SetRequest ResponseType
+    = CheckLocationRequest ResponseType

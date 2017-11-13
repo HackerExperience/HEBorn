@@ -1,5 +1,7 @@
 module Core.Error exposing (..)
 
+import Requests.Types exposing (Code(..))
+
 
 type alias Error =
     ( String, String )
@@ -8,6 +10,22 @@ type alias Error =
 fakeTest : String -> Error
 fakeTest =
     (,) "FAKE_TEST"
+
+
+request : String -> String -> Error
+request name msg =
+    porra <| ("Couldn't decode '" ++ name ++ "' request response:\n" ++ msg)
+
+
+requestCode : String -> a -> Error
+requestCode name code =
+    porra <|
+        ("Unexpected '"
+            ++ name
+            ++ "' request error code '"
+            ++ toString code
+            ++ "''"
+        )
 
 
 astralProj : String -> Error
