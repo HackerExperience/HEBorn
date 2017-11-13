@@ -1,9 +1,17 @@
-module Apps.LogViewer.Menu.Actions exposing (actionHandler)
+module Apps.LogViewer.Menu.Actions
+    exposing
+        ( actionHandler
+        , startCrypting
+        , startDecrypting
+        , startHiding
+        , startDeleting
+        )
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Utils.Update as Update
+import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
@@ -21,24 +29,9 @@ actionHandler data action model =
                 |> Update.fromModel
 
         EdittingEntryApply logId ->
-            let
-                edited =
-                    getEdit logId model
-
-                dispatch =
-                    case edited of
-                        Just edited ->
-                            edited
-                                |> Servers.UpdateLog logId
-                                |> Dispatch.logs (Game.getActiveCId data)
-
-                        Nothing ->
-                            Dispatch.none
-
-                model_ =
-                    leaveEditing logId model
-            in
-                ( model_, Cmd.none, dispatch )
+            model
+                |> enterEditing data logId
+                |> Update.fromModel
 
         EdittingEntryCancel logId ->
             model
@@ -48,38 +41,65 @@ actionHandler data action model =
         EncryptEntry logId ->
             let
                 dispatch =
-                    Logs.Encrypt
-                        |> Dispatch.log
-                            (Game.getActiveCId data)
-                            logId
+                    startCrypting logId data model
             in
-                model
                 ( model, Cmd.none, dispatch )
 
         DecryptEntry logId ->
             let
                 dispatch =
-                    Logs.Decrypt "NOT IMPLEMENTED YET"
-                        |> Dispatch.log
-                            (Game.getActiveCId data)
-                            logId
+                    startDecrypting logId model
             in
                 ( model, Cmd.none, dispatch )
 
         HideEntry logId ->
             let
                 dispatch =
-                    Logs.Hide logId
-                        |> Dispatch.logs
-                            (Game.getActiveCId data)
+                    startHiding logId data model
             in
                 ( model, Cmd.none, dispatch )
 
         DeleteEntry logId ->
             let
                 dispatch =
-                    Logs.Delete logId
-                        |> Dispatch.logs
-                            (Game.getActiveCId data)
+                    startDeleting logId data model
             in
                 ( model, Cmd.none, dispatch )
+
+
+startCrypting : Logs.ID -> Game.Data -> Model -> Dispatch
+startCrypting id data model =
+    let
+        dispatch =
+            id
+                |> Servers.EncryptLog
+                |> Dispatch.logs (Game.getActiveCId data)
+    in
+        dispatch
+
+
+startDecrypting : Logs.ID -> Model -> Dispatch
+startDecrypting id model =
+    Dispatch.none
+
+
+startHiding : Logs.ID -> Game.Data -> Model -> Dispatch
+startHiding id data model =
+    let
+        dispatch =
+            id
+                |> Servers.HideLog
+                |> Dispatch.logs (Game.getActiveCId data)
+    in
+        dispatch
+
+
+startDeleting : Logs.ID -> Game.Data -> Model -> Dispatch
+startDeleting id data model =
+    let
+        dispatch =
+            id
+                |> Servers.DeleteLog
+                |> Dispatch.logs (Game.getActiveCId data)
+    in
+        dispatch
