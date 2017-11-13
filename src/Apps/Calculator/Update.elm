@@ -131,78 +131,61 @@ onKeyMsg code model =
 
         -- Codes 48 to 57 are normal numbers codes
         -- Codes 96 to 105 are numpad codes
-
-        isNumber = 
+        isNumber =
             (code >= 48 && code <= 57) || (code >= 96 && code <= 105)
 
         -- Code 13 refers to the Return Key
-
-        isReturn = 
+        isReturn =
             (code == 13)
 
         -- Code 107 refers to the Plus Signal Key
-
-        isAdd = 
+        isAdd =
             (code == 107)
 
         -- Code 109 refers to the Minus Signal Key
-
         isSubtract =
             (code == 109)
 
         -- Code 106 refers to the Asterisk Key
-
         isMultiply =
             (code == 106)
 
         -- Code 191 refers to the Divide Key
-
         isDivide =
             (code == 191)
 
         -- Code 8 refers to the Backspace Key
-
         isBackspace =
             (code == 8)
 
         -- Code 188 refers to the Comma key and 190 to the Dot Key
         -- Code 110 refers to Numpad's Decimal Key
-
         isComma =
             (code == 188 || code == 190 || code == 110)
 
         code_ =
             if code <= 57 then
-              code
+                code
             else
-              code - 48
+                code - 48
     in
         --If Char code is between 48 and 57 (in other words 0 and 9)
-
-        if  isNumber then
+        if isNumber then
             onInput (getStringfromChar code_) model
-
         else if isReturn then
             onEqual model
-
         else if isAdd then
             onSum model
-
         else if isSubtract then
             onSubtract model
-
         else if isMultiply then
             onMultiply model
-
         else if isDivide then
             onDivide model
-
         else if isBackspace then
             onBackspace model
-
         else if isComma then
             onComma model
-
         else
             model
 

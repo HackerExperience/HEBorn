@@ -32,6 +32,11 @@ title model =
     "Calculator"
 
 
+windowInitSize : ( Float, Float )
+windowInitSize =
+    ( 195, 293 )
+
+
 icon : String
 icon =
     "calculator"
