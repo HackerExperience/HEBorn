@@ -75,6 +75,8 @@ onInput n model =
         createTyping x y =
             if x == "0" then
                 Typing y
+            else if (String.length x) >= 17 then
+                Typing x
             else
                 Typing (x ++ y)
     in
@@ -305,11 +307,11 @@ canInputComma str =
     let
         canInputCommaHelper str =
             if (String.length str) > 0 then
-                str ++ ","
+                str ++ "."
             else
                 str
     in
-        if String.contains "," str then
+        if String.contains "." str then
             str
         else
             canInputCommaHelper str
@@ -319,8 +321,10 @@ inputBackspace : Model -> Model
 inputBackspace model =
     let
         drop x =
-            if (String.length x) > 0 then
+            if (String.length x) > 1 then
                 Typing (String.dropRight 1 x)
+            else if (String.length x) == 1 then
+                Typing "0"
             else
                 Typing x
     in
