@@ -1,10 +1,4 @@
-module Game.Servers.Settings.Types
-    exposing
-        ( Settings(..)
-        , encode
-        , decodeLocation
-        , decodeError
-        )
+module Game.Servers.Settings.Types exposing (Settings(..), encode)
 
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder, Value)
@@ -28,20 +22,6 @@ encode config =
 
         Name name ->
             encodeName name
-
-
-
--- decoders
-
-
-decodeLocation : Decoder String
-decodeLocation =
-    Decode.field "address" Decode.string
-
-
-decodeError : Decoder String
-decodeError =
-    Decode.field "error" Decode.string
 
 
 

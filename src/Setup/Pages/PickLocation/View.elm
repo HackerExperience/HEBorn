@@ -2,9 +2,11 @@ module Setup.Pages.PickLocation.View exposing (view)
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import Html.Attributes exposing (disabled)
 import Html.CssHelpers
 import Native.Untouchable
 import Game.Models as Game
+import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Setup.Resources exposing (..)
 import Setup.Pages.Helpers exposing (withHeader)
 import Setup.Pages.PickLocation.Models exposing (..)
@@ -40,10 +42,10 @@ locPickerBox { toMsg, onNext, onPrevious } model =
                         [ text "SELECTED COORDS: "
                         , br [] []
                         , text ">> LAT: "
-                        , text (toString coords.lat)
+                        , text <| toString coords.lat
                         , br [] []
                         , text ">> LON: "
-                        , text (toString coords.lng)
+                        , text <| toString coords.lng
                         , br [] []
                         , br [] []
                         , text "PROCESSING AREA INFO..."
@@ -57,7 +59,19 @@ locPickerBox { toMsg, onNext, onPrevious } model =
             div []
                 [ button [ onClick <| toMsg ResetLoc ] [ text "RESET" ]
                 , button [ onClick onPrevious ] [ text "BACK" ]
-                , button [ onClick onNext ] [ text "NEXT" ]
+                , buttonNext onNext model
                 ]
     in
         div [] [ info, btns ]
+
+
+buttonNext : (List Settings -> msg) -> Model -> Html msg
+buttonNext onNext model =
+    let
+        attrs =
+            if isOkay model then
+                [ onClick <| onNext <| settings model ]
+            else
+                [ disabled True ]
+    in
+        button attrs [ text "NEXT" ]

@@ -10,15 +10,19 @@ type alias Model =
 
 
 settings : Model -> List Settings
-settings =
-    .hostname >> Settings.Name
+settings model =
+    case model.hostname of
+        Just name ->
+            [ Settings.Name name ]
+
+        Nothing ->
+            []
 
 
 initialModel : Model
 initialModel =
-    -- REVIEWER PLS
     { hostname = Nothing
-    , okay = True
+    , okay = True -- set me to false after backend integration
     }
 
 

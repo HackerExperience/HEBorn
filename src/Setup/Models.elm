@@ -1,6 +1,7 @@
 module Setup.Models exposing (..)
 
 import Game.Models as Game
+import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Json.Encode as Encode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Ports.Map exposing (Coordinates)
@@ -14,7 +15,7 @@ type alias Model =
     { page : Maybe PageModel
     , pages : List String
     , remaining : List PageModel
-    , done : List PageModel
+    , done : PagesDone
     , isLoading : Bool
     }
 
@@ -27,6 +28,10 @@ type PageModel
     | ChooseThemeModel
     | FinishModel
     | CustomFinishModel
+
+
+type alias PagesDone =
+    List ( PageModel, List Settings )
 
 
 mapId : String
@@ -158,8 +163,8 @@ setPage page model =
     { model | page = Just page }
 
 
-nextPage : Model -> Model
-nextPage model =
+nextPage : List Settings -> Model -> Model
+nextPage settings model =
     let
         current =
             List.head model.remaining
@@ -172,7 +177,7 @@ nextPage model =
         done =
             case model.page of
                 Just page ->
-                    page :: model.done
+                    ( page, settings ) :: model.done
 
                 Nothing ->
                     model.done
@@ -191,7 +196,9 @@ previousPage : Model -> Model
 previousPage model =
     let
         current =
-            List.head model.done
+            model.done
+                |> List.head
+                |> Maybe.map Tuple.first
 
         done =
             model.done
@@ -250,7 +257,7 @@ encodeDone =
             else
                 Ok model.done
 
-        encodePages page list =
+        encodePages ( page, _ ) list =
             case list of
                 Ok list ->
                     case encodePageModel page of

@@ -1,43 +1,50 @@
-module Setup.Pages.Mainframe.Requests exposing (..)
+module Setup.Pages.Mainframe.Requests
+    exposing
+        ( Response(..)
+        , checkName
+        , receive
+        )
 
 import Requests.Types exposing (ConfigSource)
 import Game.Servers.Shared as Servers
 import Game.Servers.Settings.Check as Check
-import Game.Servers.Settings.Set as Set
 import Game.Servers.Settings.Types exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
+import Requests.Types exposing (ResponseType, ConfigSource, Code(..))
 
 
 type Response
-    = Check Check.Response
-    | Set Set.Response
+    = CheckName Bool
 
 
-checkRequest :
+checkName :
     Config msg
-    -> Settings
+    -> String
     -> Servers.CId
     -> ConfigSource a
     -> Cmd msg
-checkRequest { toMsg } =
-    Check.request (CheckRequest >> Request >> toMsg)
-
-
-setRequest : Config msg -> Settings -> Servers.CId -> ConfigSource a -> Cmd msg
-setRequest { toMsg } =
-    Set.request (SetRequest >> Request >> toMsg)
+checkName config =
+    Name >> check config CheckNameRequest
 
 
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        CheckRequest ( code, data ) ->
-            data
-                |> Check.receive code
-                |> Maybe.map Check
+        CheckNameRequest ( code, data ) ->
+            Just <| Check.receiveName CheckName code data
 
-        SetRequest ( code, data ) ->
-            data
-                |> Set.receive code
-                |> Maybe.map Set
+
+
+-- internals
+
+
+check :
+    Config msg
+    -> (ResponseType -> RequestMsg)
+    -> Settings
+    -> Servers.CId
+    -> ConfigSource a
+    -> Cmd msg
+check { toMsg } myMsg =
+    Check.request (myMsg >> Request >> toMsg)

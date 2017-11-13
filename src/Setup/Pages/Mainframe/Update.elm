@@ -53,7 +53,7 @@ onValidate config game model =
         cmd =
             case Maybe.uncurry mainframe hostname of
                 Just ( cid, name ) ->
-                    checkRequest config (Name name) cid game
+                    checkName config name cid game
 
                 Nothing ->
                     Cmd.none
@@ -73,39 +73,11 @@ updateRequest :
     -> UpdateResponse msg
 updateRequest config game mResponse model =
     case mResponse of
-        Just (Check (Check.Valid _)) ->
-            onCheckValid config game model
-
-        Just (Check (Check.Invalid reason)) ->
-            Update.fromModel model
-
-        Just (Set (Set.Valid _)) ->
+        Just (CheckName True) ->
             Update.fromModel <| setOkay model
 
-        Just (Set (Set.Invalid _)) ->
+        Just (CheckName False) ->
             Update.fromModel model
 
         Nothing ->
             Update.fromModel model
-
-
-onCheckValid : Config msg -> Game.Model -> Model -> UpdateResponse msg
-onCheckValid config game model =
-    let
-        mainframe =
-            game
-                |> Game.getAccount
-                |> Account.getMainframe
-
-        hostname =
-            getHostname model
-
-        cmd =
-            case Maybe.uncurry mainframe hostname of
-                Just ( cid, name ) ->
-                    setRequest config (Name name) cid game
-
-                Nothing ->
-                    Cmd.none
-    in
-        ( model, cmd, Dispatch.none )

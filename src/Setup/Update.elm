@@ -8,6 +8,7 @@ import Core.Dispatch.Core as Core
 import Core.Error as Error
 import Game.Models as Game
 import Game.Account.Models as Account
+import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Models exposing (..)
@@ -29,8 +30,8 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        NextPage ->
-            onNextPage game model
+        NextPage settings ->
+            onNextPage game settings model
 
         PreviousPage ->
             onPreviousPage game model
@@ -55,9 +56,20 @@ update game msg model =
 -- message handlers
 
 
-onNextPage : Game.Model -> Model -> UpdateResponse
-onNextPage game model =
-    ( nextPage model, Cmd.none, Dispatch.none )
+onNextPage : Game.Model -> List Settings -> Model -> UpdateResponse
+onNextPage game settings model =
+    let
+        model_ =
+            nextPage settings model
+    in
+        if doneSetup model_ then
+            let
+                dispatch =
+                    Dispatch.core Core.Play
+            in
+                ( model_, Cmd.none, dispatch )
+        else
+            ( model_, Cmd.none, Dispatch.none )
 
 
 onPreviousPage : Game.Model -> Model -> UpdateResponse
