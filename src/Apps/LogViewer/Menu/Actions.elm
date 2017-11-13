@@ -44,7 +44,7 @@ actionHandler data action model =
                     startCrypting logId data model
             in
                 ( model, Cmd.none, dispatch )
-
+                
         DecryptEntry logId ->
             let
                 dispatch =
