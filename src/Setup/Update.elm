@@ -57,42 +57,7 @@ update game msg model =
 
 onNextPage : Game.Model -> Model -> UpdateResponse
 onNextPage game model =
-    let
-        resultEncodedPage =
-            model.page
-                |> Result.fromMaybe "No page to convert"
-                |> Result.andThen encodePageModel
-
-        model_ =
-            nextPage model
-
-        dispatch =
-            if doneSetup model_ then
-                Dispatch.core Core.Play
-            else
-                Dispatch.none
-
-        cmd =
-            case resultEncodedPage of
-                Ok pageNameValue ->
-                    let
-                        accountId =
-                            game
-                                |> Game.getAccount
-                                |> Account.getId
-                    in
-                        Setup.request pageNameValue accountId game
-
-                Err _ ->
-                    Cmd.none
-
-        cmd_ =
-            Cmd.batch
-                [ cmd
-                , locationPickerCmd model_
-                ]
-    in
-        ( model_, cmd_, dispatch )
+    ( nextPage model, Cmd.none, Dispatch.none )
 
 
 onPreviousPage : Game.Model -> Model -> UpdateResponse

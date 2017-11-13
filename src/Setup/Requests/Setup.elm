@@ -14,13 +14,14 @@ type Response
     = Okay
 
 
-request : Value -> Account.ID -> ConfigSource a -> Cmd Msg
-request name id =
+request : List Value -> Account.ID -> ConfigSource a -> Cmd Msg
+request pages id =
     let
         payload =
-            Encode.object [ ( "page", name ) ]
+            Encode.object
+                [ ( "pages", Encode.list pages ) ]
     in
-        Requests.request (Topics.accountSetup id)
+        Requests.request (Topics.clientSetup id)
             (SetupRequest >> Request)
             payload
 
