@@ -5,6 +5,7 @@ import Html.Events exposing (onClick, onInput, onBlur)
 import Html.Attributes exposing (placeholder, disabled)
 import Html.CssHelpers
 import Game.Models as Game
+import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Setup.Resources exposing (..)
 import Setup.Pages.Helpers exposing (withHeader)
 import Setup.Pages.Mainframe.Models exposing (..)
@@ -23,7 +24,7 @@ view { toMsg, onNext, onPrevious } game model =
         , hostnameInput toMsg model
         , div []
             [ button [ onClick onPrevious ] [ text "BACK" ]
-            , nextBtn (onNext settings model) model
+            , nextBtn onNext model
             ]
         ]
 
@@ -38,12 +39,12 @@ hostnameInput toMsg model =
         [ text <| Maybe.withDefault "" model.hostname ]
 
 
-nextBtn : msg -> Model -> Html msg
+nextBtn : (List Settings -> msg) -> Model -> Html msg
 nextBtn onNext model =
     let
         attrs =
             if isOkay model then
-                [ onClick onNext ]
+                [ onClick <| onNext <| settings model ]
             else
                 [ disabled True ]
     in

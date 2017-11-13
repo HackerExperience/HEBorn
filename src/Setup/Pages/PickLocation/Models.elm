@@ -1,6 +1,7 @@
 module Setup.Pages.PickLocation.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates)
+import Game.Servers.Settings.Types as Settings exposing (Settings)
 
 
 type alias Model =
@@ -24,7 +25,7 @@ initialModel : Model
 initialModel =
     { coordinates = Nothing
     , areaLabel = Nothing
-    , okay = False
+    , okay = True -- set me to false after backend integration
     }
 
 
@@ -40,14 +41,24 @@ setCoords coordinates model =
 
 setAreaLabel : Maybe String -> Model -> Model
 setAreaLabel areaLabel model =
-    { model | areaLabel = areaLabel }
+    case areaLabel of
+        Just area ->
+            { model | areaLabel = Just area, okay = True }
 
-
-setOkay : Model -> Model
-setOkay model =
-    { model | okay = True }
+        Nothing ->
+            { model | areaLabel = Nothing, okay = False }
 
 
 isOkay : Model -> Bool
 isOkay =
     .okay
+
+
+settings : Model -> List Settings
+settings model =
+    case model.coordinates of
+        Just coords ->
+            [ Settings.Location coords ]
+
+        Nothing ->
+            []

@@ -10,5 +10,4 @@ type Msg
 
 
 type RequestMsg
-    = CheckRequest ResponseType
-    | SetRequest ResponseType
+    = CheckNameRequest ResponseType

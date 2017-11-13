@@ -1,4 +1,4 @@
-module Game.Servers.Settings.Set exposing (Response(..), request, receive)
+module Game.Servers.Settings.Set exposing (request)
 
 import Requests.Requests as Requests
 import Requests.Topics as Topics
@@ -8,32 +8,6 @@ import Game.Servers.Shared exposing (..)
 import Requests.Types exposing (ConfigSource, Code(..), ResponseType)
 
 
-type Response
-    = Valid Value
-    | Invalid String
-
-
 request : (ResponseType -> msg) -> Settings -> CId -> ConfigSource a -> Cmd msg
 request msg settings cid =
     Requests.request (Topics.serverConfigSet cid) msg (encode settings)
-
-
-receive : Code -> Decode.Value -> Maybe Response
-receive code json =
-    case code of
-        OkCode ->
-            Just <| Valid json
-
-        _ ->
-            case Decode.decodeValue decodeError json of
-                Ok msg ->
-                    Just <| Invalid msg
-
-                Err msg ->
-                    let
-                        _ =
-                            Debug.log
-                                "▶ Invalid server config.set response:"
-                                msg
-                    in
-                        Nothing
