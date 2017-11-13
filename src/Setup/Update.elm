@@ -8,18 +8,19 @@ import Core.Dispatch.Core as Core
 import Core.Error as Error
 import Game.Models as Game
 import Game.Account.Models as Account
-import Game.Servers.Settings.Types as Settings exposing (Settings)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
+import Setup.Requests exposing (..)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Configs as Configs
 import Setup.Pages.PickLocation.Update as PickLocation
 import Setup.Pages.PickLocation.Messages as PickLocation
 import Setup.Pages.Mainframe.Update as Mainframe
 import Setup.Pages.Mainframe.Messages as Mainframe
 import Setup.Requests.Setup as Setup
-import Setup.Requests exposing (..)
+import Setup.Requests.SetServer as SetServer
 import Decoders.Client
 
 
@@ -54,22 +55,23 @@ update game msg model =
 
 
 -- message handlers
+--    Dispatch.core Core.Play
 
 
 onNextPage : Game.Model -> List Settings -> Model -> UpdateResponse
-onNextPage game settings model =
+onNextPage game settings model0 =
     let
-        model_ =
-            nextPage settings model
+        model =
+            nextPage settings model0
     in
-        if doneSetup model_ then
+        if doneSetup model then
             let
-                dispatch =
-                    Dispatch.core Core.Play
+                ( model_, cmd ) =
+                    setRequest game model
             in
-                ( model_, Cmd.none, dispatch )
+                ( model_, Cmd.none, Dispatch.none )
         else
-            ( model_, Cmd.none, Dispatch.none )
+            ( model, Cmd.none, Dispatch.none )
 
 
 onPreviousPage : Game.Model -> Model -> UpdateResponse
@@ -129,7 +131,58 @@ onPickLocationMsg game msg model =
 updateRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
 updateRequest game response model =
     case response of
-        _ ->
+        Just (SetServer problems) ->
+            onGenericSet game problems model
+
+        Just (Setup status) ->
+            onSetup game status model
+
+        Nothing ->
+            Update.fromModel model
+
+
+onGenericSet : Game.Model -> List Settings -> Model -> UpdateResponse
+onGenericSet game list model =
+    let
+        model_ =
+            setTopicsDone Settings.ServerTopic True model
+    in
+        if List.isEmpty list && noTopicsRemaining model_ then
+            let
+                id =
+                    game
+                        |> Game.getAccount
+                        |> Account.getId
+            in
+                ( model_
+                , Setup.request (List.map Tuple.first model.done) id game
+                , Dispatch.none
+                )
+        else
+            let
+                noErrors =
+                    flip List.member list >> not
+
+                keepBadPages ( model, settings ) =
+                    if List.all noErrors settings then
+                        Nothing
+                    else
+                        Just <| pageModelToString model
+            in
+                model_
+                    |> setBadPages (List.filterMap keepBadPages model.done)
+                    |> undoPages
+                    |> Update.fromModel
+
+
+onSetup : Game.Model -> Setup.Response -> Model -> UpdateResponse
+onSetup game status model =
+    case status of
+        Setup.Okay ->
+            ( model, Cmd.none, Dispatch.core Core.Play )
+
+        Setup.Error ->
+            -- TODO: decide what to do
             Update.fromModel model
 
 
@@ -181,3 +234,48 @@ locationPickerCmd model =
 
         _ ->
             Cmd.none
+
+
+setRequest : Game.Model -> Model -> ( Model, Cmd Msg )
+setRequest game model =
+    -- this could be improved
+    let
+        mainframe =
+            game
+                |> Game.getAccount
+                |> Account.getMainframe
+    in
+        case mainframe of
+            Just mainframe ->
+                let
+                    settings =
+                        model
+                            |> getDone
+                            |> List.concatMap Tuple.second
+                            |> Settings.groupSettings
+
+                    model_ =
+                        List.foldl (Tuple.first >> flip setTopicsDone False)
+                            model
+                            settings
+
+                    cid =
+                        mainframe
+
+                    request ( type_, settings ) =
+                        case type_ of
+                            Settings.ServerTopic ->
+                                SetServer.request settings cid game
+
+                            Settings.AccountTopic ->
+                                Cmd.none
+
+                    cmd =
+                        settings
+                            |> List.map request
+                            |> Cmd.batch
+                in
+                    ( model_, cmd )
+
+            Nothing ->
+                ( model, Cmd.none )

@@ -12,9 +12,8 @@ import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Pages.PickLocation.Config exposing (..)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)
-import Setup.Pages.PickLocation.Requests exposing (..)
-import Game.Servers.Settings.Check as Check
-import Game.Servers.Settings.Types exposing (..)
+import Setup.Settings as Settings exposing (Settings)
+import Setup.Requests.Check as Check
 import Game.Account.Models as Account
 
 
@@ -37,8 +36,8 @@ update config game msg model =
         ResetLoc ->
             onResetLocation model
 
-        Request data ->
-            updateRequest config game (receive data) model
+        Checked maybeLabel ->
+            Update.fromModel <| setAreaLabel maybeLabel model
 
 
 onMapClick : Config msg -> Value -> Model -> UpdateResponse msg
@@ -102,22 +101,3 @@ onGeoRevResp config value model =
 onResetLocation : Model -> UpdateResponse msg
 onResetLocation model =
     ( setAreaLabel Nothing model, Cmd.none, Dispatch.none )
-
-
-
--- request handlers
-
-
-updateRequest :
-    Config msg
-    -> Game.Model
-    -> Maybe Response
-    -> Model
-    -> UpdateResponse msg
-updateRequest config game mResponse model =
-    case mResponse of
-        Just (CheckLocation name) ->
-            Update.fromModel <| setAreaLabel name model
-
-        Nothing ->
-            Update.fromModel model

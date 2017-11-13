@@ -1,6 +1,6 @@
 module Setup.Pages.PickLocation.Config exposing (Config)
 
-import Game.Servers.Settings.Types exposing (Settings)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Messages exposing (..)
 
 

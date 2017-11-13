@@ -9,11 +9,9 @@ import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
-import Setup.Pages.Mainframe.Requests exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
-import Game.Servers.Settings.Check as Check
-import Game.Servers.Settings.Set as Set
-import Game.Servers.Settings.Types exposing (..)
+import Setup.Settings as Settings exposing (Settings)
+import Setup.Requests.Check as Check
 import Game.Account.Models as Account
 
 
@@ -30,8 +28,11 @@ update config game msg model =
         Validate ->
             onValidate config game model
 
-        Request data ->
-            updateRequest config game (receive data) model
+        Checked True ->
+            Update.fromModel <| setOkay model
+
+        Checked False ->
+            Update.fromModel model
 
 
 onMainframe : String -> Model -> UpdateResponse msg
@@ -40,7 +41,7 @@ onMainframe str model =
 
 
 onValidate : Config msg -> Game.Model -> Model -> UpdateResponse msg
-onValidate config game model =
+onValidate { toMsg } game model =
     let
         mainframe =
             game
@@ -53,31 +54,9 @@ onValidate config game model =
         cmd =
             case Maybe.uncurry mainframe hostname of
                 Just ( cid, name ) ->
-                    checkName config name cid game
+                    Check.serverName (Checked >> toMsg) name cid game
 
                 Nothing ->
                     Cmd.none
     in
         ( model, cmd, Dispatch.none )
-
-
-
--- request handlers
-
-
-updateRequest :
-    Config msg
-    -> Game.Model
-    -> Maybe Response
-    -> Model
-    -> UpdateResponse msg
-updateRequest config game mResponse model =
-    case mResponse of
-        Just (CheckName True) ->
-            Update.fromModel <| setOkay model
-
-        Just (CheckName False) ->
-            Update.fromModel model
-
-        Nothing ->
-            Update.fromModel model

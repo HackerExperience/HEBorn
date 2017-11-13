@@ -1,6 +1,6 @@
 module Setup.Pages.Mainframe.Config exposing (Config)
 
-import Game.Servers.Settings.Types exposing (Settings)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Mainframe.Messages exposing (..)
 
 
