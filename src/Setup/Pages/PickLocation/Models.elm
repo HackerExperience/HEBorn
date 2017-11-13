@@ -1,7 +1,7 @@
 module Setup.Pages.PickLocation.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates)
-import Game.Servers.Settings.Types as Settings exposing (Settings)
+import Setup.Settings as Settings exposing (Settings)
 
 
 type alias Model =

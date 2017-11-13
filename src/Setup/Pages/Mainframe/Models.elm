@@ -1,6 +1,6 @@
 module Setup.Pages.Mainframe.Models exposing (..)
 
-import Game.Servers.Settings.Types as Settings exposing (Settings)
+import Setup.Settings as Settings exposing (Settings)
 
 
 type alias Model =
