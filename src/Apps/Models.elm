@@ -269,5 +269,8 @@ windowInitSize app =
         BrowserApp ->
             Browser.windowInitSize
 
+        CalculatorApp ->
+            Calculator.windowInitSize
+
         _ ->
             ( 600, 400 )

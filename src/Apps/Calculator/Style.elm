@@ -24,10 +24,10 @@ css =
             , height (px 206)
             , padding (px 10)
             ]
-        , button [
-            focus
-                [outline zero |> important]
-          ]
+        , button
+            [ focus
+                [ outline zero |> important ]
+            ]
         , class DisplayContainer
             [ displayFlex
             , border3 (px 1) solid (hex "000000")
