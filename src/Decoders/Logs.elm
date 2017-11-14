@@ -7,7 +7,11 @@ import Game.Servers.Logs.Models exposing (..)
 
 
 type alias Index =
-    List ( ID, Log )
+    List LogWithIndex
+
+
+type alias LogWithIndex =
+    ( ID, Log )
 
 
 model : Decoder Model

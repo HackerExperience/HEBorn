@@ -25,6 +25,7 @@ type Content
     = Simple String String -- Title Message
     | NewEmail String -- Person_ID
     | DownloadStarted NIP Filesystem.FileEntry
+    | DownloadConcluded NIP Filesystem.FileEntry
 
 
 initialModel : Model
