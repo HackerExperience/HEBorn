@@ -34,7 +34,7 @@ title model =
 
 windowInitSize : ( Float, Float )
 windowInitSize =
-    ( 195, 293 )
+    ( 195, 243 )
 
 
 icon : String
