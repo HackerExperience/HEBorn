@@ -8,10 +8,12 @@ import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Network.Types as Network
 import Events.Server.Filesystem.Added as FileAdded
+import Events.Server.Filesystem.Downloaded as FileDownloaded
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
+import Events.Server.Logs.Created as LogCreated
 import Game.Web.Models as Web
 import Game.Web.Types as Web
 
@@ -46,6 +48,7 @@ type Filesystem
     | NewTextFile Filesystem.Path Filesystem.Name
     | NewDir Filesystem.Path Filesystem.Name
     | FileAdded FileAdded.Data
+    | FileDownloaded FileDownloaded.Data
 
 
 {-| Messages related to server's logs.
@@ -55,6 +58,7 @@ type Logs
     | EncryptLog Logs.ID
     | HideLog Logs.ID
     | DeleteLog Logs.ID
+    | CreatedLog LogCreated.Data
 
 
 {-| Messages related to server's processes.

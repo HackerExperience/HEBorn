@@ -64,3 +64,14 @@ toast id { notification, state } =
                                 ++ " download has started!"
                         ]
                     ]
+
+                DownloadConcluded origin file ->
+                    [ h6
+                        []
+                        [ text <| "Download concluded" ]
+                    , p []
+                        [ text <|
+                            (Filesystem.getName <| Tuple.second file)
+                                ++ " download has concluded!"
+                        ]
+                    ]

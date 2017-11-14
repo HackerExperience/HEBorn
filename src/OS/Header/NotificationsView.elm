@@ -116,6 +116,13 @@ renderContent content =
               )
             )
 
+        DownloadConcluded origin file ->
+            ( "New download concluded"
+            , ((Filesystem.getName <| Tuple.second file)
+                ++ " download concluded!"
+              )
+            )
+
 
 notification : Notifications.ID -> ( String, String ) -> Html Msg
 notification id ( title, body ) =

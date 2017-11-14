@@ -5,7 +5,9 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Servers.Shared exposing (CId)
 import Events.Server.Filesystem.Added as FileAdded
+import Events.Server.Filesystem.Downloaded as FileDownloaded
 import Events.Server.Logs.Changed as LogsChanged
+import Events.Server.Logs.Created as LogCreated
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -18,10 +20,13 @@ events cid name json =
         "file_added" ->
             FileAdded.handler (onFileAdded cid) json
 
+        "file_downloaded" ->
+            FileDownloaded.handler (onFileDownloaded cid) json
+
         "process_created" ->
             ProcessStarted.handler (onProcessStarted cid) json
 
-        "process_conclusion" ->
+        "process_completed" ->
             ProcessConclusion.handler (onProcessConclusion cid) json
 
         "top_recalcado" ->
@@ -31,10 +36,10 @@ events cid name json =
             BruteforceFailed.handler (onBruteforceFailed cid) json
 
         "log_created" ->
-            Err "Pedro didn't implemented this yet"
+            LogCreated.handler (onLogCreated cid) json
 
         _ ->
-            Err ""
+            Err "Not implemented or incompatible event router"
 
 
 
@@ -44,6 +49,11 @@ events cid name json =
 onFileAdded : CId -> FileAdded.Data -> Dispatch
 onFileAdded id =
     Servers.FileAdded >> Dispatch.filesystem id
+
+
+onFileDownloaded : CId -> FileDownloaded.Data -> Dispatch
+onFileDownloaded id =
+    Servers.FileDownloaded >> Dispatch.filesystem id
 
 
 onProcessStarted : CId -> ProcessStarted.Data -> Dispatch
@@ -64,3 +74,8 @@ onProcessesChanged id =
 onBruteforceFailed : CId -> BruteforceFailed.Data -> Dispatch
 onBruteforceFailed id =
     Servers.FailedBruteforceProcess >> Dispatch.processes id
+
+
+onLogCreated : CId -> LogCreated.Data -> Dispatch
+onLogCreated id =
+    Servers.CreatedLog >> Dispatch.logs id
