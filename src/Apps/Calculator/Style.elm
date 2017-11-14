@@ -20,62 +20,58 @@ css =
         [ class MainContainer
             [ displayFlex
             , flexDirection column
-            , width (px 175)
-            , height (px 206)
             , padding (px 10)
-            ]
-        , button
-            [ focus
-                [ outline zero |> important ]
-            ]
-        , class DisplayContainer
-            [ displayFlex
-            , border3 (px 1) solid (hex "000000")
-            , backgroundColor (hex "ffffff")
-            , flex (int 1)
-            , padding (px 4)
-            , overflow hidden
-            ]
-        , class ButtonsContainer
-            [ displayFlex
-            , flexDirection row
-            , flexWrap wrap
-            , height (pct 80)
             , children
-                [ class ButtonsContainerSub
-                    [ display block
+                [ class DisplayContainer
+                    [ displayFlex
+                    , border3 (px 1) solid (hex "000000")
+                    , backgroundColor (hex "ffffff")
+                    , flex (int 1)
+                    , padding (px 4)
+                    , overflow hidden
+                    ]
+                , class ButtonsContainer
+                    [ displayFlex
                     , flexDirection row
                     , flexWrap wrap
-                    , height (pct 40)
-                    , width (pct 75)
+                    , height (pct 80)
                     , children
-                        [ class ZeroBtn
-                            [ width (pct 66.66)
-                            , height (pct 50)
+                        [ class ButtonsContainerSub
+                            [ display block
+                            , flexDirection row
+                            , flexWrap wrap
+                            , height (pct 40)
+                            , width (pct 75)
+                            , children
+                                [ class ZeroBtn
+                                    [ width (pct 66.66)
+                                    , height (pct 50)
+                                    ]
+                                , class NormalSubBtn
+                                    [ width (pct 33.33)
+                                    , height (pct 50)
+                                    ]
+                                ]
                             ]
-                        , class NormalSubBtn
-                            [ width (pct 33.33)
-                            , height (pct 50)
+                        , class
+                            NormalBtn
+                            [ width (pct 25)
+                            , height (pct 20)
+                            ]
+                        , class ApplyBtn
+                            [ height (pct 40.25)
+                            , width (pct 25)
+                            ]
+                        , class DoubleWidthBtn
+                            [ width (pct 50)
+                            , height (pct 20)
+                            , color (hex "FF0000")
+                            ]
+                        , button
+                            [ display block
+                            , fontFamily monospace
                             ]
                         ]
-                    ]
-                , class
-                    NormalBtn
-                    [ width (pct 25)
-                    , height (pct 20)
-                    ]
-                , class ApplyBtn
-                    [ height (pct 40.25)
-                    , width (pct 25)
-                    ]
-                , class DoubleWidthBtn
-                    [ width (pct 50)
-                    , height (pct 20)
-                    , color (hex "FF0000")
-                    ]
-                , button
-                    [ display block
-                    , fontFamily monospace
                     ]
                 ]
             ]
