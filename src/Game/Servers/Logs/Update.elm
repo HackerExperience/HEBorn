@@ -34,6 +34,9 @@ update game nip msg model =
         Request data ->
             onRequest game nip (receive data) model
 
+        HandleCreated id log ->
+            onCreated game nip id log model
+
 
 
 -- collection message handlers
@@ -69,6 +72,13 @@ onLogMsg game nip id msg model =
 
         Nothing ->
             Update.fromModel model
+
+
+onCreated : Game.Model -> CId -> ID -> Log -> Model -> UpdateResponse
+onCreated game nip id log model =
+    model
+        |> insert id log
+        |> Update.fromModel
 
 
 updateRequest : Game.Model -> CId -> Response -> Model -> UpdateResponse
