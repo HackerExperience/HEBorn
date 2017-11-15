@@ -2,14 +2,14 @@ module OS.SessionManager.WindowManager.View exposing (view)
 
 import Dict
 import Html exposing (..)
-import Html.Attributes exposing (style, attribute)
+import Html.Attributes as Attributes exposing (style, attribute)
 import Html.Events exposing (onMouseDown)
 import Html.CssHelpers
 import Html.Keyed
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Utils.Html.Attributes exposing (decoratedAttr, appAttr, iconAttr, activeContextAttr)
-import Utils.Html.Events exposing (onClickMe)
+import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Models as Apps
 import Apps.View as Apps
 import Game.Data as Game
@@ -63,19 +63,37 @@ windowClasses window =
 
 windowWrapper : ID -> Window -> Html Msg -> Html Msg
 windowWrapper id window view =
-    div
-        [ windowClasses window
-        , windowStyle window
-        , decoratedAttr <| isDecorated window
-        , appAttr window.app
-        , activeContextAttr <| windowContext window
-        , onMouseDown (UpdateFocusTo (Just id))
-        ]
-        [ header id window
-        , div
-            [ class [ Res.WindowBody ] ]
-            [ view ]
-        ]
+    let
+        windowStaticAttrs =
+            [ windowClasses window
+            , windowStyle window
+            , decoratedAttr <| isDecorated window
+            , appAttr window.app
+            , activeContextAttr <| windowContext window
+            , onMouseDown (UpdateFocusTo (Just id))
+            ]
+
+        windowKeyDownListener =
+            Apps.keyLogger window.app
+
+        windowAttrs =
+            case windowKeyDownListener of
+                Just msg ->
+                    msg
+                        >> AppMsg Active id
+                        |> onKeyDown
+                        |> flip (::) windowStaticAttrs
+
+                Nothing ->
+                    windowStaticAttrs
+    in
+        div
+            windowAttrs
+            [ header id window
+            , div
+                [ class [ Res.WindowBody ] ]
+                [ view ]
+            ]
 
 
 isDecorated : Window -> Bool
@@ -87,15 +105,8 @@ isDecorated window =
 
 header : ID -> Window -> Html Msg
 header id window =
-    div
-        [ Draggable.mouseTrigger id DragMsg
-        , class [ Res.HeaderSuper ]
-        ]
-        [ div
-            [ class [ Res.WindowHeader ]
-            , onMouseDown (UpdateFocusTo (Just id))
-            ]
-          <|
+    let
+        windowBody =
             if (isDecorated window) then
                 [ headerTitle (title window) (Apps.icon window.app)
                 , headerContext id <| realContext window
@@ -103,7 +114,17 @@ header id window =
                 ]
             else
                 []
-        ]
+    in
+        div
+            [ Draggable.mouseTrigger id DragMsg
+            , class [ Res.HeaderSuper ]
+            ]
+            [ div
+                [ class [ Res.WindowHeader ]
+                , onMouseDown (UpdateFocusTo (Just id))
+                ]
+                windowBody
+            ]
 
 
 headerContext : ID -> Maybe Context -> Html Msg
