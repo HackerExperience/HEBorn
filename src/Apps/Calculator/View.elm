@@ -10,6 +10,7 @@ import Game.Data as Game
 import Apps.Calculator.Models exposing (..)
 import Apps.Calculator.Messages exposing (Msg(..))
 import Apps.Calculator.Resources exposing (..)
+import Core.Error as Error
 
 
 { id, class, classList } =
@@ -107,9 +108,9 @@ render model =
                             y
 
                         Err msg ->
-                            Debug.log
-                                "Die monster you don't belong in this world"
-                                10
+                            "Should not exist a number button out of range 0-9"
+                                |> Error.impossible
+                                |> uncurry Native.Panic.crash
             in
                 if x /= -1 then
                     if x <= 3 && x /= 0 then
@@ -119,7 +120,10 @@ render model =
                     else
                         genBtn [ NormalBtn ] (Input string) string
                 else
-                    text "Die Monster you don't belong in this world"
+                    -- "Die Monster you don't belong in this world"
+                    "Should not exist a number button out of range 0-9"
+                        |> Error.impossible
+                        |> uncurry Native.Panic.crash
     in
         div [ class [ MainContainer ] ]
             [ div [ class [ DisplayContainer ] ]
