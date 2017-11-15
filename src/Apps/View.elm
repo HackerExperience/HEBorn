@@ -25,6 +25,7 @@ import Apps.LanViewer.View as LanViewer
 import Apps.Email.View as Email
 import Apps.Bug.View as Bug
 import Apps.Calculator.View as Calculator
+import Apps.Calculator.Messages as CalculatorMessages
 import Game.Data as Game
 
 
@@ -93,5 +94,8 @@ isDecorated app =
 keyLogger : App -> Maybe (Int -> Msg)
 keyLogger app =
     case app of
+        CalculatorApp ->
+            CalculatorMessages.KeyMsg >> CalculatorMsg |> Just
+
         _ ->
             Nothing

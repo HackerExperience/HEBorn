@@ -7,7 +7,12 @@ import Json.Decode as Json
 
 onKeyDown : (Int -> msg) -> Attribute msg
 onKeyDown handler =
-    on "keydown" <| Json.map handler keyCode
+    onWithOptions "keydown"
+        { stopPropagation = False
+        , preventDefault = True
+        }
+    <|
+        Json.map handler keyCode
 
 
 onChange : (String -> msg) -> Attribute msg
