@@ -1,6 +1,12 @@
-module Apps.View exposing (view)
+module Apps.View
+    exposing
+        ( view
+        , isDecorated
+        , keyLogger
+        )
 
 import Html exposing (Html)
+import Apps.Apps exposing (..)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.View as LogViewer
@@ -68,3 +74,20 @@ view data model =
 
         BugModel model ->
             Html.map BugMsg (Bug.view data model)
+
+
+isDecorated : App -> Bool
+isDecorated app =
+    case app of
+        MusicApp ->
+            False
+
+        _ ->
+            True
+
+
+keyLogger : App -> Maybe (Int -> Msg)
+keyLogger app =
+    case app of
+        _ ->
+            Nothing
