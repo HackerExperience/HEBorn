@@ -232,16 +232,13 @@ insertFile id file ({ files, folders } as model) =
         path =
             getPath file
 
-        directoryExists =
-            isFolder path model
-
         noFileExists =
             file
                 |> getFullpath
                 |> flip isFile model
                 |> not
     in
-        if directoryExists && noFileExists then
+        if noFileExists then
             let
                 model_ =
                     deleteFile id model
@@ -295,12 +292,10 @@ Time is O(n*2) of filesystem and O(n) of deleted entries.
 -}
 deleteFolder : Path -> Model -> Model
 deleteFolder path ({ folders } as model) =
-    case scan path model of
-        [ _ ] ->
-            { model | folders = Dict.remove (joinPath path) folders }
-
-        _ ->
-            model
+    if List.isEmpty <| scan path model then
+        { model | folders = Dict.remove (joinPath path) folders }
+    else
+        model
 
 
 {-| Moves a File using its Id and Path.
@@ -343,13 +338,23 @@ renameFile id name model =
 
 
 toPath : String -> Path
-toPath =
-    String.split "/"
+toPath path =
+    case String.split "/" path of
+        "" :: path ->
+            "" :: path
+
+        path ->
+            "" :: path
 
 
 joinPath : Path -> String
-joinPath =
-    String.join "/"
+joinPath path =
+    case path of
+        "" :: _ ->
+            String.join "/" path
+
+        _ ->
+            "/" ++ (String.join "/" path)
 
 
 pathBase : Path -> Name
@@ -370,12 +375,7 @@ parentPath =
 appendPath : Name -> Path -> Path
 appendPath name path =
     -- add root folder if not present
-    case List.head path of
-        Just "" ->
-            path ++ [ name ]
-
-        _ ->
-            "" :: (path ++ [ name ])
+    path ++ [ name ]
 
 
 concatPath : List Path -> Path
@@ -392,6 +392,7 @@ Time is O(n*2) of filesystem and O(n) of folder childs.
 -}
 list : Path -> Model -> List Entry
 list path model =
+    -- TODO: add nested folder support
     let
         drop =
             String.dropLeft (String.length (joinPath path))
@@ -405,12 +406,22 @@ list path model =
                     file.path == path
 
                 FolderEntry path _ ->
-                    path
-                        |> joinPath
-                        |> drop
-                        |> split
-                        |> List.length
-                        |> ((==) 1)
+                    let
+                        isEmpty =
+                            model
+                                |> getFolder path
+                                |> Maybe.map List.isEmpty
+                                |> Maybe.withDefault True
+                    in
+                        if isEmpty then
+                            True
+                        else
+                            path
+                                |> joinPath
+                                |> drop
+                                |> split
+                                |> List.length
+                                |> ((==) 1)
     in
         model
             |> scan path
@@ -452,12 +463,28 @@ scan path model =
                 |> List.head
                 |> Maybe.withDefault ""
 
-        reducer location files entries =
-            if (contains location) then
-                files
-                    |> List.filterMap (get >> Maybe.andThen (uncurry filter))
-                    |> (::) (FolderEntry (toPath location) name)
-                    |> flip List.append entries
+        reducer current files entries =
+            if (contains current) then
+                let
+                    entries1 =
+                        List.filterMap
+                            (get >> Maybe.andThen (uncurry filter))
+                            files
+
+                    entries2 =
+                        let
+                            myPath =
+                                toPath current
+                        in
+                            if current == location then
+                                entries1
+                            else
+                                myPath
+                                    |> pathBase
+                                    |> FolderEntry (parentPath myPath)
+                                    |> flip (::) entries1
+                in
+                    List.append entries2 entries
             else
                 entries
     in

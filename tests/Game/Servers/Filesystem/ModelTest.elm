@@ -25,6 +25,8 @@ operationsTests =
             moveTests
         , describe "delete"
             deleteTests
+        , describe "scan"
+            scanTests
         ]
 
 
@@ -45,7 +47,7 @@ insertTests =
 
 insertFileTests : List Test
 insertFileTests =
-    [ fuzz Gen.fileEntry "can't add files to non-existing path" <|
+    [ fuzz Gen.fileEntry "can add files to non-existing path" <|
         \fileEntry ->
             let
                 id =
@@ -58,7 +60,7 @@ insertFileTests =
             in
                 initialModel
                     |> insertFile id file
-                    |> Expect.equal initialModel
+                    |> Expect.notEqual initialModel
     , fuzz Gen.fileEntry "can add files into existing folders" <|
         \fileEntry ->
             let
@@ -119,7 +121,7 @@ insertFileTests =
 
 insertFolderTests : List Test
 insertFolderTests =
-    [ fuzz unit "can't add folder to non-existing path" <|
+    [ fuzz unit "can add folder to non-existing paths" <|
         \() ->
             initialModel
                 |> insertFolder [ "", "non-existing" ] "path"
@@ -171,7 +173,7 @@ moveTests =
 moveFileTests : List Test
 moveFileTests =
     [ fuzz (tuple3 ( Gen.model, Gen.fileEntry, Gen.folder ))
-        "file is present on new location"
+        "can move file to existing path"
       <|
         \( model, fileEntry, ( path, name ) ) ->
             let
@@ -193,7 +195,7 @@ moveFileTests =
                     |> isFile (getFullpath file)
                     |> Expect.equal True
     , fuzz (tuple3 ( Gen.model, Gen.fileEntry, Gen.folder ))
-        "file is absent on new location"
+        "can move file to non-existing path"
       <|
         \( model, fileEntry, ( path, name ) ) ->
             let
@@ -211,7 +213,7 @@ moveFileTests =
                 model
                     |> insertFile id file
                     |> isFile (getFullpath file)
-                    |> Expect.equal False
+                    |> Expect.equal True
     ]
 
 
@@ -223,7 +225,7 @@ moveFileTests =
 
 deleteTests : List Test
 deleteTests =
-    [ describe "delete stdfile"
+    [ describe "delete file"
         deleteFileTests
     , describe "delete folder"
         deleteFolderTests
@@ -289,4 +291,212 @@ deleteFolderTests =
                 model_
                     |> isFolder path_
                     |> Expect.equal False
+    ]
+
+
+
+--------------------------------------------------------------------------------
+-- Add File
+--------------------------------------------------------------------------------
+
+
+scanTests : List Test
+scanTests =
+    -- hardcoded tests to make it easier to understand what's happening
+    [ describe "scan path"
+        scanPathTests
+    , describe "list path"
+        listPathTests
+    ]
+
+
+scanPathTests : List Test
+scanPathTests =
+    [ fuzz unit "scan includes nested files" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> scan [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id3" file3
+                    , FileEntry "id2" file2
+                    , FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2"
+                    , FolderEntry [ "" ] "folder1"
+                    ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "scan won't include files from unrelated paths" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "", "folder1" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> scan [ "", "folder1" ]
+
+                expectFiles =
+                    [ FileEntry "id2" file2
+                    , FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "scan include files from detached paths" <|
+        \() ->
+            let
+                file =
+                    File "file" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id" file
+                        |> scan [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id" file
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    ]
+
+
+listPathTests : List Test
+listPathTests =
+    [ fuzz unit "list includes nested files" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> list [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "" ] "folder1"
+                    ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "list won't include files from unrelated paths" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "", "folder1" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> list [ "", "folder1" ]
+
+                expectFiles =
+                    [ FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "list includes detached folders" <|
+        \() ->
+            let
+                file =
+                    File "file" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id" file
+                        |> list [ "" ]
+
+                noFiles =
+                    entries
+                        |> List.filter (isFolderEntry >> not)
+                        |> List.isEmpty
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal True noFiles
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
     ]
