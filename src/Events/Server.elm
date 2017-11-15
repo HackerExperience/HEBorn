@@ -4,7 +4,7 @@ import Events.Types exposing (Router)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Servers.Shared exposing (CId)
-import Events.Server.Filesystem.NewFile as NewFile
+import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Logs.Changed as LogsChanged
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
@@ -15,8 +15,8 @@ import Events.Server.Processes.Changed as ProcessesChanged
 events : CId -> Router Dispatch
 events cid name json =
     case name of
-        "new_file" ->
-            NewFile.handler (onNewFile cid) json
+        "file_added" ->
+            FileAdded.handler (onFileAdded cid) json
 
         "process_created" ->
             ProcessStarted.handler (onProcessStarted cid) json
@@ -41,9 +41,9 @@ events cid name json =
 -- internals
 
 
-onNewFile : CId -> NewFile.Data -> Dispatch
-onNewFile id =
-    Servers.CreatedFile >> Dispatch.filesystem id
+onFileAdded : CId -> FileAdded.Data -> Dispatch
+onFileAdded id =
+    Servers.FileAdded >> Dispatch.filesystem id
 
 
 onProcessStarted : CId -> ProcessStarted.Data -> Dispatch

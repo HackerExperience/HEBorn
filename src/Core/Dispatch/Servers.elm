@@ -4,10 +4,10 @@ import Time exposing (Time)
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Logs.Models as Logs
-import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Network.Types as Network
-import Events.Server.Filesystem.NewFile as NewFile
+import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -40,12 +40,12 @@ type Server
 {-| Messages related to server's filesystem.
 -}
 type Filesystem
-    = DeleteFile Filesystem.FileID
-    | MoveFile Filesystem.FileID Filesystem.Location
-    | RenameFile Filesystem.FileID String
-    | NewTextFile Filesystem.FilePath
-    | NewDir Filesystem.FilePath
-    | CreatedFile NewFile.Data
+    = DeleteFile Filesystem.Id
+    | MoveFile Filesystem.Id Filesystem.Path
+    | RenameFile Filesystem.Id String
+    | NewTextFile Filesystem.Path Filesystem.Name
+    | NewDir Filesystem.Path Filesystem.Name
+    | FileAdded FileAdded.Data
 
 
 {-| Messages related to server's logs.
@@ -65,8 +65,8 @@ type Processes
     | RemoveProcess Processes.ID
     | CompleteProcess Processes.ID
     | NewBruteforceProcess Time Network.IP
-    | NewDownloadProcess Time Network.NIP Filesystem.ForeignFileBox String
-    | NewPublicDownloadProcess Time Network.NIP Filesystem.ForeignFileBox String
+    | NewDownloadProcess Time Network.NIP Filesystem.FileEntry String
+    | NewPublicDownloadProcess Time Network.NIP Filesystem.FileEntry String
     | StartedProcess ProcessStarted.Data
     | ConcludedProcess ProcessConclusion.Data
     | ChangedProcesses ProcessesChanged.Data

@@ -1,14 +1,12 @@
-module Game.Servers.Filesystem.Update exposing (update, bootstrap)
+module Game.Servers.Filesystem.Update exposing (update)
 
 import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
 import Requests.Requests as Requests
 import Game.Models as Game
 import Game.Servers.Filesystem.Messages exposing (..)
-import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
-import Game.Servers.Filesystem.Requests.Sync as Sync
 import Game.Servers.Filesystem.Requests.Delete as Delete
 import Game.Servers.Filesystem.Requests.Move as Move
 import Game.Servers.Filesystem.Requests.Rename as Rename
@@ -19,14 +17,14 @@ import Game.Network.Types exposing (NIP)
 
 
 type alias UpdateResponse =
-    ( Filesystem, Cmd Msg, Dispatch )
+    ( Model, Cmd Msg, Dispatch )
 
 
 update :
     Game.Model
     -> CId
     -> Msg
-    -> Filesystem
+    -> Model
     -> UpdateResponse
 update game cid msg model =
     case msg of
@@ -39,195 +37,133 @@ update game cid msg model =
         HandleRename fileId newBaseName ->
             handleRename game cid fileId newBaseName model
 
-        HandleNewTextFile path ->
-            handleNewTextFile game
-                cid
-                (toString game.meta.lastTick)
-                path
-                model
+        HandleNewTextFile path name ->
+            handleNewTextFile game cid path name model
 
-        HandleNewDir path ->
-            handleNewDir game cid (toString game.meta.lastTick) path model
+        HandleNewDir path name ->
+            handleNewDir game cid path name model
 
         Request request ->
             onRequest game cid (receive request) model
-
-
-bootstrap : Value -> Filesystem -> Filesystem
-bootstrap json model =
-    decodeValue Sync.decoder json
-        |> Requests.report
-        |> Maybe.map (apply model)
-        |> Maybe.withDefault model
 
 
 
 -- internals
 
 
-handleDelete : Game.Model -> CId -> FileID -> Filesystem -> UpdateResponse
-handleDelete game cid fileId model =
+handleDelete : Game.Model -> CId -> Id -> Model -> UpdateResponse
+handleDelete game cid id model =
     let
-        file =
-            getEntry fileId model
-
-        model_ =
-            case file of
+        ( model_, cmd ) =
+            case getFile id model of
                 Just file ->
-                    deleteEntry file model
+                    ( deleteFile id model
+                    , Delete.request id cid game
+                    )
 
                 Nothing ->
-                    model
-
-        serverCmd =
-            Delete.request fileId cid game
+                    ( model, Cmd.none )
     in
-        ( model_, serverCmd, Dispatch.none )
+        ( model_, cmd, Dispatch.none )
 
 
 handleMove :
     Game.Model
     -> CId
-    -> FileID
-    -> Location
-    -> Filesystem
+    -> Id
+    -> Path
+    -> Model
     -> UpdateResponse
-handleMove game cid fileId newLocation model =
+handleMove game cid id newPath model =
     let
-        model_ =
-            model
-                |> getEntry fileId
-                |> Maybe.map
-                    (\e ->
-                        moveEntry
-                            ( newLocation, getEntryBasename e )
-                            e
-                            model
+        ( model_, cmd ) =
+            case getFile id model of
+                Just file ->
+                    ( moveFile id newPath model
+                    , Move.request newPath id cid game
                     )
-                |> Maybe.withDefault model
 
-        serverCmd =
-            Move.request newLocation fileId cid game
+                Nothing ->
+                    ( model, Cmd.none )
     in
-        ( model_, serverCmd, Dispatch.none )
+        ( model_, cmd, Dispatch.none )
 
 
 handleRename :
     Game.Model
     -> CId
-    -> FileID
-    -> String
-    -> Filesystem
+    -> Id
+    -> Name
+    -> Model
     -> UpdateResponse
-handleRename game cid fileId newBaseName model =
+handleRename game cid id name model =
     let
-        model_ =
-            model
-                |> getEntry fileId
-                |> Maybe.map
-                    (\e ->
-                        moveEntry
-                            ( getEntryLocation e model
-                            , newBaseName
-                            )
-                            e
-                            model
+        ( model_, cmd ) =
+            case getFile id model of
+                Just file ->
+                    ( renameFile id name model
+                    , Rename.request name id cid game
                     )
-                |> Maybe.withDefault model
 
-        serverCmd =
-            Rename.request newBaseName fileId cid game
+                Nothing ->
+                    ( model, Cmd.none )
     in
-        ( model_, serverCmd, Dispatch.none )
+        ( model_, cmd, Dispatch.none )
 
 
 handleNewTextFile :
     Game.Model
     -> CId
-    -> FileID
-    -> FilePath
-    -> Filesystem
+    -> Path
+    -> Name
+    -> Model
     -> UpdateResponse
-handleNewTextFile game cid fileId ( fileLocation, fileBaseName ) model =
+handleNewTextFile game cid path name model =
     let
-        toFileEntry path =
-            FileEntry
-                { id =
-                    "tempID"
-                        ++ "_TXT_"
-                        ++ (fileBaseName)
-                        ++ "_"
-                        ++ fileId
-                , name = fileBaseName
-                , extension = "txt"
-                , version = Nothing
-                , size = Just 0
-                , parent = path
-                , mime = Text
-                }
+        fullpath =
+            appendPath name path
 
-        maybeModel =
-            locationToParentRef fileLocation model
-                |> Maybe.map toFileEntry
-                |> Maybe.map (flip addEntry model)
+        file =
+            File name "txt" path 0 Text
+
+        model_ =
+            insertFile (joinPath fullpath) file model
     in
-        case maybeModel of
-            Just model_ ->
-                let
-                    cmd =
-                        Create.request "txt"
-                            fileBaseName
-                            fileLocation
-                            cid
-                            game
-                in
-                    ( model_, cmd, Dispatch.none )
-
-            Nothing ->
-                Update.fromModel model
+        if model /= model_ then
+            ( model_
+            , Create.request "txt" name fullpath cid game
+            , Dispatch.none
+            )
+        else
+            Update.fromModel model
 
 
 handleNewDir :
     Game.Model
     -> CId
-    -> FileID
-    -> FilePath
-    -> Filesystem
+    -> Path
+    -> Name
+    -> Model
     -> UpdateResponse
-handleNewDir game cid fileId ( fileLocation, fileName ) model =
+handleNewDir game cid path name model =
     let
         model_ =
-            model
-                |> locationToParentRef fileLocation
-                |> Maybe.map
-                    (\path ->
-                        let
-                            entry =
-                                FolderEntry
-                                    { id =
-                                        "tempID"
-                                            ++ "_DIR_"
-                                            ++ (fileName ++ "_")
-                                            ++ fileId
-                                    , name = fileName
-                                    , parent = path
-                                    }
-                        in
-                            addEntry entry model
-                    )
-                |> Maybe.withDefault model
-
-        serverCmd =
-            Create.request "/" fileName fileLocation cid game
+            insertFolder path name model
     in
-        ( model_, serverCmd, Dispatch.none )
+        if model /= model_ then
+            ( model_
+            , Create.request "/" name path cid game
+            , Dispatch.none
+            )
+        else
+            Update.fromModel model
 
 
 onRequest :
     Game.Model
     -> CId
     -> Maybe Response
-    -> Filesystem
+    -> Model
     -> UpdateResponse
 onRequest cid game response model =
     case response of
@@ -242,47 +178,7 @@ updateRequest :
     Game.Model
     -> CId
     -> Response
-    -> Filesystem
+    -> Model
     -> UpdateResponse
 updateRequest game cid data model =
     Update.fromModel model
-
-
-
--- sync/bootstrap internals
-
-
-apply : Filesystem -> Foreigners -> Filesystem
-apply =
-    let
-        convEntry parentRef src filesystem =
-            case src of
-                ForeignFile data ->
-                    let
-                        entry =
-                            FileEntry
-                                { id = data.id
-                                , name = data.name
-                                , parent = parentRef
-                                , extension = data.extension
-                                , version = data.version
-                                , size = data.size
-                                , mime = data.mime
-                                }
-                    in
-                        addEntry entry filesystem
-
-                ForeignFolder data ->
-                    let
-                        entry =
-                            FolderEntry
-                                { id = data.id
-                                , name = data.name
-                                , parent = parentRef
-                                }
-                    in
-                        List.foldl (convEntry <| NodeRef data.id)
-                            (addEntry entry filesystem)
-                            data.children
-    in
-        List.foldl (convEntry RootRef)

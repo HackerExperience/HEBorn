@@ -2,30 +2,31 @@ module Game.Servers.Filesystem.ModelTest exposing (all)
 
 import Expect
 import Gen.Filesystem as Gen
-import Fuzz exposing (int, tuple, tuple3, tuple4)
-import Helper.Filesystem as Helper exposing (createLocation, hackPath)
+import Fuzz exposing (unit, tuple, tuple3, tuple4)
+import Helper.Filesystem as Helper exposing (mkdirp)
 import Test exposing (Test, describe)
-import TestUtils exposing (fuzz, once, ensureDifferentSeed)
-import Game.Servers.Filesystem.Shared exposing (..)
+import TestUtils exposing (fuzz, batch)
 import Game.Servers.Filesystem.Models exposing (..)
 
 
 all : Test
 all =
     describe "filesystem"
-        [ fileOperationsTests
+        [ operationsTests
         ]
 
 
-fileOperationsTests : Test
-fileOperationsTests =
+operationsTests : Test
+operationsTests =
     describe "file operations"
-        [ describe "add file"
-            addFileTests
-        , describe "move file"
-            moveFileTests
-        , describe "delete files"
-            deleteFileTests
+        [ describe "insert"
+            insertTests
+        , describe "move"
+            moveTests
+        , describe "delete"
+            deleteTests
+        , describe "scan"
+            scanTests
         ]
 
 
@@ -35,97 +36,124 @@ fileOperationsTests =
 --------------------------------------------------------------------------------
 
 
-addFileTests : List Test
-addFileTests =
-    [ describe "generic add file tests "
-        addFileGenericTests
+insertTests : List Test
+insertTests =
+    [ describe "insert file tests "
+        insertFileTests
+    , describe "insert folder tests "
+        insertFolderTests
     ]
 
 
-addFileGenericTests : List Test
-addFileGenericTests =
-    [ fuzz
-        (tuple ( Gen.model, Gen.file ))
-        "can't add stdfile to non-existing path (no recursive)"
-      <|
-        \( model, file ) ->
-            model
-                |> addEntry
-                    (hackPath (NodeRef "inexistant") file)
-                |> Expect.equal model
-    , fuzz
-        (tuple ( Gen.model, Gen.file ))
-        "can add stdfile to non-existing path (recursively)"
-      <|
-        \( filesystem, file ) ->
+insertFileTests : List Test
+insertFileTests =
+    [ fuzz Gen.fileEntry "can add files to non-existing path" <|
+        \fileEntry ->
             let
-                fileID =
-                    getEntryId file
+                id =
+                    toId fileEntry
 
-                model =
-                    addEntry file filesystem
+                file =
+                    fileEntry
+                        |> toFile
+                        |> setPath [ "", "non-existing", "path" ]
             in
-                file
-                    |> flip getEntryLocation model
-                    |> flip findChildren model
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Expect.equal (Just file)
-
-    {- test below probably will need revision: we *can* add folder to non-existing path
-       as long as the top-level path exists. Example:
-       we can add Folder f to /path/f when /path exists (and /path/f obviously doesn't)
-       we can't add Folder f to /path/to/f when /path exists but /path/to does not.
-    -}
-    , fuzz
-        (tuple ( Gen.model, Gen.folder ))
-        "can add folders to non-existing path"
-      <|
-        \( model, folder ) ->
+                initialModel
+                    |> insertFile id file
+                    |> Expect.notEqual initialModel
+    , fuzz Gen.fileEntry "can add files into existing folders" <|
+        \fileEntry ->
             let
-                originalModel =
-                    model
-                        |> addEntry folder
+                id =
+                    toId fileEntry
 
-                loc =
-                    getEntryLocation folder originalModel
+                file =
+                    fileEntry
+                        |> toFile
+                        |> setPath [ "" ]
             in
-                originalModel
-                    |> isLocationValid loc
+                initialModel
+                    |> insertFile id file
+                    |> isFile (getFullpath file)
                     |> Expect.equal True
     , fuzz
-        (tuple4 ( Gen.model, Gen.folder, Gen.file, Gen.file ))
+        (tuple3 ( Gen.model, Gen.fileEntry, Gen.fileEntry ))
         "multiple files can exist on the same folder"
       <|
-        \( model, folder, file1, file2 ) ->
+        \( model, fileEntry1, fileEntry2 ) ->
             let
-                parentRef =
-                    NodeRef <| getEntryId folder
+                path =
+                    [ "", "example" ]
 
-                file1_ =
-                    hackPath parentRef file1
+                id1 =
+                    toId fileEntry1
 
-                file2_ =
-                    hackPath parentRef file2
+                id2 =
+                    toId fileEntry2
 
-                fullModel =
+                file1 =
+                    fileEntry1
+                        |> toFile
+                        |> setPath path
+
+                file2 =
+                    fileEntry2
+                        |> toFile
+                        |> setPath path
+
+                model_ =
                     model
-                        |> addEntry folder
-                        |> addEntry file1_
-                        |> addEntry file2_
+                        |> mkdirp path
+                        |> insertFile id1 file1
+                        |> insertFile id2 file2
 
-                ( loc, name ) =
-                    getEntryLink folder fullModel
-
-                childs =
-                    findChildren (loc ++ [ name ]) fullModel
-
-                result =
-                    ( List.member file1_ childs
-                    , List.member file2_ childs
-                    )
+                fileExists =
+                    getFullpath
+                        >> flip isFile model_
+                        >> Expect.equal True
             in
-                Expect.equal ( True, True ) result
+                batch
+                    [ fileExists file1
+                    , fileExists file2
+                    ]
+    ]
+
+
+insertFolderTests : List Test
+insertFolderTests =
+    [ fuzz unit "can add folder to non-existing paths" <|
+        \() ->
+            initialModel
+                |> insertFolder [ "", "non-existing" ] "path"
+                |> Expect.equal initialModel
+    , fuzz unit "can add folder into existing folders" <|
+        \() ->
+            initialModel
+                |> insertFolder [ "" ] "example"
+                |> Expect.notEqual initialModel
+    , fuzz
+        (tuple3 ( Gen.model, Gen.folder, Gen.folder ))
+        "multiple folders can exist on the same folder"
+      <|
+        \( model, folder1, folder2 ) ->
+            let
+                insertFolder_ =
+                    uncurry insertFolder
+
+                model_ =
+                    model
+                        |> insertFolder_ folder1
+                        |> insertFolder_ folder2
+
+                expectIsDirectory =
+                    uncurry (flip appendPath)
+                        >> flip isFolder model_
+                        >> Expect.equal True
+            in
+                batch
+                    [ expectIsDirectory folder1
+                    , expectIsDirectory folder2
+                    ]
     ]
 
 
@@ -135,241 +163,57 @@ addFileGenericTests =
 --------------------------------------------------------------------------------
 
 
+moveTests : List Test
+moveTests =
+    [ describe "move file around"
+        moveFileTests
+    ]
+
+
 moveFileTests : List Test
 moveFileTests =
-    [ describe "generic tests"
-        moveFileGenericTests
-    , describe "move stdfile around"
-        moveStdFileTests
-    , describe "move folders around"
-        moveFolderTests
-    ]
-
-
-moveFileGenericTests : List Test
-moveFileGenericTests =
-    [ fuzz
-        (tuple3 ( Gen.model, Gen.entry, Gen.location ))
-        "can't move file to non-existing path"
+    [ fuzz (tuple3 ( Gen.model, Gen.fileEntry, Gen.folder ))
+        "can move file to existing path"
       <|
-        \( filesystem, file, destination ) ->
+        \( model, fileEntry, ( path, name ) ) ->
             let
-                model =
-                    addEntry file filesystem
+                path_ =
+                    appendPath name path
+
+                id =
+                    toId fileEntry
+
+                file =
+                    toFile fileEntry
+
+                model_ =
+                    model
+                        |> insertFile id file
+                        |> mkdirp path_
+            in
+                model_
+                    |> isFile (getFullpath file)
+                    |> Expect.equal True
+    , fuzz (tuple3 ( Gen.model, Gen.fileEntry, Gen.folder ))
+        "can move file to non-existing path"
+      <|
+        \( model, fileEntry, ( path, name ) ) ->
+            let
+                path_ =
+                    appendPath name path
+
+                id =
+                    toId fileEntry
+
+                file =
+                    fileEntry
+                        |> toFile
+                        |> setPath path_
             in
                 model
-                    |> moveEntry
-                        ( destination, getEntryBasename file )
-                        file
-                    |> Expect.equal model
-    ]
-
-
-moveStdFileTests : List Test
-moveStdFileTests =
-    [ fuzz
-        (tuple3 ( Gen.model, Gen.file, Gen.folder ))
-        "file is present on new location"
-      <|
-        \( model, file, folder ) ->
-            let
-                fileID =
-                    getEntryId file
-
-                originalModel =
-                    model
-                        |> addEntry file
-                        |> addEntry folder
-
-                ( grandLoc, fatherName ) =
-                    getEntryLink folder originalModel
-
-                destAsLoc =
-                    grandLoc ++ [ fatherName ]
-
-                destination =
-                    ( destAsLoc, getEntryBasename file )
-
-                fullModel =
-                    originalModel
-                        |> moveEntry destination file
-            in
-                fullModel
-                    |> findChildren destAsLoc
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Maybe.map getEntryId
-                    |> Expect.equal (Just fileID)
-    , fuzz
-        (tuple3 ( Gen.model, Gen.file, Gen.folder ))
-        "file is absent on old location"
-      <|
-        \( model, file, folder ) ->
-            let
-                fileID =
-                    getEntryId file
-
-                originalModel =
-                    model
-                        |> addEntry file
-                        |> addEntry folder
-
-                originalLocation =
-                    getEntryLocation file originalModel
-
-                folderAsLoc =
-                    getEntryLocation folder originalModel
-                        ++ [ getEntryBasename folder ]
-
-                destination =
-                    ( folderAsLoc
-                    , getEntryBasename file
-                    )
-            in
-                originalModel
-                    |> moveEntry destination file
-                    |> findChildren originalLocation
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Expect.equal Nothing
-    , fuzz
-        (tuple3 ( Gen.model, Gen.file, Gen.folder ))
-        "old path is still present"
-      <|
-        \( model, file, folder ) ->
-            let
-                originalModel =
-                    model
-                        |> addEntry file
-                        |> addEntry folder
-
-                newLoc =
-                    getEntryLocation folder originalModel
-                        ++ [ getEntryBasename folder ]
-
-                oldParent =
-                    getEntryLocation file originalModel
-            in
-                originalModel
-                    |> moveEntry
-                        ( newLoc, getEntryBasename file )
-                        file
-                    |> isLocationValid oldParent
+                    |> insertFile id file
+                    |> isFile (getFullpath file)
                     |> Expect.equal True
-    ]
-
-
-moveFolderTests : List Test
-moveFolderTests =
-    [ fuzz
-        (tuple3 ( Gen.model, Gen.entry, Gen.folder ))
-        "folder is present on new location"
-      <|
-        \( model, file, folder ) ->
-            let
-                fileID =
-                    getEntryId file
-
-                originalModel =
-                    model
-                        |> addEntry file
-                        |> addEntry folder
-
-                (( newLoc, newName ) as destination) =
-                    ( getEntryLocation folder originalModel, getEntryBasename file )
-            in
-                originalModel
-                    |> moveEntry destination file
-                    |> findChildren newLoc
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Maybe.map getEntryId
-                    |> Expect.equal (Just fileID)
-
-    {- We moved /bar to /foo, so now we have /foo/bar. We need to ensure our
-       model recognizes path /foo/bar as valid
-    -}
-    , fuzz
-        (tuple3 ( Gen.model, Gen.folder, Gen.folder ))
-        "new folder path is added to the model"
-      <|
-        \( model, origin, target ) ->
-            let
-                originalModel =
-                    model
-                        |> addEntry origin
-                        |> addEntry target
-
-                destination =
-                    getEntryLocation target originalModel
-
-                newLink =
-                    ( destination, getEntryBasename origin )
-            in
-                originalModel
-                    |> moveEntry newLink origin
-                    |> isEntryDirectory newLink
-                    |> Expect.equal True
-    , fuzz
-        (tuple4 ( Gen.model, Gen.entry, Gen.folder, Gen.folder ))
-        "we can move a new file into the moved folder"
-      <|
-        \( model, file, folder1, folder2 ) ->
-            let
-                originalModel =
-                    model
-                        |> addEntry folder1
-                        |> addEntry folder2
-
-                ( newGrandpa, newParent ) =
-                    getEntryLink folder2 originalModel
-
-                newLink =
-                    ( newGrandpa ++ [ newParent ], getEntryBasename folder1 )
-
-                newFileLocation =
-                    Tuple.first newLink ++ [ Tuple.second newLink ]
-
-                fileID =
-                    getEntryId file
-
-                parentRef =
-                    NodeRef <| getEntryId folder1
-
-                file_ =
-                    hackPath parentRef file
-            in
-                originalModel
-                    |> moveEntry newLink folder1
-                    |> addEntry file_
-                    |> findChildren newFileLocation
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Expect.equal (Just file_)
-    , fuzz
-        (tuple3 ( Gen.model, Gen.folder, Gen.folder ))
-        "old folder path no longer exists"
-      <|
-        \( model, folder1, folder2 ) ->
-            let
-                originalModel =
-                    model
-                        |> addEntry folder1
-                        |> addEntry folder2
-
-                ( f2parent, f2name ) =
-                    getEntryLink folder2 originalModel
-
-                originalLink =
-                    getEntryLink folder1 originalModel
-
-                destination =
-                    ( f2parent ++ [ f2name ], getEntryBasename folder1 )
-            in
-                originalModel
-                    |> moveEntry destination folder1
-                    |> isEntryDirectory originalLink
-                    |> Expect.equal False
     ]
 
 
@@ -379,142 +223,280 @@ moveFolderTests =
 --------------------------------------------------------------------------------
 
 
-deleteFileTests : List Test
-deleteFileTests =
-    [ describe "delete stdfile"
-        deleteStdFileTests
+deleteTests : List Test
+deleteTests =
+    [ describe "delete file"
+        deleteFileTests
     , describe "delete folder"
         deleteFolderTests
     ]
 
 
-deleteStdFileTests : List Test
-deleteStdFileTests =
+deleteFileTests : List Test
+deleteFileTests =
     [ fuzz
-        (tuple ( Gen.model, Gen.file ))
-        "stdfile no longer exists on path"
+        (tuple ( Gen.model, Gen.fileEntry ))
+        "file no longer exists on path"
       <|
-        \( model, file ) ->
+        \( model, fileEntry ) ->
             let
-                fileID =
-                    getEntryId file
+                id =
+                    toId fileEntry
 
-                originalModel =
-                    addEntry file model
+                file =
+                    toFile fileEntry
 
-                originalLocation =
-                    getEntryLocation file originalModel
-            in
-                originalModel
-                    |> deleteEntry file
-                    |> findChildren originalLocation
-                    |> List.filter (\x -> (getEntryId x) == fileID)
-                    |> List.head
-                    |> Expect.equal Nothing
-    , fuzz
-        (tuple ( Gen.model, Gen.file ))
-        "removed stdfile path still exists"
-      <|
-        \( model, file ) ->
-            let
-                originalModel =
-                    addEntry file model
-
-                loc =
-                    getEntryLocation file originalModel
-            in
-                originalModel
-                    |> deleteEntry file
-                    |> isLocationValid loc
-                    |> Expect.equal True
-    , fuzz
-        (tuple3 ( Gen.model, Gen.file, Gen.file ))
-        "'sister' files still exists on that path"
-      <|
-        \( model, file, file2 ) ->
-            let
-                parentRef =
-                    getEntryParent file
-
-                sister =
-                    hackPath parentRef file2
-
-                sisterID =
-                    getEntryId sister
-
-                originalModel =
+                model_ =
                     model
-                        |> addEntry file
-                        |> addEntry sister
-
-                path =
-                    getEntryLocation file originalModel
+                        |> insertFile id file
+                        |> deleteFile id
             in
-                originalModel
-                    |> deleteEntry file
-                    |> findChildren path
-                    |> List.filter (\x -> (getEntryId x) == sisterID)
-                    |> List.head
-                    |> Expect.equal (Just sister)
+                model_
+                    |> getFile id
+                    |> Expect.equal Nothing
     ]
 
 
 deleteFolderTests : List Test
 deleteFolderTests =
     [ fuzz
-        (tuple3 ( Gen.model, Gen.entry, Gen.folder ))
+        (tuple ( Gen.model, Gen.fileEntry ))
         "won't delete folder when there are files inside"
       <|
-        \( filesystem, file, folder ) ->
+        \( model, fileEntry ) ->
             let
-                parentRef =
-                    NodeRef <| getEntryId folder
+                id =
+                    toId fileEntry
 
-                file_ =
-                    hackPath parentRef file
+                file =
+                    toFile fileEntry
 
-                model =
-                    filesystem
-                        |> addEntry folder
-                        |> addEntry file_
+                model_ =
+                    insertFile id file model
             in
-                model
-                    |> deleteEntry folder
-                    |> Expect.equal model
-    , fuzz
-        (tuple ( Gen.model, Gen.folder ))
-        "folder no longer exists on path"
-      <|
-        \( model, folder ) ->
+                model_
+                    |> deleteFolder (getPath file)
+                    |> Expect.equal model_
+    , fuzz (tuple ( Gen.model, Gen.folder )) "folder path no longer exists" <|
+        \( model, ( path, name ) ) ->
             let
-                originalModel =
+                path_ =
+                    appendPath name path
+
+                model_ =
                     model
-                        |> addEntry folder
-
-                originalLocation =
-                    getEntryLocation folder originalModel
-
-                folderID =
-                    getEntryId folder
+                        |> insertFolder path name
+                        |> deleteFolder path_
             in
-                originalModel
-                    |> deleteEntry folder
-                    |> findChildren originalLocation
-                    |> List.filter (\x -> (getEntryId x) == folderID)
-                    |> List.head
-                    |> Expect.equal Nothing
-    , fuzz
-        (tuple ( Gen.model, Gen.folder ))
-        "folder path no longer exists"
-      <|
-        \( model, folder ) ->
-            let
-                fullModel =
-                    model
-                        |> addEntry folder
-                        |> deleteEntry folder
-            in
-                fullModel
-                    |> isEntryDirectory (getEntryLink folder fullModel)
+                model_
+                    |> isFolder path_
                     |> Expect.equal False
+    ]
+
+
+
+--------------------------------------------------------------------------------
+-- Add File
+--------------------------------------------------------------------------------
+
+
+scanTests : List Test
+scanTests =
+    -- hardcoded tests to make it easier to understand what's happening
+    [ describe "scan path"
+        scanPathTests
+    , describe "list path"
+        listPathTests
+    ]
+
+
+scanPathTests : List Test
+scanPathTests =
+    [ fuzz unit "scan includes nested files" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> scan [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id3" file3
+                    , FileEntry "id2" file2
+                    , FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2"
+                    , FolderEntry [ "" ] "folder1"
+                    ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "scan won't include files from unrelated paths" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "", "folder1" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> scan [ "", "folder1" ]
+
+                expectFiles =
+                    [ FileEntry "id2" file2
+                    , FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "scan include files from detached paths" <|
+        \() ->
+            let
+                file =
+                    File "file" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id" file
+                        |> scan [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id" file
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    ]
+
+
+listPathTests : List Test
+listPathTests =
+    [ fuzz unit "list includes nested files" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> list [ "" ]
+
+                expectFiles =
+                    [ FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "" ] "folder1"
+                    ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "list won't include files from unrelated paths" <|
+        \() ->
+            let
+                file1 =
+                    File "file1" "txt" [ "", "folder1" ] 0 Text
+
+                file2 =
+                    File "file2" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                file3 =
+                    File "file3" "txt" [ "", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id1" file1
+                        |> insertFile "id2" file2
+                        |> insertFile "id3" file3
+                        |> list [ "", "folder1" ]
+
+                expectFiles =
+                    [ FileEntry "id1" file1
+                    ]
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal expectFiles <|
+                        List.filter (isFolderEntry >> not) entries
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
+    , fuzz unit "list includes detached folders" <|
+        \() ->
+            let
+                file =
+                    File "file" "txt" [ "", "folder1", "folder2" ] 0 Text
+
+                entries =
+                    initialModel
+                        |> insertFile "id" file
+                        |> list [ "" ]
+
+                noFiles =
+                    entries
+                        |> List.filter (isFolderEntry >> not)
+                        |> List.isEmpty
+
+                expectFolders =
+                    [ FolderEntry [ "", "folder1" ] "folder2" ]
+            in
+                batch
+                    [ Expect.equal True noFiles
+                    , Expect.equal expectFolders <|
+                        List.filter isFolderEntry entries
+                    ]
     ]

@@ -1,8 +1,4 @@
-module Game.Servers.Filesystem.Requests
-    exposing
-        ( Response(..)
-        , receive
-        )
+module Game.Servers.Filesystem.Requests exposing (Response(..), receive)
 
 import Game.Servers.Filesystem.Messages exposing (..)
 
@@ -14,9 +10,6 @@ type Response
 receive : RequestMsg -> Maybe Response
 receive response =
     case response of
-        SyncRequest response ->
-            Nothing
-
         DeleteRequest response ->
             Nothing
 

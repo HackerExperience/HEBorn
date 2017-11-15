@@ -12,6 +12,7 @@ module Utils.List
         , foldrWhile
         , unique
         , uniqueBy
+        , dropRight
         )
 
 import Set exposing (Set)
@@ -163,6 +164,11 @@ uniqueHelp f existing remaining =
                     uniqueHelp f existing rest
                 else
                     first :: uniqueHelp f (Set.insert computedFirst existing) rest
+
+
+dropRight : Int -> List a -> List a
+dropRight n =
+    List.reverse >> List.drop n >> List.reverse
 
 
 

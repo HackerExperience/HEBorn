@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Native.Panic
 import Core.Error as Error
 import Game.Account.Bounces.Models as Bounces
-import Game.Servers.Filesystem.Shared as Filesystem exposing (Filesystem)
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
@@ -43,7 +43,7 @@ type alias Server =
     , type_ : ServerType
     , nips : List NIP
     , coordinates : Maybe Coordinates
-    , filesystem : Filesystem
+    , filesystem : Filesystem.Model
     , logs : Logs.Model
     , processes : Processes.Model
     , tunnels : Tunnels.Model
@@ -300,12 +300,12 @@ setNIPs nips server =
     { server | nips = nips }
 
 
-getFilesystem : Server -> Filesystem
+getFilesystem : Server -> Filesystem.Model
 getFilesystem =
     .filesystem
 
 
-setFilesystem : Filesystem -> Server -> Server
+setFilesystem : Filesystem.Model -> Server -> Server
 setFilesystem filesystem model =
     { model | filesystem = filesystem }
 

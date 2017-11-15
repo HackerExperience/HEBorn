@@ -1,355 +1,749 @@
-module Game.Servers.Filesystem.Models exposing (..)
+module Game.Servers.Filesystem.Models
+    exposing
+        ( Model
+        , Files
+        , Folders
+        , Id
+        , File
+        , Path
+        , Name
+        , Extension
+        , Version
+        , Size
+        , Entry(..)
+        , FileEntry
+        , Type(..)
+        , CrackerModules
+        , FirewallModules
+        , ExploitModules
+        , HasherModules
+        , LogForgerModules
+        , LogRecoverModules
+        , EncryptorModules
+        , DecryptorModules
+        , AnyMapModules
+        , initialModel
+        , insertFile
+        , insertFolder
+        , deleteFile
+        , deleteFolder
+        , moveFile
+        , renameFile
+        , toPath
+        , joinPath
+        , pathBase
+        , parentPath
+        , appendPath
+        , concatPath
+        , list
+        , scan
+        , getFile
+        , getFolder
+        , getName
+        , setName
+        , getExtension
+        , getPath
+        , setPath
+        , getFullpath
+        , getSize
+        , getType
+        , getMeanVersion
+        , getModuleVersion
+        , getEntryName
+        , isValidFilename
+        , isFile
+        , isFolder
+        , isFolderEntry
+        , hasModules
+        , toId
+        , toFile
+        , toFileEntry
+        )
 
-import Dict
-import Game.Servers.Filesystem.Shared exposing (..)
-import Game.Servers.Filesystem.PathTree exposing (..)
+import Dict exposing (Dict)
+import Utils.List as List
 
 
-initialModel : Filesystem
+{-| Two dicts, one mapping ids to files, another mapping paths to ids.
+This is not the fastest or simplest way for doing it, but this method
+helps keeping types simpler.
+-}
+type alias Model =
+    { files : Files
+    , folders : Folders
+    }
+
+
+type alias Files =
+    Dict Id File
+
+
+type alias Folders =
+    Dict String (List Id)
+
+
+type alias Id =
+    String
+
+
+type alias File =
+    { name : Name
+    , extension : Extension
+    , path : Path
+    , size : Size
+    , type_ : Type
+    }
+
+
+type Entry
+    = FileEntry Id File
+    | FolderEntry Path String
+
+
+type alias Path =
+    List Name
+
+
+type alias Name =
+    String
+
+
+type alias Extension =
+    String
+
+
+type alias Size =
+    Int
+
+
+{-| Use this type for passing a `File` around with its `Id`.
+-}
+type alias FileEntry =
+    ( Id, File )
+
+
+{-| Note: a file version is computed when requested.
+-}
+type alias Version =
+    Float
+
+
+{-| Possible file types, software files include modules.
+-}
+type Type
+    = Text
+    | CryptoKey
+    | Cracker CrackerModules
+    | Firewall FirewallModules
+    | Exploit ExploitModules
+    | Hasher HasherModules
+    | LogForger LogForgerModules
+    | LogRecover LogRecoverModules
+    | Encryptor EncryptorModules
+    | Decryptor DecryptorModules
+    | AnyMap AnyMapModules
+
+
+{-| The base for a module is a version, additional data may be included.
+-}
+type alias Module a =
+    { a | version : Float }
+
+
+{-| A simple module includes nothing but the version.
+-}
+type alias SimpleModule =
+    Module {}
+
+
+type alias CrackerModules =
+    { bruteForce : SimpleModule
+    , overFlow : SimpleModule
+    }
+
+
+type alias FirewallModules =
+    { active : SimpleModule
+    , passive : SimpleModule
+    }
+
+
+type alias ExploitModules =
+    { ftp : SimpleModule
+    , ssh : SimpleModule
+    }
+
+
+type alias HasherModules =
+    { password : SimpleModule
+    }
+
+
+type alias LogForgerModules =
+    { create : SimpleModule
+    , edit : SimpleModule
+    }
+
+
+type alias LogRecoverModules =
+    { recover : SimpleModule
+    }
+
+
+type alias EncryptorModules =
+    { file : SimpleModule
+    , log : SimpleModule
+    , connection : SimpleModule
+    , process : SimpleModule
+    }
+
+
+type alias DecryptorModules =
+    { file : SimpleModule
+    , log : SimpleModule
+    , connection : SimpleModule
+    , process : SimpleModule
+    }
+
+
+type alias AnyMapModules =
+    { geo : SimpleModule
+    , net : SimpleModule
+    }
+
+
+
+-- crud
+
+
+initialModel : Model
 initialModel =
-    { entries = Dict.empty, rootTree = Dict.empty }
+    { files = Dict.empty
+    , folders = Dict.fromList [ ( "", [] ) ]
+    }
 
 
-getEntryId : Entry -> FileID
-getEntryId entry =
-    case entry of
-        FileEntry file ->
-            file.id
-
-        FolderEntry folder ->
-            folder.id
-
-
-getEntryLocation : Entry -> Filesystem -> Location
-getEntryLocation entry filesystem =
-    entry
-        |> getEntryParent
-        |> getAncestorsList filesystem
-        |> List.reverse
-        |> List.map (getEntryName)
-
-
-getEntryBasename : Entry -> String
-getEntryBasename entry =
-    case entry of
-        FileEntry file ->
-            file.name
-
-        FolderEntry folder ->
-            folder.name
-
-
-getEntryName : Entry -> String
-getEntryName entry =
-    case entry of
-        FileEntry prop ->
-            -- TODO: add extension with a new function like getFileExtension
-            (getEntryBasename entry) ++ extensionSeparator ++ prop.extension
-
-        FolderEntry _ ->
-            getEntryBasename entry
-
-
-getEntryLink : Entry -> Filesystem -> FilePath
-getEntryLink entry filesystem =
+{-| Inserting a file requires its `Id`, the insertion
+will occur in the file's path.
+-}
+insertFile : Id -> File -> Model -> Model
+insertFile id file ({ files, folders } as model) =
     let
-        name =
-            getEntryName entry
+        path =
+            getPath file
 
-        loc =
-            getEntryLocation entry filesystem
+        noFileExists =
+            file
+                |> getFullpath
+                |> flip isFile model
+                |> not
     in
-        ( loc, name )
+        if noFileExists then
+            let
+                model_ =
+                    deleteFile id model
+            in
+                { model_
+                    | files = Dict.insert id file files
+                    , folders = insertInFolder id path folders
+                }
+        else
+            model
 
 
-getEntryParent : Entry -> ParentReference
-getEntryParent entry =
-    case entry of
-        FileEntry file ->
-            file.parent
+{-| Inserting a folder requires its `Path`.
+-}
+insertFolder : Path -> Name -> Model -> Model
+insertFolder path name ({ folders } as model) =
+    if isFolder path model then
+        let
+            fullpath =
+                path
+                    |> appendPath name
+                    |> joinPath
+        in
+            case Dict.get fullpath folders of
+                Just _ ->
+                    model
 
-        FolderEntry folder ->
-            folder.parent
+                Nothing ->
+                    { model | folders = Dict.insert fullpath [] folders }
+    else
+        model
 
 
-getEntry : FileID -> Filesystem -> Maybe Entry
-getEntry entryID filesystem =
-    Dict.get entryID filesystem.entries
+{-| Deleting a File is O(n) of the folder size.
+-}
+deleteFile : Id -> Model -> Model
+deleteFile id ({ files, folders } as model) =
+    case Dict.get id files of
+        Just file ->
+            { model
+                | files = Dict.remove id files
+                , folders = removeFromFolder id file.path folders
+            }
+
+        Nothing ->
+            model
 
 
-findEntryId : FilePath -> Filesystem -> Maybe FileID
-findEntryId link filesystem =
-    case findPathNode link filesystem.rootTree of
-        Ok (Leaf id) ->
-            Just id
+{-| Deletes a folder by path, also removes its childs.
+Time is O(n*2) of filesystem and O(n) of deleted entries.
+-}
+deleteFolder : Path -> Model -> Model
+deleteFolder path ({ folders } as model) =
+    if List.isEmpty <| scan path model then
+        { model | folders = Dict.remove (joinPath path) folders }
+    else
+        model
 
-        Ok (Node id _) ->
-            Just id
+
+{-| Moves a File using its Id and Path.
+Time is O(n*2) of filesystem and O(n) of path entries.
+-}
+moveFile : Id -> Path -> Model -> Model
+moveFile id path ({ files, folders } as model) =
+    case Dict.get id files of
+        Just file ->
+            let
+                file_ =
+                    { file | path = path }
+
+                files_ =
+                    Dict.insert id file_ files
+
+                folders_ =
+                    folders
+                        |> removeFromFolder id file.path
+                        |> insertInFolder id file_.path
+            in
+                { model | files = files_, folders = folders_ }
+
+        Nothing ->
+            model
+
+
+renameFile : Id -> Name -> Model -> Model
+renameFile id name model =
+    case getFile id model of
+        Just file ->
+            insertFile id (setName name file) model
+
+        Nothing ->
+            model
+
+
+
+-- path operations
+
+
+toPath : String -> Path
+toPath path =
+    case String.split "/" path of
+        "" :: path ->
+            "" :: path
+
+        path ->
+            "" :: path
+
+
+joinPath : Path -> String
+joinPath path =
+    case path of
+        "" :: _ ->
+            String.join "/" path
 
         _ ->
+            "/" ++ (String.join "/" path)
+
+
+pathBase : Path -> Name
+pathBase path =
+    case List.head <| List.reverse path of
+        Just a ->
+            a
+
+        Nothing ->
+            ""
+
+
+parentPath : Path -> Path
+parentPath =
+    List.dropRight 1
+
+
+appendPath : Name -> Path -> Path
+appendPath name path =
+    -- add root folder if not present
+    path ++ [ name ]
+
+
+concatPath : List Path -> Path
+concatPath =
+    List.concat
+
+
+
+-- listing path contents
+
+
+{-| List direct entries of given folder.
+Time is O(n*2) of filesystem and O(n) of folder childs.
+-}
+list : Path -> Model -> List Entry
+list path model =
+    -- TODO: add nested folder support
+    let
+        drop =
+            String.dropLeft (String.length (joinPath path))
+
+        split =
+            String.split "/"
+
+        filter item =
+            case item of
+                FileEntry _ file ->
+                    file.path == path
+
+                FolderEntry path _ ->
+                    let
+                        isEmpty =
+                            model
+                                |> getFolder path
+                                |> Maybe.map List.isEmpty
+                                |> Maybe.withDefault True
+                    in
+                        if isEmpty then
+                            True
+                        else
+                            path
+                                |> joinPath
+                                |> drop
+                                |> split
+                                |> List.length
+                                |> ((==) 1)
+    in
+        model
+            |> scan path
+            |> List.filter filter
+
+
+{-| List direct entries of given folder.
+Time is O(n*2) of filesystem.
+-}
+scan : Path -> Model -> List Entry
+scan path model =
+    let
+        location =
+            joinPath path
+
+        contains =
+            String.contains location
+
+        get id =
+            case getFile id model of
+                Just file ->
+                    Just ( id, file )
+
+                Nothing ->
+                    Nothing
+
+        filter id file =
+            if (contains (joinPath file.path)) then
+                Just <| FileEntry id file
+            else
+                Nothing
+
+        path_ =
+            parentPath path
+
+        name =
+            path
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault ""
+
+        reducer current files entries =
+            if (contains current) then
+                let
+                    entries1 =
+                        List.filterMap
+                            (get >> Maybe.andThen (uncurry filter))
+                            files
+
+                    entries2 =
+                        let
+                            myPath =
+                                toPath current
+                        in
+                            if current == location then
+                                entries1
+                            else
+                                myPath
+                                    |> pathBase
+                                    |> FolderEntry (parentPath myPath)
+                                    |> flip (::) entries1
+                in
+                    List.append entries2 entries
+            else
+                entries
+    in
+        Dict.foldl reducer [] model.folders
+
+
+
+-- getters/setters
+
+
+getFile : Id -> Model -> Maybe File
+getFile id =
+    .files >> Dict.get id
+
+
+getFolder : Path -> Model -> Maybe (List Id)
+getFolder path =
+    .folders >> Dict.get (joinPath path)
+
+
+getName : File -> Name
+getName =
+    .name
+
+
+setName : String -> File -> File
+setName name file =
+    { file | name = name }
+
+
+getExtension : File -> Extension
+getExtension =
+    .extension
+
+
+getPath : File -> Path
+getPath =
+    .path
+
+
+setPath : Path -> File -> File
+setPath path file =
+    { file | path = path }
+
+
+getFullpath : File -> Path
+getFullpath file =
+    file
+        |> getPath
+        |> appendPath (getName file)
+
+
+getSize : File -> Size
+getSize =
+    .size
+
+
+getType : File -> Type
+getType =
+    .type_
+
+
+getMeanVersion : File -> Maybe Version
+getMeanVersion file =
+    case getModuleVersions file of
+        Just versions ->
+            versions
+                |> List.foldl (+) 0.0
+                |> flip (/) (toFloat <| List.length versions)
+                |> Just
+
+        Nothing ->
             Nothing
 
 
-findEntry : FilePath -> Filesystem -> Maybe Entry
-findEntry link filesystem =
-    filesystem
-        |> findEntryId link
-        |> Maybe.andThen ((flip getEntry) filesystem)
+getModuleVersion : Module a -> Version
+getModuleVersion =
+    .version
 
 
-isParentValid : Entry -> Filesystem -> Bool
-isParentValid entry filesystem =
-    case getEntryParent entry of
-        RootRef ->
-            True
+getEntryName : Entry -> Name
+getEntryName entry =
+    case entry of
+        FolderEntry _ name ->
+            name
 
-        NodeRef id ->
-            Dict.member id filesystem.entries
-
-
-addEntry : Entry -> Filesystem -> Filesystem
-addEntry entry filesystem =
-    if (isParentValid entry filesystem) then
-        let
-            location =
-                getEntryLocation entry
-
-            id =
-                getEntryId entry
-
-            link =
-                getEntryLink entry filesystem
-
-            newElem =
-                case entry of
-                    FileEntry _ ->
-                        Leaf id
-
-                    FolderEntry _ ->
-                        Node id Dict.empty
-
-            rootTree =
-                addPathNode
-                    newElem
-                    link
-                    filesystem.rootTree
-        in
-            case rootTree of
-                Ok rootTree ->
-                    let
-                        entries =
-                            Dict.insert
-                                id
-                                entry
-                                filesystem.entries
-                    in
-                        { entries = entries, rootTree = rootTree }
-
-                Err _ ->
-                    -- It's possible to return THE ERROR
-                    filesystem
-    else
-        filesystem
+        FileEntry _ file ->
+            getName file
 
 
-deleteEntry : Entry -> Filesystem -> Filesystem
-deleteEntry entry filesystem =
-    let
-        link =
-            getEntryLink entry filesystem
 
-        id =
-            getEntryId entry
-
-        rootTree =
-            deletePathNode False link filesystem.rootTree
-    in
-        case rootTree of
-            Ok rootTree ->
-                let
-                    entries =
-                        Dict.remove id filesystem.entries
-                in
-                    { entries = entries, rootTree = rootTree }
-
-            _ ->
-                filesystem
-
-
-moveEntry : FilePath -> Entry -> Filesystem -> Filesystem
-moveEntry (( newLoc, newName ) as newLink) entry filesystem =
-    let
-        originalLink =
-            getEntryLink entry filesystem
-
-        pathNode =
-            findPathNode originalLink filesystem.rootTree
-
-        newParent =
-            locationToParentRef newLoc filesystem
-
-        fullLink =
-            case entry of
-                FileEntry prop ->
-                    ( newLoc
-                    , newName ++ extensionSeparator ++ prop.extension
-                    )
-
-                FolderEntry _ ->
-                    newLink
-    in
-        case ( pathNode, newParent ) of
-            ( Ok pathNode, Just newParent ) ->
-                let
-                    rootTreeRes =
-                        filesystem.rootTree
-                            |> deletePathNode True originalLink
-                            |> Result.andThen (addPathNode pathNode fullLink)
-                in
-                    case rootTreeRes of
-                        Ok rootTree_ ->
-                            let
-                                apply header =
-                                    { header | name = newName, parent = newParent }
-
-                                entry_ =
-                                    case entry of
-                                        FileEntry fileBox ->
-                                            fileBox |> apply |> FileEntry
-
-                                        FolderEntry folderBox ->
-                                            folderBox |> apply |> FolderEntry
-
-                                entries =
-                                    Dict.insert (getEntryId entry) entry_ filesystem.entries
-                            in
-                                { entries = entries, rootTree = rootTree_ }
-
-                        _ ->
-                            filesystem
-
-            _ ->
-                filesystem
-
-
-nodeExists : FilePath -> Filesystem -> Bool
-nodeExists link filesystem =
-    case findPathNode link filesystem.rootTree of
-        Ok _ ->
-            True
-
-        _ ->
-            False
-
-
-isEntryDirectory : FilePath -> Filesystem -> Bool
-isEntryDirectory link filesystem =
-    case findPathNode link filesystem.rootTree of
-        Ok (Node id _) ->
-            True
-
-        _ ->
-            False
-
-
-isLocationValid : Location -> Filesystem -> Bool
-isLocationValid loc filesystem =
-    case (List.reverse loc) of
-        [] ->
-            True
-
-        [ unique ] ->
-            isEntryDirectory ( [], unique ) filesystem
-
-        last :: others ->
-            isEntryDirectory ( List.reverse others, last ) filesystem
-
-
-findChildrenIds : Location -> PathTree -> IOResult (List FileID)
-findChildrenIds loc pathTree =
-    case loc of
-        [] ->
-            Ok <| treeToIdList pathTree
-
-        [ now ] ->
-            case (Dict.get now pathTree) of
-                Just (Node _ childTree) ->
-                    Ok <| treeToIdList childTree
-
-                Just (Leaf _) ->
-                    Err ParentIsFile
-
-                Nothing ->
-                    Err MissingParent
-
-        now :: tail ->
-            case (Dict.get now pathTree) of
-                Just (Node _ childTree) ->
-                    findChildrenIds tail childTree
-
-                Just (Leaf _) ->
-                    Err ParentIsFile
-
-                Nothing ->
-                    Err MissingParent
-
-
-findChildren : Location -> Filesystem -> List Entry
-findChildren loc filesystem =
-    filesystem.rootTree
-        |> findChildrenIds loc
-        |> Result.map
-            (List.filterMap
-                ((flip getEntry) filesystem)
-            )
-        |> Result.withDefault []
+-- checking operations
 
 
 isValidFilename : String -> Bool
-isValidFilename fName =
+isValidFilename filename =
     -- TODO: Add special characters & entire name validation
-    if String.length fName > 0 then
+    if String.length filename > 0 then
         False
-    else if String.length fName < 255 then
+    else if String.length filename < 255 then
         False
     else
         True
 
 
-locationToParentRef : Location -> Filesystem -> Maybe ParentReference
-locationToParentRef loc filesystem =
-    case (List.reverse loc) of
-        [] ->
-            Just RootRef
+isFile : Path -> Model -> Bool
+isFile fullpath { files, folders } =
+    let
+        path =
+            parentPath fullpath
 
-        [ unique ] ->
-            filesystem
-                |> findEntryId ( [], unique )
-                |> Maybe.map NodeRef
+        name =
+            pathBase fullpath
+    in
+        folders
+            |> Dict.get (joinPath path)
+            |> Maybe.withDefault []
+            |> List.filter
+                (flip Dict.get files
+                    >> Maybe.map getName
+                    >> Maybe.map ((==) name)
+                    >> Maybe.withDefault False
+                )
+            |> List.isEmpty
+            |> not
 
-        last :: others ->
-            ( List.reverse others, last )
-                |> (flip findEntryId) filesystem
-                |> Maybe.map NodeRef
+
+isFolder : Path -> Model -> Bool
+isFolder path model =
+    case getFolder path model of
+        Just _ ->
+            True
+
+        Nothing ->
+            False
 
 
-getAncestorsList : Filesystem -> ParentReference -> List Entry
-getAncestorsList filesystem parent =
-    case parent of
-        RootRef ->
-            []
+isFolderEntry : Entry -> Bool
+isFolderEntry entry =
+    case entry of
+        FolderEntry _ _ ->
+            True
 
-        NodeRef id ->
-            let
-                entry =
-                    getEntry id filesystem
-            in
-                case entry of
-                    Just entry ->
-                        getEntryParent entry
-                            |> getAncestorsList filesystem
-                            |> ((::) entry)
+        FileEntry _ _ ->
+            False
 
-                    _ ->
-                        -- ATTENTION: Correct action = IOErr MissingParent
-                        []
+
+hasModules : File -> Bool
+hasModules file =
+    case getType file of
+        Text ->
+            False
+
+        CryptoKey ->
+            False
+
+        _ ->
+            True
+
+
+
+-- entry convertion
+
+
+toId : FileEntry -> Id
+toId =
+    Tuple.first
+
+
+toFile : FileEntry -> File
+toFile =
+    Tuple.second
+
+
+toFileEntry : Entry -> Maybe FileEntry
+toFileEntry entry =
+    case entry of
+        FolderEntry _ _ ->
+            Nothing
+
+        FileEntry id file ->
+            Just ( id, file )
+
+
+
+-- internals
+
+
+removeFromFolder : Id -> Path -> Folders -> Folders
+removeFromFolder id path folders =
+    let
+        location =
+            joinPath path
+    in
+        case Dict.get location folders of
+            Just ids ->
+                ids
+                    |> List.filter ((/=) id)
+                    |> flip (Dict.insert location) folders
+
+            Nothing ->
+                folders
+
+
+insertInFolder : Id -> Path -> Folders -> Folders
+insertInFolder id path folders =
+    let
+        location =
+            joinPath path
+    in
+        folders
+            |> Dict.get location
+            |> Maybe.withDefault []
+            |> (::) id
+            |> flip (Dict.insert location) folders
+
+
+getModuleVersions : File -> Maybe (List Version)
+getModuleVersions file =
+    case getType file of
+        Text ->
+            Nothing
+
+        CryptoKey ->
+            Nothing
+
+        Cracker { bruteForce, overFlow } ->
+            Just [ bruteForce.version, overFlow.version ]
+
+        Firewall { active, passive } ->
+            Just [ active.version, passive.version ]
+
+        Exploit { ftp, ssh } ->
+            Just [ ftp.version, ssh.version ]
+
+        Hasher { password } ->
+            Just [ password.version ]
+
+        LogForger { create, edit } ->
+            Just [ create.version, edit.version ]
+
+        LogRecover { recover } ->
+            Just [ recover.version ]
+
+        Encryptor { file, log, connection, process } ->
+            Just
+                [ file.version
+                , log.version
+                , connection.version
+                , process.version
+                ]
+
+        Decryptor { file, log, connection, process } ->
+            Just
+                [ file.version
+                , log.version
+                , connection.version
+                , process.version
+                ]
+
+        AnyMap { geo, net } ->
+            Just [ geo.version, net.version ]

@@ -6,196 +6,331 @@ import Json.Decode
         ( Decoder
         , map
         , andThen
-        , field
-        , oneOf
         , succeed
         , fail
-        , maybe
-        , lazy
+        , oneOf
+        , field
         , list
-        , string
+        , dict
         , int
+        , float
+        , string
         )
-import Json.Decode.Pipeline exposing (decode, required, optional, custom)
+import Json.Decode.Pipeline exposing (decode, required, custom)
 import Game.Servers.Shared exposing (..)
-import Game.Servers.Filesystem.Shared as Filesystem exposing (..)
-import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Models as Filesystem
 import Utils.Json.Decode exposing (commonError)
 
 
-model : Maybe Filesystem.Filesystem -> Decoder Filesystem
-model maybeFilesytem =
+{-| A parser that merges the response with the model, parses:
+
+    ```
+    dict string
+        (list
+            { name:
+                string
+            , extension:
+                string
+            , path:
+                string
+            , size:
+                int
+            , type:
+                (string) type
+            , modules:
+                modules for type
+            }
+        )
+    ```
+
+`type` defines expected modules:
+
+    ```
+    enum: "cracker"
+        | "firewall"
+        | "exploit"
+        | "hasher"
+        | "log_forger"
+        | "log_recover"
+        | "encryptor"
+        | "decryptor"
+        | "any_map"
+        | "text"
+        | "crypto_key"
+    ```
+
+`modules` type varies according to the software type:
+
+    ```
+    modules for "cracker":
+        bruteforce: simple_module
+        overflow: simple_module
+
+    modules for "firewall":
+        active: simple_module
+        passive: simple_module
+
+    modules for "exploit":
+        ftp: simple_module
+        ssh: simple_module
+
+    modules for "hasher":
+        password: simple_module
+
+    modules for "log_forger":
+        create: simple_module
+        edit: simple_module
+
+    modules for "log_recover":
+        recover: simple_module
+
+    modules for "encryptor":
+        file: simple_module
+        log: simple_module
+        connection: simple_module
+        process: simple_module
+
+    modules for "decryptor":
+        file: simple_module
+        log: simple_module
+        connection: simple_module
+        process: simple_module
+
+    modules for "any_map":
+        geo: simple_module
+        net: simple_module
+
+    modules for "text":
+        ---
+
+    modules for "crypto_key":
+        ---
+    ```
+
+`simple_module` is a generic module format for modules without special fields:
+
+    ```
+    version: float
+    ```
+
+Some types like `text` and `crypto_key` won't required the `modules` field.
+
+-}
+model : Maybe Filesystem.Model -> Decoder Filesystem.Model
+model =
     let
-        filesystem =
-            case maybeFilesytem of
-                Just filesystem ->
-                    filesystem
+        -- convert maybe model into model
+        withDefault maybeFs =
+            case maybeFs of
+                Just fs ->
+                    fs
 
                 Nothing ->
-                    initialModel
+                    Filesystem.initialModel
+
+        -- a fold to insert files into model
+        insertFiles =
+            Filesystem.insertFile
+                |> uncurry
+                |> List.foldl
+                |> flip
+
+        -- insert folder and its files
+        folderReducer location files =
+            let
+                path =
+                    Filesystem.toPath location
+
+                parent =
+                    Filesystem.parentPath path
+
+                name =
+                    Filesystem.pathBase path
+            in
+                Filesystem.insertFolder parent name
+                    >> insertFiles files
+
+        -- insert folders and its files
+        insertContents =
+            Dict.foldl folderReducer
+
+        -- transform server response
+        mapEntries =
+            flip map <| dict <| list fileEntry
     in
-        map (flip apply filesystem) index
+        withDefault >> insertContents >> mapEntries
 
 
-index : Decoder Foreigners
-index =
+entry : Decoder Filesystem.Entry
+entry =
     oneOf
-        -- [α ONLY] TEMPORARY FALLBACK
-        [ list (entry ())
-        , succeed []
+        [ map (uncurry Filesystem.FileEntry) fileEntry
+        , map (uncurry Filesystem.FolderEntry) folder
         ]
 
 
-apply : Foreigners -> Filesystem -> Filesystem
-apply =
-    let
-        convEntry parentRef src filesystem =
-            case src of
-                ForeignFile data ->
-                    let
-                        entry =
-                            FileEntry
-                                { id = data.id
-                                , name = data.name
-                                , parent = parentRef
-                                , extension = data.extension
-                                , version = data.version
-                                , size = data.size
-                                , mime = data.mime
-                                }
-                    in
-                        addEntry entry filesystem
-
-                ForeignFolder data ->
-                    let
-                        entry =
-                            FolderEntry
-                                { id = data.id
-                                , name = data.name
-                                , parent = parentRef
-                                }
-                    in
-                        List.foldl (convEntry <| NodeRef data.id)
-                            (addEntry entry filesystem)
-                            data.children
-    in
-        flip (List.foldl (convEntry RootRef))
+folder : Decoder ( Filesystem.Path, Filesystem.Name )
+folder =
+    decode (,)
+        |> required "path" path
+        |> required "name" string
 
 
-entry : () -> Decoder Foreigner
-entry () =
-    oneOf
-        [ file |> map ForeignFile
-        , (lazy folder) |> map ForeignFolder
-        ]
-
-
-file : Decoder ForeignFileBox
-file =
-    decode fileConstructor
+fileEntry : Decoder Filesystem.FileEntry
+fileEntry =
+    decode (,)
         |> required "id" string
+        |> custom file
+
+
+file : Decoder Filesystem.File
+file =
+    decode Filesystem.File
         |> required "name" string
         |> required "extension" string
-        |> optional "size" (maybe int) Nothing
-        |> optional "version" (maybe int) Nothing
-        |> custom mime
+        |> required "path" path
+        |> required "size" int
+        |> custom fileType
 
 
-fileConstructor :
-    FileID
-    -> FileName
-    -> String
-    -> FileSize
-    -> FileVersion
-    -> Mime
-    -> ForeignFileBox
-fileConstructor id name ext sz ver mime =
-    { id = id
-    , name = name
-    , extension = ext
-    , size = sz
-    , version = ver
-    , mime = mime
-    }
+fileType : Decoder Filesystem.Type
+fileType =
+    let
+        decodeField =
+            field "type" string
+
+        modulesFor =
+            field "modules"
+
+        decodeModules type_ =
+            case type_ of
+                "cracker" ->
+                    map Filesystem.Cracker <| modulesFor cracker
+
+                "firewall" ->
+                    map Filesystem.Firewall <| modulesFor firewall
+
+                "exploit" ->
+                    map Filesystem.Exploit <| modulesFor exploit
+
+                "hasher" ->
+                    map Filesystem.Hasher <| modulesFor hasher
+
+                "log_forger" ->
+                    map Filesystem.LogForger <| modulesFor logForger
+
+                "log_recover" ->
+                    map Filesystem.LogRecover <| modulesFor logRecover
+
+                "encryptor" ->
+                    map Filesystem.Encryptor <| modulesFor encryptor
+
+                "decryptor" ->
+                    map Filesystem.Decryptor <| modulesFor decryptor
+
+                "any_map" ->
+                    map Filesystem.AnyMap <| modulesFor anyMap
+
+                "text" ->
+                    succeed Filesystem.Text
+
+                "crypto_key" ->
+                    succeed Filesystem.CryptoKey
+
+                _ ->
+                    fail "deu ruim"
+    in
+        andThen decodeModules decodeField
 
 
-folder : () -> Decoder ForeignFolderBox
-folder () =
-    decode folderConstructor
-        |> required "children" (list <| lazy entry)
-        |> required "name" string
-        |> required "id" string
+path : Decoder Filesystem.Path
+path =
+    map Filesystem.toPath string
 
 
-folderConstructor : Foreigners -> FileName -> FileID -> ForeignFolderBox
-folderConstructor children name id =
-    { id = id
-    , name = name
-    , children = children
-    }
+
+-- module decode helpers
 
 
-mime : Decoder Mime
-mime =
-    field "type" string
-        |> andThen decodeMime
+simpleModule : Decoder { version : Filesystem.Version }
+simpleModule =
+    let
+        constructor version =
+            { version = version }
+    in
+        decode constructor
+            |> version
 
 
-decodeMime : String -> Decoder Mime
-decodeMime type_ =
-    case type_ of
-        "cracker" ->
-            modulesAssembler CrackerModules
-                |> module_ "bruteforce"
-                |> module_ "overflow"
-                |> modulesResolve Cracker
-
-        "firewall" ->
-            modulesAssembler FirewallModules
-                |> module_ "fwl_active"
-                |> module_ "fwl_passive"
-                |> modulesResolve Firewall
-
-        _ ->
-            fail <| commonError "file type" type_
+version : Decoder (Float -> b) -> Decoder b
+version =
+    required "version" float
 
 
-type alias Modules =
-    Dict String ModuleData
+
+-- software types
 
 
-modules : Decoder Modules
-modules =
-    decode (,)
-        |> required "name" string
-        |> required "version" (map (Just >> ModuleData) int)
-        |> list
-        |> map Dict.fromList
+cracker : Decoder Filesystem.CrackerModules
+cracker =
+    decode Filesystem.CrackerModules
+        |> required "bruteforce" simpleModule
+        |> required "overflow" simpleModule
 
 
-modulesAssembler : (ModuleData -> b) -> Decoder ( Modules, ModuleData -> b )
-modulesAssembler mimeType =
-    field "modules" modules
-        |> map (flip (,) mimeType)
+firewall : Decoder Filesystem.FirewallModules
+firewall =
+    decode Filesystem.FirewallModules
+        |> required "active" simpleModule
+        |> required "passive" simpleModule
 
 
-module_ : String -> Decoder ( Modules, ModuleData -> b ) -> Decoder ( Modules, b )
-module_ name =
-    map <|
-        \( src, fn ) ->
-            case Dict.get name src of
-                Just mod ->
-                    ( src, fn mod )
-
-                Nothing ->
-                    ( src, fn <| ModuleData <| Nothing )
+exploit : Decoder Filesystem.ExploitModules
+exploit =
+    decode Filesystem.ExploitModules
+        |> required "ftp" simpleModule
+        |> required "ssh" simpleModule
 
 
-modulesResolve : (a -> Mime) -> Decoder ( Modules, a ) -> Decoder Mime
-modulesResolve fn =
-    map (Tuple.second >> fn)
+hasher : Decoder Filesystem.HasherModules
+hasher =
+    decode Filesystem.HasherModules
+        |> required "password" simpleModule
 
 
-moduleError : String -> Decoder Mime
-moduleError value =
-    fail <| commonError "file module" value
+logForger : Decoder Filesystem.LogForgerModules
+logForger =
+    decode Filesystem.LogForgerModules
+        |> required "create" simpleModule
+        |> required "edit" simpleModule
+
+
+logRecover : Decoder Filesystem.LogRecoverModules
+logRecover =
+    decode Filesystem.LogRecoverModules
+        |> required "recover" simpleModule
+
+
+encryptor : Decoder Filesystem.EncryptorModules
+encryptor =
+    decode Filesystem.EncryptorModules
+        |> required "file" simpleModule
+        |> required "log" simpleModule
+        |> required "connection" simpleModule
+        |> required "process" simpleModule
+
+
+decryptor : Decoder Filesystem.DecryptorModules
+decryptor =
+    decode Filesystem.DecryptorModules
+        |> required "file" simpleModule
+        |> required "log" simpleModule
+        |> required "connection" simpleModule
+        |> required "process" simpleModule
+
+
+anyMap : Decoder Filesystem.AnyMapModules
+anyMap =
+    decode Filesystem.AnyMapModules
+        |> required "geo" simpleModule
+        |> required "net" simpleModule

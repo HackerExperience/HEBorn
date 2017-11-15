@@ -1,7 +1,7 @@
 module Apps.Browser.Widgets.PublicFiles.Model exposing (Model)
 
-import Game.Servers.Filesystem.Shared exposing (ForeignFileBox)
+import Game.Servers.Filesystem.Models as Filesystem
 
 
 type alias Model =
-    List ForeignFileBox
+    List Filesystem.FileEntry

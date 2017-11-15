@@ -77,13 +77,13 @@ fromFilesystem id dispatch =
         RenameFile a b ->
             [ filesystem id <| Filesystem.HandleRename a b ]
 
-        NewTextFile a ->
-            [ filesystem id <| Filesystem.HandleNewTextFile a ]
+        NewTextFile a b ->
+            [ filesystem id <| Filesystem.HandleNewTextFile a b ]
 
-        NewDir a ->
-            [ filesystem id <| Filesystem.HandleNewDir a ]
+        NewDir a b ->
+            [ filesystem id <| Filesystem.HandleNewDir a b ]
 
-        CreatedFile _ ->
+        FileAdded _ ->
             []
 
 

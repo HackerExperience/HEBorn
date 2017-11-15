@@ -8,8 +8,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
-import Game.Servers.Filesystem.Shared exposing (..)
-import Game.Servers.Filesystem.Models exposing (getEntryName, getEntryLink)
+import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Lib exposing (..)
@@ -36,54 +35,56 @@ idAttr =
     attribute idAttrKey
 
 
+entryIcon : Filesystem.Entry -> Classes
+entryIcon entry =
+    if Filesystem.isFolderEntry entry then
+        CasedDirIcon
+    else
+        case Maybe.map Filesystem.toFile <| Filesystem.toFileEntry entry of
+            Just file ->
+                case Filesystem.getType file of
+                    Filesystem.Cracker _ ->
+                        VirusIcon
 
--- VIEW WRAPPER
+                    Filesystem.Firewall _ ->
+                        FirewallIcon
 
+                    _ ->
+                        GenericArchiveIcon
 
-entryIcon : Entry -> Classes
-entryIcon file =
-    case file of
-        FolderEntry _ ->
-            CasedDirIcon
-
-        FileEntry prop ->
-            case prop.mime of
-                Cracker _ ->
-                    VirusIcon
-
-                Firewall _ ->
-                    FirewallIcon
-
-                -- ADD ICONS HERE
-                _ ->
-                    GenericArchiveIcon
+            Nothing ->
+                GenericArchiveIcon
 
 
-fileVerToText : FileVersion -> Html Msg
+fileVerToText : Maybe Filesystem.Version -> Html Msg
 fileVerToText ver =
     ver
         |> Maybe.map toString
-        |> Maybe.withDefault "N/V"
+        |> Maybe.withDefault "N/D"
         |> text
 
 
-moduleVerToText : Int -> Html Msg
+moduleVerToText : Filesystem.Version -> Html Msg
 moduleVerToText ver =
     ver
         |> toString
         |> text
 
 
-sizeToText : FileSize -> Html Msg
+sizeToText : Filesystem.Size -> Html Msg
 sizeToText size =
     size
-        |> Maybe.map (toFloat >> bytesToString)
-        |> Maybe.withDefault "N/S"
+        |> toFloat
+        |> bytesToString
         |> text
 
 
-module_ : FileID -> Mime -> ( String, Int, Classes ) -> Html Msg
-module_ fileID mime ( name, version, iconClass ) =
+module_ :
+    Filesystem.Id
+    -> Filesystem.Type
+    -> ( String, Filesystem.Version, Classes )
+    -> Html Msg
+module_ fileID type_ ( name, version, iconClass ) =
     div [ menuActiveAction fileID ]
         [ span [ class [ iconClass ] ] []
         , span [] [ text name ]
@@ -92,66 +93,57 @@ module_ fileID mime ( name, version, iconClass ) =
         ]
 
 
-moduleList : FileID -> Mime -> List (Html Msg)
-moduleList fileID mime =
-    List.map (module_ fileID mime) <|
-        mimeModules mime
+moduleList : Filesystem.Id -> Filesystem.Type -> List (Html Msg)
+moduleList fileID type_ =
+    List.map (module_ fileID type_) <|
+        modulesOfType type_
 
 
-mimeModules : Mime -> List ( String, Int, Classes )
-mimeModules mime =
-    List.filterMap
-        (\( a, b, c ) ->
-            case b.version of
-                Just b ->
-                    Just ( a, b, c )
-
-                Nothing ->
-                    Nothing
-        )
-    <|
-        case mime of
-            Cracker { bruteForce, overFlow } ->
+modulesOfType : Filesystem.Type -> List ( String, Filesystem.Version, Classes )
+modulesOfType type_ =
+    List.map (\( a, b, c ) -> ( a, Filesystem.getModuleVersion b, c )) <|
+        case type_ of
+            Filesystem.Cracker { bruteForce, overFlow } ->
                 [ ( "Bruteforce", bruteForce, ActiveIcon )
                 , ( "Overflow", overFlow, ActiveIcon )
                 ]
 
-            Firewall { active, passive } ->
+            Filesystem.Firewall { active, passive } ->
                 [ ( "Active", active, ActiveIcon )
                 , ( "Passive", passive, PassiveIcon )
                 ]
 
-            Exploit { ftp, ssh } ->
+            Filesystem.Exploit { ftp, ssh } ->
                 [ ( "FTP", ftp, ActiveIcon )
                 , ( "SSH", ssh, ActiveIcon )
                 ]
 
-            Hasher { password } ->
+            Filesystem.Hasher { password } ->
                 [ ( "Password", password, ActiveIcon ) ]
 
-            LogForger { create, edit } ->
+            Filesystem.LogForger { create, edit } ->
                 [ ( "Create", create, ActiveIcon )
                 , ( "Edit", edit, ActiveIcon )
                 ]
 
-            LogRecover { recover } ->
+            Filesystem.LogRecover { recover } ->
                 [ ( "Recover", recover, ActiveIcon ) ]
 
-            Encryptor { file, log, connection, process } ->
+            Filesystem.Encryptor { file, log, connection, process } ->
                 [ ( "File", file, ActiveIcon )
                 , ( "Log", log, ActiveIcon )
                 , ( "Connections", connection, ActiveIcon )
                 , ( "Process", process, ActiveIcon )
                 ]
 
-            Decryptor { file, log, connection, process } ->
+            Filesystem.Decryptor { file, log, connection, process } ->
                 [ ( "File", file, ActiveIcon )
                 , ( "Log", log, ActiveIcon )
                 , ( "Connections", connection, ActiveIcon )
                 , ( "Process", process, ActiveIcon )
                 ]
 
-            Anymap { geo, net } ->
+            Filesystem.AnyMap { geo, net } ->
                 [ ( "Geo", geo, ActiveIcon )
                 , ( "Net", net, ActiveIcon )
                 ]
@@ -160,31 +152,29 @@ mimeModules mime =
                 []
 
 
-treeEntry : Server -> Entry -> Html Msg
+treeEntry : Server -> Filesystem.Entry -> Html Msg
 treeEntry server file =
     let
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
 
         label =
-            span [] [ text <| getEntryName file ]
+            span [] [ text <| Filesystem.getEntryName file ]
     in
+        -- forced to leak implementation details
         case file of
-            FolderEntry data ->
+            Filesystem.FolderEntry path name ->
                 let
                     fs =
                         Servers.getFilesystem server
 
-                    ( goLoc, goFolder ) =
-                        getEntryLink file fs
-
-                    meAsLoc =
-                        goLoc ++ [ goFolder ]
+                    fullpath =
+                        Filesystem.appendPath name path
                 in
                     div
                         [ class [ NavEntry, EntryDir, EntryExpanded ]
-                        , menuTreeDir data.id
-                        , onClick <| GoPath meAsLoc
+                        , menuTreeDir fullpath
+                        , onClick <| GoPath fullpath
                         ]
                         [ div
                             [ class [ EntryView ] ]
@@ -192,60 +182,63 @@ treeEntry server file =
                         , div
                             [ class [ EntryChilds ] ]
                           <|
-                            treeEntryPath server meAsLoc
+                            treeEntryPath server fullpath
                         ]
 
-            FileEntry prop ->
+            Filesystem.FileEntry id file ->
                 div
                     [ class [ NavEntry, EntryArchive ]
-                    , menuTreeArchive prop.id
+                    , menuTreeArchive id
                     ]
                     [ icon, label ]
 
 
-treeEntryPath : Server -> Location -> List (Html Msg)
+treeEntryPath : Server -> Filesystem.Path -> List (Html Msg)
 treeEntryPath server path =
     path
         |> resolvePath server
         |> List.map (treeEntry server)
 
 
-detailedEntry : Server -> Entry -> Html Msg
-detailedEntry server file =
-    case file of
-        FolderEntry data ->
+detailedEntry : Server -> Filesystem.Entry -> Html Msg
+detailedEntry server entry =
+    case entry of
+        Filesystem.FolderEntry path name ->
             let
                 fs =
                     Servers.getFilesystem server
 
-                ( goLoc, goFolder ) =
-                    getEntryLink file fs
-
-                meAsLoc =
-                    goLoc ++ [ goFolder ]
+                path_ =
+                    Filesystem.appendPath name path
             in
                 div
                     [ class [ CntListEntry, EntryDir ]
-                    , menuMainDir data.id
-                    , onClick <| GoPath meAsLoc
-                    , idAttr data.id
+                    , menuMainDir path_
+                    , onClick <| GoPath path_
+                    , idAttr <| Filesystem.joinPath path_
                     ]
                     [ span [ class [ DirIcon ] ] []
-                    , span [] [ text data.name ]
+                    , span [] [ text name ]
                     ]
 
-        FileEntry prop ->
-            (case prop.mime of
-                Text ->
+        Filesystem.FileEntry id file ->
+            case Filesystem.getType file of
+                Filesystem.Text ->
                     div
                         [ class [ CntListEntry, EntryArchive ]
-                        , menuMainArchive prop.id
-                        , idAttr prop.id
+                        , menuMainArchive id
+                        , idAttr id
                         ]
-                        [ span [ class [ entryIcon file ] ] []
-                        , span [] [ text <| getEntryName file ]
-                        , span [] [ fileVerToText prop.version ]
-                        , span [] [ sizeToText prop.size ]
+                        [ span [ class [ entryIcon entry ] ] []
+                        , span [] [ text <| Filesystem.getName file ]
+                        , span []
+                            [ fileVerToText <|
+                                Filesystem.getMeanVersion file
+                            ]
+                        , span []
+                            [ sizeToText <|
+                                Filesystem.getSize file
+                            ]
                         ]
 
                 _ ->
@@ -253,35 +246,37 @@ detailedEntry server file =
                         baseEntry =
                             div
                                 [ class [ CntListEntry, EntryArchive ]
-                                , menuExecutable prop.id
-                                , idAttr prop.id
+                                , menuExecutable id
+                                , idAttr id
                                 ]
-                                [ span [ class [ entryIcon file ] ] []
-                                , span [] [ text <| getEntryName file ]
-                                , span [] [ fileVerToText prop.version ]
-                                , span [] [ sizeToText prop.size ]
+                                [ span [ class [ entryIcon entry ] ] []
+                                , span [] [ text <| Filesystem.getName file ]
+                                , span []
+                                    [ fileVerToText <|
+                                        Filesystem.getMeanVersion file
+                                    ]
+                                , span []
+                                    [ sizeToText <|
+                                        Filesystem.getSize file
+                                    ]
                                 ]
                     in
-                        if (hasModules prop.mime) then
+                        if Filesystem.hasModules file then
                             div [ class [ CntListContainer ] ]
                                 [ baseEntry
                                 , div [ class [ CntListChilds ] ] <|
-                                    moduleList prop.id prop.mime
+                                    moduleList id <|
+                                        Filesystem.getType file
                                 ]
                         else
                             baseEntry
-            )
 
 
-detailedEntryList : Server -> List Entry -> List (Html Msg)
+detailedEntryList : Server -> List Filesystem.Entry -> List (Html Msg)
 detailedEntryList server list =
     List.map
         (detailedEntry server)
         list
-
-
-
--- END OF THAT
 
 
 usage : Float -> Float -> Html Msg
@@ -312,20 +307,17 @@ usage min max =
             ]
 
 
-explorerColumn : Location -> Server -> Html Msg
+explorerColumn : Filesystem.Path -> Server -> Html Msg
 explorerColumn path server =
     div
         [ class [ Nav ]
         ]
-        [ div [ class [ NavTree ] ] <|
-            treeEntryPath
-                server
-                path
+        [ div [ class [ NavTree ] ] <| treeEntryPath server path
         , usage 256000000 1024000000
         ]
 
 
-breadcrumbItem : Location -> String -> Html Msg
+breadcrumbItem : Filesystem.Path -> String -> Html Msg
 breadcrumbItem path label =
     span
         [ class [ BreadcrumbItem ]
@@ -334,14 +326,17 @@ breadcrumbItem path label =
         [ text label ]
 
 
-breadcrumbFold : String -> ( List (Html Msg), Location ) -> ( List (Html Msg), Location )
+breadcrumbFold :
+    Filesystem.Name
+    -> ( List (Html Msg), Filesystem.Path )
+    -> ( List (Html Msg), Filesystem.Path )
 breadcrumbFold item ( htmlElems, pathAcu ) =
     if (String.length item) < 1 then
         ( htmlElems, pathAcu )
     else
         let
             fullPath =
-                pathAcu ++ [ item ]
+                Filesystem.appendPath item pathAcu
 
             newElems =
                 item
@@ -351,17 +346,17 @@ breadcrumbFold item ( htmlElems, pathAcu ) =
             ( newElems, fullPath )
 
 
-breadcrumb : Location -> Html Msg
+breadcrumb : Filesystem.Path -> Html Msg
 breadcrumb path =
     path
-        |> List.foldl breadcrumbFold ( [], [] )
+        |> List.foldl breadcrumbFold ( [], [ "" ] )
         |> Tuple.first
         |> List.reverse
-        |> (::) (breadcrumbItem [] "DISK")
+        |> (::) (breadcrumbItem [ "" ] "DISK")
         |> div [ class [ LocBar ] ]
 
 
-explorerMainHeader : Location -> Html Msg
+explorerMainHeader : Filesystem.Path -> Html Msg
 explorerMainHeader path =
     div
         [ class [ ContentHeader ] ]
@@ -370,7 +365,7 @@ explorerMainHeader path =
             [ class [ ActBtns ] ]
             [ span
                 [ class [ GoUpBtn ]
-                , onClick <| GoPath <| locationGoUp path
+                , onClick <| GoPath <| Filesystem.parentPath path
                 ]
                 []
             , span
@@ -425,8 +420,12 @@ explorerMainDinamycContent editing =
                 , button [ onClick ApplyEdit ] [ text "RENAME" ]
                 ]
 
+            -- TODO: add folder features
+            _ ->
+                []
 
-explorerMain : EditingStatus -> Location -> Server -> Html Msg
+
+explorerMain : EditingStatus -> Filesystem.Path -> Server -> Html Msg
 explorerMain editing path server =
     div
         [ class
@@ -448,7 +447,7 @@ view data ({ editing, path } as model) =
             Game.getActiveServer data
     in
         div [ class [ Window ] ]
-            [ explorerColumn [] activeServer
+            [ explorerColumn [ "" ] activeServer
             , explorerMain editing path activeServer
             , menuView model
             ]
