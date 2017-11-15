@@ -56,13 +56,8 @@ pathMoveAroundTests =
                         |> Servers.getFilesystem
                         |> mkdirp folder_
 
-                newServerWithFile =
-                    Servers.setFilesystem filesystem server
-
                 explorer =
-                    changePath folder_
-                        (Servers.getFilesystem newServerWithFile)
-                        initialModel
+                    changePath folder_ filesystem initialModel
             in
                 explorer
                     |> getPath

@@ -312,10 +312,7 @@ explorerColumn path server =
     div
         [ class [ Nav ]
         ]
-        [ div [ class [ NavTree ] ] <|
-            treeEntryPath
-                server
-                path
+        [ div [ class [ NavTree ] ] <| treeEntryPath server path
         , usage 256000000 1024000000
         ]
 
@@ -355,7 +352,7 @@ breadcrumb path =
         |> List.foldl breadcrumbFold ( [], [ "" ] )
         |> Tuple.first
         |> List.reverse
-        |> (::) (breadcrumbItem [ "/" ] "DISK")
+        |> (::) (breadcrumbItem [ "" ] "DISK")
         |> div [ class [ LocBar ] ]
 
 
@@ -450,7 +447,7 @@ view data ({ editing, path } as model) =
             Game.getActiveServer data
     in
         div [ class [ Window ] ]
-            [ explorerColumn [ "/" ] activeServer
+            [ explorerColumn [ "" ] activeServer
             , explorerMain editing path activeServer
             , menuView model
             ]
