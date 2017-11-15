@@ -6,7 +6,6 @@ module Apps.Models
         , name
         , title
         , icon
-        , isDecorated
         , windowInitSize
         )
 
@@ -248,16 +247,6 @@ title model =
 
         BugModel model ->
             Bug.title model
-
-
-isDecorated : App -> Bool
-isDecorated app =
-    case app of
-        MusicApp ->
-            False
-
-        _ ->
-            True
 
 
 windowInitSize : App -> ( Float, Float )
