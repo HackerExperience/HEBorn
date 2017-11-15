@@ -2,7 +2,7 @@ module OS.SessionManager.WindowManager.View exposing (view)
 
 import Dict
 import Html exposing (..)
-import Html.Attributes as Attributes exposing (style, attribute)
+import Html.Attributes as Attributes exposing (style, attribute, tabindex)
 import Html.Events exposing (onMouseDown)
 import Html.CssHelpers
 import Html.Keyed
@@ -67,6 +67,7 @@ windowWrapper id window view =
         windowStaticAttrs =
             [ windowClasses window
             , windowStyle window
+            , tabindex 1
             , decoratedAttr <| isDecorated window
             , appAttr window.app
             , activeContextAttr <| windowContext window
