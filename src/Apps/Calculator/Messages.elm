@@ -1,7 +1,6 @@
 module Apps.Calculator.Messages exposing (Msg(..))
 
 import Apps.Calculator.Menu.Messages as Menu
-import Keyboard
 
 
 type Msg
@@ -17,4 +16,4 @@ type Msg
     | CleanAll
     | Backspace
     | Equal
-    | KeyMsg Keyboard.KeyCode
+    | KeyMsg Int
