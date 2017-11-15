@@ -26,8 +26,6 @@ all =
     describe "process integration tests"
         [ describe "reacting to events"
             eventTests
-        , describe "reacting to requests"
-            requestTests
         ]
 
 
@@ -41,12 +39,12 @@ eventTests : List Test
 eventTests =
     [ fuzz
         GenGame.model
-        "event 'process_started' creates a new process"
+        "event 'process_created' creates a new process"
       <|
         \game ->
             let
                 ( serverId, server ) =
-                    fromJust "process_started fetching gateway" <|
+                    fromJust "process_created fetching gateway" <|
                         Game.getGateway game
 
                 -- building event
@@ -54,7 +52,7 @@ eventTests =
                     ServerChannel serverId
 
                 name =
-                    "process_started"
+                    "process_created"
 
                 json =
                     toValue
@@ -226,103 +224,4 @@ eventTests =
                     |> get "id"
                     |> Maybe.map getState
                     |> Expect.equal (Just <| Failed Unknown)
-    ]
-
-
-
---------------------------------------------------------------------------------
--- Request Tests
---------------------------------------------------------------------------------
-
-
-requestTests : List Test
-requestTests =
-    [ fuzz
-        (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "request 'bruteforce' replaces an optimistic process"
-      <|
-        \( game0, process0 ) ->
-            let
-                ( serverId, server0 ) =
-                    fromJust "bruteforce fetching gateway" <|
-                        Game.getGateway game0
-
-                process1 =
-                    { process0 | state = Starting }
-
-                processes0 =
-                    Servers.getProcesses server0
-
-                ( oldId, processes1 ) =
-                    insertOptimistic process1 processes0
-
-                server1 =
-                    Servers.setProcesses processes1 server0
-
-                servers1 =
-                    Servers.insert serverId server1 (Game.getServers game0)
-
-                game1 =
-                    Game.setServers servers1 game0
-
-                json =
-                    toValue
-                        """
-                        { "type" : "cracker"
-                        , "access" :
-                            { "origin_ip" : "id"
-                            , "priority" : 3
-                            , "usage" :
-                                { "cpu" :
-                                    { "percentage" : 0.1
-                                    , "absolute" : 1
-                                    }
-                                , "mem" :
-                                    { "percentage" : 0.0
-                                    , "absolute" : 1
-                                    }
-                                , "down" :
-                                    { "percentage" : 0.0
-                                    , "absolute" : 1
-                                    }
-                                , "up" :
-                                    { "percentage" : 0.0
-                                    , "absolute" : 1
-                                    }
-                                }
-                            , "connection_id" : "id"
-                            }
-                        , "state" : "running"
-                        , "file" :
-                            { "id" : "id"
-                            , "version" : 0.0
-                            , "name" : "process"
-                            }
-                        , "progress" :
-                            { "percentage" : 0.0
-                            , "creation_date" : 0.0
-                            , "completion_date" : 0.0
-                            }
-                        , "network_id" : "id"
-                        , "target_ip" : "id"
-                        , "process_id" : "id"
-                        }
-                        """
-
-                msg =
-                    Game.ServersMsg <|
-                        Servers.ServerMsg serverId <|
-                            Servers.ProcessesMsg <|
-                                Request <|
-                                    BruteforceRequest oldId ( OkCode, json )
-            in
-                game1
-                    |> updateGame msg
-                    |> Game.getServers
-                    |> Servers.get serverId
-                    |> fromJust "bruteforce fetching serverId"
-                    |> Servers.getProcesses
-                    |> get "id"
-                    |> Maybe.map (getState)
-                    |> Expect.equal (Just Running)
     ]
