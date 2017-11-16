@@ -22,7 +22,7 @@ settings model =
 initialModel : Model
 initialModel =
     { hostname = Nothing
-    , okay = True -- set me to false after backend integration
+    , okay = False
     }
 
 

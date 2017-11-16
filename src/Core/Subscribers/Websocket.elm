@@ -56,7 +56,9 @@ fromJoined channel value =
             ]
 
         Channels.ServerChannel cid ->
-            [ servers <| Servers.HandleJoinedServer cid value ]
+            [ servers <| Servers.HandleJoinedServer cid value
+            , setup <| Setup.HandleJoinedServer cid
+            ]
 
         _ ->
             []
@@ -66,7 +68,8 @@ fromJoinFailed : Channel -> Value -> Subscribers
 fromJoinFailed channel value =
     case channel of
         Channels.ServerChannel cid ->
-            [ web <| Web.HandleJoinServerFailed cid ]
+            [ web <| Web.HandleJoinServerFailed cid
+            ]
 
         _ ->
             []

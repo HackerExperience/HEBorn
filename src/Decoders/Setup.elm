@@ -37,7 +37,7 @@ pageFromString str =
         "welcome" ->
             succeed Welcome
 
-        "mainframe" ->
+        "server" ->
             succeed Mainframe
 
         "pick_location" ->
