@@ -8,7 +8,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Error as Error
 import Core.Dispatch.Websocket as Ws
 import Core.Dispatch.Core as Core
-import Driver.Websocket.Channels exposing (Channel(ServerChannel, RequestsChannel))
+import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
@@ -59,9 +59,6 @@ update msg model =
             Request.receive model data
                 |> Maybe.map (flip updateRequest model)
                 |> Maybe.withDefault (Update.fromModel model)
-
-        HandleConnected ->
-            handleConnected model
 
         HandleJoinedAccount value ->
             handleJoinedAccount value model
@@ -173,16 +170,6 @@ onResyncResponse servers model =
 
 
 -- events
-
-
-handleConnected : Model -> UpdateResponse
-handleConnected model =
-    let
-        dispatch =
-            Dispatch.websocket <|
-                Ws.Join RequestsChannel Nothing
-    in
-        ( model, Cmd.none, dispatch )
 
 
 handleJoinedAccount : Value -> Model -> UpdateResponse

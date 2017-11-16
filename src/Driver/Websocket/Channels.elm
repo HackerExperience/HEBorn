@@ -6,7 +6,6 @@ import Game.Servers.Shared as Servers
 
 type Channel
     = AccountChannel Account.ID
-    | RequestsChannel
     | ServerChannel Servers.CId
 
 
@@ -23,6 +22,3 @@ getAddress channel =
 
                 Servers.EndpointCId ( id, ip ) ->
                     "server:" ++ id ++ "@" ++ ip
-
-        RequestsChannel ->
-            "requests"

@@ -30,9 +30,6 @@ events channel event json =
 router : Ws.Channel -> String -> Value -> Result String Dispatch
 router channel event json =
     case channel of
-        Ws.RequestsChannel ->
-            Err ""
-
         Ws.AccountChannel _ ->
             Account.events event json
 
