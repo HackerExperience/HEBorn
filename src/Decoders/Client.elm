@@ -8,11 +8,7 @@ import Decoders.Setup
 
 setupPages : Decoder Setup.Pages
 setupPages =
-    -- TODO: remove this fallback after getting helix support
-    oneOf
-        [ succeed Setup.pageOrder
-        , Decoders.Setup.remainingPages
-            |> field "pages"
-            |> field "setup"
-            |> field "client"
-        ]
+    Decoders.Setup.remainingPages
+        |> field "pages"
+        |> field "setup"
+        |> field "client"

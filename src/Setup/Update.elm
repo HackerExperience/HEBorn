@@ -8,6 +8,7 @@ import Core.Dispatch.Core as Core
 import Core.Error as Error
 import Game.Models as Game
 import Game.Account.Models as Account
+import Game.Servers.Shared as Servers
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Models exposing (..)
@@ -49,13 +50,18 @@ update game msg model =
             else
                 Update.fromModel model
 
+        HandleJoinedServer cid ->
+            if isLoading model then
+                handleJoinedServer game cid model
+            else
+                Update.fromModel model
+
         Request data ->
             updateRequest game (receive data) model
 
 
 
 -- message handlers
---    Dispatch.core Core.Play
 
 
 onNextPage : Game.Model -> List Settings -> Model -> UpdateResponse
@@ -69,7 +75,7 @@ onNextPage game settings model0 =
                 ( model_, cmd ) =
                     setRequest game model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, cmd, Dispatch.none )
         else
             ( model, Cmd.none, Dispatch.none )
 
@@ -194,19 +200,10 @@ handleJoinedAccount : Value -> Model -> UpdateResponse
 handleJoinedAccount value model =
     case Decode.decodeValue Decoders.Client.setupPages value of
         Ok pages ->
-            let
-                model_ =
-                    model
-                        |> doneLoading
-                        |> setPages pages
-
-                dispatch =
-                    if hasPages model_ then
-                        Dispatch.core Core.Play
-                    else
-                        Dispatch.none
-            in
-                ( model_, Cmd.none, dispatch )
+            ( setPages pages model
+            , Cmd.none
+            , Dispatch.none
+            )
 
         Err reason ->
             let
@@ -217,6 +214,34 @@ handleJoinedAccount value model =
                         |> Dispatch.core
             in
                 ( model, Cmd.none, dispatch )
+
+
+handleJoinedServer : Game.Model -> Servers.CId -> Model -> UpdateResponse
+handleJoinedServer game cid model =
+    let
+        mainframe =
+            game
+                |> Game.getAccount
+                |> Account.getMainframe
+
+        dispatch =
+            if hasPages model then
+                Dispatch.none
+            else
+                Dispatch.core Core.Play
+    in
+        case mainframe of
+            Just mainframe ->
+                if mainframe == cid then
+                    ( doneLoading model
+                    , Cmd.none
+                    , dispatch
+                    )
+                else
+                    Update.fromModel model
+
+            Nothing ->
+                Update.fromModel model
 
 
 
@@ -238,7 +263,7 @@ locationPickerCmd model =
 
 setRequest : Game.Model -> Model -> ( Model, Cmd Msg )
 setRequest game model =
-    -- this could be improved
+    -- this could be improved a little bit
     let
         mainframe =
             game

@@ -17,8 +17,10 @@ import Setup.Settings exposing (..)
 
 serverName : (Bool -> msg) -> String -> CId -> ConfigSource a -> Cmd msg
 serverName func name cid =
-    [ encodeSettings <| Name name ]
-        |> Encode.object
+    name
+        |> Name
+        |> encodeSettings
+        |> encodeKV
         |> Requests.request (Topics.serverConfigCheck cid)
             (uncurry receiveServerName >> func)
 
@@ -30,14 +32,24 @@ serverLocation :
     -> ConfigSource a
     -> Cmd msg
 serverLocation func coords cid =
-    [ encodeSettings <| Location coords ]
-        |> Encode.object
+    coords
+        |> Location
+        |> encodeSettings
+        |> encodeKV
         |> Requests.request (Topics.serverConfigCheck cid)
             (uncurry receiveServerLocation >> func)
 
 
 
 -- internals
+
+
+encodeKV : ( String, Value ) -> Value
+encodeKV ( key, value ) =
+    Encode.object
+        [ ( "key", Encode.string key )
+        , ( "value", value )
+        ]
 
 
 receiveServerName : Code -> Value -> Bool

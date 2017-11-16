@@ -55,7 +55,6 @@ pageOrder : Pages
 pageOrder =
     [ Welcome
     , Mainframe
-    , PickLocation
     , Finish
     ]
 
@@ -68,6 +67,9 @@ remainingPages pages =
     in
         case List.head newPages of
             Just Welcome ->
+                newPages
+
+            Just _ ->
                 -- insert local greetings/farewells
                 newPages
                     |> List.reverse
@@ -75,8 +77,8 @@ remainingPages pages =
                     |> List.reverse
                     |> (::) CustomWelcome
 
-            _ ->
-                newPages
+            Nothing ->
+                []
 
 
 initializePages : Pages -> List PageModel
@@ -152,7 +154,7 @@ isLoading =
 
 hasPages : Model -> Bool
 hasPages =
-    .pages >> List.isEmpty
+    .pages >> List.isEmpty >> not
 
 
 setPages : Pages -> Model -> Model
@@ -322,7 +324,7 @@ encodePageModel page =
             Ok <| Encode.string "welcome"
 
         MainframeModel _ ->
-            Ok <| Encode.string "mainframe"
+            Ok <| Encode.string "server"
 
         PickLocationModel _ ->
             Ok <| Encode.string "location_picker"

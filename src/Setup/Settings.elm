@@ -68,7 +68,7 @@ encodeSettings setting =
                     encodeLocation coord
 
                 Name name ->
-                    encodeName name
+                    encodeHostname name
     in
         ( key, value )
 
@@ -99,7 +99,7 @@ settingToString setting =
             "location"
 
         Name _ ->
-            "name"
+            "hostname"
 
 
 encodeLocation : Coordinates -> Value
@@ -110,9 +110,10 @@ encodeLocation { lat, lng } =
         ]
 
 
-encodeName : String -> Value
-encodeName name =
-    Encode.string name
+encodeHostname : String -> Value
+encodeHostname name =
+    Encode.object
+        [ ( "hostname", Encode.string name ) ]
 
 
 getTarget : Settings -> SettingTopic
@@ -128,10 +129,10 @@ getTarget settings =
 targetFromString : String -> Maybe SettingTopic
 targetFromString str =
     case str of
-        "Account" ->
+        "AccountTopic" ->
             Just AccountTopic
 
-        "Server" ->
+        "ServerTopic" ->
             Just ServerTopic
 
         _ ->
