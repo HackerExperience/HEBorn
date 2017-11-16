@@ -6,6 +6,7 @@ import Html.Attributes exposing (placeholder, disabled)
 import Html.CssHelpers
 import Game.Models as Game
 import Setup.Resources exposing (..)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Helpers exposing (withHeader)
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
@@ -38,12 +39,12 @@ hostnameInput toMsg model =
         [ text <| Maybe.withDefault "" model.hostname ]
 
 
-nextBtn : msg -> Model -> Html msg
+nextBtn : (List Settings -> msg) -> Model -> Html msg
 nextBtn onNext model =
     let
         attrs =
             if isOkay model then
-                [ onClick onNext ]
+                [ onClick <| onNext <| settings model ]
             else
                 [ disabled True ]
     in

@@ -1,5 +1,7 @@
 module Setup.Pages.Mainframe.Models exposing (..)
 
+import Setup.Settings as Settings exposing (Settings)
+
 
 type alias Model =
     { hostname : Maybe String
@@ -7,11 +9,20 @@ type alias Model =
     }
 
 
+settings : Model -> List Settings
+settings model =
+    case model.hostname of
+        Just name ->
+            [ Settings.Name name ]
+
+        Nothing ->
+            []
+
+
 initialModel : Model
 initialModel =
-    -- REVIEWER PLS
     { hostname = Nothing
-    , okay = True
+    , okay = False
     }
 
 

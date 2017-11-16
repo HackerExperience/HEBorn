@@ -3,7 +3,6 @@ module Game.Web.Messages exposing (Msg(..), RequestMsg(..))
 import Requests.Types exposing (ResponseType)
 import Game.Web.Models exposing (Requester)
 import Game.Servers.Shared as Servers
-import Driver.Websocket.Reports as Ws
 import Driver.Websocket.Channels exposing (..)
 import Game.Web.Models exposing (..)
 import Game.Meta.Types exposing (Context(..))

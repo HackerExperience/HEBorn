@@ -1,7 +1,7 @@
 module Decoders.Account exposing (..)
 
-import Json.Decode as Decode exposing (Decoder, map, field, succeed, oneOf)
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional)
+import Json.Decode as Decode exposing (Decoder, map, field, string, succeed, oneOf)
+import Json.Decode.Pipeline exposing (decode, required, hardcoded, optional)
 import Game.Account.Models exposing (..)
 import Game.Servers.Shared as Servers
 import Setup.Types as Setup
@@ -31,16 +31,4 @@ account model =
 
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
 mainframe model =
-    optional "mainframe" (map Just Decoders.Servers.playerCId) model.mainframe
-
-
-setupPages : Decoder Setup.Pages
-setupPages =
-    -- TODO: remove this fallback after getting helix support
-    oneOf
-        [ succeed Setup.pageOrder
-        , Decoders.Setup.remainingPages
-            |> field "pages"
-            |> field "setup"
-            |> field "account"
-        ]
+    required "mainframe" (map (Servers.GatewayCId >> Just) string)

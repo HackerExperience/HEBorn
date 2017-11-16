@@ -114,12 +114,12 @@ eventTests =
                     |> Expect.equal (Just Cracker)
     , fuzz
         (tuple ( GenGame.model, GenProcesses.fullProcess ))
-        "event 'process_conclusion' concludes a process"
+        "event 'process_completed' concludes a process"
       <|
         \( game0, process0 ) ->
             let
                 ( serverId, server0 ) =
-                    fromJust "process_conclusion fetching gateway" <|
+                    fromJust "process_completed fetching gateway" <|
                         Game.getGateway game0
 
                 process1 =
@@ -145,7 +145,7 @@ eventTests =
                     ServerChannel serverId
 
                 name =
-                    "process_conclusion"
+                    "process_completed"
 
                 json =
                     toValue

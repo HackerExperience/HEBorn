@@ -4,7 +4,7 @@ import Core.Dispatch.Servers exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Core.Messages as Core
 import Game.Messages as Game
-import Game.Notifications.Models exposing (Content(DownloadStarted))
+import Game.Notifications.Models exposing (Content(DownloadStarted, DownloadConcluded))
 import Game.Servers.Messages as Servers
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -86,21 +86,27 @@ fromFilesystem id dispatch =
         FileAdded _ ->
             []
 
+        FileDownloaded _ ->
+            []
+
 
 fromLogs : CId -> Logs -> Subscribers
-fromLogs id dispatch =
+fromLogs cid dispatch =
     case dispatch of
         UpdateLog a b ->
-            [ logs id <| Logs.LogMsg a <| Logs.HandleUpdateContent b ]
+            [ logs cid <| Logs.LogMsg a <| Logs.HandleUpdateContent b ]
 
         EncryptLog a ->
-            [ logs id <| Logs.LogMsg a Logs.HandleEncrypt ]
+            [ logs cid <| Logs.LogMsg a Logs.HandleEncrypt ]
 
         HideLog a ->
-            [ logs id <| Logs.HandleHide a ]
+            [ logs cid <| Logs.HandleHide a ]
 
         DeleteLog a ->
-            [ logs id <| Logs.HandleDelete a ]
+            [ logs cid <| Logs.HandleDelete a ]
+
+        CreatedLog ( id, content ) ->
+            [ logs cid <| Logs.HandleCreated id content ]
 
 
 fromProcesses : CId -> Processes -> Subscribers

@@ -1,12 +1,20 @@
-module Driver.Websocket.Messages exposing (Msg(..))
+module Driver.Websocket.Messages exposing (..)
 
 import Events.Events as Events
 import Driver.Websocket.Channels exposing (..)
 import Json.Encode exposing (Value)
 
 
+type alias Token =
+    String
+
+
+type alias ClientName =
+    String
+
+
 type Msg
-    = Connected String
+    = Connected Token ClientName
     | Disconnected
     | Joined Channel Value
     | JoinFailed Channel Value

@@ -1,18 +1,19 @@
 module Setup.Pages.Configs exposing (..)
 
 import Setup.Messages exposing (..)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Config as PickLocation
 import Setup.Pages.Mainframe.Config as Mainframe
 
 
 welcome : { onNext : Msg }
 welcome =
-    { onNext = NextPage }
+    { onNext = NextPage [] }
 
 
-finish : { onPrevious : Msg, onNext : Msg }
+finish : { onNext : Msg, onPrevious : Msg }
 finish =
-    { onNext = NextPage, onPrevious = PreviousPage }
+    { onNext = NextPage [], onPrevious = PreviousPage }
 
 
 pickLocation : PickLocation.Config Msg

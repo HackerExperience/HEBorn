@@ -1,11 +1,12 @@
 module Setup.Models exposing (..)
 
+import Dict as Dict
 import Game.Models as Game
 import Json.Encode as Encode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Ports.Map exposing (Coordinates)
 import Setup.Types exposing (..)
 import Setup.Messages exposing (Msg)
+import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Models as PickLocation
 import Setup.Pages.Mainframe.Models as Mainframe
 
@@ -13,9 +14,11 @@ import Setup.Pages.Mainframe.Models as Mainframe
 type alias Model =
     { page : Maybe PageModel
     , pages : List String
+    , badPages : List String
     , remaining : List PageModel
-    , done : List PageModel
+    , done : PagesDone
     , isLoading : Bool
+    , topicsDone : TopicsDone
     }
 
 
@@ -27,6 +30,15 @@ type PageModel
     | ChooseThemeModel
     | FinishModel
     | CustomFinishModel
+
+
+type alias PagesDone =
+    List ( PageModel, List Settings )
+
+
+type alias TopicsDone =
+    { server : Bool
+    }
 
 
 mapId : String
@@ -43,7 +55,6 @@ pageOrder : Pages
 pageOrder =
     [ Welcome
     , Mainframe
-    , PickLocation
     , Finish
     ]
 
@@ -56,6 +67,9 @@ remainingPages pages =
     in
         case List.head newPages of
             Just Welcome ->
+                newPages
+
+            Just _ ->
                 -- insert local greetings/farewells
                 newPages
                     |> List.reverse
@@ -63,8 +77,8 @@ remainingPages pages =
                     |> List.reverse
                     |> (::) CustomWelcome
 
-            _ ->
-                newPages
+            Nothing ->
+                []
 
 
 initializePages : Pages -> List PageModel
@@ -102,12 +116,20 @@ initialModel game =
         model =
             { page = Nothing
             , pages = []
+            , badPages = []
             , remaining = []
             , done = []
             , isLoading = True
+            , topicsDone = initialTopicsDone
             }
     in
         ( model, Cmd.none, Dispatch.none )
+
+
+initialTopicsDone : TopicsDone
+initialTopicsDone =
+    { server = True
+    }
 
 
 doneLoading : Model -> Model
@@ -132,7 +154,7 @@ isLoading =
 
 hasPages : Model -> Bool
 hasPages =
-    .pages >> List.isEmpty
+    .pages >> List.isEmpty >> not
 
 
 setPages : Pages -> Model -> Model
@@ -153,13 +175,33 @@ setPages pages model =
         }
 
 
+setBadPages : List String -> Model -> Model
+setBadPages pages model =
+    { model | badPages = pages }
+
+
 setPage : PageModel -> Model -> Model
 setPage page model =
     { model | page = Just page }
 
 
-nextPage : Model -> Model
-nextPage model =
+getDone : Model -> PagesDone
+getDone =
+    .done
+
+
+setTopicsDone : Settings.SettingTopic -> Bool -> Model -> Model
+setTopicsDone setting value ({ topicsDone } as model) =
+    case setting of
+        Settings.ServerTopic ->
+            { model | topicsDone = { topicsDone | server = value } }
+
+        _ ->
+            model
+
+
+nextPage : List Settings -> Model -> Model
+nextPage settings model =
     let
         current =
             List.head model.remaining
@@ -172,7 +214,7 @@ nextPage model =
         done =
             case model.page of
                 Just page ->
-                    page :: model.done
+                    ( page, settings ) :: model.done
 
                 Nothing ->
                     model.done
@@ -190,11 +232,16 @@ nextPage model =
 previousPage : Model -> Model
 previousPage model =
     let
+        pagesDone =
+            getDone model
+
         current =
-            List.head model.done
+            pagesDone
+                |> List.head
+                |> Maybe.map Tuple.first
 
         done =
-            model.done
+            pagesDone
                 |> List.tail
                 |> Maybe.withDefault []
 
@@ -214,6 +261,21 @@ previousPage model =
             }
     in
         model_
+
+
+undoPages : Model -> Model
+undoPages model =
+    let
+        pages =
+            getDone model
+                |> List.map Tuple.first
+                |> List.reverse
+    in
+        { model
+            | done = []
+            , page = List.head pages
+            , remaining = List.drop 1 pages
+        }
 
 
 pageModelToString : PageModel -> String
@@ -241,6 +303,20 @@ pageModelToString page =
             "FINISH"
 
 
+encodeDone : List PageModel -> List Value
+encodeDone =
+    let
+        encodePages page list =
+            case encodePageModel page of
+                Ok page ->
+                    page :: list
+
+                Err msg ->
+                    list
+    in
+        List.foldl encodePages []
+
+
 encodePageModel : PageModel -> Result String Value
 encodePageModel page =
     case page of
@@ -248,7 +324,7 @@ encodePageModel page =
             Ok <| Encode.string "welcome"
 
         MainframeModel _ ->
-            Ok <| Encode.string "mainframe"
+            Ok <| Encode.string "server"
 
         PickLocationModel _ ->
             Ok <| Encode.string "location_picker"
@@ -265,3 +341,8 @@ encodePageModel page =
                     ++ (pageModelToString page)
                     ++ "' to json, this is a local page."
                 )
+
+
+noTopicsRemaining : Model -> Bool
+noTopicsRemaining { topicsDone } =
+    topicsDone.server
