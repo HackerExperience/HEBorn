@@ -17,7 +17,6 @@ type Msg
     | WebMsg Web.Msg
     | Resync
     | Request RequestMsg
-    | HandleConnected
     | HandleJoinedAccount Value
 
 
