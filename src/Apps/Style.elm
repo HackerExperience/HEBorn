@@ -14,6 +14,7 @@ import Apps.LocationPicker.Style as LocationPicker
 import Apps.LanViewer.Style as LanViewer
 import Apps.Email.Style as Email
 import Apps.Bug.Style as Bug
+import Apps.Calculator.Style as Calculator
 
 
 cssList : List Stylesheet
@@ -31,4 +32,5 @@ cssList =
     , LanViewer.css
     , Email.css
     , Bug.css
+    , Calculator.css
     ]

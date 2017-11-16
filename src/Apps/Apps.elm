@@ -17,3 +17,4 @@ type App
     | LanViewerApp
     | EmailApp
     | BugApp
+    | CalculatorApp

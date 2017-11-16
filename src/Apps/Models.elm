@@ -25,6 +25,7 @@ import Apps.LocationPicker.Models as LocationPicker
 import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
+import Apps.Calculator.Models as Calculator
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
@@ -46,6 +47,7 @@ type AppModel
     | LanViewerModel LanViewer.Model
     | EmailModel Email.Model
     | BugModel Bug.Model
+    | CalculatorModel Calculator.Model
 
 
 type Contexts
@@ -101,6 +103,9 @@ contexts app =
         BugApp ->
             ContextualApp
 
+        CalculatorApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -149,6 +154,9 @@ name app =
 
         BugApp ->
             Bug.name
+
+        CalculatorApp ->
+            Calculator.name
 
 
 icon : App -> String
@@ -199,6 +207,9 @@ icon app =
         BugApp ->
             Bug.icon
 
+        CalculatorApp ->
+            Calculator.icon
+
 
 title : AppModel -> String
 title model =
@@ -248,12 +259,18 @@ title model =
         BugModel model ->
             Bug.title model
 
+        CalculatorModel model ->
+            Calculator.title model
+
 
 windowInitSize : App -> ( Float, Float )
 windowInitSize app =
     case app of
         BrowserApp ->
             Browser.windowInitSize
+
+        CalculatorApp ->
+            Calculator.windowInitSize
 
         _ ->
             ( 600, 400 )
