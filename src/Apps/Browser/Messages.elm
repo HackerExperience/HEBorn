@@ -21,8 +21,8 @@ type Msg
     | OpenApp Apps.App
     | SelectEndpoint
     | Logout
-    | HandlePasswordAcquired PasswordAcquired.Data
     | PublicDownload Network.NIP Filesystem.FileEntry
+    | HandlePasswordAcquired PasswordAcquired.Data
 
 
 type TabMsg
@@ -31,9 +31,9 @@ type TabMsg
     | GoPrevious
     | GoNext
     | PageMsg Page.Msg
-    | Fetched Response
     | Crack Network.NIP
     | AnyMap Network.NIP
     | Login Network.NIP String
-    | LoginFailed
     | Cracked Network.NIP String
+    | LoginFailed
+    | HandleFetched Response

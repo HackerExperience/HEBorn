@@ -54,7 +54,7 @@ import Utils.Json.Decode exposing (commonError)
         | "log_recover"
         | "encryptor"
         | "decryptor"
-        | "any_map"
+        | "anymap"
         | "text"
         | "crypto_key"
     ```
@@ -67,8 +67,8 @@ import Utils.Json.Decode exposing (commonError)
         overflow: simple_module
 
     modules for "firewall":
-        active: simple_module
-        passive: simple_module
+        fwl_active: simple_module
+        fwl_passive: simple_module
 
     modules for "exploit":
         ftp: simple_module
@@ -78,27 +78,27 @@ import Utils.Json.Decode exposing (commonError)
         password: simple_module
 
     modules for "log_forger":
-        create: simple_module
-        edit: simple_module
+        log_create: simple_module
+        log_edit: simple_module
 
     modules for "log_recover":
-        recover: simple_module
+        log_recover: simple_module
 
     modules for "encryptor":
-        file: simple_module
-        log: simple_module
-        connection: simple_module
-        process: simple_module
+        enc_file: simple_module
+        enc_log: simple_module
+        enc_connection: simple_module
+        enc_process: simple_module
 
     modules for "decryptor":
-        file: simple_module
-        log: simple_module
-        connection: simple_module
-        process: simple_module
+        dec_file: simple_module
+        dec_log: simple_module
+        dec_connection: simple_module
+        dec_process: simple_module
 
-    modules for "any_map":
-        geo: simple_module
-        net: simple_module
+    modules for "anymap":
+        map_geo: simple_module
+        map_net: simple_module
 
     modules for "text":
         ---
@@ -228,7 +228,7 @@ fileType =
                 "decryptor" ->
                     map Filesystem.Decryptor <| modulesFor decryptor
 
-                "any_map" ->
+                "anymap" ->
                     map Filesystem.AnyMap <| modulesFor anyMap
 
                 "text" ->
@@ -237,8 +237,8 @@ fileType =
                 "crypto_key" ->
                     succeed Filesystem.CryptoKey
 
-                _ ->
-                    fail "deu ruim"
+                error ->
+                    fail <| commonError "type" error
     in
         andThen decodeModules decodeField
 
@@ -281,8 +281,8 @@ cracker =
 firewall : Decoder Filesystem.FirewallModules
 firewall =
     decode Filesystem.FirewallModules
-        |> required "active" simpleModule
-        |> required "passive" simpleModule
+        |> required "fwl_active" simpleModule
+        |> required "fwl_passive" simpleModule
 
 
 exploit : Decoder Filesystem.ExploitModules
@@ -301,36 +301,36 @@ hasher =
 logForger : Decoder Filesystem.LogForgerModules
 logForger =
     decode Filesystem.LogForgerModules
-        |> required "create" simpleModule
-        |> required "edit" simpleModule
+        |> required "log_create" simpleModule
+        |> required "log_edit" simpleModule
 
 
 logRecover : Decoder Filesystem.LogRecoverModules
 logRecover =
     decode Filesystem.LogRecoverModules
-        |> required "recover" simpleModule
+        |> required "log_recover" simpleModule
 
 
 encryptor : Decoder Filesystem.EncryptorModules
 encryptor =
     decode Filesystem.EncryptorModules
-        |> required "file" simpleModule
-        |> required "log" simpleModule
-        |> required "connection" simpleModule
-        |> required "process" simpleModule
+        |> required "enc_file" simpleModule
+        |> required "enc_log" simpleModule
+        |> required "enc_connection" simpleModule
+        |> required "enc_process" simpleModule
 
 
 decryptor : Decoder Filesystem.DecryptorModules
 decryptor =
     decode Filesystem.DecryptorModules
-        |> required "file" simpleModule
-        |> required "log" simpleModule
-        |> required "connection" simpleModule
-        |> required "process" simpleModule
+        |> required "dec_file" simpleModule
+        |> required "dec_log" simpleModule
+        |> required "dec_connection" simpleModule
+        |> required "dec_process" simpleModule
 
 
 anyMap : Decoder Filesystem.AnyMapModules
 anyMap =
     decode Filesystem.AnyMapModules
-        |> required "geo" simpleModule
-        |> required "net" simpleModule
+        |> required "map_geo" simpleModule
+        |> required "map_net" simpleModule

@@ -30,7 +30,7 @@ dispatch dispatch =
             ]
 
         FetchedUrl { sessionId, windowId, context, tabId } response ->
-            [ Browser.Fetched response
+            [ Browser.HandleFetched response
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
             ]
@@ -83,8 +83,8 @@ fromFilesystem id dispatch =
         NewDir a b ->
             [ filesystem id <| Filesystem.HandleNewDir a b ]
 
-        FileAdded _ ->
-            []
+        FileAdded ( a, b ) ->
+            [ filesystem id <| Filesystem.HandleAdded a b ]
 
         FileDownloaded _ ->
             []

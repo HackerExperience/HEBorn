@@ -10,6 +10,7 @@ type Msg
     | HandleNewTextFile Path Name
     | HandleNewDir Path Name
     | HandleMove Id Path
+    | HandleAdded Id File
     | Request RequestMsg
 
 

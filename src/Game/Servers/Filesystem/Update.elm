@@ -43,6 +43,9 @@ update game cid msg model =
         HandleNewDir path name ->
             handleNewDir game cid path name model
 
+        HandleAdded id file ->
+            onHandleAdded id file model
+
         Request request ->
             onRequest game cid (receive request) model
 
@@ -157,6 +160,14 @@ handleNewDir game cid path name model =
             )
         else
             Update.fromModel model
+
+
+onHandleAdded : Id -> File -> Model -> UpdateResponse
+onHandleAdded id file model =
+    ( insertFile id file model
+    , Cmd.none
+    , Dispatch.none
+    )
 
 
 onRequest :
