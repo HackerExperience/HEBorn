@@ -156,7 +156,7 @@ handleLogout game model =
             getToken model
 
         cmd =
-            Logout.request token game
+            Logout.request token model.id game
     in
         ( model_, cmd, Dispatch.none )
 
@@ -171,7 +171,7 @@ handleLogoutAndCrash game error model =
             getToken model
 
         cmd =
-            Logout.request token game
+            Logout.request token model.id game
     in
         ( model_, cmd, Dispatch.none )
 

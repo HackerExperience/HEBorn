@@ -20,13 +20,13 @@ register =
     HttpTopic "account/register"
 
 
-logout : Topic
-logout =
-    WebsocketTopic RequestsChannel "account.logout"
-
-
 
 -- account
+
+
+logout : Account.ID -> Topic
+logout id =
+    WebsocketTopic (AccountChannel id) "account.logout"
 
 
 accountResync : Account.ID -> Topic
