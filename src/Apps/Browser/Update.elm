@@ -75,11 +75,11 @@ update data msg model =
         Logout ->
             onLogout model
 
-        HandlePasswordAcquired event ->
-            onEveryTabMsg data (Cracked event.nip event.password) model
-
         PublicDownload source file ->
             onReqDownload data source file model
+
+        HandlePasswordAcquired event ->
+            onEveryTabMsg data (Cracked event.nip event.password) model
 
 
 
@@ -262,9 +262,6 @@ processTabMsg data tabId tab msg model =
         GoAddress url ->
             onGoAddress data url model.me tabId tab
 
-        Fetched response ->
-            onFetched response tab
-
         Crack nip ->
             onCrack data nip tab
 
@@ -274,11 +271,14 @@ processTabMsg data tabId tab msg model =
         Login nip password ->
             onLogin data nip password model.me tabId tab
 
+        Cracked _ _ ->
+            Update.fromModel tab
+
         LoginFailed ->
             Update.fromModel tab
 
-        Cracked _ _ ->
-            Update.fromModel tab
+        HandleFetched response ->
+            onHandleFetched response tab
 
 
 
@@ -315,33 +315,6 @@ onGoPrevious =
 onGoNext : Tab -> TabUpdateResponse
 onGoNext =
     gotoNextPage >> Update.fromModel
-
-
-onFetched : Web.Response -> Tab -> TabUpdateResponse
-onFetched response tab =
-    let
-        ( url, pageModel ) =
-            case response of
-                Web.PageLoaded site ->
-                    ( site.url, Pages.initialModel site )
-
-                Web.PageNotFound url ->
-                    ( url, Pages.NotFoundModel { url = url } )
-
-                Web.ConnectionError url ->
-                    -- TODO: Change to some "failed" page
-                    ( url, Pages.BlankModel )
-
-        isLoadingThisRequest =
-            (Pages.isLoading <| getPage tab)
-                && (getURL tab == url)
-    in
-        if (isLoadingThisRequest) then
-            tab
-                |> gotoPage url pageModel
-                |> Update.fromModel
-        else
-            Update.fromModel tab
 
 
 onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
@@ -437,3 +410,30 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
                 Servers.Login gatewayNip remoteIp password requester
     in
         ( tab, Cmd.none, dispatch )
+
+
+onHandleFetched : Web.Response -> Tab -> TabUpdateResponse
+onHandleFetched response tab =
+    let
+        ( url, pageModel ) =
+            case response of
+                Web.PageLoaded site ->
+                    ( site.url, Pages.initialModel site )
+
+                Web.PageNotFound url ->
+                    ( url, Pages.NotFoundModel { url = url } )
+
+                Web.ConnectionError url ->
+                    -- TODO: Change to some "failed" page
+                    ( url, Pages.BlankModel )
+
+        isLoadingThisRequest =
+            (Pages.isLoading <| getPage tab)
+                && (getURL tab == url)
+    in
+        if (isLoadingThisRequest) then
+            tab
+                |> gotoPage url pageModel
+                |> Update.fromModel
+        else
+            Update.fromModel tab
