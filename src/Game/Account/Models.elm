@@ -45,6 +45,7 @@ type alias Model =
     , gateways : List Servers.CId
     , activeGateway : Maybe Servers.CId -- NEVER SET TO "NOTHING" (EXCEPT ON INIT)
     , context : Context
+    , activeNetwork : String
     , bounces : Bounces.Model
     , notifications : Notifications.Model
     , logout : Logout
@@ -68,6 +69,7 @@ initialModel id username token =
     , gateways = []
     , activeGateway = Nothing
     , context = Gateway
+    , activeNetwork = "::"
     , bounces = Bounces.initialModel
     , notifications = Notifications.initialModel
     , logout = StillLogged
