@@ -9,6 +9,9 @@ type Class
     | AutoHide
     | Connection
     | Taskbar
+    | Network
+    | AvailableNetworks
+    | ActiveNetwork
     | SGateway
     | SBounce
     | SEndpoint

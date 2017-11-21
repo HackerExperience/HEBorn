@@ -22,7 +22,9 @@ account model =
         |> hardcoded model.gateways
         |> hardcoded model.activeGateway
         |> hardcoded model.context
+        |> hardcoded model.activeNetwork
         |> hardcoded model.bounces
+        |> hardcoded model.userBounces
         |> hardcoded model.inventory
         |> hardcoded model.notifications
         |> hardcoded model.logout
