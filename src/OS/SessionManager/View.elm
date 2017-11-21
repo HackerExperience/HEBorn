@@ -11,6 +11,7 @@ import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.View as WM
 import OS.SessionManager.WindowManager.Resources as WmRes
 import OS.SessionManager.Dock.View as Dock
+import OS.Header.NetworkView as NetworkTongue
 
 
 osClass : List class -> Attribute msg
@@ -27,7 +28,8 @@ view : GameData.Data -> Model -> Html Msg
 view game model =
     div
         [ osClass [ OsRes.Session ] ]
-        [ viewWM game model
+        [ NetworkTongue.view game False
+        , viewWM game model
         , viewDock game model
         ]
 

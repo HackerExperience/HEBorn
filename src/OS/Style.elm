@@ -21,7 +21,7 @@ css =
                 , class Session
                     [ flex (int 1)
                     , flexContainerVert
-                    , children [ dock ]
+                    , children [ dock, networkTongue ]
                     ]
                 , toasts
                 , class Version
@@ -129,6 +129,38 @@ dock =
             , hover
                 [ marginBottom (px 0) ]
             ]
+        ]
+
+
+networkTongue : Snippet
+networkTongue =
+    class Network
+        [ position absolute
+        , left (px 0)
+        , right (px 0)
+        , margin2 (px 0) auto
+        , width (px 320)
+        , children
+            [ class AvailableNetworks
+                [ margin (px 0)
+                ]
+            , class ActiveNetwork
+                [ flexContainerHorz
+                , children
+                    [ everything
+                        [ firstChild [ flex (int 1) ]
+                        , lastChild
+                            [ flex (int 0)
+                            , width (px 32)
+                            ]
+                        , lineHeight (px 25)
+                        , textAlign center
+                        ]
+                    ]
+                ]
+            ]
+        , backgroundColor Colors.bgWindow
+        , globalShadow
         ]
 
 
