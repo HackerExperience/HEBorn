@@ -27,7 +27,9 @@ import Utils.Json.Decode exposing (commonError)
     ```
     dict string
         (list
-            { name:
+            { id :
+                string
+            , name:
                 string
             , extension:
                 string
