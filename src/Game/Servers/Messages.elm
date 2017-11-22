@@ -12,6 +12,7 @@ import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
@@ -42,6 +43,7 @@ type ServerMsg
     | FilesystemMsg StorageId Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
+    | HardwareMsg Hardware.Msg
     | TunnelsMsg Tunnels.Msg
     | ServerRequest ServerRequestMsg
     | NotificationsMsg Notifications.Msg
