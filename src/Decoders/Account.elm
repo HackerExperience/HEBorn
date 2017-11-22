@@ -23,7 +23,6 @@ account model =
         |> hardcoded model.activeGateway
         |> hardcoded model.context
         |> hardcoded model.bounces
-        |> hardcoded model.inventory
         |> hardcoded model.notifications
         |> hardcoded model.logout
         |> mainframe model

@@ -21,6 +21,8 @@ import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
+import Game.Inventory.Messages as Inventory
+import Game.Inventory.Update as Inventory
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
 import Game.LogStream.Messages as LogFlix
@@ -51,6 +53,9 @@ update msg model =
 
         StoryMsg msg ->
             onStory msg model
+
+        InventoryMsg msg ->
+            onInventory msg model
 
         WebMsg msg ->
             onWeb msg model
@@ -123,6 +128,18 @@ onStory msg game =
         , set = (\story game -> { game | story = story })
         , toMsg = StoryMsg
         , update = (Story.update game)
+        }
+        msg
+        game
+
+
+onInventory : Inventory.Msg -> Model -> UpdateResponse
+onInventory msg game =
+    Update.child
+        { get = .inventory
+        , set = (\inventory game -> { game | inventory = inventory })
+        , toMsg = InventoryMsg
+        , update = Inventory.update
         }
         msg
         game

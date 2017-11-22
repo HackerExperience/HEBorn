@@ -1,28 +1,10 @@
-module Game.Account.Models
-    exposing
-        ( Model
-        , ID
-        , Token
-        , Username
-        , Email
-        , Logout(..)
-        , initialModel
-        , insertGateway
-        , getId
-        , getToken
-        , getGateway
-        , getContext
-        , getDatabase
-        , getBounces
-        , getMainframe
-        )
+module Game.Account.Models exposing (..)
 
 import Core.Error as Error exposing (Error)
 import Game.Servers.Shared as Servers
 import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
-import Game.Account.Inventory.Models as Inventory
 import Game.Notifications.Models as Notifications
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
@@ -66,7 +48,6 @@ type alias Model =
     , activeGateway : Maybe Servers.CId -- NEVER SET TO "NOTHING" (EXCEPT ON INIT)
     , context : Context
     , bounces : Bounces.Model
-    , inventory : Inventory.Model
     , notifications : Notifications.Model
     , logout : Logout
     , mainframe : Maybe Servers.CId
@@ -90,7 +71,6 @@ initialModel id username token =
     , activeGateway = Nothing
     , context = Gateway
     , bounces = Bounces.initialModel
-    , inventory = Inventory.initialModel
     , notifications = Notifications.initialModel
     , logout = StillLogged
     , mainframe = Nothing

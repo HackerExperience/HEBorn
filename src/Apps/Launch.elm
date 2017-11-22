@@ -80,7 +80,8 @@ launch data ({ windowId } as config) app =
                 |> Update.fromModel
 
         ServersGearsApp ->
-            ServersGears.initialModel
+            data
+                |> ServersGears.initialModel
                 |> ServersGearsModel
                 |> Update.fromModel
 

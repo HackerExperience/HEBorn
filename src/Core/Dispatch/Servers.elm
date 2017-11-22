@@ -13,6 +13,10 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Events.Server.Logs.Created as LogCreated
+import Events.Server.Hardware.MotherboardAttached as MotherboardAttached
+import Events.Server.Hardware.MotherboardDetached as MotherboardDetached
+import Events.Server.Hardware.ComponentLinked as ComponentLinked
+import Events.Server.Hardware.ComponentUnlinked as ComponentUnlinked
 import Game.Web.Models as Web
 import Game.Web.Types as Web
 
@@ -34,6 +38,7 @@ type Server
     | Filesystem StorageId Filesystem
     | Logs Logs
     | Processes Processes
+    | Hardware Hardware
     | LogoutServer
     | FetchUrl String Network.ID Web.Requester
 
@@ -74,3 +79,10 @@ type Processes
     | ConcludedProcess ProcessConclusion.Data
     | ChangedProcesses ProcessesChanged.Data
     | FailedBruteforceProcess BruteforceFailed.Data
+
+
+type Hardware
+    = MotherboardAttached MotherboardAttached.Data
+    | MotherboardDetached MotherboardDetached.Data
+    | ComponentLinked ComponentLinked.Data
+    | ComponentUnlinked ComponentUnlinked.Data
