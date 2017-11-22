@@ -109,16 +109,16 @@ renderContent content =
             , "Check on Thunderpigeon"
             )
 
-        DownloadStarted origin file ->
+        DownloadStarted origin storage fileEntry ->
             ( "New download started"
-            , ((Filesystem.getName <| Tuple.second file)
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
                 ++ " download started!"
               )
             )
 
-        DownloadConcluded origin file ->
+        DownloadConcluded origin storage fileEntry ->
             ( "New download concluded"
-            , ((Filesystem.getName <| Tuple.second file)
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
                 ++ " download concluded!"
               )
             )

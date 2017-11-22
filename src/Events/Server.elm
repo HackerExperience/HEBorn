@@ -3,7 +3,7 @@ module Events.Server exposing (events)
 import Events.Types exposing (Router)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Filesystem.Downloaded as FileDownloaded
 import Events.Server.Logs.Changed as LogsChanged
@@ -18,10 +18,10 @@ events : CId -> Router Dispatch
 events cid name json =
     case name of
         "file_added" ->
-            FileAdded.handler (onFileAdded cid) json
+            FileAdded.handler (uncurry <| onFileAdded cid) json
 
         "file_downloaded" ->
-            FileDownloaded.handler (onFileDownloaded cid) json
+            FileDownloaded.handler (uncurry <| onFileDownloaded cid) json
 
         "process_created" ->
             ProcessStarted.handler (onProcessStarted cid) json
@@ -46,14 +46,14 @@ events cid name json =
 -- internals
 
 
-onFileAdded : CId -> FileAdded.Data -> Dispatch
-onFileAdded id =
-    Servers.FileAdded >> Dispatch.filesystem id
+onFileAdded : CId -> Servers.StorageId -> FileAdded.Data -> Dispatch
+onFileAdded cid id =
+    Servers.FileAdded >> Dispatch.filesystem cid id
 
 
-onFileDownloaded : CId -> FileDownloaded.Data -> Dispatch
-onFileDownloaded id =
-    Servers.FileDownloaded >> Dispatch.filesystem id
+onFileDownloaded : CId -> Servers.StorageId -> FileDownloaded.Data -> Dispatch
+onFileDownloaded cid id =
+    Servers.FileDownloaded >> Dispatch.filesystem cid id
 
 
 onProcessStarted : CId -> ProcessStarted.Data -> Dispatch

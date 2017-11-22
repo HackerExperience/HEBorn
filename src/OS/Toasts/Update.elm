@@ -21,11 +21,6 @@ update :
     -> UpdateResponse
 update _ msg model =
     case msg of
-        Insert new ->
-            model
-                |> insert new
-                |> uncurry waitFade
-
         Remove id ->
             onRemove id model
 
@@ -34,6 +29,11 @@ update _ msg model =
 
         Fade id ->
             onFade id model
+
+        HandleInsert source content ->
+            model
+                |> insert (Toast content source Alive)
+                |> uncurry waitFade
 
 
 onRemove : Int -> Model -> UpdateResponse

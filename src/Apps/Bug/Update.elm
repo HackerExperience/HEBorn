@@ -41,7 +41,7 @@ update data msg model =
             ( model
             , Cmd.none
             , Notifications.Simple "Hi" "Hello"
-                |> Notifications.HandleInsert Nothing
+                |> Notifications.Toast Nothing
                 |> Dispatch.notifications
             )
 

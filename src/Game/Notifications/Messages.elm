@@ -5,5 +5,5 @@ import Game.Notifications.Models exposing (..)
 
 
 type Msg
-    = ReadAll
-    | Insert Time Notification
+    = HandleInsert (Maybe Time) Content
+    | HandleReadAll
