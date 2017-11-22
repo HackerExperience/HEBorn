@@ -1,4 +1,4 @@
-module Events.Account.Story.NewEmail exposing (Data, handler)
+module Events.Account.Story.NewEmail exposing (Data, handler, notify)
 
 import Json.Decode
     exposing
@@ -30,6 +30,15 @@ type alias Data =
 handler : Handler Data event
 handler event =
     decodeValue newEmail >> Result.map event
+
+
+notify : (String -> value) -> (Maybe Float -> value -> msg) -> Data -> msg
+notify toContent toMsg { personId, messageNode } =
+    let
+        ( time, _ ) =
+            messageNode
+    in
+        toMsg (Just time) <| toContent personId
 
 
 
