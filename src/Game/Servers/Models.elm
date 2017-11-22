@@ -30,10 +30,6 @@ type alias GatewayCache =
     }
 
 
-type alias SessionId =
-    String
-
-
 type alias Servers =
     Dict SessionId Server
 
@@ -43,7 +39,8 @@ type alias Server =
     , type_ : ServerType
     , nips : List NIP
     , coordinates : Maybe Coordinates
-    , filesystem : Filesystem.Model
+    , mainStorage : StorageId
+    , storages : Storages
     , logs : Logs.Model
     , processes : Processes.Model
     , tunnels : Tunnels.Model
@@ -54,6 +51,16 @@ type alias Server =
 
 type alias Coordinates =
     Float
+
+
+type alias Storages =
+    Dict StorageId Storage
+
+
+type alias Storage =
+    { name : String
+    , filesystem : Filesystem.Model
+    }
 
 
 type ServerType
@@ -277,7 +284,7 @@ activateEndpoint endpoint ({ endpoints } as data) =
 
 
 
------- server getters/setters
+-- server getters/setters
 
 
 getName : Server -> String
@@ -300,14 +307,49 @@ setNIPs nips server =
     { server | nips = nips }
 
 
-getFilesystem : Server -> Filesystem.Model
+listStorages : Server -> List ( StorageId, Storage )
+listStorages server =
+    Dict.toList server.storages
+
+
+getMainStorageId : Server -> StorageId
+getMainStorageId =
+    .mainStorage
+
+
+getMainStorage : Server -> Maybe Storage
+getMainStorage server =
+    getStorage (getMainStorageId server) server
+
+
+getStorage : StorageId -> Server -> Maybe Storage
+getStorage id server =
+    Dict.get id server.storages
+
+
+setStorage : StorageId -> Storage -> Server -> Server
+setStorage id storages server =
+    { server | storages = Dict.insert id storages server.storages }
+
+
+getStorageName : Storage -> String
+getStorageName =
+    .name
+
+
+setStorageName : String -> Storage -> Storage
+setStorageName name storage =
+    { storage | name = name }
+
+
+getFilesystem : Storage -> Filesystem.Model
 getFilesystem =
     .filesystem
 
 
-setFilesystem : Filesystem.Model -> Server -> Server
-setFilesystem filesystem model =
-    { model | filesystem = filesystem }
+setFilesystem : Filesystem.Model -> Storage -> Storage
+setFilesystem fs storage =
+    { storage | filesystem = fs }
 
 
 getLogs : Server -> Logs.Model

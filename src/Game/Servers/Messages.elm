@@ -39,7 +39,7 @@ type RequestMsg
 type ServerMsg
     = HandleSetBounce (Maybe Bounces.ID)
     | HandleSetEndpoint (Maybe CId)
-    | FilesystemMsg Filesystem.Msg
+    | FilesystemMsg StorageId Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg
     | TunnelsMsg Tunnels.Msg

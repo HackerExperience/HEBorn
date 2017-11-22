@@ -35,7 +35,7 @@ fromEmails dispatch =
             [ emails <| Emails.HandleReply a ]
 
         ReceivedEmail data ->
-            receivedEmail data
+            [ emails <| Emails.HandleNewEmail data ]
 
         UnlockedEmail a ->
             [ emails <| Emails.HandleReplyUnlocked a ]
@@ -52,21 +52,3 @@ fromMissions dispatch =
 
         _ ->
             []
-
-
-receivedEmail : StoryNewEmail.Data -> Subscribers
-receivedEmail data =
-    let
-        time =
-            Tuple.first data.messageNode
-
-        from =
-            data.personId
-
-        email =
-            emails <| Emails.HandleNewEmail data
-
-        notification =
-            notifyAccount time False <| NewEmail from
-    in
-        email :: notification

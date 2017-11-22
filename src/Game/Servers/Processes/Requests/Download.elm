@@ -26,7 +26,7 @@ import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models exposing (ID, Process)
 import Game.Network.Types exposing (NIP)
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 
 
 type Response
@@ -93,10 +93,7 @@ encoder ( netId, ip ) fileId storageId =
         [ ( "network_id", Encode.string netId )
         , ( "ip", Encode.string ip )
         , ( "file_id", Encode.string fileId )
-
-        {- STORAGE ISN'T IMPLEMENTED YET
-           , ( "storage_id", Encode.string storageId )
-        -}
+        , ( "storage_id", Encode.string storageId )
         ]
 
 

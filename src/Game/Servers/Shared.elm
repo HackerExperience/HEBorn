@@ -14,3 +14,11 @@ type alias EndpointAddress =
 type CId
     = GatewayCId Id
     | EndpointCId EndpointAddress
+
+
+type alias StorageId =
+    String
+
+
+type alias SessionId =
+    String

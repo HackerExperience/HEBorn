@@ -2,6 +2,7 @@ module Game.Servers.Processes.Messages exposing (Msg(..), RequestMsg(..))
 
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Shared as Servers
 import Game.Network.Types as Network
 import Game.Servers.Filesystem.Models as Filesystem
 import Events.Server.Processes.Started as ProcessStarted
@@ -16,8 +17,8 @@ type Msg
     | HandleRemove ID
     | HandleComplete ID -- may be removed
     | HandleStartBruteforce Network.IP
-    | HandleStartDownload Network.NIP Filesystem.FileEntry String
-    | HandleStartPublicDownload Network.NIP Filesystem.FileEntry String
+    | HandleStartDownload Network.NIP Servers.StorageId Filesystem.FileEntry
+    | HandleStartPublicDownload Network.NIP Servers.StorageId Filesystem.FileEntry
       -- start may be removed if we provide a specific
       -- function for every process type
     | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )

@@ -44,10 +44,13 @@ onDelete :
     -> UpdateResponse
 onDelete data id model =
     let
+        storage =
+            getStorage (Game.getActiveServer data) model
+
         gameMsg =
             id
                 |> Servers.DeleteFile
-                |> Dispatch.filesystem (Game.getActiveCId data)
+                |> Dispatch.filesystem (Game.getActiveCId data) storage
     in
         ( model, Cmd.none, gameMsg )
 
@@ -59,18 +62,29 @@ onGoPath :
     -> UpdateResponse
 onGoPath data path model =
     let
-        fs =
-            data
-                |> Game.getActiveServer
-                |> Servers.getFilesystem
+        server =
+            Game.getActiveServer data
+
+        storage =
+            getStorage server model
+
+        maybeFs =
+            server
+                |> Servers.getStorage storage
+                |> Maybe.map Servers.getFilesystem
     in
-        if Filesystem.isFolder path fs then
-            ( changePath path fs model
-            , Cmd.none
-            , Dispatch.none
-            )
-        else
-            ( model, Cmd.none, Dispatch.none )
+        case maybeFs of
+            Just fs ->
+                if Filesystem.isFolder path fs then
+                    ( changePath path fs model
+                    , Cmd.none
+                    , Dispatch.none
+                    )
+                else
+                    ( model, Cmd.none, Dispatch.none )
+
+            Nothing ->
+                ( model, Cmd.none, Dispatch.none )
 
 
 onUpdateEditing :
@@ -88,21 +102,32 @@ onEnterRename :
     -> UpdateResponse
 onEnterRename data id model =
     let
-        fs =
-            data
-                |> Game.getActiveServer
-                |> Servers.getFilesystem
+        server =
+            Game.getActiveServer data
+
+        storage =
+            getStorage server model
+
+        maybeFs =
+            server
+                |> Servers.getStorage storage
+                |> Maybe.map Servers.getFilesystem
     in
-        case Filesystem.getFile id fs of
-            Just file ->
-                let
-                    model_ =
-                        file
-                            |> Filesystem.getName
-                            |> Renaming id
-                            |> ((flip setEditing) model)
-                in
-                    ( model, Cmd.none, Dispatch.none )
+        case maybeFs of
+            Just fs ->
+                case Filesystem.getFile id fs of
+                    Just file ->
+                        let
+                            model_ =
+                                file
+                                    |> Filesystem.getName
+                                    |> Renaming id
+                                    |> ((flip setEditing) model)
+                        in
+                            ( model, Cmd.none, Dispatch.none )
+
+                    Nothing ->
+                        ( model, Cmd.none, Dispatch.none )
 
             Nothing ->
                 ( model, Cmd.none, Dispatch.none )

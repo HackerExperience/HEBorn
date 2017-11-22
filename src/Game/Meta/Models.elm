@@ -2,6 +2,7 @@ module Game.Meta.Models
     exposing
         ( Model
         , initialModel
+        , getLastTick
         )
 
 import Game.Servers.Shared as Servers
@@ -23,3 +24,8 @@ initialModel =
     { online = 0
     , lastTick = 0
     }
+
+
+getLastTick : Model -> Time
+getLastTick =
+    .lastTick

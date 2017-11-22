@@ -3,6 +3,7 @@ module Game.Notifications.Models exposing (..)
 import Time exposing (Time)
 import Dict exposing (Dict)
 import Game.Network.Types exposing (NIP)
+import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 
 
@@ -24,8 +25,8 @@ type alias Notification =
 type Content
     = Simple String String -- Title Message
     | NewEmail String -- Person_ID
-    | DownloadStarted NIP Filesystem.FileEntry
-    | DownloadConcluded NIP Filesystem.FileEntry
+    | DownloadStarted NIP Servers.StorageId Filesystem.FileEntry
+    | DownloadConcluded NIP Servers.StorageId Filesystem.FileEntry
 
 
 initialModel : Model
