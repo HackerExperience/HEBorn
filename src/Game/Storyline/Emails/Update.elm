@@ -2,11 +2,8 @@ module Game.Storyline.Emails.Update exposing (update)
 
 import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Notifications as Notifications
 import Utils.Update as Update
 import Game.Models as Game
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents exposing (Content)
@@ -96,14 +93,8 @@ handleNewEmail game data model =
 
         model_ =
             setPerson personId person_ model
-
-        dispatch =
-            personId
-                |> Notifications.NewEmail
-                |> Notifications.NotifyAccount (Just time)
-                |> Dispatch.notifications
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, Cmd.none, Dispatch.none )
 
 
 handleReplyUnlocked :

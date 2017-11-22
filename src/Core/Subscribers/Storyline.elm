@@ -5,7 +5,8 @@ import Core.Subscribers.Helpers exposing (..)
 import Core.Messages as Core
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Game.Messages as Game
-import Game.Notifications.Models exposing (Content(NewEmail))
+import Game.Notifications.Models as Notifications
+import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Emails.Messages as Emails
 import Game.Storyline.Missions.Messages as Missions
@@ -34,8 +35,13 @@ fromEmails dispatch =
         ReplyEmail a ->
             [ emails <| Emails.HandleReply a ]
 
-        ReceivedEmail data ->
-            [ emails <| Emails.HandleNewEmail data ]
+        ReceivedEmail a ->
+            [ emails <| Emails.HandleNewEmail a
+            , accountNotif <|
+                StoryNewEmail.notify Notifications.NewEmail
+                    Notifications.HandleInsert
+                    a
+            ]
 
         UnlockedEmail a ->
             [ emails <| Emails.HandleReplyUnlocked a ]
