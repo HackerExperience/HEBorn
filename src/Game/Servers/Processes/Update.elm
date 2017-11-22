@@ -37,7 +37,7 @@ update game cid msg model =
                 |> Game.getServers
                 |> Servers.getNIP cid
     in
-        case msg of
+        case Debug.log "feijoada\n\n\n\n\n\n\n\n" msg of
             HandlePause id ->
                 handlePause game id model
 
@@ -126,7 +126,6 @@ updateOrSync func id model =
             func process
 
         Nothing ->
-            -- TODO: add sync request here
             Update.fromModel model
 
 

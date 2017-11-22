@@ -199,13 +199,8 @@ initialModel =
 -}
 insert : ID -> Process -> Model -> Model
 insert id process model =
-    case Dict.get id model.processes of
-        Nothing ->
-            Dict.insert id process model.processes
-                |> flip setProcesses model
-
-        Just _ ->
-            model
+    Dict.insert id process model.processes
+        |> flip setProcesses model
 
 
 {-| Inserts a Process optimistically, generating a temporary id for it.
@@ -316,7 +311,7 @@ conclude succeeded process =
                 Nothing ->
                     Concluded
     in
-        { process | state = state }
+        Debug.log "WOOOO\n\n" { process | state = state }
 
 
 failWithReason : Reason -> Process -> Process
