@@ -14,6 +14,8 @@ import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Update as Processes
+import Game.Servers.Hardware.Messages as Hardware
+import Game.Servers.Hardware.Update as Hardware
 import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
@@ -116,6 +118,9 @@ updateServer game model cid msg server =
         ProcessesMsg msg ->
             onProcessesMsg game cid msg server
 
+        HardwareMsg msg ->
+            onHardwareMsg game cid msg server
+
         TunnelsMsg msg ->
             onTunnelsMsg game msg server
 
@@ -205,6 +210,21 @@ onProcessesMsg game cid =
         , set = (\processes model -> { model | processes = processes })
         , toMsg = ProcessesMsg
         , update = (Processes.update game cid)
+        }
+
+
+onHardwareMsg :
+    Game.Model
+    -> CId
+    -> Hardware.Msg
+    -> Server
+    -> ServerUpdateResponse
+onHardwareMsg game cid =
+    Update.child
+        { get = .hardware
+        , set = (\hardware model -> { model | hardware = hardware })
+        , toMsg = HardwareMsg
+        , update = (Hardware.update game cid)
         }
 
 

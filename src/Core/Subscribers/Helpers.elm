@@ -18,9 +18,11 @@ import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
+import Game.Servers.Hardware.Messages as Hardware
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Emails.Messages as Emails
+import Game.Inventory.Messages as Inventory
 import Game.Servers.Shared exposing (CId)
 import Game.Web.Messages as Web
 
@@ -74,6 +76,11 @@ processes id =
     Servers.ProcessesMsg >> server id
 
 
+hardware : CId -> Hardware.Msg -> Core.Msg
+hardware id =
+    Servers.HardwareMsg >> server id
+
+
 logs : CId -> Logs.Msg -> Core.Msg
 logs id =
     Servers.LogsMsg >> server id
@@ -97,6 +104,11 @@ missions =
 emails : Emails.Msg -> Core.Msg
 emails =
     Storyline.EmailsMsg >> storyline
+
+
+inventory : Inventory.Msg -> Core.Msg
+inventory =
+    Game.InventoryMsg >> game
 
 
 toasts : Toasts.Msg -> Core.Msg
