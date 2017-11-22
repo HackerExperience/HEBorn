@@ -126,7 +126,6 @@ updateOrSync func id model =
             func process
 
         Nothing ->
-            -- TODO: add sync request here
             Update.fromModel model
 
 
