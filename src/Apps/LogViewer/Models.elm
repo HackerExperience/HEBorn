@@ -113,7 +113,7 @@ enterEditing data id model =
             case Dict.get id logs of
                 Just log ->
                     case Logs.getContent log of
-                        Logs.Uncrypted data ->
+                        Logs.NormalContent data ->
                             Just <| updateEditing id data.raw model
 
                         Logs.Encrypted ->
@@ -164,7 +164,7 @@ updateTextFilter data filter model =
     let
         filterer id log =
             case Logs.getContent log of
-                Logs.Uncrypted data ->
+                Logs.NormalContent data ->
                     String.contains filter data.raw
 
                 Logs.Encrypted ->

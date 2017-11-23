@@ -43,7 +43,7 @@ content : String -> Content
 content src =
     src
         |> dataFromSever
-        |> Uncrypted
+        |> NormalContent
 
 
 data : Decoder Data
