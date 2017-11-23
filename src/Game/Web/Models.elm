@@ -10,7 +10,7 @@ module Game.Web.Models
 
 import Dict exposing (Dict)
 import Game.Servers.Shared as Servers
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Web.Types exposing (..)
 import Game.Network.Types as Network
 

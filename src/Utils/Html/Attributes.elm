@@ -2,7 +2,7 @@ module Utils.Html.Attributes exposing (..)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import Apps.Apps as Apps
 import Apps.Models as Apps
 

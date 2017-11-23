@@ -4,7 +4,7 @@ import Native.Panic
 import Core.Error as Error
 import Game.Data exposing (Data)
 import Game.Models as Game
-import Game.Meta.Types exposing (..)
+import Game.Meta.Types.Context exposing (..)
 import Game.Account.Models as Account
 import Game.Models as Game
 import Game.Servers.Models as Servers

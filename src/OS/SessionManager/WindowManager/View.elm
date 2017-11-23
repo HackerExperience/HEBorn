@@ -13,7 +13,7 @@ import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Models as Apps
 import Apps.View as Apps
 import Game.Data as Game
-import Game.Meta.Types exposing (..)
+import Game.Meta.Types.Context exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res

@@ -1,7 +1,7 @@
 module Core.Dispatch.Account exposing (..)
 
 import Game.Servers.Shared as Servers
-import Game.Meta.Types exposing (Context)
+import Game.Meta.Types.Context exposing (Context)
 import Events.Account.PasswordAcquired as PasswordAcquired
 
 

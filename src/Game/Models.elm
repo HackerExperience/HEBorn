@@ -27,7 +27,7 @@ import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Meta.Types exposing (..)
+import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web

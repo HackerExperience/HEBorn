@@ -2,7 +2,7 @@ module Apps.Browser.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import Apps.Config exposing (..)
 import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages.Models as Pages

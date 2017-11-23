@@ -23,7 +23,7 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Apps.Apps as Apps
-import Game.Meta.Types exposing (Context(Endpoint))
+import Game.Meta.Types.Context exposing (Context(Endpoint))
 
 
 type alias UpdateResponse =
