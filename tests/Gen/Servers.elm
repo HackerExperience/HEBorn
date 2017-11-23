@@ -16,7 +16,7 @@ import Random.Pcg
         )
 import Random.Pcg.Extra exposing (andMap)
 import Fuzz exposing (Fuzzer)
-import Game.Network.Types exposing (IP)
+import Game.Meta.Types.Network exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
