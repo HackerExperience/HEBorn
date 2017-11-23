@@ -142,7 +142,7 @@ renderContent log =
     let
         rendered =
             case Logs.getContent log of
-                Logs.Uncrypted data ->
+                Logs.NormalContent data ->
                     render data
 
                 Logs.Encrypted ->
@@ -191,7 +191,7 @@ btnsNormal logID =
 btnsCryptographed : Logs.ID -> List ( Attribute Msg, Msg )
 btnsCryptographed logID =
     [ ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnUncrypt, BottomButton ], StartDecrypting logID )
+    , ( class [ BtnDecrypt, BottomButton ], StartDecrypting logID )
     ]
 
 
@@ -203,7 +203,7 @@ renderBottomActions id log model =
                 btnsEditing id
             else if (isEntryExpanded id model) then
                 case log.content of
-                    Logs.Uncrypted _ ->
+                    Logs.NormalContent _ ->
                         btnsNormal id
 
                     Logs.Encrypted ->
@@ -249,7 +249,7 @@ menuInclude id log model =
         [ menuEditingEntry id ]
     else
         case log.content of
-            Logs.Uncrypted _ ->
+            Logs.NormalContent _ ->
                 [ menuNormalEntry id ]
 
             Logs.Encrypted ->

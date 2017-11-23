@@ -22,7 +22,7 @@ type alias Log =
 
 
 type Content
-    = Uncrypted Data
+    = NormalContent Data
     | Encrypted
 
 
@@ -86,7 +86,7 @@ initialModel =
 new : Time -> Status -> Maybe String -> Log
 new timestamp status content =
     content
-        |> Maybe.map (dataFromString >> Uncrypted)
+        |> Maybe.map (dataFromString >> NormalContent)
         |> Maybe.withDefault Encrypted
         |> Log timestamp status
 
@@ -137,7 +137,7 @@ setContent newContent log =
         content =
             case newContent of
                 Just raw ->
-                    Uncrypted <| dataFromString raw
+                    NormalContent <| dataFromString raw
 
                 Nothing ->
                     Encrypted

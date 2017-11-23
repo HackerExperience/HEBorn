@@ -108,7 +108,7 @@ genContent : Generator Content
 genContent =
     Random.choices
         [ Random.constant Encrypted
-        , Random.map Uncrypted genData
+        , Random.map NormalContent genData
         ]
 
 
@@ -130,7 +130,7 @@ genData =
 
         toData str =
             case getContent <| new 0.0 Normal str of
-                Uncrypted data ->
+                NormalContent data ->
                     data
 
                 Encrypted ->

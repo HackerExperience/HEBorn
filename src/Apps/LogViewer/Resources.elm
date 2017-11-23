@@ -10,7 +10,7 @@ type Classes
     | BtnFilter
     | BtnCrypt
     | BtnDelete
-    | BtnUncrypt
+    | BtnDecrypt
     | BtnApply
     | BtnCancel
     | BottomButton

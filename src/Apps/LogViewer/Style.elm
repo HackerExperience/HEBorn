@@ -46,7 +46,7 @@ css =
             [ ico
             , before [ Icon.trash ]
             ]
-        , class BtnUncrypt
+        , class BtnDecrypt
             [ ico
             , before [ Icon.unlock ]
             ]
