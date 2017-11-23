@@ -1,6 +1,6 @@
 module Decoders.Network exposing (..)
 
-import Game.Network.Types as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Json.Decode exposing (Decoder, index, string, list)
 import Json.Decode.Pipeline exposing (decode, custom, required)
 

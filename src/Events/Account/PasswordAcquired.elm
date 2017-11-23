@@ -10,7 +10,7 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, custom)
 import Events.Types exposing (Handler)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias Data =

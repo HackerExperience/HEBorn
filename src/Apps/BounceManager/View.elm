@@ -6,7 +6,7 @@ import Html.CssHelpers
 import Game.Account.Database.Models exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
 import Game.Data as Game
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import UI.Inlines.Networking as Inlines
 import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)

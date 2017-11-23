@@ -12,7 +12,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)

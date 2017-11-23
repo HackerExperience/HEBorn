@@ -1,7 +1,7 @@
 module Apps.Browser.Messages exposing (..)
 
 import Game.Web.Types exposing (Response)
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Apps as Apps
 import Apps.Browser.Menu.Messages as Menu

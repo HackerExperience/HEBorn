@@ -9,7 +9,7 @@ import Json.Decode as Decode
         )
 import Json.Decode.Pipeline exposing (decode, required)
 import Game.Account.Bounces.Models exposing (..)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Apps.Apps as Apps
 
 

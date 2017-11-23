@@ -8,7 +8,7 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Apps.Apps as Apps
 import Apps.Models as Apps
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 
 

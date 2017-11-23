@@ -1,7 +1,7 @@
 module Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 
 import Game.Servers.Shared as Servers
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Apps as Apps
 

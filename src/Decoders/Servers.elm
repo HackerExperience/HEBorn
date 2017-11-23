@@ -31,7 +31,7 @@ import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Notifications.Models as Notifications
 import Game.Servers.Shared exposing (..)
-import Game.Network.Types as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Decoders.Network
 import Decoders.Processes
 import Decoders.Logs

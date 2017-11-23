@@ -2,7 +2,7 @@ module Game.Servers.Tunnels.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 
 
 type alias Model =

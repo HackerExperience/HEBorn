@@ -15,7 +15,7 @@ import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import Driver.Websocket.Messages as Ws
 import Apps.Browser.Messages as Browser
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 
 
 type alias UpdateResponse =

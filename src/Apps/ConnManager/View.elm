@@ -7,7 +7,7 @@ import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
