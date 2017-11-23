@@ -162,6 +162,14 @@ type alias CompletionDate =
     Time
 
 
+whenStarted : (Process -> Process) -> Process -> Process
+whenStarted func process =
+    if isStarting process then
+        process
+    else
+        func process
+
+
 whenIncomplete : (Process -> Process) -> Process -> Process
 whenIncomplete func process =
     if isConcluded process then
@@ -191,13 +199,8 @@ initialModel =
 -}
 insert : ID -> Process -> Model -> Model
 insert id process model =
-    case Dict.get id model.processes of
-        Nothing ->
-            Dict.insert id process model.processes
-                |> flip setProcesses model
-
-        Just _ ->
-            model
+    Dict.insert id process model.processes
+        |> flip setProcesses model
 
 
 {-| Inserts a Process optimistically, generating a temporary id for it.
@@ -213,29 +216,6 @@ insertOptimistic process model0 =
                 |> flip setProcesses model1
     in
         ( id, model2 )
-
-
-{-| Replace a process, can't replace optimistic ones as they shouldn't be
-changed until replaced with real ones.
--}
-upsert : ID -> Process -> Model -> Model
-upsert id process model =
-    let
-        override () =
-            Dict.insert id process model.processes
-                |> flip setProcesses model
-    in
-        case get id model of
-            Just process ->
-                case getState process of
-                    Starting ->
-                        model
-
-                    _ ->
-                        override ()
-
-            _ ->
-                override ()
 
 
 get : ID -> Model -> Maybe Process
@@ -487,6 +467,16 @@ isConcluded process =
             True
 
         Failed _ ->
+            True
+
+        _ ->
+            False
+
+
+isStarting : Process -> Bool
+isStarting process =
+    case getState process of
+        Starting ->
             True
 
         _ ->

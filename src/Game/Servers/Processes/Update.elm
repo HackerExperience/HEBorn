@@ -126,7 +126,6 @@ updateOrSync func id model =
             func process
 
         Nothing ->
-            -- TODO: add sync request here
             Update.fromModel model
 
 
@@ -139,7 +138,7 @@ handlePause game id model =
     let
         update process =
             model
-                |> upsert id (pause process)
+                |> insert id (whenStarted pause process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -150,7 +149,7 @@ handleResume game id model =
     let
         update process =
             model
-                |> upsert id (resume process)
+                |> insert id (whenStarted resume process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -242,7 +241,7 @@ onComplete game id model =
     let
         update process =
             model
-                |> upsert id (conclude Nothing process)
+                |> insert id (whenStarted (conclude Nothing) process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -332,7 +331,7 @@ handlePauseEvent id model =
     let
         update process =
             model
-                |> upsert id (pause process)
+                |> insert id (whenStarted pause process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -343,7 +342,7 @@ handleResumeEvent id model =
     let
         update process =
             model
-                |> upsert id (resume process)
+                |> insert id (whenStarted resume process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -361,7 +360,7 @@ handleProcessConclusion id model =
     let
         update process =
             model
-                |> upsert id (conclude (Just True) process)
+                |> insert id (whenStarted (conclude (Just True)) process)
                 |> Update.fromModel
     in
         updateOrSync update id model
@@ -372,8 +371,8 @@ handleBruteforceFailed data model =
     let
         update process =
             model
-                |> upsert data.processId
-                    (conclude (Just False) process)
+                |> insert data.processId
+                    (whenStarted (conclude (Just False)) process)
                 |> Update.fromModel
     in
         updateOrSync update data.processId model
