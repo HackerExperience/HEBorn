@@ -8,7 +8,7 @@ import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Models
 import Game.Account.Messages as Account
-import Game.Meta.Types exposing (Context)
+import Game.Meta.Types.Context exposing (Context)
 import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Story
 import Game.Servers.Shared as Servers

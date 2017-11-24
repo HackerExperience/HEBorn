@@ -27,11 +27,11 @@ import Json.Decode.Pipeline
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Meta.Types exposing (..)
+import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
-import Game.Network.Types as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
 import Utils.Json.Decode exposing (optionalMaybe)
 import Decoders.Storyline

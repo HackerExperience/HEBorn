@@ -23,7 +23,7 @@ import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
 import Game.Models exposing (..)

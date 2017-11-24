@@ -2,7 +2,7 @@ module OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 import Draggable
 import Apps.Messages as Apps
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import OS.SessionManager.WindowManager.Models exposing (..)
 
 

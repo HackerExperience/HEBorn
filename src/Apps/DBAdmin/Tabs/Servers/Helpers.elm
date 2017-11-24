@@ -2,7 +2,7 @@ module Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Database.Models as Database
-import Game.Network.Types as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Apps.DBAdmin.Models exposing (..)
 
 

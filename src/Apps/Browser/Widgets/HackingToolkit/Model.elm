@@ -6,7 +6,7 @@ module Apps.Browser.Widgets.HackingToolkit.Model
         , setPassword
         )
 
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias Model =

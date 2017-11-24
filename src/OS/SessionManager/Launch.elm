@@ -5,7 +5,7 @@ import Core.Dispatch.Storyline as Storyline
 import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import Game.Servers.Shared as Servers
 import OS.SessionManager.Models exposing (..)

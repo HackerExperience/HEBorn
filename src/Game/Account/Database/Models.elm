@@ -2,7 +2,7 @@ module Game.Account.Database.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Shared exposing (ID)
 
 

@@ -3,7 +3,7 @@ module Game.Servers.Logs.Models exposing (..)
 import Dict exposing (Dict)
 import Time exposing (Time)
 import Regex exposing (HowMany(All), regex)
-import Game.Network.Types exposing (IP, NIP)
+import Game.Meta.Types.Network exposing (IP, NIP)
 
 
 type alias Model =

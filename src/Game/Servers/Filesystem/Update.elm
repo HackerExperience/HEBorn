@@ -13,7 +13,7 @@ import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
 import Game.Servers.Shared exposing (CId)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias UpdateResponse =

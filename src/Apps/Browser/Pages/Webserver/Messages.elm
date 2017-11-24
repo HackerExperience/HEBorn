@@ -1,7 +1,7 @@
 module Apps.Browser.Pages.Webserver.Messages exposing (Msg(..))
 
 import Apps.Browser.Pages.CommonActions exposing (..)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 type Msg

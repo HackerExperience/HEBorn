@@ -1,6 +1,6 @@
 module Core.Dispatch.OS exposing (..)
 
-import Game.Meta.Types exposing (Context)
+import Game.Meta.Types.Context exposing (Context)
 import Apps.Apps exposing (App)
 
 

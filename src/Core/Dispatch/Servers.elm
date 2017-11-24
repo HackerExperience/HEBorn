@@ -6,7 +6,7 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models as Processes
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Filesystem.Downloaded as FileDownloaded
 import Events.Server.Processes.Started as ProcessStarted

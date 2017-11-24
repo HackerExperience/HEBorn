@@ -25,7 +25,7 @@ import Decoders.Processes
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models exposing (ID, Process)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 
 

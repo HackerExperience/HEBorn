@@ -3,7 +3,7 @@ module Game.Servers.Processes.Models exposing (..)
 import Dict exposing (Dict)
 import Time exposing (Time)
 import Game.Shared
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Logs.Models as Logs
 import Utils.Dict as Dict

@@ -5,14 +5,14 @@ import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Servers.Shared as Servers
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 import Apps.Browser.Widgets.HackingPanel.View as HackingPanel exposing (hackingPanel)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Apps.Apps as Apps
 
 

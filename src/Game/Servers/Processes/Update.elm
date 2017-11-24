@@ -16,7 +16,7 @@ import Game.Servers.Processes.Requests.Download as Download
 import Game.Servers.Processes.Requests exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
-import Game.Network.Types as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
 
 

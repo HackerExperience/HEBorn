@@ -1,4 +1,4 @@
-module Game.Network.Types exposing (..)
+module Game.Meta.Types.Network exposing (..)
 
 
 type alias IP =

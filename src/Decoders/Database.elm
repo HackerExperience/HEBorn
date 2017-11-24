@@ -12,7 +12,7 @@ import Json.Decode as Decode
         )
 import Json.Decode.Pipeline exposing (decode, required)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Account.Database.Models exposing (..)
 
 

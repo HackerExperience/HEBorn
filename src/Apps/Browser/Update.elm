@@ -12,7 +12,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Apps.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -23,7 +23,7 @@ import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Apps.Apps as Apps
-import Game.Meta.Types exposing (Context(Endpoint))
+import Game.Meta.Types.Context exposing (Context(Endpoint))
 
 
 type alias UpdateResponse =

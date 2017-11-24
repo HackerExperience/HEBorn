@@ -34,11 +34,11 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Decoders.Network
 import Decoders.Filesystem
 import Game.Servers.Shared as Servers
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Models exposing (Requester)
-import Game.Network.Types exposing (NIP)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 request :

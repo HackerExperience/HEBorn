@@ -14,7 +14,7 @@ module Game.Account.Bounces.Models
         )
 
 import Dict exposing (Dict)
-import Game.Network.Types as Network
+import Game.Meta.Types.Network as Network
 
 
 type alias Model =

@@ -1,6 +1,6 @@
 module OS.SessionManager.Messages exposing (Msg(..))
 
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared as Servers
 import OS.SessionManager.Dock.Messages as Dock
 import OS.SessionManager.WindowManager.Messages as WM
