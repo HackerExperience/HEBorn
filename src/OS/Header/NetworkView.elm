@@ -5,7 +5,7 @@ import Html.CssHelpers
 import Utils.Html exposing (spacer)
 import Game.Data exposing (Data)
 import Game.Models as Game
-import Game.Meta.Types exposing (Context(..))
+import Game.Meta.Types.Context exposing (..)
 import Game.Account.Models as Account
 import OS.Header.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)

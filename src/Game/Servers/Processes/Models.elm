@@ -12,7 +12,10 @@ import Random.Pcg as Random
 
 
 type alias Model =
-    RandomUuid.Model { processes : Processes }
+    RandomUuid.Model
+        { processes : Processes
+        , lastModified : Time
+        }
 
 
 type alias Processes =
@@ -192,7 +195,13 @@ initialModel : Model
 initialModel =
     { randomUuidSeed = Random.initialSeed 42
     , processes = Dict.empty
+    , lastModified = 0
     }
+
+
+getLastModified : Model -> Time
+getLastModified =
+    .lastModified
 
 
 {-| Inserts a Process, can't replace existing ones.

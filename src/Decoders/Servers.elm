@@ -1,5 +1,6 @@
 module Decoders.Servers exposing (..)
 
+import Time exposing (Time)
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -42,8 +43,8 @@ import Decoders.Tunnels
 import Decoders.Filesystem
 
 
-server : Maybe GatewayCache -> Decoder Server
-server gatewayCache =
+server : Time -> Maybe GatewayCache -> Decoder Server
+server now gatewayCache =
     decode Server
         |> optional "name" string ""
         |> optional "server_type" serverType Desktop
@@ -52,7 +53,7 @@ server gatewayCache =
         |> required "main_storage" string
         |> required "storages" storages
         |> logs
-        |> processes
+        |> processes now
         |> tunnels
         |> custom (ownership gatewayCache)
         |> notifications
@@ -102,13 +103,15 @@ analyzedEndpoint =
     succeed {}
 
 
-processes : Decoder (Processes.Model -> a) -> Decoder a
-processes =
+processes : Time -> Decoder (Processes.Model -> a) -> Decoder a
+processes now =
     let
         default =
             Processes.initialModel
     in
-        optional "processes" (Decoders.Processes.model <| Just default) default
+        optional "processes"
+            (Decoders.Processes.model now <| Just default)
+            default
 
 
 withStorageId : Decoder a -> Decoder ( StorageId, a )
