@@ -44,10 +44,10 @@ update game msg model =
             onResync game cid model
 
         Request data ->
-            onRequest game (receive data) model
+            onRequest game (receive game.meta.lastTick data) model
 
         HandleJoinedServer cid value ->
-            handleJoinedServer cid value model
+            handleJoinedServer game cid value model
 
 
 onServerMsg : Game.Model -> CId -> ServerMsg -> Model -> UpdateResponse
@@ -247,11 +247,16 @@ updateServerRequest game response server =
             Update.fromModel server
 
 
-handleJoinedServer : CId -> Value -> Model -> UpdateResponse
-handleJoinedServer cid value model =
+handleJoinedServer :
+    Game.Model
+    -> CId
+    -> Value
+    -> Model
+    -> UpdateResponse
+handleJoinedServer game cid value model =
     let
         decodeBootstrap =
-            Decoders.Servers.server <| getGatewayCache cid model
+            Decoders.Servers.server game.meta.lastTick <| getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->

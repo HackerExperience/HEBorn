@@ -5,6 +5,7 @@ module Game.Servers.Requests.Resync
         , receive
         )
 
+import Time exposing (Time)
 import Json.Decode as Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
@@ -31,11 +32,11 @@ request gatewayCache id =
         emptyPayload
 
 
-receive : Maybe GatewayCache -> CId -> Code -> Value -> Maybe Response
-receive gatewayCache id code json =
+receive : Time -> Maybe GatewayCache -> CId -> Code -> Value -> Maybe Response
+receive now gatewayCache id code json =
     case code of
         OkCode ->
-            decodeValue (Decoders.Servers.server gatewayCache) json
+            decodeValue (Decoders.Servers.server now gatewayCache) json
                 |> Result.map ((,) id >> Okay)
                 |> Requests.report
 

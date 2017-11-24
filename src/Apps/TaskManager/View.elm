@@ -1,6 +1,5 @@
 module Apps.TaskManager.View exposing (view)
 
-import Dict
 import Time exposing (Time)
 import Html exposing (..)
 import Html.CssHelpers
@@ -8,10 +7,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
-import Game.Models
-import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Models as Servers
-import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
@@ -43,10 +39,6 @@ view data model =
     Html.CssHelpers.withNamespace prefix
 
 
-
--- private
-
-
 maybe : Maybe (Html msg) -> Html msg
 maybe =
     Maybe.withDefault <| text ""
@@ -75,26 +67,47 @@ etaBar secondsLeft progress =
         progressBar progress formattedTime 16
 
 
-viewState : Time -> Processes.Process -> Html Msg
-viewState now proc =
+syncProgress : Time -> Time -> Float -> Float -> Float
+syncProgress now lastSync remaining lastProgress =
+    if (remaining <= 0) || (lastProgress >= 1) then
+        1
+    else
+        (now - lastSync)
+            / remaining
+            * (1 - lastProgress)
+            + lastProgress
+
+
+viewState : Time -> Time -> Processes.Process -> Html Msg
+viewState now lastRecalc proc =
     case Processes.getState proc of
         Processes.Starting ->
             text "Starting..."
 
         Processes.Running ->
             let
-                progress =
-                    Processes.getProgressPercentage proc
+                lastProgress =
+                    proc
+                        |> Processes.getProgressPercentage
+
+                maybeCompletitionDate =
+                    Processes.getCompletionDate proc
 
                 timeLeft =
-                    proc
-                        |> Processes.getCompletionDate
-                        |> Maybe.map (flip (-) now)
-                        |> Maybe.withDefault 0
+                    Maybe.map
+                        (flip (-) now >> max 0)
+                        maybeCompletitionDate
+
+                progress =
+                    Maybe.map2
+                        (syncProgress now lastRecalc)
+                        timeLeft
+                        lastProgress
             in
-                progress
-                    |> Maybe.map (etaBar timeLeft)
-                    |> maybe
+                maybe <|
+                    Maybe.map2 etaBar
+                        timeLeft
+                        progress
 
         Processes.Paused ->
             text "Paused"
@@ -139,6 +152,12 @@ viewTaskRow :
     -> Html Msg
 viewTaskRow data now (( _, process ) as entry) =
     let
+        lastRecalc =
+            data
+                |> Game.getActiveServer
+                |> Servers.getProcesses
+                |> Processes.getLastModified
+
         usageView =
             process
                 |> Processes.getUsage
@@ -154,7 +173,7 @@ viewTaskRow data now (( _, process ) as entry) =
                 , br [] []
                 ]
             , div []
-                [ viewState now process ]
+                [ viewState now lastRecalc process ]
             , div []
                 [ usageView ]
             ]
