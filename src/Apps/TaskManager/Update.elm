@@ -3,6 +3,11 @@ module Apps.TaskManager.Update exposing (update)
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
+import Game.Servers.Processes.Models as Processes
+import Game.Servers.Processes.Messages as Processes
+import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Models
     exposing
         ( Model
@@ -64,3 +69,57 @@ onTick data now model =
                 model
     in
         ( model_, Cmd.none, Dispatch.none )
+
+
+updateTasks : Servers.Server -> Model -> Model
+updateTasks server old =
+    let
+        tasks =
+            Servers.getProcesses server
+
+        reduce process sum =
+            process
+                |> Processes.getUsage
+                |> Maybe.map (flip taskUsageSum sum)
+                |> Maybe.withDefault sum
+
+        ( cpu, mem, down, up ) =
+            tasks
+                |> Processes.values
+                |> List.foldr reduce ( 0.0, 0.0, 0.0, 0.0 )
+
+        historyCPU =
+            (increaseHistory cpu old.historyCPU)
+
+        historyMem =
+            (increaseHistory mem old.historyMem)
+
+        historyDown =
+            (increaseHistory down old.historyDown)
+
+        historyUp =
+            (increaseHistory up old.historyUp)
+    in
+        Model
+            old.menu
+            historyCPU
+            historyMem
+            historyDown
+            historyUp
+
+
+taskUsageSum :
+    Processes.ResourcesUsage
+    -> ( Float, Float, Float, Float )
+    -> ( Float, Float, Float, Float )
+taskUsageSum { cpu, mem, down, up } ( acuCpu, acuMem, acuDown, acuUp ) =
+    ( acuCpu + (Processes.getPercentUsage cpu)
+    , acuMem + (Processes.getPercentUsage mem)
+    , acuDown + (Processes.getPercentUsage down)
+    , acuUp + (Processes.getPercentUsage up)
+    )
+
+
+increaseHistory : a -> List a -> List a
+increaseHistory new old =
+    new :: (List.take 19 old)

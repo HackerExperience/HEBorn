@@ -1,5 +1,6 @@
 module Decoders.Processes exposing (..)
 
+import Time exposing (Time)
 import Dict exposing (Dict)
 import Game.Servers.Processes.Models exposing (..)
 import Json.Decode as Decode exposing (..)
@@ -7,8 +8,8 @@ import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (optionalMaybe)
 
 
-model : Maybe Model -> Decoder Model
-model maybeModel =
+model : Time -> Maybe Model -> Decoder Model
+model now maybeModel =
     let
         model =
             case maybeModel of
@@ -19,7 +20,10 @@ model maybeModel =
                     initialModel
 
         apply dict =
-            { model | processes = dict }
+            { model
+                | processes = dict
+                , lastModified = now
+            }
     in
         map apply processDict
 

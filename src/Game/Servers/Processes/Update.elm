@@ -98,7 +98,7 @@ update game cid msg model =
                 handleBruteforceFailed data model
 
             HandleProcessesChanged data ->
-                handleProcessesChanged data model
+                handleProcessesChanged game data model
 
             HandleBruteforceSuccess id ->
                 handleBruteforceSuccess id model
@@ -377,9 +377,9 @@ handleBruteforceFailed data model =
         updateOrSync update data.processId model
 
 
-handleProcessesChanged : ProcessesChanged.Data -> Model -> UpdateResponse
-handleProcessesChanged processes model =
-    Update.fromModel { model | processes = processes }
+handleProcessesChanged : Game.Model -> ProcessesChanged.Data -> Model -> UpdateResponse
+handleProcessesChanged game processes model =
+    Update.fromModel { model | processes = processes, lastModified = game.meta.lastTick }
 
 
 handleBruteforceSuccess : ID -> Model -> UpdateResponse
