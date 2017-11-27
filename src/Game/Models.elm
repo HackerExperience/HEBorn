@@ -31,6 +31,7 @@ import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
+import Game.BackFeed.Models as BackFeed
 import Core.Config exposing (Config)
 
 
@@ -41,6 +42,7 @@ type alias Model =
     , story : Story.Model
     , web : Web.Model
     , config : Config
+    , backfeed : BackFeed.Model
     }
 
 
@@ -60,6 +62,7 @@ initialModel id username token config =
     , meta = Meta.initialModel
     , story = Story.initialModel
     , web = Web.initialModel
+    , backfeed = BackFeed.initialModel
     , config = config
     }
 

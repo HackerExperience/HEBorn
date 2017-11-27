@@ -9,11 +9,13 @@ module Game.Data
         , fromGateway
         , fromEndpoint
         , fromServerCId
+        , getBackFeed
         )
 
 import Game.Models exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
+import Game.BackFeed.Models exposing (BackFeed)
 
 
 type alias Data =
@@ -105,6 +107,11 @@ getEndpoints =
     getActiveServer
         >> Servers.getEndpoints
         >> Maybe.withDefault []
+
+
+getBackFeed : Data -> BackFeed
+getBackFeed =
+    .game >> .backfeed >> .logs
 
 
 

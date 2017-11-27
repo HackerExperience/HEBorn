@@ -10,6 +10,7 @@ import OS.Toasts.Models as Toasts exposing (Toast)
 import OS.Toasts.Messages as Toasts
 import Game.Messages as Game
 import Game.Account.Messages as Account
+import Game.BackFeed.Messages as BackFeed
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
@@ -116,6 +117,11 @@ accountNotif =
 sessionManager : SessionManager.Msg -> Core.Msg
 sessionManager =
     OS.SessionManagerMsg >> os
+
+
+backfeed : BackFeed.Msg -> Core.Msg
+backfeed =
+    Game.LogFlixMsg >> game
 
 
 os : OS.Msg -> Core.Msg

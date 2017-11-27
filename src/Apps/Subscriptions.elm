@@ -19,6 +19,7 @@ import Apps.LanViewer.Subscriptions as LanViewer
 import Apps.Email.Subscriptions as Email
 import Apps.Bug.Subscriptions as Bug
 import Apps.Calculator.Subscriptions as Calculator
+import Apps.LogFlix.Subscriptions as LogFlix
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -87,3 +88,7 @@ subscriptions data model =
         CalculatorModel model ->
             Calculator.subscriptions data model
                 |> Sub.map CalculatorMsg
+
+        LogFlixModel model ->
+            LogFlix.subscriptions data model
+                |> Sub.map LogFlixMsg

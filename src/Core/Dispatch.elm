@@ -18,6 +18,7 @@ module Core.Dispatch
         , emails
         , missions
         , websocket
+        , logflix
         , notifications
         )
 
@@ -36,6 +37,7 @@ import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Websocket as Websocket
 import Core.Dispatch.Notifications as Notifications
 import Game.Servers.Shared exposing (CId, StorageId)
+import Core.Dispatch.BackFeed as LogFlix
 
 
 type Dispatch
@@ -50,6 +52,7 @@ type Internal
     | Storyline Storyline.Dispatch
     | Websocket Websocket.Dispatch
     | Notifications Notifications.Dispatch
+    | LogFlix LogFlix.Dispatch
 
 
 none : Dispatch
@@ -135,6 +138,11 @@ websocket =
 notifications : Notifications.Dispatch -> Dispatch
 notifications =
     Notifications >> dispatch
+
+
+logflix : LogFlix.Dispatch -> Dispatch
+logflix =
+    LogFlix >> dispatch
 
 
 

@@ -18,3 +18,4 @@ type App
     | EmailApp
     | BugApp
     | CalculatorApp
+    | LogFlixApp

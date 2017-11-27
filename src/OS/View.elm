@@ -15,6 +15,7 @@ import OS.Header.Models as Header
 import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 import OS.Toasts.View as Toasts
+import OS.Console.View as Console
 
 
 { id, class, classList } =
@@ -61,6 +62,7 @@ viewOS data model =
     [ viewHeader
         data
         model.header
+    , console data model
     , viewMain data model
     , toasts data model
     , lazy displayVersion
@@ -94,3 +96,8 @@ toasts data model =
     model.toasts
         |> Toasts.view data
         |> Html.map ToastsMsg
+
+
+console : Game.Data -> Model -> Html Msg
+console data model =
+    Console.view data
