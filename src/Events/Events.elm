@@ -5,6 +5,7 @@ import Driver.Websocket.Channels as Ws
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Account as Account
 import Events.Server as Server
+import Events.BackFeed as LogFlix
 
 
 events : Ws.Channel -> String -> Value -> Maybe Dispatch
@@ -35,6 +36,9 @@ router channel event json =
 
         Ws.ServerChannel id ->
             Server.events id event json
+
+        Ws.LogFlixChannel ->
+            LogFlix.events event json
 
 
 notFound : String -> String -> Maybe Dispatch

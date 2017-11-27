@@ -22,6 +22,10 @@ type Class
     | Empty
     | Toasts
     | Fading
+    | LogConsole
+    | LogConsoleBox
+    | LogConsoleHeader
+    | LogConsoleDataDiv
 
 
 type Id

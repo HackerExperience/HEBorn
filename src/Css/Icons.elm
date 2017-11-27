@@ -302,3 +302,8 @@ bug =
 calculator : Icon
 calculator =
     faIcon FA.calculator
+
+
+logfl : Icon
+logfl =
+    faIcon FA.diamond

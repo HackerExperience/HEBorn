@@ -23,6 +23,7 @@ import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
+import Apps.LogFlix.Models as LogFlix
 
 
 launch : Game.Data -> Config -> App -> ( AppModel, Cmd Msg, Dispatch )
@@ -115,4 +116,9 @@ launch data ({ windowId } as config) app =
         CalculatorApp ->
             Calculator.initialModel
                 |> CalculatorModel
+                |> Update.fromModel
+
+        LogFlixApp ->
+            LogFlix.initialModel
+                |> LogFlixModel
                 |> Update.fromModel

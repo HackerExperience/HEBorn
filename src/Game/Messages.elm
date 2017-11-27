@@ -6,6 +6,7 @@ import Game.Servers.Messages as Servers
 import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
 import Game.Web.Messages as Web
+import Game.BackFeed.Messages as LogFlix
 import Requests.Types exposing (ResponseType)
 
 
@@ -15,6 +16,7 @@ type Msg
     | MetaMsg Meta.Msg
     | StoryMsg Story.Msg
     | WebMsg Web.Msg
+    | LogFlixMsg LogFlix.Msg
     | Resync
     | Request RequestMsg
     | HandleJoinedAccount Value

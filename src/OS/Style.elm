@@ -15,7 +15,8 @@ css : Stylesheet
 css =
     (stylesheet << namespace prefix)
         [ id Dashboard
-            [ dashboard
+            [ --dashboard
+              console --dev
             , children
                 [ header
                 , class Session
@@ -49,6 +50,25 @@ dashboard =
         , fontFamily sansSerif
         , fontFamilies [ "Open Sans" ]
         , Css.fontWeight (int 300)
+        ]
+
+
+console : Style
+console =
+    batch
+        [ width (pct 100)
+        , minHeight (pct 100)
+        , flexContainerVert
+        , position relative
+        , zIndex (int 0)
+        , backgroundColor (hex "000000")
+        , color (hex "00FF00")
+        , fontFamily monospace
+        , fontFamilies [ "Monospace" ]
+        , children
+            [ class LogConsoleHeader
+                [ justifyContent spaceBetween ]
+            ]
         ]
 
 

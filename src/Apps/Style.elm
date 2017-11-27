@@ -15,6 +15,7 @@ import Apps.LanViewer.Style as LanViewer
 import Apps.Email.Style as Email
 import Apps.Bug.Style as Bug
 import Apps.Calculator.Style as Calculator
+import Apps.LogFlix.Style as LogFlix
 
 
 cssList : List Stylesheet
@@ -33,4 +34,5 @@ cssList =
     , Email.css
     , Bug.css
     , Calculator.css
+    , LogFlix.css
     ]

@@ -19,6 +19,7 @@ import Apps.LanViewer.Update as LanViewer
 import Apps.Email.Update as Email
 import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
+import Apps.LogFlix.Update as LogFlix
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -183,6 +184,16 @@ update data msg model =
                     map CalculatorModel
                         CalculatorMsg
                         (Calculator.update data msg model)
+
+                _ ->
+                    ( model, Cmd.none, Dispatch.none )
+
+        LogFlixMsg msg ->
+            case model of
+                LogFlixModel model ->
+                    map LogFlixModel
+                        LogFlixMsg
+                        (LogFlix.update data msg model)
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
