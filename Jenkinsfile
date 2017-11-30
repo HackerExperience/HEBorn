@@ -35,7 +35,7 @@ parallel(
         unstash 'source'
         // `stash` won't keep file permissions (why??)
         // so we have to fix them here
-        sh 'chmod +x node_modules/.bin/*'
+        sh 'chmod +x node_modules/.bin/* stats/*.sh'
 
         sh 'gmake test-long'
       }
@@ -49,7 +49,7 @@ parallel(
         unstash 'source'
         // `stash` won't keep file permissions (why??)
         // so we have to fix them here
-        sh 'chmod +x node_modules/.bin/*'
+        sh 'chmod +x node_modules/.bin/* stats/*.sh'
 
         // Reuse existing compiled files
         // sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
