@@ -1,5 +1,6 @@
 module Apps.Explorer.Models exposing (..)
 
+import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Menu.Models as Menu
@@ -16,6 +17,7 @@ type EditingStatus
 
 type alias Model =
     { menu : Menu.Model
+    , storageId : Maybe Servers.StorageId
     , path : Filesystem.Path
     , editing : EditingStatus
     }
@@ -52,6 +54,7 @@ icon =
 initialModel : Model
 initialModel =
     { menu = Menu.initialMenu
+    , storageId = Nothing
     , path = [ "" ]
     , editing = NotEditing
     }
@@ -76,6 +79,28 @@ setPath path model =
     }
 
 
+setStorage : Servers.StorageId -> Model -> Model
+setStorage storageId model =
+    { model | storageId = Just storageId }
+
+
+getStorage : Server -> Model -> Servers.StorageId
+getStorage server model =
+    case model.storageId of
+        Just storageId ->
+            storageId
+
+        Nothing ->
+            Servers.getMainStorageId server
+
+
+getFilesystem : Server -> Model -> Maybe Filesystem.Model
+getFilesystem server model =
+    server
+        |> Servers.getStorage (getStorage server model)
+        |> Maybe.map Servers.getFilesystem
+
+
 changePath :
     Filesystem.Path
     -> Filesystem.Model
@@ -93,6 +118,9 @@ setEditing val src =
     { src | editing = val }
 
 
-resolvePath : Server -> Filesystem.Path -> List Filesystem.Entry
-resolvePath server path =
-    Filesystem.list path (Servers.getFilesystem server)
+resolvePath : Filesystem.Path -> Server -> Model -> List Filesystem.Entry
+resolvePath path server model =
+    model
+        |> getFilesystem server
+        |> Maybe.map (Filesystem.list path)
+        |> Maybe.withDefault []

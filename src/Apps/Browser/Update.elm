@@ -226,11 +226,8 @@ onReqDownload data source file model =
                 |> Game.getGame
                 |> Game.Models.unsafeGetGateway
 
-        lastTick =
-            data.game.meta.lastTick
-
         startMsg =
-            Servers.NewPublicDownloadProcess lastTick source file "storage id"
+            Servers.NewPublicDownloadProcess source "storage id" file
 
         dispatch =
             Dispatch.processes me startMsg
@@ -326,12 +323,9 @@ onCrack data nip tab =
         targetIp =
             Network.getIp nip
 
-        lastTick =
-            data.game.meta.lastTick
-
         dispatch =
             Dispatch.processes serverId <|
-                Servers.NewBruteforceProcess lastTick targetIp
+                Servers.NewBruteforceProcess targetIp
     in
         ( tab, Cmd.none, dispatch )
 

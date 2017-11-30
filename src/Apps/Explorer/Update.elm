@@ -19,30 +19,45 @@ type alias UpdateResponse =
 
 update : Game.Data -> Msg -> Model -> UpdateResponse
 update data msg model =
-    case msg of
-        -- Menu
-        MenuMsg (Menu.MenuClick action) ->
-            actionHandler data action model
+    let
+        server =
+            Game.getActiveServer data
 
-        MenuMsg msg ->
-            onMenuMsg data msg model
+        maybeFs =
+            model
+                |> getStorage server
+                |> flip Servers.getStorage server
+                |> Maybe.map Servers.getFilesystem
+    in
+        case maybeFs of
+            Just fs ->
+                case msg of
+                    -- Menu
+                    MenuMsg (Menu.MenuClick action) ->
+                        actionHandler data action model
 
-        -- General Acts
-        GoPath newPath ->
-            onGoPath data newPath model
+                    MenuMsg msg ->
+                        onMenuMsg data msg model
 
-        UpdateEditing newState ->
-            onUpdateEditing newState model
+                    -- General Acts
+                    GoPath newPath ->
+                        onGoPath data newPath fs model
 
-        EnterRename id ->
-            onEnterRename data id model
+                    UpdateEditing newState ->
+                        onUpdateEditing newState model
 
-        ApplyEdit ->
-            onApplyEdit data model
+                    EnterRename id ->
+                        onEnterRename data id fs model
 
-        _ ->
-            -- TODO: implement folder operation requests
-            Update.fromModel model
+                    ApplyEdit ->
+                        onApplyEdit data fs model
+
+                    _ ->
+                        -- TODO: implement folder operation requests
+                        Update.fromModel model
+
+            Nothing ->
+                Update.fromModel model
 
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
@@ -57,16 +72,14 @@ onMenuMsg data msg model =
         ( { model | menu = menu_ }, cmd_, coreMsg )
 
 
-onGoPath : Game.Data -> Filesystem.Path -> Model -> UpdateResponse
-onGoPath data newPath model =
-    let
-        fs =
-            (Servers.getFilesystem <| Game.getActiveServer <| data)
-
-        model_ =
-            changePath newPath fs model
-    in
-        Update.fromModel model_
+onGoPath :
+    Game.Data
+    -> Filesystem.Path
+    -> Filesystem.Model
+    -> Model
+    -> UpdateResponse
+onGoPath data newPath fs model =
+    Update.fromModel <| changePath newPath fs model
 
 
 onUpdateEditing : EditingStatus -> Model -> UpdateResponse
@@ -78,14 +91,14 @@ onUpdateEditing newState model =
         Update.fromModel model_
 
 
-onEnterRename : Game.Data -> Filesystem.Id -> Model -> UpdateResponse
-onEnterRename data id model =
+onEnterRename :
+    Game.Data
+    -> Filesystem.Id
+    -> Filesystem.Model
+    -> Model
+    -> UpdateResponse
+onEnterRename data id fs model =
     let
-        fs =
-            data
-                |> Game.getActiveServer
-                |> Servers.getFilesystem
-
         file =
             Filesystem.getFile id fs
 
@@ -101,13 +114,14 @@ onEnterRename data id model =
         Update.fromModel model_
 
 
-onApplyEdit : Game.Data -> Model -> UpdateResponse
-onApplyEdit data model =
+onApplyEdit : Game.Data -> Filesystem.Model -> Model -> UpdateResponse
+onApplyEdit data fs model =
     let
+        storageId =
+            getStorage (Game.getActiveServer data) model
+
         fsMsg =
-            data
-                |> Game.getActiveCId
-                |> Dispatch.filesystem
+            Dispatch.filesystem (Game.getActiveCId data) storageId
 
         gameMsg =
             case model.editing of

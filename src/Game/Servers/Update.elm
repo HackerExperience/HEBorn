@@ -22,6 +22,7 @@ import Game.Web.Messages as Web
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
+import Game.Notifications.Source as Notifications
 import Game.Servers.Requests.Resync as Resync
 
 
@@ -106,8 +107,8 @@ updateServer game model cid msg server =
         HandleSetEndpoint remote ->
             handleSetEndpoint game remote server
 
-        FilesystemMsg msg ->
-            onFilesystemMsg game cid msg server
+        FilesystemMsg storageId msg ->
+            onFilesystemMsg game cid storageId msg server
 
         LogsMsg msg ->
             onLogsMsg game cid msg server
@@ -122,7 +123,7 @@ updateServer game model cid msg server =
             updateServerRequest game (serverReceive data) server
 
         NotificationsMsg msg ->
-            onNotificationsMsg game msg server
+            onNotificationsMsg game cid msg server
 
 
 handleSetBounce :
@@ -149,16 +150,32 @@ handleSetEndpoint game cid server =
 onFilesystemMsg :
     Game.Model
     -> CId
+    -> StorageId
     -> Filesystem.Msg
     -> Server
     -> ServerUpdateResponse
-onFilesystemMsg game cid =
-    Update.child
-        { get = .filesystem
-        , set = (\fs model -> { model | filesystem = fs })
-        , toMsg = FilesystemMsg
-        , update = (Filesystem.update game cid)
-        }
+onFilesystemMsg game cid id msg server =
+    case getStorage id server of
+        Just storage ->
+            let
+                ( filesystem, cmd, dispatch ) =
+                    storage
+                        |> getFilesystem
+                        |> Filesystem.update game cid msg
+
+                storage_ =
+                    setFilesystem filesystem storage
+
+                server_ =
+                    setStorage id storage_ server
+
+                cmd_ =
+                    Cmd.map (FilesystemMsg id) cmd
+            in
+                ( server_, cmd_, dispatch )
+
+        Nothing ->
+            Update.fromModel server
 
 
 onLogsMsg :
@@ -203,15 +220,16 @@ onTunnelsMsg game =
 
 onNotificationsMsg :
     Game.Model
+    -> CId
     -> Notifications.Msg
     -> Server
     -> ServerUpdateResponse
-onNotificationsMsg game =
+onNotificationsMsg game cid =
     Update.child
         { get = .notifications
         , set = (\notifications model -> { model | notifications = notifications })
         , toMsg = NotificationsMsg
-        , update = (Notifications.update game)
+        , update = (Notifications.update game (Notifications.Server cid))
         }
 
 

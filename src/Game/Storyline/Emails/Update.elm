@@ -4,8 +4,6 @@ import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Models as Game
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents exposing (Content)

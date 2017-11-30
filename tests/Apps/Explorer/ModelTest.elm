@@ -51,13 +51,19 @@ pathMoveAroundTests =
                 folder_ =
                     Filesystem.appendPath name path
 
-                filesystem =
+                maybeFilesystem =
                     server
-                        |> Servers.getFilesystem
-                        |> mkdirp folder_
+                        |> Servers.getMainStorage
+                        |> Maybe.map Servers.getFilesystem
+                        |> Maybe.map (mkdirp folder_)
 
                 explorer =
-                    changePath folder_ filesystem initialModel
+                    case maybeFilesystem of
+                        Just fs ->
+                            changePath folder_ fs initialModel
+
+                        Nothing ->
+                            initialModel
             in
                 explorer
                     |> getPath
@@ -75,12 +81,14 @@ pathMoveAroundTests =
                     game.servers.servers
                         |> Dict.toList
                         |> List.head
+                        |> Maybe.map Tuple.second
+                        |> Maybe.andThen Servers.getMainStorage
+                        |> Maybe.map Servers.getFilesystem
             in
                 case maybeServer of
-                    Just ( _, server ) ->
+                    Just fs ->
                         initialModel
-                            |> changePath folder_
-                                (Servers.getFilesystem server)
+                            |> changePath folder_ fs
                             |> Expect.equal initialModel
 
                     Nothing ->

@@ -15,7 +15,7 @@ import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
 import Game.Servers.Processes.Requests.Download as Download
 import Game.Servers.Processes.Requests exposing (..)
 import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
 
@@ -59,7 +59,7 @@ update game cid msg model =
                     (newOptimistic Cracker nip target unknownProcessFile)
                     model
 
-            HandleStartDownload origin fileId storageId ->
+            HandleStartDownload origin storageId fileId ->
                 handleDownload game
                     cid
                     (newOptimistic
@@ -72,7 +72,7 @@ update game cid msg model =
                     fileId
                     model
 
-            HandleStartPublicDownload origin fileId storageId ->
+            HandleStartPublicDownload origin storageId fileId ->
                 handleDownload game
                     cid
                     (newOptimistic
@@ -108,7 +108,6 @@ update game cid msg model =
 
 
 
--->>>>>>> Refactor Servers.CId to finally be the union it always should've been.
 -- internals
 
 
@@ -400,13 +399,13 @@ failDownloadFile lastTick cid oldId model message =
         dispatch =
             message
                 |> Notifications.Simple "Impossible to start download"
-                |> Notifications.HandleInsert Nothing
+                |> Notifications.NotifyServer cid Nothing
                 |> Dispatch.notifications
 
         model_ =
             remove oldId model
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, Cmd.none, Dispatch.none )
 
 
 okDownloadFile : ID -> ID -> Process -> CId -> Model -> UpdateResponse
