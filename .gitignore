@@ -3,6 +3,7 @@ elm-stuff/
 build/
 /vendor/
 /*.html
+stats/*.dat
 npm-debug.log
 release.tar.gz
 

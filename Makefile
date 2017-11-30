@@ -28,14 +28,20 @@ setup:
   endif
   # ??? not sure why some bins aren't installed as executable
   # this seems to be only on the FreeBSD build server
-	chmod +x node_modules/.bin/*
+	chmod +x node_modules/.bin/* stats/*.sh
 
 ################################################################################
 # Compile
 ################################################################################
 
+list_instances = ps ax | grep -E "(elm\-make|webpack\-dev\-server)" | grep -v grep
+
 compile:
-	elm-make $(main) && rm -f index.html
+  ifneq ($(shell $(list_instances)),)
+	$(error Probably already building)
+  endif
+	(elm-make $(main) && rm -f index.html && ./stats/succeedBuild.sh) || \
+		(./stats/increaseFailedBuilds.sh && false)
 
 compile-loop:
 	-while :; do $(MAKE) compile; sleep 2; done
@@ -76,11 +82,16 @@ release: build
 # of changes are made, but it makes everything much faster when the
 # whole app, with dependencies, need to be built. This usually happens
 # when adding dependencies, changing branches etc.
-dev: compile build
-	npm start
+dev: compile build watch
 
 # Add annoying css hot reloader. Useful when editing styles.
-dev-css: compile build-css
+dev-css: compile build-css watch
+
+# Start webpack
+watch:
+  ifneq ($(shell $(list_instances)),)
+	$(error Probably already running)
+  endif
 	npm start
 
 ################################################################################
