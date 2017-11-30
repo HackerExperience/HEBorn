@@ -152,8 +152,8 @@ modulesOfType type_ =
                 []
 
 
-treeEntry : Server -> Filesystem.Entry -> Html Msg
-treeEntry server file =
+treeEntry : Server -> Filesystem.Entry -> Model -> Html Msg
+treeEntry server file model =
     let
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
@@ -165,25 +165,25 @@ treeEntry server file =
         case file of
             Filesystem.FolderEntry path name ->
                 let
-                    fs =
-                        Servers.getFilesystem server
-
                     fullpath =
                         Filesystem.appendPath name path
                 in
-                    div
-                        [ class [ NavEntry, EntryDir, EntryExpanded ]
-                        , menuTreeDir fullpath
-                        , onClick <| GoPath fullpath
-                        ]
-                        [ div
-                            [ class [ EntryView ] ]
-                            [ icon, label ]
-                        , div
-                            [ class [ EntryChilds ] ]
-                          <|
-                            treeEntryPath server fullpath
-                        ]
+                    case getFilesystem server model of
+                        Just fs ->
+                            div
+                                [ class [ NavEntry, EntryDir, EntryExpanded ]
+                                , menuTreeDir fullpath
+                                , onClick <| GoPath fullpath
+                                ]
+                                [ div
+                                    [ class [ EntryView ] ]
+                                    [ icon, label ]
+                                , div [ class [ EntryChilds ] ] <|
+                                    treeEntryPath server fullpath model
+                                ]
+
+                        Nothing ->
+                            div [] []
 
             Filesystem.FileEntry id file ->
                 div
@@ -193,33 +193,35 @@ treeEntry server file =
                     [ icon, label ]
 
 
-treeEntryPath : Server -> Filesystem.Path -> List (Html Msg)
-treeEntryPath server path =
-    path
-        |> resolvePath server
-        |> List.map (treeEntry server)
+treeEntryPath : Server -> Filesystem.Path -> Model -> List (Html Msg)
+treeEntryPath server path model =
+    model
+        |> resolvePath path server
+        |> List.map (flip (treeEntry server) model)
 
 
-detailedEntry : Server -> Filesystem.Entry -> Html Msg
-detailedEntry server entry =
+detailedEntry : Server -> Filesystem.Entry -> Model -> Html Msg
+detailedEntry server entry model =
     case entry of
         Filesystem.FolderEntry path name ->
             let
-                fs =
-                    Servers.getFilesystem server
-
                 path_ =
                     Filesystem.appendPath name path
             in
-                div
-                    [ class [ CntListEntry, EntryDir ]
-                    , menuMainDir path_
-                    , onClick <| GoPath path_
-                    , idAttr <| Filesystem.joinPath path_
-                    ]
-                    [ span [ class [ DirIcon ] ] []
-                    , span [] [ text name ]
-                    ]
+                case getFilesystem server model of
+                    Just fs ->
+                        div
+                            [ class [ CntListEntry, EntryDir ]
+                            , menuMainDir path_
+                            , onClick <| GoPath path_
+                            , idAttr <| Filesystem.joinPath path_
+                            ]
+                            [ span [ class [ DirIcon ] ] []
+                            , span [] [ text name ]
+                            ]
+
+                    Nothing ->
+                        div [] []
 
         Filesystem.FileEntry id file ->
             case Filesystem.getType file of
@@ -272,11 +274,9 @@ detailedEntry server entry =
                             baseEntry
 
 
-detailedEntryList : Server -> List Filesystem.Entry -> List (Html Msg)
-detailedEntryList server list =
-    List.map
-        (detailedEntry server)
-        list
+detailedEntryList : Server -> List Filesystem.Entry -> Model -> List (Html Msg)
+detailedEntryList server list model =
+    List.map (flip (detailedEntry server) model) list
 
 
 usage : Float -> Float -> Html Msg
@@ -307,12 +307,12 @@ usage min max =
             ]
 
 
-explorerColumn : Filesystem.Path -> Server -> Html Msg
-explorerColumn path server =
+explorerColumn : Filesystem.Path -> Server -> Model -> Html Msg
+explorerColumn path server model =
     div
         [ class [ Nav ]
         ]
-        [ div [ class [ NavTree ] ] <| treeEntryPath server path
+        [ div [ class [ NavTree ] ] <| treeEntryPath server path model
         , usage 256000000 1024000000
         ]
 
@@ -425,17 +425,17 @@ explorerMainDinamycContent editing =
                 []
 
 
-explorerMain : EditingStatus -> Filesystem.Path -> Server -> Html Msg
-explorerMain editing path server =
+explorerMain : EditingStatus -> Filesystem.Path -> Server -> Model -> Html Msg
+explorerMain editing path server model =
     div
         [ class
             [ Content ]
         ]
         [ explorerMainHeader path
         , explorerMainDinamycContent editing
-        , path
-            |> resolvePath server
-            |> detailedEntryList server
+        , model
+            |> resolvePath path server
+            |> flip (detailedEntryList server) model
             |> div [ class [ ContentList ] ]
         ]
 
@@ -443,11 +443,11 @@ explorerMain editing path server =
 view : Game.Data -> Model -> Html Msg
 view data ({ editing, path } as model) =
     let
-        activeServer =
+        server =
             Game.getActiveServer data
     in
         div [ class [ Window ] ]
-            [ explorerColumn [ "" ] activeServer
-            , explorerMain editing path activeServer
+            [ explorerColumn [ "" ] server model
+            , explorerMain editing path server model
             , menuView model
             ]

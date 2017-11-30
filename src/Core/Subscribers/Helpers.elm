@@ -1,6 +1,5 @@
 module Core.Subscribers.Helpers exposing (..)
 
-import Time exposing (Time)
 import Apps.Messages as Apps
 import Core.Messages as Core
 import Driver.Websocket.Messages as Ws
@@ -14,9 +13,8 @@ import Game.Account.Messages as Account
 import Game.BackFeed.Messages as BackFeed
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications exposing (Notification)
-import Game.Notifications.Source as Notifications
 import Game.Servers.Messages as Servers
+import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
@@ -66,9 +64,9 @@ server id =
     Servers.ServerMsg id >> servers
 
 
-filesystem : CId -> Filesystem.Msg -> Core.Msg
-filesystem id =
-    Servers.FilesystemMsg >> server id
+filesystem : CId -> Servers.StorageId -> Filesystem.Msg -> Core.Msg
+filesystem cid id =
+    Servers.FilesystemMsg id >> server cid
 
 
 processes : CId -> Processes.Msg -> Core.Msg
@@ -101,9 +99,19 @@ emails =
     Storyline.EmailsMsg >> storyline
 
 
-apps : List Apps.Msg -> Core.Msg
-apps =
-    SessionManager.EveryAppMsg >> sessionManager
+toasts : Toasts.Msg -> Core.Msg
+toasts =
+    OS.ToastsMsg >> os
+
+
+serverNotif : CId -> Notifications.Msg -> Core.Msg
+serverNotif id =
+    Servers.NotificationsMsg >> server id
+
+
+accountNotif : Notifications.Msg -> Core.Msg
+accountNotif =
+    Account.NotificationsMsg >> account
 
 
 sessionManager : SessionManager.Msg -> Core.Msg
@@ -121,12 +129,13 @@ os =
     Core.OSMsg
 
 
-toast : Notifications.Content -> Core.Msg
-toast content =
-    os <|
-        OS.ToastsMsg <|
-            Toasts.Insert <|
-                Toast content Nothing Toasts.Alive
+
+-- REVIEW: not-so-consistent helpers
+
+
+apps : List Apps.Msg -> Core.Msg
+apps =
+    SessionManager.EveryAppMsg >> sessionManager
 
 
 browser windowRef context =
@@ -137,42 +146,3 @@ browser windowRef context =
 app windowRef context =
     SessionManager.AppMsg windowRef context
         >> sessionManager
-
-
-notifyServer :
-    CId
-    -> Time
-    -> Bool
-    -> Notifications.Content
-    -> Subscribers
-notifyServer cid time isRead content =
-    [ Notification content isRead
-        |> Notifications.Insert time
-        |> Servers.NotificationsMsg
-        |> server cid
-    , os <|
-        OS.ToastsMsg <|
-            Toasts.Insert <|
-                Toast content
-                    (Just (Notifications.Server cid))
-                    Toasts.Alive
-    ]
-
-
-notifyAccount :
-    Time
-    -> Bool
-    -> Notifications.Content
-    -> Subscribers
-notifyAccount time isRead content =
-    [ Notification content isRead
-        |> Notifications.Insert time
-        |> Account.NotificationsMsg
-        |> account
-    , os <|
-        OS.ToastsMsg <|
-            Toasts.Insert <|
-                Toast content
-                    (Just Notifications.Account)
-                    Toasts.Alive
-    ]

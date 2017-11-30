@@ -4,8 +4,6 @@ module Core.Subscribers exposing (dispatch)
 
 This is what does the real dispatching.
 
-This file should be eventually split once it gets big enough.
-
 -}
 
 import Core.Dispatch as Dispatch exposing (Dispatch, Internal)

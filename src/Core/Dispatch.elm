@@ -31,13 +31,14 @@ is able to affect the OS instead of just Account.
 
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Core as Core
-import Core.Dispatch.Notifications as Notifications
 import Core.Dispatch.OS as OS
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Websocket as Websocket
 import Core.Dispatch.BackFeed as LogFlix
 import Game.Servers.Shared exposing (CId)
+import Core.Dispatch.Notifications as Notifications
+import Game.Servers.Shared exposing (CId, StorageId)
 
 
 type Dispatch
@@ -100,9 +101,9 @@ server id =
     Servers.Server id >> Servers >> dispatch
 
 
-filesystem : CId -> Servers.Filesystem -> Dispatch
-filesystem id =
-    Servers.Filesystem >> server id
+filesystem : CId -> StorageId -> Servers.Filesystem -> Dispatch
+filesystem cid id =
+    Servers.Filesystem id >> server cid
 
 
 logs : CId -> Servers.Logs -> Dispatch

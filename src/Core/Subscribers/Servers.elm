@@ -4,12 +4,13 @@ import Core.Dispatch.Servers exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Core.Messages as Core
 import Game.Messages as Game
-import Game.Notifications.Models exposing (Content(DownloadStarted, DownloadConcluded))
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Models as Notifications
 import Game.Servers.Messages as Servers
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Shared exposing (CId)
 import Game.Web.Messages as Web
 import Apps.Browser.Messages as Browser
 
@@ -23,6 +24,7 @@ dispatch dispatch =
         Login gatewayNIP endpointIP password requester ->
             [ web <| Web.Login gatewayNIP endpointIP password requester ]
 
+        -- REVIEW: we might be leaking too much detail
         FailLogin { sessionId, windowId, context, tabId } ->
             [ Browser.LoginFailed
                 |> Browser.SomeTabMsg tabId
@@ -41,50 +43,50 @@ dispatch dispatch =
 
 
 fromServer : CId -> Server -> Subscribers
-fromServer id dispatch =
+fromServer cid dispatch =
     case dispatch of
         SetBounce a ->
-            [ server id <| Servers.HandleSetBounce a ]
+            [ server cid <| Servers.HandleSetBounce a ]
 
         SetEndpoint a ->
-            [ server id <| Servers.HandleSetEndpoint a ]
+            [ server cid <| Servers.HandleSetEndpoint a ]
 
-        Filesystem dispatch ->
-            fromFilesystem id dispatch
+        Filesystem id dispatch ->
+            fromFilesystem cid id dispatch
 
         Logs dispatch ->
-            fromLogs id dispatch
+            fromLogs cid dispatch
 
         Processes dispatch ->
-            fromProcesses id dispatch
+            fromProcesses cid dispatch
 
         LogoutServer ->
             []
 
         FetchUrl url nId requester ->
-            [ web <| Web.FetchUrl url nId id requester ]
+            [ web <| Web.FetchUrl url nId cid requester ]
 
 
-fromFilesystem : CId -> Filesystem -> Subscribers
-fromFilesystem id dispatch =
+fromFilesystem : CId -> Servers.StorageId -> Filesystem -> Subscribers
+fromFilesystem cid id dispatch =
     case dispatch of
         DeleteFile a ->
-            [ filesystem id <| Filesystem.HandleDelete a ]
+            [ filesystem cid id <| Filesystem.HandleDelete a ]
 
         MoveFile a b ->
-            [ filesystem id <| Filesystem.HandleMove a b ]
+            [ filesystem cid id <| Filesystem.HandleMove a b ]
 
         RenameFile a b ->
-            [ filesystem id <| Filesystem.HandleRename a b ]
+            [ filesystem cid id <| Filesystem.HandleRename a b ]
 
         NewTextFile a b ->
-            [ filesystem id <| Filesystem.HandleNewTextFile a b ]
+            [ filesystem cid id <| Filesystem.HandleNewTextFile a b ]
 
         NewDir a b ->
-            [ filesystem id <| Filesystem.HandleNewDir a b ]
+            [ filesystem cid id <| Filesystem.HandleNewDir a b ]
 
         FileAdded ( a, b ) ->
-            [ filesystem id <| Filesystem.HandleAdded a b ]
+            [ filesystem cid id <| Filesystem.HandleAdded a b ]
 
         FileDownloaded _ ->
             []
@@ -124,16 +126,22 @@ fromProcesses id dispatch =
         CompleteProcess a ->
             [ processes id <| Processes.HandleComplete a ]
 
-        NewBruteforceProcess time a ->
+        NewBruteforceProcess a ->
             [ processes id <| Processes.HandleStartBruteforce a ]
 
-        NewDownloadProcess time a b c ->
-            (processes id <| Processes.HandleStartDownload a b c)
-                :: (notifyServer id time False <| DownloadStarted a b)
+        NewDownloadProcess a b c ->
+            [ processes id <| Processes.HandleStartDownload a b c
+            , serverNotif id <|
+                Notifications.HandleInsert Nothing <|
+                    Notifications.DownloadStarted a b c
+            ]
 
-        NewPublicDownloadProcess time a b c ->
-            (processes id <| Processes.HandleStartPublicDownload a b c)
-                :: (notifyServer id time False <| DownloadStarted a b)
+        NewPublicDownloadProcess a b c ->
+            [ processes id <| Processes.HandleStartPublicDownload a b c
+            , serverNotif id <|
+                Notifications.HandleInsert Nothing <|
+                    Notifications.DownloadStarted a b c
+            ]
 
         StartedProcess a ->
             [ processes id <| Processes.HandleProcessStarted a ]

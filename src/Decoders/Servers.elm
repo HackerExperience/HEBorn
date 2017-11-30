@@ -6,6 +6,7 @@ import Json.Decode as Decode
         , Value
         , andThen
         , map
+        , map2
         , oneOf
         , succeed
         , fail
@@ -14,6 +15,7 @@ import Json.Decode as Decode
         , value
         , field
         , list
+        , dict
         )
 import Json.Decode.Pipeline
     exposing
@@ -47,7 +49,8 @@ server gatewayCache =
         |> optional "server_type" serverType Desktop
         |> required "nips" (list Decoders.Network.nipTuple)
         |> optionalMaybe "coordinates" float
-        |> filesystem
+        |> required "main_storage" string
+        |> required "storages" storages
         |> logs
         |> processes
         |> tunnels
@@ -106,6 +109,28 @@ processes =
             Processes.initialModel
     in
         optional "processes" (Decoders.Processes.model <| Just default) default
+
+
+withStorageId : Decoder a -> Decoder ( StorageId, a )
+withStorageId a =
+    map2 (,) storageId a
+
+
+storageId : Decoder StorageId
+storageId =
+    field "storage_id" string
+
+
+storages : Decoder Storages
+storages =
+    dict storage
+
+
+storage : Decoder Storage
+storage =
+    decode Storage
+        |> required "name" string
+        |> filesystem
 
 
 filesystem : Decoder (Filesystem.Model -> a) -> Decoder a

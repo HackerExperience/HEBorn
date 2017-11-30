@@ -1,5 +1,6 @@
 module Gen.Servers exposing (..)
 
+import Dict exposing (Dict)
 import Gen.Filesystem
 import Gen.Logs
 import Gen.Processes
@@ -140,7 +141,9 @@ genGenericServer gen =
             , type_ = Desktop
             , nips = [ nip ]
             , coordinates = Just 0
-            , filesystem = fs
+            , mainStorage = "storage"
+            , storages =
+                Dict.fromList [ ( "storage", Storage "Storage" fs ) ]
             , logs = logs
             , processes = proc
             , tunnels = Tunnels.initialModel

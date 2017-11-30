@@ -54,13 +54,33 @@ genOne =
     let
         generateStateRecord game id server file1 file2 folder1 folder2 =
             let
+                maybeStorage =
+                    getMainStorage server
+
+                maybeFilesystem =
+                    maybeStorage
+                        |> Maybe.map getFilesystem
+                        |> Maybe.map (uncurry insertFile file1)
+                        |> Maybe.map (uncurry insertFolder folder1)
+
+                maybeStorage_ =
+                    case ( maybeStorage, maybeFilesystem ) of
+                        ( Just storage, Just fs ) ->
+                            Just <| setFilesystem fs storage
+
+                        _ ->
+                            Nothing
+
+                server_ =
+                    case maybeStorage_ of
+                        Just storage ->
+                            setStorage (getMainStorageId server) storage server
+
+                        Nothing ->
+                            server
+
                 servers =
-                    server
-                        |> getFilesystem
-                        |> uncurry insertFile file1
-                        |> uncurry insertFolder folder1
-                        |> flip setFilesystem server
-                        |> flip (Servers.insert id) game.servers
+                    Servers.insert id server_ game.servers
 
                 game_ =
                     { game | servers = servers }
@@ -76,7 +96,7 @@ genOne =
                         folder2
             in
                 { game = game_
-                , server = server
+                , server = server_
                 , valid = valid
                 , invalid = invalid
                 }

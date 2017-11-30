@@ -10,6 +10,7 @@ import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import Game.Notifications.Messages as Notifications
+import Game.Notifications.Source as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Meta.Types.Context exposing (..)
 import Game.Account.Database.Messages as Database
@@ -140,7 +141,7 @@ onNotifications game msg model =
         { get = .notifications
         , set = (\notifications model -> { model | notifications = notifications })
         , toMsg = NotificationsMsg
-        , update = (Notifications.update game)
+        , update = (Notifications.update game Notifications.Account)
         }
         msg
         model

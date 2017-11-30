@@ -1,40 +1,30 @@
-module Core.Subscribers.Notifications exposing (..)
+module Core.Subscribers.Notifications exposing (dispatch)
 
-import Core.Dispatch.Notifications exposing (..)
-import Core.Subscribers.Helpers exposing (..)
+import Time exposing (Time)
+import Game.Servers.Shared exposing (CId)
 import Game.Notifications.Messages as Notifications
-import Game.Notifications.Source exposing (Source(..))
+import Game.Notifications.Models exposing (Content)
 import Game.Servers.Messages as Servers
 import Game.Account.Messages as Account
+import OS.Toasts.Messages as Toasts
+import Core.Dispatch.Notifications exposing (..)
+import Core.Subscribers.Helpers exposing (..)
 
 
 dispatch : Dispatch -> Subscribers
 dispatch dispatch =
     case dispatch of
-        HandleInsert Nothing content ->
-            [ toast content
-            ]
+        NotifyServer a b c ->
+            [ serverNotif a <| Notifications.HandleInsert b c ]
 
-        HandleInsert (Just ( Server cid, time, isRead )) content ->
-            notifyServer cid time isRead content
+        ReadAllServer a ->
+            [ serverNotif a <| Notifications.HandleReadAll ]
 
-        HandleInsert (Just ( Account, time, isRead )) content ->
-            notifyAccount time isRead content
+        NotifyAccount a b ->
+            [ accountNotif <| Notifications.HandleInsert a b ]
 
-        HandleInsert (Just ( Chat, time, isRead )) content ->
-            []
+        ReadAllAccount ->
+            [ accountNotif <| Notifications.HandleReadAll ]
 
-        ReadAll (Server cid) ->
-            [ server cid <|
-                Servers.NotificationsMsg <|
-                    Notifications.ReadAll
-            ]
-
-        ReadAll Account ->
-            [ account <|
-                Account.NotificationsMsg <|
-                    Notifications.ReadAll
-            ]
-
-        ReadAll Chat ->
-            []
+        Toast a b ->
+            [ toasts <| Toasts.HandleInsert a b ]

@@ -54,24 +54,24 @@ toast id { notification, state } =
                     , p [] [ text "Click to open Thunderpigeon" ]
                     ]
 
-                DownloadStarted origin file ->
+                DownloadStarted origin storageId file ->
                     [ h6
                         []
                         [ text <| "Download started" ]
                     , p []
                         [ text <|
-                            (Filesystem.getName <| Tuple.second file)
+                            (Filesystem.getName <| Filesystem.toFile file)
                                 ++ " download has started!"
                         ]
                     ]
 
-                DownloadConcluded origin file ->
+                DownloadConcluded origin storageId file ->
                     [ h6
                         []
                         [ text <| "Download concluded" ]
                     , p []
                         [ text <|
-                            (Filesystem.getName <| Tuple.second file)
+                            (Filesystem.getName <| Filesystem.toFile file)
                                 ++ " download has concluded!"
                         ]
                     ]

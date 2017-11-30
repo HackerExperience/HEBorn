@@ -93,10 +93,7 @@ encoder ( netId, ip ) fileId storageId =
         [ ( "network_id", Encode.string netId )
         , ( "ip", Encode.string ip )
         , ( "file_id", Encode.string fileId )
-
-        {- STORAGE ISN'T IMPLEMENTED YET
-           , ( "storage_id", Encode.string storageId )
-        -}
+        , ( "storage_id", Encode.string storageId )
         ]
 
 
