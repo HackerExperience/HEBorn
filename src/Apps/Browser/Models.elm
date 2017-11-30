@@ -3,6 +3,8 @@ module Apps.Browser.Models exposing (..)
 import Dict exposing (Dict)
 import Utils.List as List
 import Game.Meta.Types.Context exposing (Context(..))
+import Game.Meta.Types.Network exposing (NIP)
+import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Config exposing (..)
 import Apps.Browser.Menu.Models as Menu
 import Apps.Browser.Pages.Models as Pages
@@ -22,6 +24,7 @@ type alias Tab =
     , page : Pages.Model
     , previousPages : BrowserHistory
     , nextPages : BrowserHistory
+    , modal : Maybe ModalAction
     }
 
 
@@ -38,6 +41,10 @@ type alias Model =
     , lastTab : Int
     , menu : Menu.Model
     }
+
+
+type ModalAction
+    = ForDownload NIP Filesystem.FileEntry
 
 
 name : String
@@ -84,6 +91,7 @@ initTab =
     , page = Pages.HomeModel
     , previousPages = []
     , nextPages = []
+    , modal = Nothing
     }
 
 
@@ -94,6 +102,7 @@ emptyTab =
     , page = Pages.BlankModel
     , previousPages = []
     , nextPages = []
+    , modal = Nothing
     }
 
 
@@ -244,10 +253,10 @@ getNowTab model =
 
 
 setNowTab : Tab -> Model -> Model
-setNowTab app model =
+setNowTab tab model =
     let
         newTabs =
-            setTab model.nowTab app model.tabs
+            setTab model.nowTab tab model.tabs
     in
         { model | tabs = newTabs }
 
@@ -351,3 +360,8 @@ deleteTab nTab model =
                     model.rightTabs
         in
             { model | rightTabs = wL ++ wR }
+
+
+leaveModal : Tab -> Tab
+leaveModal tab =
+    { tab | modal = Nothing }

@@ -2,9 +2,11 @@ module Apps.Browser.Messages exposing (..)
 
 import Game.Web.Types exposing (Response)
 import Game.Meta.Types.Network as Network
+import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Apps as Apps
 import Apps.Browser.Menu.Messages as Menu
+import Apps.Browser.Models exposing (ModalAction(..))
 import Apps.Browser.Pages.Messages as Page
 import Events.Account.PasswordAcquired as PasswordAcquired
 
@@ -21,7 +23,7 @@ type Msg
     | OpenApp Apps.App
     | SelectEndpoint
     | Logout
-    | PublicDownload Network.NIP Filesystem.FileEntry
+    | PublicDownload Network.NIP Filesystem.FileEntry StorageId
     | HandlePasswordAcquired PasswordAcquired.Data
 
 
@@ -37,3 +39,4 @@ type TabMsg
     | Cracked Network.NIP String
     | LoginFailed
     | HandleFetched Response
+    | EnterModal (Maybe ModalAction)

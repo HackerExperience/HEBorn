@@ -15,6 +15,7 @@ import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Pages.View as Pages
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import UI.Widgets.Modal exposing (modalPickStorage)
 
 
 { id, class, classList } =
@@ -37,7 +38,7 @@ view data model =
             ]
             [ viewTabs model
             , viewToolbar tab
-            , viewPg data tab.page
+            , viewPg data tab
             , menuView model
             ]
 
@@ -158,7 +159,7 @@ pageMsgIntersept msg =
                     ActiveTabMsg <| Cracked target password
 
                 Common.PublicDownload origin file ->
-                    PublicDownload origin file
+                    ActiveTabMsg <| EnterModal <| Just <| ForDownload origin file
 
                 Common.LoginFailed ->
                     ActiveTabMsg <| LoginFailed
@@ -176,8 +177,26 @@ pageMsgIntersept msg =
             ActiveTabMsg <| PageMsg msg
 
 
-viewPg : Game.Data -> Pages.Model -> Html Msg
-viewPg data pg =
+viewPg : Game.Data -> Tab -> Html Msg
+viewPg data { page, modal } =
     div
         [ class [ PageContent ] ]
-        [ (Html.map pageMsgIntersept (Pages.view data pg)) ]
+        [ (Html.map pageMsgIntersept (Pages.view data page))
+        , case modal of
+            Just (ForDownload source file) ->
+                let
+                    storages =
+                        data
+                            |> Game.getActiveServer
+                            |> .storages
+
+                    onPick chosen =
+                        chosen
+                            |> Maybe.map (PublicDownload source file)
+                            |> Maybe.withDefault (ActiveTabMsg <| EnterModal Nothing)
+                in
+                    modalPickStorage storages onPick
+
+            Nothing ->
+                text ""
+        ]

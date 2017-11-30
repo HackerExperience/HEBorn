@@ -1,15 +1,17 @@
 module UI.Widgets.Modal
     exposing
         ( modal
+        , modalPickStorage
         , modalOkCancel
         , modalNode
         , overlayNode
         )
 
+import Dict exposing (Dict)
 import Html exposing (Html, Attribute, node, div, button, text, h3, span)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
-import Utils.Html.Attributes exposing (dataDecorated)
+import Game.Servers.Models exposing (Storages)
 import OS.SessionManager.WindowManager.Resources exposing (..)
 
 
@@ -19,6 +21,29 @@ import OS.SessionManager.WindowManager.Resources exposing (..)
 wmClass : List class -> Attribute msg
 wmClass =
     .class <| Html.CssHelpers.withNamespace prefix
+
+
+modalPickStorage : Storages -> (Maybe String -> msg) -> Html msg
+modalPickStorage storages pickResponse =
+    let
+        storageReducer key value acu =
+            ( pickResponse <| Just key, value.name ) :: acu
+
+        storagesBtns =
+            Dict.foldr storageReducer [] storages
+
+        btns =
+            storagesBtns
+                |> (::) ( pickResponse Nothing, "Cancel" )
+                |> List.reverse
+
+        cancel =
+            (Just <| pickResponse Nothing)
+    in
+        modal (Just "Pick a storage")
+            "Select where you want to save oswaldo:"
+            btns
+            cancel
 
 
 modalOkCancel : Maybe String -> String -> msg -> msg -> Html msg
@@ -57,6 +82,8 @@ modal title content buttons fallback =
                 [ node msgNode [] main
                 , buttons_
                 ]
+                |> List.singleton
+                |> node containerNode []
 
         root =
             node modalNode [] [ overlay fallback, content_ ]
@@ -88,6 +115,11 @@ btnsNode =
 contentNode : String
 contentNode =
     "content"
+
+
+containerNode : String
+containerNode =
+    "container"
 
 
 msgNode : String

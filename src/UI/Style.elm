@@ -4,7 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (typeSelector, input, span, button)
 import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
-import Css.Utils as Css exposing (withAttribute)
+import Css.Utils as Css exposing (withAttribute, child)
 import Css.Icons as Icon exposing (locationTarget)
 import UI.Colors as Colors exposing (hyperlink, localhost)
 
@@ -284,20 +284,30 @@ modal =
                 , height (pct 100)
                 , zIndex (int -1)
                 ]
-            , typeSelector "content"
+            , typeSelector "container"
                 [ backgroundColor Colors.bgModal
-                , color Colors.white
-                , internalPadding
-                , children
-                    [ typeSelector "btns"
-                        [ textAlign right
-                        , display block
-                        , children
-                            [ button
-                                [ marginLeft (px 8)
-                                , border3 (px 2) solid Colors.white
-                                , color Colors.white
-                                , backgroundColor Colors.bgModal
+                , child (typeSelector "content")
+                    [ display block
+                    , left (px 0)
+                    , right (px 0)
+                    , margin2 (px 0) auto
+                    , minWidth (px 320)
+                    , maxWidth (px 640)
+                    , width (pct 100)
+                    , color Colors.white
+                    , internalPadding
+                    , children
+                        [ typeSelector "btns"
+                            [ textAlign right
+                            , display block
+                            , children
+                                [ button
+                                    [ marginLeft (px 8)
+                                    , border3 (px 2) solid Colors.white
+                                    , color Colors.white
+                                    , backgroundImage none
+                                    , backgroundColor Colors.bgModal
+                                    ]
                                 ]
                             ]
                         ]
