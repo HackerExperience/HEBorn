@@ -1,5 +1,6 @@
 module Apps.Explorer.View exposing (..)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (value, attribute)
 import Html.Events exposing (onClick, onInput)
@@ -307,14 +308,41 @@ usage min max =
             ]
 
 
-explorerColumn : Filesystem.Path -> Server -> Model -> Html Msg
-explorerColumn path server model =
+explorerColumn : Server -> Model -> Html Msg
+explorerColumn { storages, mainStorage } model =
     div
         [ class [ Nav ]
         ]
-        [ div [ class [ NavTree ] ] <| treeEntryPath server path model
+        [ Dict.foldl (storageTreeEntry mainStorage) [] storages
+            |> div [ class [ NavTree ] ]
         , usage 256000000 1024000000
         ]
+
+
+storageTreeEntry mainStorage storageId { name } acu =
+    let
+        activeAttributeValue =
+            if (mainStorage == storageId) then
+                "master"
+            else
+                "slave"
+
+        activeAttribute =
+            attribute "ide-flag" activeAttributeValue
+
+        icon =
+            span [ class [ NavIcon, StorageIcon ], activeAttribute ] []
+
+        label =
+            span [] [ text name ]
+    in
+        (div
+            [ class [ NavEntry, EntryArchive ]
+            , onClick (GoStorage storageId)
+            ]
+            [ icon, label ]
+        )
+            :: acu
 
 
 breadcrumbItem : Filesystem.Path -> String -> Html Msg
@@ -447,7 +475,7 @@ view data ({ editing, path } as model) =
             Game.getActiveServer data
     in
         div [ class [ Window ] ]
-            [ explorerColumn [ "" ] server model
+            [ explorerColumn server model
             , explorerMain editing path server model
             , menuView model
             ]

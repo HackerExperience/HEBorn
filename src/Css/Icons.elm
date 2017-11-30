@@ -16,7 +16,7 @@ fontFamily =
 
 explorer : Icon
 explorer =
-    faIcon FA.fileArchiveO
+    faIcon FA.archive
 
 
 windowMinimize : Icon
@@ -302,3 +302,8 @@ bug =
 calculator : Icon
 calculator =
     faIcon FA.calculator
+
+
+storage : Icon
+storage =
+    faIcon FA.hddO
