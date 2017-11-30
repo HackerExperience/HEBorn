@@ -157,6 +157,7 @@ genNonEmptyTab =
                 , page = current
                 , previousPages = past
                 , nextPages = future
+                , modal = Nothing
                 }
     in
         genNonEmptyHistory

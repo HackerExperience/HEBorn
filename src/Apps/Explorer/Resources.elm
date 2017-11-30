@@ -26,6 +26,7 @@ type Classes
     | PassiveIcon
     | DirIcon
     | GenericArchiveIcon
+    | StorageIcon
     | CasedDirIcon
     | CasedOpIcon
     | NavEntry
