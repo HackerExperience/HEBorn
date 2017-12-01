@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Json.Decode as Decode
     exposing
         ( Decoder
+        , Value
         , map
         , field
         , oneOf
@@ -33,8 +34,22 @@ backlog =
 type_ : Decoder Type
 type_ =
     let
-        decodedField =
-            field "type" string
+        channel =
+            string
+                |> field "channel"
+                |> field "data"
+                |> field "meta"
+
+        decodeChannel channel =
+            case channel of
+                "account" ->
+                    JoinAccount
+
+                "server" ->
+                    JoinServer
+
+                _ ->
+                    Join
 
         decodeType typename =
             case typename of
@@ -48,7 +63,7 @@ type_ =
                     succeed Receive
 
                 "join" ->
-                    succeed Join
+                    map decodeChannel channel
 
                 "error" ->
                     succeed Error
@@ -56,4 +71,4 @@ type_ =
                 _ ->
                     succeed Other
     in
-        andThen decodeType decodedField
+        andThen decodeType <| field "type" string

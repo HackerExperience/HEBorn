@@ -80,6 +80,12 @@ typeToString log =
         BackFeed.Join ->
             "Join"
 
+        BackFeed.JoinAccount ->
+            "JoinAccount"
+
+        BackFeed.JoinServer ->
+            "JoinServer"
+
         BackFeed.Error ->
             "Error"
 

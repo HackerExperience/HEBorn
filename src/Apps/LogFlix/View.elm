@@ -135,18 +135,45 @@ renderEntry use_string id log =
         time simple =
             timestampToFullData log.timestamp
 
-        -- if simple then
-        --else
-        --   toString timestamp
         timestamp =
             text (time <| not use_string)
 
-        color =
-            LogColor.getLogColor log
+        typeLog =
+            case log.type_ of
+                BackFeed.Request ->
+                    [ class [ BFRequest ] ]
+
+                BackFeed.Receive ->
+                    [ class [ BFReceive ] ]
+
+                BackFeed.Join ->
+                    [ class [ BFJoin ] ]
+
+                BackFeed.JoinAccount ->
+                    [ class [ BFJoinAccount ] ]
+
+                BackFeed.JoinServer ->
+                    [ class [ BFJoinServer ] ]
+
+                BackFeed.Other ->
+                    [ class [ BFOther ] ]
+
+                BackFeed.None ->
+                    [ class [ BFNone ] ]
+
+                BackFeed.Event ->
+                    [ class [ BFEvent ] ]
+
+                BackFeed.Error ->
+                    [ class [ BFError ] ]
     in
         div [ class [ LogBox ] ]
             [ div [ class [ LogHeader ] ]
-                [ div [ color ] [ type_ ], div [] [ timestamp ] ]
+                [ div typeLog
+                    [ type_ ]
+                , div []
+                    [ timestamp ]
+                ]
             , div [ class [ DataDiv ] ]
                 [ data ]
             ]
