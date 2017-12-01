@@ -13,7 +13,7 @@ import OS.Resources exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "console"
+    Html.CssHelpers.withNamespace "os"
 
 
 view : Game.Data -> Html msg
@@ -45,12 +45,40 @@ viewLog id log =
         time =
             timestampToFullData log.timestamp
 
-        color =
-            LogColor.getLogColor log
+        setClass =
+            case log.type_ of
+                BackFeed.Request ->
+                    [ class [ BFRequest ] ]
+
+                BackFeed.Receive ->
+                    [ class [ BFReceive ] ]
+
+                BackFeed.Join ->
+                    [ class [ BFJoin ] ]
+
+                BackFeed.JoinAccount ->
+                    [ class [ BFJoinAccount ] ]
+
+                BackFeed.JoinServer ->
+                    [ class [ BFJoinServer ] ]
+
+                BackFeed.Other ->
+                    [ class [ BFOther ] ]
+
+                BackFeed.None ->
+                    [ class [ BFNone ] ]
+
+                BackFeed.Event ->
+                    [ class [ BFEvent ] ]
+
+                BackFeed.Error ->
+                    [ class [ BFError ] ]
     in
-        div [ class [ LogConsoleBox ] ]
-            [ div []
-                [ span [ color ] [ type_ ]
+        div []
+            [ div [ class [ LogConsoleHeader ] ]
+                [ span
+                    setClass
+                    [ type_ ]
                 , span [] [ text " " ]
                 , span [] [ text time ]
                 ]

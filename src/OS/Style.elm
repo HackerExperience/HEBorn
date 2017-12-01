@@ -15,10 +15,10 @@ css : Stylesheet
 css =
     (stylesheet << namespace prefix)
         [ id Dashboard
-            [ --dashboard
-              console --dev
+            [ dashboard
             , children
                 [ header
+                , console
                 , class Session
                     [ flex (int 1)
                     , flexContainerVert
@@ -53,21 +53,46 @@ dashboard =
         ]
 
 
-console : Style
+console : Snippet
 console =
-    batch
+    class LogConsole
         [ width (pct 100)
         , minHeight (pct 100)
         , flexContainerVert
         , position relative
         , zIndex (int 0)
-        , backgroundColor (hex "000000")
+        , backgroundColor (rgba 0 0 0 0.5)
         , color (hex "00FF00")
         , fontFamily monospace
         , fontFamilies [ "Monospace" ]
         , children
-            [ class LogConsoleHeader
-                [ justifyContent spaceBetween ]
+            [ div
+                [ children
+                    [ class LogConsoleHeader
+                        [ justifyContent spaceBetween
+                        , children
+                            [ class BFRequest
+                                [ color (hex "0000FF") ]
+                            , class BFReceive
+                                [ color (hex "00FFFF") ]
+                            , class BFJoin
+                                [ color (hex "00FF00") ]
+                            , class BFJoinAccount
+                                [ color (hex "00FF00") ]
+                            , class BFJoinServer
+                                [ color (hex "0000FF") ]
+                            , class BFOther
+                                [ color (hex "777777") ]
+                            , class BFNone
+                                [ color (hex "333333") ]
+                            , class BFEvent
+                                [ color (hex "999900") ]
+                            , class BFError
+                                [ color (hex "FF0000") ]
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ]
 

@@ -26,6 +26,8 @@ type Type
     = None
     | Error
     | Join
+    | JoinAccount
+    | JoinServer
     | Request
     | Receive
     | Event
@@ -97,6 +99,12 @@ getType type_ =
         "join" ->
             Join
 
+        "join_account" ->
+            JoinAccount
+
+        "join_server" ->
+            JoinServer
+
         "error" ->
             Error
 
@@ -129,6 +137,12 @@ getByTypeKey type_ =
 
         Join ->
             "join"
+
+        JoinAccount ->
+            "join_account"
+
+        JoinServer ->
+            "join_server"
 
         Error ->
             "error"
