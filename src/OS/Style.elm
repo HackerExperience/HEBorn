@@ -23,7 +23,7 @@ css =
                 , class Session
                     [ flex (int 1)
                     , flexContainerVert
-                    , children [ dock, networkTongue ]
+                    , children [ dock ]
                     ]
                 , toasts
                 , class Version
@@ -109,6 +109,7 @@ header =
             [ logo
             , connection
             , taskbar
+            , networkTongue
             ]
         ]
 
@@ -184,7 +185,7 @@ networkTongue =
         [ position absolute
         , left (px 0)
         , right (px 0)
-        , margin2 (px 0) auto
+        , margin3 (px 32) auto (px 0)
         , width (px 320)
         , children
             [ class AvailableNetworks
