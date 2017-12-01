@@ -43,6 +43,9 @@ update data msg model =
                     GoPath newPath ->
                         onGoPath data newPath fs model
 
+                    GoStorage newStorageId ->
+                        onGoStorage newStorageId model
+
                     UpdateEditing newState ->
                         onUpdateEditing newState model
 
@@ -80,6 +83,12 @@ onGoPath :
     -> UpdateResponse
 onGoPath data newPath fs model =
     Update.fromModel <| changePath newPath fs model
+
+
+onGoStorage : String -> Model -> UpdateResponse
+onGoStorage newStorageId model =
+    { model | storageId = Just newStorageId, path = [ "" ] }
+        |> Update.fromModel
 
 
 onUpdateEditing : EditingStatus -> Model -> UpdateResponse

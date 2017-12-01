@@ -9,6 +9,7 @@ import Core.Dispatch.OS as OS
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
+import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Messages as Web
 import Game.Web.Types as Web
@@ -75,8 +76,8 @@ update data msg model =
         Logout ->
             onLogout model
 
-        PublicDownload source file ->
-            onReqDownload data source file model
+        PublicDownload source file storage ->
+            onReqDownload data source file storage model
 
         HandlePasswordAcquired event ->
             onEveryTabMsg data (Cracked event.nip event.password) model
@@ -217,9 +218,10 @@ onReqDownload :
     Game.Data
     -> Network.NIP
     -> Filesystem.FileEntry
+    -> StorageId
     -> Model
     -> UpdateResponse
-onReqDownload data source file model =
+onReqDownload data source file storage model =
     let
         ( me, _ ) =
             data
@@ -227,12 +229,18 @@ onReqDownload data source file model =
                 |> Game.Models.unsafeGetGateway
 
         startMsg =
-            Servers.NewPublicDownloadProcess source "storage id" file
+            Servers.NewPublicDownloadProcess source storage file
 
         dispatch =
             Dispatch.processes me startMsg
+
+        model_ =
+            model
+                |> getNowTab
+                |> leaveModal
+                |> flip setNowTab model
     in
-        ( model, Cmd.none, dispatch )
+        ( model_, Cmd.none, dispatch )
 
 
 processTabMsg :
@@ -276,6 +284,9 @@ processTabMsg data tabId tab msg model =
 
         HandleFetched response ->
             onHandleFetched response tab
+
+        EnterModal newModal ->
+            onEnterModal newModal tab
 
 
 
@@ -431,3 +442,9 @@ onHandleFetched response tab =
                 |> Update.fromModel
         else
             Update.fromModel tab
+
+
+onEnterModal : Maybe ModalAction -> Tab -> TabUpdateResponse
+onEnterModal newModal tab =
+    { tab | modal = newModal }
+        |> Update.fromModel

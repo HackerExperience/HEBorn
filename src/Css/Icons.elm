@@ -16,7 +16,7 @@ fontFamily =
 
 explorer : Icon
 explorer =
-    faIcon FA.fileArchiveO
+    faIcon FA.archive
 
 
 windowMinimize : Icon
@@ -307,3 +307,8 @@ calculator =
 logfl : Icon
 logfl =
     faIcon FA.diamond
+    
+    
+storage : Icon
+storage =
+    faIcon FA.hddO
