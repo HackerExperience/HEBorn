@@ -307,8 +307,8 @@ calculator =
 logfl : Icon
 logfl =
     faIcon FA.diamond
-    
-    
+
+
 storage : Icon
 storage =
     faIcon FA.hddO
