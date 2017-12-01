@@ -45,6 +45,10 @@ update data msg model =
         SelectEndpoint cid ->
             onSelectEndpoint data cid model
 
+        SelectNetwork nid ->
+            -- TODO
+            Update.fromModel model
+
         ContextTo context ->
             onContextTo context model
 

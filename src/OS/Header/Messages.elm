@@ -14,6 +14,7 @@ type Msg
     | SelectGateway (Maybe Servers.CId)
     | SelectBounce (Maybe String)
     | SelectEndpoint (Maybe Servers.CId)
+    | SelectNetwork String
     | CheckMenus
     | ContextTo Context
     | ToggleCampaign
