@@ -3,9 +3,11 @@ module OS.Header.NetworkView exposing (view)
 import Html exposing (..)
 import Html.CssHelpers
 import Utils.Html exposing (spacer)
+import Utils.List as List
 import Game.Data exposing (Data)
 import Game.Models as Game
 import Game.Meta.Types.Context exposing (..)
+import Game.Meta.Types.Network as Network
 import Game.Account.Models as Account
 import OS.Header.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
@@ -28,18 +30,19 @@ view data isOpen =
             Account.getContext account
 
         availableNetworks =
-            case activeContext of
-                Gateway ->
-                    []
-
-                Endpoint ->
-                    []
+            data
+                |> Game.Data.getActiveServer
+                |> .nips
+                |> List.map (Network.getId)
+                |> List.unique
+                |> List.filter ((/=) account.activeNetwork)
+                |> List.map (text >> List.singleton >> li [])
     in
         div [ class [ Network ] ]
-            [ ul [ class [ AvailableNetworks ] ]
-                availableNetworks
-            , div [ class [ ActiveNetwork ] ]
+            [ div [ class [ ActiveNetwork ] ]
                 [ div [] [ text account.activeNetwork ]
                 , div [] [ text "⌄" ]
                 ]
+            , ul [ class [ AvailableNetworks ] ]
+                availableNetworks
             ]
