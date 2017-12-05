@@ -4,6 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Common exposing (flexContainerHorz)
 import Css.Icons as Icon
+import Css.Colors as Colors
 import Apps.LogFlix.Resources exposing (Classes(..), prefix)
 
 
@@ -30,27 +31,27 @@ css =
                     , justifyContent spaceBetween
                     , children
                         [ class BFRequest
-                            [ color (hex "0000FF") ]
+                            [ color Colors.blue ]
                         , class BFReceive
-                            [ color (hex "00FFFF") ]
+                            [ color Colors.yellow ]
                         , class BFJoin
-                            [ color (hex "00FF00") ]
+                            [ color Colors.lime ]
                         , class BFJoinAccount
-                            [ color (hex "00FF00") ]
+                            [ color Colors.green ]
                         , class BFJoinServer
-                            [ color (hex "0000FF") ]
+                            [ color Colors.maroon ]
                         , class BFOther
-                            [ color (hex "777777") ]
+                            [ color Colors.gray ]
                         , class BFNone
-                            [ color (hex "333333") ]
+                            [ color Colors.silver ]
                         , class BFEvent
-                            [ color (hex "999900") ]
+                            [ color Colors.orange ]
                         , class BFError
-                            [ color (hex "FF0000") ]
+                            [ color Colors.red ]
                         ]
                     ]
                 , class DataDiv
-                    [ border3 (px 1) solid (hex "000000")
+                    [ border3 (px 1) solid Colors.black
                     ]
                 ]
             ]

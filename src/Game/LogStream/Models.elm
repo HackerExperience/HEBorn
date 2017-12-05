@@ -1,4 +1,4 @@
-module Game.BackFeed.Models exposing (..)
+module Game.LogStream.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
@@ -7,11 +7,11 @@ import Core.Error as Error
 
 
 type alias Model =
-    { logs : BackFeed }
+    { logs : LogStream }
 
 
-type alias BackFeed =
-    Dict Id BackLog
+type alias LogStream =
+    Dict Id Log
 
 
 type alias Id =
@@ -34,7 +34,7 @@ type Type
     | Other
 
 
-type alias BackLog =
+type alias Log =
     { type_ : Type
     , data : Data
     , timestamp : Time
@@ -47,7 +47,7 @@ initialModel =
     { logs = Dict.empty }
 
 
-insertLog : BackLog -> Model -> Model
+insertLog : Log -> Model -> Model
 insertLog log model =
     let
         log_id =
@@ -62,7 +62,7 @@ insertLog log model =
         model_
 
 
-findId : ( Time, Int ) -> BackFeed -> Id
+findId : ( Time, Int ) -> LogStream -> Id
 findId (( birth, from ) as pig) backfeed =
     backfeed
         |> Dict.get pig
@@ -70,22 +70,22 @@ findId (( birth, from ) as pig) backfeed =
         |> Maybe.withDefault pig
 
 
-remove : Id -> BackFeed -> BackFeed
+remove : Id -> LogStream -> LogStream
 remove =
     Dict.remove
 
 
-member : Id -> BackFeed -> Bool
+member : Id -> LogStream -> Bool
 member =
     Dict.member
 
 
-get : Id -> BackFeed -> Maybe BackLog
+get : Id -> LogStream -> Maybe Log
 get =
     Dict.get
 
 
-filter : (Id -> BackLog -> Bool) -> BackFeed -> BackFeed
+filter : (Id -> Log -> Bool) -> LogStream -> LogStream
 filter =
     Dict.filter
 
@@ -157,26 +157,26 @@ getByTypeKey type_ =
             "other"
 
 
-getTimestamp : BackLog -> Time
+getTimestamp : Log -> Time
 getTimestamp =
     .timestamp
 
 
-isSimpleWebLog : BackLog -> Bool
+isSimpleWebLog : Log -> Bool
 isSimpleWebLog log =
     log.type_ /= Other
 
 
-getWebLogType : BackLog -> Type
+getWebLogType : Log -> Type
 getWebLogType =
     .type_
 
 
-getWebLogData : BackLog -> Data
+getWebLogData : Log -> Data
 getWebLogData =
     .data
 
 
-getWebLogTime : BackLog -> Time
+getWebLogTime : Log -> Time
 getWebLogTime =
     .timestamp
