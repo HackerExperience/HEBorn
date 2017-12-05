@@ -15,7 +15,7 @@ import Core.Subscribers.OS as OS
 import Core.Subscribers.Servers as Servers
 import Core.Subscribers.Storyline as Storyline
 import Core.Subscribers.Websocket as Websocket
-import Core.Subscribers.BackFeed as LogFlix
+import Core.Subscribers.LogStream as LogFlix
 
 
 dispatch : Dispatch -> Subscribers
