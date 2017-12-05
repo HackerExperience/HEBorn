@@ -2,12 +2,11 @@ module OS.Console.View exposing (view)
 
 import Dict exposing (Dict)
 import Game.Data as Game
-import Game.BackFeed.Models as BackFeed
+import Game.LogStream.Models as LogStream
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
-import OS.Console.Messages exposing (Msg(..))
-import Utils.LogFlix.Helpers as LogColor
+import OS.Console.Messages exposing (Msg)
 import UI.ToString exposing (timestampToFullData)
 import OS.Resources exposing (..)
 
@@ -20,20 +19,20 @@ view : Game.Data -> Html msg
 view data =
     let
         view_ =
-            viewLogs (Game.getBackFeed data) ++ [ text "/home/OLOCOBIXO_>" ]
+            viewLogs (Game.getLogStream data) ++ [ text "elliot@localhost_>" ]
     in
         div [ class [ LogConsole ] ]
             view_
 
 
-viewLogs : BackFeed.BackFeed -> List (Html msg)
+viewLogs : LogStream.LogStream -> List (Html msg)
 viewLogs logs =
     logs
         |> Dict.toList
         |> List.map (uncurry <| viewLog)
 
 
-viewLog : BackFeed.Id -> BackFeed.BackLog -> Html msg
+viewLog : LogStream.Id -> LogStream.Log -> Html msg
 viewLog id log =
     let
         data =
@@ -44,40 +43,10 @@ viewLog id log =
 
         time =
             timestampToFullData log.timestamp
-
-        setClass =
-            case log.type_ of
-                BackFeed.Request ->
-                    [ class [ BFRequest ] ]
-
-                BackFeed.Receive ->
-                    [ class [ BFReceive ] ]
-
-                BackFeed.Join ->
-                    [ class [ BFJoin ] ]
-
-                BackFeed.JoinAccount ->
-                    [ class [ BFJoinAccount ] ]
-
-                BackFeed.JoinServer ->
-                    [ class [ BFJoinServer ] ]
-
-                BackFeed.Other ->
-                    [ class [ BFOther ] ]
-
-                BackFeed.None ->
-                    [ class [ BFNone ] ]
-
-                BackFeed.Event ->
-                    [ class [ BFEvent ] ]
-
-                BackFeed.Error ->
-                    [ class [ BFError ] ]
     in
         div []
             [ div [ class [ LogConsoleHeader ] ]
-                [ span
-                    setClass
+                [ span (setClass log)
                     [ type_ ]
                 , span [] [ text " " ]
                 , span [] [ text time ]
@@ -85,3 +54,34 @@ viewLog id log =
             , div []
                 [ data ]
             ]
+
+
+setClass : LogStream.Log -> List (Html.Attribute msg)
+setClass log =
+    case log.type_ of
+        LogStream.Request ->
+            [ class [ BFRequest ] ]
+
+        LogStream.Receive ->
+            [ class [ BFReceive ] ]
+
+        LogStream.Join ->
+            [ class [ BFJoin ] ]
+
+        LogStream.JoinAccount ->
+            [ class [ BFJoinAccount ] ]
+
+        LogStream.JoinServer ->
+            [ class [ BFJoinServer ] ]
+
+        LogStream.Other ->
+            [ class [ BFOther ] ]
+
+        LogStream.None ->
+            [ class [ BFNone ] ]
+
+        LogStream.Event ->
+            [ class [ BFEvent ] ]
+
+        LogStream.Error ->
+            [ class [ BFError ] ]

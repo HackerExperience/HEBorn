@@ -60,7 +60,7 @@ fromJoined channel value =
             , setup <| Setup.HandleJoinedServer cid
             ]
 
-        _ ->
+        Channels.LogFlixChannel ->
             []
 
 

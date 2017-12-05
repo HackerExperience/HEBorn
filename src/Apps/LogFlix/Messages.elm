@@ -8,4 +8,3 @@ type Msg
     = MenuMsg Menu.Msg
     | UpdateTextFilter String
     | GoTab MainTab
-    | DummyNoOp
