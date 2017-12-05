@@ -2,11 +2,10 @@ module Game.Inventory.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Events.Server.Hardware.ComponentLinked as ComponentLinked
-import Events.Server.Hardware.ComponentUnlinked as ComponentUnlinked
 import Game.Models as Game
 import Game.Inventory.Messages exposing (..)
 import Game.Inventory.Models exposing (..)
+import Game.Inventory.Shared exposing (..)
 
 
 type alias UpdateResponse =
@@ -16,28 +15,22 @@ type alias UpdateResponse =
 update : Msg -> Model -> UpdateResponse
 update msg model =
     case msg of
-        HandleComponentLinked data ->
-            handleComponentLinked data model
+        HandleComponentUsed entry ->
+            handleComponentUsed entry model
 
-        HandleComponentUnlinked data ->
-            handleComponentUnlinked data model
+        HandleComponentFreed entry ->
+            handleComponentFreed entry model
 
 
-handleComponentLinked :
-    ComponentLinked.Data
-    -> Model
-    -> UpdateResponse
-handleComponentLinked data model =
+handleComponentUsed : Entry -> Model -> UpdateResponse
+handleComponentUsed entry model =
     model
-        |> setAvailability False (Component data.componentId)
+        |> setAvailability False entry
         |> Update.fromModel
 
 
-handleComponentUnlinked :
-    ComponentUnlinked.Data
-    -> Model
-    -> UpdateResponse
-handleComponentUnlinked data model =
+handleComponentFreed : Entry -> Model -> UpdateResponse
+handleComponentFreed entry model =
     model
-        |> setAvailability True (Component data.componentId)
+        |> setAvailability True entry
         |> Update.fromModel

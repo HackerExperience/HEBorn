@@ -68,6 +68,11 @@ serverConfigSet cid =
     WebsocketTopic (ServerChannel cid) "config.set"
 
 
+updateMotherboard : Servers.CId -> Topic
+updateMotherboard cid =
+    WebsocketTopic (ServerChannel cid) "motherboard.set"
+
+
 
 -- logs
 

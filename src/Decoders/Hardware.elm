@@ -19,7 +19,7 @@ import Json.Decode.Pipeline exposing (decode, required, custom)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Servers.Hardware.Models as Hardware exposing (..)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Game.Meta.Types.Network.Connections as Connections
+import Game.Meta.Types.Network.Connections as NetConnections
 import Decoders.Network
 import Decoders.Components
 
@@ -34,17 +34,17 @@ motherboard : Decoder Motherboard
 motherboard =
     decode Motherboard
         |> required "motherboard_id" (map Just string)
-        |> custom networks
-        |> custom slots
+        |> required "network_connections" ncs
+        |> required "slots" slots
 
 
-networks : Decoder Motherboard.Networks
-networks =
-    dict network
+ncs : Decoder Motherboard.NetConnections
+ncs =
+    dict nc
 
 
-network : Decoder Connections.Id
-network =
+nc : Decoder NetConnections.Id
+nc =
     Decoders.Network.nip
 
 

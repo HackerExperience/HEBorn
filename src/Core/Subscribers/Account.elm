@@ -8,6 +8,7 @@ import Apps.Browser.Messages as Browser
 import Game.Messages as Game
 import Game.Account.Messages as Account
 import Game.Account.Database.Messages as Database
+import Game.Inventory.Messages as Inventory
 
 
 dispatch : Dispatch -> Subscribers
@@ -35,3 +36,18 @@ dispatch dispatch =
 
         Logout ->
             [ account <| Account.HandleLogout ]
+
+        Inventory dispatch ->
+            fromInventory dispatch
+
+
+fromInventory : Inventory -> Subscribers
+fromInventory dispatch =
+    case dispatch of
+        UsedInventoryEntry a ->
+            [ inventory <| Inventory.HandleComponentUsed a
+            ]
+
+        FreedInventoryEntry a ->
+            [ inventory <| Inventory.HandleComponentFreed a
+            ]
