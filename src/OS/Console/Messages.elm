@@ -1,5 +1,5 @@
-module OS.Console.Messages exposing (Msg(..))
+module OS.Console.Messages exposing (Msg)
 
 
-type Msg
-    = NoOp
+type alias Msg =
+    Never

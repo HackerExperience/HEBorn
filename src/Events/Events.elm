@@ -5,7 +5,7 @@ import Driver.Websocket.Channels as Ws
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Events.Account as Account
 import Events.Server as Server
-import Events.BackFeed as LogFlix
+import Events.LogStream as LogFlix
 
 
 events : Ws.Channel -> String -> Value -> Maybe Dispatch

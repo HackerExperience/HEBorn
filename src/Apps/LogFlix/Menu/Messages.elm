@@ -6,13 +6,7 @@ import Apps.LogFlix.Menu.Models exposing (Menu)
 
 
 type MenuAction
-    = NormalEntryEdit ID
-    | EdittingEntryApply ID
-    | EdittingEntryCancel ID
-    | EncryptEntry ID
-    | DecryptEntry ID
-    | HideEntry ID
-    | DeleteEntry ID
+    = Dummy
 
 
 type Msg

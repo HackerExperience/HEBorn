@@ -8,6 +8,7 @@ import Css.Utils exposing (..)
 import Css.Icons as Icons
 import UI.Style exposing (clickableBox)
 import UI.Colors as Colors
+import Css.Colors
 import OS.Resources exposing (..)
 
 
@@ -57,10 +58,10 @@ console : Snippet
 console =
     class LogConsole
         [ width (pct 100)
-        , minHeight (pct 100)
+        , marginTop (px 41)
         , flexContainerVert
-        , position relative
-        , zIndex (int 0)
+        , position absolute
+        , zIndex (int -1)
         , backgroundColor (rgba 0 0 0 0.5)
         , color (hex "00FF00")
         , fontFamily monospace
@@ -72,23 +73,23 @@ console =
                         [ justifyContent spaceBetween
                         , children
                             [ class BFRequest
-                                [ color (hex "0000FF") ]
+                                [ color Css.Colors.blue ]
                             , class BFReceive
-                                [ color (hex "00FFFF") ]
+                                [ color Css.Colors.yellow ]
                             , class BFJoin
-                                [ color (hex "00FF00") ]
+                                [ color Css.Colors.lime ]
                             , class BFJoinAccount
-                                [ color (hex "00FF00") ]
+                                [ color Css.Colors.green ]
                             , class BFJoinServer
-                                [ color (hex "0000FF") ]
+                                [ color Css.Colors.maroon ]
                             , class BFOther
-                                [ color (hex "777777") ]
+                                [ color Css.Colors.gray ]
                             , class BFNone
-                                [ color (hex "333333") ]
+                                [ color Css.Colors.silver ]
                             , class BFEvent
-                                [ color (hex "999900") ]
+                                [ color Css.Colors.orange ]
                             , class BFError
-                                [ color (hex "FF0000") ]
+                                [ color Css.Colors.red ]
                             ]
                         ]
                     ]

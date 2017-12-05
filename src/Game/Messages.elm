@@ -6,7 +6,7 @@ import Game.Servers.Messages as Servers
 import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
 import Game.Web.Messages as Web
-import Game.BackFeed.Messages as LogFlix
+import Game.LogStream.Messages as LogFlix
 import Requests.Types exposing (ResponseType)
 
 

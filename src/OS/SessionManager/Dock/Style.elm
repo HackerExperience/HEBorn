@@ -204,6 +204,16 @@ conditionalApps =
                     ]
                 ]
             ]
+        , withAttribute (Css.NOT <| Css.EQ "game-version" "dev")
+            [ descendants
+                [ class Item
+                    [ withAttribute (Css.EQ "app" "Logflix")
+                        [ display none
+                        , opacity (int 0)
+                        ]
+                    ]
+                ]
+            ]
         , withAttribute (Css.NOT <| Css.EQ "game-mode" "campaign")
             [ descendants
                 [ class Item

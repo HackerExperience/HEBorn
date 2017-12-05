@@ -3,7 +3,7 @@ module Apps.LogFlix.Models exposing (..)
 import Dict exposing (Dict)
 import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
-import Game.BackFeed.Models as BackFeed
+import Game.LogStream.Models as LogStream
 import Apps.LogFlix.Menu.Models as Menu
 
 
@@ -16,7 +16,7 @@ type alias Model =
     { menu : Menu.Model
     , filterText : String
     , filterFlags : List Never
-    , filterCache : List BackFeed.Id
+    , filterCache : List LogStream.Id
     , sorting : Sorting
     , selected : MainTab
     }
@@ -68,38 +68,38 @@ tabToString tab =
             "Simple"
 
 
-typeToString : BackFeed.BackLog -> String
+typeToString : LogStream.Log -> String
 typeToString log =
     case log.type_ of
-        BackFeed.None ->
+        LogStream.None ->
             ""
 
-        BackFeed.Request ->
+        LogStream.Request ->
             "Request"
 
-        BackFeed.Join ->
+        LogStream.Join ->
             "Join"
 
-        BackFeed.JoinAccount ->
+        LogStream.JoinAccount ->
             "JoinAccount"
 
-        BackFeed.JoinServer ->
+        LogStream.JoinServer ->
             "JoinServer"
 
-        BackFeed.Error ->
+        LogStream.Error ->
             "Error"
 
-        BackFeed.Receive ->
+        LogStream.Receive ->
             "Receive"
 
-        BackFeed.Event ->
+        LogStream.Event ->
             "Event"
 
-        BackFeed.Other ->
-            ""
+        LogStream.Other ->
+            "Other"
 
 
-catchDataWhenFiltering : List BackFeed.Id -> BackFeed.Id -> Maybe BackFeed.Id
+catchDataWhenFiltering : List LogStream.Id -> LogStream.Id -> Maybe LogStream.Id
 catchDataWhenFiltering filterCache log =
     if List.member log filterCache then
         Just log
@@ -107,7 +107,7 @@ catchDataWhenFiltering filterCache log =
         Nothing
 
 
-applyFilter : Model -> BackFeed.BackFeed -> Dict BackFeed.Id BackFeed.BackLog
+applyFilter : Model -> LogStream.LogStream -> Dict LogStream.Id LogStream.Log
 applyFilter model =
     let
         filterer id log =
@@ -118,31 +118,22 @@ applyFilter model =
             else
                 True
     in
-        BackFeed.filter filterer
+        LogStream.filter filterer
 
 
 updateTextFilter : Game.Data -> String -> Model -> Model
 updateTextFilter data filter model =
-    -- TODO
-    initialModel
+    let
+        filterer id log =
+            String.contains filter <| toString log.data
 
-
-
---    let
---        filterer id log =
---            case BackFeed.getContent log of
---                BackFeed.NormalContent data ->
---                    String.contains filter data.raw
---                BackFeed.Encrypted ->
---                    False
---        filterCache =
---            data
---                |> Game.getActiveServer
---                |> Servers.getLogs
---                |> BackFeed.filter filterer
---                |> Dict.keys
---    in
---        { model
---            | filterText = filter
---            , filterCache = filterCache
---        }
+        filterCache =
+            data
+                |> Game.getLogStream
+                |> LogStream.filter filterer
+                |> Dict.keys
+    in
+        { model
+            | filterText = filter
+            , filterCache = filterCache
+        }
