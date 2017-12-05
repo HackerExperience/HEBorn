@@ -1,10 +1,10 @@
-module Game.BackFeed.Update exposing (update)
+module Game.LogStream.Update exposing (update)
 
 import Utils.Update as Update
 import Game.Models as Game
-import Game.BackFeed.Models exposing (..)
-import Game.BackFeed.Messages exposing (..)
-import Game.BackFeed.Requests exposing (..)
+import Game.LogStream.Models exposing (..)
+import Game.LogStream.Messages exposing (..)
+import Game.LogStream.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -13,7 +13,7 @@ type alias UpdateResponse =
 
 
 type alias WebLogUpdateResponse =
-    ( BackLog, Cmd BackLogMsg, Dispatch )
+    ( Log, Cmd LogMsg, Dispatch )
 
 
 update : Game.Model -> Msg -> Model -> UpdateResponse
@@ -26,6 +26,6 @@ update game msg model =
             Update.fromModel model
 
 
-onHandleCreate : BackLog -> Model -> UpdateResponse
+onHandleCreate : Log -> Model -> UpdateResponse
 onHandleCreate log model =
     Update.fromModel (insertLog log model)

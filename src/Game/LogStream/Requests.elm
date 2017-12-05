@@ -1,20 +1,20 @@
-module Game.BackFeed.Requests
+module Game.LogStream.Requests
     exposing
         ( Response(..)
-        , BackLogResponse(..)
+        , LogResponse(..)
         , receive
         , logReceive
         )
 
-import Game.BackFeed.Messages exposing (..)
+import Game.LogStream.Messages exposing (..)
 
 
 type Response
     = Response
 
 
-type BackLogResponse
-    = BackFeedResponse
+type LogResponse
+    = LogStreamResponse
 
 
 receive : RequestMsg -> Maybe Response
@@ -24,6 +24,6 @@ receive response =
             Nothing
 
 
-logReceive : BackLogRequestMsg -> Maybe BackLogResponse
+logReceive : LogRequestMsg -> Maybe LogResponse
 logReceive response =
     Nothing

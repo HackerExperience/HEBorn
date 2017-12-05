@@ -16,10 +16,9 @@ import UI.Inlines.Networking as Inlines exposing (user, addr, file)
 import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
-import Utils.LogFlix.Helpers as LogColor
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.BackFeed.Models as BackFeed
+import Game.LogStream.Models as LogStream
 import Apps.LogFlix.Messages exposing (Msg(..))
 import Apps.LogFlix.Models exposing (..)
 import Apps.LogFlix.Resources exposing (Classes(..), prefix)
@@ -50,44 +49,35 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : BackFeed.BackFeed -> List (Html Msg)
+viewTabAll : LogStream.LogStream -> List (Html Msg)
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : BackFeed.BackFeed -> List (Html Msg)
+viewTabSimple : LogStream.LogStream -> List (Html Msg)
 viewTabSimple model =
     let
         filter id log =
             case log.type_ of
-                BackFeed.Other ->
+                LogStream.Other ->
                     False
 
                 _ ->
                     True
-
-        logs =
-            model
     in
-        renderEntries (Dict.filter filter logs) False
+        renderEntries (Dict.filter filter model) False
 
 
 view : Game.Data -> Model -> Html Msg
 view data model =
     let
-        allSource =
-            Game.getBackFeed data
-
-        simpleSource =
-            Game.getBackFeed data
-
         viewData =
             case model.selected of
                 TabAll ->
-                    viewTabAll allSource
+                    viewTabAll <| Game.getLogStream data
 
                 TabSimple ->
-                    viewTabSimple simpleSource
+                    viewTabSimple <| Game.getLogStream data
 
         filterHeaderLayout =
             verticalList
@@ -113,14 +103,14 @@ view data model =
 -- internals
 
 
-renderEntries : Dict BackFeed.Id BackFeed.BackLog -> Bool -> List (Html Msg)
+renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> List (Html Msg)
 renderEntries logs use_string =
     logs
         |> Dict.toList
         |> List.map (uncurry <| renderEntry use_string)
 
 
-renderEntry : Bool -> BackFeed.Id -> BackFeed.BackLog -> Html Msg
+renderEntry : Bool -> LogStream.Id -> LogStream.Log -> Html Msg
 renderEntry use_string id log =
     let
         data =
@@ -137,39 +127,10 @@ renderEntry use_string id log =
 
         timestamp =
             text (time <| not use_string)
-
-        typeLog =
-            case log.type_ of
-                BackFeed.Request ->
-                    [ class [ BFRequest ] ]
-
-                BackFeed.Receive ->
-                    [ class [ BFReceive ] ]
-
-                BackFeed.Join ->
-                    [ class [ BFJoin ] ]
-
-                BackFeed.JoinAccount ->
-                    [ class [ BFJoinAccount ] ]
-
-                BackFeed.JoinServer ->
-                    [ class [ BFJoinServer ] ]
-
-                BackFeed.Other ->
-                    [ class [ BFOther ] ]
-
-                BackFeed.None ->
-                    [ class [ BFNone ] ]
-
-                BackFeed.Event ->
-                    [ class [ BFEvent ] ]
-
-                BackFeed.Error ->
-                    [ class [ BFError ] ]
     in
         div [ class [ LogBox ] ]
             [ div [ class [ LogHeader ] ]
-                [ div typeLog
+                [ div (setTypeLog log)
                     [ type_ ]
                 , div []
                     [ timestamp ]
@@ -177,3 +138,34 @@ renderEntry use_string id log =
             , div [ class [ DataDiv ] ]
                 [ data ]
             ]
+
+
+setTypeLog : LogStream.Log -> List (Html.Attribute msg)
+setTypeLog log =
+    case log.type_ of
+        LogStream.Request ->
+            [ class [ BFRequest ] ]
+
+        LogStream.Receive ->
+            [ class [ BFReceive ] ]
+
+        LogStream.Join ->
+            [ class [ BFJoin ] ]
+
+        LogStream.JoinAccount ->
+            [ class [ BFJoinAccount ] ]
+
+        LogStream.JoinServer ->
+            [ class [ BFJoinServer ] ]
+
+        LogStream.Other ->
+            [ class [ BFOther ] ]
+
+        LogStream.None ->
+            [ class [ BFNone ] ]
+
+        LogStream.Event ->
+            [ class [ BFEvent ] ]
+
+        LogStream.Error ->
+            [ class [ BFError ] ]

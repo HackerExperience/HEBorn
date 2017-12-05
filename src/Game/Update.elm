@@ -23,9 +23,9 @@ import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
-import Game.BackFeed.Messages as LogFlix
-import Game.BackFeed.Models as LogFlix
-import Game.BackFeed.Update as LogFlix
+import Game.LogStream.Messages as LogFlix
+import Game.LogStream.Models as LogFlix
+import Game.LogStream.Update as LogFlix
 import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync

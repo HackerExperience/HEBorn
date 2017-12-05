@@ -1,9 +1,9 @@
-module Events.BackFeed exposing (events)
+module Events.LogStream exposing (events)
 
 import Events.Types exposing (Router)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.BackFeed as LogFlix
-import Events.BackFeed.Created as Created
+import Core.Dispatch.LogStream as LogFlix
+import Events.LogStream.Created as Created
 
 
 events : Router Dispatch
@@ -18,8 +18,4 @@ events name json =
 
 onLog : Created.Data -> Dispatch
 onLog =
-    let
-        _ =
-            Debug.log "Chegou em onLog"
-    in
-        LogFlix.Create >> Dispatch.logflix
+    LogFlix.Create >> Dispatch.logflix
