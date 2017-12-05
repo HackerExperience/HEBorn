@@ -6,6 +6,8 @@ build/
 stats/*.dat
 npm-debug.log
 release.tar.gz
+package-lock.json
+yarn.lock
 
 # IntelliJ
 /.idea
