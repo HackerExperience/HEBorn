@@ -4,37 +4,21 @@ import Dict exposing (Dict)
 import Game.Meta.Types.Components as Components exposing (Components)
 import Game.Meta.Types.Components.Type as Components
 import Game.Meta.Types.Components.Specs as Specs exposing (Specs)
-import Game.Meta.Types.Network.Connections as Connections exposing (Connections)
+import Game.Meta.Types.Network.Connections as NetConnections exposing (Connections)
+import Game.Inventory.Shared exposing (..)
 
 
 type alias Model =
     { components : Components
-    , connections : Connections
+    , ncs : Connections
     , specs : Specs
     }
-
-
-type Entry
-    = Component Components.Id
-    | Connection Connections.Id
-
-
-type alias Group =
-    Dict String ( AvailableEntries, UnavailableEntries )
-
-
-type alias AvailableEntries =
-    List Entry
-
-
-type alias UnavailableEntries =
-    List Entry
 
 
 initialModel : Model
 initialModel =
     { components = Components.empty
-    , connections = Connections.empty
+    , ncs = NetConnections.empty
     , specs = Specs.empty
     }
 
@@ -67,27 +51,27 @@ removeComponent id model =
         { model | components = components }
 
 
-getConnection : Connections.Id -> Model -> Maybe Connections.Connection
-getConnection id model =
-    Connections.get id model.connections
+getNC : NetConnections.Id -> Model -> Maybe NetConnections.Connection
+getNC id model =
+    NetConnections.get id model.ncs
 
 
-insertConnection : Connections.Id -> Connections.Connection -> Model -> Model
-insertConnection id connection model =
+insertNC : NetConnections.Id -> NetConnections.Connection -> Model -> Model
+insertNC id connection model =
     let
-        connections =
-            Connections.insert id connection model.connections
+        ncs =
+            NetConnections.insert id connection model.ncs
     in
-        { model | connections = connections }
+        { model | ncs = ncs }
 
 
-removeConnection : Connections.Id -> Model -> Model
-removeConnection id model =
+removeNC : NetConnections.Id -> Model -> Model
+removeNC id model =
     let
-        connections =
-            Connections.remove id model.connections
+        ncs =
+            NetConnections.remove id model.ncs
     in
-        { model | connections = connections }
+        { model | ncs = ncs }
 
 
 setAvailability : Bool -> Entry -> Model -> Model
@@ -103,11 +87,11 @@ setAvailability available entry model =
                 Nothing ->
                     model
 
-        Connection id ->
-            case getConnection id model of
+        NetConnection id ->
+            case getNC id model of
                 Just connection ->
-                    insertConnection id
-                        (Connections.setAvailable False connection)
+                    insertNC id
+                        (NetConnections.setAvailable False connection)
                         model
 
                 Nothing ->
@@ -122,17 +106,17 @@ isAvailable entry model =
                 |> getComponent id
                 |> Maybe.map Components.isAvailable
 
-        Connection id ->
+        NetConnection id ->
             model
-                |> getConnection id
-                |> Maybe.map Connections.isAvailable
+                |> getNC id
+                |> Maybe.map NetConnections.isAvailable
 
 
 {-| Groups Inventory by component type and availability state,
 the firt item of the tuple holds available components, the second
 one holds currently used components.
 -}
-group : (Entry -> Bool) -> Model -> Group
+group : (Entry -> Bool) -> Model -> Groups
 group isAvailable model =
     let
         groupBy =
@@ -144,30 +128,30 @@ group isAvailable model =
                 group
 
         reduceConnections id _ group =
-            groupBy "Connections" (Connection id) group
+            groupBy "Network Connections" (NetConnection id) group
 
         appendFold func =
             flip <| Dict.foldl func
     in
         model.components
             |> Dict.foldl reduceComponents Dict.empty
-            |> appendFold reduceConnections model.connections
+            |> appendFold reduceConnections model.ncs
 
 
 
----- internals
+-- internals
 
 
 groupHelper :
     (Entry -> Bool)
     -> String
     -> Entry
-    -> Group
-    -> Group
-groupHelper isAvailable key entry group =
+    -> Groups
+    -> Groups
+groupHelper isAvailable key entry groups =
     let
         ( free, using ) =
-            group
+            groups
                 |> Dict.get key
                 |> Maybe.withDefault ( [], [] )
 
@@ -177,4 +161,4 @@ groupHelper isAvailable key entry group =
             else
                 ( free, entry :: using )
     in
-        Dict.insert key value group
+        Dict.insert key value groups

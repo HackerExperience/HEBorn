@@ -1,9 +1,8 @@
 module Game.Inventory.Messages exposing (Msg(..))
 
-import Events.Server.Hardware.ComponentLinked as ComponentLinked
-import Events.Server.Hardware.ComponentUnlinked as ComponentUnlinked
+import Game.Inventory.Shared exposing (..)
 
 
 type Msg
-    = HandleComponentLinked ComponentLinked.Data
-    | HandleComponentUnlinked ComponentUnlinked.Data
+    = HandleComponentUsed Entry
+    | HandleComponentFreed Entry
