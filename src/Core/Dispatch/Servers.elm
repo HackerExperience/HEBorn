@@ -15,8 +15,6 @@ import Events.Server.Processes.Changed as ProcessesChanged
 import Events.Server.Logs.Created as LogCreated
 import Events.Server.Hardware.MotherboardAttached as MotherboardAttached
 import Events.Server.Hardware.MotherboardDetached as MotherboardDetached
-import Events.Server.Hardware.ComponentLinked as ComponentLinked
-import Events.Server.Hardware.ComponentUnlinked as ComponentUnlinked
 import Game.Web.Models as Web
 import Game.Web.Types as Web
 
@@ -84,5 +82,3 @@ type Processes
 type Hardware
     = MotherboardAttached MotherboardAttached.Data
     | MotherboardDetached MotherboardDetached.Data
-    | ComponentLinked ComponentLinked.Data
-    | ComponentUnlinked ComponentUnlinked.Data

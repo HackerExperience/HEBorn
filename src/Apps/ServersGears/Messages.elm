@@ -6,4 +6,4 @@ import Apps.ServersGears.Models exposing (..)
 
 type Msg
     = MenuMsg Menu.Msg
-    | Select Selection
+    | Select (Maybe Selection)

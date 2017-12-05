@@ -13,7 +13,10 @@ type alias Specs =
 
 
 type alias Spec =
-    { meta : Meta }
+    { name : String
+    , description : String
+    , meta : Meta
+    }
 
 
 type Meta
@@ -99,28 +102,18 @@ render spec =
 
 
 get : Id -> Specs -> Maybe Spec
-get id specs =
-    case id of
-        "CPU1" ->
-            Just <| Spec <| CPU <| MetaCPU 1
+get =
+    Dict.get
 
-        "HDD1" ->
-            Just <| Spec <| HDD <| MetaHDD 10240 1024
 
-        "RAM1" ->
-            Just <| Spec <| RAM <| MetaRAM 128 32
+getName : Spec -> String
+getName =
+    .name
 
-        "NIC1" ->
-            Just <| Spec <| NIC <| MetaNIC 10 10
 
-        "USB1" ->
-            Just <| Spec <| USB <| MetaUSB 1
-
-        "MOBO1" ->
-            Just <| Spec <| MOB <| MetaMOB 4 2 4 1 6
-
-        _ ->
-            Nothing
+getDescription : Spec -> String
+getDescription =
+    .description
 
 
 toType : Spec -> Components.Type

@@ -2,7 +2,7 @@ module Game.Meta.Types.Components exposing (..)
 
 import Dict exposing (Dict)
 import Game.Meta.Types.Components.Type exposing (..)
-import Game.Meta.Types.Components.Specs exposing (..)
+import Game.Meta.Types.Components.Specs as Specs exposing (Spec)
 
 
 type alias Id =
@@ -14,11 +14,9 @@ type alias Components =
 
 
 type alias Component =
-    { name : String
-    , description : String
+    { spec : Spec
     , durability : Float
     , available : Bool
-    , spec : Spec
     }
 
 
@@ -54,12 +52,12 @@ setAvailable available component =
 
 getName : Component -> String
 getName =
-    .name
+    getSpec >> Specs.getName
 
 
 getDescription : Component -> String
 getDescription =
-    .description
+    getSpec >> Specs.getDescription
 
 
 getDurability : Component -> Float
@@ -67,9 +65,14 @@ getDurability =
     .durability
 
 
+getSpec : Component -> Spec
+getSpec =
+    .spec
+
+
 getType : Component -> Type
 getType =
-    .spec >> toType
+    getSpec >> Specs.toType
 
 
 isAvailable : Component -> Bool

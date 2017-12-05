@@ -169,13 +169,3 @@ fromHardware id dispatch =
 
         MotherboardDetached a ->
             [ hardware id <| Hardware.HandleMotherboardDetached a ]
-
-        ComponentLinked a ->
-            [ hardware id <| Hardware.HandleComponentLinked a
-            , inventory <| Inventory.HandleComponentLinked a
-            ]
-
-        ComponentUnlinked a ->
-            [ hardware id <| Hardware.HandleComponentUnlinked a
-            , inventory <| Inventory.HandleComponentUnlinked a
-            ]
