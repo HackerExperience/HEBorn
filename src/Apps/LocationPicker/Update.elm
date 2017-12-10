@@ -12,11 +12,15 @@ import Apps.LocationPicker.Menu.Update as Menu
 import Apps.LocationPicker.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd LocationPicker.Msg, Dispatch )
+
+
 update :
     Game.Data
     -> LocationPicker.Msg
     -> Model
-    -> ( Model, Cmd LocationPicker.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -24,33 +28,51 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
-
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+            onMenuMsg data msg model
 
         MapClick value ->
-            let
-                model_ =
-                    value
-                        |> Map.decodeCoordinates
-                        |> Result.toMaybe
-                        |> flip setPos model
-            in
-                ( model_, Cmd.none, Dispatch.none )
+            onMapClick value model
 
         GeoResp value ->
-            if Gloc.checkInstance value model.self then
-                geoResp value model
-            else
-                ( model, Cmd.none, Dispatch.none )
+            onGeoResp value model
 
 
-geoResp : Value -> Model -> ( Model, Cmd LocationPicker.Msg, Dispatch )
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    let
+        ( menu_, cmd, coreMsg ) =
+            Menu.update data msg model.menu
+
+        cmd_ =
+            Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
+    in
+        ( model_, cmd_, coreMsg )
+
+
+onMapClick : Value -> Model -> UpdateResponse
+onMapClick value model =
+    let
+        model_ =
+            value
+                |> Map.decodeCoordinates
+                |> Result.toMaybe
+                |> flip setPos model
+    in
+        ( model_, Cmd.none, Dispatch.none )
+
+
+onGeoResp : Value -> Model -> UpdateResponse
+onGeoResp value model =
+    if Gloc.checkInstance value model.self then
+        geoResp value model
+    else
+        ( model, Cmd.none, Dispatch.none )
+
+
+geoResp : Value -> Model -> UpdateResponse
 geoResp value model =
     let
         newPos =

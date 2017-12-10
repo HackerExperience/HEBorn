@@ -18,11 +18,15 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd TaskManager.Msg, Dispatch )
+
+
 update :
     Game.Data
     -> TaskManager.Msg
     -> Model
-    -> ( Model, Cmd TaskManager.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -30,24 +34,37 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
-
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+            onMenuMsg data msg model
 
         --- Every update
         Tick now ->
-            let
-                activeServer =
-                    Game.getActiveServer data
+            onTick data now model
 
-                model_ =
-                    updateTasks
-                        activeServer
-                        model
-            in
-                ( model_, Cmd.none, Dispatch.none )
+
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    let
+        ( menu_, cmd, coreMsg ) =
+            Menu.update data msg model.menu
+
+        cmd_ =
+            Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
+    in
+        ( model_, cmd_, coreMsg )
+
+
+onTick : Game.Data -> Time -> Model -> UpdateResponse
+onTick data now model =
+    let
+        activeServer =
+            Game.getActiveServer data
+
+        model_ =
+            updateTasks
+                activeServer
+                model
+    in
+        ( model_, Cmd.none, Dispatch.none )
