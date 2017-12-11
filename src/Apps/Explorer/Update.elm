@@ -71,8 +71,11 @@ onMenuMsg data msg model =
 
         cmd_ =
             Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
     in
-        ( { model | menu = menu_ }, cmd_, coreMsg )
+        ( model_, cmd_, coreMsg )
 
 
 onGoPath :

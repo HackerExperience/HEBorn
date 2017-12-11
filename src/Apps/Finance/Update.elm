@@ -9,11 +9,15 @@ import Apps.Finance.Menu.Update as Menu
 import Apps.Finance.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd Finance.Msg, Dispatch )
+
+
 update :
     Game.Data
     -> Finance.Msg
     -> Model
-    -> ( Model, Cmd Finance.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -21,11 +25,19 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
+            onMenuMsg data msg model
 
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    let
+        ( menu_, cmd, coreMsg ) =
+            Menu.update data msg model.menu
+
+        cmd_ =
+            Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
+    in
+        ( model_, cmd_, coreMsg )

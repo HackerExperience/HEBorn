@@ -2,18 +2,22 @@ module Apps.BounceManager.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Apps.BounceManager.Models exposing (Model)
+import Apps.BounceManager.Models exposing (Model, MainTab)
 import Apps.BounceManager.Messages as BounceManager exposing (Msg(..))
 import Apps.BounceManager.Menu.Messages as Menu
 import Apps.BounceManager.Menu.Update as Menu
 import Apps.BounceManager.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd BounceManager.Msg, Dispatch )
+
+
 update :
     Game.Data
     -> BounceManager.Msg
     -> Model
-    -> ( Model, Cmd BounceManager.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -21,18 +25,31 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
-
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+            onMenuMsg data msg model
 
         GoTab tab ->
-            let
-                model_ =
-                    { model | selected = tab }
-            in
-                ( model_, Cmd.none, Dispatch.none )
+            onGoTab tab model
+
+
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    let
+        ( menu_, cmd, coreMsg ) =
+            Menu.update data msg model.menu
+
+        cmd_ =
+            Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
+    in
+        ( model_, cmd_, coreMsg )
+
+
+onGoTab : MainTab -> Model -> UpdateResponse
+onGoTab tab model =
+    let
+        model_ =
+            { model | selected = tab }
+    in
+        ( model_, Cmd.none, Dispatch.none )

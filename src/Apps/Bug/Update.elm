@@ -16,11 +16,15 @@ import Apps.Bug.Menu.Update as Menu
 import Apps.Bug.Menu.Actions as Menu
 
 
+type alias UpdateResponse =
+    ( Model, Cmd Hackerbug.Msg, Dispatch )
+
+
 update :
     Game.Data
     -> Hackerbug.Msg
     -> Model
-    -> ( Model, Cmd Hackerbug.Msg, Dispatch )
+    -> UpdateResponse
 update data msg model =
     case msg of
         -- -- Context
@@ -28,33 +32,56 @@ update data msg model =
             Menu.actionHandler data action model
 
         MenuMsg msg ->
-            let
-                ( menu_, cmd, coreMsg ) =
-                    Menu.update data msg model.menu
-
-                cmd_ =
-                    Cmd.map MenuMsg cmd
-            in
-                ( { model | menu = menu_ }, cmd_, coreMsg )
+            onMenuMsg data msg model
 
         DummyToast ->
-            ( model
-            , Cmd.none
-            , Notifications.Simple "Hi" "Hello"
-                |> Notifications.Toast Nothing
-                |> Dispatch.notifications
-            )
+            onDummyToast model
 
         PoliteCrash ->
-            ( model
-            , Cmd.none
-            , "This is a polite crash."
-                |> Error.fakeTest
-                |> Account.LogoutAndCrash
-                |> Dispatch.account
-            )
+            onPoliteCrash model
 
         UnpoliteCrash ->
-            "This is an unpolite crash."
-                |> Error.fakeTest
-                |> uncurry Native.Panic.crash
+            onUnpoliteCrash model
+
+
+onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg data msg model =
+    let
+        ( menu_, cmd, coreMsg ) =
+            Menu.update data msg model.menu
+
+        cmd_ =
+            Cmd.map MenuMsg cmd
+
+        model_ =
+            { model | menu = menu_ }
+    in
+        ( model_, cmd_, coreMsg )
+
+
+onDummyToast : Model -> UpdateResponse
+onDummyToast model =
+    ( model
+    , Cmd.none
+    , Notifications.Simple "Hi" "Hello"
+        |> Notifications.Toast Nothing
+        |> Dispatch.notifications
+    )
+
+
+onPoliteCrash : Model -> UpdateResponse
+onPoliteCrash model =
+    ( model
+    , Cmd.none
+    , "This is a polite crash."
+        |> Error.fakeTest
+        |> Account.LogoutAndCrash
+        |> Dispatch.account
+    )
+
+
+onUnpoliteCrash : Model -> UpdateResponse
+onUnpoliteCrash model =
+    "This is an unpolite crash."
+        |> Error.fakeTest
+        |> uncurry Native.Panic.crash
