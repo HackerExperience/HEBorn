@@ -10,6 +10,7 @@ import Game.LogStream.Models as LogStream
 import Game.Models exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import Game.Inventory.Models as Inventory
 import Gen.Servers
 import Gen.Utils exposing (..)
 
@@ -46,6 +47,8 @@ genModel =
                 Web.initialModel
             , backfeed =
                 LogStream.initialModel
+            , inventory =
+                Inventory.initialModel
             , config =
                 { apiHttpUrl = ""
                 , apiWsUrl = ""
