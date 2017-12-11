@@ -25,6 +25,7 @@ import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Notifications.Source as Notifications
 import Game.Servers.Requests.Resync as Resync
+import Game.Meta.Types.Network as Network
 
 
 type alias UpdateResponse =
@@ -108,6 +109,9 @@ updateServer game model cid msg server =
         HandleSetEndpoint remote ->
             handleSetEndpoint game remote server
 
+        HandleSetActiveNIP nip ->
+            handleSetActiveNIP game nip server
+
         FilesystemMsg storageId msg ->
             onFilesystemMsg game cid storageId msg server
 
@@ -148,6 +152,16 @@ handleSetEndpoint :
     -> ServerUpdateResponse
 handleSetEndpoint game cid server =
     setEndpointCId cid server
+        |> Update.fromModel
+
+
+handleSetActiveNIP :
+    Game.Model
+    -> Network.NIP
+    -> Server
+    -> ServerUpdateResponse
+handleSetActiveNIP game nip server =
+    setActiveNIP nip server
         |> Update.fromModel
 
 

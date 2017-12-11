@@ -3,6 +3,7 @@ module Game.Servers.Processes.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Notifications as Notifications
+import Core.Error as Error
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -18,6 +19,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
+import Native.Panic
 
 
 type alias UpdateResponse =
@@ -31,80 +33,89 @@ update :
     -> Model
     -> UpdateResponse
 update game cid msg model =
-    let
-        nip =
-            game
-                |> Game.getServers
-                |> Servers.getNIP cid
-    in
-        case msg of
-            HandlePause id ->
-                handlePause game id model
+    case (Servers.get cid (Game.getServers game)) of
+        Just server ->
+            let
+                nip =
+                    Servers.getActiveNIP server
+            in
+                updateServer game cid nip server msg model
 
-            HandleResume id ->
-                handleResume game id model
+        Nothing ->
+            "Trying to update nonexistent server..."
+                |> Error.someGetReturnedNothing
+                |> Native.Panic.crash
 
-            HandleRemove id ->
-                handleRemove game id model
 
-            Start type_ target file ->
-                handleStart game
-                    cid
-                    (newOptimistic type_ nip target (newProcessFile file))
-                    model
+updateServer game cid nip server msg model =
+    case msg of
+        HandlePause id ->
+            handlePause game id model
 
-            HandleStartBruteforce target ->
-                handleStart game
-                    cid
-                    (newOptimistic Cracker nip target unknownProcessFile)
-                    model
+        HandleResume id ->
+            handleResume game id model
 
-            HandleStartDownload origin storageId fileId ->
-                handleDownload game
-                    cid
-                    (newOptimistic
-                        (Download (DownloadContent PrivateFTP storageId))
-                        nip
-                        (Network.getIp nip)
-                        unknownProcessFile
-                    )
-                    origin
-                    fileId
-                    model
+        HandleRemove id ->
+            handleRemove game id model
 
-            HandleStartPublicDownload origin storageId fileId ->
-                handleDownload game
-                    cid
-                    (newOptimistic
-                        (Download (DownloadContent PublicFTP storageId))
-                        nip
-                        (Network.getIp nip)
-                        unknownProcessFile
-                    )
-                    origin
-                    fileId
-                    model
+        Start type_ target file ->
+            handleStart game
+                cid
+                (newOptimistic type_ nip target (newProcessFile file))
+                model
 
-            HandleComplete id ->
-                onComplete game id model
+        HandleStartBruteforce target ->
+            handleStart game
+                cid
+                (newOptimistic Cracker nip target unknownProcessFile)
+                model
 
-            HandleProcessStarted data ->
-                handleProcessStarted data model
+        HandleStartDownload origin storageId fileId ->
+            handleDownload game
+                cid
+                (newOptimistic
+                    (Download (DownloadContent PrivateFTP storageId))
+                    nip
+                    (Network.getIp nip)
+                    unknownProcessFile
+                )
+                origin
+                fileId
+                model
 
-            HandleProcessConclusion data ->
-                handleProcessConclusion data model
+        HandleStartPublicDownload origin storageId fileId ->
+            handleDownload game
+                cid
+                (newOptimistic
+                    (Download (DownloadContent PublicFTP storageId))
+                    nip
+                    (Network.getIp nip)
+                    unknownProcessFile
+                )
+                origin
+                fileId
+                model
 
-            HandleBruteforceFailed data ->
-                handleBruteforceFailed data model
+        HandleComplete id ->
+            onComplete game id model
 
-            HandleProcessesChanged data ->
-                handleProcessesChanged game data model
+        HandleProcessStarted data ->
+            handleProcessStarted data model
 
-            HandleBruteforceSuccess id ->
-                handleBruteforceSuccess id model
+        HandleProcessConclusion data ->
+            handleProcessConclusion data model
 
-            Request data ->
-                updateRequest game cid (receive data) model
+        HandleBruteforceFailed data ->
+            handleBruteforceFailed data model
+
+        HandleProcessesChanged data ->
+            handleProcessesChanged game data model
+
+        HandleBruteforceSuccess id ->
+            handleBruteforceSuccess id model
+
+        Request data ->
+            updateRequest game cid (receive data) model
 
 
 

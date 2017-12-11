@@ -8,7 +8,7 @@ port := 8000
 
 # Automatic settings
 UNAME := $(shell uname)
-PATH := $(PATH):$(nodebin)
+PATH := $(nodebin):$(PATH)
 JS_PACKAGE_MNGR := $(shell which yarn || which npm)
 
 ################################################################################
@@ -52,7 +52,7 @@ prepare:
 
 # Update index.html and compile css
 build: prepare
-	cat static/index.html | touch build/index.html
+	cat static/index.html > build/index.html
 	elm-css src/Core/Stylesheets.elm -o static/css
 
 #  Add CSS hot-reloader
