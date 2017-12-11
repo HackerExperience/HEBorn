@@ -40,9 +40,19 @@ impossible =
 
 neeiae : String -> Error
 neeiae =
-    (,) "ERROR_NONEXISTINGENDPOINT_ISACTIVEENDPOINT"
+    (,) "ERR_NONEXISTINGENDPOINT_ISACTIVEENDPOINT"
+
+
+someGetReturnedNothing : String -> Error
+someGetReturnedNothing =
+    (,) "PAGE_FAULT_IN_NONPAGED_AREA"
 
 
 porra : String -> Error
 porra =
     (,) "ERR_PORRA_RENATO"
+
+
+notInServers : String -> Error
+notInServers =
+    (,) "ERR_NONEXISTINGSERVER"

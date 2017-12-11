@@ -1,11 +1,13 @@
 module Apps.Browser.Update exposing (update)
 
 import Dict
+import Native.Panic
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Account as Account
 import Core.Dispatch.OS as OS
+import Core.Error as Error
 import Game.Data as Game
 import Game.Models
 import Game.Servers.Models as Servers
@@ -360,8 +362,12 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
 
         networkId =
             servers
-                |> Servers.getNIP cid
-                |> Network.getId
+                |> Servers.get cid
+                |> Maybe.map
+                    (Servers.getActiveNIP
+                        >> Network.getId
+                    )
+                |> Maybe.withDefault "::"
 
         requester =
             { sessionId = sessionId
@@ -405,14 +411,23 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
             }
 
         gatewayNip =
-            Servers.getNIP (Game.getActiveCId data) servers
+            Servers.get (Game.getActiveCId data) servers
+                |> Maybe.map (Servers.getActiveNIP)
 
         remoteIp =
             Network.getIp remoteNip
 
         dispatch =
-            Dispatch.servers <|
-                Servers.Login gatewayNip remoteIp password requester
+            case gatewayNip of
+                Just gatewayNip ->
+                    Dispatch.servers <|
+                        Servers.Login gatewayNip remoteIp password requester
+
+                Nothing ->
+                    -- You don't have a Gateway?
+                    "A gateway is required for everything!"
+                        |> Error.astralProj
+                        |> uncurry Native.Panic.crash
     in
         ( tab, Cmd.none, dispatch )
 

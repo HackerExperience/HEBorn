@@ -31,6 +31,7 @@ type Dispatch
 type Server
     = SetBounce (Maybe Bounces.ID)
     | SetEndpoint (Maybe CId)
+    | SetActiveNIP Network.NIP
     | Filesystem StorageId Filesystem
     | Logs Logs
     | Processes Processes

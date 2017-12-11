@@ -10,6 +10,7 @@ import Game.Models as Game
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network
 import Game.Account.Models as Account
+import Game.Servers.Models as Servers
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -22,31 +23,26 @@ import OS.Resources exposing (..)
 view : Data -> Bool -> Html Msg
 view data isOpen =
     let
-        account =
-            data
-                |> Game.Data.getGame
-                |> Game.getAccount
+        onClickNetwork nip =
+            onClick <| SelectNIP nip
 
-        activeContext =
-            Account.getContext account
+        activeServer =
+            Game.Data.getActiveServer data
 
-        onClickNetwork netId =
-            onClick <| SelectNetwork netId
+        activeNIP =
+            Servers.getActiveNIP activeServer
 
         availableNetworks =
-            data
-                |> Game.Data.getActiveServer
+            activeServer
                 |> .nips
-                |> List.map
-                    (Network.getId)
                 |> List.unique
                 |> List.filter
-                    ((/=) account.activeNetwork)
+                    ((/=) activeNIP)
                 |> List.map
-                    (\netId ->
-                        text netId
+                    (\nip ->
+                        text (Network.getId nip)
                             |> List.singleton
-                            |> li [ onClickNetwork netId ]
+                            |> li [ onClickNetwork nip ]
                     )
     in
         case availableNetworks of
@@ -56,7 +52,7 @@ view data isOpen =
             _ ->
                 div [ class [ Network ] ]
                     [ div [ class [ ActiveNetwork ] ]
-                        [ div [] [ text account.activeNetwork ]
+                        [ div [] [ text (Network.getId activeNIP) ]
                         , div [] [ text "⌄" ]
                         ]
                     , ul [ class [ AvailableNetworks ] ]

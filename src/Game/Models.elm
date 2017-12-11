@@ -151,7 +151,7 @@ unsafeGetGateway model =
             server
 
         Nothing ->
-            "Player has no active gateway!"
+            "Player has no active gateway! [2]"
                 |> Error.astralProj
                 |> uncurry Native.Panic.crash
 

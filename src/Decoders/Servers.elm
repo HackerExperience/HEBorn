@@ -1,6 +1,7 @@
 module Decoders.Servers exposing (..)
 
 import Time exposing (Time)
+import Dict
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -48,7 +49,7 @@ server now gatewayCache =
     decode Server
         |> optional "name" string ""
         |> optional "server_type" serverType Desktop
-        |> required "nips" (list Decoders.Network.nipTuple)
+        |> andThen decodeNIPs
         |> optionalMaybe "coordinates" float
         |> required "main_storage" string
         |> required "storages" storages
@@ -57,6 +58,24 @@ server now gatewayCache =
         |> tunnels
         |> custom (ownership gatewayCache)
         |> notifications
+
+
+hackActiveNIP : (List NIP -> NIP -> a) -> List NIP -> Decoder a
+hackActiveNIP callback nips =
+    case List.head nips of
+        Just head ->
+            succeed (callback nips head)
+
+        Nothing ->
+            fail "No head item in server's nip list"
+
+
+decodeNIPs : (List NIP -> NIP -> a) -> Decoder a
+decodeNIPs callback =
+    Decoders.Network.nipTuple
+        |> list
+        |> field "nips"
+        |> andThen (hackActiveNIP callback)
 
 
 serverType : Decoder ServerType
@@ -87,8 +106,8 @@ ownership gatewayCache =
 
 
 gatewayOwnership : GatewayCache -> Decoder GatewayData
-gatewayOwnership { activeNIP, endpoints } =
-    succeed <| GatewayData activeNIP endpoints Nothing
+gatewayOwnership { endpoints } =
+    succeed <| GatewayData endpoints Nothing
 
 
 endpointOwnership : Decoder EndpointData

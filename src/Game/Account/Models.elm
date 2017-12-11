@@ -65,7 +65,6 @@ type alias Model =
     , gateways : List Servers.CId
     , activeGateway : Maybe Servers.CId -- NEVER SET TO "NOTHING" (EXCEPT ON INIT)
     , context : Context
-    , activeNetwork : String
     , bounces : Bounces.Model
     , userBounces : List Bounces.ID
     , inventory : Inventory.Model
@@ -91,7 +90,6 @@ initialModel id username token =
     , gateways = []
     , activeGateway = Nothing
     , context = Gateway
-    , activeNetwork = "::"
     , bounces = Bounces.initialModel
     , userBounces = []
     , inventory = Inventory.initialModel

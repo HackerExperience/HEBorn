@@ -66,6 +66,9 @@ fromServer cid dispatch =
         FetchUrl url nId requester ->
             [ web <| Web.FetchUrl url nId cid requester ]
 
+        SetActiveNIP nip ->
+            [ server cid <| Servers.HandleSetActiveNIP nip ]
+
 
 fromFilesystem : CId -> Servers.StorageId -> Filesystem -> Subscribers
 fromFilesystem cid id dispatch =

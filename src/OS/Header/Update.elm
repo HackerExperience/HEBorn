@@ -5,14 +5,11 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Servers as Servers
+import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
-import Game.Models
-import Game.Account.Messages as Account
 import Game.Meta.Types.Context exposing (Context)
-import Game.Notifications.Messages as Notifications
-import Game.Storyline.Messages as Story
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared as Servers
-import Game.Servers.Models as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 
@@ -45,9 +42,8 @@ update data msg model =
         SelectEndpoint cid ->
             onSelectEndpoint data cid model
 
-        SelectNetwork nid ->
-            -- TODO
-            Update.fromModel model
+        SelectNIP nip ->
+            onSelectNIP data nip model
 
         ContextTo context ->
             onContextTo context model
@@ -178,11 +174,8 @@ onTogglecampaign model =
 onServerReadAll : Servers.CId -> Model -> UpdateResponse
 onServerReadAll cid model =
     let
-        --Dispatch.server cid <|
-        --Servers.NotificationsMsg
-        --Notifications.ReadAll
         dispatch =
-            Dispatch.none
+            Dispatch.notifications <| Notifications.ReadAllServer cid
     in
         ( model, Cmd.none, dispatch )
 
@@ -190,10 +183,21 @@ onServerReadAll cid model =
 onAccountReadAll : Model -> UpdateResponse
 onAccountReadAll model =
     let
-        --Dispatch.account <|
-        --    Account.NotificationsMsg
-        --        Notifications.ReadAll
         dispatch =
-            Dispatch.none
+            Dispatch.notifications Notifications.ReadAllAccount
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onSelectNIP : Game.Data -> NIP -> Model -> UpdateResponse
+onSelectNIP data nip model =
+    let
+        dispatcher =
+            data
+                |> Game.getActiveCId
+                |> Dispatch.server
+
+        dispatch =
+            dispatcher <| Servers.SetActiveNIP nip
     in
         ( model, Cmd.none, dispatch )

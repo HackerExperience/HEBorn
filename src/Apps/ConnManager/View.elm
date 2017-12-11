@@ -80,9 +80,8 @@ view data model =
 
         nip =
             data
-                |> Game.getGame
-                |> Game.Models.getServers
-                |> Servers.getNIP (Game.getActiveCId data)
+                |> Game.getActiveServer
+                |> Servers.getActiveNIP
 
         mainEntries =
             data

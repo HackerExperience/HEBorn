@@ -192,8 +192,8 @@ endpointLabel :
 endpointLabel servers cid server =
     let
         ip =
-            servers
-                |> Servers.getNIP cid
+            server
+                |> Servers.getActiveNIP
                 |> Network.getIp
 
         name =

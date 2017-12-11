@@ -16,6 +16,7 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Notifications.Messages as Notifications
+import Game.Meta.Types.Network as Network
 
 
 -- messages and requests received by the server collection
@@ -39,6 +40,7 @@ type RequestMsg
 type ServerMsg
     = HandleSetBounce (Maybe Bounces.ID)
     | HandleSetEndpoint (Maybe CId)
+    | HandleSetActiveNIP Network.NIP
     | FilesystemMsg StorageId Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

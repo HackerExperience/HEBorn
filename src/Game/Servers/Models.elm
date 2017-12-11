@@ -38,6 +38,7 @@ type alias Server =
     { name : String
     , type_ : ServerType
     , nips : List NIP
+    , activeNIP : NIP
     , coordinates : Maybe Coordinates
     , mainStorage : StorageId
     , storages : Storages
@@ -74,8 +75,7 @@ type Ownership
 
 
 type alias GatewayData =
-    { activeNIP : NIP
-    , endpoints : List CId
+    { endpoints : List CId
     , endpoint : Maybe CId
     }
 
@@ -95,39 +95,6 @@ initialModel =
     { gateways = Dict.empty
     , servers = Dict.empty
     }
-
-
-getNIPSafe : CId -> Model -> Maybe NIP
-getNIPSafe cid model =
-    case cid of
-        GatewayCId id ->
-            let
-                withOwnership { ownership } =
-                    case ownership of
-                        GatewayOwnership { activeNIP } ->
-                            Just activeNIP
-
-                        _ ->
-                            Nothing
-            in
-                model.servers
-                    |> Dict.get id
-                    |> Maybe.andThen withOwnership
-
-        EndpointCId nip ->
-            Just nip
-
-
-getNIP : CId -> Model -> NIP
-getNIP cid model =
-    case getNIPSafe cid model of
-        Just nip ->
-            nip
-
-        Nothing ->
-            "Bad usage of getNIP."
-                |> Error.impossible
-                |> uncurry Native.Panic.crash
 
 
 
@@ -211,7 +178,7 @@ insert cid server model0 =
                     case cid of
                         GatewayCId id ->
                             insertGateway id
-                                data.activeNIP
+                                server.activeNIP
                                 []
                                 data.endpoints
                                 model0
@@ -295,6 +262,11 @@ getName =
 setName : String -> Server -> Server
 setName name server =
     { server | name = name }
+
+
+getActiveNIP : Server -> NIP
+getActiveNIP { activeNIP } =
+    activeNIP
 
 
 getNIPs : Server -> List NIP
@@ -395,6 +367,11 @@ setEndpointCId cid ({ ownership } as server) =
                     ownership
     in
         { server | ownership = ownership_ }
+
+
+setActiveNIP : NIP -> Server -> Server
+setActiveNIP nip server =
+    { server | activeNIP = nip }
 
 
 getEndpoints : Server -> Maybe (List CId)
