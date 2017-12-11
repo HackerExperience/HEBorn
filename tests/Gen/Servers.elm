@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Gen.Filesystem
 import Gen.Logs
 import Gen.Processes
+import Gen.Hardware
 import Random.Pcg
     exposing
         ( Generator
@@ -22,6 +23,7 @@ import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Notifications.Models as Notifications
+import Game.Servers.Hardware.Models as Hardware
 import Gen.Network exposing (..)
 import Gen.Utils exposing (..)
 
@@ -120,23 +122,25 @@ genEndpointOwnership =
 
 genServer : Generator Server
 genServer =
-    genGenericServer genOwnserhip
+    genGenericServer genOwnserhip Gen.Hardware.genGatewayHardware
 
 
 genGatewayServer : Generator Server
 genGatewayServer =
-    genGenericServer <| map GatewayOwnership genGatewayOwnership
+    Gen.Hardware.genGatewayHardware
+        |> genGenericServer (map GatewayOwnership genGatewayOwnership)
 
 
 genEndpointServer : Generator Server
 genEndpointServer =
-    genGenericServer <| map EndpointOwnership genEndpointOwnership
+    Gen.Hardware.genEndpointHardware
+        |> genGenericServer (map EndpointOwnership genEndpointOwnership)
 
 
-genGenericServer : Generator Ownership -> Generator Server
-genGenericServer gen =
+genGenericServer : Generator Ownership -> Generator Hardware.Model -> Generator Server
+genGenericServer genOwnserhip genHardware =
     let
-        buildServerRecord ownership nip fs logs proc =
+        buildServerRecord ownership nip fs logs proc hardware =
             { name = "Dummy"
             , type_ = Desktop
             , nips = [ nip ]
@@ -151,14 +155,17 @@ genGenericServer gen =
                 ownership
             , notifications =
                 Notifications.initialModel
+            , hardware =
+                hardware
             }
     in
-        gen
+        genOwnserhip
             |> map buildServerRecord
             |> andMap genNip
             |> andMap Gen.Filesystem.genModel
             |> andMap Gen.Logs.genModel
             |> andMap Gen.Processes.genModel
+            |> andMap genHardware
 
 
 genServerList : Generator (List Server)
