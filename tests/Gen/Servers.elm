@@ -112,7 +112,7 @@ genOwnserhip =
 
 genGatewayOwnership : Generator GatewayData
 genGatewayOwnership =
-    map (\nip -> GatewayData nip [] Nothing) genNip
+    constant <| GatewayData [] Nothing
 
 
 genEndpointOwnership : Generator EndpointData
@@ -144,6 +144,7 @@ genGenericServer genOwnserhip genHardware =
             { name = "Dummy"
             , type_ = Desktop
             , nips = [ nip ]
+            , activeNIP = nip
             , coordinates = Just 0
             , mainStorage = "storage"
             , storages =
