@@ -11,6 +11,7 @@ import Apps.Browser.ModelTest as BrowserModel
 import Apps.Explorer.ModelTest as ExplorerModel
 import Game.Account.IntegrationTest as AccountIntegration
 import Game.Servers.Processes.IntegrationTest as ProcessIntegration
+import Game.Meta.Type.MotherboardTest as MotherboardTest
 
 
 all : Test
@@ -23,4 +24,5 @@ all =
         , ExplorerModel.all
         , AccountIntegration.all
         , ProcessIntegration.all
+        , MotherboardTest.all
         ]
