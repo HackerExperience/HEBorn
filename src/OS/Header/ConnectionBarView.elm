@@ -78,11 +78,14 @@ view ({ game } as data) { openMenu } =
             Account.getBounces account
     in
         div [ class [ Connection ] ]
-            [ contextToggler onGateway (ContextTo Gateway)
+            [ contextToggler onGateway (ContextTo Gateway) activeEndpointCId
             , gatewaySelector servers openMenu activeGatewayCId gateways
             , bounceSelector bounces openMenu activeBounce gatewayBounces
             , endpointSelector servers openMenu activeEndpointCId endpoints
-            , contextToggler (not onGateway) (ContextTo Endpoint)
+            , contextToggler
+                (not onGateway)
+                (ContextTo Endpoint)
+                activeEndpointCId
             ]
 
 
@@ -90,21 +93,29 @@ view ({ game } as data) { openMenu } =
 -- INTERNALS
 
 
-contextToggler : Bool -> Msg -> Html Msg
-contextToggler active handler =
+contextToggler : Bool -> Msg -> Maybe Servers.CId -> Html Msg
+contextToggler active handler activeEndpointCId =
     let
         classes =
             if active then
                 [ Context, Selected ]
             else
                 [ Context ]
+
+        span_ =
+            case activeEndpointCId of
+                Just cid ->
+                    span
+                        [ onClick handler
+                        , class classes
+                        , boolAttr "active" active
+                        ]
+                        []
+
+                Nothing ->
+                    span [] []
     in
-        span
-            [ onClick handler
-            , class classes
-            , boolAttr "active" active
-            ]
-            []
+        span_
 
 
 selector :
