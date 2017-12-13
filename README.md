@@ -14,6 +14,7 @@ You'll need
 - [elm-format](https://github.com/avh4/elm-format) for linting
 - GNU Make (default make on Linux)
 - Patience, we are slowly growing this codebase into a playable, fun game.
+- [Helix](https://github.com/HackerExperience/Helix), the game server.
 
 ## Usage
 
