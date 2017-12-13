@@ -4,7 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (disabled)
-import Html.Lazy exposing (lazy2)
+import Html.Lazy exposing (lazy, lazy2)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Models as GameModels
@@ -28,7 +28,16 @@ import Apps.ServersGears.Menu.View exposing (..)
 
 view : Game.Data -> Model -> Html Msg
 view data model =
-    div [] []
+    let
+        isGateway =
+            data
+                |> Game.getActiveServer
+                |> Servers.isGateway
+    in
+        if isGateway then
+            editablePanel data model
+        else
+            readonlyPanel data model
 
 
 readonlyPanel : Game.Data -> Model -> Html Msg
@@ -49,19 +58,33 @@ editablePanel data model =
         case getMotherboard model of
             Just motherboard ->
                 div []
-                    [ viewMotherboard inventory motherboard model
-                    , viewInventory inventory model
+                    [ p [ onClick <| Select (Just SelectingUnlink) ]
+                        [ text "unlink" ]
+                    , p [ onClick <| Select Nothing ]
+                        [ text "deselect" ]
+                    , lazy (viewMotherboard inventory motherboard) model
+                    , lazy2 viewInventory inventory model
                     ]
 
             Nothing ->
                 div []
-                    [ viewInventory inventory model
+                    [ lazy2 viewInventory inventory model
                     ]
 
 
 viewMotherboard : Inventory.Model -> Motherboard -> Model -> Html Msg
 viewMotherboard inventory motherboard model =
-    div [] []
+    -- this function should delegate to other functions according
+    -- to motherboard model
+    let
+        toList func id slot list =
+            func id slot :: list
+    in
+        motherboard
+            |> Motherboard.getSlots
+            |> Dict.foldl (toList <| viewSlot inventory motherboard model) []
+            |> List.reverse
+            |> div []
 
 
 viewSlot :
@@ -132,6 +155,8 @@ viewGroup inventory model name ( available, unavailable ) =
 
 viewEntry : Inventory.Model -> Model -> Inventory.Entry -> Html Msg
 viewEntry inventory model entry =
+    -- it's also possible to check the model selection to add effects to
+    -- selected entries and slots
     let
         selection =
             SelectingEntry entry
