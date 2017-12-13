@@ -76,10 +76,9 @@ encrypted =
     "⠽⠕⠥ ⠚⠥⠎⠞ ⠇⠕⠎⠞ ⠠⠠⠞⠓⠑ ⠠⠠⠛⠁⠍⠑"
 
 
-renderEntries : Model -> Dict Logs.ID Logs.Log -> List (Html Msg)
+renderEntries : Model -> Logs.Model -> List (Html Msg)
 renderEntries model logs =
-    logs
-        |> Dict.toList
+    getLogsfromDate logs
         |> List.map (uncurry <| renderEntry model)
 
 
@@ -254,6 +253,26 @@ menuInclude id log model =
 
             Logs.Encrypted ->
                 [ menuEncryptedEntry id ]
+
+
+getLogsfromDateHelper :
+    Dict Logs.ID Logs.Log
+    -> Logs.Date
+    -> Logs.ID
+    -> List ( Logs.ID, Logs.Log )
+    -> List ( Logs.ID, Logs.Log )
+getLogsfromDateHelper logs k v a =
+    case Dict.get v logs of
+        Just log ->
+            a ++ [ ( v, log ) ]
+
+        Nothing ->
+            a
+
+
+getLogsfromDate : Logs.Model -> List ( Logs.ID, Logs.Log )
+getLogsfromDate logs =
+    Dict.foldr (getLogsfromDateHelper logs.logs) [] logs.drawOrder
 
 
 render : Logs.Data -> List (Html Msg)

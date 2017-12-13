@@ -1,7 +1,18 @@
 module Decoders.Logs exposing (..)
 
 import Dict exposing (Dict)
-import Json.Decode as Decode exposing (Decoder, map, oneOf, succeed, string, float, list)
+import Json.Decode as Decode
+    exposing
+        ( Decoder
+        , map
+        , oneOf
+        , succeed
+        , string
+        , float
+        , list
+        , andThen
+        )
+import Time exposing (Time)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom, hardcoded)
 import Game.Servers.Logs.Models exposing (..)
 
@@ -16,7 +27,19 @@ type alias LogWithIndex =
 
 model : Decoder Model
 model =
-    map Dict.fromList index
+    let
+        logs =
+            map Dict.fromList index
+
+        drawOrder =
+            map (Dict.foldl reducer Dict.empty) logs
+
+        reducer id log acu =
+            Dict.insert (findId ( log.timestamp, 0 ) acu) id acu
+    in
+        decode Model
+            |> custom logs
+            |> custom drawOrder
 
 
 index : Decoder Index
