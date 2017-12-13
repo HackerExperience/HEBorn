@@ -87,8 +87,8 @@ catchDataWhenFiltering filterCache log =
         Nothing
 
 
-applyFilter : Model -> Logs.Model -> Dict Logs.ID Logs.Log
-applyFilter model =
+applyFilter : Model -> Logs.Model -> Logs.Model
+applyFilter model logs =
     let
         filterer id log =
             if String.length model.filterText > 0 then
@@ -98,7 +98,7 @@ applyFilter model =
             else
                 True
     in
-        Logs.filter filterer
+        { logs | logs = Logs.filter filterer logs }
 
 
 enterEditing : Game.Data -> Logs.ID -> Model -> Model
@@ -110,7 +110,7 @@ enterEditing data id model =
                 |> Servers.getLogs
 
         model_ =
-            case Dict.get id logs of
+            case Dict.get id logs.logs of
                 Just log ->
                     case Logs.getContent log of
                         Logs.NormalContent data ->

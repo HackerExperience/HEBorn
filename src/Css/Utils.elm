@@ -1,5 +1,7 @@
 module Css.Utils exposing (..)
 
+import Html
+import Html.Attributes as Attributes exposing (style)
 import Css exposing (..)
 
 
@@ -101,3 +103,8 @@ nest ns i =
 child : (List Style -> Snippet) -> List Style -> Style
 child selector styles =
     children <| List.singleton (selector styles)
+
+
+styles : List Css.Style -> Html.Attribute msg
+styles =
+    Css.asPairs >> style
