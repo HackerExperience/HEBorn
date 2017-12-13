@@ -7,11 +7,9 @@ module Game.Servers.Hardware.Requests.UpdateMotherboard
 
 import Json.Decode as Decode
     exposing
-        ( Decoder
-        , Value
+        ( Value
         , decodeValue
         )
-import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))

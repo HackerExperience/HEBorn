@@ -91,7 +91,7 @@ viewSlot :
     Inventory.Model
     -> Motherboard
     -> Model
-    -> Motherboard.Id
+    -> Motherboard.SlotId
     -> Motherboard.Slot
     -> Html Msg
 viewSlot inventory motherboard model id slot =

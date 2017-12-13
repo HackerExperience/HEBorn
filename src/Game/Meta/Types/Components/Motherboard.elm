@@ -20,10 +20,10 @@ type alias NetConnections =
 
 
 type alias Slots =
-    Dict Id Slot
+    Dict SlotId Slot
 
 
-type alias Id =
+type alias SlotId =
     String
 
 
@@ -41,14 +41,14 @@ empty =
     }
 
 
-getComponent : Id -> Motherboard -> Maybe Components.Id
+getComponent : SlotId -> Motherboard -> Maybe Components.Id
 getComponent id motherboard =
     motherboard.slots
         |> Dict.get id
         |> Maybe.andThen .component
 
 
-linkComponent : Id -> Components.Id -> Motherboard -> Motherboard
+linkComponent : SlotId -> Components.Id -> Motherboard -> Motherboard
 linkComponent id component motherboard =
     case Dict.get id motherboard.slots of
         Just slot ->
@@ -65,7 +65,7 @@ linkComponent id component motherboard =
             motherboard
 
 
-unlinkComponent : Id -> Motherboard -> Motherboard
+unlinkComponent : SlotId -> Motherboard -> Motherboard
 unlinkComponent id motherboard =
     let
         maybeSlot =
@@ -107,7 +107,7 @@ unlinkNC id motherboard =
     { motherboard | ncs = Dict.remove id motherboard.ncs }
 
 
-getSlot : Id -> Motherboard -> Maybe Slot
+getSlot : SlotId -> Motherboard -> Maybe Slot
 getSlot id motherboard =
     Dict.get id <| getSlots motherboard
 
