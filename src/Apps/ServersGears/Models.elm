@@ -85,7 +85,17 @@ getSelection =
 
 setSelection : Maybe Selection -> Model -> Model
 setSelection selection model =
-    { model | selection = selection }
+    case selection of
+        Just SelectingUnlink ->
+            setSelection Nothing model
+
+        _ ->
+            { model | selection = selection }
+
+
+removeSelection : Model -> Model
+removeSelection =
+    setSelection Nothing
 
 
 doSelect : Maybe Selection -> Inventory.Model -> Model -> Model
@@ -98,7 +108,7 @@ doSelect selection inventory model =
                     case getMotherboard model of
                         Just motherboard ->
                             -- swap two slots
-                            swapSlots id id_ motherboard model
+                            swapSlots id id_ inventory motherboard model
 
                         Nothing ->
                             -- can't perform slot actions without a mobo
@@ -114,7 +124,7 @@ doSelect selection inventory model =
 
                 Nothing ->
                     -- remove slot selection
-                    setSelection Nothing model
+                    removeSelection model
 
         Just (SelectingEntry entry) ->
             case selection of
@@ -132,11 +142,11 @@ doSelect selection inventory model =
 
                 Nothing ->
                     -- remove entry selection
-                    setSelection Nothing model
+                    removeSelection model
 
         Just SelectingUnlink ->
             -- why click on unlink without selecting anything?
-            model
+            removeSelection model
 
         Nothing ->
             -- select
@@ -216,6 +226,7 @@ removeNetConnection slotId inventory model =
                     |> Motherboard.unlinkNC compId
                     |> flip setMotherboard model
                     |> setAvailability entry False inventory
+                    |> removeSelection
 
             Nothing ->
                 model
@@ -369,34 +380,33 @@ isSlotFilled id motherboard =
 -- internals - doSelect helpers
 
 
-swapSlots : Motherboard.Id -> Motherboard.Id -> Motherboard -> Model -> Model
-swapSlots slotIdA slotIdB motherboard model =
+swapSlots :
+    Motherboard.Id
+    -> Motherboard.Id
+    -> Inventory.Model
+    -> Motherboard
+    -> Model
+    -> Model
+swapSlots slotIdA slotIdB inventory motherboard model =
     let
-        slotA =
-            Motherboard.getSlot slotIdA motherboard
+        maybeA =
+            Motherboard.getComponent slotIdA motherboard
 
-        slotB =
-            Motherboard.getSlot slotIdB motherboard
+        maybeB =
+            Motherboard.getComponent slotIdB motherboard
     in
-        case Maybe.uncurry slotA slotB of
-            Just ( slotA, slotB ) ->
-                let
-                    typeA =
-                        Motherboard.getSlotType slotA
-
-                    typeB =
-                        Motherboard.getSlotType slotB
-
-                    --componentA =
-                    --componentB =
-                in
-                    if typeA == typeB then
-                        model
-                    else
-                        model
+        case Maybe.uncurry maybeA maybeB of
+            Just ( idA, idB ) ->
+                model
+                    |> linkSlot slotIdA
+                        (Inventory.Component idB)
+                        inventory
+                    |> linkSlot slotIdB
+                        (Inventory.Component idA)
+                        inventory
 
             Nothing ->
-                model
+                removeSelection model
 
 
 linkSlot :
@@ -420,9 +430,10 @@ linkSlot slotId entry inventory model =
                 model
                     |> setMotherboard motherboard_
                     |> setAvailability entry False inventory
+                    |> removeSelection
 
         Nothing ->
-            model
+            removeSelection model
 
 
 unlinkSlot : Motherboard.Id -> Inventory.Model -> Model -> Model
@@ -437,9 +448,10 @@ unlinkSlot slotId inventory model =
         case Maybe.uncurry maybeMotherboard maybeCompId of
             Just ( motherboard, id ) ->
                 motherboard
-                    |> Motherboard.unlinkComponent id
+                    |> Motherboard.unlinkComponent slotId
                     |> flip setMotherboard model
                     |> setAvailability (Inventory.Component id) True inventory
+                    |> removeSelection
 
             Nothing ->
-                model
+                removeSelection model
