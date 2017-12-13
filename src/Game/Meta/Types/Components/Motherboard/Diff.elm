@@ -85,7 +85,7 @@ diffReducer old id component diff =
             insert component diff
 
 
-toLinkedComponents : Motherboard -> Dict Motherboard.Id Components.Id
+toLinkedComponents : Motherboard -> Dict Motherboard.SlotId Components.Id
 toLinkedComponents =
     let
         reducer id slot dict =

@@ -28,7 +28,7 @@ type alias Overrides =
 
 
 type Selection
-    = SelectingSlot Motherboard.Id
+    = SelectingSlot Motherboard.SlotId
     | SelectingEntry Inventory.Entry
     | SelectingUnlink
 
@@ -198,7 +198,7 @@ setAvailability entry available inventory model =
                 model
 
 
-removeNetConnection : Motherboard.Id -> Inventory.Model -> Model -> Model
+removeNetConnection : Motherboard.SlotId -> Inventory.Model -> Model -> Model
 removeNetConnection slotId inventory model =
     let
         maybeMotherboard =
@@ -294,7 +294,7 @@ checkWithMotherboard func model =
 
 
 doesTypesMatch :
-    Motherboard.Id
+    Motherboard.SlotId
     -> Inventory.Entry
     -> Inventory.Model
     -> Motherboard
@@ -340,7 +340,7 @@ doesTypesMatch id entry inventory motherboard =
             False
 
 
-doesSlotsSwap : Motherboard.Id -> Motherboard.Id -> Motherboard -> Bool
+doesSlotsSwap : Motherboard.SlotId -> Motherboard.SlotId -> Motherboard -> Bool
 doesSlotsSwap id1 id2 motherboard =
     let
         maybeSlot1 =
@@ -368,7 +368,7 @@ doesSlotsSwap id1 id2 motherboard =
                 False
 
 
-isSlotFilled : Motherboard.Id -> Motherboard -> Bool
+isSlotFilled : Motherboard.SlotId -> Motherboard -> Bool
 isSlotFilled id motherboard =
     motherboard
         |> Motherboard.getSlot id
@@ -381,8 +381,8 @@ isSlotFilled id motherboard =
 
 
 swapSlots :
-    Motherboard.Id
-    -> Motherboard.Id
+    Motherboard.SlotId
+    -> Motherboard.SlotId
     -> Inventory.Model
     -> Motherboard
     -> Model
@@ -410,7 +410,7 @@ swapSlots slotIdA slotIdB inventory motherboard model =
 
 
 linkSlot :
-    Motherboard.Id
+    Motherboard.SlotId
     -> Inventory.Entry
     -> Inventory.Model
     -> Model
@@ -436,7 +436,7 @@ linkSlot slotId entry inventory model =
             removeSelection model
 
 
-unlinkSlot : Motherboard.Id -> Inventory.Model -> Model -> Model
+unlinkSlot : Motherboard.SlotId -> Inventory.Model -> Model -> Model
 unlinkSlot slotId inventory model =
     let
         maybeMotherboard =

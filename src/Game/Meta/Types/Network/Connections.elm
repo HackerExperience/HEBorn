@@ -9,7 +9,7 @@ type alias Id =
 
 
 type alias Connections =
-    Dict NIP Connection
+    Dict Id Connection
 
 
 type alias Connection =
