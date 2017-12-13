@@ -23,6 +23,9 @@ import Game.Storyline.Messages as Story
 import Game.Storyline.Update as Story
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
+import Game.LogStream.Messages as LogFlix
+import Game.LogStream.Models as LogFlix
+import Game.LogStream.Update as LogFlix
 import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
@@ -51,6 +54,9 @@ update msg model =
 
         WebMsg msg ->
             onWeb msg model
+
+        LogFlixMsg msg ->
+            onLogFlix msg model
 
         Resync ->
             onResync model
@@ -141,6 +147,18 @@ onServers msg game =
         , set = (\servers game -> { game | servers = servers })
         , toMsg = ServersMsg
         , update = (Servers.update game)
+        }
+        msg
+        game
+
+
+onLogFlix : LogFlix.Msg -> Model -> UpdateResponse
+onLogFlix msg game =
+    Update.child
+        { get = .backfeed
+        , set = (\backfeed game -> { game | backfeed = backfeed })
+        , toMsg = LogFlixMsg
+        , update = (LogFlix.update game)
         }
         msg
         game

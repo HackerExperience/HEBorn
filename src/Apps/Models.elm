@@ -26,6 +26,7 @@ import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
+import Apps.LogFlix.Models as LogFlix
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Game.Data as Game
@@ -48,6 +49,7 @@ type AppModel
     | EmailModel Email.Model
     | BugModel Bug.Model
     | CalculatorModel Calculator.Model
+    | LogFlixModel LogFlix.Model
 
 
 type Contexts
@@ -106,6 +108,9 @@ contexts app =
         CalculatorApp ->
             ContextlessApp
 
+        LogFlixApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -157,6 +162,9 @@ name app =
 
         CalculatorApp ->
             Calculator.name
+
+        LogFlixApp ->
+            LogFlix.name
 
 
 icon : App -> String
@@ -210,6 +218,9 @@ icon app =
         CalculatorApp ->
             Calculator.icon
 
+        LogFlixApp ->
+            LogFlix.icon
+
 
 title : AppModel -> String
 title model =
@@ -262,6 +273,9 @@ title model =
         CalculatorModel model ->
             Calculator.title model
 
+        LogFlixModel model ->
+            LogFlix.title model
+
 
 windowInitSize : App -> ( Float, Float )
 windowInitSize app =
@@ -271,6 +285,9 @@ windowInitSize app =
 
         CalculatorApp ->
             Calculator.windowInitSize
+
+        LogFlixApp ->
+            LogFlix.windowInitSize
 
         _ ->
             ( 600, 400 )

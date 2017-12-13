@@ -8,6 +8,7 @@ import Css.Utils exposing (..)
 import Css.Icons as Icons
 import UI.Style exposing (clickableBox)
 import UI.Colors as Colors
+import Css.Colors
 import OS.Resources exposing (..)
 
 
@@ -18,6 +19,7 @@ css =
             [ dashboard
             , children
                 [ header
+                , console
                 , class Session
                     [ flex (int 1)
                     , flexContainerVert
@@ -49,6 +51,50 @@ dashboard =
         , fontFamily sansSerif
         , fontFamilies [ "Open Sans" ]
         , Css.fontWeight (int 300)
+        ]
+
+
+console : Snippet
+console =
+    class LogConsole
+        [ width (pct 100)
+        , marginTop (px 41)
+        , flexContainerVert
+        , position absolute
+        , zIndex (int -1)
+        , backgroundColor (rgba 0 0 0 0.5)
+        , color (hex "00FF00")
+        , fontFamily monospace
+        , fontFamilies [ "Monospace" ]
+        , children
+            [ div
+                [ children
+                    [ class LogConsoleHeader
+                        [ justifyContent spaceBetween
+                        , children
+                            [ class BFRequest
+                                [ color Css.Colors.blue ]
+                            , class BFReceive
+                                [ color Css.Colors.yellow ]
+                            , class BFJoin
+                                [ color Css.Colors.lime ]
+                            , class BFJoinAccount
+                                [ color Css.Colors.green ]
+                            , class BFJoinServer
+                                [ color Css.Colors.maroon ]
+                            , class BFOther
+                                [ color Css.Colors.gray ]
+                            , class BFNone
+                                [ color Css.Colors.silver ]
+                            , class BFEvent
+                                [ color Css.Colors.orange ]
+                            , class BFError
+                                [ color Css.Colors.red ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ]
 
 

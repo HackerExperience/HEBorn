@@ -35,6 +35,7 @@ import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
 import Utils.Json.Decode exposing (optionalMaybe)
 import Decoders.Storyline
+import Decoders.LogStream
 import Decoders.Account
 import Decoders.Servers
 import Decoders.Network
@@ -79,6 +80,7 @@ bootstrap game =
         |> required "storyline" Decoders.Storyline.story
         |> hardcoded game.web
         |> hardcoded game.config
+        |> hardcoded game.backfeed
         |> map (,)
         |> andThen (\done -> map done <| servers)
         |> map (uncurry insertServers)

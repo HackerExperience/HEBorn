@@ -170,6 +170,7 @@ itemIco =
         , addIco "email" Icon.email
         , addIco "bug" Icon.bug
         , addIco "calculator" Icon.calculator
+        , addIco "logfl" Icon.logfl
         , addGrad "explorer" Gradients.mangoPulp
         , addGrad "logvw" Gradients.stellar
         , addGrad "browser" Gradients.pinotNoir
@@ -186,6 +187,7 @@ itemIco =
         , addGrad "email" Gradients.darkSkies
         , addGrad "bug" Gradients.superman
         , addGrad "calculator" Gradients.mangoPulp
+        , addGrad "logfl" Gradients.aquaMarine
         ]
 
 
@@ -196,6 +198,16 @@ conditionalApps =
             [ descendants
                 [ class Item
                     [ withAttribute (Css.EQ "app" "The bug")
+                        [ display none
+                        , opacity (int 0)
+                        ]
+                    ]
+                ]
+            ]
+        , withAttribute (Css.NOT <| Css.EQ "game-version" "dev")
+            [ descendants
+                [ class Item
+                    [ withAttribute (Css.EQ "app" "Logflix")
                         [ display none
                         , opacity (int 0)
                         ]

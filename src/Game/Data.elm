@@ -9,11 +9,13 @@ module Game.Data
         , fromGateway
         , fromEndpoint
         , fromServerCId
+        , getLogStream
         )
 
 import Game.Models exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
+import Game.LogStream.Models exposing (LogStream)
 
 
 type alias Data =
@@ -105,6 +107,11 @@ getEndpoints =
     getActiveServer
         >> Servers.getEndpoints
         >> Maybe.withDefault []
+
+
+getLogStream : Data -> LogStream
+getLogStream =
+    .game >> .backfeed >> .logs
 
 
 

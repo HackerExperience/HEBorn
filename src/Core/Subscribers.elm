@@ -15,6 +15,7 @@ import Core.Subscribers.OS as OS
 import Core.Subscribers.Servers as Servers
 import Core.Subscribers.Storyline as Storyline
 import Core.Subscribers.Websocket as Websocket
+import Core.Subscribers.LogStream as LogFlix
 
 
 dispatch : Dispatch -> Subscribers
@@ -49,3 +50,6 @@ fromInternal dispatch =
 
         Dispatch.Notifications dispatch ->
             Notifications.dispatch dispatch
+
+        Dispatch.LogFlix dispatch ->
+            LogFlix.dispatch dispatch
