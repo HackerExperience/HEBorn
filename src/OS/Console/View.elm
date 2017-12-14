@@ -28,8 +28,7 @@ view data =
 viewLogs : LogStream.LogStream -> List (Html msg)
 viewLogs logs =
     logs
-        |> Dict.toList
-        |> List.map (uncurry <| viewLog)
+        |> Dict.foldl (\k v acc -> viewLog k v :: acc) []
 
 
 viewLog : LogStream.Id -> LogStream.Log -> Html msg

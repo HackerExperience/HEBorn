@@ -55,7 +55,7 @@ view data model =
     in
         verticalSticked
             (Just [ filterHeaderLayout ])
-            viewData
+            [ viewData ]
             Nothing
 
 
@@ -80,12 +80,12 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : LogStream.LogStream -> List (Html Msg)
+viewTabAll : LogStream.LogStream -> Html Msg
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : LogStream.LogStream -> List (Html Msg)
+viewTabSimple : LogStream.LogStream -> Html Msg
 viewTabSimple model =
     let
         filter id log =
@@ -103,21 +103,21 @@ viewTabSimple model =
 -- internals
 
 
-renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> List (Html Msg)
-renderEntries logs use_string =
+renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> Html Msg
+renderEntries logs useString =
     logs
-        |> Dict.toList
-        |> List.map (uncurry <| renderEntry use_string)
+        |> Dict.foldl (\k v acc -> renderEntry useString k v :: acc) []
+        |> verticalList
 
 
 renderEntry : Bool -> LogStream.Id -> LogStream.Log -> Html Msg
-renderEntry use_string id log =
+renderEntry useString id log =
     let
         data =
             text (toString log.data)
 
         type_ =
-            if use_string then
+            if useString then
                 text (log.typeString)
             else
                 text (typeToString log)
@@ -126,7 +126,7 @@ renderEntry use_string id log =
             timestampToFullData log.timestamp
 
         timestamp =
-            text (time <| not use_string)
+            text (time <| not useString)
     in
         div [ class [ LogBox ] ]
             [ div [ class [ LogHeader ] ]
