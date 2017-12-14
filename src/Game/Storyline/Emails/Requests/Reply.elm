@@ -21,7 +21,6 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
 import Game.Storyline.Emails.Messages exposing (..)
-import Game.Storyline.Emails.Models exposing (..)
 
 
 type Response

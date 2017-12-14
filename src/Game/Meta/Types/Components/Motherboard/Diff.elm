@@ -5,7 +5,6 @@ import Set exposing (Set)
 import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components as Components
-import Game.Meta.Types.Network.Connections as NetConnections
 
 
 type alias Diff =

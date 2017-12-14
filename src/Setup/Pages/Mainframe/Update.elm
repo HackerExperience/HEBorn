@@ -1,16 +1,12 @@
 module Setup.Pages.Mainframe.Update exposing (update)
 
-import Json.Decode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Utils.Update as Update
 import Utils.Maybe as Maybe
-import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
-import Setup.Settings as Settings exposing (Settings)
 import Setup.Requests.Check as Check
 import Game.Account.Models as Account
 

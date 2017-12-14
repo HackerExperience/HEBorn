@@ -7,8 +7,6 @@ import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Notifications.Models as Notifications
 import Game.Meta.Types.Context exposing (..)
-import Game.Meta.Types.Network exposing (NIP)
-import Setup.Types as Setup
 
 
 type alias ID =

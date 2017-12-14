@@ -1,6 +1,5 @@
 module Decoders.Storyline exposing (..)
 
-import Dict
 import Json.Decode as Decode
     exposing
         ( Decoder

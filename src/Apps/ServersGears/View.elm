@@ -8,18 +8,15 @@ import Html.Lazy exposing (lazy, lazy2)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Models as GameModels
-import Game.Account.Models as Account
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
 import Game.Servers.Models as Servers
-import Game.Servers.Hardware.Models as Hardware
 import Game.Meta.Types.Components as Components exposing (Components)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Network.Connections as NetConnections exposing (Connections)
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 import Apps.ServersGears.Resources exposing (Classes(..), prefix)
-import Apps.ServersGears.Menu.View exposing (..)
 
 
 { id, class, classList } =

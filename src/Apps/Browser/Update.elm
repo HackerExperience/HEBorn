@@ -11,7 +11,6 @@ import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
-import Game.Web.Messages as Web
 import Game.Web.Types as Web
 import Game.Meta.Types.Network as Network
 import Apps.Config exposing (..)

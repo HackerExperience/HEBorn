@@ -1,6 +1,5 @@
 module Decoders.Missions exposing (..)
 
-import Dict
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -12,7 +11,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, resolve)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Storyline.Missions.Missions exposing (..)
-import Game.Storyline.Missions.Actions exposing (..)
 import Game.Storyline.Missions.Models exposing (..)
 import Game.Storyline.Missions.StepGen exposing (..)
 

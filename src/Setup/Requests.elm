@@ -3,7 +3,6 @@ module Setup.Requests exposing (Response(..), receive)
 import Setup.Requests.Setup as Setup
 import Setup.Requests.SetServer as SetServer
 import Setup.Messages exposing (..)
-import Setup.Models exposing (..)
 
 
 type Response

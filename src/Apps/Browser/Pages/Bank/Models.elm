@@ -5,7 +5,6 @@ module Apps.Browser.Pages.Bank.Models
         , getTitle
         )
 
-import Game.Meta.Types.Network as Network
 import Game.Web.Types as Web
 
 

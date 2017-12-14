@@ -1,11 +1,8 @@
 module Apps.Calculator.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Utils.Html exposing (spacer)
-import UI.ToString exposing (timestampToFullData)
 import Game.Data as Game
 import Apps.Calculator.Models exposing (..)
 import Apps.Calculator.Messages exposing (Msg(..))

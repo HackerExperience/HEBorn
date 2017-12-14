@@ -4,10 +4,6 @@ import Json.Decode as Decode exposing (Decoder, map, field, string, succeed, one
 import Json.Decode.Pipeline exposing (decode, required, hardcoded, optional)
 import Game.Account.Models exposing (..)
 import Game.Servers.Shared as Servers
-import Setup.Types as Setup
-import Setup.Models as Setup
-import Decoders.Servers
-import Decoders.Setup
 
 
 account : Model -> Decoder Model

@@ -3,10 +3,6 @@ module Apps.Browser.Pages.DownloadCenter.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
-import Game.Models as Game
-import Game.Meta.Types.Network exposing (NIP)
-import Game.Servers.Shared as Servers
-import Game.Servers.Processes.Messages as Processes
 import Apps.Browser.Pages.CommonActions exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)

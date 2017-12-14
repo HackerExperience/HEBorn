@@ -8,9 +8,7 @@ import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Components as Components
 import Game.Meta.Types.Components.Type as Components
-import Game.Meta.Types.Network.Connections as NetConnections
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware
 

@@ -5,7 +5,6 @@ import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Types exposing (..)
-import Game.Meta.Types.Context exposing (Context(..))
 
 
 type alias Model =

@@ -3,7 +3,6 @@ module OS.Header.Messages exposing (Msg(..))
 import Game.Meta.Types.Context exposing (Context)
 import Game.Servers.Shared as Servers
 import OS.Header.Models exposing (OpenMenu)
-import UI.Widgets.CustomSelect as CustomSelect
 
 
 type Msg

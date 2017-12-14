@@ -10,7 +10,6 @@ import Game.Storyline.Missions.Actions exposing (Action(..))
 import OS.Resources as OS
 import OS.SessionManager.Dock.Resources as Dock
 import OS.SessionManager.WindowManager.Resources as WM
-import Apps.Apps as Apps
 import Apps.Models as Apps
 import Apps.Explorer.Resources as Explorer
 

@@ -7,7 +7,6 @@ import Requests.Types exposing (ConfigSource, Code(..))
 import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Game.Account.Models as Account
-import Decoders.Game exposing (ServersToJoin)
 
 
 type Response

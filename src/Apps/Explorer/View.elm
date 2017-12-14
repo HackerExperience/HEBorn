@@ -9,10 +9,10 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
+import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
-import Apps.Explorer.Lib exposing (..)
 import Apps.Explorer.Menu.View
     exposing
         ( menuView
@@ -319,6 +319,12 @@ explorerColumn { storages, mainStorage } model =
         ]
 
 
+storageTreeEntry :
+    Servers.StorageId
+    -> Servers.StorageId
+    -> Servers.Storage
+    -> List (Html Msg)
+    -> List (Html Msg)
 storageTreeEntry mainStorage storageId { name } acu =
     let
         activeAttributeValue =

@@ -10,8 +10,6 @@ import Setup.Messages as Setup
 import Game.Messages as Game
 import Game.Account.Messages as Account
 import Game.Servers.Messages as Servers
-import Game.Servers.Shared exposing (CId)
-import Game.Servers.Processes.Messages as Processes
 import Game.Web.Messages as Web
 
 

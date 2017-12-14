@@ -7,7 +7,6 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
-import Events.Events as Events exposing (..)
 import Landing.Messages as Landing
 import Landing.Update as Landing
 import Game.Data as Game

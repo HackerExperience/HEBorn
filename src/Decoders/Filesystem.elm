@@ -17,7 +17,6 @@ import Json.Decode
         , string
         )
 import Json.Decode.Pipeline exposing (decode, required, custom)
-import Game.Servers.Shared exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
 import Utils.Json.Decode exposing (commonError)
 
