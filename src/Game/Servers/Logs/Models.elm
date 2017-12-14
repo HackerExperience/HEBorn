@@ -7,11 +7,17 @@ import Game.Meta.Types.Network exposing (IP, NIP)
 
 
 type alias Model =
-    Dict ID Log
+    { logs : Dict ID Log
+    , drawOrder : Dict Date ID
+    }
 
 
 type alias ID =
     String
+
+
+type alias Date =
+    ( Time, Int )
 
 
 type alias Log =
@@ -80,7 +86,9 @@ type alias ServerUser =
 
 initialModel : Model
 initialModel =
-    Dict.empty
+    { logs = Dict.empty
+    , drawOrder = Dict.empty
+    }
 
 
 new : Time -> Status -> Maybe String -> Log
@@ -92,28 +100,74 @@ new timestamp status content =
 
 
 insert : ID -> Log -> Model -> Model
-insert =
-    Dict.insert
+insert id log model =
+    let
+        logs =
+            Dict.insert id log model.logs
+
+        drawOrder =
+            Dict.insert
+                (findId ( log.timestamp, 0 ) model.drawOrder)
+                id
+                model.drawOrder
+    in
+        { model | logs = logs, drawOrder = drawOrder }
+
+
+findId : ( Time, Int ) -> Dict Date ID -> Date
+findId (( birth, from ) as pig) model =
+    model
+        |> Dict.get pig
+        |> Maybe.map (\twin -> findId ( birth, from + 1 ) model)
+        |> Maybe.withDefault pig
 
 
 remove : ID -> Model -> Model
-remove =
-    Dict.remove
+remove id model =
+    let
+        logs =
+            Dict.remove id model.logs
+
+        drawOrder =
+            searchAndDestroy 0 id model
+    in
+        { model | logs = logs, drawOrder = drawOrder }
+
+
+searchAndDestroy : Int -> ID -> Model -> Dict Date ID
+searchAndDestroy n id model =
+    if n < 99 then
+        case get id model of
+            Just log ->
+                case Dict.get ( log.timestamp, n ) model.drawOrder of
+                    Just candidate ->
+                        if candidate == id then
+                            Dict.remove ( log.timestamp, n ) model.drawOrder
+                        else
+                            searchAndDestroy (n + 1) id model
+
+                    Nothing ->
+                        searchAndDestroy (n + 1) id model
+
+            Nothing ->
+                searchAndDestroy (n + 1) id model
+    else
+        model.drawOrder
 
 
 member : ID -> Model -> Bool
-member =
-    Dict.member
+member id model =
+    Dict.member id model.logs
 
 
 get : ID -> Model -> Maybe Log
-get =
-    Dict.get
+get id model =
+    Dict.get id model.logs
 
 
 filter : (ID -> Log -> Bool) -> Model -> Dict ID Log
-filter =
-    Dict.filter
+filter filterer model =
+    Dict.filter filterer model.logs
 
 
 getTimestamp : Log -> Time

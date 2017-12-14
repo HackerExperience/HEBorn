@@ -171,8 +171,10 @@ verticalSticked =
             , typeSelector "mainCont"
                 [ flex (int 1)
                 , flexContainerVert
+                , overflow hidden
                 ]
             ]
+        , maxHeight (pct 100)
         ]
 
 
