@@ -55,7 +55,7 @@ view data model =
     in
         verticalSticked
             (Just [ filterHeaderLayout ])
-            viewData
+            [ viewData ]
             Nothing
 
 
@@ -80,12 +80,12 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : LogStream.LogStream -> List (Html Msg)
+viewTabAll : LogStream.LogStream -> Html Msg
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : LogStream.LogStream -> List (Html Msg)
+viewTabSimple : LogStream.LogStream -> Html Msg
 viewTabSimple model =
     let
         filter id log =
@@ -103,11 +103,12 @@ viewTabSimple model =
 -- internals
 
 
-renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> List (Html Msg)
+renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> Html Msg
 renderEntries logs use_string =
     logs
-        |> Dict.toList
+        |> Dict.foldr (\x y acc -> acc ++ [ ( x, y ) ]) []
         |> List.map (uncurry <| renderEntry use_string)
+        |> verticalList
 
 
 renderEntry : Bool -> LogStream.Id -> LogStream.Log -> Html Msg

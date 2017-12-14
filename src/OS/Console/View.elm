@@ -28,7 +28,7 @@ view data =
 viewLogs : LogStream.LogStream -> List (Html msg)
 viewLogs logs =
     logs
-        |> Dict.toList
+        |> Dict.foldr (\x y acc -> acc ++ [ ( x, y ) ]) []
         |> List.map (uncurry <| viewLog)
 
 
