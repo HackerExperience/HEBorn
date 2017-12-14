@@ -3,7 +3,6 @@ module Setup.Messages exposing (..)
 import Json.Encode exposing (Value)
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers
-import Setup.Types exposing (..)
 import Setup.Settings exposing (Settings, SettingTopic)
 import Setup.Pages.PickLocation.Messages as PickLocation
 import Setup.Pages.Mainframe.Messages as Mainframe

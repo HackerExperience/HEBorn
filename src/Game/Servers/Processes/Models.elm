@@ -6,7 +6,6 @@ import Game.Shared
 import Game.Meta.Types.Network as Network
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Logs.Models as Logs
-import Utils.Dict as Dict
 import Utils.Model.RandomUuid as RandomUuid
 import Random.Pcg as Random
 

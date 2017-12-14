@@ -1,14 +1,16 @@
 module Core.Subscribers.Helpers exposing (..)
 
 import Apps.Messages as Apps
+import Apps.Browser.Messages as Browser
 import Core.Messages as Core
 import Driver.Websocket.Messages as Ws
 import Setup.Messages as Setup
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
-import OS.Toasts.Models as Toasts exposing (Toast)
+import OS.SessionManager.Types as SessionManager
 import OS.Toasts.Messages as Toasts
 import Game.Messages as Game
+import Game.Meta.Types.Context exposing (Context)
 import Game.Account.Messages as Account
 import Game.LogStream.Messages as LogStream
 import Game.Account.Database.Messages as Database
@@ -150,11 +152,21 @@ apps =
     SessionManager.EveryAppMsg >> sessionManager
 
 
+browser :
+    SessionManager.WindowRef
+    -> Context
+    -> Browser.Msg
+    -> Core.Msg
 browser windowRef context =
     Apps.BrowserMsg
         >> app windowRef context
 
 
+app :
+    SessionManager.WindowRef
+    -> Context
+    -> Apps.Msg
+    -> Core.Msg
 app windowRef context =
     SessionManager.AppMsg windowRef context
         >> sessionManager

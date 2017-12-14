@@ -1,7 +1,6 @@
 module Decoders.Tunnels exposing (..)
 
 import Dict exposing (Dict)
-import Utils.Json.Decode exposing (optionalMaybe)
 import Json.Decode
     exposing
         ( Decoder

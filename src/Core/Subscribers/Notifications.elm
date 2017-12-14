@@ -1,11 +1,6 @@
 module Core.Subscribers.Notifications exposing (dispatch)
 
-import Time exposing (Time)
-import Game.Servers.Shared exposing (CId)
 import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models exposing (Content)
-import Game.Servers.Messages as Servers
-import Game.Account.Messages as Account
 import OS.Toasts.Messages as Toasts
 import Core.Dispatch.Notifications exposing (..)
 import Core.Subscribers.Helpers exposing (..)

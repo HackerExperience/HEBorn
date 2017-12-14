@@ -1,7 +1,6 @@
 module Apps.Explorer.Lib exposing (..)
 
 import Game.Servers.Filesystem.Models as Filesystem
-import Utils.List as List
 
 
 -- FILESYSTEM

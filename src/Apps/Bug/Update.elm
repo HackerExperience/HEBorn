@@ -7,8 +7,6 @@ import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
 import Game.Notifications.Models as Notifications
 import Native.Panic
-import OS.Toasts.Messages as Toasts
-import OS.Toasts.Models as Toasts
 import Apps.Bug.Models exposing (Model)
 import Apps.Bug.Messages as Hackerbug exposing (Msg(..))
 import Apps.Bug.Menu.Messages as Menu

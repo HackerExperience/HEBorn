@@ -6,7 +6,6 @@ import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Decoders.Logs
 

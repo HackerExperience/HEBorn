@@ -6,7 +6,6 @@ import Core.Dispatch.Servers as Servers
 import Game.Servers.Shared as Servers exposing (CId)
 import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Filesystem.Downloaded as FileDownloaded
-import Events.Server.Logs.Changed as LogsChanged
 import Events.Server.Logs.Created as LogCreated
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion

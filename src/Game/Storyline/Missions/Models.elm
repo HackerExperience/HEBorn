@@ -1,10 +1,8 @@
 module Game.Storyline.Missions.Models exposing (..)
 
-import Apps.Apps exposing (App(..))
 import Game.Shared
 import Game.Storyline.Missions.Actions exposing (Action)
 import Game.Storyline.Missions.Missions exposing (Mission(NoMission))
-import Game.Storyline.Missions.StepGen as Actions
 
 
 type alias ID =

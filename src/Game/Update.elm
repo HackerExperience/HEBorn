@@ -26,7 +26,6 @@ import Game.Inventory.Update as Inventory
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
 import Game.LogStream.Messages as LogFlix
-import Game.LogStream.Models as LogFlix
 import Game.LogStream.Update as LogFlix
 import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)

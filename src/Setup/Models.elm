@@ -1,6 +1,5 @@
 module Setup.Models exposing (..)
 
-import Dict as Dict
 import Game.Models as Game
 import Json.Encode as Encode exposing (Value)
 import Core.Dispatch as Dispatch exposing (Dispatch)

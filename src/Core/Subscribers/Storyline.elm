@@ -2,9 +2,7 @@ module Core.Subscribers.Storyline exposing (dispatch)
 
 import Core.Dispatch.Storyline exposing (..)
 import Core.Subscribers.Helpers exposing (..)
-import Core.Messages as Core
 import Events.Account.Story.NewEmail as StoryNewEmail
-import Game.Messages as Game
 import Game.Notifications.Models as Notifications
 import Game.Notifications.Messages as Notifications
 import Game.Storyline.Messages as Storyline

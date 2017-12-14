@@ -1,7 +1,6 @@
 module Setup.Pages.Helpers exposing (withHeader)
 
 import Html exposing (..)
-import Html.CssHelpers
 import Setup.Resources exposing (..)
 
 

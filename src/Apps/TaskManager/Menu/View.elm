@@ -14,7 +14,6 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
-import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg

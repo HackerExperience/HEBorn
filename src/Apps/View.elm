@@ -27,7 +27,6 @@ import Apps.Bug.View as Bug
 import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
 import Apps.LogFlix.View as LogFlix
-import Apps.LogFlix.Messages as LogFlixMessages
 import Game.Data as Game
 
 

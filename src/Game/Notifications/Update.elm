@@ -10,8 +10,6 @@ import Game.Notifications.Models exposing (..)
 import Game.Notifications.Source exposing (..)
 import Game.Notifications.Messages exposing (..)
 import Game.Meta.Models as Meta
-import OS.Toasts.Messages as Toasts
-import OS.Toasts.Models as Toasts
 
 
 type alias UpdateResponse =

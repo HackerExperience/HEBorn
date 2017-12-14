@@ -1,6 +1,5 @@
 module Setup.Subscriptions exposing (subscriptions)
 
-import Game.Models as Game
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
 import Setup.Models exposing (..)

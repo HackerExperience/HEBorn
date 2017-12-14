@@ -1,7 +1,6 @@
 module Apps.Browser.Pages.Webserver.View exposing (view)
 
 import Html exposing (..)
-import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Servers.Shared as Servers

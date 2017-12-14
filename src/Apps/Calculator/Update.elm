@@ -5,7 +5,6 @@ import Utils.Update as Update
 import Apps.Calculator.Models exposing (..)
 import Game.Data as Game
 import Apps.Calculator.Messages as Calculator exposing (Msg(..))
-import Apps.Calculator.View exposing (..)
 import Char
 
 

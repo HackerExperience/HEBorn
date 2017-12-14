@@ -1,7 +1,6 @@
 module OS.Toasts.Models exposing (..)
 
 import Dict exposing (Dict)
-import Time exposing (Time)
 import Game.Notifications.Source exposing (Source)
 import Game.Notifications.Models as Notifications
 

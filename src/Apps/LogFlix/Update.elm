@@ -1,7 +1,6 @@
 module Apps.LogFlix.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
 import Utils.Update as Update
 import Game.Data as Game
 import Apps.LogFlix.Models exposing (..)

@@ -1,7 +1,5 @@
 module Core.Error exposing (..)
 
-import Requests.Types exposing (Code(..))
-
 
 type alias Error =
     ( String, String )

@@ -1,6 +1,5 @@
 module Setup.Pages.PickLocation.Subscriptions exposing (subscriptions)
 
-import Game.Models as Game
 import Utils.Ports.Map exposing (mapClick)
 import Utils.Ports.Geolocation exposing (geoLocResp, geoRevResp)
 import Setup.Pages.PickLocation.Models exposing (..)

@@ -4,7 +4,6 @@ import Utils.Update as Update
 import Game.Models as Game
 import Game.LogStream.Models exposing (..)
 import Game.LogStream.Messages exposing (..)
-import Game.LogStream.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
