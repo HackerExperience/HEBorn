@@ -9,8 +9,6 @@ import OS.SessionManager.Models as SessionManager
 import OS.SessionManager.Subscriptions as SessionManager
 
 
-{-| TODO: change signature to GameData.Data -> Model -> Sub Msg
--}
 subscriptions : GameData.Data -> Model -> Sub Msg
 subscriptions data model =
     let
