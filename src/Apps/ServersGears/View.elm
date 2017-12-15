@@ -62,6 +62,8 @@ editablePanel data model =
                         [ text "unlink" ]
                     , p [ onClick <| Select Nothing ]
                         [ text "deselect" ]
+                    , p [ onClick <| Save ]
+                        [ text "save" ]
                     , lazy (viewMotherboard inventory motherboard) model
                     , lazy2 viewInventory inventory model
                     ]

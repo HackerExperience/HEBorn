@@ -59,6 +59,7 @@ server gatewayCache =
         |> custom (ownership gatewayCache)
         |> notifications
         |> hardware
+        |> map (Debug.log "A Cute Motherboard")
 
 
 serverType : Decoder ServerType
@@ -99,7 +100,7 @@ hardware =
         default =
             Hardware.initialModel
     in
-        optional "hardware" Decoders.Hardware.hardware default
+        required "hardware" Decoders.Hardware.hardware
 
 
 endpointOwnership : Decoder EndpointData

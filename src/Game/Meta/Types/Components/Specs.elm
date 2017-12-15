@@ -4,6 +4,9 @@ import Dict exposing (Dict)
 import Game.Meta.Types.Components.Type as Components
 
 
+-- NOTES: We should migrate to slot type in the future.
+
+
 type alias Id =
     String
 
@@ -65,7 +68,16 @@ type alias MetaMOB =
 
 empty : Specs
 empty =
-    Dict.empty
+    -- temporary hadcoded specs
+    Dict.fromList
+        [ ( "cpu_001", Spec "Threadisaster" "" <| CPU <| MetaCPU 256 )
+        , ( "ram_001", Spec "Ram Na Montana" "" <| RAM <| MetaRAM 256 100 )
+        , ( "hdd_001", Spec "SemDisk" "" <| HDD <| MetaHDD 1024 1000 )
+        , ( "nic_001", Spec "BoringNic" "" <| NIC <| MetaNIC 0 0 )
+        , ( "mobo_001", Spec "Mobo1" "" <| MOB <| MetaMOB 1 1 1 1 0 )
+        , ( "mobo_002", Spec "Mobo2" "" <| MOB <| MetaMOB 2 1 2 1 1 )
+        , ( "mobo_999", Spec "Mobo2" "" <| MOB <| MetaMOB 4 4 4 4 4 )
+        ]
 
 
 render : Spec -> List ( String, String )

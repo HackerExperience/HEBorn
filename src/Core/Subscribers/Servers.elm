@@ -164,8 +164,8 @@ fromProcesses id dispatch =
 fromHardware : CId -> Hardware -> Subscribers
 fromHardware id dispatch =
     case dispatch of
-        MotherboardAttached a ->
-            [ hardware id <| Hardware.HandleMotherboardAttached a ]
+        MotherboardUpdated a ->
+            [ hardware id <| Hardware.HandleMotherboardUpdated a ]
 
-        MotherboardDetached a ->
-            [ hardware id <| Hardware.HandleMotherboardDetached a ]
+        MotherboardUpdate a ->
+            [ hardware id <| Hardware.HandleMotherboardUpdate a ]

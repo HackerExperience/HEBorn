@@ -1,4 +1,4 @@
-module Events.Server.Hardware.MotherboardAttached exposing (..)
+module Events.Server.Hardware.MotherboardUpdated exposing (..)
 
 import Json.Decode exposing (decodeValue)
 import Events.Types exposing (Handler)

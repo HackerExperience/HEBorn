@@ -102,55 +102,77 @@ doSelect : Maybe Selection -> Inventory.Model -> Model -> Model
 doSelect selection inventory model =
     case getSelection model of
         Just (SelectingSlot id) ->
-            case selection of
-                Just (SelectingSlot id_) ->
-                    -- swap slots
-                    case getMotherboard model of
-                        Just motherboard ->
-                            -- swap two slots
-                            swapSlots id id_ inventory motherboard model
-
-                        Nothing ->
-                            -- can't perform slot actions without a mobo
-                            model
-
-                Just (SelectingEntry entry) ->
-                    -- link the slot to the inventory entry
-                    linkSlot id entry inventory model
-
-                Just SelectingUnlink ->
-                    -- unlink that slot
-                    unlinkSlot id inventory model
-
-                Nothing ->
-                    -- remove slot selection
-                    removeSelection model
+            -- selected a slot before selecting another thing
+            doSelectFromSlot id selection inventory model
 
         Just (SelectingEntry entry) ->
-            case selection of
-                Just (SelectingSlot id) ->
-                    -- link the inventory entry to the slot
-                    linkSlot id entry inventory model
-
-                Just (SelectingEntry _) ->
-                    -- change selection to another inventory entry
-                    setSelection selection model
-
-                Just SelectingUnlink ->
-                    -- why click on unlink without selecting a slot?
-                    model
-
-                Nothing ->
-                    -- remove entry selection
-                    removeSelection model
+            -- selected an entry before selecting another thing
+            doSelectFromEntry entry selection inventory model
 
         Just SelectingUnlink ->
-            -- why click on unlink without selecting anything?
+            -- impossible case, why selecting a trigger option?
             removeSelection model
 
         Nothing ->
-            -- select
+            -- wasn't selecting anything
             setSelection selection model
+
+
+doSelectFromSlot :
+    Motherboard.SlotId
+    -> Maybe Selection
+    -> Inventory.Model
+    -> Model
+    -> Model
+doSelectFromSlot id selection inventory model =
+    case selection of
+        Just (SelectingSlot id_) ->
+            -- try to swap a linked slot with an empty one
+            case getMotherboard model of
+                Just motherboard ->
+                    -- swap these two slots
+                    swapSlots id id_ inventory motherboard model
+
+                Nothing ->
+                    -- can't perform slot actions without having a motherboard
+                    model
+
+        Just (SelectingEntry entry) ->
+            -- link the slot to the inventory entry
+            linkSlot id entry inventory model
+
+        Just SelectingUnlink ->
+            -- unlink that slot
+            unlinkSlot id inventory model
+
+        Nothing ->
+            -- remove slot selection
+            removeSelection model
+
+
+doSelectFromEntry :
+    Inventory.Entry
+    -> Maybe Selection
+    -> Inventory.Model
+    -> Model
+    -> Model
+doSelectFromEntry entry selection inventory model =
+    case selection of
+        Just (SelectingSlot id) ->
+            -- link the inventory entry to the slot
+            linkSlot id entry inventory model
+
+        Just (SelectingEntry _) ->
+            -- change selection to another inventory entry
+            setSelection selection model
+
+        Just SelectingUnlink ->
+            -- impossible case, can't click unlink when selecting an entry
+            model
+
+        Nothing ->
+            -- remove entry selection
+            removeSelection model
 
 
 isAvailable : Inventory.Model -> Model -> Inventory.Entry -> Bool

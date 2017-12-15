@@ -3,8 +3,7 @@ module Game.Servers.Hardware.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
 import Utils.Update as Update
-import Events.Server.Hardware.MotherboardAttached as MotherboardAttached
-import Events.Server.Hardware.MotherboardDetached as MotherboardDetached
+import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
 import Game.Models as Game
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
@@ -22,21 +21,21 @@ type alias UpdateResponse =
 update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
 update game cid msg model =
     case msg of
-        HandleMotherboardAttached data ->
-            handleMotherboardAttached data model
+        HandleMotherboardUpdated data ->
+            handleMotherboardUpdated data model
 
-        HandleMotherboardDetached data ->
-            handleMotherboardDetached data model
+        HandleMotherboardUpdate data ->
+            handleMotherboardUpdate game cid data model
 
         Request response ->
             onRequest game cid (receive response) model
 
 
-handleMotherboardAttached :
-    MotherboardAttached.Data
+handleMotherboardUpdated :
+    MotherboardUpdated.Data
     -> Model
     -> UpdateResponse
-handleMotherboardAttached model_ model =
+handleMotherboardUpdated model_ model =
     let
         oldMotherboard =
             model
@@ -56,29 +55,42 @@ handleMotherboardAttached model_ model =
         ( model_, Cmd.none, dispatch )
 
 
-handleMotherboardDetached :
-    MotherboardDetached.Data
+
+--handleMotherboardDetached :
+--    MotherboardDetached.Data
+--    -> Model
+--    -> UpdateResponse
+--handleMotherboardDetached data model =
+--    case getMotherboard model of
+--        Just oldMotherboard ->
+--            let
+--                newMotherboard =
+--                    Motherboard.empty
+--                model_ =
+--                    setMotherboard (Just newMotherboard) model
+--                dispatch =
+--                    oldMotherboard
+--                        |> Motherboard.diff newMotherboard
+--                        |> dispatchDiff
+--            in
+--                ( model_, Cmd.none, dispatch )
+--        Nothing ->
+--            Update.fromModel model
+
+
+handleMotherboardUpdate :
+    Game.Model
+    -> CId
+    -> Motherboard
     -> Model
     -> UpdateResponse
-handleMotherboardDetached data model =
-    case getMotherboard model of
-        Just oldMotherboard ->
-            let
-                newMotherboard =
-                    Motherboard.empty
-
-                model_ =
-                    setMotherboard (Just newMotherboard) model
-
-                dispatch =
-                    oldMotherboard
-                        |> Motherboard.diff newMotherboard
-                        |> dispatchDiff
-            in
-                ( model_, Cmd.none, dispatch )
-
-        Nothing ->
-            Update.fromModel model
+handleMotherboardUpdate game cid motherboard model =
+    let
+        cmd =
+            UpdateMotherboard.request motherboard cid game
+                |> Debug.log "CMD"
+    in
+        ( model, cmd, Dispatch.none )
 
 
 onRequest : Game.Model -> CId -> Maybe Response -> Model -> UpdateResponse
