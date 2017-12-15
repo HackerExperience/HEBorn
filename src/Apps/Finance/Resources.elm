@@ -5,6 +5,8 @@ type Classes
     = FinanceEntry
     | Bitcoin
     | RealMoney
+    | RightSide
+    | LeftSide
 
 
 prefix : String

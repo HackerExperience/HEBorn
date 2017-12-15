@@ -11,13 +11,17 @@ css : Stylesheet
 css =
     (stylesheet << namespace prefix)
         [ class FinanceEntry
-            [ display block
+            [ displayFlex
             , padding2 (px 4) (px 6)
             , children
                 [ everything
                     [ display inlineBlock ]
-                , div
-                    [ float right ]
+                , class RightSide
+                    []
+                , class LeftSide
+                    [ alignSelf flexStart
+                    , flex (int 1)
+                    ]
                 ]
             ]
         ]

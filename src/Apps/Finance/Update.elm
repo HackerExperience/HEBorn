@@ -1,8 +1,9 @@
 module Apps.Finance.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.Update as Update
 import Game.Data as Game
-import Apps.Finance.Models exposing (Model)
+import Apps.Finance.Models exposing (Model, MainTab)
 import Apps.Finance.Messages as Finance exposing (Msg(..))
 import Apps.Finance.Menu.Messages as Menu
 import Apps.Finance.Menu.Update as Menu
@@ -27,6 +28,9 @@ update data msg model =
         MenuMsg msg ->
             onMenuMsg data msg model
 
+        GoTab tab ->
+            onGoTabs data tab model
+
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
 onMenuMsg data msg model =
@@ -41,3 +45,12 @@ onMenuMsg data msg model =
             { model | menu = menu_ }
     in
         ( model_, cmd_, coreMsg )
+
+
+onGoTabs : Game.Data -> MainTab -> Model -> UpdateResponse
+onGoTabs data tab model =
+    let
+        model_ =
+            { model | selected = tab }
+    in
+        Update.fromModel model_
