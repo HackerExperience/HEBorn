@@ -13,5 +13,5 @@ inventory : Specs -> Decoder Model
 inventory specs =
     decode Model
         |> required "components" (Decoders.Components.components specs)
-        |> required "connections" Decoders.Network.connections
+        |> required "network_connections" Decoders.Network.connections
         |> hardcoded specs

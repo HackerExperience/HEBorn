@@ -25,7 +25,7 @@ hardware =
 motherboard : Decoder Motherboard
 motherboard =
     decode Motherboard
-        |> required "motherboard_id" (map Just string)
+        |> optionalMaybe "motherboard_id" string
         |> required "network_connections" ncs
         |> required "slots" slots
 

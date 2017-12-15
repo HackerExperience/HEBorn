@@ -92,13 +92,13 @@ bootstrap game =
 inventory : Model -> Decoder (Inventory.Model -> b) -> Decoder b
 inventory game =
     let
-        inventory =
-            getInventory game
-
         specs =
-            Inventory.getSpecs inventory
+            Inventory.getSpecs <| getInventory game
+
+        inventory_ =
+            field "inventory" <| Decoders.Inventory.inventory specs
     in
-        optional "inventory" (Decoders.Inventory.inventory specs) inventory
+        required "account" inventory_
 
 
 account : Model -> Decoder (Account.Model -> b) -> Decoder b

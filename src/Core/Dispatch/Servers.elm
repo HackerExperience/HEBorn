@@ -6,6 +6,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Meta.Types.Network as Network
+import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Events.Server.Filesystem.Added as FileAdded
 import Events.Server.Filesystem.Downloaded as FileDownloaded
 import Events.Server.Processes.Started as ProcessStarted
@@ -13,8 +14,7 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Events.Server.Logs.Created as LogCreated
-import Events.Server.Hardware.MotherboardAttached as MotherboardAttached
-import Events.Server.Hardware.MotherboardDetached as MotherboardDetached
+import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
 import Game.Web.Models as Web
 import Game.Web.Types as Web
 
@@ -80,5 +80,5 @@ type Processes
 
 
 type Hardware
-    = MotherboardAttached MotherboardAttached.Data
-    | MotherboardDetached MotherboardDetached.Data
+    = MotherboardUpdated MotherboardUpdated.Data
+    | MotherboardUpdate Motherboard

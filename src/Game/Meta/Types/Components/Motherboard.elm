@@ -153,7 +153,7 @@ encode motherboard =
                 ]
 
         Nothing ->
-            Encode.object []
+            Encode.object [ ( "cmd", Encode.string "detach" ) ]
 
 
 encodeSlots : Slots -> Value

@@ -70,7 +70,7 @@ serverConfigSet cid =
 
 updateMotherboard : Servers.CId -> Topic
 updateMotherboard cid =
-    WebsocketTopic (ServerChannel cid) "motherboard.set"
+    WebsocketTopic (ServerChannel cid) "motherboard.update"
 
 
 

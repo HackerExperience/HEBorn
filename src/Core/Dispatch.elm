@@ -14,6 +14,7 @@ module Core.Dispatch
         , filesystem
         , logs
         , processes
+        , hardware
         , storyline
         , emails
         , missions
@@ -113,6 +114,11 @@ logs id =
 processes : CId -> Servers.Processes -> Dispatch
 processes id =
     Servers.Processes >> server id
+
+
+hardware : CId -> Servers.Hardware -> Dispatch
+hardware id =
+    Servers.Hardware >> server id
 
 
 storyline : Storyline.Dispatch -> Dispatch

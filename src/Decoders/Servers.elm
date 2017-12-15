@@ -99,7 +99,7 @@ hardware =
         default =
             Hardware.initialModel
     in
-        optional "hardware" Decoders.Hardware.hardware default
+        required "hardware" Decoders.Hardware.hardware
 
 
 endpointOwnership : Decoder EndpointData

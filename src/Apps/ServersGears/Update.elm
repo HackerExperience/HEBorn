@@ -1,6 +1,7 @@
 module Apps.ServersGears.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.Servers as ServersDispatch
 import Utils.Update as Update
 import Game.Data as Game
 import Game.Models as GameModels
@@ -20,19 +21,16 @@ type alias UpdateResponse =
 
 update : Game.Data -> Msg -> Model -> UpdateResponse
 update data msg model =
-    let
-        motherboard =
-            data
-                |> Game.getActiveServer
-                |> Servers.getHardware
-                |> Hardware.getMotherboard
-    in
-        case motherboard of
-            Just motherboard ->
-                updateGateway data motherboard msg model
+    case getMotherboard model of
+        Just motherboard ->
+            updateGateway data motherboard msg model
 
-            Nothing ->
-                updateEndpoint data msg model
+        Nothing ->
+            updateEndpoint data msg model
+
+
+
+-- gateway-only update
 
 
 updateGateway :
@@ -42,7 +40,29 @@ updateGateway :
     -> Model
     -> UpdateResponse
 updateGateway data motherboard msg model =
-    updateGeneric data msg model
+    case msg of
+        Save ->
+            onSave data motherboard model
+
+        msg ->
+            updateGeneric data msg model
+
+
+onSave : Game.Data -> Motherboard -> Model -> UpdateResponse
+onSave game motherboard model =
+    let
+        cid =
+            Game.getActiveCId game
+
+        dispatch =
+            Dispatch.hardware cid <|
+                ServersDispatch.MotherboardUpdate motherboard
+    in
+        ( model, Cmd.none, dispatch )
+
+
+
+-- endpoint-only update
 
 
 updateEndpoint :
@@ -52,6 +72,10 @@ updateEndpoint :
     -> UpdateResponse
 updateEndpoint data msg model =
     updateGeneric data msg model
+
+
+
+-- generic update
 
 
 updateGeneric : Game.Data -> Msg -> Model -> UpdateResponse
@@ -65,6 +89,9 @@ updateGeneric data msg model =
 
         Select selection ->
             onSelectMsg data selection model
+
+        _ ->
+            Update.fromModel model
 
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse

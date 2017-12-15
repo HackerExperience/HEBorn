@@ -1,13 +1,13 @@
 module Game.Servers.Hardware.Messages exposing (..)
 
 import Requests.Types exposing (ResponseType)
-import Events.Server.Hardware.MotherboardAttached as MotherboardAttached
-import Events.Server.Hardware.MotherboardDetached as MotherboardDetached
+import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
+import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 
 
 type Msg
-    = HandleMotherboardAttached MotherboardAttached.Data
-    | HandleMotherboardDetached MotherboardDetached.Data
+    = HandleMotherboardUpdated MotherboardUpdated.Data
+    | HandleMotherboardUpdate Motherboard
     | Request RequestMsg
 
 
