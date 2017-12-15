@@ -14,6 +14,9 @@ import Game.Notifications.Source as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Meta.Types.Context exposing (..)
 import Game.Notifications.Source as Notifications
+import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Messages as Finances
+import Game.Account.Finances.Update as Finances
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
@@ -34,6 +37,9 @@ update game msg model =
     case msg of
         BouncesMsg msg ->
             onBounce game msg model
+
+        FinancesMsg msg ->
+            onFinances game msg model
 
         DatabaseMsg msg ->
             onDatabase game msg model
@@ -131,6 +137,18 @@ onDatabase game msg model =
         , set = (\database model -> { model | database = database })
         , toMsg = DatabaseMsg
         , update = (Database.update game)
+        }
+        msg
+        model
+
+
+onFinances : Game.Model -> Finances.Msg -> Model -> UpdateResponse
+onFinances game msg model =
+    Update.child
+        { get = .finances
+        , set = (\finances model -> { model | finances = finances })
+        , toMsg = FinancesMsg
+        , update = (Finances.update game)
         }
         msg
         model
