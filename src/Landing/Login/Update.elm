@@ -16,29 +16,61 @@ type alias UpdateResponse =
 
 update : Core.Model -> Msg -> Model -> UpdateResponse
 update core msg model =
-    -- TODO: update to standards
     case msg of
         SubmitLogin ->
-            let
-                cmd =
-                    Login.request model.username model.password core
-            in
-                ( model, cmd, Dispatch.none )
+            onSubmitLogin model
 
         SetUsername username ->
-            ( { model | username = username }, Cmd.none, Dispatch.none )
+            onSetUsername username model
 
         ValidateUsername ->
-            ( model, Cmd.none, Dispatch.none )
+            onValidateUsername model
 
         SetPassword password ->
-            ( { model | password = password }, Cmd.none, Dispatch.none )
+            onSetPassword password model
 
         ValidatePassword ->
-            ( model, Cmd.none, Dispatch.none )
+            onValidatePassword model
 
         Request data ->
             onRequest core (receive data) model
+
+
+onSubmitLogin : Model -> UpdateResponse
+onSubmitLogin model =
+    let
+        cmd =
+            Login.request model.username model.password core
+    in
+        ( model, cmd, Dispatch.none )
+
+
+onSetUsername : String -> Model -> UpdateResponse
+onSetUsername username model =
+    let
+        model_ =
+            { model | username = username }
+    in
+        Update.fromModel model_
+
+
+onSetPassword : String -> Model -> UpdateResponse
+onSetPassword password model =
+    let
+        model_ =
+            { model | password = password }
+    in
+        Update.fromModel model_
+
+
+onValidateUsername : Model -> UpdateResponse
+onValidateUsername model =
+    Update.fromModel model
+
+
+onValidatePassword : Model -> UpdateResponse
+onValidatePassword model =
+    Update.fromModel model
 
 
 onRequest : Core.Model -> Maybe Response -> Model -> UpdateResponse
