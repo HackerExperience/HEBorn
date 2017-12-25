@@ -56,8 +56,12 @@ type alias Product =
     Components.Id
 
 
+type alias ProductValue =
+    Int
+
+
 type PaymentType
-    = Purchase Shop Product Int -- Int for Product Value
+    = Purchase Shop Product ProductValue
 
 
 initialModel : Model

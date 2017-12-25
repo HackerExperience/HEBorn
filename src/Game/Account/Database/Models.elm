@@ -8,8 +8,8 @@ import Game.Shared exposing (ID)
 
 type alias Model =
     { servers : HackedServers
-    , bankAccounts : List String
-    , btcWallets : List String
+    , bankAccounts : HackedBankAccounts
+    , btcWallets : HackedBitcoinWallets
     }
 
 
@@ -19,12 +19,50 @@ type ServerType
     | Player
 
 
+type alias AtmId =
+    ID
+
+
 type alias InstalledVirus =
     ( ID, String, Float )
 
 
 type alias RunningVirus =
     ( ID, Time )
+
+
+type alias HackedBankAccount =
+    { name : String
+    , password : String
+    , balance : Int
+    }
+
+
+type alias HackedAccountNumber =
+    Int
+
+
+type alias HackedBankAccountID =
+    ( AtmId, HackedAccountNumber )
+
+
+type alias HackedBankAccounts =
+    Dict HackedBankAccountID HackedBankAccount
+
+
+type alias HackedBitcoinAddress =
+    String
+
+
+type alias HackedBitcoinWallet =
+    { address : String
+    , password : String
+    , balance : Float
+    }
+
+
+type alias HackedBitcoinWallets =
+    Dict HackedBitcoinAddress HackedBitcoinWallet
 
 
 type alias HackedServers =
@@ -44,7 +82,7 @@ type alias HackedServer =
 
 initialModel : Model
 initialModel =
-    Model Dict.empty [] []
+    Model Dict.empty Dict.empty Dict.empty
 
 
 getHackedServers : Model -> HackedServers
@@ -89,3 +127,39 @@ getHackedServer nip servers =
 insertServer : NIP -> HackedServer -> HackedServers -> HackedServers
 insertServer =
     Dict.insert
+
+
+insertBankAccount :
+    HackedBankAccountID
+    -> HackedBankAccount
+    -> HackedBankAccounts
+    -> HackedBankAccounts
+insertBankAccount id account hackedAccounts =
+    Dict.insert id account hackedAccounts
+
+
+removeBankAccount :
+    HackedBankAccountID
+    -> HackedBankAccounts
+    -> HackedBankAccounts
+removeBankAccount id hackedAccounts =
+    Dict.remove id hackedAccounts
+
+
+insertBitcoinWallet :
+    HackedBitcoinAddress
+    -> HackedBitcoinWallet
+    -> HackedBitcoinWallets
+    -> HackedBitcoinWallets
+insertBitcoinWallet address wallet hackedWallets =
+    Dict.insert address wallet hackedWallets
+
+
+getBankAccounts : Model -> HackedBankAccounts
+getBankAccounts =
+    .bankAccounts
+
+
+getBitcoinWallets : Model -> HackedBitcoinWallets
+getBitcoinWallets =
+    .btcWallets
