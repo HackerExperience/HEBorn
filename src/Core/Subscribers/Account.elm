@@ -22,6 +22,9 @@ dispatch dispatch =
         Finances a ->
             fromFinances a
 
+        Database a ->
+            fromDatabase a
+
         SetContext a ->
             [ account <| Account.HandleSetContext a ]
 
@@ -58,11 +61,18 @@ fromInventory dispatch =
 fromFinances : Finances -> Subscribers
 fromFinances dispatch =
     case dispatch of
-        BankAccountOpened ( a, b ) ->
-            [ accountFinances <| Finances.HandleBankAccountOpened a b ]
-
         BankAccountClosed a ->
             [ accountFinances <| Finances.HandleBankAccountClosed a ]
 
         BankAccountUpdated ( a, b ) ->
             [ accountFinances <| Finances.HandleBankAccountUpdated a b ]
+
+
+fromDatabase : Database -> Subscribers
+fromDatabase dispatch =
+    case dispatch of
+        DatabaseAccountRemoved a ->
+            [ database <| Database.HandleDatabaseAccountRemoved a ]
+
+        DatabaseAccountUpdated ( a, b ) ->
+            [ database <| Database.HandleDatabaseAccountUpdated a b ]

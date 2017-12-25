@@ -4,8 +4,14 @@ import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (Context)
 import Game.Inventory.Shared as Inventory
 import Game.Account.Finances.Models exposing (AccountId, BankAccount)
+import Game.Account.Database.Models
+    exposing
+        ( HackedBankAccountID
+        , HackedBankAccount
+        )
 import Events.Account.PasswordAcquired as PasswordAcquired
-import Events.Account.Finances.BankAccountOpened as BankAccountOpened
+import Events.Account.Database.DBAccountUpdated as DBAccountUpdated
+import Events.Account.Database.DBAccountRemoved as DBAccountRemoved
 import Events.Account.Finances.BankAccountClosed as BankAccountClosed
 import Events.Account.Finances.BankAccountUpdated as BankAccountUpdated
 
@@ -19,6 +25,7 @@ type Dispatch
     | NewGateway Servers.CId
     | PasswordAcquired PasswordAcquired.Data
     | Finances Finances
+    | Database Database
     | LogoutAndCrash ( String, String )
     | Logout
     | Inventory Inventory
@@ -30,6 +37,10 @@ type Inventory
 
 
 type Finances
-    = BankAccountOpened ( AccountId, BankAccount )
-    | BankAccountClosed AccountId
+    = BankAccountClosed AccountId
     | BankAccountUpdated ( AccountId, BankAccount )
+
+
+type Database
+    = DatabaseAccountRemoved HackedBankAccountID
+    | DatabaseAccountUpdated ( HackedBankAccountID, HackedBankAccount )

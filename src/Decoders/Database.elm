@@ -9,8 +9,11 @@ import Json.Decode as Decode
         , list
         , string
         , float
+        , int
+        , fail
+        , succeed
         )
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, required, custom)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Account.Database.Models exposing (..)
@@ -59,7 +62,7 @@ servers =
 hackedServer : Decoder HackedServer
 hackedServer =
     decode HackedServer
-        |> custom nip
+        --|> custom nip
         |> required "password" string
         |> optionalMaybe "label" string
         |> optionalMaybe "notes" string
@@ -74,3 +77,25 @@ nip =
     decode (,)
         |> required "netid" string
         |> required "ip" string
+
+
+bankAccountEntry : Decoder ( HackedBankAccountID, HackedBankAccount )
+bankAccountEntry =
+    decode (,)
+        |> custom hackedBankAccountId
+        |> custom hackedBankAccount
+
+
+hackedBankAccountId : Decoder HackedBankAccountID
+hackedBankAccountId =
+    decode (,)
+        |> required "atm_id" string
+        |> required "account_num" int
+
+
+hackedBankAccount : Decoder HackedBankAccount
+hackedBankAccount =
+    decode HackedBankAccount
+        |> required "name" string
+        |> required "password" string
+        |> required "balance" int

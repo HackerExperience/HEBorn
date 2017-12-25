@@ -8,7 +8,8 @@ import Events.Account.PasswordAcquired as PasswordAcquired
 import Events.Account.Story.StepProceeded as StoryStepProceeded
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
-import Events.Account.Finances.BankAccountOpened as BankAccountOpened
+import Events.Account.Database.DBAccountUpdated as DBAccountUpdated
+import Events.Account.Database.DBAccountRemoved as DBAccountRemoved
 import Events.Account.Finances.BankAccountClosed as BankAccountClosed
 import Events.Account.Finances.BankAccountUpdated as BankAccountUpdated
 
@@ -28,14 +29,17 @@ events name json =
         "story_email_reply_unlocked" ->
             StoryReplyUnlocked.handler onStoryReplyUnlocked json
 
-        "bank_account_opened" ->
-            BankAccountOpened.handler onBankAccountOpened json
-
         "bank_account_closed" ->
             BankAccountClosed.handler onBankAccountClosed json
 
         "bank_account_updated" ->
             BankAccountUpdated.handler onBankAccountUpdated json
+
+        "db_account_updated" ->
+            DBAccountUpdated.handler onDBAccountUpdated json
+
+        "db_account_removed" ->
+            DBAccountRemoved.handler onDBAccountRemoved json
 
         _ ->
             Err ""
@@ -65,11 +69,6 @@ onStoryReplyUnlocked =
     Storyline.UnlockedEmail >> Dispatch.emails
 
 
-onBankAccountOpened : BankAccountOpened.Data -> Dispatch
-onBankAccountOpened =
-    Account.BankAccountOpened >> Dispatch.finances
-
-
 onBankAccountClosed : BankAccountClosed.Data -> Dispatch
 onBankAccountClosed =
     Account.BankAccountClosed >> Dispatch.finances
@@ -78,3 +77,13 @@ onBankAccountClosed =
 onBankAccountUpdated : BankAccountUpdated.Data -> Dispatch
 onBankAccountUpdated =
     Account.BankAccountUpdated >> Dispatch.finances
+
+
+onDBAccountUpdated : DBAccountUpdated.Data -> Dispatch
+onDBAccountUpdated =
+    Account.DatabaseAccountUpdated >> Dispatch.database
+
+
+onDBAccountRemoved : DBAccountRemoved.Data -> Dispatch
+onDBAccountRemoved =
+    Account.DatabaseAccountRemoved >> Dispatch.database
