@@ -9,6 +9,5 @@ import Game.Account.Finances.Models
 
 
 type Msg
-    = HandleBankAccountOpened AccountId BankAccount
-    | HandleBankAccountClosed AccountId
+    = HandleBankAccountClosed AccountId
     | HandleBankAccountUpdated AccountId BankAccount
