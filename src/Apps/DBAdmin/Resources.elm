@@ -11,6 +11,11 @@ type Classes
     | BtnCancel
     | BottomButton
     | BoxifyMe
+    | FinanceEntry
+    | Bitcoin
+    | RealMoney
+    | RightSide
+    | LeftSide
 
 
 prefix : String

@@ -8,6 +8,9 @@ import Events.Account.PasswordAcquired as PasswordAcquired
 import Events.Account.Story.StepProceeded as StoryStepProceeded
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
+import Events.Account.Database.DBAccountAcquired as DBAccountAcquired
+import Events.Account.Database.DBAccountUpdated as DBAccountUpdated
+import Events.Account.Database.DBAccountRemoved as DBAccountRemoved
 import Events.Account.Finances.BankAccountOpened as BankAccountOpened
 import Events.Account.Finances.BankAccountClosed as BankAccountClosed
 import Events.Account.Finances.BankAccountUpdated as BankAccountUpdated
@@ -36,6 +39,15 @@ events name json =
 
         "bank_account_updated" ->
             BankAccountUpdated.handler onBankAccountUpdated json
+
+        "db_account_acquired" ->
+            DBAccountAcquired.handler onDBAccountAcquired json
+
+        "db_account_updated" ->
+            DBAccountUpdated.handler onDBAccountUpdated json
+
+        "db_account_removed" ->
+            DBAccountRemoved.handler onDBAccountRemoved json
 
         _ ->
             Err ""
@@ -78,3 +90,18 @@ onBankAccountClosed =
 onBankAccountUpdated : BankAccountUpdated.Data -> Dispatch
 onBankAccountUpdated =
     Account.BankAccountUpdated >> Dispatch.finances
+
+
+onDBAccountAcquired : DBAccountAcquired.Data -> Dispatch
+onDBAccountAcquired =
+    Account.DatabaseAccountAcquired >> Dispatch.database
+
+
+onDBAccountUpdated : DBAccountUpdated.Data -> Dispatch
+onDBAccountUpdated =
+    Account.DatabaseAccountUpdated >> Dispatch.database
+
+
+onDBAccountRemoved : DBAccountRemoved.Data -> Dispatch
+onDBAccountRemoved =
+    Account.DatabaseAccountRemoved >> Dispatch.database
