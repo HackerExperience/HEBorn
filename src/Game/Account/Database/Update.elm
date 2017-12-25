@@ -19,6 +19,12 @@ update game msg model =
         HandlePasswordAcquired data ->
             handlePasswordAcquired data model
 
+        HandleDatabaseAccountRemoved id ->
+            onHandleDatabaseAccountRemoved id model
+
+        HandleDatabaseAccountUpdated id account ->
+            onHandleDatabaseAccountUpdated id account model
+
 
 {-| Saves password for that server, inserts a new server entry
 if none is found.
@@ -35,5 +41,36 @@ handlePasswordAcquired data model =
                 |> setPassword data.password
                 |> flip (insertServer data.nip) servers
                 |> flip setHackedServers model
+    in
+        Update.fromModel model_
+
+
+onHandleDatabaseAccountRemoved :
+    HackedBankAccountID
+    -> Model
+    -> UpdateResponse
+onHandleDatabaseAccountRemoved id model =
+    let
+        bankAccounts =
+            removeBankAccount id model.bankAccounts
+
+        model_ =
+            { model | bankAccounts = bankAccounts }
+    in
+        Update.fromModel model_
+
+
+onHandleDatabaseAccountUpdated :
+    HackedBankAccountID
+    -> HackedBankAccount
+    -> Model
+    -> UpdateResponse
+onHandleDatabaseAccountUpdated id account model =
+    let
+        bankAccounts =
+            insertBankAccount id account model.bankAccounts
+
+        model_ =
+            { model | bankAccounts = bankAccounts }
     in
         Update.fromModel model_

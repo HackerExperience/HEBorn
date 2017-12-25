@@ -14,21 +14,11 @@ type alias UpdateResponse =
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of
-        HandleBankAccountOpened accountId account ->
-            handleBankAccountOpened accountId account model
-
         HandleBankAccountClosed accountId ->
             handleBankAccountClosed accountId model
 
         HandleBankAccountUpdated accountId account ->
             handleBankAccountUpdated accountId account model
-
-
-handleBankAccountOpened : AccountId -> BankAccount -> Model -> UpdateResponse
-handleBankAccountOpened accountId bankAccount model =
-    model
-        |> insertBankAccount accountId bankAccount
-        |> Update.fromModel
 
 
 handleBankAccountClosed : AccountId -> Model -> UpdateResponse
