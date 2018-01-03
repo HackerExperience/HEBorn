@@ -21,6 +21,7 @@ type Easing
 
 type Condition
     = EQ String String
+    | BOOL String
     | NOT Condition
 
 
@@ -56,6 +57,9 @@ conditionToString cond =
     case cond of
         EQ a b ->
             "[" ++ a ++ "=\"" ++ b ++ "\"" ++ "]"
+
+        BOOL key ->
+            "[" ++ key ++ "=\"Y\"]"
 
         NOT cond ->
             "not(" ++ conditionToString cond ++ ")"

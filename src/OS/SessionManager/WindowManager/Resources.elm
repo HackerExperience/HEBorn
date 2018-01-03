@@ -27,3 +27,13 @@ workspaceNode =
 prefix : String
 prefix =
     "wm"
+
+
+decoratedAttrTag : String
+decoratedAttrTag =
+    "decorated"
+
+
+appIconAttrTag : String
+appIconAttrTag =
+    "icon"

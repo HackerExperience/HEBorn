@@ -3,7 +3,7 @@ module OS.SessionManager.Dock.View exposing (view)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (title)
+import Html.Attributes exposing (title, attribute)
 import Utils.Html.Attributes exposing (..)
 import Html.CssHelpers
 import OS.Resources as OsRes
@@ -83,7 +83,7 @@ icons apps wm =
                     div
                         [ class [ Res.Item ]
                         , appAttr app
-                        , hasInstance isNotEmpty
+                        , boolAttr Res.appHasInstanceAttrTag isNotEmpty
                         ]
                         content
             in
@@ -102,7 +102,7 @@ icon app group wm =
     div
         [ class [ Res.ItemIco ]
         , onClick (AppButton app)
-        , iconAttr (Apps.icon app)
+        , attribute Res.appIconAttrTag (Apps.icon app)
         , title (Apps.name app)
         ]
         []

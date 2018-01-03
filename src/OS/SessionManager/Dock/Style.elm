@@ -7,13 +7,15 @@ import Css.Utils as Css exposing (Easing(..), pseudoContent, withAttribute, tran
 import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
 import Css.Gradients as Gradients
 import Css.Icons as Icon
-import OS.SessionManager.Dock.Resources exposing (Classes(..), prefix)
+import Utils.Html.Attributes exposing (appAttrTag)
+import OS.Resources as OS
+import OS.SessionManager.Dock.Resources exposing (..)
 
 
 addIco : String -> Style -> Style
 addIco cond style =
     withAttribute
-        (Css.EQ "icon" cond)
+        (Css.EQ appIconAttrTag cond)
         [ before
             [ style ]
         ]
@@ -22,7 +24,7 @@ addIco cond style =
 addGrad : String -> (AngleOrDirection {} -> Style) -> Style
 addGrad cond style =
     withAttribute
-        (Css.EQ "icon" cond)
+        (Css.EQ appIconAttrTag cond)
         [ style toBottom ]
 
 
@@ -76,7 +78,7 @@ css =
                 , marginLeft (px 21)
                 , transition 0.25 "margin" EaseOut
                 ]
-            , withAttribute (Css.EQ "hasinst" "Y")
+            , withAttribute (Css.BOOL appHasInstanceAttrTag)
                 [ after
                     [ padding (px 2)
                     , backgroundColor (hex "FFF")
@@ -194,30 +196,24 @@ itemIco =
 conditionalApps : Css.Snippet
 conditionalApps =
     id "Dashboard"
-        [ withAttribute (Css.NOT <| Css.EQ "game-version" "dev")
+        [ withAttribute (Css.NOT <| Css.EQ OS.gameVersionAttrTag OS.devVersion)
             [ descendants
                 [ class Item
-                    [ withAttribute (Css.EQ "app" "The bug")
+                    [ withAttribute (Css.EQ appAttrTag "The bug")
+                        [ display none
+                        , opacity (int 0)
+                        ]
+                    , withAttribute (Css.EQ appAttrTag "Logflix")
                         [ display none
                         , opacity (int 0)
                         ]
                     ]
                 ]
             ]
-        , withAttribute (Css.NOT <| Css.EQ "game-version" "dev")
+        , withAttribute (Css.NOT <| Css.EQ OS.gameModeAttrTag OS.campaignMode)
             [ descendants
                 [ class Item
-                    [ withAttribute (Css.EQ "app" "Logflix")
-                        [ display none
-                        , opacity (int 0)
-                        ]
-                    ]
-                ]
-            ]
-        , withAttribute (Css.NOT <| Css.EQ "game-mode" "campaign")
-            [ descendants
-                [ class Item
-                    [ withAttribute (Css.EQ "app" "Thunderpigeon")
+                    [ withAttribute (Css.EQ appAttrTag "Thunderpigeon")
                         [ display none
                         , opacity (int 0)
                         ]

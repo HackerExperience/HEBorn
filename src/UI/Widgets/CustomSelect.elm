@@ -2,7 +2,7 @@ module UI.Widgets.CustomSelect exposing (customSelect)
 
 import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
-import Utils.Html.Attributes exposing (selectedAttr, openAttr)
+import Utils.Html.Attributes exposing (boolAttr)
 import Utils.Html.Events exposing (onClickMe)
 
 
@@ -30,7 +30,7 @@ customSelect attrs ( mouseEnter, mouseLeave ) msg open render opened active list
                     [ onMouseEnter mouseEnter
                     , onMouseLeave mouseLeave
                     , onClickMe open
-                    , openAttr opened
+                    , boolAttr openAttrTag opened
                     ]
     in
         case render True active of
@@ -52,7 +52,7 @@ customOption onClick render active item =
         Just html ->
             Just <|
                 node optionNode
-                    [ selectedAttr active
+                    [ boolAttr selectedAttrTag active
                     , onClickMe (onClick item)
                     ]
                     [ html ]
@@ -74,3 +74,13 @@ optionNode =
 selectorNode : String
 selectorNode =
     "customSelect"
+
+
+selectedAttrTag : String
+selectedAttrTag =
+    "selected"
+
+
+openAttrTag : String
+openAttrTag =
+    "open"

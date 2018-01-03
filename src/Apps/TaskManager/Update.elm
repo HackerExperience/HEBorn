@@ -8,11 +8,6 @@ import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Messages as Processes
 import Apps.TaskManager.Models exposing (Model)
-import Apps.TaskManager.Models
-    exposing
-        ( Model
-        , updateTasks
-        )
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
 import Apps.TaskManager.Menu.Messages as Menu
 import Apps.TaskManager.Menu.Update as Menu

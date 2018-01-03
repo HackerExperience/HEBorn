@@ -7,20 +7,32 @@ import Apps.Apps as Apps
 import Apps.Models as Apps
 
 
+-- ONLY PUT HERE ATTRIBUTES THAT REQUIRES MAPPING OR PIPES
+-- AND THAT WILL BE USED IN MORE THAN ONE PLACE
+-- Tags:
+
+
+idAttrTag : String
+idAttrTag =
+    "id"
+
+
+appAttrTag : String
+appAttrTag =
+    "app"
+
+
+activeContextAttrTag : String
+activeContextAttrTag =
+    "context"
+
+
+
+-- Per Type Attrs:
+
+
 boolAttr : String -> Bool -> Attribute msg
 boolAttr attr boolean =
-    let
-        value =
-            if boolean then
-                "1"
-            else
-                "0"
-    in
-        attribute attr value
-
-
-boolAttrYN : String -> Bool -> Attribute msg
-boolAttrYN attr boolean =
     let
         value =
             if boolean then
@@ -31,51 +43,29 @@ boolAttrYN attr boolean =
         attribute attr value
 
 
-selectedAttr : Bool -> Attribute msg
-selectedAttr =
-    boolAttr "selected"
 
-
-hasInstance : Bool -> Attribute msg
-hasInstance =
-    boolAttrYN "hasinst"
-
-
-iconAttr : String -> Attribute msg
-iconAttr =
-    attribute "icon"
+-- Content-specific Attrs:
 
 
 idAttr : String -> Attribute msg
 idAttr =
-    attribute "id"
-
-
-decoratedAttr : Bool -> Attribute msg
-decoratedAttr =
-    boolAttrYN "decorated"
+    attribute idAttrTag
 
 
 appAttr : Apps.App -> Attribute msg
 appAttr =
     Apps.name
-        >> attribute "app"
-
-
-gameVersionAttr : String -> Attribute msg
-gameVersionAttr =
-    attribute "game-version"
-
-
-gameModeAttr : String -> Attribute msg
-gameModeAttr =
-    attribute "game-mode"
+        >> attribute appAttrTag
 
 
 activeContextAttr : Context -> Attribute msg
 activeContextAttr =
     activeContextValue
-        >> attribute "context"
+        >> attribute activeContextAttrTag
+
+
+
+-- Utils:
 
 
 activeContextValue : Context -> String
@@ -86,12 +76,3 @@ activeContextValue c =
 
         Endpoint ->
             "end"
-
-
-openAttr : Bool -> Attribute msg
-openAttr open =
-    attribute "open" <|
-        if open then
-            "open"
-        else
-            "0"

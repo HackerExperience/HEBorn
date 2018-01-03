@@ -1,9 +1,11 @@
 module OS.Header.NetworkView exposing (view)
 
 import Html exposing (..)
+import Html.Attributes exposing (attribute)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Utils.Html exposing (spacer)
+import Utils.Html.Attributes exposing (boolAttr)
 import Utils.List as List
 import Game.Data exposing (Data)
 import Game.Models as Game
@@ -51,10 +53,16 @@ view data isOpen =
 
             _ ->
                 div [ class [ Network ] ]
-                    [ div [ class [ ActiveNetwork ] ]
+                    [ div
+                        [ class [ ActiveNetwork ]
+                        , onClick <| ToggleMenus NetworkOpen
+                        ]
                         [ div [] [ text (Network.getId activeNIP) ]
                         , div [] [ text "⌄" ]
                         ]
-                    , ul [ class [ AvailableNetworks ] ]
+                    , ul
+                        [ class [ AvailableNetworks ]
+                        , boolAttr expandedMenuAttrTag isOpen
+                        ]
                         availableNetworks
                     ]

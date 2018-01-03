@@ -4,7 +4,7 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (withAttribute, nest)
 import Utils.List as List
-import Utils.Html.Attributes exposing (activeContextValue)
+import Utils.Html.Attributes exposing (activeContextValue, appAttrTag)
 import Game.Storyline.Missions.Models exposing (..)
 import Game.Storyline.Missions.Actions exposing (Action(..))
 import OS.Resources as OS
@@ -29,7 +29,7 @@ highlights mission =
         GoApp app context ->
             namespace Dock.prefix
                 [ class Dock.ItemIco
-                    [ withAttribute (Css.EQ "icon" (Apps.icon app))
+                    [ withAttribute (Css.EQ Dock.appIconAttrTag (Apps.icon app))
                         [ borderRadius (px 0) |> important
                         , backgroundImage none |> important
                         , backgroundColor (hex "F00")
@@ -38,14 +38,14 @@ highlights mission =
                 ]
                 ++ namespace OS.prefix
                     [ class OS.Context
-                        [ withAttribute (Css.EQ "active" "\"0\"")
+                        [ withAttribute (Css.NOT (Css.BOOL OS.headerContextActiveAttrTag))
                             [ backgroundColor (hex "F00") ]
                         ]
                     ]
                 ++ namespace WM.prefix
                     [ class WM.Window
                         [ nest
-                            [ withAttribute (Css.EQ "app" (Apps.name app))
+                            [ withAttribute (Css.EQ appAttrTag (Apps.name app))
                             , context
                                 |> activeContextValue
                                 |> Css.EQ "context"

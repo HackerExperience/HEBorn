@@ -21,7 +21,7 @@ view data model =
         [ logo
         , ConnBar.view data model
         , Taskbar.view data model
-        , NetworkTongue.view data False
+        , NetworkTongue.view data (model.openMenu == NetworkOpen)
         ]
 
 

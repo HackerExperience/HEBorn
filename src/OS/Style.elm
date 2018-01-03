@@ -190,6 +190,12 @@ networkTongue =
         , children
             [ class AvailableNetworks
                 [ margin (px 0)
+                , overflowY scroll
+                , transition 0.5 "max-height" EaseOut
+                , height auto
+                , maxHeight (vh 50)
+                , withAttribute (NOT (BOOL expandedMenuAttrTag))
+                    [ maxHeight (px 0) ]
                 ]
             , class ActiveNetwork
                 [ flexContainerHorz

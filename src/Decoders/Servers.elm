@@ -28,6 +28,7 @@ import Json.Decode.Pipeline
         , custom
         )
 import Utils.Json.Decode exposing (optionalMaybe)
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs

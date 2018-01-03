@@ -72,7 +72,7 @@ toogable =
                 , minHeight (px 16)
                 , before [ Icon.divExpand ]
                 , cursor pointer
-                , withAttribute (Css.EQ "expanded" "1")
+                , withAttribute (Css.BOOL "expanded")
                     [ before [ Icon.divContract ] ]
                 ]
             ]
@@ -100,7 +100,7 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        , withAttribute (Css.EQ "localhost" "1")
+        , withAttribute (Css.BOOL "localhost")
             [ color Colors.localhost
             , fontWeight bold
             , children
@@ -123,7 +123,7 @@ linkAddr =
             , typeSelector "addr"
                 [ textDecoration underline ]
             ]
-        , withAttribute (Css.EQ "root" "1")
+        , withAttribute (Css.BOOL "root")
             [ color Colors.root
             , fontWeight bold
             , children
@@ -197,7 +197,7 @@ customSelect : Snippet
 customSelect =
     typeSelector "customSelect"
         [ children [ typeSelector "selector" [ display none ] ]
-        , withAttribute (Css.EQ "open" "open")
+        , withAttribute (Css.BOOL "open")
             [ children [ typeSelector "selector" [ display block ] ] ]
         ]
 
@@ -225,7 +225,7 @@ horizontalTabs =
                 , borderTop3 (px 1) solid Colors.separator
                 , borderTopLeftRadius (px 12)
                 , borderTopRightRadius (px 12)
-                , withAttribute (Css.EQ "selected" "1")
+                , withAttribute (Css.BOOL "selected")
                     [ backgroundColor Colors.bgSelected
                     ]
                 ]

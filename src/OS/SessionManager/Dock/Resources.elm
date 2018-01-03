@@ -14,3 +14,13 @@ type Classes
 prefix : String
 prefix =
     "dock"
+
+
+appIconAttrTag : String
+appIconAttrTag =
+    "icon"
+
+
+appHasInstanceAttrTag : String
+appHasInstanceAttrTag =
+    "hasinst"

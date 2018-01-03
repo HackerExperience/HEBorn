@@ -108,7 +108,7 @@ contextToggler active handler activeEndpointCId =
                     span
                         [ onClick handler
                         , class classes
-                        , boolAttr "active" active
+                        , boolAttr headerContextActiveAttrTag active
                         ]
                         []
 

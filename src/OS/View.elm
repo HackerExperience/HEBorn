@@ -1,9 +1,10 @@
 module OS.View exposing (view)
 
 import Html exposing (Html, div, text)
-import Utils.Html.Attributes exposing (gameVersionAttr, gameModeAttr, activeContextAttr)
+import Html.Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
+import Utils.Html.Attributes exposing (activeContextAttr)
 import Game.Data as Game
 import Game.Models as Game
 import OS.Models exposing (Model)
@@ -34,16 +35,16 @@ view data model =
         gameMode =
             case data.game.story.enabled of
                 True ->
-                    "campaign"
+                    Res.campaignMode
 
                 False ->
-                    "multiplayer"
+                    Res.multiplayerMode
     in
         div
             [ id Res.Dashboard
             , menuEmpty
-            , gameVersionAttr data.game.config.version
-            , gameModeAttr gameMode
+            , attribute Res.gameVersionAttrTag data.game.config.version
+            , attribute Res.gameModeAttrTag gameMode
             , activeContextAttr data.game.account.context
             ]
             (osContent ++ dynStyle)
