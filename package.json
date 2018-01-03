@@ -11,7 +11,6 @@
     "autoprefixer": "^7.2.1",
     "copy-webpack-plugin": "^4.2.3",
     "css-loader": "^0.28.7",
-    "elm": "^0.18.0",
     "elm-css": "^0.6.1",
     "elm-format": "^0.6.1-alpha",
     "elm-hot-loader": "^0.5.4",

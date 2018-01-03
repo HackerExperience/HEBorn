@@ -9,6 +9,7 @@ node('elm') {
 
     checkout scm
 
+    sh 'gmake prefer-native'
     sh 'gmake setup'
 
     stash name: 'source', useDefaultExcludes: false

@@ -23,6 +23,12 @@ setup:
 	elm-package install -y
 	chmod +x node_modules/.bin/* stats/*.sh
 
+prefer-native:
+	rm -rf node_modules/elm node_modules/elm-format
+	mkdir -p node_modules/elm node_modules/elm-format
+	echo "{ \"name\": \"elm\", \"version\": \"0.18.0\" }" > node_modules/elm/package.json
+	echo "{ \"name\": \"elm-format\", \"version\": \"0.6.1-alpha\" }" > node_modules/elm-format/package.json
+
 ################################################################################
 # Compile
 ################################################################################
