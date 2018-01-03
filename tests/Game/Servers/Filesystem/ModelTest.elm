@@ -1,4 +1,4 @@
-module Game.Servers.Filesystem.ModelTest exposing (all)
+module Game.Servers.Filesystem.ModelTest exposing (all, operationsTests)
 
 import Expect
 import Gen.Filesystem as Gen

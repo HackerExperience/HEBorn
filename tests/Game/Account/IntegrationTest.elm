@@ -1,4 +1,4 @@
-module Game.Account.IntegrationTest exposing (all)
+module Game.Account.IntegrationTest exposing (all, passwordAcquired, replyUnlocked)
 
 import Dict exposing (Dict)
 import Expect

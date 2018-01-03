@@ -1,4 +1,4 @@
-module Game.Servers.Logs.ModelTest exposing (all)
+module Game.Servers.Logs.ModelTest exposing (all, logOperationsTests)
 
 import Expect
 import Gen.Logs as Gen
