@@ -10,8 +10,13 @@ import Game.Data as Game
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers
+import Game.Storyline.Models as Storyline
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
+import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Servers.Hardware.Models as Hardware
+import Game.Notifications.Models as NotificingOpen
 
 
 type alias UpdateResponse =
@@ -34,7 +39,7 @@ update data msg model =
             onMouseLeavesDropdown model
 
         SelectGateway cid ->
-            onSelectGateway cid model
+            onSelectGateway data cid model
 
         SelectBounce id ->
             onSelectBounce data id model
@@ -98,13 +103,19 @@ onMouseLeavesDropdown model =
         { model | mouseSomewhereInside = False }
 
 
-onSelectGateway : Maybe Servers.CId -> Model -> UpdateResponse
-onSelectGateway cid model =
+onSelectGateway : Game.Data -> Maybe Servers.CId -> Model -> UpdateResponse
+onSelectGateway data cid model =
     let
         dispatch =
             case cid of
                 Just cid ->
-                    Dispatch.account <| Account.SetGateway cid
+                    Dispatch.batch
+                        [ -- Change selected server
+                          Dispatch.account <| Account.SetGateway cid
+
+                        -- Switch game mode depending on Server.type
+                        , switchGameMode data cid
+                        ]
 
                 Nothing ->
                     Dispatch.none
@@ -201,3 +212,38 @@ onSelectNIP data nip model =
             dispatcher <| Servers.SetActiveNIP nip
     in
         ( model, Cmd.none, dispatch )
+
+
+
+-- internals
+
+
+switchGameMode : Game.Data -> Servers.CId -> Dispatch
+switchGameMode data cid =
+    let
+        isStoryModeActive =
+            Storyline.isActive data.game.story
+    in
+        case (Servers.get cid data.game.servers) of
+            Just server ->
+                case server.type_ of
+                    Servers.DesktopCampaign ->
+                        if isStoryModeActive then
+                            Dispatch.none
+                        else
+                            Dispatch.storyline <| Storyline.Toggle
+
+                    Servers.Desktop ->
+                        if isStoryModeActive then
+                            Dispatch.storyline <| Storyline.Toggle
+                        else
+                            Dispatch.none
+
+                    Servers.Mobile ->
+                        if isStoryModeActive then
+                            Dispatch.storyline <| Storyline.Toggle
+                        else
+                            Dispatch.none
+
+            Nothing ->
+                Dispatch.none

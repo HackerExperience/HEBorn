@@ -12,6 +12,7 @@ import Events.Account.Database.BankAccountUpdated as DBBankAccountUpdated
 import Events.Account.Database.BankAccountRemoved as DBBankAccountRemoved
 import Events.Account.Finances.BankAccountClosed as BankAccountClosed
 import Events.Account.Finances.BankAccountUpdated as BankAccountUpdated
+import Events.Account.Story.Completed as StoryCompleted
 
 
 events : Router Dispatch
@@ -40,6 +41,9 @@ events name json =
 
         "db_account_removed" ->
             DBBankAccountRemoved.handler onDBBankAccountRemoved json
+
+        "tutorial_finished" ->
+            StoryCompleted.handler onStoryCompleted json
 
         _ ->
             Err ""
@@ -87,3 +91,8 @@ onDBBankAccountUpdated =
 onDBBankAccountRemoved : DBBankAccountRemoved.Data -> Dispatch
 onDBBankAccountRemoved =
     Account.DatabaseAccountRemoved >> Dispatch.database
+
+
+onStoryCompleted : StoryCompleted.Data -> Dispatch
+onStoryCompleted =
+    Storyline.Completed >> Dispatch.storyline

@@ -40,6 +40,7 @@ type alias Model =
     { id : ID
     , username : String
     , auth : AuthData
+    , inTutorial : Bool
     , email : Maybe Email
     , database : Database.Model
     , dock : Dock.Model
@@ -64,6 +65,7 @@ initialModel id username token =
     { id = id
     , username = username
     , auth = initialAuth token
+    , inTutorial = True
     , email = Nothing
     , database = Database.initialModel
     , dock = Dock.initialModel

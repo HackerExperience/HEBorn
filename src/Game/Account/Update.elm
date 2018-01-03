@@ -71,6 +71,9 @@ update game msg model =
         HandleLogoutAndCrash error ->
             handleLogoutAndCrash game error model
 
+        HandleTutorialCompleted bool ->
+            handleTutorialCompleted game bool model
+
         HandleConnected ->
             handleConnected model
 
@@ -179,6 +182,15 @@ handleLogout game model =
             Logout.request token model.id game
     in
         ( model_, cmd, Dispatch.none )
+
+
+handleTutorialCompleted : Game.Model -> Bool -> Model -> UpdateResponse
+handleTutorialCompleted game bool model =
+    let
+        model_ =
+            { model | inTutorial = bool }
+    in
+        Update.fromModel model_
 
 
 handleLogoutAndCrash : Game.Model -> Error -> Model -> UpdateResponse
