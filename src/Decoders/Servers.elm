@@ -90,7 +90,7 @@ serverType =
                     succeed Desktop
 
                 "desktop_story" ->
-                    succeed Desktop
+                    succeed DesktopCampaign
 
                 "mobile" ->
                     succeed Mobile

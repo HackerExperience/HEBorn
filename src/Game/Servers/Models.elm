@@ -68,6 +68,7 @@ type alias Storage =
 
 type ServerType
     = Desktop
+    | DesktopCampaign
     | Mobile
 
 
@@ -417,6 +418,19 @@ isGateway { ownership } =
             True
 
         EndpointOwnership _ ->
+            False
+
+
+isFreeplay : Server -> Bool
+isFreeplay server =
+    case server.type_ of
+        Desktop ->
+            True
+
+        Mobile ->
+            True
+
+        DesktopCampaign ->
             False
 
 

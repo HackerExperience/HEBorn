@@ -3,8 +3,12 @@ module Core.Subscribers.Storyline exposing (dispatch)
 import Core.Dispatch.Storyline exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Events.Account.Story.NewEmail as StoryNewEmail
+import Events.Account.Story.Completed as StoryCompleted
+import Game.Messages as Game
 import Game.Notifications.Models as Notifications
 import Game.Notifications.Messages as Notifications
+import Game.Account.Models as Account
+import Game.Account.Messages as Account
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Emails.Messages as Emails
 import Game.Storyline.Missions.Messages as Missions
@@ -21,6 +25,9 @@ dispatch dispatch =
 
         Missions dispatch ->
             fromMissions dispatch
+
+        Completed dispatch ->
+            fromCompleted dispatch
 
 
 
@@ -56,3 +63,11 @@ fromMissions dispatch =
 
         _ ->
             []
+
+
+fromCompleted : StoryCompleted.Data -> Subscribers
+fromCompleted dispatch =
+    [ account <| Account.HandleTutorialCompleted dispatch.completed
+
+    -- , make a popup window to ask for player switch to FreePlay Mode
+    ]

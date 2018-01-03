@@ -12,6 +12,7 @@ account model =
         |> hardcoded model.id
         |> hardcoded model.username
         |> hardcoded model.auth
+        |> hardcoded model.inTutorial
         |> hardcoded model.email
         |> hardcoded model.database
         |> hardcoded model.dock
