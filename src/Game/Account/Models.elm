@@ -39,6 +39,7 @@ type alias Model =
     { id : ID
     , username : String
     , auth : AuthData
+    , inTutorial : Bool
     , email : Maybe Email
     , database : Database.Model
     , dock : Dock.Model
@@ -49,6 +50,7 @@ type alias Model =
     , notifications : Notifications.Model
     , logout : Logout
     , mainframe : Maybe Servers.CId
+    , campaignGateway : Maybe Servers.CId
     }
 
 
@@ -62,6 +64,7 @@ initialModel id username token =
     { id = id
     , username = username
     , auth = initialAuth token
+    , inTutorial = True
     , email = Nothing
     , database = Database.initialModel
     , dock = Dock.initialModel
@@ -72,6 +75,7 @@ initialModel id username token =
     , notifications = Notifications.initialModel
     , logout = StillLogged
     , mainframe = Nothing
+    , campaignGateway = Nothing
     }
 
 

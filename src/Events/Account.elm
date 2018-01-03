@@ -8,6 +8,7 @@ import Events.Account.PasswordAcquired as PasswordAcquired
 import Events.Account.Story.StepProceeded as StoryStepProceeded
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
+import Events.Account.Story.Completed as StoryCompleted
 
 
 events : Router Dispatch
@@ -24,6 +25,9 @@ events name json =
 
         "story_email_reply_unlocked" ->
             StoryReplyUnlocked.handler onStoryReplyUnlocked json
+
+        "tutorial_finished" ->
+            StoryCompleted.handler onStoryCompleted json
 
         _ ->
             Err ""
@@ -51,3 +55,8 @@ onStoryNewEmail =
 onStoryReplyUnlocked : StoryReplyUnlocked.Data -> Dispatch
 onStoryReplyUnlocked =
     Storyline.UnlockedEmail >> Dispatch.emails
+
+
+onStoryCompleted : StoryCompleted.Data -> Dispatch
+onStoryCompleted =
+    Storyline.Completed >> Dispatch.storyline

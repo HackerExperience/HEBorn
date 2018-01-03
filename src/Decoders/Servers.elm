@@ -48,6 +48,7 @@ server gatewayCache =
     decode Server
         |> optional "name" string ""
         |> optional "server_type" serverType Desktop
+        |> required "mode" serverMode
         |> required "nips" (list Decoders.Network.nipTuple)
         |> optionalMaybe "coordinates" float
         |> required "main_storage" string
@@ -200,3 +201,20 @@ playerCId =
 remoteCId : Decoder CId
 remoteCId =
     map EndpointCId <| Decoders.Network.nip
+
+
+serverMode : Decoder ServerMode
+serverMode =
+    let
+        decodeType str =
+            case str of
+                "campaign" ->
+                    succeed Campaign
+
+                "freemode" ->
+                    succeed Freemode
+
+                str ->
+                    fail ("Unknown server mode `" ++ str ++ "'")
+    in
+        andThen decodeType string

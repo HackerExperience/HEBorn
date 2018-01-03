@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Storyline.Models as Story
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
@@ -24,7 +25,7 @@ view openMenu game =
 
 visibleAccountGear : Game.Model -> Html Msg
 visibleAccountGear { account, story } =
-    [ toggleCampaignBtn story
+    [ toggleCampaignBtn account story
     , logoutBtn
     ]
         |> List.map (List.singleton >> li [])
@@ -48,17 +49,24 @@ invisibleAccountGear =
         []
 
 
-toggleCampaignBtn : Story.Model -> Html Msg
-toggleCampaignBtn { enabled } =
-    button
-        [ onClick ToggleCampaign ]
-    <|
-        List.singleton <|
-            text <|
-                if enabled then
-                    "Go Multiplayer"
-                else
-                    "Go Campaign"
+toggleCampaignBtn : Account.Model -> Story.Model -> Html Msg
+toggleCampaignBtn account { enabled } =
+    let
+        canSwitch =
+            not account.inTutorial
+    in
+        if canSwitch then
+            button
+                [ onClick ToggleCampaign ]
+            <|
+                List.singleton <|
+                    text <|
+                        if enabled then
+                            "Go Multiplayer"
+                        else
+                            "Go Campaign"
+        else
+            div [] []
 
 
 logoutBtn : Html Msg

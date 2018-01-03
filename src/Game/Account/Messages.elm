@@ -19,6 +19,7 @@ type Msg
     | HandleSetContext Context
     | HandleNewGateway Servers.CId
     | HandleLogoutAndCrash ( String, String )
+    | HandleTutorialCompleted Bool
     | HandleConnected
     | HandleDisconnected
 

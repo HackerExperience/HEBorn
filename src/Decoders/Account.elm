@@ -12,6 +12,7 @@ account model =
         |> hardcoded model.id
         |> hardcoded model.username
         |> hardcoded model.auth
+        |> hardcoded model.inTutorial
         |> hardcoded model.email
         |> hardcoded model.database
         |> hardcoded model.dock
@@ -22,8 +23,14 @@ account model =
         |> hardcoded model.notifications
         |> hardcoded model.logout
         |> mainframe model
+        |> hardcoded model.campaignGateway
 
 
 mainframe : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
 mainframe model =
     required "mainframe" (map (Servers.GatewayCId >> Just) string)
+
+
+campaignGateway : Model -> Decoder (Maybe Servers.CId -> b) -> Decoder b
+campaignGateway model =
+    required "campaign_gateway" (map (Servers.GatewayCId >> Just) string)
