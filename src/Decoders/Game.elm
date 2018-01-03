@@ -25,6 +25,7 @@ import Json.Decode.Pipeline
         , resolve
         )
 import Game.Account.Models as Account
+import Game.Inventory.Models as Inventory
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (..)
@@ -34,9 +35,10 @@ import Game.Web.Models as Web
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
 import Utils.Json.Decode exposing (optionalMaybe)
-import Decoders.Storyline
-import Decoders.LogStream
 import Decoders.Account
+import Decoders.Inventory
+import Decoders.Storyline
+import Decoders.Storyline
 import Decoders.Servers
 import Decoders.Network
 
@@ -75,6 +77,7 @@ bootstrap : Model -> Decoder ( Model, ServersToJoin )
 bootstrap game =
     decode Model
         |> account game
+        |> inventory game
         |> hardcoded game.servers
         |> hardcoded game.meta
         |> required "storyline" Decoders.Storyline.story
@@ -84,6 +87,18 @@ bootstrap game =
         |> map (,)
         |> andThen (\done -> map done <| servers)
         |> map (uncurry insertServers)
+
+
+inventory : Model -> Decoder (Inventory.Model -> b) -> Decoder b
+inventory game =
+    let
+        specs =
+            Inventory.getSpecs <| getInventory game
+
+        inventory_ =
+            field "inventory" <| Decoders.Inventory.inventory specs
+    in
+        required "account" inventory_
 
 
 account : Model -> Decoder (Account.Model -> b) -> Decoder b

@@ -10,6 +10,7 @@ import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Servers.Hardware.Models as Hardware
 import Game.Notifications.Models as Notifications
 
 
@@ -46,6 +47,7 @@ type alias Server =
     , tunnels : Tunnels.Model
     , ownership : Ownership
     , notifications : Notifications.Model
+    , hardware : Hardware.Model
     }
 
 
@@ -439,3 +441,8 @@ isGateway { ownership } =
 
         EndpointOwnership _ ->
             False
+
+
+getHardware : Server -> Hardware.Model
+getHardware server =
+    server.hardware

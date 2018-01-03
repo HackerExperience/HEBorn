@@ -11,6 +11,8 @@ import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Hardware.Messages as Hardware
+import Game.Inventory.Messages as Inventory
 import Game.Web.Messages as Web
 import Apps.Browser.Messages as Browser
 
@@ -59,6 +61,9 @@ fromServer cid dispatch =
 
         Processes dispatch ->
             fromProcesses cid dispatch
+
+        Hardware dispatch ->
+            fromHardware cid dispatch
 
         LogoutServer ->
             []
@@ -154,3 +159,13 @@ fromProcesses id dispatch =
 
         FailedBruteforceProcess a ->
             [ processes id <| Processes.HandleBruteforceFailed a ]
+
+
+fromHardware : CId -> Hardware -> Subscribers
+fromHardware id dispatch =
+    case dispatch of
+        MotherboardUpdated a ->
+            [ hardware id <| Hardware.HandleMotherboardUpdated a ]
+
+        MotherboardUpdate a ->
+            [ hardware id <| Hardware.HandleMotherboardUpdate a ]

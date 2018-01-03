@@ -4,6 +4,8 @@ module Game.Models
         , initialModel
         , getAccount
         , setAccount
+        , getInventory
+        , setInventory
         , getServers
         , setServers
         , getMeta
@@ -26,6 +28,7 @@ import Native.Panic
 import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import Game.Inventory.Models as Inventory
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Models as Meta
@@ -37,6 +40,7 @@ import Core.Config exposing (Config)
 
 type alias Model =
     { account : Account.Model
+    , inventory : Inventory.Model
     , servers : Servers.Model
     , meta : Meta.Model
     , story : Story.Model
@@ -58,6 +62,7 @@ initialModel :
     -> Model
 initialModel id username token config =
     { account = Account.initialModel id username token
+    , inventory = Inventory.initialModel
     , servers = Servers.initialModel
     , meta = Meta.initialModel
     , story = Story.initialModel
@@ -79,6 +84,16 @@ getAccount =
 setAccount : Account.Model -> Model -> Model
 setAccount account model =
     { model | account = account }
+
+
+getInventory : Model -> Inventory.Model
+getInventory =
+    .inventory
+
+
+setInventory : Inventory.Model -> Model -> Model
+setInventory inventory model =
+    { model | inventory = inventory }
 
 
 getServers : Model -> Servers.Model

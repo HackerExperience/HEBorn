@@ -31,6 +31,7 @@ import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
+import Game.Servers.Hardware.Models as Hardware
 import Game.Notifications.Models as Notifications
 import Game.Servers.Shared exposing (..)
 import Game.Meta.Types.Network as Network exposing (NIP)
@@ -40,6 +41,7 @@ import Decoders.Logs
 import Decoders.Notifications
 import Decoders.Tunnels
 import Decoders.Filesystem
+import Decoders.Hardware
 
 
 server : Maybe GatewayCache -> Decoder Server
@@ -56,6 +58,7 @@ server gatewayCache =
         |> tunnels
         |> custom (ownership gatewayCache)
         |> notifications
+        |> hardware
 
 
 serverType : Decoder ServerType
@@ -88,6 +91,15 @@ ownership gatewayCache =
 gatewayOwnership : GatewayCache -> Decoder GatewayData
 gatewayOwnership { activeNIP, endpoints } =
     succeed <| GatewayData activeNIP endpoints Nothing
+
+
+hardware : Decoder (Hardware.Model -> a) -> Decoder a
+hardware =
+    let
+        default =
+            Hardware.initialModel
+    in
+        required "hardware" Decoders.Hardware.hardware
 
 
 endpointOwnership : Decoder EndpointData
