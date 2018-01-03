@@ -2,7 +2,6 @@ module Apps.LogFlix.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Data as Game
-import Game.Servers.Models as Servers exposing (Server)
 import Game.LogStream.Models as LogStream
 import Apps.LogFlix.Menu.Models as Menu
 

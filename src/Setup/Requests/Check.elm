@@ -1,7 +1,5 @@
 module Setup.Requests.Check exposing (..)
 
-import Native.Panic
-import Core.Error as Error
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Encode as Encode
 import Requests.Requests as Requests

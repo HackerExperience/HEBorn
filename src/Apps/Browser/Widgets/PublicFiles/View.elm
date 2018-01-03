@@ -1,7 +1,6 @@
 module Apps.Browser.Widgets.PublicFiles.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Game.Meta.Types.Network exposing (NIP)

@@ -2,8 +2,6 @@ module Core.Subscribers.Servers exposing (dispatch)
 
 import Core.Dispatch.Servers exposing (..)
 import Core.Subscribers.Helpers exposing (..)
-import Core.Messages as Core
-import Game.Messages as Game
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Models as Notifications
 import Game.Servers.Messages as Servers
@@ -12,7 +10,6 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Hardware.Messages as Hardware
-import Game.Inventory.Messages as Inventory
 import Game.Web.Messages as Web
 import Apps.Browser.Messages as Browser
 

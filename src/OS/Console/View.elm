@@ -4,9 +4,7 @@ import Dict exposing (Dict)
 import Game.Data as Game
 import Game.LogStream.Models as LogStream
 import Html exposing (Html, div, span, text)
-import Html.Attributes exposing (..)
 import Html.CssHelpers
-import OS.Console.Messages exposing (Msg)
 import UI.ToString exposing (timestampToFullData)
 import OS.Resources exposing (..)
 

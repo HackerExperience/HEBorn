@@ -5,7 +5,6 @@ module Game.Meta.Models
         , getLastTick
         )
 
-import Game.Servers.Shared as Servers
 import Time exposing (Time)
 
 

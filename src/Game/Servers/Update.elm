@@ -20,7 +20,6 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Web.Messages as Web
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications

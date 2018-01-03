@@ -28,13 +28,8 @@ import Game.Account.Models as Account
 import Game.Inventory.Models as Inventory
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.Meta.Types.Context exposing (..)
-import Game.Meta.Models as Meta
-import Game.Storyline.Models as Story
-import Game.Web.Models as Web
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
-import Utils.Json.Decode exposing (optionalMaybe)
 import Decoders.Account
 import Decoders.Inventory
 import Decoders.Storyline

@@ -1,6 +1,5 @@
 module Decoders.Inventory exposing (..)
 
-import Dict
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Game.Meta.Types.Components.Specs exposing (Specs)

@@ -2,7 +2,6 @@ module Setup.Update exposing (update)
 
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
-import Core.Messages as Core
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Core as Core
 import Core.Error as Error

@@ -13,8 +13,6 @@ import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
-import Driver.Websocket.Messages as Ws
-import Apps.Browser.Messages as Browser
 import Game.Meta.Types.Network as Network
 
 

@@ -2,22 +2,13 @@ module Apps.LogFlix.View exposing (view)
 
 import Dict exposing (Dict)
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Html.CssHelpers
-import Time
-import Date exposing (year, hour, minute, second, fromTime)
-import Utils.Html exposing (spacer)
 import UI.ToString exposing (timestampToFullData)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
-import UI.Inlines.Networking as Inlines exposing (user, addr, file)
-import UI.Entries.Toogable exposing (toogableEntry)
-import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import Game.Data as Game
-import Game.Servers.Models as Servers
 import Game.LogStream.Models as LogStream
 import Apps.LogFlix.Messages exposing (Msg(..))
 import Apps.LogFlix.Models exposing (..)

@@ -1,6 +1,5 @@
 module Apps.TaskManager.View exposing (view)
 
-import Dict
 import Time exposing (Time)
 import Html exposing (..)
 import Html.CssHelpers
@@ -8,10 +7,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Data as Game
-import Game.Models
-import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Models as Servers
-import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)

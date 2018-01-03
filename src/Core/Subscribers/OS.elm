@@ -2,7 +2,6 @@ module Core.Subscribers.OS exposing (dispatch)
 
 import Core.Dispatch.OS exposing (..)
 import Core.Subscribers.Helpers exposing (..)
-import Core.Messages as Core
 import OS.SessionManager.Messages as SessionManager
 
 

@@ -1,8 +1,6 @@
 module Game.Servers.Filesystem.Update exposing (update)
 
-import Json.Decode exposing (Value, decodeValue)
 import Utils.Update as Update
-import Requests.Requests as Requests
 import Game.Models as Game
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
@@ -13,7 +11,6 @@ import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
 import Game.Servers.Shared exposing (CId)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias UpdateResponse =

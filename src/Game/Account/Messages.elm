@@ -1,6 +1,5 @@
 module Game.Account.Messages exposing (Msg(..), RequestMsg(..))
 
-import Json.Decode exposing (Value)
 import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (..)

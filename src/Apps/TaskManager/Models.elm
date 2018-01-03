@@ -1,6 +1,5 @@
 module Apps.TaskManager.Models exposing (..)
 
-import Dict
 import Apps.TaskManager.Menu.Models as Menu
 import Game.Servers.Models as Servers
 import Game.Shared exposing (ID)

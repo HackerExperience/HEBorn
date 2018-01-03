@@ -9,7 +9,6 @@ module Apps.Models
         , windowInitSize
         )
 
-import Apps.Messages exposing (..)
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
@@ -28,8 +27,6 @@ import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
 import Apps.Apps exposing (..)
-import Apps.Messages exposing (..)
-import Game.Data as Game
 
 
 type AppModel

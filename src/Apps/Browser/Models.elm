@@ -2,7 +2,6 @@ module Apps.Browser.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
-import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Config exposing (..)

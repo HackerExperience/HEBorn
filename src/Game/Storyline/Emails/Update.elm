@@ -2,7 +2,6 @@ module Game.Storyline.Emails.Update exposing (update)
 
 import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Notifications as Notifications
 import Utils.Update as Update
 import Game.Models as Game
 import Game.Storyline.Emails.Models exposing (..)

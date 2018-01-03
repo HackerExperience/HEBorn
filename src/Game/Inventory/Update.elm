@@ -2,7 +2,6 @@ module Game.Inventory.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Game.Models as Game
 import Game.Inventory.Messages exposing (..)
 import Game.Inventory.Models exposing (..)
 import Game.Inventory.Shared exposing (..)

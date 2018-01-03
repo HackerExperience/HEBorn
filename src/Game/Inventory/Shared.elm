@@ -2,7 +2,6 @@ module Game.Inventory.Shared exposing (..)
 
 import Dict exposing (Dict)
 import Game.Meta.Types.Components as Components exposing (Components)
-import Game.Meta.Types.Components.Type as Components
 import Game.Meta.Types.Network.Connections as Connections exposing (Connections)
 
 
