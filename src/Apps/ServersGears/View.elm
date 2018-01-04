@@ -40,7 +40,7 @@ view data model =
 readonlyPanel : Game.Data -> Model -> Html Msg
 readonlyPanel data model =
     -- TODO: when totals are available
-    div []
+    div [ class [ WindowRO ] ]
         []
 
 
@@ -54,21 +54,30 @@ editablePanel data model =
     in
         case getMotherboard model of
             Just motherboard ->
-                div []
-                    [ p [ onClick <| Select (Just SelectingUnlink) ]
-                        [ text "unlink" ]
-                    , p [ onClick <| Select Nothing ]
-                        [ text "deselect" ]
-                    , p [ onClick <| Save ]
-                        [ text "save" ]
-                    , lazy (viewMotherboard inventory motherboard) model
-                    , lazy2 viewInventory inventory model
+                div [ class [ WindowFull ] ]
+                    [ toolbar
+                    , div [ class [ MoboSplit ] ]
+                        [ lazy (viewMotherboard inventory motherboard) model
+                        , lazy2 viewInventory inventory model
+                        ]
                     ]
 
             Nothing ->
-                div []
+                div [ class [ WindowPick ] ]
                     [ lazy2 viewInventory inventory model
                     ]
+
+
+toolbar : Html Msg
+toolbar =
+    div [ class [ Toolbar ] ]
+        [ div [ onClick <| Select (Just SelectingUnlink) ]
+            [ text "unlink" ]
+        , div [ onClick <| Select Nothing ]
+            [ text "deselect" ]
+        , div [ onClick <| Save ]
+            [ text "save" ]
+        ]
 
 
 viewMotherboard : Inventory.Model -> Motherboard -> Model -> Html Msg
@@ -83,7 +92,7 @@ viewMotherboard inventory motherboard model =
             |> Motherboard.getSlots
             |> Dict.foldl (toList <| viewSlot inventory motherboard model) []
             |> List.reverse
-            |> div []
+            |> div [ class [ PanelMobo ] ]
 
 
 viewSlot :
@@ -139,13 +148,13 @@ viewInventory inventory model =
         |> Inventory.group (isAvailable inventory model)
         |> Dict.toList
         |> List.map (uncurry (viewGroup inventory model))
-        |> div []
+        |> div [ class [ PanelInvt ] ]
 
 
 viewGroup : Inventory.Model -> Model -> String -> Inventory.Group -> Html Msg
 viewGroup inventory model name ( available, unavailable ) =
     div []
-        [ p [] [ text name ]
+        [ div [ class [ GroupName ] ] [ text name ]
         , div [] <| List.map (viewEntry inventory model) available
         , hr [] []
         , div [] <| List.map (flip viewEntryDisabled inventory) unavailable
@@ -189,8 +198,8 @@ viewEntryContents entry inventory =
         Inventory.Component id ->
             case Inventory.getComponent id inventory of
                 Just component ->
-                    [ p [] [ text <| Components.getName component ]
-                    , p [] [ text <| Components.getDescription component ]
+                    [ div [] [ text <| Components.getName component ]
+                    , div [] [ text <| Components.getDescription component ]
                     ]
 
                 Nothing ->

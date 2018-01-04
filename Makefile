@@ -23,6 +23,7 @@ setup:
 	elm-package install -y
 	chmod +x node_modules/.bin/* stats/*.sh
 
+# In case you prefer to use your own binaries, must run before setup
 prefer-native:
 	rm -rf node_modules/elm node_modules/elm-format
 	mkdir -p node_modules/elm node_modules/elm-format

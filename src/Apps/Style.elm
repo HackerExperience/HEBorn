@@ -16,6 +16,7 @@ import Apps.Email.Style as Email
 import Apps.Bug.Style as Bug
 import Apps.Calculator.Style as Calculator
 import Apps.LogFlix.Style as LogFlix
+import Apps.ServersGears.Style as ServersGears
 
 
 cssList : List Stylesheet
@@ -34,5 +35,6 @@ cssList =
     , Email.css
     , Bug.css
     , Calculator.css
+    , ServersGears.css
     , LogFlix.css
     ]
