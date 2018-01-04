@@ -1,4 +1,4 @@
-module Game.Servers.Processes.ModelTest exposing (all)
+module Game.Servers.Processes.ModelTest exposing (all, processContractTests, processOperationsTests)
 
 import Expect
 import Gen.Processes as Gen

@@ -9,6 +9,7 @@ type OpenMenu
     | ChatOpen
     | ServersOpen
     | AccountOpen
+    | NetworkOpen
 
 
 type alias Model =

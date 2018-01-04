@@ -60,7 +60,7 @@ secondsToTimeNotation timeLeft =
             (floor (inMinutes timeLeft)) % 60
 
         seconds =
-            (floor (inSeconds timeLeft)) % 60
+            (ceiling (inSeconds timeLeft)) % 60
 
         showFun ( value, posfix ) accum =
             if (String.isEmpty accum) && (value <= 0) then

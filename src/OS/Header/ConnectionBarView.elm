@@ -108,7 +108,7 @@ contextToggler active handler activeEndpointCId =
                     span
                         [ onClick handler
                         , class classes
-                        , boolAttr "active" active
+                        , boolAttr headerContextActiveAttrTag active
                         ]
                         []
 
@@ -203,8 +203,8 @@ endpointLabel :
 endpointLabel servers cid server =
     let
         ip =
-            servers
-                |> Servers.getNIP cid
+            server
+                |> Servers.getActiveNIP
                 |> Network.getIp
 
         name =

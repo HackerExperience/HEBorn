@@ -9,7 +9,7 @@ import Game.Shared exposing (ServerUser, isRoot, isLocalHost)
 addrAttrs : IP -> List (Attribute msg)
 addrAttrs addr =
     if (isLocalHost addr) then
-        [ attribute "localhost" "1" ]
+        [ attribute "localhost" "Y" ]
     else
         []
 
@@ -17,7 +17,7 @@ addrAttrs addr =
 userAttrs : ServerUser -> List (Attribute msg)
 userAttrs user =
     if (isRoot user) then
-        [ attribute "root" "1" ]
+        [ attribute "root" "Y" ]
     else
         []
 

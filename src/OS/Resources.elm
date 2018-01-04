@@ -9,6 +9,9 @@ type Class
     | AutoHide
     | Connection
     | Taskbar
+    | Network
+    | AvailableNetworks
+    | ActiveNetwork
     | SGateway
     | SBounce
     | SEndpoint
@@ -55,3 +58,38 @@ indicatorNode =
 bubbleNode : String
 bubbleNode =
     "bubble"
+
+
+headerContextActiveAttrTag : String
+headerContextActiveAttrTag =
+    "active"
+
+
+gameVersionAttrTag : String
+gameVersionAttrTag =
+    "game-version"
+
+
+devVersion : String
+devVersion =
+    "dev"
+
+
+gameModeAttrTag : String
+gameModeAttrTag =
+    "game-mode"
+
+
+campaignMode : String
+campaignMode =
+    "campaign"
+
+
+multiplayerMode : String
+multiplayerMode =
+    "multiplayer"
+
+
+expandedMenuAttrTag : String
+expandedMenuAttrTag =
+    "expanded"

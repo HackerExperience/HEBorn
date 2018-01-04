@@ -109,6 +109,7 @@ header =
             [ logo
             , connection
             , taskbar
+            , networkTongue
             ]
         ]
 
@@ -175,6 +176,44 @@ dock =
             , hover
                 [ marginBottom (px 0) ]
             ]
+        ]
+
+
+networkTongue : Snippet
+networkTongue =
+    class Network
+        [ position absolute
+        , left (px 0)
+        , right (px 0)
+        , margin3 (px 32) auto (px 0)
+        , width (px 320)
+        , children
+            [ class AvailableNetworks
+                [ margin (px 0)
+                , overflowY scroll
+                , transition 0.5 "max-height" EaseOut
+                , height auto
+                , maxHeight (vh 50)
+                , withAttribute (NOT (BOOL expandedMenuAttrTag))
+                    [ maxHeight (px 0) ]
+                ]
+            , class ActiveNetwork
+                [ flexContainerHorz
+                , children
+                    [ everything
+                        [ firstChild [ flex (int 1) ]
+                        , lastChild
+                            [ flex (int 0)
+                            , width (px 32)
+                            ]
+                        , lineHeight (px 25)
+                        , textAlign center
+                        ]
+                    ]
+                ]
+            ]
+        , backgroundColor Colors.bgWindow
+        , globalShadow
         ]
 
 

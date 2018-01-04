@@ -8,7 +8,7 @@ import Html.CssHelpers
 import Html.Keyed
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
-import Utils.Html.Attributes exposing (decoratedAttr, appAttr, iconAttr, activeContextAttr)
+import Utils.Html.Attributes exposing (appAttr, boolAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Models as Apps
 import Apps.View as Apps
@@ -68,7 +68,7 @@ windowWrapper id window view =
             [ windowClasses window
             , windowStyle window
             , tabindex 1
-            , decoratedAttr <| isDecorated window
+            , boolAttr Res.decoratedAttrTag <| isDecorated window
             , appAttr window.app
             , activeContextAttr <| windowContext window
             , onMouseDown (UpdateFocusTo (Just id))
@@ -155,7 +155,7 @@ headerTitle : String -> String -> Html Msg
 headerTitle title icon =
     div
         [ class [ Res.HeaderTitle ]
-        , iconAttr icon
+        , attribute Res.appIconAttrTag icon
         ]
         [ text title ]
 

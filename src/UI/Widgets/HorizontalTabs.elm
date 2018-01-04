@@ -11,7 +11,7 @@ module UI.Widgets.HorizontalTabs
 
 import Html exposing (Html, Attribute, node, text)
 import Html.Events exposing (onClick)
-import Utils.Html.Attributes exposing (selectedAttr)
+import Utils.Html.Attributes exposing (boolAttr)
 
 
 type alias Renderer a msg =
@@ -102,7 +102,7 @@ renderItem active render handler item =
         childs
             |> (tab <|
                     [ onClick (handler item)
-                    , selectedAttr active
+                    , boolAttr selectedAttrTag active
                     ]
                         ++ attrs
                )
@@ -113,3 +113,8 @@ renderContainer mapper list =
     list
         |> List.map mapper
         |> panel []
+
+
+selectedAttrTag : String
+selectedAttrTag =
+    "selected"

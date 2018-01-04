@@ -1,4 +1,4 @@
-module Game.Meta.Type.MotherboardTest exposing (all)
+module Game.Meta.Type.MotherboardTest exposing (all, operationsTests)
 
 import Expect
 import Dict

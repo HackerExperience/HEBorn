@@ -8,6 +8,7 @@ import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
 import OS.Header.TaskbarView as Taskbar
 import OS.Header.ConnectionBarView as ConnBar
+import OS.Header.NetworkView as NetworkTongue
 
 
 { id, class, classList } =
@@ -20,6 +21,7 @@ view data model =
         [ logo
         , ConnBar.view data model
         , Taskbar.view data model
+        , NetworkTongue.view data (model.openMenu == NetworkOpen)
         ]
 
 

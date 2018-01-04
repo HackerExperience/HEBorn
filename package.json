@@ -1,54 +1,31 @@
 {
-  "name": "elm-webpack-starter",
-  "description": "Webpack setup for writing Elm apps",
-  "version": "0.8.4",
-  "license": "MIT",
-  "author": "Peter Morawiec",
+  "name": "heborn",
+  "description": "Web client for Hacker Experience 1",
+  "version": "0.0.1",
+  "license": "AGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/moarwick/elm-webpack-starter"
-  },
-  "watch": {
-    "elm-css": {
-      "patterns": [
-        "src/OS/Style.elm",
-        "src/OS/*/Style.elm",
-        "src/Apps/*/Style.elm",
-        "src/Core/Style.elm",
-        "src/Core/Stylesheets.elm"
-      ],
-      "extensions": "elm"
-    }
-  },
-  "scripts": {
-    "start": "webpack-dev-server --hot --inline --port 8000 & npm run watch",
-    "build": "webpack",
-    "reinstall": "npm i rimraf && rimraf node_modules && npm uninstall -g elm && npm i -g elm && npm i && elm package install",
-    "watch": "npm-watch",
-    "elm-css": "sleep 4 && elm-css src/Core/Stylesheets.elm -o build/css/",
-    "comment": "sleep 4 on elm-css is required so there is no conflict/slow-down on compilation time"
-  },
-  "devDependencies": {
-    "autoprefixer": "^6.3.6",
-    "copy-webpack-plugin": "^4.0.1",
-    "css-loader": "^0.26.1",
-    "elm-hot-loader": "^0.5.4",
-    "extract-text-webpack-plugin": "^1.0.1",
-    "file-loader": "^0.9.0",
-    "html-webpack-plugin": "^2.17.0",
-    "postcss-loader": "^1.1.1",
-    "rimraf": "^2.5.2",
-    "style-loader": "^0.13.1",
-    "url-loader": "^0.5.7",
-    "webpack": "^1.13.1",
-    "webpack-dev-server": "^1.14.1",
-    "webpack-merge": "^2.4.0",
-    "elm-css": "^0.6.0"
+    "url": "https://github.com/hackerexperience/heborn"
   },
   "dependencies": {
+    "autoprefixer": "^7.2.1",
+    "copy-webpack-plugin": "^4.2.3",
+    "css-loader": "^0.28.7",
+    "elm-css": "^0.6.1",
+    "elm-format": "^0.6.1-alpha",
+    "elm-hot-loader": "^0.5.4",
     "elm-test": "0.18.2",
-    "leaflet": "^1.1.0",
+    "elm-webpack-loader": "^4.4.0",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.5",
+    "html-webpack-plugin": "^2.30.1",
+    "leaflet": "^1.2.0",
     "npm-watch": "^0.1.8",
-    "webpack-dev-server": "^1.16.3"
+    "postcss-loader": "^2.0.9",
+    "style-loader": "^0.19.0",
+    "url-loader": "^0.6.2",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.9.5",
+    "webpack-merge": "^4.1.1"
   }
 }

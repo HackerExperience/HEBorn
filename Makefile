@@ -1,42 +1,49 @@
-# Does not work with BSD Make :(
 .PHONY: default setup prepare build build-css release
 default: dev
 
-UNAME := $(shell uname)
+# Default settings
 nodebin := node_modules/.bin
 main := src/Main.elm
 port := 8000
-server := $(nodebin)/webpack-dev-server --hot --inline --port $(port)
+
+# Automatic settings
+UNAME := $(shell uname)
+PATH := $(nodebin):$(PATH)
+JS_PACKAGE_MNGR := $(shell which yarn || which npm)
 
 ################################################################################
 # Setup
 ################################################################################
 
+# Prepare all dependencies
 setup:
-  ifeq ($(UNAME),FreeBSD)
-	rm -rf node_modules/elm-webpack-loader
-  endif
 	git submodule init
 	git submodule update
-	npm install
+	$(JS_PACKAGE_MNGR) install
 	elm-package install -y
-  # FreeBSD compat hack
-  # Clone elm-webpack-loader, remove `elm` from deps and then `npm install` it.
-  ifeq ($(UNAME),FreeBSD)
-	mkdir node_modules/elm-webpack-loader
-	cp -r /usr/local/elm/elm-webpack-loader/* node_modules/elm-webpack-loader
-  endif
-  # ??? not sure why some bins aren't installed as executable
-  # this seems to be only on the FreeBSD build server
-	chmod +x node_modules/.bin/*
+	chmod +x node_modules/.bin/* stats/*.sh
+
+prefer-native:
+	rm -rf node_modules/elm node_modules/elm-format
+	mkdir -p node_modules/elm node_modules/elm-format
+	echo "{ \"name\": \"elm\", \"version\": \"0.18.0\" }" > node_modules/elm/package.json
+	echo "{ \"name\": \"elm-format\", \"version\": \"0.6.1-alpha\" }" > node_modules/elm-format/package.json
 
 ################################################################################
 # Compile
 ################################################################################
 
-compile:
-	elm-make $(main) && rm -f index.html
+list_instances = ps ax | grep -E "(elm\-make|webpack\-dev\-server)" | grep -v grep
 
+# Compile-once
+compile:
+  ifneq ($(shell $(list_instances)),)
+	$(error Probably already building)
+  endif
+	(elm-make $(main) && rm -f index.html && ./stats/succeedBuild.sh) || \
+		(./stats/increaseFailedBuilds.sh && false)
+
+# Keep compiling
 compile-loop:
 	-while :; do $(MAKE) compile; sleep 2; done
 
@@ -44,13 +51,17 @@ compile-loop:
 # Build
 ################################################################################
 
+# Clean build enviroment
 prepare:
-	rm -rf build/ && mkdir -p build/
+	rm -rf build/ && \
+	mkdir -p build/
 
+# Update index.html and compile css
 build: prepare
 	cat static/index.html > build/index.html
-	$(nodebin)/elm-css src/Core/Stylesheets.elm -o static/css
+	elm-css src/Core/Stylesheets.elm -o static/css
 
+#  Add CSS hot-reloader
 build-css: prepare
 	awk '/\<\/body/ \
 	  {print \
@@ -58,37 +69,46 @@ build-css: prepare
 	    \<\/script\> \
 	  "}1' \
 	  static/index.html > build/index.html
-	$(nodebin)/elm-css src/Core/Stylesheets.elm -o static/css
+	elm-css src/Core/Stylesheets.elm -o static/css
 
+# Creates release.tar.gz
 release: build
-	npm run build
-	tar -zcf release.tar.gz build/ && mv release.tar.gz build/
+	webpack
+	tar -zcf release.tar.gz build/ && \
+	mv release.tar.gz build/
 
 ################################################################################
 # Dev
 ################################################################################
 
-# For dev, first we compile the whole app, and only then we run npm.
-# The rationale is simple: `npm start` will compile with debug and warn
-# flags, which makes the whole step much slower. Compiling first without
-# them ensures the "bulk" of the job is done quickly, and only then we
-# add the debug flags. There is little difference when only a couple
-# of changes are made, but it makes everything much faster when the
-# whole app, with dependencies, need to be built. This usually happens
-# when adding dependencies, changing branches etc.
-dev: compile build
-	npm start
+# For dev, first we compile the whole app, and only then we watch.
+dev: compile build watch
 
 # Add annoying css hot reloader. Useful when editing styles.
-dev-css: compile build-css
-	npm start
+dev-css: compile build-css watch
+
+# Starts webpack server with inline & hot-reload
+watch:
+  ifneq ($(shell $(list_instances)),)
+	$(error Probably already running)
+  endif
+	webpack-dev-server \
+		--progress \
+		--cache false \
+		--port $(port)
 
 ################################################################################
 # Tools
 ################################################################################
 
-server:
-	$(server)
+# Starts webpack server without inline nor hot-reload
+host:
+	webpack-dev-server \
+		--progress \
+		--cache false \
+		--inline false \
+		--hot false \
+		--port $(port)
 
 lint:
 	elm-format --validate src/
@@ -98,7 +118,7 @@ lint:
 ################################################################################
 
 test:
-	$(nodebin)/elm-test
+	elm-test
 
 test-quick:
 	sed 's/10/1/g' tests/Config.elm > tests/Config.elm.tmp && \
@@ -121,7 +141,6 @@ test-loop:
 
 clean:
 	rm -rf build/* && \
-	rm -f *.html && \
-	rm -f release.tar.gz && \
+	rm -f *.html release.tar.gz && \
 	git clean -id && \
 	git checkout tests/Config.elm

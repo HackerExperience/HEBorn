@@ -25,6 +25,7 @@ import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Notifications.Source as Notifications
 import Game.Servers.Requests.Resync as Resync
+import Game.Meta.Types.Network as Network
 
 
 type alias UpdateResponse =
@@ -45,10 +46,10 @@ update game msg model =
             onResync game cid model
 
         Request data ->
-            onRequest game (receive data) model
+            onRequest game (receive game.meta.lastTick data) model
 
         HandleJoinedServer cid value ->
-            handleJoinedServer cid value model
+            handleJoinedServer game cid value model
 
 
 onServerMsg : Game.Model -> CId -> ServerMsg -> Model -> UpdateResponse
@@ -108,6 +109,9 @@ updateServer game model cid msg server =
         HandleSetEndpoint remote ->
             handleSetEndpoint game remote server
 
+        HandleSetActiveNIP nip ->
+            handleSetActiveNIP game nip server
+
         FilesystemMsg storageId msg ->
             onFilesystemMsg game cid storageId msg server
 
@@ -148,6 +152,16 @@ handleSetEndpoint :
     -> ServerUpdateResponse
 handleSetEndpoint game cid server =
     setEndpointCId cid server
+        |> Update.fromModel
+
+
+handleSetActiveNIP :
+    Game.Model
+    -> Network.NIP
+    -> Server
+    -> ServerUpdateResponse
+handleSetActiveNIP game nip server =
+    setActiveNIP nip server
         |> Update.fromModel
 
 
@@ -266,11 +280,16 @@ updateServerRequest game response server =
             Update.fromModel server
 
 
-handleJoinedServer : CId -> Value -> Model -> UpdateResponse
-handleJoinedServer cid value model =
+handleJoinedServer :
+    Game.Model
+    -> CId
+    -> Value
+    -> Model
+    -> UpdateResponse
+handleJoinedServer game cid value model =
     let
         decodeBootstrap =
-            Decoders.Servers.server <| getGatewayCache cid model
+            Decoders.Servers.server game.meta.lastTick <| getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->

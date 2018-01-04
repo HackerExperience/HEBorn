@@ -3,6 +3,7 @@ module Game.Web.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Websocket as Ws
 import Core.Dispatch.Servers as Servers
+import Core.Error as Error
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Game.Models as Game
 import Game.Web.Messages exposing (..)
@@ -120,7 +121,14 @@ onJoinedServer game cid model =
             Game.getServers game
 
         nip =
-            Servers.getNIP cid servers
+            case (Servers.get cid servers) of
+                Just server ->
+                    Servers.getActiveNIP server
+
+                Nothing ->
+                    "How did you do that?"
+                        |> Error.notInServers
+                        |> uncurry Native.Panic.crash
 
         ( maybeRequester, model_ ) =
             finishLoading nip model
@@ -145,13 +153,18 @@ onJoinedServer game cid model =
 handleJoinFailed : Game.Model -> Servers.CId -> Model -> UpdateResponse
 handleJoinFailed game cid model =
     let
-        ( maybeRequester, model_ ) =
-            case Servers.getNIPSafe cid (Game.getServers game) of
-                Just nip ->
-                    finishLoading nip model
+        nip =
+            case Servers.get cid (Game.getServers game) of
+                Just server ->
+                    Servers.getActiveNIP server
 
                 Nothing ->
-                    ( Nothing, model )
+                    "How did you do that?"
+                        |> Error.notInServers
+                        |> uncurry Native.Panic.crash
+
+        ( maybeRequester, model_ ) =
+            finishLoading nip model
 
         dispatch =
             case maybeRequester of

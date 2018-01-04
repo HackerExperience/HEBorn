@@ -28,7 +28,7 @@ var commonConfig = {
   },
 
   resolve: {
-    extensions: ['', '.js', '.elm', '.css', '.png', '.jpg'],
+    extensions: ['.js', '.elm', '.css', '.png', '.jpg'],
     alias: {
         leaflet_css: __dirname + "/node_modules/leaflet/dist/leaflet.css",
         leaflet_js: __dirname + "/node_modules/leaflet/dist/leaflet.js"
@@ -51,7 +51,7 @@ var commonConfig = {
       },
       {
         test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "file?publicPath=../&name=fonts/[name].[ext]"
+        loader: "file-loader?publicPath=../&name=fonts/[name].[ext]"
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
@@ -63,10 +63,11 @@ var commonConfig = {
       },
       {
         test: /\.(css|scss)$/,
-        loader: ExtractTextPlugin.extract( 'style-loader', [
+        use: [
+          'style-loader',
           'css-loader',
-          'postcss-loader',
-        ])
+          'postcss-loader'
+        ]
       }
     ]
   },
@@ -81,8 +82,6 @@ var commonConfig = {
       ["HEBORN_API_HTTP_URL", "HEBORN_API_WEBSOCKET_URL", "HEBORN_VERSION"]
     )
   ],
-
-  postcss: [ autoprefixer( { browsers: ['last 2 versions'] } ) ]
 
 };
 
@@ -102,7 +101,7 @@ if ( TARGET_ENV === 'development' ) {
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-hot!elm-webpack?verbose=true&warn=true&debug=true'
+          loader:  'elm-hot-loader!elm-webpack-loader?verbose=true&warn=true&debug=true'
         }
       ]
     },
@@ -125,7 +124,7 @@ if ( TARGET_ENV === 'production' ) {
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-webpack'
+          loader:  'elm-webpack-loader'
         }
       ]
     },

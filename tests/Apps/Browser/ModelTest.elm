@@ -1,4 +1,4 @@
-module Apps.Browser.ModelTest exposing (all)
+module Apps.Browser.ModelTest exposing (all, historyOperations, browseOperations)
 
 import Expect
 import Test exposing (Test, describe, test)

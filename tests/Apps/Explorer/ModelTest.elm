@@ -1,4 +1,4 @@
-module Apps.Explorer.ModelTest exposing (all)
+module Apps.Explorer.ModelTest exposing (all, pathOperations)
 
 import Expect
 import Dict as Dict

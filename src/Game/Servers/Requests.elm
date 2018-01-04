@@ -6,6 +6,7 @@ module Game.Servers.Requests
         , serverReceive
         )
 
+import Time exposing (Time)
 import Game.Servers.Requests.Resync as Resync
 import Game.Servers.Messages
     exposing
@@ -22,12 +23,12 @@ type ServerResponse
     = ServerResponse
 
 
-receive : RequestMsg -> Maybe Response
-receive response =
+receive : Time -> RequestMsg -> Maybe Response
+receive now response =
     case response of
         ResyncRequest maybeServerUid id ( code, data ) ->
             Maybe.map ResyncServer <|
-                Resync.receive maybeServerUid id code data
+                Resync.receive now maybeServerUid id code data
 
 
 serverReceive : ServerRequestMsg -> Maybe ServerResponse

@@ -7,7 +7,7 @@ import Css.Icons as Icon
 import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import UI.Colors as Colors
-import OS.SessionManager.WindowManager.Resources exposing (Classes(..), prefix)
+import OS.SessionManager.WindowManager.Resources exposing (..)
 
 
 wmBorderRadius : Px
@@ -16,10 +16,10 @@ wmBorderRadius =
 
 
 addIco : String -> Style -> Style
-addIco cond style =
-    withAttribute (Css.EQ "icon" cond)
+addIco cond style_ =
+    withAttribute (Css.EQ appIconAttrTag cond)
         [ before
-            [ style ]
+            [ style_ ]
         ]
 
 
@@ -40,7 +40,7 @@ css =
             , borderRadius wmBorderRadius
             , flexDirection column
             , flex (int 0)
-            , withAttribute (Css.EQ "decorated" "N")
+            , withAttribute (Css.NOT (Css.BOOL decoratedAttrTag))
                 [ children
                     [ div
                         [ children
@@ -55,7 +55,7 @@ css =
                         ]
                     ]
                 ]
-            , withAttribute (Css.EQ "decorated" "Y")
+            , withAttribute (Css.BOOL decoratedAttrTag)
                 [ globalShadow
                 , backgroundColor Colors.bgWindow
                 , borderRadius wmBorderRadius
@@ -166,7 +166,7 @@ css =
                     , class WindowHeader
                         [ borderRadius (px 0) ]
                     ]
-                , withAttribute (Css.EQ "decorated" "Y")
+                , withAttribute (Css.BOOL decoratedAttrTag)
                     [ children
                         [ div
                             [ children
