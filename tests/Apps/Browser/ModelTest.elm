@@ -6,7 +6,6 @@ import Fuzz exposing (int, tuple, tuple3, tuple4)
 import TestUtils exposing (fuzz, once, ensureDifferentSeed)
 import Gen.Browser as Gen
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Pages.Models as Pages
 
 
 all : Test
@@ -72,7 +71,7 @@ walkBackwardHistoryTests =
                 |> gotoPage "pg2" page2
                 |> gotoPage "pg1" page1
                 |> getPreviousPages
-                |> Expect.equal [ ( "pg2", page2 ), ( "pg1", page1 ), ( "about:home", Pages.HomeModel ) ]
+                |> Expect.equal [ ( "pg2", page2 ), ( "pg1", page1 ), ( "about:home", HomeModel ) ]
     ]
 
 

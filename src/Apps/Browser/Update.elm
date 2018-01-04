@@ -16,16 +16,17 @@ import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
 import Game.Meta.Types.Network as Network
 import Apps.Config exposing (..)
-import Apps.Browser.Messages exposing (..)
-import Apps.Browser.Models exposing (..)
-import Apps.Browser.Pages.Messages as Pages
-import Apps.Browser.Pages.Update as Pages
-import Apps.Browser.Pages.Models as Pages
+import Apps.Apps as Apps
+import Game.Meta.Types.Context exposing (Context(Endpoint))
+import Apps.Browser.Pages.Webserver.Update as Webserver
+import Apps.Browser.Pages.Bank.Update as Bank
+import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Actions as Menu
-import Apps.Apps as Apps
-import Game.Meta.Types.Context exposing (Context(Endpoint))
+import Apps.Browser.Pages.Configs exposing (..)
+import Apps.Browser.Messages exposing (..)
+import Apps.Browser.Models exposing (..)
 
 
 type alias UpdateResponse =
@@ -33,24 +34,36 @@ type alias UpdateResponse =
 
 
 type alias TabUpdateResponse =
-    ( Tab, Cmd TabMsg, Dispatch )
+    ( Tab, Cmd Msg, Dispatch )
 
 
-update :
-    Game.Data
-    -> Msg
-    -> Model
-    -> UpdateResponse
+update : Game.Data -> Msg -> Model -> UpdateResponse
 update data msg model =
     case msg of
-        -- Menu
+        -- menu
         MenuMsg (Menu.MenuClick action) ->
             Menu.actionHandler data action model
 
         MenuMsg msg ->
             onMenuMsg data msg model
 
-        -- TabMsgs
+        ChangeTab tabId ->
+            Update.fromModel <| goTab tabId model
+
+        NewTabIn url ->
+            onNewTabIn data url model
+
+        PublicDownload nip entry ->
+            update data
+                (ActiveTabMsg <| EnterModal <| Just <| ForDownload nip entry)
+                model
+
+        ReqDownload source file storage ->
+            onReqDownload data source file storage model
+
+        HandlePasswordAcquired event ->
+            onEveryTabMsg data (Cracked event.nip event.password) model
+
         ActiveTabMsg msg ->
             updateSomeTabMsg data model.nowTab msg model
 
@@ -59,29 +72,6 @@ update data msg model =
 
         EveryTabMsg msg ->
             onEveryTabMsg data msg model
-
-        -- Browser
-        NewTabIn url ->
-            onNewTabIn data url model
-
-        ChangeTab tabId ->
-            goTab tabId model
-                |> Update.fromModel
-
-        OpenApp app ->
-            onOpenApp app model
-
-        SelectEndpoint ->
-            onSelectEndpoint model
-
-        Logout ->
-            onLogout model
-
-        PublicDownload source file storage ->
-            onReqDownload data source file storage model
-
-        HandlePasswordAcquired event ->
-            onEveryTabMsg data (Cracked event.nip event.password) model
 
 
 
@@ -126,93 +116,8 @@ onNewTabIn data url model =
 
         model_ =
             setNowTab tab_ goTabModel
-
-        cmd_ =
-            Cmd.map (SomeTabMsg tabId) cmd
     in
-        ( model_, cmd_, dispatch )
-
-
-onOpenApp : Apps.App -> Model -> UpdateResponse
-onOpenApp app model =
-    let
-        dispatch =
-            Dispatch.os <| OS.OpenApp (Just Endpoint) app
-    in
-        ( model, Cmd.none, dispatch )
-
-
-onSelectEndpoint : Model -> UpdateResponse
-onSelectEndpoint model =
-    let
-        dispatch =
-            Dispatch.account <|
-                Account.SetContext Endpoint
-    in
-        ( model, Cmd.none, dispatch )
-
-
-onLogout : Model -> UpdateResponse
-onLogout model =
-    -- TODO #285
-    Update.fromModel model
-
-
-updateSomeTabMsg :
-    Game.Data
-    -> Int
-    -> TabMsg
-    -> Model
-    -> UpdateResponse
-updateSomeTabMsg data tabId msg model =
-    let
-        tab =
-            getTab tabId model.tabs
-
-        result =
-            processTabMsg data tabId tab msg model
-
-        setThisTab tab_ =
-            { model | tabs = (setTab tabId tab_ model.tabs) }
-    in
-        result
-            |> Update.mapModel setThisTab
-            |> Update.mapCmd (SomeTabMsg tabId)
-
-
-onEveryTabMsg : Game.Data -> TabMsg -> Model -> UpdateResponse
-onEveryTabMsg data msg model =
-    model.tabs
-        |> Dict.foldl (reduceTabMsg data msg model) ( Dict.empty, Cmd.none, Dispatch.none )
-        |> Update.mapModel (\tabs_ -> { model | tabs = tabs_ })
-
-
-reduceTabMsg :
-    Game.Data
-    -> TabMsg
-    -> Model
-    -> Int
-    -> Tab
-    -> ( Tabs, Cmd Msg, Dispatch )
-    -> ( Tabs, Cmd Msg, Dispatch )
-reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
-    let
-        ( tab_, cmd1, dispatch1 ) =
-            processTabMsg data tabId tab msg model
-
-        tabs_ =
-            Dict.insert tabId tab tabs
-
-        cmd =
-            Cmd.batch
-                [ cmd0
-                , Cmd.map (SomeTabMsg tabId) cmd1
-                ]
-
-        dispatch =
-            Dispatch.batch [ dispatch0, dispatch1 ]
-    in
-        ( tabs_, cmd, dispatch )
+        ( model_, cmd, dispatch )
 
 
 onReqDownload :
@@ -244,102 +149,155 @@ onReqDownload data source file storage model =
         ( model_, Cmd.none, dispatch )
 
 
+
+-- tabs
+
+
+updateSomeTabMsg :
+    Game.Data
+    -> Int
+    -> TabMsg
+    -> Model
+    -> UpdateResponse
+updateSomeTabMsg data tabId msg model =
+    let
+        tab =
+            getTab tabId model.tabs
+
+        setThisTab tab_ =
+            { model | tabs = (setTab tabId tab_ model.tabs) }
+    in
+        model
+            |> processTabMsg data tabId msg tab
+            |> Update.mapModel setThisTab
+
+
+onEveryTabMsg : Game.Data -> TabMsg -> Model -> UpdateResponse
+onEveryTabMsg data msg model =
+    model.tabs
+        |> Dict.foldl (reduceTabMsg data msg model) ( Dict.empty, Cmd.none, Dispatch.none )
+        |> Update.mapModel (\tabs_ -> { model | tabs = tabs_ })
+
+
+reduceTabMsg :
+    Game.Data
+    -> TabMsg
+    -> Model
+    -> Int
+    -> Tab
+    -> ( Tabs, Cmd Msg, Dispatch )
+    -> ( Tabs, Cmd Msg, Dispatch )
+reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
+    let
+        ( tab_, cmd1, dispatch1 ) =
+            processTabMsg data tabId msg tab model
+
+        tabs_ =
+            Dict.insert tabId tab tabs
+
+        cmd =
+            Cmd.batch
+                [ cmd0
+                , cmd1
+                ]
+
+        dispatch =
+            Dispatch.batch [ dispatch0, dispatch1 ]
+    in
+        ( tabs_, cmd, dispatch )
+
+
 processTabMsg :
     Game.Data
     -> Int
-    -> Tab
     -> TabMsg
+    -> Tab
     -> Model
     -> TabUpdateResponse
-processTabMsg data tabId tab msg model =
+processTabMsg data tabId msg tab model =
     case msg of
-        UpdateAddress newAddr ->
-            onUpdateAddress newAddr tab
-
         GoPrevious ->
-            onGoPrevious tab
+            Update.fromModel <| gotoPreviousPage tab
 
         GoNext ->
-            onGoNext tab
+            Update.fromModel <| gotoNextPage tab
 
-        PageMsg msg ->
-            onPageMsg data msg tab
+        UpdateAddress url ->
+            Update.fromModel { tab | addressBar = url }
 
-        GoAddress url ->
-            onGoAddress data url model.me tabId tab
-
-        Crack nip ->
-            onCrack data nip tab
-
-        AnyMap _ ->
-            Update.fromModel tab
-
-        Login nip password ->
-            onLogin data nip password model.me tabId tab
-
-        Cracked _ _ ->
-            Update.fromModel tab
-
-        LoginFailed ->
-            Update.fromModel tab
+        EnterModal modal ->
+            Update.fromModel { tab | modal = modal }
 
         HandleFetched response ->
             onHandleFetched response tab
 
-        EnterModal newModal ->
-            onEnterModal newModal tab
+        GoAddress url ->
+            onGoAddress data url model.me tabId tab
+
+        AnyMap nip ->
+            -- TODO: implementation pending
+            Update.fromModel tab
+
+        OpenApp app ->
+            ( tab
+            , Cmd.none
+            , Dispatch.os <| OS.OpenApp (Just Endpoint) app
+            )
+
+        SelectEndpoint ->
+            ( tab
+            , Cmd.none
+            , Dispatch.account <| Account.SetContext Endpoint
+            )
+
+        Login nip password ->
+            onLogin data nip password model.me tabId tab
+
+        Logout ->
+            -- TODO #285
+            Update.fromModel tab
+
+        LoginFailed ->
+            -- TODO: forward error
+            Update.fromModel tab
+
+        Crack nip ->
+            onCrack data nip tab
+
+        Cracked _ _ ->
+            -- TODO: forward success
+            Update.fromModel tab
+
+        -- site msgs
+        _ ->
+            onPageMsg data msg tab
 
 
-
--- tabs internals
-
-
-onPageMsg :
-    Game.Data
-    -> Pages.Msg
-    -> Tab
-    -> TabUpdateResponse
-onPageMsg data msg tab =
-    Update.child
-        { get = .page
-        , set = (\page tab -> { tab | page = page })
-        , toMsg = PageMsg
-        , update = (Pages.update data)
-        }
-        msg
-        tab
-
-
-onUpdateAddress : URL -> Tab -> TabUpdateResponse
-onUpdateAddress newAddr tab =
-    { tab | addressBar = newAddr }
-        |> Update.fromModel
-
-
-onGoPrevious : Tab -> TabUpdateResponse
-onGoPrevious =
-    gotoPreviousPage >> Update.fromModel
-
-
-onGoNext : Tab -> TabUpdateResponse
-onGoNext =
-    gotoNextPage >> Update.fromModel
-
-
-onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
-onCrack data nip tab =
+onHandleFetched : Web.Response -> Tab -> TabUpdateResponse
+onHandleFetched response tab =
     let
-        serverId =
-            Game.getActiveCId data
+        ( url, pageModel ) =
+            case response of
+                Web.PageLoaded site ->
+                    ( site.url, initialPage site )
 
-        targetIp =
-            Network.getIp nip
+                Web.PageNotFound url ->
+                    ( url, NotFoundModel { url = url } )
 
-        dispatch =
-            Dispatch.processes serverId <|
-                Servers.NewBruteforceProcess targetIp
+                Web.ConnectionError url ->
+                    -- TODO: Change to some "failed" page
+                    ( url, BlankModel )
+
+        isLoadingThisRequest =
+            (isLoading <| getPage tab)
+                && (getURL tab == url)
     in
-        ( tab, Cmd.none, dispatch )
+        if (isLoadingThisRequest) then
+            tab
+                |> gotoPage url pageModel
+                |> Update.fromModel
+        else
+            Update.fromModel tab
 
 
 onGoAddress :
@@ -382,7 +340,7 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
                     requester
 
         tab_ =
-            gotoPage url (Pages.LoadingModel url) tab
+            gotoPage url (LoadingModel url) tab
     in
         ( tab_, Cmd.none, dispatch )
 
@@ -431,34 +389,52 @@ onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
         ( tab, Cmd.none, dispatch )
 
 
-onHandleFetched : Web.Response -> Tab -> TabUpdateResponse
-onHandleFetched response tab =
+onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
+onCrack data nip tab =
     let
-        ( url, pageModel ) =
-            case response of
-                Web.PageLoaded site ->
-                    ( site.url, Pages.initialModel site )
+        serverId =
+            Game.getActiveCId data
 
-                Web.PageNotFound url ->
-                    ( url, Pages.NotFoundModel { url = url } )
+        targetIp =
+            Network.getIp nip
 
-                Web.ConnectionError url ->
-                    -- TODO: Change to some "failed" page
-                    ( url, Pages.BlankModel )
-
-        isLoadingThisRequest =
-            (Pages.isLoading <| getPage tab)
-                && (getURL tab == url)
+        dispatch =
+            Dispatch.processes serverId <|
+                Servers.NewBruteforceProcess targetIp
     in
-        if (isLoadingThisRequest) then
-            tab
-                |> gotoPage url pageModel
-                |> Update.fromModel
-        else
+        ( tab, Cmd.none, dispatch )
+
+
+onPageMsg : Game.Data -> TabMsg -> Tab -> TabUpdateResponse
+onPageMsg data msg tab =
+    let
+        ( page_, cmd, dispatch ) =
+            updatePage data msg tab.page
+
+        tab_ =
+            { tab | page = page_ }
+    in
+        ( tab_, cmd, dispatch )
+
+
+updatePage :
+    Game.Data
+    -> TabMsg
+    -> Page
+    -> ( Page, Cmd Msg, Dispatch )
+updatePage data msg tab =
+    case ( tab, msg ) of
+        ( WebserverModel page, WebserverMsg msg ) ->
+            Update.mapModel WebserverModel <|
+                Webserver.update webserverConfig data msg page
+
+        ( BankModel page, BankMsg msg ) ->
+            Update.mapModel BankModel <|
+                Bank.update bankConfig data msg page
+
+        ( DownloadCenterModel page, DownloadCenterMsg msg ) ->
+            Update.mapModel DownloadCenterModel <|
+                DownloadCenter.update downloadCenterConfig data msg page
+
+        _ ->
             Update.fromModel tab
-
-
-onEnterModal : Maybe ModalAction -> Tab -> TabUpdateResponse
-onEnterModal newModal tab =
-    { tab | modal = newModal }
-        |> Update.fromModel

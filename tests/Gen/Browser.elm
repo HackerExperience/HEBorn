@@ -16,7 +16,6 @@ import Random.Pcg
         )
 import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Pages.Models as Pages
 import Game.Web.Types as Web
 
 
@@ -25,17 +24,17 @@ import Game.Web.Types as Web
 --------------------------------------------------------------------------------
 
 
-page : Fuzzer Pages.Model
+page : Fuzzer Page
 page =
     fuzzer genPage
 
 
-emptyPage : Fuzzer Pages.Model
+emptyPage : Fuzzer Page
 emptyPage =
     fuzzer genEmptyPage
 
 
-pageList : Fuzzer (List Pages.Model)
+pageList : Fuzzer (List Page)
 pageList =
     fuzzer genPageList
 
@@ -91,7 +90,7 @@ emptyModel =
 --------------------------------------------------------------------------------
 
 
-genPage : Generator Pages.Model
+genPage : Generator Page
 genPage =
     -- TODO: generate other site tpes
     let
@@ -107,7 +106,7 @@ genPage =
                         }
                     }
             in
-                Pages.initialModel site
+                initialPage site
     in
         map generate unique
 
@@ -117,12 +116,12 @@ genPageURL =
     stringRange 2 12
 
 
-genEmptyPage : Generator Pages.Model
+genEmptyPage : Generator Page
 genEmptyPage =
-    constant Pages.BlankModel
+    constant BlankModel
 
 
-genPageList : Generator (List Pages.Model)
+genPageList : Generator (List Page)
 genPageList =
     andThen ((flip list) genPage) (int 2 10)
 
