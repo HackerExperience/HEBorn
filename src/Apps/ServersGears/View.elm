@@ -17,6 +17,7 @@ import Game.Meta.Types.Network.Connections as NetConnections exposing (Connectio
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 import Apps.ServersGears.Resources exposing (Classes(..), prefix)
+import UI.Widgets.Motherboard exposing (..)
 
 
 { id, class, classList } =
@@ -82,64 +83,47 @@ toolbar =
 
 viewMotherboard : Inventory.Model -> Motherboard -> Model -> Html Msg
 viewMotherboard inventory motherboard model =
-    -- this function should delegate to other functions according
-    -- to motherboard model
     let
-        toList func id slot list =
-            func id slot :: list
+        slots =
+            Motherboard.getSlots motherboard
     in
-        motherboard
-            |> Motherboard.getSlots
-            |> Dict.foldl (toList <| viewSlot inventory motherboard model) []
-            |> List.reverse
-            |> div [ class [ PanelMobo ] ]
+        div [ class [ PanelMobo ] ]
+            [ selectedComponent inventory motherboard model
+            , div [ class [ MoboContainer ] ]
+                [ defaultMobo (SelectingSlot >> Just >> Select) motherboard ]
+            ]
 
 
-viewSlot :
-    Inventory.Model
-    -> Motherboard
-    -> Model
-    -> Motherboard.SlotId
-    -> Motherboard.Slot
-    -> Html Msg
-viewSlot inventory motherboard model id slot =
-    let
-        selection =
-            SelectingSlot id
+selectedComponent : Inventory.Model -> Motherboard -> Model -> Html Msg
+selectedComponent { components } { slots } { selection } =
+    case selection of
+        Just (SelectingSlot slotId) ->
+            Dict.get slotId slots
+                |> Maybe.andThen .component
+                |> Maybe.andThen (flip Dict.get components)
+                |> Maybe.map (.spec >> .name >> (++) "Linked: ")
+                |> Maybe.withDefault "Empty Slot"
+                |> text
+                |> List.singleton
+                |> div []
 
-        maybeId =
-            Motherboard.getSlotComponent slot
+        Just (SelectingEntry (Inventory.Component id)) ->
+            Dict.get id components
+                |> Maybe.map (.spec >> .name)
+                |> Maybe.withDefault "?"
+                |> (++) "Unlinked: "
+                |> text
+                |> List.singleton
+                |> div []
 
-        maybeNC =
-            slot
-                |> Motherboard.getSlotComponent
-                |> Maybe.andThen (flip Motherboard.getNC motherboard)
+        Just (SelectingEntry (Inventory.NetConnection ( _, ip ))) ->
+            div [] [ text <| "Unlinked:" ++ ip ]
 
-        networkText =
-            case maybeNC of
-                Just nc ->
-                    text ("With NC " ++ toString nc)
+        Just SelectingUnlink ->
+            div [] [ text "Just clicked unlink." ]
 
-                Nothing ->
-                    text ""
-
-        content0 =
-            case maybeId of
-                Just id ->
-                    viewEntryContents (Inventory.Component id) inventory
-
-                Nothing ->
-                    []
-
-        content =
-            content0 ++ [ networkText ]
-    in
-        if isMatching selection inventory model then
-            div [ onClick <| Select <| Just selection ]
-                content
-        else
-            div [ disabled True ]
-                content
+        _ ->
+            div [] [ text "Nothing selected." ]
 
 
 viewInventory : Inventory.Model -> Model -> Html Msg
@@ -152,12 +136,10 @@ viewInventory inventory model =
 
 
 viewGroup : Inventory.Model -> Model -> String -> Inventory.Group -> Html Msg
-viewGroup inventory model name ( available, unavailable ) =
-    div []
+viewGroup inventory model name ( available, _ ) =
+    div [ class [ Group ] ]
         [ div [ class [ GroupName ] ] [ text name ]
-        , div [] <| List.map (viewEntry inventory model) available
-        , hr [] []
-        , div [] <| List.map (flip viewEntryDisabled inventory) unavailable
+        , div [ class [ GroupAvail ] ] <| List.map (viewEntry inventory model) available
         ]
 
 
@@ -208,7 +190,7 @@ viewEntryContents entry inventory =
         Inventory.NetConnection id ->
             case Inventory.getNC id inventory of
                 Just nc ->
-                    [ p [] [ text <| NetConnections.getName nc ]
+                    [ div [] [ text <| NetConnections.getName nc ]
                     ]
 
                 Nothing ->

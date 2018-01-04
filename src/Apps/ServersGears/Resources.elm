@@ -6,10 +6,14 @@ type Classes
     | WindowPick
     | WindowFull
     | MoboSplit
+    | MoboContainer
     | Toolbar
     | PanelMobo
     | PanelInvt
+    | Group
     | GroupName
+    | GroupAvail
+    | GroupUnav
 
 
 prefix : String

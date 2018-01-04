@@ -28,7 +28,7 @@ var commonConfig = {
   },
 
   resolve: {
-    extensions: ['.js', '.elm', '.css', '.png', '.jpg'],
+    extensions: ['.js', '.elm', '.css', '.png', '.jpg', '.svg', '.ico'],
     alias: {
         leaflet_css: __dirname + "/node_modules/leaflet/dist/leaflet.css",
         leaflet_js: __dirname + "/node_modules/leaflet/dist/leaflet.js"
@@ -54,12 +54,16 @@ var commonConfig = {
         loader: "file-loader?publicPath=../&name=fonts/[name].[ext]"
       },
       {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "url-loader?limit=10000&mimetype=image/svg+xml&publicPath=../&name=files/[name].[ext]"
+        test: /\.svg$/,
+        loader: "url-loader?limit=50000&mimetype=image/svg+xml&publicPath=../&name=images/[name].[ext]"
       },
       {
         test: /\.(png|jpg)$/,
-        loader: "file-loader?name=images/[name].[ext]"
+        loader: "url-loader?name=images/[name].[ext]"
+      },
+      {
+        test: /\.ico$/,
+        loader: "url-loader?name=[name].[ext]"
       },
       {
         test: /\.(css|scss)$/,
@@ -73,11 +77,23 @@ var commonConfig = {
   },
 
   plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: 'static/img/',
+        to:   'images/'
+      },
+      {
+        from: 'static/favicon.ico',
+        to: 'favicon.ico'
+      },
+    ]),
+
     new HtmlWebpackPlugin({
       template: 'build/index.html',
       inject:   'body',
       filename: 'index.html'
     }),
+
     new webpack.EnvironmentPlugin(
       ["HEBORN_API_HTTP_URL", "HEBORN_API_WEBSOCKET_URL", "HEBORN_VERSION"]
     )
@@ -85,7 +101,7 @@ var commonConfig = {
 
 };
 
-// additional webpack settings for local env (when invoked by 'npm start')
+// additional webpack settings for local env
 if ( TARGET_ENV === 'development' ) {
   console.log( 'Serving locally...');
 
@@ -113,7 +129,7 @@ if ( TARGET_ENV === 'development' ) {
   });
 }
 
-// additional webpack settings for prod env (when invoked via 'npm run build')
+// additional webpack settings for prod env
 if ( TARGET_ENV === 'production' ) {
   console.log( 'Building for prod...');
 
@@ -130,17 +146,6 @@ if ( TARGET_ENV === 'production' ) {
     },
 
     plugins: [
-      new CopyWebpackPlugin([
-        {
-          from: 'static/img/',
-          to:   'img/'
-        },
-        {
-          from: 'static/favicon.ico',
-          to: 'favicon.ico'
-        },
-      ]),
-
       new webpack.optimize.OccurenceOrderPlugin(),
 
       new ExtractTextPlugin( 'css/[name]-[hash].css', { allChunks: true } ),
