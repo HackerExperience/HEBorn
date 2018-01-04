@@ -37,6 +37,9 @@ loadingView =
     div []
         [ p [] [ text "Keyboard not found" ]
         , p [] [ text "Press Ctrl+W to quit, keep waiting to continue..." ]
+        , br [] []
+        , p [] [ text "This is just a joke, game is downloading all yours server data!" ]
+        , p [] [ text "This may take a while..." ]
         ]
 
 
