@@ -76,7 +76,7 @@ empty =
         , ( "nic_001", Spec "BoringNic" "" <| NIC <| MetaNIC 0 0 )
         , ( "mobo_001", Spec "Mobo1" "" <| MOB <| MetaMOB 1 1 1 1 0 )
         , ( "mobo_002", Spec "Mobo2" "" <| MOB <| MetaMOB 2 1 2 1 1 )
-        , ( "mobo_999", Spec "Mobo2" "" <| MOB <| MetaMOB 4 4 4 4 4 )
+        , ( "mobo_999", Spec "Mobo9" "" <| MOB <| MetaMOB 4 4 4 4 4 )
         ]
 
 

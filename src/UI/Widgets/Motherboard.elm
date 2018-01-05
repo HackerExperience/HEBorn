@@ -4,7 +4,7 @@ import Html exposing (Html)
 import Dict
 import Svg exposing (svg, use)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (onClick)
+import Utils.Svg.Events exposing (onClickMe)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 
 
@@ -14,7 +14,7 @@ defaultMobo select { slots } =
         onCPU =
             "cpu_0"
                 |> select
-                |> onClick
+                |> onClickMe
 
         hasCPU =
             hasComponent "cpu_0" slots
@@ -22,7 +22,7 @@ defaultMobo select { slots } =
         onNIC =
             "nic_0"
                 |> select
-                |> onClick
+                |> onClickMe
 
         hasNIC =
             hasComponent "nic_0" slots
@@ -30,7 +30,7 @@ defaultMobo select { slots } =
         onHDD =
             "hdd_0"
                 |> select
-                |> onClick
+                |> onClickMe
 
         hasHDD =
             hasComponent "hdd_0" slots

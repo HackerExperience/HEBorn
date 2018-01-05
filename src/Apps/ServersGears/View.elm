@@ -13,6 +13,7 @@ import Game.Inventory.Shared as Inventory
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Components as Components exposing (Components)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
+import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Network.Connections as NetConnections exposing (Connections)
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
@@ -56,7 +57,7 @@ editablePanel data model =
         case getMotherboard model of
             Just motherboard ->
                 div [ class [ WindowFull ] ]
-                    [ toolbar
+                    [ lazy2 toolbar motherboard model
                     , div [ class [ MoboSplit ] ]
                         [ lazy (viewMotherboard inventory motherboard) model
                         , lazy2 viewInventory inventory model
@@ -65,20 +66,36 @@ editablePanel data model =
 
             Nothing ->
                 div [ class [ WindowPick ] ]
-                    [ lazy2 viewInventory inventory model
+                    [ lazy2 viewPickMobo inventory model
                     ]
 
 
-toolbar : Html Msg
-toolbar =
-    div [ class [ Toolbar ] ]
-        [ div [ onClick <| Select (Just SelectingUnlink) ]
-            [ text "unlink" ]
-        , div [ onClick <| Select Nothing ]
-            [ text "deselect" ]
-        , div [ onClick <| Save ]
-            [ text "save" ]
-        ]
+toolbar : Motherboard -> Model -> Html Msg
+toolbar { slots } { selection, anyChange } =
+    let
+        unlink =
+            case selection of
+                Just (SelectingSlot slotId) ->
+                    case (Maybe.andThen (.component) <| Dict.get slotId slots) of
+                        Just _ ->
+                            div [ onClick <| Unlink ]
+                                [ text "Unlink" ]
+
+                        Nothing ->
+                            text ""
+
+                _ ->
+                    text ""
+
+        save =
+            if anyChange then
+                div [ onClick <| Save ]
+                    [ text "Save" ]
+            else
+                text ""
+    in
+        div [ class [ Toolbar ] ]
+            [ unlink, save ]
 
 
 viewMotherboard : Inventory.Model -> Motherboard -> Model -> Html Msg
@@ -87,7 +104,7 @@ viewMotherboard inventory motherboard model =
         slots =
             Motherboard.getSlots motherboard
     in
-        div [ class [ PanelMobo ] ]
+        div [ class [ PanelMobo ], onClick <| Select Nothing ]
             [ selectedComponent inventory motherboard model
             , div [ class [ MoboContainer ] ]
                 [ defaultMobo (SelectingSlot >> Just >> Select) motherboard ]
@@ -111,18 +128,15 @@ selectedComponent { components } { slots } { selection } =
             Dict.get id components
                 |> Maybe.map (.spec >> .name)
                 |> Maybe.withDefault "?"
-                |> (++) "Unlinked: "
+                |> (++) "Inventory: "
                 |> text
                 |> List.singleton
                 |> div []
 
         Just (SelectingEntry (Inventory.NetConnection ( _, ip ))) ->
-            div [] [ text <| "Unlinked:" ++ ip ]
+            div [] [ text <| "Inventory:" ++ ip ]
 
-        Just SelectingUnlink ->
-            div [] [ text "Just clicked unlink." ]
-
-        _ ->
+        Nothing ->
             div [] [ text "Nothing selected." ]
 
 
@@ -132,7 +146,16 @@ viewInventory inventory model =
         |> Inventory.group (isAvailable inventory model)
         |> Dict.toList
         |> List.map (uncurry (viewGroup inventory model))
+        -- TODO: Should use UI Vertical List
         |> div [ class [ PanelInvt ] ]
+
+
+viewPickMobo : Inventory.Model -> Model -> Html Msg
+viewPickMobo inventory model =
+    inventory.components
+        |> Dict.filter (\_ compo -> (Components.getType compo) == MOB)
+        |> (\c -> { inventory | components = c })
+        |> flip viewInventory model
 
 
 viewGroup : Inventory.Model -> Model -> String -> Inventory.Group -> Html Msg
@@ -145,16 +168,7 @@ viewGroup inventory model name ( available, _ ) =
 
 viewEntry : Inventory.Model -> Model -> Inventory.Entry -> Html Msg
 viewEntry inventory model entry =
-    -- it's also possible to check the model selection to add effects to
-    -- selected entries and slots
-    let
-        selection =
-            SelectingEntry entry
-    in
-        if isMatching selection inventory model then
-            viewEntryEnabled selection entry inventory model
-        else
-            viewEntryDisabled entry inventory
+    viewEntryEnabled (SelectingEntry entry) entry inventory model
 
 
 viewEntryEnabled :
@@ -165,12 +179,6 @@ viewEntryEnabled :
     -> Html Msg
 viewEntryEnabled selection entry inventory model =
     div [ onClick <| Select <| Just selection ] <|
-        viewEntryContents entry inventory
-
-
-viewEntryDisabled : Inventory.Entry -> Inventory.Model -> Html Msg
-viewEntryDisabled entry inventory =
-    div [ disabled True ] <|
         viewEntryContents entry inventory
 
 
