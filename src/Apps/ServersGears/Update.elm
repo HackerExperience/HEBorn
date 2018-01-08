@@ -57,8 +57,11 @@ onSave game motherboard model =
         dispatch =
             Dispatch.hardware cid <|
                 ServersDispatch.MotherboardUpdate motherboard
+
+        model_ =
+            { model | anyChange = False }
     in
-        ( model, Cmd.none, dispatch )
+        ( model_, Cmd.none, dispatch )
 
 
 
@@ -90,6 +93,9 @@ updateGeneric data msg model =
         Select selection ->
             onSelectMsg data selection model
 
+        Unlink ->
+            onUnlinkMsg data model
+
         _ ->
             Update.fromModel model
 
@@ -110,11 +116,44 @@ onMenuMsg data msg model =
 
 
 onSelectMsg : Game.Data -> Maybe Selection -> Model -> UpdateResponse
-onSelectMsg data selection model =
+onSelectMsg data selection_ model =
     let
-        inventory =
+        inv =
             data
                 |> Game.getGame
                 |> GameModels.getInventory
     in
-        Update.fromModel <| doSelect selection inventory model
+        case ( model.motherboard, model.selection, selection_ ) of
+            ( Just mobo, Just (SelectingSlot slotA), Just (SelectingSlot slotB) ) ->
+                model
+                    |> swapSlots slotA slotB inv mobo
+                    |> Update.fromModel
+
+            ( Just mobo, Just (SelectingEntry entry), Just (SelectingSlot slot) ) ->
+                model
+                    |> linkSlot slot entry inv mobo
+                    |> Update.fromModel
+
+            _ ->
+                Update.fromModel <|
+                    { model | selection = selection_ }
+
+
+onUnlinkMsg : Game.Data -> Model -> UpdateResponse
+onUnlinkMsg data model =
+    case model.selection of
+        Just (SelectingSlot slot) ->
+            let
+                inv =
+                    data
+                        |> Game.getGame
+                        |> GameModels.getInventory
+            in
+                model
+                    |> unlinkSlot slot inv
+                    |> Update.fromModel
+
+        _ ->
+            model
+                |> removeSelection
+                |> Update.fromModel

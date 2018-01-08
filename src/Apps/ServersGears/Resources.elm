@@ -2,7 +2,18 @@ module Apps.ServersGears.Resources exposing (..)
 
 
 type Classes
-    = Todo
+    = WindowRO
+    | WindowPick
+    | WindowFull
+    | MoboSplit
+    | MoboContainer
+    | Toolbar
+    | PanelMobo
+    | PanelInvt
+    | Group
+    | GroupName
+    | GroupAvail
+    | GroupUnav
 
 
 prefix : String

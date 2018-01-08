@@ -7,7 +7,7 @@ import Game.Data as Game
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Components as Components
-import Game.Meta.Types.Components.Type as Components
+import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware
@@ -18,6 +18,7 @@ type alias Model =
     , overrides : Overrides
     , selection : Maybe Selection
     , motherboard : Maybe Motherboard
+    , anyChange : Bool
     }
 
 
@@ -28,7 +29,6 @@ type alias Overrides =
 type Selection
     = SelectingSlot Motherboard.SlotId
     | SelectingEntry Inventory.Entry
-    | SelectingUnlink
 
 
 name : String
@@ -54,15 +54,37 @@ initialModel data =
                 |> Game.getActiveServer
                 |> Servers.getHardware
                 |> Hardware.getMotherboard
+
+        getSlotComponent slotId { component } acu =
+            case component of
+                Nothing ->
+                    acu
+
+                Just id ->
+                    ( toString (Inventory.Component id)
+                    , ( False, Inventory.Component id )
+                    )
+                        :: acu
+
+        overrides =
+            case motherboard of
+                Just motherboard ->
+                    Dict.foldl getSlotComponent [] motherboard.slots
+                        |> Dict.fromList
+
+                Nothing ->
+                    Dict.empty
     in
         { menu =
             Menu.initialMenu
         , overrides =
-            Dict.empty
+            overrides
         , selection =
             Nothing
         , motherboard =
             motherboard
+        , anyChange =
+            False
         }
 
 
@@ -83,94 +105,12 @@ getSelection =
 
 setSelection : Maybe Selection -> Model -> Model
 setSelection selection model =
-    case selection of
-        Just SelectingUnlink ->
-            setSelection Nothing model
-
-        _ ->
-            { model | selection = selection }
+    { model | selection = selection }
 
 
 removeSelection : Model -> Model
 removeSelection =
     setSelection Nothing
-
-
-doSelect : Maybe Selection -> Inventory.Model -> Model -> Model
-doSelect selection inventory model =
-    case getSelection model of
-        Just (SelectingSlot id) ->
-            -- selected a slot before selecting another thing
-            doSelectFromSlot id selection inventory model
-
-        Just (SelectingEntry entry) ->
-            -- selected an entry before selecting another thing
-            doSelectFromEntry entry selection inventory model
-
-        Just SelectingUnlink ->
-            -- impossible case, why selecting a trigger option?
-            removeSelection model
-
-        Nothing ->
-            -- wasn't selecting anything
-            setSelection selection model
-
-
-doSelectFromSlot :
-    Motherboard.SlotId
-    -> Maybe Selection
-    -> Inventory.Model
-    -> Model
-    -> Model
-doSelectFromSlot id selection inventory model =
-    case selection of
-        Just (SelectingSlot id_) ->
-            -- try to swap a linked slot with an empty one
-            case getMotherboard model of
-                Just motherboard ->
-                    -- swap these two slots
-                    swapSlots id id_ inventory motherboard model
-
-                Nothing ->
-                    -- can't perform slot actions without having a motherboard
-                    model
-
-        Just (SelectingEntry entry) ->
-            -- link the slot to the inventory entry
-            linkSlot id entry inventory model
-
-        Just SelectingUnlink ->
-            -- unlink that slot
-            unlinkSlot id inventory model
-
-        Nothing ->
-            -- remove slot selection
-            removeSelection model
-
-
-doSelectFromEntry :
-    Inventory.Entry
-    -> Maybe Selection
-    -> Inventory.Model
-    -> Model
-    -> Model
-doSelectFromEntry entry selection inventory model =
-    case selection of
-        Just (SelectingSlot id) ->
-            -- link the inventory entry to the slot
-            linkSlot id entry inventory model
-
-        Just (SelectingEntry _) ->
-            -- change selection to another inventory entry
-            setSelection selection model
-
-        Just SelectingUnlink ->
-            -- impossible case, can't click unlink when selecting an entry
-            model
-
-        Nothing ->
-            -- remove entry selection
-            removeSelection model
 
 
 isAvailable : Inventory.Model -> Model -> Inventory.Entry -> Bool
@@ -204,200 +144,18 @@ setAvailability entry available inventory model =
         case Inventory.isAvailable entry inventory of
             Just True ->
                 if available then
-                    { model | overrides = remove () }
+                    { model | overrides = remove (), anyChange = True }
                 else
-                    { model | overrides = insert () }
+                    { model | overrides = insert (), anyChange = True }
 
             Just False ->
                 if available then
-                    { model | overrides = insert () }
+                    { model | overrides = insert (), anyChange = True }
                 else
-                    { model | overrides = remove () }
+                    { model | overrides = remove (), anyChange = True }
 
             Nothing ->
                 model
-
-
-removeNetConnection : Motherboard.SlotId -> Inventory.Model -> Model -> Model
-removeNetConnection slotId inventory model =
-    let
-        maybeMotherboard =
-            getMotherboard model
-
-        maybeComponentId =
-            Maybe.andThen (Motherboard.getComponent slotId) maybeMotherboard
-
-        maybeMoboAndCompId =
-            Maybe.uncurry maybeMotherboard maybeComponentId
-
-        maybeNetConnection =
-            case maybeMoboAndCompId of
-                Just ( motherboard, componentId ) ->
-                    motherboard
-                        |> Motherboard.getNC componentId
-                        |> Maybe.map Inventory.NetConnection
-
-                Nothing ->
-                    Nothing
-    in
-        case Maybe.uncurry maybeMoboAndCompId maybeNetConnection of
-            Just ( ( motherboard, compId ), entry ) ->
-                motherboard
-                    |> Motherboard.unlinkNC compId
-                    |> flip setMotherboard model
-                    |> setAvailability entry False inventory
-                    |> removeSelection
-
-            Nothing ->
-                model
-
-
-isMatching :
-    Selection
-    -> Inventory.Model
-    -> Model
-    -> Bool
-isMatching selection inventory model =
-    case getSelection model of
-        Just (SelectingEntry entry) ->
-            case selection of
-                SelectingEntry _ ->
-                    -- allow changing selected entry
-                    True
-
-                SelectingSlot id ->
-                    -- highlight slots of the same entry type
-                    checkWithMotherboard (doesTypesMatch id entry inventory)
-                        model
-
-                SelectingUnlink ->
-                    -- can't unlink from inventory
-                    False
-
-        Just (SelectingSlot id) ->
-            case selection of
-                SelectingEntry entry ->
-                    -- highlight entries of the same slot type
-                    checkWithMotherboard (doesTypesMatch id entry inventory)
-                        model
-
-                SelectingSlot id_ ->
-                    -- allow changing component from slot when they
-                    -- match types
-                    checkWithMotherboard (doesSlotsSwap id id_)
-                        model
-
-                SelectingUnlink ->
-                    -- allow unlinking linked slots
-                    checkWithMotherboard (isSlotFilled id)
-                        model
-
-        Just SelectingUnlink ->
-            -- can't click on unlink when no slot is selected
-            False
-
-        Nothing ->
-            -- allow setting selection to anything
-            True
-
-
-
--- internals - isMatching helpers
-
-
-checkWithMotherboard : (Motherboard -> Bool) -> Model -> Bool
-checkWithMotherboard func model =
-    model
-        |> getMotherboard
-        |> Maybe.map func
-        |> Maybe.withDefault False
-
-
-doesTypesMatch :
-    Motherboard.SlotId
-    -> Inventory.Entry
-    -> Inventory.Model
-    -> Motherboard
-    -> Bool
-doesTypesMatch id entry inventory motherboard =
-    case Motherboard.getSlot id motherboard of
-        Just slot ->
-            case entry of
-                Inventory.Component id ->
-                    -- component and slot types match
-                    let
-                        slotType =
-                            Motherboard.getSlotType slot
-
-                        isEmpty =
-                            Motherboard.slotIsEmpty slot
-
-                        maybeComponentType =
-                            inventory
-                                |> Inventory.getComponent id
-                                |> Maybe.map Components.getType
-                    in
-                        case maybeComponentType of
-                            Just componentType ->
-                                isEmpty && (slotType == componentType)
-
-                            Nothing ->
-                                False
-
-                Inventory.NetConnection nc ->
-                    -- slot is a nic slot and it's empty
-                    let
-                        slotType =
-                            Motherboard.getSlotType slot
-
-                        isEmpty =
-                            Motherboard.slotIsEmpty slot
-                    in
-                        isEmpty && (slotType == Components.NIC)
-
-        Nothing ->
-            -- slot isn't found, why bother checking?
-            False
-
-
-doesSlotsSwap : Motherboard.SlotId -> Motherboard.SlotId -> Motherboard -> Bool
-doesSlotsSwap id1 id2 motherboard =
-    let
-        maybeSlot1 =
-            Motherboard.getSlot id1 motherboard
-
-        maybeSlot2 =
-            Motherboard.getSlot id2 motherboard
-    in
-        case Maybe.uncurry maybeSlot1 maybeSlot2 of
-            Just ( slot1, slot2 ) ->
-                let
-                    slot1T =
-                        Motherboard.getSlotType slot1
-
-                    slot2T =
-                        Motherboard.getSlotType slot2
-
-                    isEmpty =
-                        Motherboard.slotIsEmpty slot2
-                in
-                    isEmpty && (slot1T == slot2T)
-
-            Nothing ->
-                -- slots not found, why bother?
-                False
-
-
-isSlotFilled : Motherboard.SlotId -> Motherboard -> Bool
-isSlotFilled id motherboard =
-    motherboard
-        |> Motherboard.getSlot id
-        |> Maybe.map (Motherboard.slotIsEmpty >> not)
-        |> Maybe.withDefault False
-
-
-
--- internals - doSelect helpers
 
 
 swapSlots :
@@ -409,51 +167,100 @@ swapSlots :
     -> Model
 swapSlots slotIdA slotIdB inventory motherboard model =
     let
-        maybeA =
-            Motherboard.getComponent slotIdA motherboard
+        a =
+            Dict.get slotIdA motherboard.slots
 
-        maybeB =
-            Motherboard.getComponent slotIdB motherboard
+        typeA =
+            Maybe.map (.type_) a
+
+        compA =
+            Maybe.andThen (.component) a
+
+        b =
+            Dict.get slotIdB motherboard.slots
+
+        typeB =
+            Maybe.map (.type_) b
+
+        compB =
+            Maybe.andThen (.component) b
     in
-        case Maybe.uncurry maybeA maybeB of
-            Just ( idA, idB ) ->
-                model
-                    |> linkSlot slotIdA
-                        (Inventory.Component idB)
-                        inventory
-                    |> linkSlot slotIdB
-                        (Inventory.Component idA)
-                        inventory
+        if typeA == typeB then
+            case Maybe.uncurry compA compB of
+                Just ( idA, idB ) ->
+                    model
+                        |> linkSlot slotIdA
+                            (Inventory.Component idB)
+                            inventory
+                            motherboard
+                        |> linkSlot slotIdB
+                            (Inventory.Component idA)
+                            inventory
+                            motherboard
 
-            Nothing ->
-                removeSelection model
+                Nothing ->
+                    setSelection (Just <| SelectingSlot slotIdB) model
+        else
+            setSelection (Just <| SelectingSlot slotIdB) model
 
 
 linkSlot :
     Motherboard.SlotId
     -> Inventory.Entry
     -> Inventory.Model
+    -> Motherboard
     -> Model
     -> Model
-linkSlot slotId entry inventory model =
-    case getMotherboard model of
-        Just motherboard ->
-            let
-                motherboard_ =
-                    case entry of
-                        Inventory.Component id ->
+linkSlot slotId entry inventory motherboard model =
+    let
+        slot =
+            Dict.get slotId motherboard.slots
+
+        typeSlot =
+            Maybe.map (.type_) slot
+
+        ( motherboard_, areSameType ) =
+            case entry of
+                Inventory.Component id ->
+                    let
+                        areSameType =
+                            inventory.components
+                                |> Dict.get id
+                                |> Maybe.map (Components.getType)
+                                |> (==) typeSlot
+
+                        mobo_ =
                             Motherboard.linkComponent slotId id motherboard
+                    in
+                        ( mobo_, areSameType )
 
-                        Inventory.NetConnection nc ->
+                Inventory.NetConnection nc ->
+                    let
+                        isValidSlot { type_, component } =
+                            case component of
+                                Just _ ->
+                                    type_ == NIC
+
+                                Nothing ->
+                                    False
+
+                        mobo_ =
                             Motherboard.linkNC slotId nc motherboard
-            in
-                model
-                    |> setMotherboard motherboard_
-                    |> setAvailability entry False inventory
-                    |> removeSelection
 
-        Nothing ->
-            removeSelection model
+                        areSameType =
+                            slot
+                                |> Maybe.map isValidSlot
+                                |> Maybe.withDefault False
+                    in
+                        ( mobo_, areSameType )
+    in
+        if areSameType then
+            model
+                |> setMotherboard motherboard_
+                |> setAvailability entry False inventory
+                |> removeSelection
+        else
+            setSelection (Just <| SelectingSlot slotId) model
 
 
 unlinkSlot : Motherboard.SlotId -> Inventory.Model -> Model -> Model
