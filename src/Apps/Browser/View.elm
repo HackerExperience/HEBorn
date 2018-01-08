@@ -6,16 +6,27 @@ import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
 import Game.Data as Game
-import Apps.Browser.Messages exposing (..)
-import Apps.Browser.Models exposing (..)
-import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
-import Apps.Browser.Pages.Messages as Pages
-import Apps.Browser.Pages.CommonActions as Common
-import Apps.Browser.Pages.Models as Pages
-import Apps.Browser.Pages.View as Pages
-import Apps.Browser.Resources exposing (Classes(..), prefix)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import UI.Widgets.Modal exposing (modalPickStorage)
+import Apps.Browser.Pages.NotFound.View as NotFound
+import Apps.Browser.Pages.Home.View as Home
+import Apps.Browser.Pages.Webserver.View as Webserver
+import Apps.Browser.Pages.Profile.View as Profile
+import Apps.Browser.Pages.Whois.View as Whois
+import Apps.Browser.Pages.DownloadCenter.View as DownloadCenter
+import Apps.Browser.Pages.ISP.View as ISP
+import Apps.Browser.Pages.Bank.View as Bank
+import Apps.Browser.Pages.Store.View as Store
+import Apps.Browser.Pages.BTC.View as BTC
+import Apps.Browser.Pages.FBI.View as FBI
+import Apps.Browser.Pages.News.View as News
+import Apps.Browser.Pages.Bithub.View as Bithub
+import Apps.Browser.Pages.MissionCenter.View as MissionCenter
+import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
+import Apps.Browser.Pages.Configs exposing (..)
+import Apps.Browser.Resources exposing (Classes(..), prefix)
+import Apps.Browser.Messages exposing (..)
+import Apps.Browser.Models exposing (..)
 
 
 { id, class, classList } =
@@ -120,7 +131,7 @@ viewTabLabel : Tabs -> Bool -> Int -> ( List (Attribute Msg), List (Html Msg) )
 viewTabLabel src _ tab =
     getTab tab src
         |> getPage
-        |> Pages.getTitle
+        |> getTitle
         |> text
         |> List.singleton
         |> (,) [ menuTab tab ]
@@ -135,53 +146,11 @@ viewTabs b =
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
-pageMsgIntersept : Pages.Msg -> Msg
-pageMsgIntersept msg =
-    case msg of
-        Pages.GlobalMsg msg ->
-            case msg of
-                Common.GoAddress url ->
-                    ActiveTabMsg <| GoAddress url
-
-                Common.NewTabIn url ->
-                    NewTabIn url
-
-                Common.Crack nip ->
-                    ActiveTabMsg <| Crack nip
-
-                Common.AnyMap nip ->
-                    ActiveTabMsg <| AnyMap nip
-
-                Common.Login nip password ->
-                    ActiveTabMsg <| Login nip password
-
-                Common.Cracked target password ->
-                    ActiveTabMsg <| Cracked target password
-
-                Common.PublicDownload origin file ->
-                    ActiveTabMsg <| EnterModal <| Just <| ForDownload origin file
-
-                Common.LoginFailed ->
-                    ActiveTabMsg <| LoginFailed
-
-                Common.OpenApp app ->
-                    OpenApp app
-
-                Common.SelectEndpoint ->
-                    SelectEndpoint
-
-                Common.Logout ->
-                    Logout
-
-        _ ->
-            ActiveTabMsg <| PageMsg msg
-
-
 viewPg : Game.Data -> Tab -> Html Msg
 viewPg data { page, modal } =
     div
         [ class [ PageContent ] ]
-        [ (Html.map pageMsgIntersept (Pages.view data page))
+        [ viewPage data page
         , case modal of
             Just (ForDownload source file) ->
                 let
@@ -192,11 +161,64 @@ viewPg data { page, modal } =
 
                     onPick chosen =
                         chosen
-                            |> Maybe.map (PublicDownload source file)
-                            |> Maybe.withDefault (ActiveTabMsg <| EnterModal Nothing)
+                            |> Maybe.map (ReqDownload source file)
+                            |> Maybe.withDefault
+                                (ActiveTabMsg <| EnterModal Nothing)
                 in
                     modalPickStorage storages onPick
 
             Nothing ->
                 text ""
         ]
+
+
+viewPage : Game.Data -> Page -> Html Msg
+viewPage data page =
+    case page of
+        NotFoundModel _ ->
+            NotFound.view
+
+        HomeModel ->
+            Home.view homeConfig
+
+        WebserverModel page ->
+            Webserver.view webserverConfig data page
+
+        ProfileModel ->
+            Profile.view
+
+        WhoisModel ->
+            Whois.view
+
+        DownloadCenterModel page ->
+            DownloadCenter.view downloadCenterConfig data page
+
+        ISPModel ->
+            ISP.view
+
+        BankModel page ->
+            Bank.view bankConfig page
+
+        StoreModel ->
+            Store.view
+
+        BTCModel ->
+            BTC.view
+
+        FBIModel ->
+            FBI.view
+
+        NewsModel ->
+            News.view
+
+        BithubModel ->
+            Bithub.view
+
+        MissionCenterModel ->
+            MissionCenter.view
+
+        LoadingModel _ ->
+            div [] []
+
+        BlankModel ->
+            div [] []

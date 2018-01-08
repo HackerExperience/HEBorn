@@ -9,13 +9,15 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import Apps.Browser.Resources exposing (Classes(..), prefix)
-import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.HackingToolkit.Model exposing (..)
+import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias Config msg =
     { onInput : String -> msg
-    , onCommonAction : CommonActions -> msg
+    , onLogin : NIP -> String -> msg
+    , onCrack : NIP -> msg
+    , onAnyMap : NIP -> msg
     , onEnterPanel : msg
     , showPassword : Bool
     }
@@ -66,8 +68,7 @@ loginForm config model =
                     []
                 , button
                     [ inputText
-                        |> Login model.target
-                        |> config.onCommonAction
+                        |> config.onLogin model.target
                         |> onClick
                     ]
                     [ text "Go" ]
@@ -87,9 +88,9 @@ toggleBtn { onEnterPanel } =
 
 
 crackBtn : Config msg -> Model -> Html msg
-crackBtn config model =
+crackBtn { onCrack } model =
     div
-        [ onClick <| config.onCommonAction <| Crack model.target
+        [ onClick <| onCrack model.target
         ]
         [ text "C"
         , br [] []
@@ -98,9 +99,9 @@ crackBtn config model =
 
 
 anyMapBtn : Config msg -> Model -> Html msg
-anyMapBtn config model =
+anyMapBtn { onAnyMap } model =
     div
-        [ onClick <| config.onCommonAction <| AnyMap model.target
+        [ onClick <| onAnyMap model.target
         ]
         [ text "M"
         , br [] []

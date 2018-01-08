@@ -4,31 +4,13 @@ import Dict exposing (Dict)
 import Utils.List as List
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
+import Game.Web.Types as Web
 import Apps.Config exposing (..)
+import Apps.Browser.Pages.NotFound.Models as PageNotFound
+import Apps.Browser.Pages.Webserver.Models as PageWebserver
+import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
+import Apps.Browser.Pages.Bank.Models as PageBank
 import Apps.Browser.Menu.Models as Menu
-import Apps.Browser.Pages.Models as Pages
-
-
-type alias URL =
-    String
-
-
-type alias BrowserHistory =
-    List ( URL, Pages.Model )
-
-
-type alias Tab =
-    { addressBar : URL
-    , lastURL : URL
-    , page : Pages.Model
-    , previousPages : BrowserHistory
-    , nextPages : BrowserHistory
-    , modal : Maybe ModalAction
-    }
-
-
-type alias Tabs =
-    Dict Int Tab
 
 
 type alias Model =
@@ -40,6 +22,48 @@ type alias Model =
     , lastTab : Int
     , menu : Menu.Model
     }
+
+
+type alias Tabs =
+    Dict Int Tab
+
+
+type alias Tab =
+    { addressBar : URL
+    , lastURL : URL
+    , page : Page
+    , previousPages : BrowserHistory
+    , nextPages : BrowserHistory
+    , modal : Maybe ModalAction
+    }
+
+
+type Page
+    = NotFoundModel PageNotFound.Model
+    | HomeModel
+    | WebserverModel PageWebserver.Model
+    | ProfileModel
+    | WhoisModel
+    | DownloadCenterModel DownloadCenter.Model
+    | ISPModel
+    | BankModel PageBank.Model
+    | StoreModel
+    | BTCModel
+    | FBIModel
+    | NewsModel
+    | BithubModel
+    | MissionCenterModel
+      -- Virtual ones
+    | LoadingModel String
+    | BlankModel
+
+
+type alias URL =
+    String
+
+
+type alias BrowserHistory =
+    List ( URL, Page )
 
 
 type ModalAction
@@ -58,7 +82,7 @@ title model =
             getNowTab model
 
         pgTitle =
-            Pages.getTitle (getPage app)
+            getTitle (getPage app)
 
         posfix =
             if (String.length pgTitle) > 12 then
@@ -87,7 +111,7 @@ initTab : Tab
 initTab =
     { addressBar = "about:home"
     , lastURL = "about:home"
-    , page = Pages.HomeModel
+    , page = HomeModel
     , previousPages = []
     , nextPages = []
     , modal = Nothing
@@ -98,7 +122,7 @@ emptyTab : Tab
 emptyTab =
     { addressBar = ""
     , lastURL = "about:blank"
-    , page = Pages.BlankModel
+    , page = BlankModel
     , previousPages = []
     , nextPages = []
     , modal = Nothing
@@ -119,7 +143,7 @@ initialModel me =
     }
 
 
-getPage : Tab -> Pages.Model
+getPage : Tab -> Page
 getPage browser =
     browser.page
 
@@ -139,13 +163,13 @@ getNextPages browser =
     browser.nextPages
 
 
-gotoPage : String -> Pages.Model -> Tab -> Tab
+gotoPage : String -> Page -> Tab -> Tab
 gotoPage url page tab =
     if page /= getPage tab then
         let
             previousPages =
                 -- Loading pages should not be added to history
-                if (Pages.isLoading tab.page) then
+                if (isLoading tab.page) then
                     getPreviousPages tab
                 else
                     ( tab.lastURL, tab.page )
@@ -202,7 +226,7 @@ reorderHistory :
     (Tab -> BrowserHistory)
     -> (Tab -> BrowserHistory)
     -> Tab
-    -> Maybe ( ( URL, Pages.Model ), BrowserHistory, BrowserHistory )
+    -> Maybe ( ( URL, Page ), BrowserHistory, BrowserHistory )
 reorderHistory getFromList getToList tab =
     let
         from =
@@ -364,3 +388,111 @@ deleteTab nTab model =
 leaveModal : Tab -> Tab
 leaveModal tab =
     { tab | modal = Nothing }
+
+
+initialPage : Web.Site -> Page
+initialPage ({ url, type_, meta } as site) =
+    case type_ of
+        Web.NotFound ->
+            NotFoundModel <| PageNotFound.initialModel url
+
+        Web.Home ->
+            HomeModel
+
+        Web.Webserver content ->
+            WebserverModel <| PageWebserver.initialModel content meta
+
+        Web.Profile ->
+            ProfileModel
+
+        Web.Whois ->
+            WhoisModel
+
+        Web.DownloadCenter content ->
+            DownloadCenterModel <| DownloadCenter.initialModel content meta
+
+        Web.ISP ->
+            ISPModel
+
+        Web.Bank content ->
+            BankModel <| PageBank.initialModel url content
+
+        Web.Store ->
+            StoreModel
+
+        Web.BTC ->
+            BTCModel
+
+        Web.FBI ->
+            FBIModel
+
+        Web.News ->
+            NewsModel
+
+        Web.Bithub ->
+            BithubModel
+
+        Web.MissionCenter ->
+            MissionCenterModel
+
+
+getTitle : Page -> String
+getTitle page =
+    case page of
+        NotFoundModel page ->
+            PageNotFound.getTitle page
+
+        HomeModel ->
+            "Home"
+
+        WebserverModel page ->
+            PageWebserver.getTitle page
+
+        ProfileModel ->
+            "Your Profile"
+
+        WhoisModel ->
+            "Whois"
+
+        DownloadCenterModel _ ->
+            "Download Center"
+
+        ISPModel ->
+            "Internet Provider"
+
+        BankModel page ->
+            PageBank.getTitle page
+
+        StoreModel ->
+            "Store"
+
+        BTCModel ->
+            "BTV"
+
+        FBIModel ->
+            "Federal Bureal Intelligence"
+
+        NewsModel ->
+            "News"
+
+        BithubModel ->
+            "Software Reasearch"
+
+        MissionCenterModel ->
+            "Head Quarters"
+
+        LoadingModel _ ->
+            "Loading..."
+
+        BlankModel ->
+            "New Tab"
+
+
+isLoading : Page -> Bool
+isLoading page =
+    case page of
+        LoadingModel _ ->
+            True
+
+        _ ->
+            False

@@ -6,6 +6,7 @@ import Game.Data as Game
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
+import Apps.Browser.Pages.DownloadCenter.Config exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
@@ -19,26 +20,29 @@ import Apps.Apps as Apps
     Html.CssHelpers.withNamespace prefix
 
 
-hackingToolkitConfig : Bool -> HackingToolkit.Config Msg
-hackingToolkitConfig showPassword =
-    { onInput = UpdatePasswordField
-    , onCommonAction = GlobalMsg
-    , onEnterPanel = SetShowingPanel True
+hackingToolkitConfig : Config msg -> Bool -> HackingToolkit.Config msg
+hackingToolkitConfig { toMsg, onLogin, onCrack, onAnyMap } showPassword =
+    { onInput = UpdatePasswordField >> toMsg
+    , onLogin = onLogin
+    , onCrack = onCrack
+    , onAnyMap = onAnyMap
+    , onEnterPanel = toMsg <| SetShowingPanel True
     , showPassword = showPassword
     }
 
 
-publicFilesConfig : NIP -> PublicFiles.Config Msg
-publicFilesConfig source =
-    { source = source
-    , onCommonAction = GlobalMsg
-    }
+publicFilesConfig : Config msg -> NIP -> PublicFiles.Config msg
+publicFilesConfig { onPublicDownload } source =
+    { onPublicDownload = onPublicDownload source }
 
 
-hackingPanelConfig : HackingPanel.Config Msg
-hackingPanelConfig =
-    { onCommonAction = GlobalMsg
-    , onSetShowingPanel = SetShowingPanel
+hackingPanelConfig : Config msg -> HackingPanel.Config msg
+hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onOpenApp } =
+    { onLogout = onLogout
+    , onSelectEndpoint = onSelectEndpoint
+    , onAnyMap = onAnyMap
+    , onOpenApp = onOpenApp
+    , onSetShowingPanel = SetShowingPanel >> toMsg
     , apps =
         [ Apps.TaskManagerApp
         , Apps.ConnManagerApp
@@ -50,8 +54,8 @@ hackingPanelConfig =
     }
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Game.Data -> Model -> Html msg
+view config data model =
     let
         -- this is cheating:
         cid =
@@ -61,25 +65,25 @@ view data model =
             List.member cid (Game.getEndpoints data)
     in
         if (model.showingPanel && endpointMember) then
-            viewPos model.toolkit.target
+            viewPos config model.toolkit.target
         else
-            viewPre data (not endpointMember) model
+            viewPre config data (not endpointMember) model
 
 
-viewPre : Game.Data -> Bool -> Model -> Html Msg
-viewPre data showPassword model =
+viewPre : Config msg -> Game.Data -> Bool -> Model -> Html msg
+viewPre config data showPassword model =
     div [ class [ AutoHeight ] ]
         [ div [ class [ DummyTitle ] ]
             [ text <| "Welcome to " ++ model.title ++ "!" ]
         , publicFiles
-            (publicFilesConfig model.toolkit.target)
+            (publicFilesConfig config model.toolkit.target)
             model.publicFiles
         , hackingToolkit
-            (hackingToolkitConfig showPassword)
+            (hackingToolkitConfig config showPassword)
             model.toolkit
         ]
 
 
-viewPos : NIP -> Html Msg
-viewPos nip =
-    hackingPanel hackingPanelConfig nip
+viewPos : Config msg -> NIP -> Html msg
+viewPos config nip =
+    hackingPanel (hackingPanelConfig config) nip

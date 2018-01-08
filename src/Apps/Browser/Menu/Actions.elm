@@ -3,7 +3,6 @@ module Apps.Browser.Menu.Actions exposing (actionHandler)
 import Game.Data as Game
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (Msg)
-import Apps.Browser.Pages.Models as Pages
 import Apps.Browser.Menu.Messages exposing (MenuAction(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
@@ -55,7 +54,7 @@ actionHandler data action model =
                     getNowTab model
 
                 tab_ =
-                    gotoPage "about:blank" Pages.BlankModel app
+                    gotoPage "about:blank" BlankModel app
 
                 model_ =
                     setNowTab tab_ model

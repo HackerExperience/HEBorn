@@ -9,11 +9,13 @@ import Html.Events exposing (onClick)
 import Apps.Apps as Apps
 import Apps.Models as Apps
 import Game.Meta.Types.Network exposing (NIP)
-import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 
 
 type alias Config msg =
-    { onCommonAction : CommonActions -> msg
+    { onLogout : msg
+    , onSelectEndpoint : msg
+    , onAnyMap : NIP -> msg
+    , onOpenApp : Apps.App -> msg
     , onSetShowingPanel : Bool -> msg
     , apps : List Apps.App
     , allowAnyMap : Bool
@@ -22,9 +24,9 @@ type alias Config msg =
 
 
 logout : Config msg -> Html msg
-logout { onCommonAction } =
+logout { onLogout } =
     li
-        [ onClick <| onCommonAction Logout ]
+        [ onClick <| onLogout ]
         [ text "Logout" ]
 
 
@@ -43,16 +45,16 @@ baseOptions config =
 
 
 selectEndpoint : Config msg -> Html msg
-selectEndpoint { onCommonAction } =
+selectEndpoint { onSelectEndpoint } =
     li
-        [ onClick <| onCommonAction SelectEndpoint ]
+        [ onClick <| onSelectEndpoint ]
         [ text "Open Remote Desktop" ]
 
 
 anyMap : Config msg -> NIP -> Html msg
-anyMap { onCommonAction } nip =
+anyMap { onAnyMap } nip =
     li
-        [ onClick <| onCommonAction <| AnyMap nip ]
+        [ onClick <| onAnyMap nip ]
         [ text "Start AnyMap" ]
 
 
@@ -83,7 +85,7 @@ hackingPanel config nip =
 
 
 openApp : Config msg -> Apps.App -> Html msg
-openApp { onCommonAction } app =
+openApp { onOpenApp } app =
     li
-        [ onClick <| onCommonAction <| OpenApp app ]
+        [ onClick <| onOpenApp app ]
         [ text ("Open " ++ Apps.name app) ]

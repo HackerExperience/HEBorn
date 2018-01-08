@@ -6,13 +6,11 @@ import Html.CssHelpers
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
 import Apps.Browser.Resources exposing (Classes(..), prefix)
-import Apps.Browser.Pages.CommonActions exposing (CommonActions(..))
 import Apps.Browser.Widgets.PublicFiles.Model exposing (..)
 
 
 type alias Config msg =
-    { source : NIP
-    , onCommonAction : CommonActions -> msg
+    { onPublicDownload : Filesystem.FileEntry -> msg
     }
 
 
@@ -22,12 +20,11 @@ type alias Config msg =
 
 publicFiles : Config msg -> Model -> Html msg
 publicFiles config model =
-    ul [] <|
-        List.map (file config) model
+    ul [] <| List.map (file config) model
 
 
 file : Config msg -> Filesystem.FileEntry -> Html msg
-file config fileEntry =
+file { onPublicDownload } fileEntry =
     fileEntry
         |> Filesystem.toFile
         |> Filesystem.getType
@@ -49,8 +46,7 @@ file config fileEntry =
             )
         |> li
             [ fileEntry
-                |> PublicDownload config.source
-                |> config.onCommonAction
+                |> onPublicDownload
                 |> onClick
             ]
 
