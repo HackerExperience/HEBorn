@@ -50,7 +50,7 @@ server : Time -> Maybe GatewayCache -> Decoder Server
 server now gatewayCache =
     decode Server
         |> optional "name" string ""
-        |> optional "server_type" serverType Desktop
+        |> required "server_type" serverType
         |> andThen decodeNIPs
         |> optionalMaybe "coordinates" float
         |> required "main_storage" string
@@ -86,10 +86,13 @@ serverType =
     let
         decodeType str =
             case str of
-                "Desktop" ->
+                "desktop" ->
                     succeed Desktop
 
-                "Mobile" ->
+                "desktop_story" ->
+                    succeed Desktop
+
+                "mobile" ->
                     succeed Mobile
 
                 str ->
