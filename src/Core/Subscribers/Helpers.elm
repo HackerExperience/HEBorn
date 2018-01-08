@@ -12,6 +12,7 @@ import OS.Toasts.Messages as Toasts
 import Game.Messages as Game
 import Game.Meta.Types.Context exposing (Context)
 import Game.Account.Messages as Account
+import Game.Account.Finances.Messages as Finances
 import Game.LogStream.Messages as LogStream
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
@@ -126,6 +127,11 @@ serverNotif id =
 accountNotif : Notifications.Msg -> Core.Msg
 accountNotif =
     Account.NotificationsMsg >> account
+
+
+accountFinances : Finances.Msg -> Core.Msg
+accountFinances =
+    Account.FinancesMsg >> account
 
 
 sessionManager : SessionManager.Msg -> Core.Msg
