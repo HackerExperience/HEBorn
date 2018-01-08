@@ -1,4 +1,4 @@
-module UI.Widgets.Motherboard exposing (..)
+module UI.Widgets.Motherboard exposing (guessMobo, defaultMobo)
 
 import Html exposing (Html)
 import Dict
@@ -6,6 +6,12 @@ import Svg exposing (svg, use)
 import Svg.Attributes exposing (..)
 import Utils.Svg.Events exposing (onClickMe)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
+
+
+guessMobo : (Motherboard.SlotId -> msg) -> Motherboard -> Html msg
+guessMobo =
+    -- TODO: When others mobos appears, add a case here to autoselect them
+    defaultMobo
 
 
 defaultMobo : (Motherboard.SlotId -> msg) -> Motherboard -> Html msg
@@ -44,6 +50,10 @@ defaultMobo select { slots } =
             , use [ hasHDD, onHDD, xlinkHref "images/mobo.svg#Hard_Drive_1_" ] []
             , use [ hasNIC, onNIC, xlinkHref "images/mobo.svg#GPU_1_" ] []
             ]
+
+
+
+-- internals
 
 
 hasComponent : String -> Motherboard.Slots -> Svg.Attribute msg

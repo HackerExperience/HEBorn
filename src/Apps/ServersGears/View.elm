@@ -107,7 +107,7 @@ viewMotherboard inventory motherboard model =
         div [ class [ PanelMobo ], onClick <| Select Nothing ]
             [ selectedComponent inventory motherboard model
             , div [ class [ MoboContainer ] ]
-                [ defaultMobo (SelectingSlot >> Just >> Select) motherboard ]
+                [ guessMobo (SelectingSlot >> Just >> Select) motherboard ]
             ]
 
 
