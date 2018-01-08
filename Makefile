@@ -15,13 +15,18 @@ JS_PACKAGE_MNGR := $(shell which yarn || which npm)
 # Setup
 ################################################################################
 
-# Prepare all dependencies
+# Prepare release dependencies
 setup:
 	git submodule init
 	git submodule update
 	$(JS_PACKAGE_MNGR) install
 	elm-package install -y
 	chmod +x node_modules/.bin/* stats/*.sh
+
+# Prepare all dependencies
+setup-tests: setup
+	cd tests
+	elm-package install -y
 
 # In case you prefer to use your own binaries, must run before setup
 prefer-native:
