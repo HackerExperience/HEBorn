@@ -129,7 +129,7 @@ playerNetwork : (List NIP -> NIP -> a) -> Decoder a
 playerNetwork func =
     let
         apply nips =
-            case List.head <| Network.filterInternet nips of
+            case List.head nips of
                 Just nip ->
                     succeed <| func nips nip
 
