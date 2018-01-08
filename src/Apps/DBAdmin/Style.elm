@@ -44,6 +44,20 @@ css =
             ]
         , class BottomButton
             [ cursor pointer ]
+        , class FinanceEntry
+            [ displayFlex
+            , padding2 (px 4) (px 6)
+            , children
+                [ everything
+                    [ display block ]
+                , class RightSide
+                    []
+                , class LeftSide
+                    [ alignSelf flexStart
+                    , flex (int 1)
+                    ]
+                ]
+            ]
         , class BoxifyMe
             [ border3 (px 1) solid (hex "444")
             , padding (px 2)
