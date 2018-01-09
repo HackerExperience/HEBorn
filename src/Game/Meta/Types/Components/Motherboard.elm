@@ -129,17 +129,21 @@ getSlotComponent =
 
 slotIsEmpty : Slot -> Bool
 slotIsEmpty { component } =
-    case component of
-        Just _ ->
-            False
-
-        Nothing ->
-            True
+    Maybe.isNothing component
 
 
 getNCs : Motherboard -> NetConnections
 getNCs =
     .ncs
+
+
+slotHasNC : SlotId -> Motherboard -> Bool
+slotHasNC slotId motherboard =
+    motherboard
+        |> getSlot slotId
+        |> Maybe.andThen getSlotComponent
+        |> Maybe.map (flip getNC motherboard)
+        |> Maybe.isJust
 
 
 encode : Motherboard -> Value

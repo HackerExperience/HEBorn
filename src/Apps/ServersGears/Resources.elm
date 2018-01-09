@@ -14,6 +14,7 @@ type Classes
     | GroupName
     | GroupAvail
     | GroupUnav
+    | Highlight
 
 
 prefix : String

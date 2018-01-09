@@ -134,9 +134,35 @@ onSelectMsg data selection_ model =
                     |> linkSlot slot entry inv mobo
                     |> Update.fromModel
 
+            ( Just mobo, Just (SelectingSlot slot), Just (SelectingEntry entry) ) ->
+                let
+                    fixSelection model_ =
+                        if model_.selection == model.selection then
+                            highlightComponent entry inv selection_ model_
+                        else
+                            model_
+                in
+                    model
+                        |> linkSlot slot entry inv mobo
+                        |> fixSelection
+                        |> Update.fromModel
+
+            ( Just mobo, _, Just (SelectingSlot slotId) ) ->
+                model
+                    |> highlightSlot slotId mobo selection_
+                    |> Update.fromModel
+
+            ( _, _, Just (SelectingEntry entry) ) ->
+                model
+                    |> highlightComponent entry inv selection_
+                    |> Update.fromModel
+
             _ ->
-                Update.fromModel <|
-                    { model | selection = selection_ }
+                model
+                    |> setSelection
+                        selection_
+                        Nothing
+                    |> Update.fromModel
 
 
 onUnlinkMsg : Game.Data -> Model -> UpdateResponse
