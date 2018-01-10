@@ -27,7 +27,7 @@ css =
                         , firstChild
                             [ borderLeft (px 0) ]
                         ]
-                    , borderBottom3 (px 1) solid black
+                    , borderTop3 (px 1) solid black
                     ]
                 , class MoboSplit
                     [ flex (int 1)
@@ -72,4 +72,6 @@ css =
                     ]
                 ]
             ]
+        , class Highlight
+            [ color hyperlink ]
         ]

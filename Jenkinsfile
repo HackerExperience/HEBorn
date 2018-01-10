@@ -3,88 +3,40 @@
 node('elm') {
   stage('Pre-build') {
     step([$class: 'WsCleanup'])
-
+    
     env.BUILD_VERSION = sh(script: 'date +%Y.%m.%d%H%M', returnStdout: true).trim()
     def ARTIFACT_PATH = "${env.BRANCH_NAME}/${env.BUILD_VERSION}"
 
     checkout scm
 
-    sh 'gmake prefer-native'
-    sh 'gmake setup'
+    sh 'gmake prefer-native setup setup-tests'
+  }
 
-    stash name: 'source', useDefaultExcludes: false
+  stage('Lint') {
+    sh 'gmake lint'
+  }
+
+  stage('Test') {
+    sh 'gmake test-long'
+  }
+
+  stage('Compile') {
+    withEnv([
+      'HEBORN_API_HTTP_URL=https://api.hackerexperience.com/v1',
+      'HEBORN_API_WEBSOCKET_URL=wss://api.hackerexperience.com/websocket',
+      "HEBORN_VERSION=${env.BUILD_VERSION}"
+      ]) {
+      sh 'gmake compile release'
+    }
   }
 }
 
-parallel(
-  'Lint': {
-    node('elm') {
-      stage('Lint') {
-        step([$class: 'WsCleanup'])
-
-        unstash 'source'
-
-        sh 'gmake lint'
-      }
+if (env.BRANCH_NAME == 'master') {
+  node('!master') {
+    stage('Save artifacts') {
+      sh "aws s3 cp build/release.tar.gz s3://he2-releases/heborn/${env.BRANCH_NAME}/${env.BUILD_VERSION}.tar.gz --storage-class REDUCED_REDUNDANCY"
     }
-  },
-  'Test': {
-    node('elm') {
-      stage('Test') {
-        step([$class: 'WsCleanup'])
 
-        unstash 'source'
-        // `stash` won't keep file permissions (why??)
-        // so we have to fix them here
-        sh 'chmod +x node_modules/.bin/* stats/*.sh'
-
-        sh 'gmake test-long'
-      }
-    }
-  },
-  'Compile': {
-    node('elm') {
-      stage('Compile') {
-        step([$class: 'WsCleanup'])
-
-        unstash 'source'
-        // `stash` won't keep file permissions (why??)
-        // so we have to fix them here
-        sh 'chmod +x node_modules/.bin/* stats/*.sh'
-
-        // Reuse existing compiled files
-        // sh 'cp -r ~/.elm/elm-stuff/* elm-stuff/'
-
-        withEnv([
-          'HEBORN_API_HTTP_URL=https://api.hackerexperience.com/v1',
-          'HEBORN_API_WEBSOCKET_URL=wss://api.hackerexperience.com/websocket',
-          "HEBORN_VERSION=${env.BUILD_VERSION}"
-          ]) {
-          sh 'gmake compile'
-          sh 'gmake release'
-        }
-
-        // Backup compiled files for later reuse
-        // TODO: It's being saved but it's not actually working, not sure why
-        // sh 'rm -rf ~/.elm/elm-stuff/* && cp -r elm-stuff/* ~/.elm/elm-stuff'
-
-        stash 'release'
-      }
-    }
-  }
-)
-
-node('!master') {
-
-  stage('Save artifacts') {
-    step([$class: 'WsCleanup'])
-    unstash 'release'
-
-    sh "aws s3 cp build/release.tar.gz s3://he2-releases/heborn/${env.BRANCH_NAME}/${env.BUILD_VERSION}.tar.gz --storage-class REDUCED_REDUNDANCY"
-
-  }
-
-  if (env.BRANCH_NAME == 'master'){
     lock(resource: 'heborn-deployment', inversePrecedence: true) {
       stage('Deploy') {
         sh "ssh deployer deploy heborn prod --branch master --version ${env.BUILD_VERSION}"
@@ -93,4 +45,3 @@ node('!master') {
     milestone()
   }
 }
-

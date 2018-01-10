@@ -57,11 +57,11 @@ editablePanel data model =
         case getMotherboard model of
             Just motherboard ->
                 div [ class [ WindowFull ] ]
-                    [ lazy2 toolbar motherboard model
-                    , div [ class [ MoboSplit ] ]
+                    [ div [ class [ MoboSplit ] ]
                         [ lazy (viewMotherboard inventory motherboard) model
-                        , lazy2 viewInventory inventory model
+                        , lazy2 viewInventory (filterMobo inventory) model
                         ]
+                    , lazy2 toolbar motherboard model
                     ]
 
             Nothing ->
@@ -107,7 +107,11 @@ viewMotherboard inventory motherboard model =
         div [ class [ PanelMobo ], onClick <| Select Nothing ]
             [ selectedComponent inventory motherboard model
             , div [ class [ MoboContainer ] ]
-                [ guessMobo (SelectingSlot >> Just >> Select) motherboard ]
+                [ guessMobo
+                    (SelectingSlot >> Just >> Select)
+                    model.highlight
+                    motherboard
+                ]
             ]
 
 
@@ -150,11 +154,18 @@ viewInventory inventory model =
         |> div [ class [ PanelInvt ] ]
 
 
+filterMobo : Inventory.Model -> Inventory.Model
+filterMobo inventory =
+    inventory.components
+        |> Dict.filter (\_ compo -> (Components.getType compo) /= MOB)
+        |> (\c -> { inventory | components = c })
+
+
 viewPickMobo : Inventory.Model -> Model -> Html Msg
 viewPickMobo inventory model =
     inventory.components
         |> Dict.filter (\_ compo -> (Components.getType compo) == MOB)
-        |> (\c -> { inventory | components = c })
+        |> (\c -> { inventory | components = c, ncs = Dict.empty })
         |> flip viewInventory model
 
 
@@ -178,8 +189,30 @@ viewEntryEnabled :
     -> Model
     -> Html Msg
 viewEntryEnabled selection entry inventory model =
-    div [ onClick <| Select <| Just selection ] <|
-        viewEntryContents entry inventory
+    let
+        isHighlighted =
+            case entry of
+                Inventory.Component id ->
+                    inventory.components
+                        |> Dict.get id
+                        |> Maybe.map (Components.getType)
+                        |> (==) model.highlight
+
+                Inventory.NetConnection nc ->
+                    model.highlight == Just NIC
+
+        highlight =
+            if isHighlighted then
+                class [ Highlight ]
+            else
+                class []
+
+        select =
+            onClick <| Select <| Just selection
+    in
+        inventory
+            |> viewEntryContents entry
+            |> div [ select, highlight ]
 
 
 viewEntryContents : Inventory.Entry -> Inventory.Model -> List (Html Msg)

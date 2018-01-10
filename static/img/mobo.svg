@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-  <symbol viewBox="420 0 1080 1080" id="Motherboard"><g fill="#FFF" fill-opacity="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2">
+  <symbol viewBox="420 0 1080 1080" id="Motherboard"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2">
     <path d="M470 80h981v925H470z"/>
     <circle cx="500" cy="108" r="12"/>
     <circle cx="500" cy="974" r="12"/>
@@ -7,30 +7,33 @@
     <circle cx="1425" cy="108" r="12"/>
     <path d="M1013 524h-52V119v1H555v519h30V150h345v404l2 1h51v235h28V524zM555 790h263v166H555z"/>
   </g></symbol>
-  <symbol viewBox="420 0 1080 1080" id="CPU_1_"><g fill="#FFF" fill-opacity="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
+  <symbol viewBox="420 0 1080 1080" id="CPU_1"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
     <path d="M1084 491h297v298h-297z"/>
     <path d="M1129 542h201v200h-201z"/>
     <path d="M1174 586h112v111h-112zm185-101v-17m-15 17v-17m-19 17v-17m-12 17v-17m-16 17v-17m-18 17v-17m-16 17v-17m-15 17v-17m-19 17v-17m-15 17v-17m-13 17v-17m-18 17v-17m-14 17v-17m-17 17v-17m-17 17v-17m-15 17v-17m-15 17v-17m-17 17v-17m286 17v-17m-297 50h-17m17 13h-17m17 15h-17m17 18h-17m17 14h-17m17 17h-17m17 13h-17m17 20h-17m17 13h-17m17 16h-17m17 17h-17m17 15h-17m17 15h-17m17 19h-17m17 15h-17m17 13h-17m17 21h-17m17 13h-17m17-286h-17m45 295v15m15-15v15m15-15v15m17-15v15m17-15v15m14-15v15m18-15v15m13-15v15m15-15v15m19-15v15m15-15v15m16-15v15m18-15v15m16-15v15m12-15v15m19-15v15m15-15v15m15-15v15m-286-15v15m297-37h15m-15-21h15m-15-13h15m-15-15h15m-15-19h15m-15-15h15m-15-15h15m-15-17h15m-15-16h15m-15-13h15m-15-20h15m-15-13h15m-15-17h15m-15-14h15m-15-18h15m-15-15h15m-15-13h15m-15-19h15m-15 286h15"/>
   </g></symbol>
-  <symbol viewBox="420 0 1080 1080" id="RAM_1_"><g fill="#FFF" fill-opacity="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
-    <path d="M1119 948v-19m-14 19v-19m-15 19v-19m-15 19v-19m-16 19v-19m-13 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-13 19v-19m266 19v-19m15 19v-19m210 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m163 19v-19m15 19v-19m-521-76h41v68h-41zm54 0h42v68h-42zm55 0h42v68h-42zm56 0h42v68h-42zm74 0h42v68h-42zm56 0h42v68h-42zm129 0h42v68h-42zm55 0h42v68h-42zm-109 0h41v68h-41z"/>
+  <symbol viewBox="420 0 1080 1080" id="RAM_1"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
     <path d="M849 839v117h318v-14c0-6 6-12 12-12s11 6 11 12v14h213V839H849z"/>
+    <path d="M1119 948v-19m-14 19v-19m-15 19v-19m-15 19v-19m-16 19v-19m-13 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-13 19v-19m266 19v-19m15 19v-19m210 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-15 19v-19m-14 19v-19m-15 19v-19m163 19v-19m15 19v-19m-521-76h41v68h-41zm54 0h42v68h-42zm55 0h42v68h-42zm56 0h42v68h-42zm74 0h42v68h-42zm56 0h42v68h-42zm129 0h42v68h-42zm55 0h42v68h-42zm-109 0h41v68h-41z"/>
   </g></symbol>
-  <symbol viewBox="420 0 1080 1080" id="Hard_Drive_1_"><g fill="#FFF" fill-opacity="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
+  <symbol viewBox="420 0 1080 1080" id="HDD_1"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
     <path d="M1029 160h374v277h-374z"/>
+    <path d="M1257 190c20 19 39 46 46 76l33 4 10 4c13 6 19 21 14 34-3 10-11 15-21 17-11 3-22-3-32-9l-1-1c-3 39-25 73-49 97v-1h88c-2 0-3-6-3-10a21 21 0 0 1 33-17V217c-2 2-7 4-12 4-11 0-21-11-21-23l3-12h-88v4z"/>
+    <path d="M1047 301a115 115 0 1 0 230 0v-2l-16-9-30-17-23-13-9-5 12 1 27 3 33 4a115 115 0 0 0-224 38z"/>
     <circle cx="1060" cy="403" r="12"/>
     <circle cx="1060" cy="197" r="12"/>
     <circle cx="1365" cy="197" r="12"/>
     <circle cx="1365" cy="403" r="12"/>
-    <circle cx="1163" cy="300" r="15"/>
     <circle cx="1162" cy="301" r="36"/>
-    <path d="M1257 190c20 19 39 46 46 76l33 4 10 4c13 6 19 21 14 34-3 10-11 15-21 17-11 3-22-3-32-9l-1-1c-3 39-25 73-49 97v-1h88c-2 0-3-6-3-10a21 21 0 0 1 33-17V217c-2 2-7 4-12 4-11 0-21-11-21-23l3-12h-88v4z"/>
-    <path d="M1047 301a115 115 0 1 0 230 0v-2l-16-9-30-17-23-13-9-5 12 1 27 3 33 4a115 115 0 0 0-224 38z"/>
+    <circle cx="1163" cy="300" r="15"/>
   </g></symbol>
-  <symbol viewBox="420 0 1080 1080" id="GPU_1_"><g fill="#FFF" fill-opacity="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
+  <symbol viewBox="420 0 1080 1080" id="NIC_1"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
     <path d="M871 412h-16m16 14h-16m16 11h-16m16 11h-16m16 10h-16m16 11h-16m16 11h-16m16 11h-16m16 11h-16m16 10h-16m16 12h-16m16 10h-16m16 12h-16m16 11h-16m16 12h-16m16 11h-16m16 11h-16m16 10h-16m16-199h-16m16-148h-16m16 11h-16m16 12h-16m16 11h-16m16 12h-16m16 11h-16m16 11h-16m16 11h-16m16 12h-16m16 9h-16m16-110h-16m16-11h-16m-13 379h35V387h-10c-4 0-8-3-8-8s4-7 8-7h10V218h-35v394zM637 192h205v495H637zm309 496H556v47h10v-38h380z"/>
+    <path d="m728 237h62v63h-62zm-44 125h63v63h-63z"/>
+  </g></symbol>
+  <symbol viewBox="420 0 1080 1080" id="NIC_1_NC"><g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3">
     <path d="M673 506h132v132H673z"/>
-    <path d="M703 520h73v51h-73zm25-283h62v63h-62zm-44 125h63v63h-63z"/>
+    <path d="m703 520h73v51h-73z" />
     <path d="M770 322h-64v-85h-22v104h85v85h22V322zm-46 271h31v34h-31z"/>
     <path d="M731 572h16v22h-16zm24 33h31v11h-31zm-63 0h32v11h-32z"/>
   </g></symbol>

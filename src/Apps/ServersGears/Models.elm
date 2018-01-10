@@ -9,6 +9,7 @@ import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Components as Components
 import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
+import Game.Meta.Types.Network.Connections as Connections
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware
 
@@ -18,6 +19,7 @@ type alias Model =
     , overrides : Overrides
     , selection : Maybe Selection
     , motherboard : Maybe Motherboard
+    , highlight : Maybe Type
     , anyChange : Bool
     }
 
@@ -54,35 +56,17 @@ initialModel data =
                 |> Game.getActiveServer
                 |> Servers.getHardware
                 |> Hardware.getMotherboard
-
-        getSlotComponent slotId { component } acu =
-            case component of
-                Nothing ->
-                    acu
-
-                Just id ->
-                    ( toString (Inventory.Component id)
-                    , ( False, Inventory.Component id )
-                    )
-                        :: acu
-
-        overrides =
-            case motherboard of
-                Just motherboard ->
-                    Dict.foldl getSlotComponent [] motherboard.slots
-                        |> Dict.fromList
-
-                Nothing ->
-                    Dict.empty
     in
         { menu =
             Menu.initialMenu
         , overrides =
-            overrides
+            findOverrides motherboard
         , selection =
             Nothing
         , motherboard =
             motherboard
+        , highlight =
+            Nothing
         , anyChange =
             False
         }
@@ -103,14 +87,17 @@ getSelection =
     .selection
 
 
-setSelection : Maybe Selection -> Model -> Model
-setSelection selection model =
-    { model | selection = selection }
+setSelection : Maybe Selection -> Maybe Type -> Model -> Model
+setSelection selection highlight model =
+    { model
+        | selection = selection
+        , highlight = highlight
+    }
 
 
 removeSelection : Model -> Model
 removeSelection =
-    setSelection Nothing
+    setSelection Nothing Nothing
 
 
 isAvailable : Inventory.Model -> Model -> Inventory.Entry -> Bool
@@ -168,22 +155,22 @@ swapSlots :
 swapSlots slotIdA slotIdB inventory motherboard model =
     let
         a =
-            Dict.get slotIdA motherboard.slots
+            Motherboard.getSlot slotIdA motherboard
 
         typeA =
-            Maybe.map (.type_) a
+            Maybe.map Motherboard.getSlotType a
 
         compA =
-            Maybe.andThen (.component) a
+            Maybe.andThen Motherboard.getSlotComponent a
 
         b =
-            Dict.get slotIdB motherboard.slots
+            Motherboard.getSlot slotIdB motherboard
 
         typeB =
-            Maybe.map (.type_) b
+            Maybe.map Motherboard.getSlotType b
 
         compB =
-            Maybe.andThen (.component) b
+            Maybe.andThen Motherboard.getSlotComponent b
     in
         if typeA == typeB then
             case Maybe.uncurry compA compB of
@@ -199,9 +186,15 @@ swapSlots slotIdA slotIdB inventory motherboard model =
                             motherboard
 
                 Nothing ->
-                    setSelection (Just <| SelectingSlot slotIdB) model
+                    setSelection
+                        (Just <| SelectingSlot slotIdB)
+                        typeB
+                        model
         else
-            setSelection (Just <| SelectingSlot slotIdB) model
+            setSelection
+                (Just <| SelectingSlot slotIdB)
+                typeB
+                model
 
 
 linkSlot :
@@ -214,53 +207,100 @@ linkSlot :
 linkSlot slotId entry inventory motherboard model =
     let
         slot =
-            Dict.get slotId motherboard.slots
+            Motherboard.getSlot slotId motherboard
 
         typeSlot =
-            Maybe.map (.type_) slot
+            Maybe.map Motherboard.getSlotType slot
 
-        ( motherboard_, areSameType ) =
+        ( motherboard_, areSameType, isSlotFree ) =
             case entry of
-                Inventory.Component id ->
-                    let
-                        areSameType =
-                            inventory.components
-                                |> Dict.get id
-                                |> Maybe.map (Components.getType)
-                                |> (==) typeSlot
-
-                        mobo_ =
-                            Motherboard.linkComponent slotId id motherboard
-                    in
-                        ( mobo_, areSameType )
+                Inventory.Component compId ->
+                    compareComponentLink typeSlot
+                        slotId
+                        compId
+                        inventory
+                        motherboard
 
                 Inventory.NetConnection nc ->
-                    let
-                        isValidSlot { type_, component } =
-                            case component of
-                                Just _ ->
-                                    type_ == NIC
+                    compareNetConn slotId
+                        slot
+                        nc
+                        motherboard
 
-                                Nothing ->
-                                    False
-
-                        mobo_ =
-                            Motherboard.linkNC slotId nc motherboard
-
-                        areSameType =
-                            slot
-                                |> Maybe.map isValidSlot
-                                |> Maybe.withDefault False
-                    in
-                        ( mobo_, areSameType )
+        maybeUnlink model =
+            if isSlotFree then
+                model
+            else
+                unlinkSlot slotId inventory model
     in
         if areSameType then
             model
+                |> maybeUnlink
                 |> setMotherboard motherboard_
                 |> setAvailability entry False inventory
                 |> removeSelection
         else
-            setSelection (Just <| SelectingSlot slotId) model
+            setSelection
+                (Just <| SelectingSlot slotId)
+                typeSlot
+                model
+
+
+compareComponentLink :
+    Maybe Type
+    -> Motherboard.SlotId
+    -> Components.Id
+    -> Inventory.Model
+    -> Motherboard
+    -> ( Motherboard, Bool, Bool )
+compareComponentLink typeSlot slotId id inventory motherboard =
+    let
+        areSameType =
+            inventory.components
+                |> Dict.get id
+                |> Maybe.map (Components.getType)
+                |> (==) typeSlot
+
+        isSlotFree =
+            motherboard
+                |> Motherboard.getSlots
+                |> Dict.get slotId
+                |> Maybe.andThen .component
+                |> Maybe.isNothing
+
+        mobo_ =
+            Motherboard.linkComponent slotId id motherboard
+    in
+        ( mobo_, areSameType, isSlotFree )
+
+
+compareNetConn :
+    Motherboard.SlotId
+    -> Maybe Motherboard.Slot
+    -> Connections.Id
+    -> Motherboard
+    -> ( Motherboard, Bool, Bool )
+compareNetConn slotId slot nc motherboard =
+    case slot of
+        Just { type_, component } ->
+            case component of
+                Just compoId ->
+                    ( Motherboard.linkNC compoId nc motherboard
+                    , type_ == NIC
+                    , Maybe.isNothing <| Motherboard.getNC compoId motherboard
+                    )
+
+                Nothing ->
+                    ( motherboard
+                    , False
+                    , False
+                    )
+
+        Nothing ->
+            ( motherboard
+            , False
+            , False
+            )
 
 
 unlinkSlot : Motherboard.SlotId -> Inventory.Model -> Model -> Model
@@ -271,14 +311,97 @@ unlinkSlot slotId inventory model =
 
         maybeCompId =
             Maybe.andThen (Motherboard.getComponent slotId) maybeMotherboard
+
+        maybeNC compId =
+            Maybe.andThen (Motherboard.getNC compId) maybeMotherboard
+
+        setNCAvailability compId mobo =
+            case maybeNC compId of
+                Just nip ->
+                    setAvailability (Inventory.NetConnection nip) True inventory mobo
+
+                Nothing ->
+                    mobo
     in
         case Maybe.uncurry maybeMotherboard maybeCompId of
             Just ( motherboard, id ) ->
                 motherboard
+                    |> Motherboard.unlinkNC id
                     |> Motherboard.unlinkComponent slotId
                     |> flip setMotherboard model
                     |> setAvailability (Inventory.Component id) True inventory
+                    |> setNCAvailability id
                     |> removeSelection
 
             Nothing ->
                 removeSelection model
+
+
+highlightSlot :
+    Motherboard.SlotId
+    -> Motherboard
+    -> Maybe Selection
+    -> Model
+    -> Model
+highlightSlot slotId mobo selection_ =
+    mobo
+        |> Motherboard.getSlot slotId
+        |> Maybe.map Motherboard.getSlotType
+        |> setSelection selection_
+
+
+highlightComponent :
+    Inventory.Entry
+    -> Inventory.Model
+    -> Maybe Selection
+    -> Model
+    -> Model
+highlightComponent entry { components } selection_ =
+    case entry of
+        Inventory.Component id ->
+            components
+                |> Dict.get id
+                |> Maybe.map Components.getType
+                |> setSelection selection_
+
+        Inventory.NetConnection nc ->
+            setSelection selection_ (Just NIC)
+
+
+findOverrides : Maybe Motherboard -> Overrides
+findOverrides motherboard =
+    let
+        getSlotEntry slotId { component } acu =
+            case component of
+                Nothing ->
+                    acu
+
+                Just id ->
+                    ( toString (Inventory.Component id)
+                    , ( False, Inventory.Component id )
+                    )
+                        :: acu
+
+        getNCEntry compoId conn acu =
+            ( toString (Inventory.NetConnection conn)
+            , ( False, Inventory.NetConnection conn )
+            )
+                :: acu
+
+        slotsOverrides mobo acu =
+            Motherboard.getSlots mobo
+                |> Dict.foldl getSlotEntry acu
+
+        ncsOverrides mobo acu =
+            Motherboard.getNCs mobo
+                |> Dict.foldl getNCEntry acu
+    in
+        case motherboard of
+            Just mobo ->
+                []
+                    |> slotsOverrides mobo
+                    |> ncsOverrides mobo
+                    |> Dict.fromList
+
+            Nothing ->
+                Dict.empty
