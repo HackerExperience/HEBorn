@@ -1,12 +1,14 @@
 module Apps.Models
     exposing
         ( AppModel(..)
+        , AppParams(..)
         , Contexts(..)
         , contexts
         , name
         , title
         , icon
         , windowInitSize
+        , paramsToApp
         )
 
 import Apps.LogViewer.Models as LogViewer
@@ -47,6 +49,10 @@ type AppModel
     | BugModel Bug.Model
     | CalculatorModel Calculator.Model
     | LogFlixModel LogFlix.Model
+
+
+type AppParams
+    = BrowserParams Browser.Params
 
 
 type Contexts
@@ -288,3 +294,10 @@ windowInitSize app =
 
         _ ->
             ( 600, 400 )
+
+
+paramsToApp : AppParams -> App
+paramsToApp params =
+    case params of
+        BrowserParams _ ->
+            BrowserApp

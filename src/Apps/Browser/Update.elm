@@ -15,7 +15,7 @@ import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
 import Game.Meta.Types.Network as Network
-import Apps.Config exposing (..)
+import Apps.Reference exposing (..)
 import Apps.Apps as Apps
 import Game.Meta.Types.Context exposing (Context(Endpoint))
 import Apps.Browser.Pages.Webserver.Update as Webserver
@@ -303,7 +303,7 @@ onHandleFetched response tab =
 onGoAddress :
     Game.Data
     -> String
-    -> Config
+    -> Reference
     -> Int
     -> Tab
     -> TabUpdateResponse
@@ -349,7 +349,7 @@ onLogin :
     Game.Data
     -> Network.NIP
     -> String
-    -> Config
+    -> Reference
     -> Int
     -> Tab
     -> TabUpdateResponse

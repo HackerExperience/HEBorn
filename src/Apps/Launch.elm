@@ -1,4 +1,4 @@
-module Apps.Launch exposing (launch)
+module Apps.Launch exposing (launch, launchParams)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
@@ -6,7 +6,7 @@ import Utils.Update as Update
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Apps.Models exposing (..)
-import Apps.Config exposing (..)
+import Apps.Reference exposing (..)
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
@@ -26,7 +26,7 @@ import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
 
 
-launch : Game.Data -> Config -> App -> ( AppModel, Cmd Msg, Dispatch )
+launch : Game.Data -> Reference -> App -> ( AppModel, Cmd Msg, Dispatch )
 launch data ({ windowId } as config) app =
     case app of
         LogViewerApp ->
@@ -123,3 +123,32 @@ launch data ({ windowId } as config) app =
             LogFlix.initialModel
                 |> LogFlixModel
                 |> Update.fromModel
+
+
+{-| This function is used to update app models when launching new apps with
+params. Launching apps with params is a two step procedure:
+
+  - First we check an existing app to see if launching a new one is needed by
+    calling this function with a False flag. A new instance is needed when
+    it returns Nothing.
+
+  - If a new instance is needed, we call this function again, this time with
+    the True param, it should update an initialModel with data from params.
+
+-}
+launchParams :
+    Bool
+    -> AppParams
+    -> AppModel
+    -> Maybe AppModel
+launchParams newInstance params model =
+    case params of
+        BrowserParams params ->
+            case model of
+                BrowserModel model ->
+                    model
+                        |> Browser.launchParams newInstance params
+                        |> Tuple.mapSecond BrowserModel
+
+                _ ->
+                    ( False, model )
