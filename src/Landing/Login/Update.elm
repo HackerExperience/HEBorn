@@ -23,14 +23,8 @@ update core msg model =
         SetUsername username ->
             onSetUsername core username model
 
-        ValidateUsername ->
-            onValidateUsername core model
-
         SetPassword password ->
             onSetPassword core password model
-
-        ValidatePassword ->
-            onValidatePassword core model
 
         Request data ->
             onRequest core (receive data) model
@@ -54,11 +48,6 @@ onSetUsername core username model =
         Update.fromModel model_
 
 
-onValidateUsername : Core.Model -> Model -> UpdateResponse
-onValidateUsername core model =
-    Update.fromModel model
-
-
 onSetPassword : Core.Model -> String -> Model -> UpdateResponse
 onSetPassword core password model =
     let
@@ -66,11 +55,6 @@ onSetPassword core password model =
             { model | password = password }
     in
         Update.fromModel model_
-
-
-onValidatePassword : Core.Model -> Model -> UpdateResponse
-onValidatePassword core model =
-    Update.fromModel model
 
 
 onRequest : Core.Model -> Maybe Response -> Model -> UpdateResponse

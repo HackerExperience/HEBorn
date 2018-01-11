@@ -10,9 +10,7 @@ import Requests.Types exposing (ResponseType)
 type Msg
     = SubmitLogin
     | SetUsername String
-    | ValidateUsername
     | SetPassword String
-    | ValidatePassword
     | Request RequestMsg
 
 

@@ -5,10 +5,20 @@ import Svg exposing (Attribute)
 import VirtualDom
 
 
-onClickMe : msg -> Attribute msg
-onClickMe handler =
+onClickWithPrevent : msg -> Attribute msg
+onClickWithPrevent handler =
     VirtualDom.onWithOptions "click"
-        { stopPropagation = True
+        { stopPropagation = False
+        , preventDefault = True
+        }
+    <|
+        Json.succeed handler
+
+
+onMouseDownWithPrevent : msg -> Attribute msg
+onMouseDownWithPrevent handler =
+    VirtualDom.onWithOptions "mousedown"
+        { stopPropagation = False
         , preventDefault = True
         }
     <|

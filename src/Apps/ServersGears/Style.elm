@@ -19,15 +19,8 @@ css =
             , children
                 [ class Toolbar
                     [ flex (int 0)
-                    , flexContainerHorz
-                    , child everything
-                        [ flex (int 1)
-                        , textAlign center
-                        , borderLeft3 (px 1) solid black
-                        , firstChild
-                            [ borderLeft (px 0) ]
-                        ]
-                    , borderTop3 (px 1) solid black
+                    , textAlign center
+                    , borderBottom3 (px 1) solid black
                     ]
                 , class MoboSplit
                     [ flex (int 1)

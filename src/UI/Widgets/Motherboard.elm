@@ -1,10 +1,11 @@
 module UI.Widgets.Motherboard exposing (guessMobo, defaultMobo)
 
 import Html exposing (Html)
-import Dict
-import Svg exposing (svg, use)
+import Svg exposing (Svg, use)
 import Svg.Attributes exposing (..)
-import Utils.Svg.Events exposing (onClickMe)
+import Svg.Lazy exposing (lazy3)
+import Svg.Keyed exposing (node)
+import Utils.Svg.Events exposing (..)
 import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 
@@ -12,7 +13,7 @@ import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboa
 guessMobo : (Motherboard.SlotId -> msg) -> Maybe Type -> Motherboard -> Html msg
 guessMobo =
     -- TODO: When others mobos appears, add a case here to autoselect them
-    defaultMobo
+    lazy3 defaultMobo
 
 
 defaultMobo : (Motherboard.SlotId -> msg) -> Maybe Type -> Motherboard -> Html msg
@@ -33,22 +34,32 @@ defaultMobo select highlight mobo =
         ( onNC, hasNC, highNC ) =
             getNC "nic_1" NIC select highlight mobo
     in
-        svg
+        node "svg"
             [ fill "red"
             , fillOpacity "0"
             , stroke "black"
             ]
-            [ use [ xlinkHref "images/mobo.svg#Motherboard" ] []
-            , use [ hasCPU, onCPU, highCPU, xlinkHref "images/mobo.svg#CPU_1" ] []
-            , use [ hasHDD, onHDD, highHDD, xlinkHref "images/mobo.svg#HDD_1" ] []
-            , use [ hasNIC, onNIC, highNIC, xlinkHref "images/mobo.svg#NIC_1" ] []
-            , use [ hasRAM, onRAM, highRAM, xlinkHref "images/mobo.svg#RAM_1" ] []
-            , use [ hasNC, onNC, highNC, xlinkHref "images/mobo.svg#NIC_1_NC" ] []
+            [ ( "mobo", use [ xlinkHref "images/mobo.svg#Motherboard" ] [] )
+            , ( "cpu", lazy3 (genericCompo "CPU_1") onCPU hasCPU highCPU )
+            , ( "hdd", lazy3 (genericCompo "HDD_1") onHDD hasHDD highHDD )
+            , ( "nic", lazy3 (genericCompo "NIC_1") onNIC hasNIC highNIC )
+            , ( "ram", lazy3 (genericCompo "RAM_1") onRAM hasRAM highRAM )
+            , ( "nc", lazy3 (genericCompo "NIC_1_NC") onNC hasNC highNC )
             ]
 
 
 
 -- internals
+
+
+genericCompo :
+    String
+    -> Svg.Attribute msg
+    -> Svg.Attribute msg
+    -> Svg.Attribute msg
+    -> Svg msg
+genericCompo id on has high =
+    use [ has, on, high, xlinkHref <| "images/mobo.svg#" ++ id ] []
 
 
 getCompo :
@@ -63,7 +74,7 @@ getCompo slotId type_ select highlight mobo =
         onCompo =
             slotId
                 |> select
-                |> onClickMe
+                |> onMouseDownWithPrevent
 
         hasCompo =
             mobo
@@ -91,7 +102,7 @@ getNC slotId type_ select highlight mobo =
         onCompo =
             slotId
                 |> select
-                |> onClickMe
+                |> onMouseDownWithPrevent
 
         hasCompo =
             mobo
