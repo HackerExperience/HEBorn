@@ -7,6 +7,7 @@ import Core.Dispatch.Account as Account
 import Core.Dispatch.Servers as Servers
 import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
+import Game.Models as Game
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared as Servers
@@ -222,9 +223,17 @@ switchGameMode : Game.Data -> Servers.CId -> Dispatch
 switchGameMode data cid =
     let
         isStoryModeActive =
-            Storyline.isActive data.game.story
+            data
+                |> Game.getGame
+                |> Game.getStory
+                |> Storyline.isActive
+
+        servers =
+            data
+                |> Game.getGame
+                |> Game.getServers
     in
-        case (Servers.get cid data.game.servers) of
+        case (Servers.get cid servers) of
             Just server ->
                 case server.type_ of
                     Servers.DesktopCampaign ->

@@ -39,3 +39,8 @@ getActiveContact =
 setActiveContact : Maybe String -> Model -> Model
 setActiveContact v m =
     { m | activeContact = v }
+
+
+windowInitSize : ( Float, Float )
+windowInitSize =
+    ( 200, 550 )
