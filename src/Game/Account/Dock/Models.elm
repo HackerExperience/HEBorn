@@ -24,5 +24,4 @@ initialModel =
     , Apps.EmailApp
     , Apps.BugApp
     , Apps.CalculatorApp
-    , Apps.LogFlixApp
     ]

@@ -2,14 +2,16 @@ module Apps.Email.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Dispatch.OS as OS
 import Core.Dispatch.Storyline as Storyline
 import Game.Data as Game
-import Game.Storyline.Emails.Contents exposing (Content)
+import Game.Storyline.Emails.Models as Emails exposing (Person)
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.Email.Menu.Messages as Menu
 import Apps.Email.Menu.Update as Menu
 import Apps.Email.Menu.Actions as Menu
+import Apps.Apps as Apps
 
 
 type alias UpdateResponse =
@@ -33,9 +35,6 @@ update data msg model =
         SelectContact email ->
             onSelectContact email model
 
-        Reply content ->
-            onReply content model
-
 
 onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
 onMenuMsg data msg model =
@@ -51,17 +50,8 @@ onMenuMsg data msg model =
 
 onSelectContact : String -> Model -> UpdateResponse
 onSelectContact email model =
-    Update.mapModel
-        (setActiveContact <| Just email)
-        (Update.fromModel model)
-
-
-onReply : Content -> Model -> UpdateResponse
-onReply content model =
     let
         dispatch =
-            content
-                |> Storyline.ReplyEmail
-                |> Dispatch.emails
+            Dispatch.os <| OS.OpenApp Nothing Apps.FloatingHeadsApp
     in
         ( model, Cmd.none, dispatch )
