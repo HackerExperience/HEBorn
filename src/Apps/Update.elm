@@ -20,6 +20,7 @@ import Apps.Email.Update as Email
 import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
 import Apps.LogFlix.Update as LogFlix
+import Apps.FloatingHeads.Update as FloatingHeads
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -198,6 +199,16 @@ update data msg model =
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
 
+        FloatingHeadsMsg msg ->
+            case model of
+                FloatingHeadsModel model ->
+                    map FloatingHeadsModel
+                        FloatingHeadsMsg
+                        (FloatingHeads.update data msg model)
+
+                _ ->
+                    ( model, Cmd.none, Dispatch.none )
+
 
 
 --case ( msg, model ) of
@@ -233,6 +244,8 @@ update data msg model =
 --      map BugModel BugMsg (Bug.update data msg model)
 --  ( CalculatorMsg msg, CalculatorModel model ) ->
 --      map CalculatorModel CalculatorMsg (Calculator.update data msg model)
+--  ( FloatingHeadsMsg msg, FloatingHeadsModel model ) ->
+--      map FloatingHeadsModel FloatingHeadsMsg (FloatingHeads.update data msg model)
 --  _ ->
 --      ( model, Cmd.none, Dispatch.none )
 
