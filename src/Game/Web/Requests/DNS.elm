@@ -37,7 +37,7 @@ import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network as Network
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)
-import Game.Web.Models exposing (Requester)
+import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network exposing (NIP)
 
 
@@ -162,6 +162,7 @@ decodeBank : Decoder Type
 decodeBank =
     decode BankContent
         |> required "title" string
+        |> required "nip" Decoders.Network.nipTuple
         |> map Bank
 
 

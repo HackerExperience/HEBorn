@@ -1,5 +1,6 @@
 module Apps.Browser.Messages exposing (..)
 
+import Game.Account.Finances.Models as Finances
 import Game.Web.Types exposing (Response)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
@@ -27,6 +28,9 @@ type Msg
     | ReqDownload Network.NIP Filesystem.FileEntry StorageId
     | PublicDownload NIP Filesystem.FileEntry
     | HandlePasswordAcquired PasswordAcquired.Data
+    | BankLogin Finances.BankLoginRequest
+    | BankTransfer Finances.BankTransferRequest
+    | BankLogout
 
 
 type TabMsg
@@ -40,6 +44,10 @@ type TabMsg
     | AnyMap NIP
     | Login NIP String
     | Logout
+    | HandleBankLogin Finances.BankAccountData
+    | HandleBankLoginError
+    | HandleBankTransfer
+    | HandleBankTransferError
     | LoginFailed
     | SelectEndpoint
     | NewApp Apps.App
