@@ -25,6 +25,9 @@ type Msg
     | ReqDownload Network.NIP Filesystem.FileEntry StorageId
     | PublicDownload NIP Filesystem.FileEntry
     | HandlePasswordAcquired PasswordAcquired.Data
+    | ReqBankLogin Game.Data Network.NIP AccountNumber String
+    | ReqBankTransfer Game.Data Network.NIP AccountNumber Network.NIP AccountNumber String Int
+    | ReqBankLogout
 
 
 type TabMsg

@@ -1,4 +1,4 @@
-module Apps.Config exposing (Config)
+module Apps.Reference exposing (Reference)
 
 import Game.Meta.Types.Context exposing (Context(..))
 
@@ -15,7 +15,7 @@ type alias SessionID =
     String
 
 
-type alias Config =
+type alias Reference =
     { sessionId : SessionID
     , windowId : WindowID
     , context : Context

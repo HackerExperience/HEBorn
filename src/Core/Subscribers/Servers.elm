@@ -12,6 +12,7 @@ import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Hardware.Messages as Hardware
 import Game.Web.Messages as Web
 import Apps.Browser.Messages as Browser
+import Apps.Browser.Pages.Bank.Messages as Bank
 
 
 dispatch : Dispatch -> Subscribers
@@ -32,6 +33,30 @@ dispatch dispatch =
 
         FetchedUrl { sessionId, windowId, context, tabId } response ->
             [ Browser.HandleFetched response
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankLoginSuccessful { sessionId, windowId, context, tabId } data ->
+            [ Bank.HandleLogin data
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankLoginError { sessionId, windowId, context, tabId } ->
+            [ Bank.HandleLoginError
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankTransferSuccessful { sessionId, windowId, context, tabId } ->
+            [ Bank.HandleTransfer
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankTransferError { sessionId, windowId, context, tabId } ->
+            [ Bank.HandleTransferError
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
             ]

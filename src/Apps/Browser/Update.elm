@@ -15,7 +15,7 @@ import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
 import Game.Meta.Types.Network as Network
-import Apps.Config exposing (..)
+import Apps.Reference exposing (..)
 import Apps.Apps as Apps
 import Game.Meta.Types.Context exposing (Context(Endpoint))
 import Apps.Browser.Pages.Webserver.Update as Webserver
@@ -72,6 +72,15 @@ update data msg model =
 
         EveryTabMsg msg ->
             onEveryTabMsg data msg model
+
+        ReqBankLogin bank login password ->
+            onReqBankLogin data bank login password model
+
+        ReqBankTransfer fromBank fromAcc toBank toAcc password value ->
+            onReqBankTransfer data fromBank fromAcc toBank toAcc password value model
+
+        ReqBankLogout ->
+            onReqBankLogout data model
 
 
 
@@ -147,6 +156,58 @@ onReqDownload data source file storage model =
                 |> flip setNowTab model
     in
         ( model_, Cmd.none, dispatch )
+
+
+onReqBankLogin :
+    Game.Data
+    -> Network.NIP
+    -> Finances.AccountNumber
+    -> String
+    -> Model
+    -> UpdateResponse
+onReqBankLogin data bank login password model =
+    let
+        loginMsg =
+            Account.BankAccountLogin data model.nip login password model.me
+
+        dispatch =
+            Dispatch.finances loginMsg
+    in
+        ( model, Cmd.none dispatch )
+
+
+onReqBankTransfer :
+    Game.Data
+    -> Network.NIP
+    -> Finances.AccountNumber
+    -> Network.NIP
+    -> Finances.AccountNumber
+    -> String
+    -> Int
+    -> Model
+    -> UpdateResponse
+onReqBankTransfer data fromBank fromAcc toBank toAcc password value model =
+    let
+        transferMsg =
+            Account.BankAccountTransfer
+                data
+                model.nip
+                fromAccount
+                toBank
+                toAccount
+                password
+                value
+                model.me
+
+        dispatch =
+            Dispatch.finances transferMsg
+    in
+        ( model, Cmd.none dispatch )
+
+
+onReqBankLogout : Game.Data -> Model -> UpdateResponse
+onReqBankLogout data model =
+    Update.fromModel model
 
 
 
@@ -303,7 +364,7 @@ onHandleFetched response tab =
 onGoAddress :
     Game.Data
     -> String
-    -> Config
+    -> Reference
     -> Int
     -> Tab
     -> TabUpdateResponse

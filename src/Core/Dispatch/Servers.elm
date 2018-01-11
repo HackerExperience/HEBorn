@@ -15,6 +15,7 @@ import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Events.Server.Logs.Created as LogCreated
 import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
+import Apps.Browser.Pages.Bank.Models as Bank
 import Game.Web.Models as Web
 import Game.Web.Types as Web
 
@@ -26,6 +27,10 @@ type Dispatch
     | Login Network.NIP Network.IP String Web.Requester
     | FetchedUrl Web.Requester Web.Response
     | FailLogin Web.Requester
+    | BankLoginSuccessful Web.Requester Bank.AccountData
+    | BankLoginError Web.Requester
+    | BankTransferSuccessful Web.Requester
+    | BankTransferError Web.Requester
 
 
 {-| Messages related to a specific server.
