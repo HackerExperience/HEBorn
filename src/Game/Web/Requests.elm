@@ -4,6 +4,7 @@ import Game.Web.Messages exposing (..)
 import Game.Web.Models exposing (..)
 import Game.Web.Types as DNS
 import Game.Web.Requests.DNS as DNS
+import Game.Meta.Types.Requester exposing (Requester)
 
 
 type Response

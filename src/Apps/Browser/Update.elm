@@ -10,15 +10,17 @@ import Core.Dispatch.OS as OS
 import Core.Error as Error
 import Game.Data as Game
 import Game.Models
+import Game.Account.Finances.Models as Finances
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
 import Game.Meta.Types.Network as Network
-import Apps.Config exposing (..)
+import Apps.Reference exposing (..)
 import Apps.Apps as Apps
 import Game.Meta.Types.Context exposing (Context(Endpoint))
 import Apps.Browser.Pages.Webserver.Update as Webserver
+import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
 import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
 import Apps.Browser.Menu.Messages as Menu
@@ -72,6 +74,15 @@ update data msg model =
 
         EveryTabMsg msg ->
             onEveryTabMsg data msg model
+
+        BankLogin request ->
+            onBankLogin data request model.me model
+
+        BankTransfer request ->
+            onBankTransfer data request model.me model
+
+        BankLogout ->
+            onBankLogout data model
 
 
 
@@ -147,6 +158,67 @@ onReqDownload data source file storage model =
                 |> flip setNowTab model
     in
         ( model_, Cmd.none, dispatch )
+
+
+onBankLogin :
+    Game.Data
+    -> Finances.BankLoginRequest
+    -> Reference
+    -> Model
+    -> UpdateResponse
+onBankLogin data request { sessionId, windowId, context } model =
+    let
+        cid =
+            data
+                |> Game.getActiveCId
+
+        requester =
+            { sessionId = sessionId
+            , windowId = windowId
+            , context = context
+            , tabId = model.nowTab
+            }
+
+        loginMsg =
+            Account.BankAccountLogin request requester cid
+
+        dispatch =
+            Dispatch.finances loginMsg
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onBankTransfer :
+    Game.Data
+    -> Finances.BankTransferRequest
+    -> Reference
+    -> Model
+    -> UpdateResponse
+onBankTransfer data request { sessionId, windowId, context } model =
+    let
+        cid =
+            data
+                |> Game.getActiveCId
+
+        requester =
+            { sessionId = sessionId
+            , windowId = windowId
+            , context = context
+            , tabId = model.nowTab
+            }
+
+        transferMsg =
+            Account.BankAccountTransfer request requester cid
+
+        dispatch =
+            Dispatch.finances transferMsg
+    in
+        ( model, Cmd.none, dispatch )
+
+
+onBankLogout : Game.Data -> Model -> UpdateResponse
+onBankLogout data model =
+    Update.fromModel model
 
 
 
@@ -250,6 +322,18 @@ processTabMsg data tabId msg tab model =
             , Dispatch.account <| Account.SetContext Endpoint
             )
 
+        HandleBankLogin accountData ->
+            handleBankLogin data tabId tab accountData model
+
+        HandleBankLoginError ->
+            handleBankError data tabId tab model
+
+        HandleBankTransfer ->
+            handleBankTransfer data tabId tab model
+
+        HandleBankTransferError ->
+            handleBankTransferError data tabId tab model
+
         Login nip password ->
             onLogin data nip password model.me tabId tab
 
@@ -303,7 +387,7 @@ onHandleFetched response tab =
 onGoAddress :
     Game.Data
     -> String
-    -> Config
+    -> Reference
     -> Int
     -> Tab
     -> TabUpdateResponse
@@ -349,7 +433,7 @@ onLogin :
     Game.Data
     -> Network.NIP
     -> String
-    -> Config
+    -> Reference
     -> Int
     -> Tab
     -> TabUpdateResponse
@@ -438,3 +522,57 @@ updatePage data msg tab =
 
         _ ->
             Update.fromModel tab
+
+
+handleBankLogin :
+    Game.Data
+    -> Int
+    -> Tab
+    -> Finances.BankAccountData
+    -> Model
+    -> TabUpdateResponse
+handleBankLogin data tabId tab accountData model =
+    let
+        page =
+            (getTab tabId model.tabs).page
+
+        ( pageModel, _, _ ) =
+            updatePage data (BankMsg <| Bank.HandleLogin accountData) page
+    in
+        Update.fromModel { tab | page = pageModel }
+
+
+handleBankError : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
+handleBankError data tabId tab model =
+    let
+        page =
+            (getTab tabId model.tabs).page
+
+        ( pageModel, _, _ ) =
+            updatePage data (BankMsg Bank.HandleLoginError) page
+    in
+        Update.fromModel { tab | page = pageModel }
+
+
+handleBankTransfer : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
+handleBankTransfer data tabId tab model =
+    let
+        page =
+            (getTab tabId model.tabs).page
+
+        ( pageModel, _, _ ) =
+            updatePage data (BankMsg Bank.HandleTransfer) page
+    in
+        Update.fromModel { tab | page = pageModel }
+
+
+handleBankTransferError : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
+handleBankTransferError data tabId tab model =
+    let
+        page =
+            (getTab tabId model.tabs).page
+
+        ( pageModel, _, _ ) =
+            updatePage data (BankMsg Bank.HandleTransferError) page
+    in
+        Update.fromModel { tab | page = pageModel }

@@ -45,6 +45,7 @@ type alias WebserverContent =
 
 type alias BankContent =
     { title : String
+    , nip : NIP
     }
 
 
