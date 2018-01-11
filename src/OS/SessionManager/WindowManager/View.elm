@@ -104,6 +104,13 @@ isDecorated window =
         |> Apps.isDecorated
 
 
+isResizable : Window -> Bool
+isResizable window =
+    window
+        |> .app
+        |> Apps.isResizable
+
+
 header : ID -> Window -> Html Msg
 header id window =
     let
@@ -111,7 +118,7 @@ header id window =
             if (isDecorated window) then
                 [ headerTitle (title window) (Apps.icon window.app)
                 , headerContext id <| realContext window
-                , headerButtons id
+                , headerButtons id window
                 ]
             else
                 []
@@ -160,25 +167,32 @@ headerTitle title icon =
         [ text title ]
 
 
-headerButtons : ID -> Html Msg
-headerButtons id =
-    div [ class [ Res.HeaderButtons ] ]
-        [ span
-            [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
-            , onClickMe (Minimize id)
+headerButtons : ID -> Window -> Html Msg
+headerButtons id window =
+    let
+        maximize =
+            if (isResizable window) then
+                span
+                    [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
+                    , onClickMe (ToggleMaximize id)
+                    ]
+                    []
+            else
+                span [] [ text "" ]
+    in
+        div [ class [ Res.HeaderButtons ] ]
+            [ span
+                [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
+                , onClickMe (Minimize id)
+                ]
+                []
+            , maximize
+            , span
+                [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
+                , onClickMe (Close id)
+                ]
+                []
             ]
-            []
-        , span
-            [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
-            , onClickMe (ToggleMaximize id)
-            ]
-            []
-        , span
-            [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
-            , onClickMe (Close id)
-            ]
-            []
-        ]
 
 
 windowStyle : Window -> Html.Attribute Msg

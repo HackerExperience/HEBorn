@@ -7,4 +7,3 @@ import Game.Storyline.Emails.Contents exposing (Content)
 type Msg
     = MenuMsg Menu.Msg
     | SelectContact String
-    | Reply Content

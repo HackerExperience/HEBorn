@@ -4,11 +4,8 @@ module Apps.Email.Resources exposing (..)
 type Classes
     = Super
     | Active
+    | Image
     | Contacts
-    | MainChat
-    | From
-    | To
-    | Sys
 
 
 prefix : String
