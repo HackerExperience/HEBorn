@@ -177,3 +177,13 @@ browse cid =
 emailReply : Account.ID -> Topic
 emailReply id =
     WebsocketTopic (AccountChannel id) "email.reply"
+
+
+bankLogin : Account.ID -> Topic
+bankLogin id =
+    WebsocketTopic (AccountChannel id) "bank.login"
+
+
+bankTransfer : Account.ID -> Topic
+bankTransfer id =
+    WebsocketTopic (AccountChannel id) "bank.transfer"

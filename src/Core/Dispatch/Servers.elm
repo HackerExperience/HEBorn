@@ -1,6 +1,7 @@
 module Core.Dispatch.Servers exposing (..)
 
 import Game.Account.Bounces.Models as Bounces
+import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Filesystem.Models as Filesystem
@@ -15,8 +16,10 @@ import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Events.Server.Logs.Created as LogCreated
 import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
+import Apps.Browser.Pages.Bank.Models as Bank
 import Game.Web.Models as Web
 import Game.Web.Types as Web
+import Game.Meta.Types.Requester exposing (Requester)
 
 
 {-| Messages related to servers.
@@ -24,8 +27,8 @@ import Game.Web.Types as Web
 type Dispatch
     = Server CId Server
     | Login Network.NIP Network.IP String Web.Requester
-    | FetchedUrl Web.Requester Web.Response
-    | FailLogin Web.Requester
+    | FetchedUrl Requester Web.Response
+    | FailLogin Requester
 
 
 {-| Messages related to a specific server.
@@ -39,7 +42,11 @@ type Server
     | Processes Processes
     | Hardware Hardware
     | LogoutServer
-    | FetchUrl String Network.ID Web.Requester
+    | FetchUrl String Network.ID Requester
+    | BankAccountLoginSuccessful Requester Finances.BankAccountData
+    | BankAccountLoginError Requester
+    | BankAccountTransferSuccessful Requester
+    | BankAccountTransferError Requester
 
 
 {-| Messages related to server's filesystem.
