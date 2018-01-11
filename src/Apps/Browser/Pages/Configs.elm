@@ -9,7 +9,11 @@ import Apps.Browser.Messages exposing (..)
 
 bankConfig : Bank.Config Msg
 bankConfig =
-    { toMsg = BankMsg >> ActiveTabMsg }
+    { toMsg = BankMsg >> ActiveTabMsg
+    , onLogin = ReqBankLogin
+    , onTransfer = ReqBankTransfer
+    , onLogout = ReqBankLogout
+    }
 
 
 downloadCenterConfig : DownloadCenter.Config Msg

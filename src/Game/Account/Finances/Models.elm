@@ -64,6 +64,15 @@ type PaymentType
     = Purchase Shop Product ProductValue
 
 
+
+-- BankAccountData is what comes from backend when the user get logged on a bank
+
+
+type alias BankAccountData =
+    { balance : Int
+    }
+
+
 initialModel : Model
 initialModel =
     { bank = Dict.empty

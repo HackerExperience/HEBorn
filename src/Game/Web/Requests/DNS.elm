@@ -162,6 +162,7 @@ decodeBank : Decoder Type
 decodeBank =
     decode BankContent
         |> required "title" string
+        |> required "nip" Decoders.Network.nipTuple
         |> map Bank
 
 

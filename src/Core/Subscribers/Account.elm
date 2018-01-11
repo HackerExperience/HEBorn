@@ -67,6 +67,12 @@ fromFinances dispatch =
         BankAccountUpdated ( a, b ) ->
             [ accountFinances <| Finances.HandleBankAccountUpdated a b ]
 
+        BankAccountLogin a b c d e ->
+            [ accountFinances <| Finances.HandleBankAccountLogin a b c d e ]
+
+        BankAccountTransfer a b c d e f g h ->
+            [ accountFinances <| Finances.HandleBankAccountTransfer a b c d e f g h ]
+
 
 fromDatabase : Database -> Subscribers
 fromDatabase dispatch =
