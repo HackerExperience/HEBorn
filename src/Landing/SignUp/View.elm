@@ -26,8 +26,7 @@ view model =
             , div [ landClass [ Res.Input ] ]
                 [ label [ for "email-field" ] [ text "email: " ]
                 , input
-                    [ id "email-field"
-                    , type_ "text"
+                    [ type_ "text"
                     , value model.email
                     , onInput (\str -> SetEmail str)
                     , onBlur ValidateEmail
@@ -38,8 +37,7 @@ view model =
             , div [ landClass [ Res.Input ] ]
                 [ label [ for "username-field" ] [ text "username: " ]
                 , input
-                    [ id "username-field"
-                    , type_ "text"
+                    [ type_ "text"
                     , value model.username
                     , onInput (\str -> SetUsername str)
                     , onBlur ValidateUsername
@@ -50,8 +48,7 @@ view model =
             , div [ landClass [ Res.Input ] ]
                 [ label [ for "password-field" ] [ text "password: " ]
                 , input
-                    [ id "password-field"
-                    , type_ "password"
+                    [ type_ "password"
                     , value model.password
                     , onInput (\str -> SetPassword str)
                     , onBlur ValidatePassword

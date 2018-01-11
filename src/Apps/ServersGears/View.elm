@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Html.Attributes exposing (disabled)
 import Html.Lazy exposing (lazy, lazy2)
 import Html.CssHelpers
+import Utils.Html.Events exposing (onClickMe)
 import Game.Data as Game
 import Game.Models as GameModels
 import Game.Inventory.Models as Inventory
@@ -57,11 +58,11 @@ editablePanel data model =
         case getMotherboard model of
             Just motherboard ->
                 div [ class [ WindowFull ] ]
-                    [ div [ class [ MoboSplit ] ]
+                    [ lazy2 toolbar motherboard model
+                    , div [ class [ MoboSplit ] ]
                         [ lazy (viewMotherboard inventory motherboard) model
                         , lazy2 viewInventory (filterMobo inventory) model
                         ]
-                    , lazy2 toolbar motherboard model
                     ]
 
             Nothing ->
@@ -87,6 +88,15 @@ toolbar { slots } { selection, anyChange } =
                 _ ->
                     text ""
 
+        deselect =
+            case selection of
+                Just _ ->
+                    div [ onClick <| Select Nothing ]
+                        [ text "Deselect" ]
+
+                Nothing ->
+                    text ""
+
         save =
             if anyChange then
                 div [ onClick <| Save ]
@@ -95,7 +105,7 @@ toolbar { slots } { selection, anyChange } =
                 text ""
     in
         div [ class [ Toolbar ] ]
-            [ unlink, save ]
+            [ unlink, deselect, save ]
 
 
 viewMotherboard : Inventory.Model -> Motherboard -> Model -> Html Msg
@@ -104,9 +114,11 @@ viewMotherboard inventory motherboard model =
         slots =
             Motherboard.getSlots motherboard
     in
-        div [ class [ PanelMobo ], onClick <| Select Nothing ]
+        div [ class [ PanelMobo ] ]
             [ selectedComponent inventory motherboard model
-            , div [ class [ MoboContainer ] ]
+            , div
+                [ class [ MoboContainer ]
+                ]
                 [ guessMobo
                     (SelectingSlot >> Just >> Select)
                     model.highlight

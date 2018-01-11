@@ -29,7 +29,6 @@ view model =
                 , type_ "text"
                 , value model.username
                 , onInput (\str -> SetUsername str)
-                , onBlur ValidateUsername
                 ]
                 []
             ]
@@ -41,7 +40,6 @@ view model =
                 , type_ "password"
                 , value model.password
                 , onInput (\str -> SetPassword str)
-                , onBlur ValidatePassword
                 ]
                 []
             ]
