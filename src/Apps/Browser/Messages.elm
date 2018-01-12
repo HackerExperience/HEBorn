@@ -9,6 +9,7 @@ import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
 import Apps.Browser.Pages.Bank.Messages as Bank
+import Apps.Browser.Pages.Store.Messages as Store
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Models exposing (..)
 
@@ -46,3 +47,4 @@ type TabMsg
     | WebserverMsg Webserver.Msg
     | BankMsg Bank.Msg
     | DownloadCenterMsg DownloadCenter.Msg
+    | StoreMsg Store.Msg

@@ -48,6 +48,11 @@ type alias BankContent =
     }
 
 
+type alias StoreContent =
+    { title : String
+    }
+
+
 type alias DownloadCenterContent =
     { title : String
     }
