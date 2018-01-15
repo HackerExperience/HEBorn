@@ -28,7 +28,6 @@ visibleAccountGear { account, story } =
     [ toggleCampaignBtn account story
     , logoutBtn
     ]
-        |> List.map (List.singleton >> li [])
         |> ul []
         |> List.singleton
         |> div
@@ -66,8 +65,10 @@ toggleCampaignBtn account { enabled } =
                 |> List.singleton
                 |> button
                     [ onClick ToggleCampaign ]
+                |> List.singleton
+                |> li []
         else
-            div [] []
+            text ""
 
 
 logoutBtn : Html Msg
@@ -75,6 +76,8 @@ logoutBtn =
     button
         [ onClick Logout ]
         [ text "Logout" ]
+        |> List.singleton
+        |> li []
 
 
 indicator : List (Attribute a) -> List (Html a) -> Html a
