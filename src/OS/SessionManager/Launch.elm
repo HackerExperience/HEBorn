@@ -15,6 +15,7 @@ import OS.SessionManager.WindowManager.Launch as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.WindowManager.Messages as WM
 import Apps.Apps as Apps
+import Apps.Models as Apps
 
 
 type alias UpdateResponse =
@@ -27,6 +28,7 @@ openApp :
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> Model
     -> UpdateResponse
 openApp =
@@ -39,6 +41,7 @@ openOrRestoreApp :
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> Model
     -> UpdateResponse
 openOrRestoreApp =
@@ -51,6 +54,7 @@ type alias Action =
     -> String
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> WM.Model
     -> ( WM.Model, Cmd WM.Msg, Dispatch )
 
@@ -62,9 +66,10 @@ helper :
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> Model
     -> UpdateResponse
-helper action data maybeContext id serverCId app model0 =
+helper action data maybeContext id serverCId app maybeParams model0 =
     case get id model0 of
         Just wm ->
             let
@@ -72,7 +77,7 @@ helper action data maybeContext id serverCId app model0 =
                     getUID model0
 
                 ( wm_, cmd, dispatch ) =
-                    action data maybeContext uuid serverCId app wm
+                    action data maybeContext uuid serverCId app maybeParams wm
 
                 cmd_ =
                     Cmd.map (WindowManagerMsg id) cmd

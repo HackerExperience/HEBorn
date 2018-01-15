@@ -18,7 +18,9 @@ import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Apps.Messages as Apps
+import Apps.Models as Apps
 import Apps.Apps as Apps
+import Apps.Launch as Apps
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -38,6 +40,9 @@ update data msg model =
         case msg of
             OpenApp context app ->
                 onOpenApp data id context app model_
+
+            HandleOpenAppParams context params ->
+                handleOpenAppParams data id context params model_
 
             WindowManagerMsg id msg ->
                 onWindowManagerMsg data id msg model_
@@ -81,7 +86,7 @@ onOpenApp data id context app model =
                 |> Servers.getEndpointCId
 
         ( model_, cmd, dispatch ) =
-            openApp data context id ip app model
+            openApp data context id ip app Nothing model
     in
         ( model_, cmd, dispatch )
 
@@ -185,8 +190,104 @@ onTargetedAppMsg data targetCid targetContext appMsgs model =
         ( model_, cmd, dispatch )
 
 
+handleOpenAppParams :
+    Game.Data
+    -> ID
+    -> Context
+    -> Apps.AppParams
+    -> Model
+    -> UpdateResponse
+handleOpenAppParams data id context params model =
+    case get id model of
+        Just wm ->
+            let
+                app =
+                    Apps.paramsToApp params
+
+                maybeId =
+                    findApp app wm
+
+                maybeOldContext =
+                    Maybe.andThen (flip WM.getContext wm) maybeId
+
+                wm1 =
+                    maybeId
+                        |> Maybe.map (flip (WM.setContext context) wm)
+                        |> Maybe.withDefault wm
+
+                maybeAppModel =
+                    Maybe.andThen (flip WM.getAppModel wm1) maybeId
+
+                launchCheck =
+                    Maybe.map (Apps.launchParams False params) maybeAppModel
+
+                ( needsNewInstance, maybeAppModel_ ) =
+                    case launchCheck of
+                        Just ( needsNewInstance, maybeAppModel ) ->
+                            ( needsNewInstance, Just maybeAppModel )
+
+                        Nothing ->
+                            ( True, Nothing )
+
+                wm2 =
+                    case Maybe.uncurry maybeId maybeAppModel_ of
+                        Just ( id, appModel ) ->
+                            WM.setAppModel id appModel wm
+
+                        Nothing ->
+                            wm
+
+                wm_ =
+                    if Just context /= maybeOldContext then
+                        case Maybe.uncurry maybeId maybeOldContext of
+                            Just ( id, context ) ->
+                                WM.setContext context id wm2
+
+                            Nothing ->
+                                wm2
+                    else
+                        wm2
+
+                model_ =
+                    refresh id wm_ model
+
+                ip =
+                    data
+                        |> Game.getActiveServer
+                        |> Servers.getEndpointCId
+            in
+                if needsNewInstance then
+                    openApp data (Just context) id ip app (Just params) model_
+                else
+                    ( model_, Cmd.none, Dispatch.none )
+
+        Nothing ->
+            ( model, Cmd.none, Dispatch.none )
+
+
 
 -- helpers
+
+
+findApp : Apps.App -> WM.Model -> Maybe WM.ID
+findApp app wm =
+    let
+        filter =
+            WM.filterApp app wm.windows
+
+        maybeFound =
+            wm.visible
+                |> List.filter filter
+                |> List.head
+    in
+        case maybeFound of
+            Just found ->
+                Just found
+
+            Nothing ->
+                wm.hidden
+                    |> List.filter filter
+                    |> List.head
 
 
 {-| A reduce helper that routes messages to apps.

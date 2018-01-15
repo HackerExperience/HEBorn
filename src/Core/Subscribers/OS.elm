@@ -8,5 +8,8 @@ import OS.SessionManager.Messages as SessionManager
 dispatch : Dispatch -> Subscribers
 dispatch dispatch =
     case dispatch of
-        OpenApp maybeContext app ->
-            [ sessionManager <| SessionManager.OpenApp maybeContext app ]
+        OpenApp a b ->
+            [ sessionManager <| SessionManager.OpenApp a b ]
+
+        OpenAppParams a b ->
+            [ sessionManager <| SessionManager.HandleOpenAppParams a b ]

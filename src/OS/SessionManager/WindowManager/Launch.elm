@@ -33,9 +33,10 @@ resert :
     -> String
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data maybeContext id serverCId app model =
+resert data maybeContext id serverCId app maybeParams model =
     -- TODO: maybe check if the opened window has the current endpoint, focus
     -- it if this is the case
     let
@@ -64,7 +65,7 @@ resert data maybeContext id serverCId app model =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data maybeContext id serverCId app model
+            insert data maybeContext id serverCId app maybeParams model
 
 
 insert :
@@ -73,9 +74,10 @@ insert :
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
+    -> Maybe Apps.AppParams
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data maybeContext id serverCId app model =
+insert data maybeContext id serverCId app maybeParams model =
     let
         { windows, visible, parentSession } =
             model
@@ -84,6 +86,15 @@ insert data maybeContext id serverCId app model =
             case Apps.contexts app of
                 Apps.ContextualApp ->
                     let
+                        context =
+                            fallbackContext data maybeContext
+
+                        data_ =
+                            data
+                                |> Game.getGame
+                                |> Game.fromEndpoint
+                                |> Maybe.withDefault data
+
                         ( modelG, cmdG, dispatchG ) =
                             Apps.launch data
                                 { sessionId = parentSession
@@ -91,12 +102,6 @@ insert data maybeContext id serverCId app model =
                                 , context = Gateway
                                 }
                                 app
-
-                        data_ =
-                            data
-                                |> Game.getGame
-                                |> Game.fromEndpoint
-                                |> Maybe.withDefault data
 
                         ( modelE, cmdE, dispatchE ) =
                             Apps.launch data_
@@ -106,8 +111,26 @@ insert data maybeContext id serverCId app model =
                                 }
                                 app
 
-                        context =
-                            fallbackContext data maybeContext
+                        ( modelG_, modelE_ ) =
+                            case maybeParams of
+                                Just params ->
+                                    case context of
+                                        Gateway ->
+                                            modelG
+                                                |> Apps.launchParams True
+                                                    params
+                                                |> Tuple.second
+                                                |> flip (,) modelE
+
+                                        Endpoint ->
+                                            modelE
+                                                |> Apps.launchParams True
+                                                    params
+                                                |> Tuple.second
+                                                |> (,) modelG
+
+                                Nothing ->
+                                    ( modelG, modelE )
 
                         cmd =
                             Cmd.batch [ cmdG, cmdE ]
@@ -116,21 +139,32 @@ insert data maybeContext id serverCId app model =
                             Dispatch.batch [ dispatchG, dispatchE ]
 
                         model =
-                            DoubleContext context modelG modelE
+                            DoubleContext context modelG_ modelE_
                     in
                         ( model, cmd, dispatch )
 
                 Apps.ContextlessApp ->
                     let
+                        contextGateway =
+                            { sessionId = parentSession
+                            , windowId = id
+                            , context = Gateway
+                            }
+
                         ( model, cmd, dispatch ) =
-                            Apps.launch data
-                                { sessionId = parentSession
-                                , windowId = id
-                                , context = Gateway
-                                }
-                                app
+                            Apps.launch data contextGateway app
+
+                        model_ =
+                            case maybeParams of
+                                Just params ->
+                                    model
+                                        |> Apps.launchParams True params
+                                        |> Tuple.second
+
+                                Nothing ->
+                                    model
                     in
-                        ( SingleContext model, cmd, dispatch )
+                        ( SingleContext model_, cmd, dispatch )
 
         cmd_ =
             Cmd.map (AppMsg Active id) cmd

@@ -23,6 +23,7 @@ module OS.SessionManager.WindowManager.Models
         , getContext
         , move
         , resize
+        , filterWindows
         , toggleMaximize
         , toggleLock
         , toggleContext
@@ -30,6 +31,7 @@ module OS.SessionManager.WindowManager.Models
         , startDragging
         , stopDragging
         , getAppModel
+        , setAppModel
         , getAppModelFromWindow
         , group
         , title
@@ -344,6 +346,11 @@ resize id width height ({ windows } as model) =
             model
 
 
+filterWindows : (ID -> Window -> Bool) -> Model -> Windows
+filterWindows func model =
+    Dict.filter func model.windows
+
+
 toggleMaximize : ID -> Model -> Model
 toggleMaximize id ({ windows } as model) =
     case Dict.get id windows of
@@ -467,6 +474,34 @@ getAppModel id model =
 
         Nothing ->
             Nothing
+
+
+setAppModel : ID -> Apps.AppModel -> Model -> Model
+setAppModel id appModel model =
+    case Dict.get id model.windows of
+        Just window ->
+            let
+                instance =
+                    case window.instance of
+                        DoubleContext Gateway _ endpoint ->
+                            DoubleContext Gateway appModel endpoint
+
+                        DoubleContext Endpoint gateway _ ->
+                            DoubleContext Endpoint gateway appModel
+
+                        SingleContext _ ->
+                            SingleContext appModel
+
+                window_ =
+                    { window | instance = instance }
+
+                windows =
+                    Dict.insert id window_ model.windows
+            in
+                { model | windows = windows }
+
+        Nothing ->
+            model
 
 
 getAppModelFromWindow : Window -> Apps.AppModel

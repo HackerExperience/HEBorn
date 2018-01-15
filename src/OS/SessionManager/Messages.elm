@@ -7,6 +7,7 @@ import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Types exposing (..)
 import Apps.Messages as Apps
+import Apps.Models as Apps
 import Apps.Apps as Apps
 
 
@@ -17,3 +18,4 @@ type Msg
     | EveryAppMsg (List Apps.Msg)
     | TargetedAppMsg Servers.CId WM.TargetContext (List Apps.Msg)
     | AppMsg WindowRef Context Apps.Msg
+    | HandleOpenAppParams Context Apps.AppParams
