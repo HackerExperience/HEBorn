@@ -7,9 +7,13 @@ module Game.Servers.Hardware.Requests.UpdateMotherboard
 
 import Json.Decode as Decode
     exposing
-        ( Value
+        ( Decoder
+        , Value
         , decodeValue
+        , succeed
+        , fail
         )
+import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (ConfigSource, Code(..))
@@ -21,6 +25,15 @@ import Decoders.Hardware
 
 type Response
     = Okay Motherboard
+    | PorraKress
+    | NaughtySlot
+    | UnhealthyFriends
+    | CoitusInterruptus
+    | TryinToUseGod
+    | WrongHole
+    | RobinHood
+    | ConnectionRequired
+    | WrongToolForTheJob
     | Error
 
 
@@ -41,5 +54,50 @@ receive code json =
                 |> Requests.report
                 |> Maybe.map Okay
 
+        ErrorCode ->
+            Requests.decodeGenericError
+                json
+                decodeErrorMessage
+
         _ ->
             Just Error
+
+
+decodeErrorMessage : String -> Decoder Response
+decodeErrorMessage str =
+    case str of
+        "bad_src" ->
+            succeed PorraKress
+
+        "bad_slot_data" ->
+            succeed NaughtySlot
+
+        "bad_network_connections" ->
+            succeed UnhealthyFriends
+
+        "motherboard_missing_initial_components" ->
+            succeed CoitusInterruptus
+
+        "component_not_found" ->
+            succeed TryinToUseGod
+
+        "motherboard_wrong_slot_type" ->
+            succeed WrongHole
+
+        "motherboard_bad_slot" ->
+            succeed NaughtySlot
+
+        "component_not_belongs" ->
+            succeed RobinHood
+
+        "network_connection_not_belongs" ->
+            succeed RobinHood
+
+        "motherboard_missing_public_nip" ->
+            succeed ConnectionRequired
+
+        "component_not_motherboard" ->
+            succeed WrongToolForTheJob
+
+        value ->
+            fail <| commonError "mobo update error message" value

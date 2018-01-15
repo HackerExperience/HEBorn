@@ -111,7 +111,7 @@ onUpdateMotherboard response model =
                 |> setMotherboard (Just motherboard)
                 |> Update.fromModel
 
-        UpdateMotherboard.Error ->
+        _ ->
             Update.fromModel model
 
 

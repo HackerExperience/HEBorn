@@ -11,6 +11,7 @@ import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
+import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
 
 
 events : CId -> Router Dispatch
@@ -36,6 +37,9 @@ events cid name json =
 
         "log_created" ->
             LogCreated.handler (onLogCreated cid) json
+
+        "motherboard_updated" ->
+            MotherboardUpdated.handler (onMotherbardUpdated cid) json
 
         _ ->
             Err "Not implemented or incompatible event router"
@@ -78,3 +82,8 @@ onBruteforceFailed id =
 onLogCreated : CId -> LogCreated.Data -> Dispatch
 onLogCreated id =
     Servers.CreatedLog >> Dispatch.logs id
+
+
+onMotherbardUpdated : CId -> MotherboardUpdated.Data -> Dispatch
+onMotherbardUpdated id =
+    Servers.MotherboardUpdated >> Dispatch.hardware id
