@@ -21,6 +21,7 @@ import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
 import Apps.LogFlix.Update as LogFlix
 import Apps.FloatingHeads.Update as FloatingHeads
+import Apps.Popup.Update as Popup
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -209,6 +210,14 @@ update data msg model =
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
 
+        PopupMsg msg ->
+            case model of
+                PopupModel model ->
+                    map PopupModel PopupMsg (Popup.update data msg model)
+
+                _ ->
+                    ( model, Cmd.none, Dispatch.none )
+
 
 
 --case ( msg, model ) of
@@ -246,6 +255,8 @@ update data msg model =
 --      map CalculatorModel CalculatorMsg (Calculator.update data msg model)
 --  ( FloatingHeadsMsg msg, FloatingHeadsModel model ) ->
 --      map FloatingHeadsModel FloatingHeadsMsg (FloatingHeads.update data msg model)
+--  ( PopupMsg msg, PopupModel model ) ->
+--      map PopupModel PopupMsg (Popup.update data msg model)
 --  _ ->
 --      ( model, Cmd.none, Dispatch.none )
 

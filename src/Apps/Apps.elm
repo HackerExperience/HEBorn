@@ -20,3 +20,4 @@ type App
     | CalculatorApp
     | LogFlixApp
     | FloatingHeadsApp
+    | PopupApp

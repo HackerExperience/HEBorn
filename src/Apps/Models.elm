@@ -27,6 +27,7 @@ import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
 import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.Popup.Models as Popup
 import Apps.Apps exposing (..)
 
 
@@ -49,6 +50,7 @@ type AppModel
     | CalculatorModel Calculator.Model
     | LogFlixModel LogFlix.Model
     | FloatingHeadsModel FloatingHeads.Model
+    | PopupModel Popup.Model
 
 
 type Contexts
@@ -113,6 +115,9 @@ contexts app =
         FloatingHeadsApp ->
             ContextlessApp
 
+        PopupApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -170,6 +175,9 @@ name app =
 
         FloatingHeadsApp ->
             FloatingHeads.name
+
+        PopupApp ->
+            Popup.name
 
 
 icon : App -> String
@@ -229,6 +237,9 @@ icon app =
         FloatingHeadsApp ->
             FloatingHeads.icon
 
+        PopupApp ->
+            Popup.icon
+
 
 title : AppModel -> String
 title model =
@@ -287,6 +298,9 @@ title model =
         FloatingHeadsModel model ->
             FloatingHeads.title model
 
+        PopupModel model ->
+            Popup.title model
+
 
 windowInitSize : App -> ( Float, Float )
 windowInitSize app =
@@ -302,6 +316,9 @@ windowInitSize app =
 
         LogFlixApp ->
             LogFlix.windowInitSize
+
+        PopupApp ->
+            Popup.windowInitSize
 
         _ ->
             ( 600, 400 )

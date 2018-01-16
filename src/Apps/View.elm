@@ -29,7 +29,7 @@ import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
 import Apps.LogFlix.View as LogFlix
 import Apps.FloatingHeads.View as FloatingHeads
-import Apps.FloatingHeads.Messages as FloatingHeadsMessages
+import Apps.Popup.View as Popup
 import Game.Data as Game
 
 
@@ -89,6 +89,9 @@ view data model =
 
         FloatingHeadsModel model ->
             Html.map FloatingHeadsMsg (FloatingHeads.view data model)
+
+        PopupModel model ->
+            Html.map PopupMsg (Popup.view data model)
 
 
 isDecorated : App -> Bool
