@@ -20,11 +20,14 @@ css =
             , padding (px 0)
             , children
                 [ li
-                    [ padding2 (px 22) (px 8) ]
-                , class Avatar
-                    [ width (px 48)
-                    , height (px 48)
-                    , borderRadius (pct 100)
+                    [ padding2 (px 22) (px 8)
+                    , children
+                        [ class Avatar
+                            [ width (px 48)
+                            , height (px 48)
+                            , borderRadius (pct 100)
+                            ]
+                        ]
                     ]
                 ]
             ]

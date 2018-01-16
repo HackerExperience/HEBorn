@@ -69,7 +69,12 @@ windowHeader : Model -> Html Msg
 windowHeader model =
     div
         [ class [ PseudoHeader ] ]
-        [ closeBtn ]
+        [ span [ class [ HeaderBtnDrag ] ] []
+        , text " "
+        , closeBtn
+        , text " "
+        , span [ class [ HeaderBtnDrag ] ] []
+        ]
 
 
 closeBtn : Html Msg
@@ -85,7 +90,7 @@ renderHeader : Maybe Person -> Html Msg
 renderHeader person =
     let
         fallbackLink =
-            "https://pbs.twimg.com/profile_images/928805578679431168/zwSXRn0K_400x400.jpg"
+            "images/avatar.jpg"
 
         imgSource =
             case person of
@@ -116,7 +121,7 @@ renderChat data active =
         |> Maybe.map Emails.getAvailableReplies
         |> Maybe.withDefault []
         |> List.map (reply data)
-        |> li []
+        |> div []
         |> List.singleton
         |> (::) (ul [] (chatMessages data active))
         |> div [ class [ Chat ] ]

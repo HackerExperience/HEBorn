@@ -61,7 +61,7 @@ contact k { about } acu =
                     src about_.picture
 
                 Nothing ->
-                    src "https://pbs.twimg.com/profile_images/928805578679431168/zwSXRn0K_400x400.jpg"
+                    src "images/avatar.jpg"
 
         image =
             img imageAttrs []

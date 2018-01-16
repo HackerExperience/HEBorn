@@ -15,13 +15,24 @@ css =
     (stylesheet << namespace prefix)
         [ class PseudoHeader
             [ lineHeight (px 16)
+            , width (px 150)
+            , textAlign center
             , children
                 [ class HeaderBtnClose
                     [ before
                         [ Icon.windowClose ]
                     , color (hex "f25156")
                     , Icon.fontFamily
-                    , marginLeft (px 134)
+                    , textShadow4 (px 1) (px 0) (px 3) Color.black
+                    , position relative
+                    , zIndex (int 2)
+                    ]
+                , class HeaderBtnDrag
+                    [ before
+                        [ Icon.moveable ]
+                    , color Color.bgWindow
+                    , Icon.fontFamily
+                    , textShadow4 (px 1) (px 0) (px 3) Color.black
                     ]
                 ]
             ]
@@ -47,6 +58,8 @@ css =
                     , width (px 400)
                     , borderRadius (px 8)
                     , padding (px 0)
+                    , marginTop (px -16)
+                    , zIndex (int 2)
                     , backgroundColor Color.bgSelected
                     , children
                         [ ul

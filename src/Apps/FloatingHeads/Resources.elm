@@ -11,6 +11,7 @@ type Classes
     | Sys
     | PseudoHeader
     | HeaderBtnClose
+    | HeaderBtnDrag
 
 
 prefix : String

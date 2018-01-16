@@ -36,10 +36,12 @@ css =
             ]
         , class Window
             [ position (absolute)
+            , zIndex (int 0)
             , displayFlex
             , borderRadius wmBorderRadius
             , flexDirection column
             , flex (int 0)
+            , focus [ outline none ]
             , withAttribute (Css.NOT (Css.BOOL decoratedAttrTag))
                 [ children
                     [ div

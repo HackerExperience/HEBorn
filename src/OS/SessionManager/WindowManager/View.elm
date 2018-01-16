@@ -67,7 +67,6 @@ windowWrapper id window view =
         windowStaticAttrs =
             [ windowClasses window
             , windowStyle window
-            , tabindex 1
             , boolAttr Res.decoratedAttrTag <| isDecorated window
             , appAttr window.app
             , activeContextAttr <| windowContext window
