@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
+import Game.Servers.Models as Servers
 import Game.Notifications.Models as Notifications
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
@@ -70,7 +71,7 @@ servers data openMenu =
         notifications =
             data
                 |> Game.getActiveServer
-                |> .notifications
+                |> Servers.getNotifications
 
         cid =
             Game.getActiveCId data
@@ -92,13 +93,19 @@ servers data openMenu =
 
 
 account : Game.Data -> OpenMenu -> ( Html Msg, Html Msg )
-account { game } openMenu =
+account data openMenu =
     let
+        game =
+            data
+                |> Game.getGame
+
         view =
             Account.view openMenu game
 
         bubble_ =
-            game.account.notifications
+            data
+                |> Game.getActiveServer
+                |> Servers.getNotifications
                 |> Notifications.countUnreaded
                 |> bubble
     in

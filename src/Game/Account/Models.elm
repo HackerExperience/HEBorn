@@ -136,3 +136,8 @@ insertGateway id ({ gateways } as model) =
                 model.gateways
     in
         { model | activeGateway = activeGateway, gateways = gateways }
+
+
+getDock : Model -> Dock.Model
+getDock =
+    .dock

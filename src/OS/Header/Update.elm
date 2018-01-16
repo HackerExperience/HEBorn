@@ -222,18 +222,19 @@ onSelectNIP data nip model =
 switchGameMode : Game.Data -> Servers.CId -> Dispatch
 switchGameMode data cid =
     let
+        server =
+            data
+                |> Game.getGame
+                |> Game.getServers
+                |> Servers.get cid
+
         isStoryModeActive =
             data
                 |> Game.getGame
                 |> Game.getStory
                 |> Storyline.isActive
-
-        servers =
-            data
-                |> Game.getGame
-                |> Game.getServers
     in
-        case (Servers.get cid servers) of
+        case server of
             Just server ->
                 case server.type_ of
                     Servers.DesktopCampaign ->
