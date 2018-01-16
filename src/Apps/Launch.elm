@@ -1,7 +1,8 @@
-module Apps.Launch exposing (launch)
+module Apps.Launch exposing (launch, launchEvent)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Game.Meta.Types.Context exposing (Context)
 import Utils.Update as Update
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
@@ -9,7 +10,8 @@ import Apps.Models exposing (..)
 import Apps.Reference exposing (..)
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
-import Apps.Browser.Models as Browser
+import Apps.Browser.Launch as Browser
+import Apps.Browser.Messages as Browser
 import Apps.Explorer.Models as Explorer
 import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
@@ -27,8 +29,13 @@ import Apps.LogFlix.Models as LogFlix
 import Apps.FloatingHeads.Models as FloatingHeads
 
 
-launch : Game.Data -> Reference -> App -> ( AppModel, Cmd Msg, Dispatch )
-launch data ({ windowId } as reference) app =
+launch :
+    Game.Data
+    -> Reference
+    -> Maybe AppParams
+    -> App
+    -> ( AppModel, Cmd Msg, Dispatch )
+launch data ({ windowId } as reference) maybeParams app =
     case app of
         LogViewerApp ->
             LogViewer.initialModel
@@ -41,9 +48,25 @@ launch data ({ windowId } as reference) app =
                 |> Update.fromModel
 
         BrowserApp ->
-            Browser.initialModel reference
-                |> BrowserModel
-                |> Update.fromModel
+            let
+                params =
+                    case maybeParams of
+                        Just (BrowserParams params) ->
+                            Just params
+
+                        _ ->
+                            Nothing
+
+                ( model, cmd, dispatch ) =
+                    Browser.launch data params reference
+
+                model_ =
+                    BrowserModel model
+
+                cmd_ =
+                    Cmd.map BrowserMsg cmd
+            in
+                ( model_, cmd_, dispatch )
 
         ExplorerApp ->
             Explorer.initialModel
@@ -129,3 +152,10 @@ launch data ({ windowId } as reference) app =
             FloatingHeads.initialModel reference
                 |> FloatingHeadsModel
                 |> Update.fromModel
+
+
+launchEvent : Context -> AppParams -> Msg
+launchEvent context params =
+    case params of
+        BrowserParams params ->
+            BrowserMsg <| Browser.LaunchApp context params

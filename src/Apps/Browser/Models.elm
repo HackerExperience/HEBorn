@@ -24,6 +24,10 @@ type alias Model =
     }
 
 
+type Params
+    = OpenAtUrl URL
+
+
 type alias Tabs =
     Dict Int Tab
 

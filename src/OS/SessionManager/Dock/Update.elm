@@ -31,7 +31,7 @@ update data msg ({ sessions } as model) =
                             |> Servers.getEndpointCId
 
                     ( model_, cmd, dispatch ) =
-                        openApp data Nothing id ip app model
+                        openApp data Nothing Nothing id ip app model
                 in
                     ( model_, cmd, dispatch )
 
@@ -43,7 +43,7 @@ update data msg ({ sessions } as model) =
                             |> Servers.getEndpointCId
 
                     ( model_, cmd, dispatch ) =
-                        openOrRestoreApp data Nothing id ip app model
+                        openOrRestoreApp data Nothing Nothing id ip app model
                 in
                     ( model_, cmd, dispatch )
 

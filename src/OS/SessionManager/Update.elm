@@ -15,10 +15,12 @@ import Game.Meta.Types.Context exposing (Context(..))
 import OS.SessionManager.Types exposing (..)
 import Game.Data as Game
 import Game.Models
+import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Apps.Messages as Apps
 import Apps.Apps as Apps
+import Apps.Launch as Apps
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
@@ -36,8 +38,11 @@ update data msg model =
             ensureSession id model
     in
         case msg of
-            OpenApp context app ->
-                onOpenApp data id context app model_
+            HandleNewApp context params app ->
+                handleNewApp data id context params app model_
+
+            HandleOpenApp context params ->
+                handleOpenApp data id context params model_
 
             WindowManagerMsg id msg ->
                 onWindowManagerMsg data id msg model_
@@ -66,14 +71,15 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-onOpenApp :
+handleNewApp :
     Game.Data
     -> ID
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> Apps.App
     -> Model
     -> UpdateResponse
-onOpenApp data id context app model =
+handleNewApp data id context params app model =
     let
         ip =
             data
@@ -81,9 +87,49 @@ onOpenApp data id context app model =
                 |> Servers.getEndpointCId
 
         ( model_, cmd, dispatch ) =
-            openApp data context id ip app model
+            openApp data context params id ip app model
     in
         ( model_, cmd, dispatch )
+
+
+handleOpenApp :
+    Game.Data
+    -> ID
+    -> Maybe Context
+    -> Apps.AppParams
+    -> Model
+    -> UpdateResponse
+handleOpenApp data id maybeContext params model =
+    let
+        app =
+            Apps.paramsToApp params
+
+        context =
+            case maybeContext of
+                Just context ->
+                    context
+
+                Nothing ->
+                    data
+                        |> Game.getGame
+                        |> Game.Models.getAccount
+                        |> Account.getContext
+
+        maybeWm =
+            get id model
+
+        maybeWindowId =
+            Maybe.andThen (findApp app) maybeWm
+    in
+        case maybeWindowId of
+            Just windowId ->
+                params
+                    |> Apps.launchEvent context
+                    |> WM.AppMsg (WM.One context) windowId
+                    |> flip (onWindowManagerMsg data id) model
+
+            Nothing ->
+                handleNewApp data id maybeContext (Just params) app model
 
 
 onWindowManagerMsg :
@@ -187,6 +233,27 @@ onTargetedAppMsg data targetCid targetContext appMsgs model =
 
 
 -- helpers
+
+
+findApp : Apps.App -> WM.Model -> Maybe WM.ID
+findApp app wm =
+    let
+        filter =
+            WM.filterApp app wm.windows
+
+        maybeFound =
+            wm.visible
+                |> List.filter filter
+                |> List.head
+    in
+        case maybeFound of
+            Just found ->
+                Just found
+
+            Nothing ->
+                wm.hidden
+                    |> List.filter filter
+                    |> List.head
 
 
 {-| A reduce helper that routes messages to apps.

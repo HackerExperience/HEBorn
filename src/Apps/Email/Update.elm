@@ -52,6 +52,6 @@ onSelectContact : String -> Model -> UpdateResponse
 onSelectContact email model =
     let
         dispatch =
-            Dispatch.os <| OS.OpenApp Nothing Apps.FloatingHeadsApp
+            Dispatch.os <| OS.NewApp Nothing Nothing Apps.FloatingHeadsApp
     in
         ( model, Cmd.none, dispatch )

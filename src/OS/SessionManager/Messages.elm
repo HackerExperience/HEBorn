@@ -8,12 +8,14 @@ import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Types exposing (..)
 import Apps.Messages as Apps
 import Apps.Apps as Apps
+import Apps.Models as Apps
 
 
 type Msg
-    = OpenApp (Maybe Context) Apps.App
-    | WindowManagerMsg ID WM.Msg
+    = WindowManagerMsg ID WM.Msg
     | DockMsg Dock.Msg
     | EveryAppMsg (List Apps.Msg)
     | TargetedAppMsg Servers.CId WM.TargetContext (List Apps.Msg)
     | AppMsg WindowRef Context Apps.Msg
+    | HandleNewApp (Maybe Context) (Maybe Apps.AppParams) Apps.App
+    | HandleOpenApp (Maybe Context) Apps.AppParams

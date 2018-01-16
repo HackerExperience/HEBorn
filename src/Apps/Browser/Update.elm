@@ -14,6 +14,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
+import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
 import Apps.Apps as Apps
@@ -46,6 +47,9 @@ update data msg model =
 
         MenuMsg msg ->
             onMenuMsg data msg model
+
+        LaunchApp context params ->
+            onLaunchApp data context params model
 
         ChangeTab tabId ->
             Update.fromModel <| goTab tabId model
@@ -92,6 +96,26 @@ onMenuMsg data msg model =
         }
         msg
         model
+
+
+onLaunchApp : Game.Data -> Context -> Params -> Model -> UpdateResponse
+onLaunchApp data context (OpenAtUrl url) model =
+    let
+        filter id tab =
+            tab.addressBar == url
+
+        maybeId =
+            model.tabs
+                |> Dict.filter filter
+                |> Dict.keys
+                |> List.head
+    in
+        case maybeId of
+            Just id ->
+                Update.fromModel <| goTab id model
+
+            Nothing ->
+                onNewTabIn data url model
 
 
 onNewTabIn : Game.Data -> URL -> Model -> UpdateResponse
@@ -175,7 +199,8 @@ updateSomeTabMsg data tabId msg model =
 onEveryTabMsg : Game.Data -> TabMsg -> Model -> UpdateResponse
 onEveryTabMsg data msg model =
     model.tabs
-        |> Dict.foldl (reduceTabMsg data msg model) ( Dict.empty, Cmd.none, Dispatch.none )
+        |> Dict.foldl (reduceTabMsg data msg model)
+            ( Dict.empty, Cmd.none, Dispatch.none )
         |> Update.mapModel (\tabs_ -> { model | tabs = tabs_ })
 
 
@@ -238,10 +263,10 @@ processTabMsg data tabId msg tab model =
             -- TODO: implementation pending
             Update.fromModel tab
 
-        OpenApp app ->
+        NewApp params ->
             ( tab
             , Cmd.none
-            , Dispatch.os <| OS.OpenApp (Just Endpoint) app
+            , Dispatch.os <| OS.NewApp Nothing Nothing params
             )
 
         SelectEndpoint ->

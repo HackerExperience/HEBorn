@@ -24,6 +24,7 @@ type alias UpdateResponse =
 openApp :
     Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
@@ -36,6 +37,7 @@ openApp =
 openOrRestoreApp :
     Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
@@ -48,6 +50,7 @@ openOrRestoreApp =
 type alias Action =
     Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> String
     -> Maybe Servers.CId
     -> Apps.App
@@ -59,12 +62,13 @@ helper :
     Action
     -> Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> UpdateResponse
-helper action data maybeContext id serverCId app model0 =
+helper action data maybeContext maybeParams id serverCId app model0 =
     case get id model0 of
         Just wm ->
             let
@@ -72,7 +76,13 @@ helper action data maybeContext id serverCId app model0 =
                     getUID model0
 
                 ( wm_, cmd, dispatch ) =
-                    action data maybeContext uuid serverCId app wm
+                    action data
+                        maybeContext
+                        maybeParams
+                        uuid
+                        serverCId
+                        app
+                        wm
 
                 cmd_ =
                     Cmd.map (WindowManagerMsg id) cmd

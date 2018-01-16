@@ -30,12 +30,13 @@ fallbackContext data maybeContext =
 resert :
     Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> String
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-resert data maybeContext id serverCId app model =
+resert data maybeContext maybeParams id serverCId app model =
     -- TODO: maybe check if the opened window has the current endpoint, focus
     -- it if this is the case
     let
@@ -64,18 +65,19 @@ resert data maybeContext id serverCId app model =
             in
                 ( model_, Cmd.none, Dispatch.none )
         else
-            insert data maybeContext id serverCId app model
+            insert data maybeContext maybeParams id serverCId app model
 
 
 insert :
     Game.Data
     -> Maybe Context
+    -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
     -> ( Model, Cmd Msg, Dispatch )
-insert data maybeContext id serverCId app model =
+insert data maybeContext maybeParams id serverCId app model =
     let
         { windows, visible, parentSession } =
             model
@@ -84,12 +86,24 @@ insert data maybeContext id serverCId app model =
             case Apps.contexts app of
                 Apps.ContextualApp ->
                     let
+                        context =
+                            fallbackContext data maybeContext
+
+                        ( gatewayParams, endpointParams ) =
+                            case context of
+                                Gateway ->
+                                    ( maybeParams, Nothing )
+
+                                Endpoint ->
+                                    ( Nothing, maybeParams )
+
                         ( modelG, cmdG, dispatchG ) =
                             Apps.launch data
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Gateway
                                 }
+                                gatewayParams
                                 app
 
                         data_ =
@@ -104,10 +118,8 @@ insert data maybeContext id serverCId app model =
                                 , windowId = id
                                 , context = Endpoint
                                 }
+                                endpointParams
                                 app
-
-                        context =
-                            fallbackContext data maybeContext
 
                         cmd =
                             Cmd.batch [ cmdG, cmdE ]
@@ -128,6 +140,7 @@ insert data maybeContext id serverCId app model =
                                 , windowId = id
                                 , context = Gateway
                                 }
+                                maybeParams
                                 app
                     in
                         ( SingleContext model, cmd, dispatch )

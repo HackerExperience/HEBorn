@@ -37,11 +37,11 @@ publicFilesConfig { onPublicDownload } source =
 
 
 hackingPanelConfig : Config msg -> HackingPanel.Config msg
-hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onOpenApp } =
+hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
     { onLogout = onLogout
     , onSelectEndpoint = onSelectEndpoint
     , onAnyMap = onAnyMap
-    , onOpenApp = onOpenApp
+    , onNewApp = onNewApp
     , onSetShowingPanel = SetShowingPanel >> toMsg
     , apps =
         [ Apps.TaskManagerApp
