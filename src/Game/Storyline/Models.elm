@@ -13,7 +13,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { enabled = False
+    { enabled = True
     , missions = Missions.initialModel
     , emails = Emails.initialModel
     }
