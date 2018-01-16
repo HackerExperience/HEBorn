@@ -317,3 +317,8 @@ logfl =
 floatingheads : Icon
 floatingheads =
     faIcon FA.book
+
+
+moveable : Icon
+moveable =
+    faIcon FA.arrows

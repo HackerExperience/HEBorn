@@ -13,6 +13,7 @@ import Game.Models as Game
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
 import Game.Storyline.Emails.Contents as Emails
+import Game.Storyline.Emails.Contents.View as Emails
 import Apps.FloatingHeads.Messages exposing (Msg(..))
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
@@ -37,18 +38,18 @@ view data model =
                 viewCompact person model
 
             Expanded ->
-                viewExpanded person model
+                viewExpanded data person model
 
 
-viewExpanded : Maybe Person -> Model -> Html Msg
-viewExpanded person model =
+viewExpanded : Game.Data -> Maybe Person -> Model -> Html Msg
+viewExpanded data person model =
     div
         []
         [ windowHeader model
         , div
             [ class [ Super ] ]
             [ renderHeader person
-            , renderChat person
+            , renderChat data person
             ]
         ]
 
@@ -68,7 +69,12 @@ windowHeader : Model -> Html Msg
 windowHeader model =
     div
         [ class [ PseudoHeader ] ]
-        [ closeBtn ]
+        [ span [ class [ HeaderBtnDrag ] ] []
+        , text " "
+        , closeBtn
+        , text " "
+        , span [ class [ HeaderBtnDrag ] ] []
+        ]
 
 
 closeBtn : Html Msg
@@ -84,7 +90,7 @@ renderHeader : Maybe Person -> Html Msg
 renderHeader person =
     let
         fallbackLink =
-            "https://pbs.twimg.com/profile_images/928805578679431168/zwSXRn0K_400x400.jpg"
+            "images/avatar.jpg"
 
         imgSource =
             case person of
@@ -109,28 +115,28 @@ renderHeader person =
             ]
 
 
-renderChat : Maybe Person -> Html Msg
-renderChat active =
+renderChat : Game.Data -> Maybe Person -> Html Msg
+renderChat data active =
     active
         |> Maybe.map Emails.getAvailableReplies
         |> Maybe.withDefault []
-        |> List.map reply
-        |> li []
+        |> List.map (reply data)
+        |> div []
         |> List.singleton
-        |> (::) (ul [] (chatMessages active))
+        |> (::) (ul [] (chatMessages data active))
         |> div [ class [ Chat ] ]
 
 
-reply : Emails.Content -> Html Msg
-reply msg =
-    Emails.toString msg
-        |> text
-        |> List.singleton
+reply : Game.Data -> Emails.Content -> Html Msg
+reply data msg =
+    msg
+        |> Emails.view data
+        |> List.map (Html.map ContentMsg)
         |> span [ onClick <| Reply msg ]
 
 
-chatMessages : Maybe Person -> List (Html Msg)
-chatMessages active =
+chatMessages : Game.Data -> Maybe Person -> List (Html Msg)
+chatMessages data active =
     active
         |> Maybe.map (Emails.getMessages >> Dict.values)
         |> Maybe.withDefault []
@@ -138,23 +144,23 @@ chatMessages active =
             (\v ->
                 case v of
                     Emails.Sent msg ->
-                        baloon To msg
+                        baloon data To msg
 
                     Emails.Received msg ->
-                        baloon From msg
+                        baloon data From msg
             )
 
 
-baloon : Classes -> Emails.Content -> Html Msg
-baloon direction msg =
+baloon : Game.Data -> Classes -> Emails.Content -> Html Msg
+baloon data direction msg =
     li
         [ class [ direction ] ]
-        [ content msg ]
+        [ content data msg ]
 
 
-content : Emails.Content -> Html Msg
-content msg =
-    Emails.toString msg
-        |> text
-        |> List.singleton
+content : Game.Data -> Emails.Content -> Html Msg
+content data msg =
+    msg
+        |> Emails.view data
+        |> List.map (Html.map ContentMsg)
         |> span []

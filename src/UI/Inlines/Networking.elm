@@ -2,30 +2,18 @@ module UI.Inlines.Networking exposing (user, addr, file)
 
 import Html exposing (Html, Attribute, text, node)
 import Html.Attributes exposing (attribute)
+import Html.Events exposing (onClick)
+import Utils.Html.Attributes exposing (boolAttr)
 import Game.Meta.Types.Network exposing (IP)
 import Game.Shared exposing (ServerUser, isRoot, isLocalHost)
 
 
-addrAttrs : IP -> List (Attribute msg)
-addrAttrs addr =
-    if (isLocalHost addr) then
-        [ attribute "localhost" "Y" ]
-    else
-        []
-
-
-userAttrs : ServerUser -> List (Attribute msg)
-userAttrs user =
-    if (isRoot user) then
-        [ attribute "root" "Y" ]
-    else
-        []
-
-
-addr : IP -> Html msg
-addr addr =
+addr : (IP -> msg) -> IP -> Html msg
+addr click addr =
     node "linkAddr"
-        (addrAttrs addr)
+        [ boolAttr "localhost" (isLocalHost addr)
+        , onClick (click addr)
+        ]
         [ node "ico" [] []
         , text " "
         , node "label" [] [ text addr ]
@@ -35,7 +23,7 @@ addr addr =
 user : ServerUser -> Html msg
 user user =
     node "linkUser"
-        (userAttrs user)
+        [ boolAttr "root" (isRoot user) ]
         [ node "ico" [] []
         , text " "
         , node "label" [] [ text user ]

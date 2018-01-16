@@ -30,7 +30,7 @@ view data model =
             viewOS data model
 
         dynStyle =
-            viewDynStyle data.game
+            DynamicStyle.view data.game
 
         gameMode =
             case data.game.story.enabled of
@@ -48,14 +48,6 @@ view data model =
             , activeContextAttr data.game.account.context
             ]
             (osContent ++ dynStyle)
-
-
-viewDynStyle : Game.Model -> List (Html Msg)
-viewDynStyle { story } =
-    if story.enabled then
-        [ lazy DynamicStyle.view story.missions ]
-    else
-        []
 
 
 viewOS : Game.Data -> Model -> List (Html Msg)

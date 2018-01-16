@@ -109,7 +109,23 @@ contentFromId id =
             succeed WelcomePCSetup
 
         "back_thanks" ->
-            succeed WelcomeBackThanks
+            succeed BackThanks
+
+        "download_cracker_public_ftp" ->
+            succeed DownloadCrackerPublicFTP
+                |> required "ip" string
+                |> field "meta"
+
+        "give_more_info" ->
+            succeed GiveMoreInfo
+                |> required "step" string
+                |> field "meta"
+
+        "more_info" ->
+            succeed MoreInfo
+
+        "sure" ->
+            succeed Sure
 
         error ->
             fail <| commonError "email_type" error
