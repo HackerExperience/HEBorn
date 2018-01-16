@@ -12,7 +12,6 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Events.Types exposing (Handler)
-import Decoders.Emails exposing (contentFromId)
 
 
 type alias Data =
