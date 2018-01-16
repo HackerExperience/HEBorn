@@ -2,23 +2,32 @@ module Game.Storyline.Emails.Contents.View exposing (..)
 
 import Html exposing (Html, text)
 import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Storyline.Emails.Contents exposing (Content(..))
 import Game.Storyline.Emails.Contents.Messages exposing (..)
 import UI.Inlines.Networking exposing (..)
 
 
 view : Game.Data -> Content -> List (Html Msg)
-view { game } content =
+view data content =
     case content of
         HelloWorld some ->
             [ text <| "hello world! " ++ some ]
 
         WelcomePCSetup ->
-            [ text <|
-                "Hey, "
-                    ++ game.account.username
-                    ++ "! There are some rumours you just got out of jail..."
-            ]
+            let
+                username =
+                    data
+                        |> Game.getGame
+                        |> Game.getAccount
+                        |> Account.getUsername
+            in
+                [ text <|
+                    "Hey, "
+                        ++ username
+                        ++ "! There are some rumours you just got out of jail..."
+                ]
 
         BackThanks ->
             [ text "Yep, the king is back! I'm needing a starter kit for getting back to work!"

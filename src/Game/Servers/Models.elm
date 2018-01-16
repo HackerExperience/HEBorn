@@ -437,3 +437,8 @@ isFreeplay server =
 getHardware : Server -> Hardware.Model
 getHardware server =
     server.hardware
+
+
+getNotifications : Server -> Notifications.Model
+getNotifications =
+    .notifications

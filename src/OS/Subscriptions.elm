@@ -2,14 +2,14 @@ module OS.Subscriptions exposing (subscriptions)
 
 import OS.Models exposing (..)
 import OS.Messages exposing (..)
-import Game.Data as GameData
+import Game.Data as Game
 import OS.Menu.Models as Menu
 import OS.Menu.Subscriptions as Menu
 import OS.SessionManager.Models as SessionManager
 import OS.SessionManager.Subscriptions as SessionManager
 
 
-subscriptions : GameData.Data -> Model -> Sub Msg
+subscriptions : Game.Data -> Model -> Sub Msg
 subscriptions data model =
     let
         menuSub =
@@ -35,7 +35,7 @@ menu model =
         |> Sub.map MenuMsg
 
 
-session : GameData.Data -> SessionManager.Model -> Sub Msg
+session : Game.Data -> SessionManager.Model -> Sub Msg
 session data model =
     model
         |> SessionManager.subscriptions data

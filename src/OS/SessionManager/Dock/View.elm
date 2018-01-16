@@ -14,7 +14,9 @@ import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
 import Apps.Models as Apps
 import Apps.Apps as Apps
-import Game.Data as GameData
+import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
 
 
 -- this module still needs a refactor to make its code more maintainable
@@ -29,7 +31,7 @@ osClass =
     .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
-view : GameData.Data -> Model -> Html Msg
+view : Game.Data -> Model -> Html Msg
 view game model =
     div [ osClass [ OsRes.Dock ] ]
         [ dock game model ]
@@ -39,7 +41,7 @@ view game model =
 -- internals
 
 
-dock : GameData.Data -> Model -> Html Msg
+dock : Game.Data -> Model -> Html Msg
 dock data model =
     let
         id =
@@ -48,8 +50,14 @@ dock data model =
         wm =
             Maybe.withDefault (WM.initialModel id) (get id model)
 
+        dock =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getDock
+
         content =
-            icons data.game.account.dock wm
+            icons dock wm
     in
         div [ class [ Res.Container ] ]
             [ div [ class [ Res.Main ] ] [ content ] ]

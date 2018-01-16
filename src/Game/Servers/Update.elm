@@ -20,6 +20,7 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
+import Game.Meta.Models as Meta
 import Decoders.Servers
 import Game.Notifications.Messages as Notifications
 import Game.Notifications.Update as Notifications
@@ -46,7 +47,7 @@ update game msg model =
             onResync game cid model
 
         Request data ->
-            onRequest game (receive game.meta.lastTick data) model
+            onRequest game data model
 
         HandleJoinedServer cid value ->
             handleJoinedServer game cid value model
@@ -65,14 +66,23 @@ onServerMsg game cid msg model =
             Update.fromModel model
 
 
-onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest game response model =
-    case response of
-        Just response ->
-            updateRequest game response model
+onRequest : Game.Model -> RequestMsg -> Model -> UpdateResponse
+onRequest game data model =
+    let
+        lastTick =
+            game
+                |> Game.getMeta
+                |> Meta.getLastTick
 
-        Nothing ->
-            Update.fromModel model
+        response =
+            receive lastTick data
+    in
+        case response of
+            Just response ->
+                updateRequest game response model
+
+            Nothing ->
+                Update.fromModel model
 
 
 updateRequest : Game.Model -> Response -> Model -> UpdateResponse
@@ -288,8 +298,13 @@ handleJoinedServer :
     -> UpdateResponse
 handleJoinedServer game cid value model =
     let
+        lastTick =
+            game
+                |> Game.getMeta
+                |> Meta.getLastTick
+
         decodeBootstrap =
-            Decoders.Servers.server game.meta.lastTick <| getGatewayCache cid model
+            Decoders.Servers.server lastTick <| getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->

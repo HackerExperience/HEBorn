@@ -17,6 +17,7 @@ import Game.Servers.Processes.Requests.Download as Download
 import Game.Servers.Processes.Requests exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers exposing (CId)
+import Game.Meta.Models as Meta
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
 import Native.Panic
@@ -300,29 +301,35 @@ onDownloadRequest :
     -> Model
     -> UpdateResponse
 onDownloadRequest game cid oldId response model =
-    case response of
-        Download.Okay ->
-            Update.fromModel model
+    let
+        lastTick =
+            game
+                |> Game.getMeta
+                |> Meta.getLastTick
+    in
+        case response of
+            Download.Okay ->
+                Update.fromModel model
 
-        Download.SelfLoop ->
-            failDownloadFile game.meta.lastTick cid oldId model <|
-                "Self download: use copy instead!"
+            Download.SelfLoop ->
+                failDownloadFile lastTick cid oldId model <|
+                    "Self download: use copy instead!"
 
-        Download.FileNotFound ->
-            failDownloadFile game.meta.lastTick cid oldId model <|
-                "The file you're trying to download no longer exists"
+            Download.FileNotFound ->
+                failDownloadFile lastTick cid oldId model <|
+                    "The file you're trying to download no longer exists"
 
-        Download.StorageFull ->
-            failDownloadFile game.meta.lastTick cid oldId model <|
-                "Not enougth space!"
+            Download.StorageFull ->
+                failDownloadFile lastTick cid oldId model <|
+                    "Not enougth space!"
 
-        Download.StorageNotFound ->
-            failDownloadFile game.meta.lastTick cid oldId model <|
-                "The storage you're trying to access no longer exists"
+            Download.StorageNotFound ->
+                failDownloadFile lastTick cid oldId model <|
+                    "The storage you're trying to access no longer exists"
 
-        Download.BadRequest ->
-            failDownloadFile game.meta.lastTick cid oldId model <|
-                "Shit happened!"
+            Download.BadRequest ->
+                failDownloadFile lastTick cid oldId model <|
+                    "Shit happened!"
 
 
 
@@ -390,7 +397,13 @@ handleBruteforceFailed data model =
 
 handleProcessesChanged : Game.Model -> ProcessesChanged.Data -> Model -> UpdateResponse
 handleProcessesChanged game processes model =
-    Update.fromModel { model | processes = processes, lastModified = game.meta.lastTick }
+    let
+        lastTick =
+            game
+                |> Game.getMeta
+                |> Meta.getLastTick
+    in
+        Update.fromModel { model | processes = processes, lastModified = lastTick }
 
 
 handleBruteforceSuccess : ID -> Model -> UpdateResponse

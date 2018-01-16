@@ -26,7 +26,7 @@ styleNode id_ stylesheet =
         []
 
 
-view : Game.Model -> List (Html Msg)
+view : Game.Model -> Html Msg
 view { story } =
     let
         missions_ =
@@ -45,4 +45,4 @@ view { story } =
             else
                 ( text "", text "" )
     in
-        [ storyStyles ]
+        storyStyles
