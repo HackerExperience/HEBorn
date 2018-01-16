@@ -281,22 +281,22 @@ render { format, raw } =
         Just format ->
             case format of
                 LocalLoginFormat data ->
-                    [ addr data.from
+                    [ addr (\_ -> DummyNoOp) data.from
                     , text " logged in as "
                     , user data.user
                     ]
 
                 RemoteLoginFormat { into } ->
                     [ text "Logged into "
-                    , addr into
+                    , addr (\_ -> DummyNoOp) into
                     ]
 
                 ConnectionFormat { nip, from, to } ->
-                    [ addr nip
+                    [ addr (\_ -> DummyNoOp) nip
                     , text " bounced connection from "
-                    , addr from
+                    , addr (\_ -> DummyNoOp) from
                     , text " to "
-                    , addr to
+                    , addr (\_ -> DummyNoOp) to
                     ]
 
                 DownloadByFormat { filename, nip } ->
@@ -310,7 +310,7 @@ render { format, raw } =
                     [ text "File "
                     , file filename
                     , text " downloaded from "
-                    , addr nip
+                    , addr (\_ -> DummyNoOp) nip
                     ]
 
         Nothing ->

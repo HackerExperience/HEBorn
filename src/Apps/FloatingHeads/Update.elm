@@ -7,6 +7,8 @@ import Core.Dispatch.OS as OS
 import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
+import Game.Storyline.Emails.Contents.Messages as Contents
+import Game.Storyline.Emails.Contents.Update as Contents
 import Apps.FloatingHeads.Models exposing (Model, Mode(..))
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
@@ -24,6 +26,9 @@ update :
     -> UpdateResponse
 update data msg model =
     case msg of
+        ContentMsg msg ->
+            onContentMsg data msg model
+
         Reply content ->
             onReply data content model
 
@@ -35,6 +40,18 @@ update data msg model =
 
         Close ->
             onClose data model
+
+
+onContentMsg : Game.Data -> Contents.Msg -> Model -> UpdateResponse
+onContentMsg data msg model =
+    let
+        ( cmd, dispatch ) =
+            Contents.update data msg
+
+        cmd_ =
+            Cmd.map ContentMsg cmd
+    in
+        ( model, cmd_, dispatch )
 
 
 onReply : Game.Data -> Content -> Model -> UpdateResponse

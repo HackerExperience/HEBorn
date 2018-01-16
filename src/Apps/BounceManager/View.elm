@@ -7,7 +7,6 @@ import Game.Account.Database.Models exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
 import Game.Data as Game
 import Game.Meta.Types.Network as Network
-import UI.Inlines.Networking as Inlines
 import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (verticalList)
@@ -46,7 +45,7 @@ viewTabLabel _ tab =
 viewBouncePath : List Network.NIP -> Html Msg
 viewBouncePath ips =
     ips
-        |> List.map (Tuple.second >> Inlines.addr)
+        |> List.map (Tuple.second >> text)
         |> List.intersperse (text " > ")
         |> span []
 
