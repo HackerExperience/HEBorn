@@ -26,6 +26,8 @@ import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
+import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.Popup.Models as Popup
 import Apps.Apps exposing (..)
 
 
@@ -47,6 +49,8 @@ type AppModel
     | BugModel Bug.Model
     | CalculatorModel Calculator.Model
     | LogFlixModel LogFlix.Model
+    | FloatingHeadsModel FloatingHeads.Model
+    | PopupModel Popup.Model
 
 
 type Contexts
@@ -108,6 +112,12 @@ contexts app =
         LogFlixApp ->
             ContextlessApp
 
+        FloatingHeadsApp ->
+            ContextlessApp
+
+        PopupApp ->
+            ContextlessApp
+
 
 name : App -> String
 name app =
@@ -162,6 +172,12 @@ name app =
 
         LogFlixApp ->
             LogFlix.name
+
+        FloatingHeadsApp ->
+            FloatingHeads.name
+
+        PopupApp ->
+            Popup.name
 
 
 icon : App -> String
@@ -218,6 +234,12 @@ icon app =
         LogFlixApp ->
             LogFlix.icon
 
+        FloatingHeadsApp ->
+            FloatingHeads.icon
+
+        PopupApp ->
+            Popup.icon
+
 
 title : AppModel -> String
 title model =
@@ -273,10 +295,19 @@ title model =
         LogFlixModel model ->
             LogFlix.title model
 
+        FloatingHeadsModel model ->
+            FloatingHeads.title model
+
+        PopupModel model ->
+            Popup.title model
+
 
 windowInitSize : App -> ( Float, Float )
 windowInitSize app =
     case app of
+        EmailApp ->
+            Email.windowInitSize
+
         BrowserApp ->
             Browser.windowInitSize
 
@@ -285,6 +316,9 @@ windowInitSize app =
 
         LogFlixApp ->
             LogFlix.windowInitSize
+
+        PopupApp ->
+            Popup.windowInitSize
 
         _ ->
             ( 600, 400 )

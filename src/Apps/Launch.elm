@@ -6,7 +6,7 @@ import Utils.Update as Update
 import Apps.Apps exposing (..)
 import Apps.Messages exposing (..)
 import Apps.Models exposing (..)
-import Apps.Config exposing (..)
+import Apps.Reference exposing (..)
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager
 import Apps.Browser.Models as Browser
@@ -24,10 +24,17 @@ import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
+import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.Popup.Models as Popup
 
 
-launch : Game.Data -> Config -> App -> ( AppModel, Cmd Msg, Dispatch )
-launch data ({ windowId } as config) app =
+--Remove on #367 PR
+
+import Apps.Popup.Shared exposing (PopupType(..))
+
+
+launch : Game.Data -> Reference -> App -> ( AppModel, Cmd Msg, Dispatch )
+launch data ({ windowId } as reference) app =
     case app of
         LogViewerApp ->
             LogViewer.initialModel
@@ -40,7 +47,7 @@ launch data ({ windowId } as config) app =
                 |> Update.fromModel
 
         BrowserApp ->
-            Browser.initialModel config
+            Browser.initialModel reference
                 |> BrowserModel
                 |> Update.fromModel
 
@@ -122,4 +129,14 @@ launch data ({ windowId } as config) app =
         LogFlixApp ->
             LogFlix.initialModel
                 |> LogFlixModel
+                |> Update.fromModel
+
+        FloatingHeadsApp ->
+            FloatingHeads.initialModel reference
+                |> FloatingHeadsModel
+                |> Update.fromModel
+
+        PopupApp ->
+            Popup.initialModel ActivationPopup reference
+                |> PopupModel
                 |> Update.fromModel

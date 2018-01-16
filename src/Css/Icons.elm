@@ -312,3 +312,8 @@ storage =
 logfl : Icon
 logfl =
     faIcon FA.diamond
+
+
+floatingheads : Icon
+floatingheads =
+    faIcon FA.book

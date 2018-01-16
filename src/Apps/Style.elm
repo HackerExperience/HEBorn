@@ -17,6 +17,8 @@ import Apps.Bug.Style as Bug
 import Apps.Calculator.Style as Calculator
 import Apps.LogFlix.Style as LogFlix
 import Apps.ServersGears.Style as ServersGears
+import Apps.FloatingHeads.Style as FloatingHeads
+import Apps.Popup.Style as Popup
 
 
 cssList : List Stylesheet
@@ -37,4 +39,6 @@ cssList =
     , Calculator.css
     , ServersGears.css
     , LogFlix.css
+    , FloatingHeads.css
+    , Popup.css
     ]

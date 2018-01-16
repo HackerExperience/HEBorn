@@ -17,6 +17,8 @@ import Apps.Email.Messages as Email
 import Apps.Bug.Messages as Bug
 import Apps.Calculator.Messages as Calculator
 import Apps.LogFlix.Messages as LogFlix
+import Apps.FloatingHeads.Messages as FloatingHeads
+import Apps.Popup.Messages as Popup
 
 
 type Msg
@@ -37,3 +39,5 @@ type Msg
     | BugMsg Bug.Msg
     | CalculatorMsg Calculator.Msg
     | LogFlixMsg LogFlix.Msg
+    | FloatingHeadsMsg FloatingHeads.Msg
+    | PopupMsg Popup.Msg

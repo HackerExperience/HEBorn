@@ -15,6 +15,6 @@ import Decoders.Missions exposing (..)
 story : Decoder Model
 story =
     decode Model
-        |> optional "enabled" bool False
+        |> optional "enabled" bool True
         |> optional "mission" mission Missions.initialModel
         |> required "email" emails

@@ -20,6 +20,8 @@ import Apps.Email.Subscriptions as Email
 import Apps.Bug.Subscriptions as Bug
 import Apps.Calculator.Subscriptions as Calculator
 import Apps.LogFlix.Subscriptions as LogFlix
+import Apps.FloatingHeads.Subscriptions as FloatingHeads
+import Apps.Popup.Subscriptions as Popup
 
 
 subscriptions : Game.Data -> AppModel -> Sub Msg
@@ -92,3 +94,11 @@ subscriptions data model =
         LogFlixModel model ->
             LogFlix.subscriptions data model
                 |> Sub.map LogFlixMsg
+
+        FloatingHeadsModel model ->
+            FloatingHeads.subscriptions data model
+                |> Sub.map FloatingHeadsMsg
+
+        PopupModel model ->
+            Popup.subscriptions data model
+                |> Sub.map PopupMsg

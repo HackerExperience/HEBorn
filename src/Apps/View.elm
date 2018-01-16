@@ -2,6 +2,7 @@ module Apps.View
     exposing
         ( view
         , isDecorated
+        , isResizable
         , keyLogger
         )
 
@@ -27,6 +28,8 @@ import Apps.Bug.View as Bug
 import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
 import Apps.LogFlix.View as LogFlix
+import Apps.FloatingHeads.View as FloatingHeads
+import Apps.Popup.View as Popup
 import Game.Data as Game
 
 
@@ -84,11 +87,30 @@ view data model =
         LogFlixModel model ->
             Html.map LogFlixMsg (LogFlix.view data model)
 
+        FloatingHeadsModel model ->
+            Html.map FloatingHeadsMsg (FloatingHeads.view data model)
+
+        PopupModel model ->
+            Html.map PopupMsg (Popup.view data model)
+
 
 isDecorated : App -> Bool
 isDecorated app =
     case app of
         MusicApp ->
+            False
+
+        FloatingHeadsApp ->
+            False
+
+        _ ->
+            True
+
+
+isResizable : App -> Bool
+isResizable app =
+    case app of
+        EmailApp ->
             False
 
         _ ->

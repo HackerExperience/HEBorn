@@ -19,3 +19,5 @@ type App
     | BugApp
     | CalculatorApp
     | LogFlixApp
+    | FloatingHeadsApp
+    | PopupApp
