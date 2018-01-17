@@ -30,7 +30,7 @@ import Json.Decode.Pipeline as Encode
 import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Decoders.Network
 import Decoders.Filesystem
 import Game.Servers.Shared as Servers
@@ -46,7 +46,7 @@ request :
     -> Network.ID
     -> Servers.CId
     -> Requester
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request url networkId cid requester =
     Requests.request (Topics.browse cid)

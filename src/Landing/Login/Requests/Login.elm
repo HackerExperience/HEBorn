@@ -11,7 +11,7 @@ import Json.Encode as Encode
 import Landing.Login.Messages exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 
 
 type Response
@@ -19,7 +19,7 @@ type Response
     | Error
 
 
-request : String -> String -> ConfigSource a -> Cmd Msg
+request : String -> String -> FlagsSource a -> Cmd Msg
 request username password =
     Requests.request Topics.login
         (LoginRequest >> Request)

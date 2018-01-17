@@ -9,7 +9,7 @@ import Decoders.Game
 import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Account.Models as Account
@@ -20,7 +20,7 @@ type Response
     = Okay ( Model, ServersToJoin )
 
 
-request : Account.ID -> ConfigSource a -> Cmd Msg
+request : Account.ID -> FlagsSource a -> Cmd Msg
 request id =
     Requests.request (Topics.accountResync id)
         (ResyncRequest >> Request)

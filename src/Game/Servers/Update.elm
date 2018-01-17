@@ -2,72 +2,91 @@ module Game.Servers.Update exposing (..)
 
 import Utils.Update as Update
 import Json.Decode as Decode exposing (Value)
+import Decoders.Servers
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
-import Game.Models as Game
 import Game.Account.Bounces.Models as Bounces
+import Game.Meta.Models as Meta
+import Game.Meta.Types.Network as Network
+import Game.Notifications.Messages as Notifications
+import Game.Notifications.Update as Notifications
+import Game.Notifications.Source as Notifications
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Logs.Update as Logs
-import Game.Servers.Messages exposing (..)
-import Game.Servers.Models exposing (..)
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Update as Processes
 import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Hardware.Update as Hardware
-import Game.Servers.Requests exposing (..)
-import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Meta.Models as Meta
-import Decoders.Servers
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Update as Notifications
-import Game.Notifications.Source as Notifications
 import Game.Servers.Requests.Resync as Resync
-import Game.Meta.Types.Network as Network
+import Game.Servers.Config exposing (..)
+import Game.Servers.Messages exposing (..)
+import Game.Servers.Models exposing (..)
+import Game.Servers.Requests exposing (..)
+import Game.Servers.Shared exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+-- Remove me after refactor
+
+import Game.Models as Game
 
 
-type alias ServerUpdateResponse =
-    ( Server, Cmd ServerMsg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+type alias ServerUpdateResponse msg =
+    ( Server, Cmd msg, Dispatch )
+
+
+
+-- remember to remove Game.Model after refactoring
+
+
+update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
+update config game msg model =
     case msg of
         ServerMsg cid msg ->
-            onServerMsg game cid msg model
+            onServerMsg config game cid msg model
 
         Resync cid ->
-            onResync game cid model
+            onResync config cid model
 
         Request data ->
-            onRequest game data model
+            onRequest config game data model
 
         HandleJoinedServer cid value ->
-            handleJoinedServer game cid value model
+            handleJoinedServer config cid value model
 
 
-onServerMsg : Game.Model -> CId -> ServerMsg -> Model -> UpdateResponse
-onServerMsg game cid msg model =
+onServerMsg :
+    Config msg
+    -> Game.Model
+    -> CId
+    -> ServerMsg
+    -> Model
+    -> UpdateResponse msg
+onServerMsg config game cid msg model =
     case get cid model of
         Just server ->
             server
-                |> updateServer game model cid msg
+                |> updateServer config game cid model msg
                 |> Update.mapModel (flip (insert cid) model)
-                |> Update.mapCmd (ServerMsg cid)
 
         Nothing ->
             Update.fromModel model
 
 
-onRequest : Game.Model -> RequestMsg -> Model -> UpdateResponse
-onRequest game data model =
+onRequest :
+    Config msg
+    -> Game.Model
+    -> RequestMsg
+    -> Model
+    -> UpdateResponse msg
+onRequest config game data model =
     let
         lastTick =
             game
@@ -79,110 +98,108 @@ onRequest game data model =
     in
         case response of
             Just response ->
-                updateRequest game response model
+                updateRequest config response model
 
             Nothing ->
                 Update.fromModel model
 
 
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game data model =
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config data model =
     case data of
         ResyncServer (Resync.Okay ( cid, server )) ->
             Update.fromModel <| insert cid server model
 
 
-onResync : Game.Model -> CId -> Model -> UpdateResponse
-onResync game cid model =
+onResync : Config msg -> CId -> Model -> UpdateResponse msg
+onResync config cid model =
     let
         cmd =
-            Resync.request (getGatewayCache cid model) cid game
+            config
+                |> Resync.request (getGatewayCache cid model) cid
+                |> Cmd.map config.toMsg
     in
         ( model, cmd, Dispatch.none )
 
 
 updateServer :
-    Game.Model
-    -> Model
+    Config msg
+    -> Game.Model
     -> CId
+    -> Model
     -> ServerMsg
     -> Server
-    -> ServerUpdateResponse
-updateServer game model cid msg server =
+    -> ServerUpdateResponse msg
+updateServer config game cid model msg server =
     case msg of
         HandleSetBounce maybeBounceId ->
-            handleSetBounce game
-                cid
-                maybeBounceId
-                server
+            handleSetBounce config cid maybeBounceId server
 
         HandleSetEndpoint remote ->
-            handleSetEndpoint game remote server
+            handleSetEndpoint config remote server
 
         HandleSetActiveNIP nip ->
-            handleSetActiveNIP game nip server
+            handleSetActiveNIP config nip server
 
         FilesystemMsg storageId msg ->
-            onFilesystemMsg game cid storageId msg server
+            onFilesystemMsg config game cid storageId msg server
 
         LogsMsg msg ->
-            onLogsMsg game cid msg server
+            onLogsMsg config game cid msg server
 
         ProcessesMsg msg ->
-            onProcessesMsg game cid msg server
+            onProcessesMsg config cid msg server
 
         HardwareMsg msg ->
-            onHardwareMsg game cid msg server
+            onHardwareMsg config game cid msg server
 
         TunnelsMsg msg ->
-            onTunnelsMsg game msg server
+            onTunnelsMsg config game cid msg server
 
         ServerRequest data ->
-            updateServerRequest game (serverReceive data) server
+            updateServerRequest config (serverReceive data) server
 
         NotificationsMsg msg ->
-            onNotificationsMsg game cid msg server
+            onNotificationsMsg config game cid msg server
 
 
 handleSetBounce :
-    Game.Model
+    Config msg
     -> CId
     -> Maybe Bounces.ID
     -> Server
-    -> ServerUpdateResponse
-handleSetBounce game cid maybeBounceId server =
-    setBounce maybeBounceId server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetBounce config cid maybeBounceId server =
+    Update.fromModel <| setBounce maybeBounceId server
 
 
 handleSetEndpoint :
-    Game.Model
+    Config msg
     -> Maybe CId
     -> Server
-    -> ServerUpdateResponse
-handleSetEndpoint game cid server =
-    setEndpointCId cid server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetEndpoint config cid server =
+    Update.fromModel <| setEndpointCId cid server
 
 
 handleSetActiveNIP :
-    Game.Model
+    Config msg
     -> Network.NIP
     -> Server
-    -> ServerUpdateResponse
-handleSetActiveNIP game nip server =
-    setActiveNIP nip server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetActiveNIP config nip server =
+    Update.fromModel <| setActiveNIP nip server
 
 
 onFilesystemMsg :
-    Game.Model
+    Config msg
+    -> Game.Model
     -> CId
     -> StorageId
     -> Filesystem.Msg
     -> Server
-    -> ServerUpdateResponse
-onFilesystemMsg game cid id msg server =
+    -> ServerUpdateResponse msg
+onFilesystemMsg config game cid id msg server =
     case getStorage id server of
         Just storage ->
             let
@@ -198,7 +215,9 @@ onFilesystemMsg game cid id msg server =
                     setStorage id storage_ server
 
                 cmd_ =
-                    Cmd.map (FilesystemMsg id) cmd
+                    Cmd.map
+                        (FilesystemMsg id >> ServerMsg cid >> config.toMsg)
+                        cmd
             in
                 ( server_, cmd_, dispatch )
 
@@ -207,81 +226,98 @@ onFilesystemMsg game cid id msg server =
 
 
 onLogsMsg :
-    Game.Model
+    Config msg
+    -> Game.Model
     -> CId
     -> Logs.Msg
     -> Server
-    -> ServerUpdateResponse
-onLogsMsg game cid =
+    -> ServerUpdateResponse msg
+onLogsMsg config game cid =
     Update.child
         { get = .logs
         , set = (\logs model -> { model | logs = logs })
-        , toMsg = LogsMsg
+        , toMsg = LogsMsg >> ServerMsg cid >> config.toMsg
         , update = (Logs.update game cid)
         }
 
 
 onProcessesMsg :
-    Game.Model
+    Config msg
     -> CId
     -> Processes.Msg
     -> Server
-    -> ServerUpdateResponse
-onProcessesMsg game cid =
-    Update.child
-        { get = .processes
-        , set = (\processes model -> { model | processes = processes })
-        , toMsg = ProcessesMsg
-        , update = (Processes.update game cid)
-        }
+    -> ServerUpdateResponse msg
+onProcessesMsg config cid msg server =
+    let
+        nip =
+            getActiveNIP server
+
+        config_ =
+            processesConfig cid nip config
+
+        ( processes, cmd, dispatch ) =
+            Processes.update config_ msg <| getProcesses server
+
+        server_ =
+            setProcesses processes server
+    in
+        ( server_, cmd, dispatch )
 
 
 onHardwareMsg :
-    Game.Model
+    Config msg
+    -> Game.Model
     -> CId
     -> Hardware.Msg
     -> Server
-    -> ServerUpdateResponse
-onHardwareMsg game cid =
+    -> ServerUpdateResponse msg
+onHardwareMsg config game cid =
     Update.child
         { get = .hardware
         , set = (\hardware model -> { model | hardware = hardware })
-        , toMsg = HardwareMsg
+        , toMsg = HardwareMsg >> ServerMsg cid >> config.toMsg
         , update = (Hardware.update game cid)
         }
 
 
-onTunnelsMsg : Game.Model -> Tunnels.Msg -> Server -> ServerUpdateResponse
-onTunnelsMsg game =
+onTunnelsMsg :
+    Config msg
+    -> Game.Model
+    -> CId
+    -> Tunnels.Msg
+    -> Server
+    -> ServerUpdateResponse msg
+onTunnelsMsg config game cid =
     Update.child
         { get = .tunnels
         , set = (\tunnels model -> { model | tunnels = tunnels })
-        , toMsg = TunnelsMsg
+        , toMsg = TunnelsMsg >> ServerMsg cid >> config.toMsg
         , update = (Tunnels.update game)
         }
 
 
 onNotificationsMsg :
-    Game.Model
+    Config msg
+    -> Game.Model
     -> CId
     -> Notifications.Msg
     -> Server
-    -> ServerUpdateResponse
-onNotificationsMsg game cid =
+    -> ServerUpdateResponse msg
+onNotificationsMsg config game cid =
     Update.child
         { get = .notifications
         , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = NotificationsMsg
+        , toMsg = NotificationsMsg >> ServerMsg cid >> config.toMsg
         , update = (Notifications.update game (Notifications.Server cid))
         }
 
 
 updateServerRequest :
-    Game.Model
+    Config msg
     -> Maybe ServerResponse
     -> Server
-    -> ServerUpdateResponse
-updateServerRequest game response server =
+    -> ServerUpdateResponse msg
+updateServerRequest config response server =
     case response of
         Just _ ->
             Update.fromModel server
@@ -291,20 +327,16 @@ updateServerRequest game response server =
 
 
 handleJoinedServer :
-    Game.Model
+    Config msg
     -> CId
     -> Value
     -> Model
-    -> UpdateResponse
-handleJoinedServer game cid value model =
+    -> UpdateResponse msg
+handleJoinedServer config cid value model =
     let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-
         decodeBootstrap =
-            Decoders.Servers.server lastTick <| getGatewayCache cid model
+            Decoders.Servers.server config.lastTick <|
+                getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
