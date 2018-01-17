@@ -9,7 +9,7 @@ import Time exposing (Time)
 import Json.Decode as Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Decoders.Servers
 import Game.Servers.Models exposing (..)
 import Game.Servers.Messages
@@ -24,7 +24,7 @@ type Response
     = Okay ( CId, Server )
 
 
-request : Maybe GatewayCache -> CId -> ConfigSource a -> Cmd Msg
+request : Maybe GatewayCache -> CId -> FlagsSource a -> Cmd Msg
 request gatewayCache id =
     -- this request is mainly used to fetch invaded computers
     Requests.request (Topics.serverResync id)

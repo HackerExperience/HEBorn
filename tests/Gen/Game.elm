@@ -49,7 +49,7 @@ genModel =
                 LogStream.initialModel
             , inventory =
                 Inventory.initialModel
-            , config =
+            , flags =
                 { apiHttpUrl = ""
                 , apiWsUrl = ""
                 , version = "test"

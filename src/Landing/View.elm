@@ -74,7 +74,7 @@ viewLogin model =
 
 viewSignUp : Core.Model -> Model -> Html Msg
 viewSignUp core model =
-    if core.config.version == "dev" then
+    if core.flags.version == "dev" then
         Html.map SignUpMsg (SignUp.view model.signUp)
     else
         div [] []

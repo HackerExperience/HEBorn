@@ -5,10 +5,10 @@ import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 
 
-request : String -> ID -> ConfigSource a -> Cmd Msg
+request : String -> ID -> FlagsSource a -> Cmd Msg
 request token id =
     let
         payload =

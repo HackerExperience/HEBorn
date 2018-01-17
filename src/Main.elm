@@ -6,7 +6,7 @@ import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Update exposing (..)
 import Core.View exposing (..)
-import Core.Config as Config exposing (Config)
+import Core.Flags as Core
 
 
 -- import TimeTravel.Navigation
@@ -24,7 +24,7 @@ init : Flags -> ( Model, Cmd Msg )
 init { seed, apiHttpUrl, apiWsUrl, version } =
     let
         config =
-            Config.init apiHttpUrl apiWsUrl version
+            Core.initFlags apiHttpUrl apiWsUrl version
 
         model =
             initialModel seed config
