@@ -1,83 +1,62 @@
 module Game.Servers.Processes.Update exposing (update)
 
+import Native.Panic
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Notifications as Notifications
 import Core.Error as Error
+import Core.Dispatch.Notifications as Notifications
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
-import Game.Models as Game
-import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Processes.Messages exposing (Msg(..))
-import Game.Servers.Processes.Models exposing (..)
-import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
-import Game.Servers.Processes.Requests.Download as Download
-import Game.Servers.Processes.Requests exposing (..)
-import Game.Servers.Models as Servers
-import Game.Servers.Shared as Servers exposing (CId)
-import Game.Meta.Models as Meta
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
-import Native.Panic
+import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Shared as Servers exposing (CId)
+import Game.Servers.Processes.Requests.Bruteforce as Bruteforce
+import Game.Servers.Processes.Requests.Download as Download
+import Game.Servers.Processes.Config exposing (..)
+import Game.Servers.Processes.Messages exposing (..)
+import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Processes.Requests exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
 update :
-    Game.Model
-    -> CId
+    Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
-update game cid msg model =
-    case (Servers.get cid (Game.getServers game)) of
-        Just server ->
-            let
-                nip =
-                    Servers.getActiveNIP server
-            in
-                updateServer game cid nip server msg model
-
-        Nothing ->
-            "Trying to update nonexistent server..."
-                |> Error.someGetReturnedNothing
-                |> Native.Panic.crash
-
-
-updateServer game cid nip server msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         HandlePause id ->
-            handlePause game id model
+            handlePause config id model
 
         HandleResume id ->
-            handleResume game id model
+            handleResume config id model
 
         HandleRemove id ->
-            handleRemove game id model
+            handleRemove config id model
 
         Start type_ target file ->
-            handleStart game
-                cid
-                (newOptimistic type_ nip target (newProcessFile file))
+            handleStart config
+                (newOptimistic type_ config.nip target (newProcessFile file))
                 model
 
         HandleStartBruteforce target ->
-            handleStart game
-                cid
-                (newOptimistic Cracker nip target unknownProcessFile)
+            handleStart config
+                (newOptimistic Cracker config.nip target unknownProcessFile)
                 model
 
         HandleStartDownload origin storageId fileId ->
-            handleDownload game
-                cid
+            handleDownload config
                 (newOptimistic
                     (Download (DownloadContent PrivateFTP storageId))
-                    nip
-                    (Network.getIp nip)
+                    config.nip
+                    (Network.getIp config.nip)
                     unknownProcessFile
                 )
                 origin
@@ -85,12 +64,11 @@ updateServer game cid nip server msg model =
                 model
 
         HandleStartPublicDownload origin storageId fileId ->
-            handleDownload game
-                cid
+            handleDownload config
                 (newOptimistic
                     (Download (DownloadContent PublicFTP storageId))
-                    nip
-                    (Network.getIp nip)
+                    config.nip
+                    (Network.getIp config.nip)
                     unknownProcessFile
                 )
                 origin
@@ -98,7 +76,7 @@ updateServer game cid nip server msg model =
                 model
 
         HandleComplete id ->
-            onComplete game id model
+            onComplete config id model
 
         HandleProcessStarted data ->
             handleProcessStarted data model
@@ -110,13 +88,13 @@ updateServer game cid nip server msg model =
             handleBruteforceFailed data model
 
         HandleProcessesChanged data ->
-            handleProcessesChanged game data model
+            handleProcessesChanged config data model
 
         HandleBruteforceSuccess id ->
             handleBruteforceSuccess id model
 
         Request data ->
-            updateRequest game cid (receive data) model
+            updateRequest config (receive data) model
 
 
 
@@ -127,10 +105,10 @@ updateServer game cid nip server msg model =
 a bootstrap otherwise.
 -}
 updateOrSync :
-    (Process -> UpdateResponse)
+    (Process -> UpdateResponse msg)
     -> ID
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 updateOrSync func id model =
     case get id model of
         Just process ->
@@ -144,8 +122,8 @@ updateOrSync func id model =
 -- processes messages
 
 
-handlePause : Game.Model -> ID -> Model -> UpdateResponse
-handlePause game id model =
+handlePause : Config msg -> ID -> Model -> UpdateResponse msg
+handlePause config id model =
     let
         update process =
             model
@@ -155,8 +133,8 @@ handlePause game id model =
         updateOrSync update id model
 
 
-handleResume : Game.Model -> ID -> Model -> UpdateResponse
-handleResume game id model =
+handleResume : Config msg -> ID -> Model -> UpdateResponse msg
+handleResume config id model =
     let
         update process =
             model
@@ -166,8 +144,8 @@ handleResume game id model =
         updateOrSync update id model
 
 
-handleRemove : Game.Model -> ID -> Model -> UpdateResponse
-handleRemove game id model =
+handleRemove : Config msg -> ID -> Model -> UpdateResponse msg
+handleRemove config id model =
     let
         model_ =
             remove id model
@@ -175,8 +153,8 @@ handleRemove game id model =
         Update.fromModel model_
 
 
-handleStart : Game.Model -> CId -> Process -> Model -> UpdateResponse
-handleStart game cid process model =
+handleStart : Config msg -> Process -> Model -> UpdateResponse msg
+handleStart config process model =
     let
         ( id, model_ ) =
             insertOptimistic process model
@@ -195,7 +173,9 @@ handleStart game cid process model =
                             |> Network.getIp
 
                     cmd =
-                        Bruteforce.request id tid tip cid game
+                        config
+                            |> Bruteforce.request id tid tip config.cid
+                            |> Cmd.map config.toMsg
                 in
                     ( model_, cmd, Dispatch.none )
 
@@ -204,14 +184,13 @@ handleStart game cid process model =
 
 
 handleDownload :
-    Game.Model
-    -> CId
+    Config msg
     -> Process
     -> NIP
     -> Filesystem.FileEntry
     -> Model
-    -> UpdateResponse
-handleDownload game cid process origin file model =
+    -> UpdateResponse msg
+handleDownload config process origin file model =
     let
         ( id, model_ ) =
             insertOptimistic process model
@@ -226,29 +205,32 @@ handleDownload game cid process origin file model =
                                     origin
                                     (Filesystem.toId file)
                                     storageId
-                                    cid
-                                    game
+                                    config.cid
+                                    config
 
                             PrivateFTP ->
                                 Download.request id
                                     origin
                                     (Filesystem.toId file)
                                     storageId
-                                    cid
-                                    game
+                                    config.cid
+                                    config
+
+                    cmd_ =
+                        Cmd.map config.toMsg cmd
                 in
-                    ( model_, cmd, Dispatch.none )
+                    ( model_, cmd_, Dispatch.none )
 
             _ ->
                 Update.fromModel model_
 
 
 onComplete :
-    Game.Model
+    Config msg
     -> ID
     -> Model
-    -> UpdateResponse
-onComplete game id model =
+    -> UpdateResponse msg
+onComplete config id model =
     let
         update process =
             model
@@ -263,87 +245,78 @@ onComplete game id model =
 
 
 updateRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> Maybe Response
     -> Model
-    -> UpdateResponse
-updateRequest game cid response model =
+    -> UpdateResponse msg
+updateRequest config response model =
     case response of
         Just (Bruteforce oldId response) ->
-            onBruteforceRequest game cid oldId response model
+            onBruteforceRequest config oldId response model
 
         Just (DownloadingFile oldId response) ->
-            onDownloadRequest game cid oldId response model
+            onDownloadRequest config oldId response model
 
         Nothing ->
             Update.fromModel model
 
 
 onBruteforceRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> ID
     -> Bruteforce.Response
     -> Model
-    -> UpdateResponse
-onBruteforceRequest game cid oldId response model =
+    -> UpdateResponse msg
+onBruteforceRequest config oldId response model =
     case response of
         Bruteforce.Okay ->
             Update.fromModel model
 
 
 onDownloadRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> ID
     -> Download.Response
     -> Model
-    -> UpdateResponse
-onDownloadRequest game cid oldId response model =
-    let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-    in
-        case response of
-            Download.Okay ->
-                Update.fromModel model
+    -> UpdateResponse msg
+onDownloadRequest config oldId response model =
+    case response of
+        Download.Okay ->
+            Update.fromModel model
 
-            Download.SelfLoop ->
-                failDownloadFile lastTick cid oldId model <|
-                    "Self download: use copy instead!"
+        Download.SelfLoop ->
+            failDownloadFile config.lastTick config.cid oldId model <|
+                "Self download: use copy instead!"
 
-            Download.FileNotFound ->
-                failDownloadFile lastTick cid oldId model <|
-                    "The file you're trying to download no longer exists"
+        Download.FileNotFound ->
+            failDownloadFile config.lastTick config.cid oldId model <|
+                "The file you're trying to download no longer exists"
 
-            Download.StorageFull ->
-                failDownloadFile lastTick cid oldId model <|
-                    "Not enougth space!"
+        Download.StorageFull ->
+            failDownloadFile config.lastTick config.cid oldId model <|
+                "Not enougth space!"
 
-            Download.StorageNotFound ->
-                failDownloadFile lastTick cid oldId model <|
-                    "The storage you're trying to access no longer exists"
+        Download.StorageNotFound ->
+            failDownloadFile config.lastTick config.cid oldId model <|
+                "The storage you're trying to access no longer exists"
 
-            Download.BadRequest ->
-                failDownloadFile lastTick cid oldId model <|
-                    "Shit happened!"
+        Download.BadRequest ->
+            failDownloadFile config.lastTick config.cid oldId model <|
+                "Shit happened!"
 
 
 
 -- event handlers
 
 
-handleProcessStarted : ProcessStarted.Data -> Model -> UpdateResponse
+handleProcessStarted : ProcessStarted.Data -> Model -> UpdateResponse msg
 handleProcessStarted ( id, process ) model =
     model
         |> insert id process
         |> Update.fromModel
 
 
-handlePauseEvent : ID -> Model -> UpdateResponse
+handlePauseEvent : ID -> Model -> UpdateResponse msg
 handlePauseEvent id model =
     let
         update process =
@@ -354,7 +327,7 @@ handlePauseEvent id model =
         updateOrSync update id model
 
 
-handleResumeEvent : ID -> Model -> UpdateResponse
+handleResumeEvent : ID -> Model -> UpdateResponse msg
 handleResumeEvent id model =
     let
         update process =
@@ -365,14 +338,14 @@ handleResumeEvent id model =
         updateOrSync update id model
 
 
-handleRemoveEvent : ID -> Model -> UpdateResponse
+handleRemoveEvent : ID -> Model -> UpdateResponse msg
 handleRemoveEvent id model =
     model
         |> remove id
         |> Update.fromModel
 
 
-handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse
+handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse msg
 handleProcessConclusion id model =
     let
         update process =
@@ -383,7 +356,7 @@ handleProcessConclusion id model =
         updateOrSync update id model
 
 
-handleBruteforceFailed : BruteforceFailed.Data -> Model -> UpdateResponse
+handleBruteforceFailed : BruteforceFailed.Data -> Model -> UpdateResponse msg
 handleBruteforceFailed data model =
     let
         update process =
@@ -395,18 +368,17 @@ handleBruteforceFailed data model =
         updateOrSync update data.processId model
 
 
-handleProcessesChanged : Game.Model -> ProcessesChanged.Data -> Model -> UpdateResponse
-handleProcessesChanged game processes model =
-    let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-    in
-        Update.fromModel { model | processes = processes, lastModified = lastTick }
+handleProcessesChanged :
+    Config msg
+    -> ProcessesChanged.Data
+    -> Model
+    -> UpdateResponse msg
+handleProcessesChanged config processes model =
+    Update.fromModel <|
+        { model | processes = processes, lastModified = config.lastTick }
 
 
-handleBruteforceSuccess : ID -> Model -> UpdateResponse
+handleBruteforceSuccess : ID -> Model -> UpdateResponse msg
 handleBruteforceSuccess id model =
     -- TODO: dispatch from password acquired after implementing "dispatch
     -- to servers of following nip"
@@ -417,7 +389,7 @@ handleBruteforceSuccess id model =
 -- request responses
 
 
-failDownloadFile : Float -> CId -> ID -> Model -> String -> UpdateResponse
+failDownloadFile : Float -> CId -> ID -> Model -> String -> UpdateResponse msg
 failDownloadFile lastTick cid oldId model message =
     let
         dispatch =
@@ -432,7 +404,7 @@ failDownloadFile lastTick cid oldId model message =
         ( model_, Cmd.none, Dispatch.none )
 
 
-okDownloadFile : ID -> ID -> Process -> CId -> Model -> UpdateResponse
+okDownloadFile : ID -> ID -> Process -> CId -> Model -> UpdateResponse msg
 okDownloadFile id oldId process cid model =
     model
         |> replace oldId id process

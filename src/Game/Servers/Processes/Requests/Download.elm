@@ -20,7 +20,7 @@ import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Processes.Models exposing (ID, Process)
@@ -43,7 +43,7 @@ request :
     -> Filesystem.Id
     -> String
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request optmistic target fileId storageId cid =
     Requests.request (Topics.fsDownload cid)
@@ -58,7 +58,7 @@ requestPublic :
     -> Filesystem.Id
     -> String
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 requestPublic optmistic target fileId storageId cid =
     Requests.request (Topics.pftpDownload cid)

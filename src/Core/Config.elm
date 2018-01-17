@@ -1,21 +1,10 @@
-module Core.Config exposing (Config, init, getVersion)
+module Core.Config exposing (..)
+
+import Game.Config as Game
+import Core.Messages exposing (..)
 
 
-type alias Config =
-    { apiHttpUrl : String
-    , apiWsUrl : String
-    , version : String
+gameConfig : Game.Config Msg
+gameConfig =
+    { toMsg = GameMsg
     }
-
-
-init : String -> String -> String -> Config
-init apiHttpUrl apiWsUrl version =
-    { apiHttpUrl = apiHttpUrl
-    , apiWsUrl = apiWsUrl
-    , version = version
-    }
-
-
-getVersion : Config -> String
-getVersion =
-    .version
