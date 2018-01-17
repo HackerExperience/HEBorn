@@ -8,6 +8,7 @@ import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (Person)
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
+import Apps.FloatingHeads.Models as FloatingHeads
 import Apps.Email.Menu.Messages as Menu
 import Apps.Email.Menu.Update as Menu
 import Apps.Email.Menu.Actions as Menu
@@ -52,6 +53,6 @@ onSelectContact : String -> Model -> UpdateResponse
 onSelectContact email model =
     let
         dispatch =
-            Dispatch.os <| OS.NewApp Nothing Nothing Apps.FloatingHeadsApp
+            Dispatch.os <| OS.OpenApp Nothing (Apps.FloatingHeadsParams <| FloatingHeads.OpenAtContact email)
     in
         ( model, Cmd.none, dispatch )

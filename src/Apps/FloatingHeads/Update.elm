@@ -1,6 +1,7 @@
 module Apps.FloatingHeads.Update exposing (update)
 
 import Utils.Update as Update
+import Game.Meta.Types.Context exposing (Context)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.OS as OS
@@ -9,7 +10,7 @@ import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
 import Game.Storyline.Emails.Contents.Messages as Contents
 import Game.Storyline.Emails.Contents.Update as Contents
-import Apps.FloatingHeads.Models exposing (Model, Mode(..))
+import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Reference exposing (Reference)
@@ -40,6 +41,9 @@ update data msg model =
 
         Close ->
             onClose data model
+
+        LaunchApp context params ->
+            onLaunchApp data context params model
 
 
 onContentMsg : Game.Data -> Contents.Msg -> Model -> UpdateResponse
@@ -95,3 +99,10 @@ onClose data model =
             Dispatch.os <| OS.CloseApp model.me
     in
         ( model, Cmd.none, dispatch )
+
+
+onLaunchApp : Game.Data -> Context -> Params -> Model -> UpdateResponse
+onLaunchApp data context params model =
+    case params of
+        OpenAtContact contact ->
+            Update.fromModel <| setActiveContact contact model
