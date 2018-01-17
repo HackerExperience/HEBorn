@@ -3,7 +3,7 @@ module Setup.Requests.Setup exposing (Response(..), request, receive)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Json.Encode as Encode exposing (Value)
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Game.Account.Models as Account
@@ -14,7 +14,7 @@ type Response
     | Error
 
 
-request : List PageModel -> Account.ID -> ConfigSource a -> Cmd Msg
+request : List PageModel -> Account.ID -> FlagsSource a -> Cmd Msg
 request pages id =
     let
         payload =

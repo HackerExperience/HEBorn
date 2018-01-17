@@ -9,7 +9,7 @@ import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Models exposing (..)
@@ -29,7 +29,7 @@ request :
     -> Network.ID
     -> Network.IP
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request optimistic network targetIp cid =
     let

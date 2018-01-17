@@ -5,6 +5,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Subscribers as Subscribers
 import Core.Messages as Core
 import Game.Messages as Game
+import Game.Config as Game
 import Game.Models as Game
 import Game.Update as Game
 import Json.Decode as Decode
@@ -18,6 +19,12 @@ once param =
 
 fuzz param =
     fuzzWith { runs = Config.baseFuzzRuns } param
+
+
+gameConfig : Game.Config Game.Msg
+gameConfig =
+    { toMsg = identity
+    }
 
 
 batch : List Expectation -> Expectation
@@ -48,7 +55,7 @@ updateGame : Game.Msg -> Game.Model -> Game.Model
 updateGame msg0 model0 =
     let
         ( model1, cmd, dispatch ) =
-            Game.update msg0 model0
+            Game.update gameConfig msg0 model0
 
         ( model2, _ ) =
             gameDispatcher model1 cmd dispatch
@@ -106,7 +113,7 @@ gameReducer msg ( model, cmd ) =
         ( model_, cmd_, _ ) =
             case msg of
                 Core.GameMsg msg ->
-                    Game.update msg model
+                    Game.update gameConfig msg model
 
                 _ ->
                     ( model, cmd, Dispatch.none )

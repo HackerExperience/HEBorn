@@ -16,7 +16,7 @@ import Json.Decode as Decode
 import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Servers.Shared exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Servers.Hardware.Messages exposing (..)
@@ -37,7 +37,7 @@ type Response
     | Error
 
 
-request : Motherboard -> CId -> ConfigSource a -> Cmd Msg
+request : Motherboard -> CId -> FlagsSource a -> Cmd Msg
 request motherboard cid =
     Requests.request (Topics.updateMotherboard cid)
         (UpdateMotherboardRequest >> Request)

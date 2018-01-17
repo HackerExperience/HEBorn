@@ -9,7 +9,7 @@ import Json.Decode as Decode exposing (Value)
 import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ResponseType, ConfigSource, Code(..))
+import Requests.Types exposing (ResponseType, FlagsSource, Code(..))
 import Game.Servers.Shared as Servers
 import Setup.Settings exposing (..)
 import Setup.Messages exposing (..)
@@ -19,7 +19,7 @@ type alias Response =
     List Settings
 
 
-request : List Settings -> Servers.CId -> ConfigSource a -> Cmd Msg
+request : List Settings -> Servers.CId -> FlagsSource a -> Cmd Msg
 request settings cid =
     Requests.request (Topics.serverConfigSet cid)
         (SetServerRequest settings >> Request)

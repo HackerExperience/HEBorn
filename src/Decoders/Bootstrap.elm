@@ -54,9 +54,9 @@ toModel game got =
             game
                 |> Game.getWeb
 
-        config =
+        flags =
             game
-                |> Game.getConfig
+                |> Game.getFlags
     in
         Game.Model
             account
@@ -64,7 +64,7 @@ toModel game got =
             meta
             got.story
             web
-            config
+            flags
 
 
 joinIndexes : ServerIndex -> GenericServers

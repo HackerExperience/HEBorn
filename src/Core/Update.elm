@@ -1,9 +1,5 @@
 module Core.Update exposing (update)
 
-import Core.Messages exposing (..)
-import Core.Models exposing (..)
-import Core.Subscribers as Subscribers
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
@@ -22,6 +18,11 @@ import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.Messages as SM
 import Apps.Messages as Apps
 import Apps.TaskManager.Messages as TaskManager
+import Core.Config exposing (..)
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Core.Messages exposing (..)
+import Core.Models exposing (..)
+import Core.Subscribers as Subscribers
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -315,14 +316,7 @@ updateLanding msg model ({ landing } as stateModel) =
 
 updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
 updateGame msg model =
-    let
-        ( model_, cmd, dispatch ) =
-            Game.update msg model
-
-        cmd_ =
-            Cmd.map GameMsg cmd
-    in
-        ( model_, cmd_, dispatch )
+    Game.update gameConfig msg model
 
 
 updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )
@@ -345,7 +339,7 @@ isDev : Model -> Bool
 isDev model =
     let
         { version } =
-            getConfig model
+            getFlags model
     in
         -- make this function return False to test the game on production mode
         version == "dev"
