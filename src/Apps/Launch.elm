@@ -27,6 +27,8 @@ import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.LogFlix.Models as LogFlix
 import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.FloatingHeads.Messages as FloatingHeads
+import Apps.FloatingHeads.Launch as FloatingHeads
 
 
 launch :
@@ -149,7 +151,7 @@ launch data ({ windowId } as reference) maybeParams app =
                 |> Update.fromModel
 
         FloatingHeadsApp ->
-            FloatingHeads.initialModel reference
+            FloatingHeads.initialModel Nothing reference
                 |> FloatingHeadsModel
                 |> Update.fromModel
 
@@ -159,3 +161,6 @@ launchEvent context params =
     case params of
         BrowserParams params ->
             BrowserMsg <| Browser.LaunchApp context params
+
+        FloatingHeadsParams params ->
+            FloatingHeadsMsg <| FloatingHeads.LaunchApp context params
