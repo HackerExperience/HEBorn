@@ -15,7 +15,7 @@ type alias Config msg =
     { onLogout : msg
     , onSelectEndpoint : msg
     , onAnyMap : NIP -> msg
-    , onOpenApp : Apps.App -> msg
+    , onNewApp : Apps.App -> msg
     , onSetShowingPanel : Bool -> msg
     , apps : List Apps.App
     , allowAnyMap : Bool
@@ -85,7 +85,7 @@ hackingPanel config nip =
 
 
 openApp : Config msg -> Apps.App -> Html msg
-openApp { onOpenApp } app =
+openApp { onNewApp } app =
     li
-        [ onClick <| onOpenApp app ]
+        [ onClick <| onNewApp app ]
         [ text ("Open " ++ Apps.name app) ]

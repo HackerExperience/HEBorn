@@ -1,4 +1,6 @@
-module Apps.Apps exposing (App(..))
+module Apps.Apps exposing (App(..), AppParams(..), paramsToApp)
+
+import Apps.Browser.Models as Browser
 
 
 type App
@@ -20,3 +22,14 @@ type App
     | CalculatorApp
     | LogFlixApp
     | FloatingHeadsApp
+
+
+type AppParams
+    = BrowserParams Browser.Params
+
+
+paramsToApp : AppParams -> App
+paramsToApp params =
+    case params of
+        BrowserParams _ ->
+            BrowserApp

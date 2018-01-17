@@ -1,6 +1,7 @@
 module Apps.Browser.Messages exposing (..)
 
 import Game.Web.Types exposing (Response)
+import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
@@ -20,6 +21,7 @@ type Msg
     | SomeTabMsg Int TabMsg
     | EveryTabMsg TabMsg
       -- Browser actions
+    | LaunchApp Context Params
     | ChangeTab Int
     | NewTabIn String
     | ReqDownload Network.NIP Filesystem.FileEntry StorageId
@@ -40,7 +42,7 @@ type TabMsg
     | Logout
     | LoginFailed
     | SelectEndpoint
-    | OpenApp Apps.App
+    | NewApp Apps.App
     | HandleFetched Response
       -- site msgs
     | WebserverMsg Webserver.Msg

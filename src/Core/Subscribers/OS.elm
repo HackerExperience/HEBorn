@@ -9,8 +9,16 @@ import OS.SessionManager.WindowManager.Messages as WM
 dispatch : Dispatch -> Subscribers
 dispatch dispatch =
     case dispatch of
-        OpenApp maybeContext app ->
-            [ sessionManager <| SessionManager.OpenApp maybeContext app ]
+        NewApp a b c ->
+            [ sessionManager <| SessionManager.HandleNewApp a b c ]
 
-        CloseApp reference ->
-            [ sessionManager <| SessionManager.WindowManagerMsg reference.sessionId (WM.Close reference.windowId) ]
+        OpenApp a b ->
+            [ sessionManager <| SessionManager.HandleOpenApp a b ]
+
+        CloseApp a ->
+            -- this is probably leaking too much information
+            [ sessionManager <|
+                SessionManager.WindowManagerMsg
+                    a.sessionId
+                    (WM.Close a.windowId)
+            ]

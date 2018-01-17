@@ -14,5 +14,5 @@ type alias Config msg =
     , onAnyMap : NIP -> msg
     , onPublicDownload : NIP -> Filesystem.FileEntry -> msg
     , onSelectEndpoint : msg
-    , onOpenApp : Apps.App -> msg
+    , onNewApp : Apps.App -> msg
     }

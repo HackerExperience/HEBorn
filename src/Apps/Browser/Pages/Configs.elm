@@ -21,7 +21,7 @@ downloadCenterConfig =
     , onAnyMap = AnyMap >> ActiveTabMsg
     , onPublicDownload = PublicDownload
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
-    , onOpenApp = OpenApp >> ActiveTabMsg
+    , onNewApp = NewApp >> ActiveTabMsg
     }
 
 
@@ -41,5 +41,5 @@ webserverConfig =
     , onAnyMap = AnyMap >> ActiveTabMsg
     , onPublicDownload = PublicDownload
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
-    , onOpenApp = OpenApp >> ActiveTabMsg
+    , onNewApp = NewApp >> ActiveTabMsg
     }
