@@ -1,6 +1,7 @@
 module Apps.Apps exposing (App(..), AppParams(..), paramsToApp)
 
 import Apps.Browser.Models as Browser
+import Apps.FloatingHeads.Models as FloatingHeads
 
 
 type App
@@ -26,6 +27,7 @@ type App
 
 type AppParams
     = BrowserParams Browser.Params
+    | FloatingHeadsParams FloatingHeads.Params
 
 
 paramsToApp : AppParams -> App
@@ -33,3 +35,6 @@ paramsToApp params =
     case params of
         BrowserParams _ ->
             BrowserApp
+
+        FloatingHeadsParams _ ->
+            FloatingHeadsApp

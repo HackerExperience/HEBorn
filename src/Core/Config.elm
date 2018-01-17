@@ -1,4 +1,4 @@
-module Core.Config exposing (Config, init)
+module Core.Config exposing (Config, init, getVersion)
 
 
 type alias Config =
@@ -14,3 +14,8 @@ init apiHttpUrl apiWsUrl version =
     , apiWsUrl = apiWsUrl
     , version = version
     }
+
+
+getVersion : Config -> String
+getVersion =
+    .version

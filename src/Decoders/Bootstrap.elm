@@ -34,17 +34,37 @@ toModel : Game.Model -> Bootstrap -> Game.Model
 toModel game got =
     let
         servers =
+            game
+                |> Game.getServers
+
+        servers_ =
             got.serverIndex
                 |> joinIndexes
-                |> List.foldl (uncurry Servers.insert) game.servers
+                |> List.foldl (uncurry Servers.insert) servers
+
+        account =
+            game
+                |> Game.getAccount
+
+        meta =
+            game
+                |> Game.getMeta
+
+        web =
+            game
+                |> Game.getWeb
+
+        config =
+            game
+                |> Game.getConfig
     in
         Game.Model
-            game.account
-            servers
-            game.meta
+            account
+            servers_
+            meta
             got.story
-            game.web
-            game.config
+            web
+            config
 
 
 joinIndexes : ServerIndex -> GenericServers

@@ -6,7 +6,9 @@ import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
-import Game.Data as Game
+import Game.Data as GameData
+import Game.Models as GameModel
+import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Messages exposing (Msg(..))
@@ -15,17 +17,23 @@ import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
-view : Game.Data -> Model -> Html Msg
+view : GameData.Data -> Model -> Html Msg
 view data model =
     let
         tasks =
             data
-                |> Game.getActiveServer
+                |> GameData.getActiveServer
                 |> Servers.getProcesses
                 |> Processes.toList
+
+        lastTick =
+            data
+                |> GameData.getGame
+                |> GameModel.getMeta
+                |> Meta.getLastTick
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable data tasks data.game.meta.lastTick
+            [ viewTasksTable data tasks lastTick
             , viewTotalResources model
             , menuView model
             ]
@@ -146,7 +154,7 @@ processMenu ( id, process ) =
 
 
 viewTaskRow :
-    Game.Data
+    GameData.Data
     -> Time
     -> ( Processes.ID, Processes.Process )
     -> Html Msg
@@ -154,7 +162,7 @@ viewTaskRow data now (( _, process ) as entry) =
     let
         lastRecalc =
             data
-                |> Game.getActiveServer
+                |> GameData.getActiveServer
                 |> Servers.getProcesses
                 |> Processes.getLastModified
 
@@ -179,7 +187,7 @@ viewTaskRow data now (( _, process ) as entry) =
             ]
 
 
-viewTasksTable : Game.Data -> Entries -> Time -> Html Msg
+viewTasksTable : GameData.Data -> Entries -> Time -> Html Msg
 viewTasksTable data entries now =
     div [ class [ TaskTable ] ]
         ([ div [ class [ EntryDivision ] ]

@@ -2,7 +2,7 @@ module OS.SessionManager.View exposing (..)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as GameData
+import Game.Data as Game
 import Dict
 import OS.Resources as OsRes
 import OS.SessionManager.Models exposing (..)
@@ -23,7 +23,7 @@ wmClass =
     .class <| Html.CssHelpers.withNamespace WmRes.prefix
 
 
-view : GameData.Data -> Model -> Html Msg
+view : Game.Data -> Model -> Html Msg
 view game model =
     div
         [ osClass [ OsRes.Session ] ]
@@ -36,14 +36,14 @@ view game model =
 -- internals
 
 
-viewDock : GameData.Data -> Model -> Html Msg
+viewDock : Game.Data -> Model -> Html Msg
 viewDock game model =
     model
         |> Dock.view game
         |> Html.map DockMsg
 
 
-viewWM : GameData.Data -> Model -> Html Msg
+viewWM : Game.Data -> Model -> Html Msg
 viewWM data model =
     let
         id =

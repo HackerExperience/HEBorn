@@ -16,6 +16,10 @@ type Mode
     | Expanded
 
 
+type Params
+    = OpenAtContact String
+
+
 name : String
 name =
     "floatingheads"
@@ -31,12 +35,20 @@ icon =
     "floatingheads"
 
 
-initialModel : Reference -> Model
-initialModel me =
-    { me = me
-    , activeContact = "friend"
-    , mode = Expanded
-    }
+initialModel : Maybe String -> Reference -> Model
+initialModel contact me =
+    case contact of
+        Just contact ->
+            { me = me
+            , activeContact = contact
+            , mode = Expanded
+            }
+
+        Nothing ->
+            { me = me
+            , activeContact = "friend"
+            , mode = Expanded
+            }
 
 
 getActiveContact : Model -> String

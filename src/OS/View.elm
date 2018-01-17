@@ -7,6 +7,9 @@ import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
 import Game.Data as Game
 import Game.Models as Game
+import Game.Account.Models as Account
+import Game.Storyline.Models as Storyline
+import Core.Config as Config
 import OS.Models exposing (Model)
 import OS.Messages exposing (Msg(..))
 import OS.Resources as Res
@@ -29,11 +32,30 @@ view data model =
         osContent =
             viewOS data model
 
+        game =
+            data
+                |> Game.getGame
+
         dynStyle =
-            DynamicStyle.view data.game
+            DynamicStyle.view game
+
+        version =
+            game
+                |> Game.getConfig
+                |> Config.getVersion
+
+        context =
+            game
+                |> Game.getAccount
+                |> Account.getContext
+
+        story =
+            game
+                |> Game.getStory
+                |> Storyline.isActive
 
         gameMode =
-            case data.game.story.enabled of
+            case story of
                 True ->
                     Res.campaignMode
 
@@ -43,25 +65,45 @@ view data model =
         div
             [ id Res.Dashboard
             , menuEmpty
-            , attribute Res.gameVersionAttrTag data.game.config.version
+            , attribute Res.gameVersionAttrTag version
             , attribute Res.gameModeAttrTag gameMode
-            , activeContextAttr data.game.account.context
+            , activeContextAttr context
             ]
-            (osContent ++ dynStyle)
+            (dynStyle :: osContent)
+
+
+viewDynStyle : Game.Model -> List (Html Msg)
+viewDynStyle game =
+    let
+        story =
+            game
+                |> Game.getStory
+    in
+        if Storyline.isActive story then
+            [ lazy DynamicStyle.view game ]
+        else
+            []
 
 
 viewOS : Game.Data -> Model -> List (Html Msg)
 viewOS data model =
-    [ viewHeader
-        data
-        model.header
-    , console data model
-    , viewMain data model
-    , toasts data model
-    , lazy displayVersion
-        data.game.config.version
-    , menuView model
-    ]
+    let
+        version =
+            data
+                |> Game.getGame
+                |> Game.getConfig
+                |> Config.getVersion
+    in
+        [ viewHeader
+            data
+            model.header
+        , console data model
+        , viewMain data model
+        , toasts data model
+        , lazy displayVersion
+            version
+        , menuView model
+        ]
 
 
 viewHeader : Game.Data -> Header.Model -> Html Msg

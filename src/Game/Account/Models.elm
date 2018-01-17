@@ -81,8 +81,13 @@ initialModel id username token =
 
 
 getId : Model -> ID
-getId model =
-    model.id
+getId =
+    .id
+
+
+getUsername : Model -> ID
+getUsername =
+    .username
 
 
 getToken : Model -> Token
@@ -136,3 +141,8 @@ insertGateway id ({ gateways } as model) =
                 model.gateways
     in
         { model | activeGateway = activeGateway, gateways = gateways }
+
+
+getDock : Model -> Dock.Model
+getDock =
+    .dock

@@ -3,9 +3,11 @@ module Apps.BounceManager.View exposing (view)
 import Dict
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Account.Database.Models exposing (HackedServers)
+import Game.Account.Database.Models as Database exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
 import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Meta.Types.Network as Network
 import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
@@ -90,10 +92,17 @@ view : Game.Data -> Model -> Html Msg
 view data ({ selected } as model) =
     let
         contentStc =
-            data.game.account.bounces
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getBounces
 
         hckdServers =
-            data.game.account.database.servers
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getDatabase
+                |> Database.getHackedServers
 
         viewData =
             case selected of

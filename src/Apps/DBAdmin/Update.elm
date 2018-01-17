@@ -3,6 +3,8 @@ module Apps.DBAdmin.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Servers.Logs.Models exposing (ID)
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Tabs exposing (..)
@@ -81,12 +83,19 @@ onToogleExpand tab itemId model =
 
 onEnterEditing : Game.Data -> MainTab -> ID -> Model -> UpdateResponse
 onEnterEditing data tab itemId model =
-    model
-        |> enterEditing
-            itemId
-            tab
-            data.game.account.database
-        |> Update.fromModel
+    let
+        database =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getDatabase
+    in
+        model
+            |> enterEditing
+                itemId
+                tab
+                database
+            |> Update.fromModel
 
 
 onLeaveEditing : MainTab -> ID -> Model -> UpdateResponse
@@ -98,21 +107,35 @@ onLeaveEditing tab itemId model =
 
 onUpdateTextFilter : Game.Data -> MainTab -> String -> Model -> UpdateResponse
 onUpdateTextFilter data tab filter model =
-    model
-        |> updateTextFilter
-            filter
-            tab
-            data.game.account.database
-        |> Update.fromModel
+    let
+        database =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getDatabase
+    in
+        model
+            |> updateTextFilter
+                filter
+                tab
+                database
+            |> Update.fromModel
 
 
 onEnterSelectingVirus : Game.Data -> ID -> Model -> UpdateResponse
 onEnterSelectingVirus data serverIp model =
-    model
-        |> Servers.enterSelectingVirus
-            serverIp
-            data.game.account.database
-        |> Update.fromModel
+    let
+        database =
+            data
+                |> Game.getGame
+                |> Game.getAccount
+                |> Account.getDatabase
+    in
+        model
+            |> Servers.enterSelectingVirus
+                serverIp
+                database
+            |> Update.fromModel
 
 
 onUpdateServersSelectVirus : ID -> ID -> Model -> UpdateResponse

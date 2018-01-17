@@ -6,13 +6,13 @@ import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
 import OS.SessionManager.WindowManager.Subscriptions as WindowManager
-import Game.Data as GameData
+import Game.Data as Game
 
 
 -- TODO: this needs to change to add pinned window support
 
 
-subscriptions : GameData.Data -> Model -> Sub Msg
+subscriptions : Game.Data -> Model -> Sub Msg
 subscriptions data model =
     let
         id =
@@ -31,7 +31,7 @@ subscriptions data model =
 -- internals
 
 
-windowManager : GameData.Data -> ID -> WindowManager.Model -> Sub Msg
+windowManager : Game.Data -> ID -> WindowManager.Model -> Sub Msg
 windowManager data id model =
     model
         |> WindowManager.subscriptions data
