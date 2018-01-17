@@ -4,6 +4,7 @@ import Apps.Browser.Pages.Bank.Config as Bank
 import Apps.Browser.Pages.DownloadCenter.Config as DownloadCenter
 import Apps.Browser.Pages.Home.Config as Home
 import Apps.Browser.Pages.Webserver.Config as Webserver
+import Apps.Browser.Pages.Store.Config as Store
 import Apps.Browser.Messages exposing (..)
 
 
@@ -42,4 +43,11 @@ webserverConfig =
     , onPublicDownload = PublicDownload
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
     , onNewApp = NewApp >> ActiveTabMsg
+    }
+
+
+storeConfig : Store.Config Msg
+storeConfig =
+    { toMsg = StoreMsg >> ActiveTabMsg
+    , onPurchase = StoreMsg >> ActiveTabMsg
     }
