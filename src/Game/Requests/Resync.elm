@@ -5,7 +5,7 @@ module Game.Requests.Resync
         , receive
         )
 
-import Decoders.Game
+import Decoders.Game exposing (ServersToJoin)
 import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
@@ -13,7 +13,6 @@ import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Account.Models as Account
-import Decoders.Game exposing (ServersToJoin)
 
 
 type Response

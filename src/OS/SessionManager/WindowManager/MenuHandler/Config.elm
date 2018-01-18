@@ -1,7 +1,6 @@
 module OS.SessionManager.WindowManager.MenuHandler.Config exposing (clientConfig)
 
-import ContextMenu exposing (ContextMenu)
-import ContextMenu exposing (Overflow(..), Cursor(..), Direction(..), defaultConfig)
+import ContextMenu exposing (..)
 import Color exposing (Color)
 
 

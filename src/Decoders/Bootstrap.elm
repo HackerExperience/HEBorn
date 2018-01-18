@@ -8,7 +8,6 @@ import Game.Servers.Shared as Servers
 import Game.Models as Game
 import Decoders.Servers
 import Decoders.Storyline
-import Decoders.Game
 
 
 -- this is the outdated bootstrap

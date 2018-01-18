@@ -1,7 +1,6 @@
 module Apps.Browser.Pages.Webserver.Models exposing (..)
 
-import Game.Web.Types exposing (Url)
-import Game.Web.Types as Web
+import Game.Web.Types as Web exposing (Url)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Widgets.PublicFiles.Model as PublicFiles
 

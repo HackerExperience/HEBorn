@@ -2,7 +2,6 @@ module Setup.Subscriptions exposing (subscriptions)
 
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
-import Setup.Models exposing (..)
 import Setup.Pages.Configs as Configs
 import Setup.Pages.PickLocation.Subscriptions as PickLocation
 

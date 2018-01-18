@@ -89,17 +89,6 @@ updateRequest game nip response model =
 -- content message handlers
 
 
-toModel : Decoders.Logs.Index -> Model
-toModel index =
-    let
-        mapper ( id, log ) =
-            ( id, log )
-    in
-        index
-            |> List.map mapper
-            |> List.foldl (uncurry insert) initialModel
-
-
 updateLog : Game.Model -> CId -> ID -> LogMsg -> Log -> LogUpdateResponse
 updateLog game nip id msg log =
     case msg of

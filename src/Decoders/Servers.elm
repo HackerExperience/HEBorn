@@ -1,7 +1,6 @@
 module Decoders.Servers exposing (..)
 
 import Time exposing (Time)
-import Dict
 import Json.Decode as Decode
     exposing
         ( Decoder

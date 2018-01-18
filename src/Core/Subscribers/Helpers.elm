@@ -17,7 +17,7 @@ import Game.LogStream.Messages as LogStream
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
-import Game.Servers.Shared as Servers
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
@@ -26,7 +26,6 @@ import Game.Storyline.Messages as Storyline
 import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Emails.Messages as Emails
 import Game.Inventory.Messages as Inventory
-import Game.Servers.Shared exposing (CId)
 import Game.Web.Messages as Web
 
 

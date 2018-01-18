@@ -18,11 +18,6 @@ import OS.SessionManager.WindowManager.Resources exposing (..)
 -- example usage: `modal "Are you sure?" []`
 
 
-wmClass : List class -> Attribute msg
-wmClass =
-    .class <| Html.CssHelpers.withNamespace prefix
-
-
 modalPickStorage : Storages -> (Maybe String -> msg) -> Html msg
 modalPickStorage storages pickResponse =
     let

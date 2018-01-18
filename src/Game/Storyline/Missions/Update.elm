@@ -32,12 +32,6 @@ handleActionDone action model =
         |> Update.fromModel
 
 
-requestSync : Cmd Msg
-requestSync =
-    -- TODO
-    Cmd.none
-
-
 onStepProceed : ID -> Model -> UpdateResponse
 onStepProceed stepId model =
     model

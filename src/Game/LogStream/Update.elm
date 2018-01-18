@@ -11,10 +11,6 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-type alias WebLogUpdateResponse =
-    ( Log, Cmd LogMsg, Dispatch )
-
-
 update : Game.Model -> Msg -> Model -> UpdateResponse
 update game msg model =
     case msg of

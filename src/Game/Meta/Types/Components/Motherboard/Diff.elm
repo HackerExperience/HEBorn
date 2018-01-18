@@ -15,10 +15,6 @@ type alias InternalDiff comparable =
     ( Set comparable, Set comparable )
 
 
-type alias Id =
-    String
-
-
 diff :
     Motherboard
     -> Motherboard

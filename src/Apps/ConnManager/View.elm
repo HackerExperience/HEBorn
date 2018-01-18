@@ -4,7 +4,6 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
-import Game.Models
 import Game.Servers.Models as Servers
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Meta.Types.Network exposing (NIP)

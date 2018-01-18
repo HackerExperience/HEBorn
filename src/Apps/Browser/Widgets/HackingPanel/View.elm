@@ -37,13 +37,6 @@ goBack { onSetShowingPanel } =
         [ text "Go back" ]
 
 
-baseOptions : Config msg -> List (Html msg)
-baseOptions config =
-    [ logout config
-    , goBack config
-    ]
-
-
 selectEndpoint : Config msg -> Html msg
 selectEndpoint { onSelectEndpoint } =
     li

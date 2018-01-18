@@ -274,24 +274,6 @@ finishPlayUpdate model ( stateModel, cmd, dispatch ) =
         dispatcher model_ cmd dispatch
 
 
-stateAndThen :
-    (a -> ( a, Cmd b, Dispatch ))
-    -> ( a, Cmd b, Dispatch )
-    -> ( a, Cmd b, Dispatch )
-stateAndThen apply ( stateModel, cmd0, dispatch0 ) =
-    let
-        ( stateModel_, cmd1, dispatch1 ) =
-            apply stateModel
-
-        cmd =
-            Cmd.batch [ cmd0, cmd1 ]
-
-        dispatch =
-            Dispatch.batch [ dispatch0, dispatch1 ]
-    in
-        ( stateModel_, cmd, dispatch )
-
-
 updateLanding :
     Landing.Msg
     -> Model

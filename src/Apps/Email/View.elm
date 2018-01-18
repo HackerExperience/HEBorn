@@ -5,8 +5,6 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Css
-import Css.Utils exposing (styles)
 import Game.Data as Game
 import Game.Models as Game
 import Game.Storyline.Models as Storyline
@@ -67,7 +65,7 @@ contact k { about } acu =
             img imageAttrs []
 
         imageAttrs =
-            source :: [ class [ Avatar ] ]
+            [ source, class [ Avatar ] ]
 
         attrs =
             [ onClick <| SelectContact k ]
