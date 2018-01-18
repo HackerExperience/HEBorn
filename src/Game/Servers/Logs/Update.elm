@@ -7,7 +7,6 @@ import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Servers.Shared exposing (CId)
-import Decoders.Logs
 
 
 type alias UpdateResponse =

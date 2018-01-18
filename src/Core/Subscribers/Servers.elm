@@ -23,7 +23,6 @@ dispatch dispatch =
         Login gatewayNIP endpointIP password requester ->
             [ web <| Web.Login gatewayNIP endpointIP password requester ]
 
-        -- REVIEW: we might be leaking too much detail
         FailLogin { sessionId, windowId, context, tabId } ->
             [ Browser.LoginFailed
                 |> Browser.SomeTabMsg tabId
