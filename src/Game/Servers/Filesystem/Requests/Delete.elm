@@ -3,13 +3,13 @@ module Game.Servers.Filesystem.Requests.Delete exposing (..)
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 
 
-request : Id -> CId -> ConfigSource a -> Cmd Msg
+request : Id -> CId -> FlagsSource a -> Cmd Msg
 request id cid =
     let
         payload =

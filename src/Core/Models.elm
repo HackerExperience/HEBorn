@@ -6,7 +6,7 @@ module Core.Models
         , SetupModel
         , PlayModel
         , initialModel
-        , getConfig
+        , getFlags
         , connect
         , login
         , logout
@@ -22,14 +22,14 @@ import OS.Models as OS
 import Utils.Update as Update
 import Landing.Models as Landing
 import Setup.Models as Setup
-import Core.Config as Config exposing (Config)
+import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
     { state : State
-    , config : Config
+    , flags : Flags
     , seed : Int
     , windowLoaded : Bool
     }
@@ -70,17 +70,17 @@ type alias Connecting =
     }
 
 
-initialModel : Int -> Config -> Model
-initialModel seed config =
+initialModel : Int -> Flags -> Model
+initialModel seed flags =
     { state = Home initialHome
-    , config = config
+    , flags = flags
     , seed = seed
     , windowLoaded = False
     }
 
 
 connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model
-connect id username token ({ state, config } as model) =
+connect id username token ({ state, flags } as model) =
     case state of
         Home home ->
             let
@@ -88,7 +88,7 @@ connect id username token ({ state, config } as model) =
                     Just <| Connecting id username token
 
                 websocket =
-                    Just <| Ws.initialModel config.apiWsUrl token "web1"
+                    Just <| Ws.initialModel flags.apiWsUrl token "web1"
 
                 home_ =
                     { home | websocket = websocket, connecting = connecting }
@@ -106,7 +106,7 @@ connect id username token ({ state, config } as model) =
 
 
 login : Model -> ( Model, Cmd Msg, Dispatch )
-login ({ state, config } as model) =
+login ({ state, flags } as model) =
     case state of
         Home ({ connecting, websocket } as home) ->
             case connecting of
@@ -115,11 +115,11 @@ login ({ state, config } as model) =
                     let
                         websocket_ =
                             Maybe.withDefault
-                                (Ws.initialModel config.apiWsUrl token "web1")
+                                (Ws.initialModel flags.apiWsUrl token "web1")
                                 websocket
 
                         game =
-                            initialGame connecting config
+                            initialGame connecting flags
 
                         ( state_, cmd, dispatch ) =
                             initialSetup websocket_ game
@@ -147,9 +147,9 @@ crash code message model =
     { model | state = Panic code message }
 
 
-getConfig : Model -> Config
-getConfig =
-    .config
+getFlags : Model -> Flags
+getFlags =
+    .flags
 
 
 setupToPlay : State -> ( State, Cmd Msg, Dispatch )
@@ -211,6 +211,6 @@ initialPlay ws game =
         ( play_, Cmd.none, Dispatch.none )
 
 
-initialGame : Connecting -> Config -> Game.Model
-initialGame { id, username, token } config =
-    Game.dummy id username token config
+initialGame : Connecting -> Flags -> Game.Model
+initialGame { id, username, token } flags =
+    Game.dummy id username token flags

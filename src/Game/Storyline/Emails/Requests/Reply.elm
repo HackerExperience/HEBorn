@@ -19,7 +19,7 @@ import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Storyline.Emails.Messages exposing (..)
 
 
@@ -32,7 +32,7 @@ type Response
 request :
     String
     -> String
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request accountId replyId =
     Requests.request

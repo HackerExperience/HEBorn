@@ -12,7 +12,7 @@ module Game.Models
         , setMeta
         , getStory
         , setStory
-        , getConfig
+        , getFlags
         , unsafeGetGateway
         , getGateway
         , setGateway
@@ -35,7 +35,7 @@ import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
 import Game.LogStream.Models as LogStream
-import Core.Config exposing (Config)
+import Core.Flags exposing (Flags)
 
 
 type alias Model =
@@ -45,7 +45,7 @@ type alias Model =
     , meta : Meta.Model
     , story : Story.Model
     , web : Web.Model
-    , config : Config
+    , flags : Flags
     , backfeed : LogStream.Model
     }
 
@@ -58,9 +58,9 @@ initialModel :
     Account.ID
     -> Account.Username
     -> Account.Token
-    -> Config
+    -> Flags
     -> Model
-initialModel id username token config =
+initialModel id username token flags =
     { account = Account.initialModel id username token
     , inventory = Inventory.initialModel
     , servers = Servers.initialModel
@@ -68,7 +68,7 @@ initialModel id username token config =
     , story = Story.initialModel
     , web = Web.initialModel
     , backfeed = LogStream.initialModel
-    , config = config
+    , flags = flags
     }
 
 
@@ -136,9 +136,9 @@ setWeb web model =
     { model | web = web }
 
 
-getConfig : Model -> Config
-getConfig =
-    .config
+getFlags : Model -> Flags
+getFlags =
+    .flags
 
 
 
