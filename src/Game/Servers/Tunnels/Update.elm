@@ -1,16 +1,17 @@
 module Game.Servers.Tunnels.Update exposing (update)
 
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
-import Utils.Update as Update
+import Game.Servers.Tunnels.Config exposing (..)
 import Game.Servers.Tunnels.Messages exposing (..)
 import Game.Servers.Tunnels.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     Update.fromModel model
