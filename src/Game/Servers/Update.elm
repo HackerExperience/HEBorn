@@ -203,23 +203,19 @@ onFilesystemMsg config game cid id msg server =
     case getStorage id server of
         Just storage ->
             let
+                config_ =
+                    filesystemConfig cid id config
+
                 ( filesystem, cmd, dispatch ) =
-                    storage
-                        |> getFilesystem
-                        |> Filesystem.update game cid msg
+                    Filesystem.update config_ msg <| getFilesystem storage
 
                 storage_ =
                     setFilesystem filesystem storage
 
                 server_ =
                     setStorage id storage_ server
-
-                cmd_ =
-                    Cmd.map
-                        (FilesystemMsg id >> ServerMsg cid >> config.toMsg)
-                        cmd
             in
-                ( server_, cmd_, dispatch )
+                ( server_, cmd, dispatch )
 
         Nothing ->
             Update.fromModel server
