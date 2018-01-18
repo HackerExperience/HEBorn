@@ -440,3 +440,13 @@ getHardware server =
 getNotifications : Server -> Notifications.Model
 getNotifications =
     .notifications
+
+
+getTunnels : Server -> Tunnels.Model
+getTunnels =
+    .tunnels
+
+
+setTunnels : Tunnels.Model -> Server -> Server
+setTunnels tunnels server =
+    { server | tunnels = tunnels }
