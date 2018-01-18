@@ -99,15 +99,18 @@ onResync config model =
 
 
 onAccount : Config msg -> Account.Msg -> Model -> UpdateResponse msg
-onAccount config msg game =
-    Update.child
-        { get = .account
-        , set = (\account game -> { game | account = account })
-        , toMsg = AccountMsg >> config.toMsg
-        , update = (Account.update game)
-        }
-        msg
-        game
+onAccount config msg model =
+    let
+        config_ =
+            accountConfig (getFlags model) config
+
+        ( account, cmd, dispatch ) =
+            Account.update config_ model msg <| getAccount model
+
+        model_ =
+            { model | account = account }
+    in
+        ( model_, cmd, dispatch )
 
 
 onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg
