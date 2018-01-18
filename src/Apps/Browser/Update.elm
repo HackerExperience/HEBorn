@@ -14,11 +14,10 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Web.Types as Web
-import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
 import Apps.Apps as Apps
-import Game.Meta.Types.Context exposing (Context(Endpoint))
 import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Update as Bank
 import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter

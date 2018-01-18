@@ -1,9 +1,7 @@
 module Game.Servers.Processes.Update exposing (update)
 
-import Native.Panic
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Error as Error
 import Core.Dispatch.Notifications as Notifications
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
@@ -316,35 +314,6 @@ handleProcessStarted ( id, process ) model =
         |> Update.fromModel
 
 
-handlePauseEvent : ID -> Model -> UpdateResponse msg
-handlePauseEvent id model =
-    let
-        update process =
-            model
-                |> insert id (whenStarted pause process)
-                |> Update.fromModel
-    in
-        updateOrSync update id model
-
-
-handleResumeEvent : ID -> Model -> UpdateResponse msg
-handleResumeEvent id model =
-    let
-        update process =
-            model
-                |> insert id (whenStarted resume process)
-                |> Update.fromModel
-    in
-        updateOrSync update id model
-
-
-handleRemoveEvent : ID -> Model -> UpdateResponse msg
-handleRemoveEvent id model =
-    model
-        |> remove id
-        |> Update.fromModel
-
-
 handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse msg
 handleProcessConclusion id model =
     let
@@ -402,10 +371,3 @@ failDownloadFile lastTick cid oldId model message =
             remove oldId model
     in
         ( model_, Cmd.none, Dispatch.none )
-
-
-okDownloadFile : ID -> ID -> Process -> CId -> Model -> UpdateResponse msg
-okDownloadFile id oldId process cid model =
-    model
-        |> replace oldId id process
-        |> Update.fromModel

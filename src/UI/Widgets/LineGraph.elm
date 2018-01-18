@@ -65,13 +65,7 @@ lineGraph values color height_ fromRight (( aspect_w, aspect_h ) as aspect) =
                 [ fill color
                 , fillOpacity "0.4"
                 , stroke "none"
-                , points
-                    (String.join " "
-                        ([ first ]
-                            ++ points_
-                            ++ [ last ]
-                        )
-                    )
+                , points <| String.join " " <| first :: (points_ ++ [ last ])
                 ]
                 []
             , polyline

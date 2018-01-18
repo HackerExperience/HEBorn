@@ -1,8 +1,6 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
-import Native.Panic
-import Core.Error as Error
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs

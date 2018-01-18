@@ -13,7 +13,6 @@ import Game.Notifications.Messages as Notifications
 import Game.Notifications.Source as Notifications
 import Game.Notifications.Update as Notifications
 import Game.Meta.Types.Context exposing (..)
-import Game.Notifications.Source as Notifications
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Finances.Update as Finances

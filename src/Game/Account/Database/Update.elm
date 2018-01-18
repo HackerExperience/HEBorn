@@ -2,7 +2,6 @@ module Game.Account.Database.Update exposing (update)
 
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
 import Events.Account.PasswordAcquired as PasswordAcquired
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)

@@ -72,19 +72,6 @@ view data model =
             (dynStyle :: osContent)
 
 
-viewDynStyle : Game.Model -> List (Html Msg)
-viewDynStyle game =
-    let
-        story =
-            game
-                |> Game.getStory
-    in
-        if Storyline.isActive story then
-            [ lazy DynamicStyle.view game ]
-        else
-            []
-
-
 viewOS : Game.Data -> Model -> List (Html Msg)
 viewOS data model =
     let
