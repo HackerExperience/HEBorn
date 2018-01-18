@@ -2,7 +2,6 @@ module Game.Web.Models
     exposing
         ( Model
         , LoadingPages
-        , Requester
         , initialModel
         , startLoading
         , finishLoading
@@ -10,6 +9,7 @@ module Game.Web.Models
 
 import Dict exposing (Dict)
 import Game.Meta.Types.Context exposing (Context(..))
+import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network
 
 
@@ -20,14 +20,6 @@ type alias Model =
 
 type alias LoadingPages =
     Dict Network.NIP Requester
-
-
-type alias Requester =
-    { sessionId : String
-    , windowId : String
-    , context : Context
-    , tabId : Int
-    }
 
 
 initialModel : Model

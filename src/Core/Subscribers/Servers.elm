@@ -71,6 +71,30 @@ fromServer cid dispatch =
         SetActiveNIP nip ->
             [ server cid <| Servers.HandleSetActiveNIP nip ]
 
+        BankAccountLoginSuccessful { sessionId, windowId, context, tabId } data ->
+            [ Browser.HandleBankLogin data
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankAccountLoginError { sessionId, windowId, context, tabId } ->
+            [ Browser.HandleBankLoginError
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankAccountTransferSuccessful { sessionId, windowId, context, tabId } ->
+            [ Browser.HandleBankTransfer
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
+        BankAccountTransferError { sessionId, windowId, context, tabId } ->
+            [ Browser.HandleBankTransferError
+                |> Browser.SomeTabMsg tabId
+                |> browser ( sessionId, windowId ) context
+            ]
+
 
 fromFilesystem : CId -> Servers.StorageId -> Filesystem -> Subscribers
 fromFilesystem cid id dispatch =

@@ -15,6 +15,7 @@ import Json.Encode as Encode
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
+import Game.Meta.Types.Requester exposing (Requester)
 
 
 type alias UpdateResponse =
