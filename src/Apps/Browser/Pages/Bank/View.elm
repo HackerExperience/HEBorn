@@ -35,7 +35,7 @@ viewLogin : Config msg -> Model -> Html msg
 viewLogin config model =
     div []
         [ viewHeader model
-        , viewLoginCointainer config model
+        , viewLoginForm config model
         , viewFooter model
         ]
 
@@ -53,7 +53,7 @@ viewTransfer : Config msg -> Model -> Html msg
 viewTransfer config model =
     div []
         [ viewHeader model
-        , viewTransferCointainer config model
+        , viewTransferForm config model
         , viewFooter model
         ]
 
@@ -68,27 +68,32 @@ viewFooter model =
     div [] [ text model.title ]
 
 
-viewLoginCointainer : Config msg -> Model -> Html msg
-viewLoginCointainer ({ toMsg, onLogin } as config) model =
+viewLoginForm : Config msg -> Model -> Html msg
+viewLoginForm ({ toMsg, onLogin } as config) model =
     let
         passwordAttr =
             [ placeholder "Password"
             , type_ "password"
-            , onInput (toMsg << UpdatePasswordField)
+            , onInput (UpdatePasswordField >> toMsg)
             ]
                 |> (++) (renderPasswordValue model)
+
+        loginAttr =
+            [ placeholder "Account Number"
+            , onInput (UpdateLoginField >> toMsg)
+            ]
+                |> (++) (renderLoginValue model)
+
+        login =
+            input loginAttr []
+
+        password =
+            input passwordAttr []
     in
-        div []
-            [ input
-                [ placeholder "Account Number"
-                , value (toString model.accountNum)
-                , onInput (toMsg << UpdateLoginField)
-                ]
-                []
+        Html.form [ action "javascript:void(0);" ]
+            [ login
             , br [] []
-            , input
-                passwordAttr
-                []
+            , password
             , div [] [ error model ]
             , br [] []
             , input
@@ -116,8 +121,8 @@ viewMainCointainer { toMsg } model =
             ]
 
 
-viewTransferCointainer : Config msg -> Model -> Html msg
-viewTransferCointainer ({ toMsg, onTransfer } as config) model =
+viewTransferForm : Config msg -> Model -> Html msg
+viewTransferForm ({ toMsg, onTransfer } as config) model =
     let
         bankIPAttr =
             [ placeholder "Bank IP"
@@ -125,7 +130,7 @@ viewTransferCointainer ({ toMsg, onTransfer } as config) model =
             ]
                 |> (++) (renderToTransferBank model)
     in
-        div []
+        Html.form [ action "javascript:void(0);" ]
             [ input
                 bankIPAttr
                 []
@@ -156,7 +161,9 @@ submitLoginAttr : Config msg -> Model -> List (Attribute msg)
 submitLoginAttr { onLogin } model =
     let
         baseAttr =
-            [ type_ "button" ]
+            [ type_ "submit"
+            , value "Submit"
+            ]
     in
         case ( model.accountNum, model.password ) of
             ( Just login, Just password ) ->
@@ -167,21 +174,19 @@ submitLoginAttr { onLogin } model =
                         , password = password
                         }
                 in
-                    request
-                        |> onLogin
-                        |> onSubmit
-                        |> List.singleton
-                        |> (++) baseAttr
+                    (onClick <| onLogin request) :: baseAttr
 
             _ ->
-                baseAttr ++ [ disabled True ]
+                (disabled True) :: baseAttr
 
 
 submitTransferAttr : Config msg -> Model -> List (Attribute msg)
 submitTransferAttr { onTransfer } model =
     let
         baseAttr =
-            [ type_ "button" ]
+            [ type_ "submit"
+            , value "Submit"
+            ]
     in
         case
             ( model.accountNum
@@ -202,15 +207,10 @@ submitTransferAttr { onTransfer } model =
                         , value = value
                         }
                 in
-                    request
-                        |> onTransfer
-                        |> onSubmit
-                        |> List.singleton
-                        |> (++) baseAttr
+                    (onClick <| onTransfer request) :: baseAttr
 
             _ ->
-                [ disabled True ]
-                    |> (++) baseAttr
+                (disabled True) :: baseAttr
 
 
 error : Model -> Html msg
@@ -238,6 +238,16 @@ renderPasswordValue model =
     case model.password of
         Just password ->
             [ value password ]
+
+        Nothing ->
+            []
+
+
+renderLoginValue : Model -> List (Attribute msg)
+renderLoginValue model =
+    case model.accountNum of
+        Just login ->
+            [ value <| toString login ]
 
         Nothing ->
             []

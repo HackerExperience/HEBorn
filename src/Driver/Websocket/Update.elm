@@ -113,6 +113,7 @@ handleJoin channel payload model =
                 |> Channel.onJoinError (JoinFailed channel)
                 |> Channel.onLeave (Leaved channel)
                 |> Channel.on "event" (Event channel)
+                |> Channel.on "event_marote" (Event channel)
 
         driverChannel_ =
             case payload of

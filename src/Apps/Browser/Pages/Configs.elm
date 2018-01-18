@@ -1,5 +1,6 @@
 module Apps.Browser.Pages.Configs exposing (..)
 
+import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Browser.Pages.Bank.Config as Bank
 import Apps.Browser.Pages.DownloadCenter.Config as DownloadCenter
 import Apps.Browser.Pages.Home.Config as Home
@@ -10,8 +11,8 @@ import Apps.Browser.Messages exposing (..)
 bankConfig : Bank.Config Msg
 bankConfig =
     { toMsg = BankMsg >> ActiveTabMsg
-    , onLogin = BankLogin
-    , onTransfer = BankTransfer
+    , onLogin = \a -> BankLogin a
+    , onTransfer = \a -> BankTransfer a
     , onLogout = BankLogout
     }
 
