@@ -27,7 +27,7 @@ import Apps.Email.View as Email
 import Apps.Bug.View as Bug
 import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
-import Apps.LogFlix.View as LogFlix
+import Apps.BackFlix.View as BackFlix
 import Apps.FloatingHeads.View as FloatingHeads
 import Apps.FloatingHeads.Messages as FloatingHeadsMessages
 import Game.Data as Game
@@ -84,8 +84,8 @@ view data model =
         CalculatorModel model ->
             Html.map CalculatorMsg (Calculator.view data model)
 
-        LogFlixModel model ->
-            Html.map LogFlixMsg (LogFlix.view data model)
+        BackFlixModel model ->
+            Html.map BackFlixMsg (BackFlix.view data model)
 
         FloatingHeadsModel model ->
             Html.map FloatingHeadsMsg (FloatingHeads.view data model)

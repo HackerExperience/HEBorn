@@ -1,8 +1,7 @@
 module Core.Dispatch.Account exposing (..)
 
-import Game.Servers.Shared as Servers
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Context exposing (Context)
-import Game.Servers.Shared exposing (CId)
 import Game.Inventory.Shared as Inventory
 import Game.Account.Finances.Models
     exposing

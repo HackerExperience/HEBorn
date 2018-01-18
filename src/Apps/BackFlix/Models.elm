@@ -1,9 +1,9 @@
-module Apps.LogFlix.Models exposing (..)
+module Apps.BackFlix.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Data as Game
-import Game.LogStream.Models as LogStream
-import Apps.LogFlix.Menu.Models as Menu
+import Game.BackFlix.Models as BackFlix
+import Apps.BackFlix.Menu.Models as Menu
 
 
 type Sorting
@@ -15,7 +15,7 @@ type alias Model =
     { menu : Menu.Model
     , filterText : String
     , filterFlags : List Never
-    , filterCache : List LogStream.Id
+    , filterCache : List BackFlix.Id
     , sorting : Sorting
     , selected : MainTab
     }
@@ -28,12 +28,12 @@ type MainTab
 
 name : String
 name =
-    "LogFlix"
+    "BackFlix"
 
 
 title : Model -> String
 title model =
-    "LogFlix"
+    "BackFlix"
 
 
 icon : String
@@ -67,38 +67,38 @@ tabToString tab =
             "Simple"
 
 
-typeToString : LogStream.Log -> String
+typeToString : BackFlix.Log -> String
 typeToString log =
     case log.type_ of
-        LogStream.None ->
+        BackFlix.None ->
             ""
 
-        LogStream.Request ->
+        BackFlix.Request ->
             "Request"
 
-        LogStream.Join ->
+        BackFlix.Join ->
             "Join"
 
-        LogStream.JoinAccount ->
+        BackFlix.JoinAccount ->
             "JoinAccount"
 
-        LogStream.JoinServer ->
+        BackFlix.JoinServer ->
             "JoinServer"
 
-        LogStream.Error ->
+        BackFlix.Error ->
             "Error"
 
-        LogStream.Receive ->
+        BackFlix.Receive ->
             "Receive"
 
-        LogStream.Event ->
+        BackFlix.Event ->
             "Event"
 
-        LogStream.Other ->
+        BackFlix.Other ->
             "Other"
 
 
-catchDataWhenFiltering : List LogStream.Id -> LogStream.Id -> Maybe LogStream.Id
+catchDataWhenFiltering : List BackFlix.Id -> BackFlix.Id -> Maybe BackFlix.Id
 catchDataWhenFiltering filterCache log =
     if List.member log filterCache then
         Just log
@@ -106,7 +106,7 @@ catchDataWhenFiltering filterCache log =
         Nothing
 
 
-applyFilter : Model -> LogStream.LogStream -> Dict LogStream.Id LogStream.Log
+applyFilter : Model -> BackFlix.BackFlix -> Dict BackFlix.Id BackFlix.Log
 applyFilter model =
     let
         filterer id log =
@@ -117,7 +117,7 @@ applyFilter model =
             else
                 True
     in
-        LogStream.filter filterer
+        BackFlix.filter filterer
 
 
 updateTextFilter : Game.Data -> String -> Model -> Model
@@ -128,8 +128,8 @@ updateTextFilter data filter model =
 
         filterCache =
             data
-                |> Game.getLogStream
-                |> LogStream.filter filterer
+                |> Game.getBackFlix
+                |> BackFlix.filter filterer
                 |> Dict.keys
     in
         { model

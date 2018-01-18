@@ -1,4 +1,4 @@
-module Apps.LogFlix.Menu.Actions
+module Apps.BackFlix.Menu.Actions
     exposing
         ( actionHandler
         )
@@ -6,16 +6,16 @@ module Apps.LogFlix.Menu.Actions
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Utils.Update as Update
-import Apps.LogFlix.Models exposing (..)
-import Apps.LogFlix.Messages as LogFlix exposing (Msg(..))
-import Apps.LogFlix.Menu.Messages exposing (MenuAction(..))
+import Apps.BackFlix.Models exposing (..)
+import Apps.BackFlix.Messages as BackFlix exposing (Msg(..))
+import Apps.BackFlix.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
     Game.Data
     -> MenuAction
     -> Model
-    -> ( Model, Cmd LogFlix.Msg, Dispatch )
+    -> ( Model, Cmd BackFlix.Msg, Dispatch )
 actionHandler data action model =
     case action of
         Dummy ->

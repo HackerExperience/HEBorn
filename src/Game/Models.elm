@@ -14,6 +14,8 @@ module Game.Models
         , setStory
         , getWeb
         , setWeb
+        , getBackFlix
+        , setBackFlix
         , getFlags
         , unsafeGetGateway
         , getGateway
@@ -37,7 +39,7 @@ import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
-import Game.LogStream.Models as LogStream
+import Game.BackFlix.Models as BackFlix
 import Core.Flags exposing (Flags)
 
 
@@ -49,7 +51,7 @@ type alias Model =
     , story : Story.Model
     , web : Web.Model
     , flags : Flags
-    , backfeed : LogStream.Model
+    , backflix : BackFlix.Model
     }
 
 
@@ -70,7 +72,7 @@ initialModel id username token flags =
     , meta = Meta.initialModel
     , story = Story.initialModel
     , web = Web.initialModel
-    , backfeed = LogStream.initialModel
+    , backflix = BackFlix.initialModel
     , flags = flags
     }
 
@@ -117,6 +119,16 @@ getMeta =
 setMeta : Meta.Model -> Model -> Model
 setMeta meta model =
     { model | meta = meta }
+
+
+getBackFlix : Model -> BackFlix.Model
+getBackFlix =
+    .backflix
+
+
+setBackFlix : BackFlix.Model -> Model -> Model
+setBackFlix backflix model =
+    { model | backflix = backflix }
 
 
 getStory : Model -> Story.Model

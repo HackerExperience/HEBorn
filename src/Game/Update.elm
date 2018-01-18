@@ -26,8 +26,8 @@ import Game.Inventory.Messages as Inventory
 import Game.Inventory.Update as Inventory
 import Game.Web.Messages as Web
 import Game.Web.Update as Web
-import Game.LogStream.Messages as LogFlix
-import Game.LogStream.Update as LogFlix
+import Game.BackFlix.Messages as BackFlix
+import Game.BackFlix.Update as BackFlix
 import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
@@ -61,8 +61,8 @@ update config msg model =
         WebMsg msg ->
             onWeb config msg model
 
-        LogFlixMsg msg ->
-            onLogFlix config msg model
+        BackFlixMsg msg ->
+            onBackFlix config msg model
 
         Resync ->
             onResync config model
@@ -206,21 +206,24 @@ onServers config msg model =
             Servers.update config_ msg <| getServers model
 
         model_ =
-            { model | servers = servers }
+            setServers servers model
     in
         ( model_, cmd, dispatch )
 
 
-onLogFlix : Config msg -> LogFlix.Msg -> Model -> UpdateResponse msg
-onLogFlix config msg game =
-    Update.child
-        { get = .backfeed
-        , set = (\backfeed game -> { game | backfeed = backfeed })
-        , toMsg = LogFlixMsg >> config.toMsg
-        , update = (LogFlix.update game)
-        }
-        msg
-        game
+onBackFlix : Config msg -> BackFlix.Msg -> Model -> UpdateResponse msg
+onBackFlix config msg model =
+    let
+        config_ =
+            backFlixConfig config
+
+        ( backflix_, cmd, dispatch ) =
+            BackFlix.update config_ msg <| getBackFlix model
+
+        model_ =
+            setBackFlix backflix_ model
+    in
+        ( model_, cmd, dispatch )
 
 
 

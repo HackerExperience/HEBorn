@@ -1,4 +1,4 @@
-module Game.LogStream.Requests
+module Game.BackFlix.Requests
     exposing
         ( Response(..)
         , LogResponse(..)
@@ -6,7 +6,7 @@ module Game.LogStream.Requests
         , logReceive
         )
 
-import Game.LogStream.Messages exposing (..)
+import Game.BackFlix.Messages exposing (..)
 
 
 type Response
@@ -14,7 +14,7 @@ type Response
 
 
 type LogResponse
-    = LogStreamResponse
+    = BackFlixResponse
 
 
 receive : RequestMsg -> Maybe Response

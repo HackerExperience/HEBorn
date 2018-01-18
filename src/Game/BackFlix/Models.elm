@@ -1,4 +1,4 @@
-module Game.LogStream.Models exposing (..)
+module Game.BackFlix.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
@@ -7,10 +7,10 @@ import Core.Error as Error
 
 
 type alias Model =
-    { logs : LogStream }
+    { logs : BackFlix }
 
 
-type alias LogStream =
+type alias BackFlix =
     Dict Id Log
 
 
@@ -62,30 +62,30 @@ insertLog log model =
         model_
 
 
-findId : ( Time, Int ) -> LogStream -> Id
-findId (( birth, from ) as pig) backfeed =
-    backfeed
+findId : ( Time, Int ) -> BackFlix -> Id
+findId (( birth, from ) as pig) backflix =
+    backflix
         |> Dict.get pig
-        |> Maybe.map (\twin -> findId ( birth, from + 1 ) backfeed)
+        |> Maybe.map (\twin -> findId ( birth, from + 1 ) backflix)
         |> Maybe.withDefault pig
 
 
-remove : Id -> LogStream -> LogStream
+remove : Id -> BackFlix -> BackFlix
 remove =
     Dict.remove
 
 
-member : Id -> LogStream -> Bool
+member : Id -> BackFlix -> Bool
 member =
     Dict.member
 
 
-get : Id -> LogStream -> Maybe Log
+get : Id -> BackFlix -> Maybe Log
 get =
     Dict.get
 
 
-filter : (Id -> Log -> Bool) -> LogStream -> LogStream
+filter : (Id -> Log -> Bool) -> BackFlix -> BackFlix
 filter =
     Dict.filter
 

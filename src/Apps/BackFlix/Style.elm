@@ -1,11 +1,11 @@
-module Apps.LogFlix.Style exposing (..)
+module Apps.BackFlix.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Common exposing (flexContainerHorz)
 import Css.Icons as Icon
 import Css.Colors as Colors
-import Apps.LogFlix.Resources exposing (Classes(..), prefix)
+import Apps.BackFlix.Resources exposing (Classes(..), prefix)
 
 
 ico : Style

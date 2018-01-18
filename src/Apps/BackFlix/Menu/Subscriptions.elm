@@ -1,8 +1,8 @@
-module Apps.LogFlix.Menu.Subscriptions exposing (..)
+module Apps.BackFlix.Menu.Subscriptions exposing (..)
 
 import ContextMenu exposing (ContextMenu)
-import Apps.LogFlix.Menu.Models exposing (Model)
-import Apps.LogFlix.Menu.Messages exposing (Msg(..))
+import Apps.BackFlix.Menu.Models exposing (Model)
+import Apps.BackFlix.Menu.Messages exposing (Msg(..))
 
 
 subscriptions : Model -> Sub Msg

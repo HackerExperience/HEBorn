@@ -13,7 +13,7 @@ import Game.Messages as Game
 import Game.Meta.Types.Context exposing (Context)
 import Game.Account.Messages as Account
 import Game.Account.Finances.Messages as Finances
-import Game.LogStream.Messages as LogStream
+import Game.BackFlix.Messages as BackFlix
 import Game.Account.Database.Messages as Database
 import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
@@ -138,9 +138,9 @@ sessionManager =
     OS.SessionManagerMsg >> os
 
 
-backfeed : LogStream.Msg -> Core.Msg
-backfeed =
-    Game.LogFlixMsg >> game
+backflix : BackFlix.Msg -> Core.Msg
+backflix =
+    Game.BackFlixMsg >> game
 
 
 os : OS.Msg -> Core.Msg

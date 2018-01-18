@@ -1,4 +1,4 @@
-module Apps.LogFlix.Menu.Models exposing (..)
+module Apps.BackFlix.Menu.Models exposing (..)
 
 import OS.SessionManager.WindowManager.MenuHandler.Models as MenuHandler
 

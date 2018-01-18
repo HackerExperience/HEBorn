@@ -3,15 +3,14 @@ module Apps.Browser.Pages.Bank.Update exposing (update)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
-import Game.Meta.Types.Network as Network
+import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Account.Finances.Requests.Login as LoginRequest
+import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Meta.Types.Network exposing (NIP)
 import Game.Account.Finances.Models exposing (AccountNumber, BankAccountData)
 import Requests.Types exposing (ResponseType)
-import Game.Account.Finances.Requests.Login as LoginRequest
-import Game.Account.Finances.Requests.Transfer as TransferRequest
 
 
 type alias UpdateResponse msg =
@@ -188,8 +187,3 @@ handleTransferError config data model =
             { model | error = Just "Transfer Error" }
     in
         Update.fromModel model_
-
-
-handleLogout : Config msg -> Game.Data -> Model -> UpdateResponse msg
-handleLogout config data model =
-    Update.fromModel model

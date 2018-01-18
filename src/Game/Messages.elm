@@ -7,7 +7,7 @@ import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
 import Game.Inventory.Messages as Inventory
 import Game.Web.Messages as Web
-import Game.LogStream.Messages as LogFlix
+import Game.BackFlix.Messages as BackFlix
 import Requests.Types exposing (ResponseType)
 
 
@@ -18,7 +18,7 @@ type Msg
     | StoryMsg Story.Msg
     | InventoryMsg Inventory.Msg
     | WebMsg Web.Msg
-    | LogFlixMsg LogFlix.Msg
+    | BackFlixMsg BackFlix.Msg
     | Resync
     | Request RequestMsg
     | HandleJoinedAccount Value

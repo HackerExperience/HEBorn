@@ -19,7 +19,7 @@ dispatch dispatch =
         Connected a ->
             [ Core.HandleConnected
             , account Account.HandleConnected
-            , ws <| Ws.HandleJoin Channels.LogFlixChannel Nothing
+            , ws <| Ws.HandleJoin Channels.BackFlixChannel Nothing
             ]
 
         Disconnected ->
@@ -58,7 +58,7 @@ fromJoined channel value =
             , setup <| Setup.HandleJoinedServer cid
             ]
 
-        Channels.LogFlixChannel ->
+        Channels.BackFlixChannel ->
             []
 
 

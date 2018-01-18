@@ -9,13 +9,13 @@ module Game.Data
         , fromGateway
         , fromEndpoint
         , fromServerCId
-        , getLogStream
+        , getBackFlix
         )
 
 import Game.Models exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
-import Game.LogStream.Models exposing (LogStream)
+import Game.BackFlix.Models exposing (BackFlix)
 
 
 type alias Data =
@@ -109,9 +109,9 @@ getEndpoints =
         >> Maybe.withDefault []
 
 
-getLogStream : Data -> LogStream
-getLogStream =
-    .game >> .backfeed >> .logs
+getBackFlix : Data -> BackFlix
+getBackFlix =
+    .game >> .backflix >> .logs
 
 
 

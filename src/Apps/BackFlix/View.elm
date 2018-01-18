@@ -1,4 +1,4 @@
-module Apps.LogFlix.View exposing (view)
+module Apps.BackFlix.View exposing (view)
 
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -9,10 +9,10 @@ import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import Game.Data as Game
-import Game.LogStream.Models as LogStream
-import Apps.LogFlix.Messages exposing (Msg(..))
-import Apps.LogFlix.Models exposing (..)
-import Apps.LogFlix.Resources exposing (Classes(..), prefix)
+import Game.BackFlix.Models as BackFlix
+import Apps.BackFlix.Messages exposing (Msg(..))
+import Apps.BackFlix.Models exposing (..)
+import Apps.BackFlix.Resources exposing (Classes(..), prefix)
 
 
 { id, class, classList } =
@@ -23,7 +23,7 @@ view : Game.Data -> Model -> Html Msg
 view data model =
     let
         data_ =
-            Game.getLogStream data
+            Game.getBackFlix data
 
         filterHeaderLayout =
             verticalList
@@ -71,17 +71,17 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : LogStream.LogStream -> Html Msg
+viewTabAll : BackFlix.BackFlix -> Html Msg
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : LogStream.LogStream -> Html Msg
+viewTabSimple : BackFlix.BackFlix -> Html Msg
 viewTabSimple model =
     let
         filter id log =
             case log.type_ of
-                LogStream.Other ->
+                BackFlix.Other ->
                     False
 
                 _ ->
@@ -94,14 +94,14 @@ viewTabSimple model =
 -- internals
 
 
-renderEntries : Dict LogStream.Id LogStream.Log -> Bool -> Html Msg
+renderEntries : Dict BackFlix.Id BackFlix.Log -> Bool -> Html Msg
 renderEntries logs useString =
     logs
         |> Dict.foldl (\k v acc -> renderEntry useString k v :: acc) []
         |> verticalList
 
 
-renderEntry : Bool -> LogStream.Id -> LogStream.Log -> Html Msg
+renderEntry : Bool -> BackFlix.Id -> BackFlix.Log -> Html Msg
 renderEntry useString id log =
     let
         data =
@@ -131,32 +131,32 @@ renderEntry useString id log =
             ]
 
 
-setTypeLog : LogStream.Log -> List (Html.Attribute msg)
+setTypeLog : BackFlix.Log -> List (Html.Attribute msg)
 setTypeLog log =
     case log.type_ of
-        LogStream.Request ->
+        BackFlix.Request ->
             [ class [ BFRequest ] ]
 
-        LogStream.Receive ->
+        BackFlix.Receive ->
             [ class [ BFReceive ] ]
 
-        LogStream.Join ->
+        BackFlix.Join ->
             [ class [ BFJoin ] ]
 
-        LogStream.JoinAccount ->
+        BackFlix.JoinAccount ->
             [ class [ BFJoinAccount ] ]
 
-        LogStream.JoinServer ->
+        BackFlix.JoinServer ->
             [ class [ BFJoinServer ] ]
 
-        LogStream.Other ->
+        BackFlix.Other ->
             [ class [ BFOther ] ]
 
-        LogStream.None ->
+        BackFlix.None ->
             [ class [ BFNone ] ]
 
-        LogStream.Event ->
+        BackFlix.Event ->
             [ class [ BFEvent ] ]
 
-        LogStream.Error ->
+        BackFlix.Error ->
             [ class [ BFError ] ]

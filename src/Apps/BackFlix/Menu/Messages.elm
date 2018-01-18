@@ -1,7 +1,7 @@
-module Apps.LogFlix.Menu.Messages exposing (Msg(..), MenuAction(..))
+module Apps.BackFlix.Menu.Messages exposing (Msg(..), MenuAction(..))
 
 import ContextMenu exposing (ContextMenu)
-import Apps.LogFlix.Menu.Models exposing (Menu)
+import Apps.BackFlix.Menu.Models exposing (Menu)
 
 
 type MenuAction

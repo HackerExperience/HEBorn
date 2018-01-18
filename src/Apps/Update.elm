@@ -19,7 +19,7 @@ import Apps.LanViewer.Update as LanViewer
 import Apps.Email.Update as Email
 import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
-import Apps.LogFlix.Update as LogFlix
+import Apps.BackFlix.Update as BackFlix
 import Apps.FloatingHeads.Update as FloatingHeads
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
@@ -189,12 +189,12 @@ update data msg model =
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
 
-        LogFlixMsg msg ->
+        BackFlixMsg msg ->
             case model of
-                LogFlixModel model ->
-                    map LogFlixModel
-                        LogFlixMsg
-                        (LogFlix.update data msg model)
+                BackFlixModel model ->
+                    map BackFlixModel
+                        BackFlixMsg
+                        (BackFlix.update data msg model)
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )

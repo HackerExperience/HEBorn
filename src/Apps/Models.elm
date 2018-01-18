@@ -25,7 +25,7 @@ import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
-import Apps.LogFlix.Models as LogFlix
+import Apps.BackFlix.Models as BackFlix
 import Apps.FloatingHeads.Models as FloatingHeads
 import Apps.Apps exposing (..)
 
@@ -47,7 +47,7 @@ type AppModel
     | EmailModel Email.Model
     | BugModel Bug.Model
     | CalculatorModel Calculator.Model
-    | LogFlixModel LogFlix.Model
+    | BackFlixModel BackFlix.Model
     | FloatingHeadsModel FloatingHeads.Model
 
 
@@ -107,7 +107,7 @@ contexts app =
         CalculatorApp ->
             ContextlessApp
 
-        LogFlixApp ->
+        BackFlixApp ->
             ContextlessApp
 
         FloatingHeadsApp ->
@@ -165,8 +165,8 @@ name app =
         CalculatorApp ->
             Calculator.name
 
-        LogFlixApp ->
-            LogFlix.name
+        BackFlixApp ->
+            BackFlix.name
 
         FloatingHeadsApp ->
             FloatingHeads.name
@@ -223,8 +223,8 @@ icon app =
         CalculatorApp ->
             Calculator.icon
 
-        LogFlixApp ->
-            LogFlix.icon
+        BackFlixApp ->
+            BackFlix.icon
 
         FloatingHeadsApp ->
             FloatingHeads.icon
@@ -281,8 +281,8 @@ title model =
         CalculatorModel model ->
             Calculator.title model
 
-        LogFlixModel model ->
-            LogFlix.title model
+        BackFlixModel model ->
+            BackFlix.title model
 
         FloatingHeadsModel model ->
             FloatingHeads.title model
@@ -300,8 +300,8 @@ windowInitSize app =
         CalculatorApp ->
             Calculator.windowInitSize
 
-        LogFlixApp ->
-            LogFlix.windowInitSize
+        BackFlixApp ->
+            BackFlix.windowInitSize
 
         _ ->
             ( 600, 400 )

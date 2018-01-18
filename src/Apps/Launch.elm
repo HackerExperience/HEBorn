@@ -25,7 +25,7 @@ import Apps.LanViewer.Models as LanViewer
 import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
-import Apps.LogFlix.Models as LogFlix
+import Apps.BackFlix.Models as BackFlix
 import Apps.FloatingHeads.Models as FloatingHeads
 import Apps.FloatingHeads.Messages as FloatingHeads
 import Apps.FloatingHeads.Launch as FloatingHeads
@@ -145,9 +145,9 @@ launch data ({ windowId } as reference) maybeParams app =
                 |> CalculatorModel
                 |> Update.fromModel
 
-        LogFlixApp ->
-            LogFlix.initialModel
-                |> LogFlixModel
+        BackFlixApp ->
+            BackFlix.initialModel
+                |> BackFlixModel
                 |> Update.fromModel
 
         FloatingHeadsApp ->

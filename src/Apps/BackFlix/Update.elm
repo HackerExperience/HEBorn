@@ -1,13 +1,13 @@
-module Apps.LogFlix.Update exposing (update)
+module Apps.BackFlix.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
-import Apps.LogFlix.Models exposing (..)
-import Apps.LogFlix.Messages as LogFlix exposing (Msg(..))
-import Apps.LogFlix.Menu.Messages as Menu
-import Apps.LogFlix.Menu.Update as Menu
-import Apps.LogFlix.Menu.Actions as Menu
+import Apps.BackFlix.Models exposing (..)
+import Apps.BackFlix.Messages as BackFlix exposing (Msg(..))
+import Apps.BackFlix.Menu.Messages as Menu
+import Apps.BackFlix.Menu.Update as Menu
+import Apps.BackFlix.Menu.Actions as Menu
 
 
 type alias UpdateResponse =
@@ -16,9 +16,9 @@ type alias UpdateResponse =
 
 update :
     Game.Data
-    -> LogFlix.Msg
+    -> BackFlix.Msg
     -> Model
-    -> ( Model, Cmd LogFlix.Msg, Dispatch )
+    -> ( Model, Cmd BackFlix.Msg, Dispatch )
 update data msg model =
     case msg of
         MenuMsg (Menu.MenuClick action) ->

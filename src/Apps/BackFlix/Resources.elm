@@ -1,4 +1,4 @@
-module Apps.LogFlix.Resources exposing (..)
+module Apps.BackFlix.Resources exposing (..)
 
 
 type Classes
