@@ -437,6 +437,11 @@ getHardware server =
     server.hardware
 
 
+setHardware : Hardware.Model -> Server -> Server
+setHardware hardware server =
+    { server | hardware = hardware }
+
+
 getNotifications : Server -> Notifications.Model
 getNotifications =
     .notifications

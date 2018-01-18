@@ -1,41 +1,42 @@
 module Game.Servers.Hardware.Update exposing (update)
 
+import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
-import Utils.Update as Update
 import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
-import Game.Models as Game
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
-import Game.Servers.Hardware.Requests.UpdateMotherboard as UpdateMotherboard
 import Game.Servers.Shared as Servers exposing (CId)
-import Game.Servers.Hardware.Requests exposing (..)
-import Game.Servers.Hardware.Messages exposing (..)
+import Game.Servers.Hardware.Config exposing (..)
 import Game.Servers.Hardware.Models exposing (..)
+import Game.Servers.Hardware.Messages exposing (..)
+import Game.Servers.Hardware.Requests exposing (..)
+import Game.Servers.Hardware.Requests.UpdateMotherboard as UpdateMotherboard
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
-update game cid msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleMotherboardUpdated data ->
-            handleMotherboardUpdated data model
+            handleMotherboardUpdated config data model
 
         HandleMotherboardUpdate data ->
-            handleMotherboardUpdate game cid data model
+            handleMotherboardUpdate config data model
 
         Request response ->
-            onRequest game cid (receive response) model
+            onRequest config (receive response) model
 
 
 handleMotherboardUpdated :
-    MotherboardUpdated.Data
+    Config msg
+    -> MotherboardUpdated.Data
     -> Model
-    -> UpdateResponse
-handleMotherboardUpdated model_ model =
+    -> UpdateResponse msg
+handleMotherboardUpdated config model_ model =
     let
         oldMotherboard =
             model
@@ -55,56 +56,39 @@ handleMotherboardUpdated model_ model =
         ( model_, Cmd.none, dispatch )
 
 
-
---handleMotherboardDetached :
---    MotherboardDetached.Data
---    -> Model
---    -> UpdateResponse
---handleMotherboardDetached data model =
---    case getMotherboard model of
---        Just oldMotherboard ->
---            let
---                newMotherboard =
---                    Motherboard.empty
---                model_ =
---                    setMotherboard (Just newMotherboard) model
---                dispatch =
---                    oldMotherboard
---                        |> Motherboard.diff newMotherboard
---                        |> dispatchDiff
---            in
---                ( model_, Cmd.none, dispatch )
---        Nothing ->
---            Update.fromModel model
-
-
 handleMotherboardUpdate :
-    Game.Model
-    -> CId
+    Config msg
     -> Motherboard
     -> Model
-    -> UpdateResponse
-handleMotherboardUpdate game cid motherboard model =
-    let
-        cmd =
-            UpdateMotherboard.request motherboard cid game
-                |> Debug.log "CMD"
-    in
-        ( model, cmd, Dispatch.none )
+    -> UpdateResponse msg
+handleMotherboardUpdate config motherboard model =
+    ( model
+    , Cmd.map config.toMsg <|
+        UpdateMotherboard.request motherboard config.cid config
+    , Dispatch.none
+    )
 
 
-onRequest : Game.Model -> CId -> Maybe Response -> Model -> UpdateResponse
-onRequest game cid request model =
+onRequest :
+    Config msg
+    -> Maybe Response
+    -> Model
+    -> UpdateResponse msg
+onRequest config request model =
     case request of
         Just (UpdateMotherboard response) ->
-            onUpdateMotherboard response model
+            onUpdateMotherboard config response model
 
         Nothing ->
             Update.fromModel model
 
 
-onUpdateMotherboard : UpdateMotherboard.Response -> Model -> UpdateResponse
-onUpdateMotherboard response model =
+onUpdateMotherboard :
+    Config msg
+    -> UpdateMotherboard.Response
+    -> Model
+    -> UpdateResponse msg
+onUpdateMotherboard config response model =
     case response of
         UpdateMotherboard.Okay motherboard ->
             model
