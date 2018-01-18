@@ -27,6 +27,7 @@ node('elm') {
       "HEBORN_VERSION=${env.BUILD_VERSION}"
       ]) {
       sh 'gmake compile release'
+      stash 'release'
     }
   }
 }
@@ -34,6 +35,9 @@ node('elm') {
 if (env.BRANCH_NAME == 'master') {
   node('!master') {
     stage('Save artifacts') {
+      step([$class: 'WsCleanup'])
+      unstash 'release'
+
       sh "aws s3 cp build/release.tar.gz s3://he2-releases/heborn/${env.BRANCH_NAME}/${env.BUILD_VERSION}.tar.gz --storage-class REDUCED_REDUNDANCY"
     }
 
