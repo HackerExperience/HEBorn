@@ -288,13 +288,18 @@ onTunnelsMsg :
     -> Tunnels.Msg
     -> Server
     -> ServerUpdateResponse msg
-onTunnelsMsg config game cid =
-    Update.child
-        { get = .tunnels
-        , set = (\tunnels model -> { model | tunnels = tunnels })
-        , toMsg = TunnelsMsg >> ServerMsg cid >> config.toMsg
-        , update = (Tunnels.update game)
-        }
+onTunnelsMsg config game cid msg server =
+    let
+        config_ =
+            tunnelsConfig cid config
+
+        ( tunnels, cmd, dispatch ) =
+            Tunnels.update config_ msg <| getTunnels server
+
+        server_ =
+            setTunnels tunnels server
+    in
+        ( server_, cmd, dispatch )
 
 
 onNotificationsMsg :
