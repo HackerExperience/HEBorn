@@ -149,7 +149,7 @@ os =
 
 
 
--- REVIEW: not-so-consistent helpers
+-- not-so-consistent helpers
 
 
 apps : List Apps.Msg -> Core.Msg
