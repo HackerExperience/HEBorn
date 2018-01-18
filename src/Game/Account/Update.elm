@@ -19,6 +19,7 @@ import Game.Account.Finances.Update as Finances
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
+import Game.Account.Config exposing (..)
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
 import Game.Account.Requests exposing (..)
@@ -27,51 +28,51 @@ import Game.Account.Bounces.Messages as Bounces
 import Game.Models as Game
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
+update config game msg model =
     case msg of
         BouncesMsg msg ->
-            onBounce game msg model
+            onBounce config game msg model
 
         FinancesMsg msg ->
-            onFinances game msg model
+            onFinances config msg model
 
         DatabaseMsg msg ->
-            onDatabase game msg model
+            onDatabase config game msg model
 
         NotificationsMsg msg ->
-            onNotifications game msg model
+            onNotifications config game msg model
 
         Request data ->
             data
                 |> receive
-                |> Maybe.map (flip (updateRequest game) model)
+                |> Maybe.map (flip (updateRequest config game) model)
                 |> Maybe.withDefault (Update.fromModel model)
 
         HandleLogout ->
-            handleLogout game model
+            handleLogout config model
 
         HandleSetGateway cid ->
-            handleSetGateway game cid model
+            handleSetGateway config game cid model
 
         HandleSetEndpoint mCid ->
-            handleSetEndpoint game mCid model
+            handleSetEndpoint config game mCid model
 
         HandleSetContext context ->
-            handleSetContext game context model
+            handleSetContext config game context model
 
         HandleNewGateway cid ->
             handleNewGateway cid model
 
         HandleLogoutAndCrash error ->
-            handleLogoutAndCrash game error model
+            handleLogoutAndCrash config game error model
 
         HandleTutorialCompleted bool ->
-            handleTutorialCompleted game bool model
+            handleTutorialCompleted config game bool model
 
         HandleConnected ->
             handleConnected model
@@ -84,17 +85,18 @@ update game msg model =
 -- internals
 
 
-handleSetGateway : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleSetGateway game cid model =
+handleSetGateway : Config msg -> Game.Model -> Servers.CId -> Model -> UpdateResponse msg
+handleSetGateway config game cid model =
     Update.fromModel { model | activeGateway = Just cid }
 
 
 handleSetEndpoint :
-    Game.Model
+    Config msg
+    -> Game.Model
     -> Maybe Servers.CId
     -> Model
-    -> UpdateResponse
-handleSetEndpoint game cid model =
+    -> UpdateResponse msg
+handleSetEndpoint config game cid model =
     case getGateway model of
         Just gateway ->
             let
@@ -110,9 +112,9 @@ handleSetEndpoint game cid model =
 
                 model_ =
                     if cid == Nothing then
-                        ensureValidContext game { model | context = Gateway }
+                        ensureValidContext config game { model | context = Gateway }
                     else
-                        ensureValidContext game model
+                        ensureValidContext config game model
             in
                 ( model_, Cmd.none, dispatch )
 
@@ -120,56 +122,59 @@ handleSetEndpoint game cid model =
             Update.fromModel model
 
 
-handleSetContext : Game.Model -> Context -> Model -> UpdateResponse
-handleSetContext game context model =
+handleSetContext : Config msg -> Game.Model -> Context -> Model -> UpdateResponse msg
+handleSetContext config game context model =
     let
         model1 =
             { model | context = context }
 
         model_ =
-            ensureValidContext game model1
+            ensureValidContext config game model1
     in
         ( model_, Cmd.none, Dispatch.none )
 
 
-onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
-onDatabase game msg model =
+onDatabase : Config msg -> Game.Model -> Database.Msg -> Model -> UpdateResponse msg
+onDatabase config game msg model =
     Update.child
         { get = .database
         , set = (\database model -> { model | database = database })
-        , toMsg = DatabaseMsg
+        , toMsg = (DatabaseMsg >> config.toMsg)
         , update = (Database.update game)
         }
         msg
         model
 
 
-onFinances : Game.Model -> Finances.Msg -> Model -> UpdateResponse
-onFinances game msg model =
-    Update.child
-        { get = .finances
-        , set = (\finances model -> { model | finances = finances })
-        , toMsg = FinancesMsg
-        , update = (Finances.update game)
-        }
-        msg
-        model
+onFinances : Config msg -> Finances.Msg -> Model -> UpdateResponse msg
+onFinances config msg model =
+    let
+        config_ =
+            financesConfig model.id config
+
+        ( finances, cmd, dispatch ) =
+            Finances.update config_ msg <| getFinances model
+
+        model_ =
+            setFinances finances model
+    in
+        ( model_, cmd, dispatch )
 
 
-onNotifications : Game.Model -> Notifications.Msg -> Model -> UpdateResponse
-onNotifications game msg model =
+onNotifications : Config msg -> Game.Model -> Notifications.Msg -> Model -> UpdateResponse msg
+onNotifications config game msg model =
     Update.child
         { get = .notifications
         , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = NotificationsMsg
+        , toMsg = (NotificationsMsg >> config.toMsg)
         , update = (Notifications.update game Notifications.Account)
         }
         msg
         model
 
 
-handleLogout : Game.Model -> Model -> UpdateResponse
-handleLogout game model =
+handleLogout : Config msg -> Model -> UpdateResponse msg
+handleLogout config model =
     let
         model_ =
             { model | logout = ToLanding }
@@ -178,13 +183,14 @@ handleLogout game model =
             getToken model
 
         cmd =
-            Logout.request token model.id game
+            Logout.request token model.id config
+                |> Cmd.map config.toMsg
     in
         ( model_, cmd, Dispatch.none )
 
 
-handleTutorialCompleted : Game.Model -> Bool -> Model -> UpdateResponse
-handleTutorialCompleted game bool model =
+handleTutorialCompleted : Config msg -> Game.Model -> Bool -> Model -> UpdateResponse msg
+handleTutorialCompleted config game bool model =
     let
         model_ =
             { model | inTutorial = bool }
@@ -192,8 +198,8 @@ handleTutorialCompleted game bool model =
         Update.fromModel model_
 
 
-handleLogoutAndCrash : Game.Model -> Error -> Model -> UpdateResponse
-handleLogoutAndCrash game error model =
+handleLogoutAndCrash : Config msg -> Game.Model -> Error -> Model -> UpdateResponse msg
+handleLogoutAndCrash config game error model =
     let
         model_ =
             { model | logout = ToCrash error }
@@ -202,19 +208,20 @@ handleLogoutAndCrash game error model =
             getToken model
 
         cmd =
-            Logout.request token model.id game
+            Logout.request token model.id config
+                |> Cmd.map config.toMsg
     in
         ( model_, cmd, Dispatch.none )
 
 
-onBounce : Game.Model -> Bounces.Msg -> Model -> UpdateResponse
-onBounce game msg model =
+onBounce : Config msg -> Game.Model -> Bounces.Msg -> Model -> UpdateResponse msg
+onBounce config game msg model =
     let
         ( bounces, cmd, dispatch ) =
             Bounces.update game msg model.bounces
 
         cmd_ =
-            Cmd.map BouncesMsg cmd
+            Cmd.map (BouncesMsg >> config.toMsg) cmd
 
         model_ =
             { model | bounces = bounces }
@@ -222,15 +229,15 @@ onBounce game msg model =
         ( model_, cmd_, dispatch )
 
 
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game response model =
+updateRequest : Config msg -> Game.Model -> Response -> Model -> UpdateResponse msg
+updateRequest config game response model =
     case response of
         _ ->
             Update.fromModel model
 
 
-ensureValidContext : Game.Model -> Model -> Model
-ensureValidContext game model =
+ensureValidContext : Config msg -> Game.Model -> Model -> Model
+ensureValidContext config game model =
     let
         servers =
             Game.getServers game
@@ -247,14 +254,14 @@ ensureValidContext game model =
             model
 
 
-handleNewGateway : Servers.CId -> Model -> UpdateResponse
+handleNewGateway : Servers.CId -> Model -> UpdateResponse msg
 handleNewGateway cid model =
     model
         |> insertGateway cid
         |> Update.fromModel
 
 
-handleConnected : Model -> UpdateResponse
+handleConnected : Model -> UpdateResponse msg
 handleConnected model =
     let
         dispatch =
@@ -264,7 +271,7 @@ handleConnected model =
         ( model, Cmd.none, dispatch )
 
 
-handleDisconnected : Model -> UpdateResponse
+handleDisconnected : Model -> UpdateResponse msg
 handleDisconnected model =
     let
         dispatch =
