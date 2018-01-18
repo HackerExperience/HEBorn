@@ -16,6 +16,7 @@ import Game.Servers.Shared exposing (..)
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , lastTick : Time
     }
 
@@ -24,6 +25,7 @@ processesConfig : CId -> NIP -> Config msg -> Processes.Config msg
 processesConfig cid nip config =
     { flags = config.flags
     , toMsg = ProcessesMsg >> ServerMsg cid >> config.toMsg
+    , batchMsg = config.batchMsg
     , cid = cid
     , nip = nip
     , lastTick = config.lastTick
@@ -34,6 +36,7 @@ logsConfig : CId -> Config msg -> Logs.Config msg
 logsConfig cid config =
     { flags = config.flags
     , toMsg = LogsMsg >> ServerMsg cid >> config.toMsg
+    , batchMsg = config.batchMsg
     , cid = cid
     }
 
@@ -42,6 +45,7 @@ filesystemConfig : CId -> StorageId -> Config msg -> Filesystem.Config msg
 filesystemConfig cid storageId config =
     { flags = config.flags
     , toMsg = FilesystemMsg storageId >> ServerMsg cid >> config.toMsg
+    , batchMsg = config.batchMsg
     , cid = cid
     }
 

@@ -28,6 +28,27 @@ import Core.Subscribers as Subscribers
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
+        MultiMsg msgs ->
+            case msgs of
+                [ msg ] ->
+                    update msg model
+
+                msg :: msgs ->
+                    --this will actually blow the stack when dispatching
+                    --many things, but we shouldn't dispatch more than 3
+                    --messages, so whatever
+                    let
+                        ( model0, cmd0 ) =
+                            update msg model
+
+                        ( model_, cmd1 ) =
+                            update (MultiMsg msgs) model0
+                    in
+                        ( model_, Cmd.batch [ cmd0, cmd1 ] )
+
+                [] ->
+                    ( model, Cmd.none )
+
         HandleBoot id username token ->
             let
                 model_ =

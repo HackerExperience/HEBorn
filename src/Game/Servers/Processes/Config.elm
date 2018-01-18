@@ -10,6 +10,7 @@ import Game.Meta.Types.Network as Network exposing (NIP)
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , cid : CId
     , nip : NIP
     , lastTick : Time
