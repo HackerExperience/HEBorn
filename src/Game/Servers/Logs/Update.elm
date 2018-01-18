@@ -1,87 +1,90 @@
 module Game.Servers.Logs.Update exposing (update)
 
 import Utils.Update as Update
-import Game.Models as Game
+import Core.Dispatch as Dispatch exposing (Dispatch)
+import Decoders.Logs
+import Game.Servers.Logs.Config exposing (..)
 import Game.Servers.Logs.Messages exposing (..)
 import Game.Servers.Logs.Models exposing (..)
 import Game.Servers.Logs.Requests exposing (..)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Servers.Shared exposing (CId)
-import Decoders.Logs
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
 type alias LogUpdateResponse =
     ( Log, Cmd LogMsg, Dispatch )
 
 
-update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
-update game nip msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleDelete id ->
-            handleDelete game nip id model
+            handleDelete config id model
 
         HandleHide id ->
-            handleHide game nip id model
+            handleHide config id model
 
         LogMsg id msg ->
-            onLogMsg game nip id msg model
+            onLogMsg config id msg model
 
         Request data ->
-            onRequest game nip (receive data) model
+            onRequest config data model
 
         HandleCreated id log ->
-            onCreated game nip id log model
+            onCreated config id log model
 
 
 
 -- collection message handlers
 
 
-handleDelete : Game.Model -> CId -> ID -> Model -> UpdateResponse
-handleDelete game nip id model =
+handleDelete : Config msg -> ID -> Model -> UpdateResponse msg
+handleDelete config id model =
     Update.fromModel model
 
 
-handleHide : Game.Model -> CId -> ID -> Model -> UpdateResponse
-handleHide game nip id model =
+handleHide : Config msg -> ID -> Model -> UpdateResponse msg
+handleHide config id model =
     Update.fromModel model
 
 
-onRequest : Game.Model -> CId -> Maybe Response -> Model -> UpdateResponse
-onRequest game nip response model =
-    case response of
-        Just response ->
-            updateRequest game nip response model
+onRequest : Config msg -> RequestMsg -> Model -> UpdateResponse msg
+onRequest config data model =
+    let
+        response =
+            receive data
+    in
+        case response of
+            Just response ->
+                updateRequest config response model
 
-        Nothing ->
-            Update.fromModel model
+            Nothing ->
+                Update.fromModel model
 
 
-onLogMsg : Game.Model -> CId -> ID -> LogMsg -> Model -> UpdateResponse
-onLogMsg game nip id msg model =
+onLogMsg : Config msg -> ID -> LogMsg -> Model -> UpdateResponse msg
+onLogMsg config id msg model =
     case get id model of
         Just log ->
-            updateLog game nip id msg log
+            updateLog config id msg log
                 |> Update.mapModel (flip (insert id) model)
-                |> Update.mapCmd (LogMsg id)
+                |> Update.mapCmd (LogMsg id >> config.toMsg)
 
         Nothing ->
             Update.fromModel model
 
 
-onCreated : Game.Model -> CId -> ID -> Log -> Model -> UpdateResponse
-onCreated game nip id log model =
+onCreated : Config msg -> ID -> Log -> Model -> UpdateResponse msg
+onCreated config id log model =
     model
         |> insert id log
         |> Update.fromModel
 
 
-updateRequest : Game.Model -> CId -> Response -> Model -> UpdateResponse
-updateRequest game nip response model =
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config response model =
     Update.fromModel model
 
 
@@ -100,69 +103,70 @@ toModel index =
             |> List.foldl (uncurry insert) initialModel
 
 
-updateLog : Game.Model -> CId -> ID -> LogMsg -> Log -> LogUpdateResponse
-updateLog game nip id msg log =
+updateLog : Config msg -> ID -> LogMsg -> Log -> LogUpdateResponse
+updateLog config id msg log =
     case msg of
         HandleUpdateContent content ->
-            handleUpdateContent game nip id content log
+            handleUpdateContent config id content log
 
         HandleEncrypt ->
-            handleEncrypt game nip id log
+            handleEncrypt config id log
 
         Decrypt content ->
-            onDecrypt game nip id content log
+            onDecrypt config id content log
 
         LogRequest data ->
-            onLogRequest game nip id (logReceive data) log
+            onLogRequest config id data log
 
 
 handleUpdateContent :
-    Game.Model
-    -> CId
+    Config msg
     -> ID
     -> String
     -> Log
     -> LogUpdateResponse
-handleUpdateContent game nip id content log =
+handleUpdateContent config id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
-handleEncrypt : Game.Model -> CId -> ID -> Log -> LogUpdateResponse
-handleEncrypt game nip id log =
+handleEncrypt : Config msg -> ID -> Log -> LogUpdateResponse
+handleEncrypt config id log =
     setContent Nothing log
         |> Update.fromModel
 
 
-onDecrypt : Game.Model -> CId -> ID -> String -> Log -> LogUpdateResponse
-onDecrypt game nip id content log =
+onDecrypt : Config msg -> ID -> String -> Log -> LogUpdateResponse
+onDecrypt config id content log =
     setContent (Just content) log
         |> Update.fromModel
 
 
 onLogRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> ID
-    -> Maybe LogResponse
+    -> LogRequestMsg
     -> Log
     -> LogUpdateResponse
-onLogRequest game nip id response log =
-    case response of
-        Just response ->
-            updateLogRequest game nip id response log
+onLogRequest config id data log =
+    let
+        response =
+            logReceive data
+    in
+        case response of
+            Just response ->
+                updateLogRequest config id response log
 
-        Nothing ->
-            Update.fromModel log
+            Nothing ->
+                Update.fromModel log
 
 
 updateLogRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> ID
     -> LogResponse
     -> Log
     -> LogUpdateResponse
-updateLogRequest game nip id resposne log =
+updateLogRequest config id resposne log =
     -- no log responses yet
     Update.fromModel log
