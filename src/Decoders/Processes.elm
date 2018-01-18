@@ -44,7 +44,7 @@ process =
         |> custom type_
         |> required "access" access
         |> required "state" state
-        |> optionalMaybe "file" file
+        |> optionalMaybe "target_file" file
         |> optionalMaybe "progress" progress
         |> required "network_id" string
         |> required "target_ip" string
@@ -87,12 +87,15 @@ access =
                 |> required "origin_ip" string
                 |> required "priority" priority
                 |> required "usage" resourcesUsage
-                |> optional "connection_id" (maybe string) Nothing
+                |> optional "source_connection_id" (maybe string) Nothing
+                |> optional "target_connection_id" (maybe string) Nothing
+                |> optional "source_file" (maybe file) Nothing
                 |> map Full
 
         partial =
             decode PartialAccess
-                |> optional "connection_id" (maybe string) Nothing
+                |> optional "source_connection_id" (maybe string) Nothing
+                |> optional "target_connection_id" (maybe string) Nothing
                 |> map Partial
     in
         oneOf [ full, partial ]
