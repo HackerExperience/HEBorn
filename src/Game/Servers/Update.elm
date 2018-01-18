@@ -232,13 +232,21 @@ onLogsMsg :
     -> Logs.Msg
     -> Server
     -> ServerUpdateResponse msg
-onLogsMsg config game cid =
-    Update.child
-        { get = .logs
-        , set = (\logs model -> { model | logs = logs })
-        , toMsg = LogsMsg >> ServerMsg cid >> config.toMsg
-        , update = (Logs.update game cid)
-        }
+onLogsMsg config game cid msg server =
+    let
+        nip =
+            getActiveNIP server
+
+        config_ =
+            logsConfig cid nip config
+
+        ( logs, cmd, dispatch ) =
+            Logs.update config_ msg <| getLogs server
+
+        server_ =
+            setLogs logs server
+    in
+        ( server_, cmd, dispatch )
 
 
 onProcessesMsg :
