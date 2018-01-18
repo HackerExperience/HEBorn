@@ -11,7 +11,7 @@ var outputPath        = path.join( __dirname, 'build' );
 console.log( 'WEBPACK GO!');
 
 // determine build env
-var TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
+var TARGET_ENV = process.env['TARGET_ENV'] === 'build' ? 'production' : 'development';
 var outputFilename = TARGET_ENV === 'production' ? '[name]-[hash].js' : '[name]-dev.js';
 
 // common webpack config
@@ -146,8 +146,6 @@ if ( TARGET_ENV === 'production' ) {
     },
 
     plugins: [
-      new webpack.optimize.OccurenceOrderPlugin(),
-
       new ExtractTextPlugin( 'css/[name]-[hash].css', { allChunks: true } ),
 
       new webpack.optimize.UglifyJsPlugin({

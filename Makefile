@@ -79,7 +79,7 @@ build-css: prepare
 
 # Creates release.tar.gz
 release: build
-	webpack
+	TARGET_ENV='build' webpack
 	tar -zcf release.tar.gz build/ && \
 	mv release.tar.gz build/
 
