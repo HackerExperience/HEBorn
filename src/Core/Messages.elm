@@ -10,7 +10,8 @@ import Core.Error as Error exposing (Error)
 
 
 type Msg
-    = HandleConnected
+    = MultiMsg (List Msg)
+    | HandleConnected
     | HandleBoot Account.ID Account.Username Account.Token
     | HandleShutdown
     | HandleCrash Error

@@ -23,8 +23,18 @@ fuzz param =
 
 gameConfig : Game.Config Game.Msg
 gameConfig =
-    { toMsg = identity
-    }
+    let
+        workaround list =
+            case list of
+                item :: _ ->
+                    item
+
+                _ ->
+                    Debug.crash "This crash comes from testing gameConfig"
+    in
+        { toMsg = identity
+        , batchMsg = workaround
+        }
 
 
 batch : List Expectation -> Expectation
