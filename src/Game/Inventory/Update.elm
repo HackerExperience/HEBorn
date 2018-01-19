@@ -2,34 +2,35 @@ module Game.Inventory.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
+import Game.Inventory.Config exposing (..)
 import Game.Inventory.Messages exposing (..)
 import Game.Inventory.Models exposing (..)
 import Game.Inventory.Shared exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Msg -> Model -> UpdateResponse
-update msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleComponentUsed entry ->
-            handleComponentUsed entry model
+            handleComponentUsed config entry model
 
         HandleComponentFreed entry ->
-            handleComponentFreed entry model
+            handleComponentFreed config entry model
 
 
-handleComponentUsed : Entry -> Model -> UpdateResponse
-handleComponentUsed entry model =
+handleComponentUsed : Config msg -> Entry -> Model -> UpdateResponse msg
+handleComponentUsed config entry model =
     model
         |> setAvailability False entry
         |> Update.fromModel
 
 
-handleComponentFreed : Entry -> Model -> UpdateResponse
-handleComponentFreed entry model =
+handleComponentFreed : Config msg -> Entry -> Model -> UpdateResponse msg
+handleComponentFreed config entry model =
     model
         |> setAvailability True entry
         |> Update.fromModel

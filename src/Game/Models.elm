@@ -12,6 +12,8 @@ module Game.Models
         , setMeta
         , getStory
         , setStory
+        , getWeb
+        , setWeb
         , getFlags
         , unsafeGetGateway
         , getGateway
