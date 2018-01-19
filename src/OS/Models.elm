@@ -1,4 +1,10 @@
-module OS.Models exposing (Model, initialModel)
+module OS.Models
+    exposing
+        ( Model
+        , initialModel
+        , getSessionManager
+        , setSessionManager
+        )
 
 import OS.SessionManager.Models as SessionManager
 import OS.Header.Models as Header
@@ -21,3 +27,13 @@ initialModel =
     , menu = Menu.initialContext
     , toasts = Toasts.initialModel
     }
+
+
+getSessionManager : Model -> SessionManager.Model
+getSessionManager =
+    .session
+
+
+setSessionManager : SessionManager.Model -> Model -> Model
+setSessionManager sm model =
+    { model | session = sm }

@@ -2,18 +2,24 @@ module Apps.Calculator.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Apps.Calculator.Models exposing (..)
 import Game.Data as Game
-import Apps.Calculator.Messages as Calculator exposing (Msg(..))
+import Apps.Calculator.Config exposing (..)
+import Apps.Calculator.Models exposing (..)
+import Apps.Calculator.Messages exposing (..)
 import Char
 
 
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
+
+
 update :
-    Game.Data
-    -> Calculator.Msg
+    Config msg
+    -> Game.Data
+    -> Msg
     -> Model
-    -> ( Model, Cmd Calculator.Msg, Dispatch )
-update data msg model =
+    -> UpdateResponse msg
+update config data msg model =
     case msg of
         Input n ->
             onInput n model

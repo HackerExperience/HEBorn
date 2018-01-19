@@ -4,6 +4,7 @@ import Dict
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import OS.SessionManager.Dock.Config exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Helpers exposing (..)
@@ -12,12 +13,21 @@ import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Messages as SessionManager
 
 
+type alias UpdateResponse =
+    ( Model, Cmd SessionManager.Msg, Dispatch )
+
+
+
+-- CONFREFACT: give Dock a real config and get rid of data
+
+
 update :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> Msg
     -> Model
-    -> ( Model, Cmd SessionManager.Msg, Dispatch )
-update data msg ({ sessions } as model) =
+    -> UpdateResponse
+update config data msg ({ sessions } as model) =
     let
         id =
             toSessionID data
