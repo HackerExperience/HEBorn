@@ -239,7 +239,7 @@ updatePlayOS msg stateModel =
         Just data ->
             let
                 ( os, cmd, dispatch ) =
-                    OS.update data msg stateModel.os
+                    OS.update osConfig data msg stateModel.os
 
                 stateModel_ =
                     { stateModel | os = os }
