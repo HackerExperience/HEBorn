@@ -11,6 +11,7 @@ import TestUtils exposing (fuzz, once)
 import Apps.Explorer.Models exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 all : Test

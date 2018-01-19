@@ -17,6 +17,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Gen.Utils exposing (fuzzer, unique, stringRange, listRange)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 import Helper.Filesystem exposing (..)
 
 

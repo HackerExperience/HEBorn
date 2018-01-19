@@ -3,7 +3,7 @@ module Events.Server.Filesystem.Downloaded exposing (..)
 import Json.Decode exposing (decodeValue)
 import Events.Types exposing (Handler)
 import Game.Servers.Shared as Servers
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Decoders.Filesystem
 import Decoders.Servers
 

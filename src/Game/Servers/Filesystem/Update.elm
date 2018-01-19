@@ -4,6 +4,7 @@ import Utils.Update as Update
 import Game.Servers.Filesystem.Config exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
 import Game.Servers.Filesystem.Requests.Delete as Delete
 import Game.Servers.Filesystem.Requests.Move as Move

@@ -5,6 +5,7 @@ import Core.Dispatch.Servers as Servers
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (..)
 import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)

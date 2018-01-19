@@ -4,7 +4,7 @@ import Time exposing (Time)
 import Dict exposing (Dict)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared as Servers
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 -- TODO: add notification data
@@ -25,8 +25,8 @@ type alias Notification =
 type Content
     = Simple String String -- Title Message
     | NewEmail String -- Person_ID
-    | DownloadStarted NIP Servers.StorageId Filesystem.Id
-    | DownloadConcluded NIP Servers.StorageId Filesystem.Id
+    | DownloadStarted NIP Servers.StorageId Filesystem.FileEntry
+    | DownloadConcluded NIP Servers.StorageId Filesystem.FileEntry
 
 
 initialModel : Model

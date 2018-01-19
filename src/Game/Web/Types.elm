@@ -1,7 +1,7 @@
 module Game.Web.Types exposing (..)
 
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 type alias Url =

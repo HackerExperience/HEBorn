@@ -7,7 +7,7 @@ import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Notifications.Models as Notifications
 import Game.Servers.Shared as Servers exposing (CId)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce exposing (bruteforceRequest)
 import Game.Servers.Processes.Requests.Download as Download
     exposing
@@ -84,13 +84,13 @@ handleStartDownload :
     -> TransferType
     -> NIP
     -> Download.StorageId
-    -> Download.FileId
+    -> Filesystem.FileEntry
     -> Model
     -> UpdateResponse msg
-handleStartDownload config transferType origin storage file model =
+handleStartDownload config transferType origin storageId file model =
     let
         process =
-            newOptimistic (Download (DownloadContent transferType storage))
+            newOptimistic (Download (DownloadContent transferType storageId))
                 config.nip
                 (Network.getIp config.nip)
                 unknownProcessFile
@@ -122,7 +122,7 @@ handleStartDownload config transferType origin storage file model =
 
         cmd =
             config
-                |> perform origin file storage config.cid
+                |> perform origin (Filesystem.toId file) storageId config.cid
                 |> Cmd.map toMsg
     in
         ( model_, cmd )
