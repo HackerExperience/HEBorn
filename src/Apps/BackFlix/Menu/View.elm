@@ -1,4 +1,4 @@
-module Apps.LogFlix.Menu.View exposing (menuView)
+module Apps.BackFlix.Menu.View exposing (menuView)
 
 import Html exposing (Html)
 import ContextMenu exposing (ContextMenu)
@@ -8,25 +8,25 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         , menuViewCreator
         )
 import Game.Servers.Logs.Models as Logs
-import Apps.LogFlix.Models exposing (Model)
-import Apps.LogFlix.Messages as LogFlix
-import Apps.LogFlix.Menu.Messages exposing (Msg(..), MenuAction(..))
-import Apps.LogFlix.Menu.Models exposing (Menu(..))
+import Apps.BackFlix.Models exposing (Model)
+import Apps.BackFlix.Messages as BackFlix
+import Apps.BackFlix.Menu.Messages exposing (Msg(..), MenuAction(..))
+import Apps.BackFlix.Menu.Models exposing (Menu(..))
 
 
-menuView : Model -> Html LogFlix.Msg
+menuView : Model -> Html BackFlix.Msg
 menuView model =
     menuViewCreator
-        LogFlix.MenuMsg
+        BackFlix.MenuMsg
         model
         model.menu
         MenuMsg
         menu
 
 
-menuFor : Menu -> Html.Attribute LogFlix.Msg
+menuFor : Menu -> Html.Attribute BackFlix.Msg
 menuFor context =
-    menuForCreator LogFlix.MenuMsg MenuMsg context
+    menuForCreator BackFlix.MenuMsg MenuMsg context
 
 
 menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))

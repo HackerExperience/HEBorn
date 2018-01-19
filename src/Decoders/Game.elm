@@ -76,7 +76,7 @@ bootstrap game =
         |> required "storyline" Decoders.Storyline.story
         |> hardcoded game.web
         |> hardcoded game.flags
-        |> hardcoded game.backfeed
+        |> hardcoded game.backflix
         |> map (,)
         |> andThen (\done -> map done <| servers)
         |> map (uncurry insertServers)

@@ -14,7 +14,6 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Game.Servers.Shared exposing (CId)
 import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
-import Decoders.Processes
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances exposing (BankLoginRequest)

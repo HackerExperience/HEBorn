@@ -4,6 +4,7 @@ import Time exposing (Time)
 import Core.Flags as Core
 import Game.Account.Config as Account
 import Game.Account.Models as Account
+import Game.BackFlix.Config as BackFlix
 import Game.Servers.Config as Servers
 import Game.Servers.Models as Servers
 import Game.Inventory.Config as Inventory
@@ -66,3 +67,8 @@ inventoryConfig flags config =
     { flags = flags
     , toMsg = InventoryMsg >> config.toMsg
     }
+
+
+backFlixConfig : Config msg -> BackFlix.Config msg
+backFlixConfig config =
+    { toMsg = BackFlixMsg >> config.toMsg }

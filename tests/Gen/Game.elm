@@ -6,7 +6,7 @@ import Game.Account.Models as Account
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
-import Game.LogStream.Models as LogStream
+import Game.BackFlix.Models as BackFlix
 import Game.Models exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
@@ -45,8 +45,8 @@ genModel =
                 Story.initialModel
             , web =
                 Web.initialModel
-            , backfeed =
-                LogStream.initialModel
+            , backflix =
+                BackFlix.initialModel
             , inventory =
                 Inventory.initialModel
             , flags =

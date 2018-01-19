@@ -1,9 +1,9 @@
-module Apps.LogFlix.Menu.Update exposing (update)
+module Apps.BackFlix.Menu.Update exposing (update)
 
 import ContextMenu exposing (ContextMenu)
 import Game.Data as Game
-import Apps.LogFlix.Menu.Models exposing (Model, Menu)
-import Apps.LogFlix.Menu.Messages exposing (Msg(..))
+import Apps.BackFlix.Menu.Models exposing (Model, Menu)
+import Apps.BackFlix.Menu.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 

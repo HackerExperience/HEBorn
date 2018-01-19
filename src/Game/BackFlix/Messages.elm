@@ -1,7 +1,7 @@
-module Game.LogStream.Messages exposing (..)
+module Game.BackFlix.Messages exposing (..)
 
 import Requests.Types exposing (ResponseType)
-import Game.LogStream.Models exposing (..)
+import Game.BackFlix.Models exposing (..)
 
 
 type Msg

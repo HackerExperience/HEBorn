@@ -19,7 +19,7 @@ import Apps.LanViewer.Subscriptions as LanViewer
 import Apps.Email.Subscriptions as Email
 import Apps.Bug.Subscriptions as Bug
 import Apps.Calculator.Subscriptions as Calculator
-import Apps.LogFlix.Subscriptions as LogFlix
+import Apps.BackFlix.Subscriptions as BackFlix
 import Apps.FloatingHeads.Subscriptions as FloatingHeads
 
 
@@ -90,9 +90,9 @@ subscriptions data model =
             Calculator.subscriptions data model
                 |> Sub.map CalculatorMsg
 
-        LogFlixModel model ->
-            LogFlix.subscriptions data model
-                |> Sub.map LogFlixMsg
+        BackFlixModel model ->
+            BackFlix.subscriptions data model
+                |> Sub.map BackFlixMsg
 
         FloatingHeadsModel model ->
             FloatingHeads.subscriptions data model

@@ -16,7 +16,7 @@ import Apps.LanViewer.Messages as LanViewer
 import Apps.Email.Messages as Email
 import Apps.Bug.Messages as Bug
 import Apps.Calculator.Messages as Calculator
-import Apps.LogFlix.Messages as LogFlix
+import Apps.BackFlix.Messages as BackFlix
 import Apps.FloatingHeads.Messages as FloatingHeads
 
 
@@ -37,5 +37,5 @@ type Msg
     | EmailMsg Email.Msg
     | BugMsg Bug.Msg
     | CalculatorMsg Calculator.Msg
-    | LogFlixMsg LogFlix.Msg
+    | BackFlixMsg BackFlix.Msg
     | FloatingHeadsMsg FloatingHeads.Msg

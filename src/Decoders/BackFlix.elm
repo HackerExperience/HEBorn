@@ -1,4 +1,4 @@
-module Decoders.LogStream exposing (..)
+module Decoders.BackFlix exposing (..)
 
 import Json.Decode as Decode
     exposing
@@ -12,7 +12,7 @@ import Json.Decode as Decode
         , andThen
         )
 import Json.Decode.Pipeline exposing (decode, required, custom)
-import Game.LogStream.Models exposing (..)
+import Game.BackFlix.Models exposing (..)
 
 
 log : Decoder Log
