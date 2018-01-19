@@ -21,6 +21,7 @@ module Game.Models
         , getActiveServer
         , setActiveServer
         , getBounces
+        , fallToGateway
         )
 
 import Dict
@@ -172,6 +173,24 @@ unsafeGetGateway model =
             "Player has no active gateway! [2]"
                 |> Error.astralProj
                 |> uncurry Native.Panic.crash
+
+
+fallToGateway : Model -> (Bool -> Account.Model) -> Account.Model
+fallToGateway model callback =
+    let
+        servers =
+            getServers model
+
+        endpoint =
+            model_
+                |> Account.getGateway
+                |> Maybe.andThen (flip Servers.get servers)
+                |> Maybe.andThen Servers.getEndpointCId
+
+        model_ =
+            getAccount model
+    in
+        callback <| Account.getContext model_ == Endpoint && endpoint == Nothing
 
 
 setGateway : Servers.Server -> Model -> Model

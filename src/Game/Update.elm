@@ -104,11 +104,14 @@ onAccount config msg model =
         lastTick =
             Meta.getLastTick (getMeta model)
 
+        fallbackGW =
+            fallToGateway model
+
         config_ =
-            accountConfig lastTick (getFlags model) config
+            accountConfig fallbackGW lastTick (getFlags model) config
 
         ( account, cmd, dispatch ) =
-            Account.update config_ model msg <| getAccount model
+            Account.update config_ msg <| getAccount model
 
         model_ =
             { model | account = account }
