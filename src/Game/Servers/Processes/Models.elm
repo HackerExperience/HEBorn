@@ -77,12 +77,15 @@ type alias FullAccess =
     { origin : Network.IP
     , priority : Priority
     , usage : ResourcesUsage
-    , connection : Maybe ConnectionID
+    , source_connection : Maybe ConnectionID
+    , target_connection : Maybe ConnectionID
+    , source_file : Maybe ProcessFile
     }
 
 
 type alias PartialAccess =
-    { connection_id : Maybe ConnectionID
+    { source_connection_id : Maybe ConnectionID
+    , target_connection_id : Maybe ConnectionID
     }
 
 
@@ -277,7 +280,9 @@ newOptimistic type_ nip target file =
                 , down = ( 0.0, 0 )
                 , up = ( 0.0, 0 )
                 }
-            , connection = Nothing
+            , source_connection = Nothing
+            , target_connection = Nothing
+            , source_file = Nothing
             }
     , state = Starting
     , progress = Nothing
@@ -411,10 +416,10 @@ getConnectionId : Process -> Maybe ConnectionID
 getConnectionId { access } =
     case access of
         Full data ->
-            data.connection
+            data.source_connection
 
-        Partial { connection_id } ->
-            connection_id
+        Partial { source_connection_id } ->
+            source_connection_id
 
 
 getName : Process -> String
