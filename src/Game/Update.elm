@@ -120,51 +120,71 @@ onAccount config msg model =
 
 
 onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg
-onMeta config msg game =
-    Update.child
-        { get = .meta
-        , set = (\meta game -> { game | meta = meta })
-        , toMsg = MetaMsg >> config.toMsg
-        , update = (Meta.update game)
-        }
-        msg
-        game
+onMeta config msg model =
+    let
+        config_ =
+            metaConfig config
+
+        ( meta, cmd, dispatch ) =
+            Meta.update config_ msg <| getMeta model
+
+        model_ =
+            setMeta meta model
+    in
+        ( model_, cmd, dispatch )
 
 
 onStory : Config msg -> Story.Msg -> Model -> UpdateResponse msg
-onStory config msg game =
-    Update.child
-        { get = .story
-        , set = (\story game -> { game | story = story })
-        , toMsg = StoryMsg >> config.toMsg
-        , update = (Story.update game)
-        }
-        msg
-        game
+onStory config msg model =
+    let
+        accountId =
+            model
+                |> getAccount
+                |> Account.getId
+
+        config_ =
+            storyConfig accountId (getFlags model) config
+
+        ( story, cmd, dispatch ) =
+            Story.update config_ msg <| getStory model
+
+        model_ =
+            setStory story model
+    in
+        ( model_, cmd, dispatch )
 
 
 onInventory : Config msg -> Inventory.Msg -> Model -> UpdateResponse msg
-onInventory config msg game =
-    Update.child
-        { get = .inventory
-        , set = (\inventory game -> { game | inventory = inventory })
-        , toMsg = InventoryMsg >> config.toMsg
-        , update = Inventory.update
-        }
-        msg
-        game
+onInventory config msg model =
+    let
+        config_ =
+            inventoryConfig (getFlags model) config
+
+        ( inventory, cmd, dispatch ) =
+            Inventory.update config_ msg <| getInventory model
+
+        model_ =
+            setInventory inventory model
+    in
+        ( model_, cmd, dispatch )
 
 
 onWeb : Config msg -> Web.Msg -> Model -> UpdateResponse msg
-onWeb config msg game =
-    Update.child
-        { get = .web
-        , set = (\web game -> { game | web = web })
-        , toMsg = WebMsg >> config.toMsg
-        , update = (Web.update game)
-        }
-        msg
-        game
+onWeb config msg model =
+    let
+        servers =
+            getServers model
+
+        config_ =
+            webConfig (getFlags model) servers config
+
+        ( web, cmd, dispatch ) =
+            Web.update config_ msg <| getWeb model
+
+        model_ =
+            setWeb web model
+    in
+        ( model_, cmd, dispatch )
 
 
 

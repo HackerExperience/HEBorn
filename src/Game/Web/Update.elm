@@ -5,7 +5,7 @@ import Core.Dispatch.Websocket as Ws
 import Core.Dispatch.Servers as Servers
 import Core.Error as Error
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
-import Game.Models as Game
+import Game.Web.Config exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)
 import Game.Web.Requests as Requests
@@ -18,46 +18,59 @@ import Game.Meta.Types.Network as Network
 import Game.Meta.Types.Requester exposing (Requester)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Login nip ip password data ->
-            onLogin game nip ip password data model
+            onLogin config nip ip password data model
 
         Request data ->
-            updateRequest game (Requests.receive data) model
+            updateRequest config (Requests.receive data) model
 
         FetchUrl url networkId cid requester ->
-            let
-                cmd =
-                    DNS.request url networkId cid requester game
-            in
-                ( model, cmd, Dispatch.none )
+            onFetchUrl config url networkId cid requester model
 
         JoinedServer cid ->
-            onJoinedServer game cid model
+            onJoinedServer config cid model
 
         HandleJoinServerFailed cid ->
-            handleJoinFailed game cid model
+            handleJoinFailed config cid model
 
 
 
 -- internals
 
 
+onFetchUrl :
+    Config msg
+    -> Url
+    -> Network.ID
+    -> Servers.CId
+    -> Requester
+    -> Model
+    -> UpdateResponse msg
+onFetchUrl config url networkId cid requester model =
+    let
+        cmd =
+            DNS.request url networkId cid requester config
+                |> Cmd.map config.toMsg
+    in
+        ( model, cmd, Dispatch.none )
+
+
 updateRequest :
-    Game.Model
+    Config msg
     -> Maybe Requests.Response
     -> Model
-    -> UpdateResponse
-updateRequest game response model =
+    -> UpdateResponse msg
+updateRequest config response model =
     case response of
         Just (Requests.DNS requester response) ->
-            onDNS game requester response model
+            onDNS config requester response model
 
         Nothing ->
             ( model, Cmd.none, Dispatch.none )
@@ -65,8 +78,8 @@ updateRequest game response model =
 
 {-| Reports back the site information to the page.
 -}
-onDNS : Game.Model -> Requester -> Response -> Model -> UpdateResponse
-onDNS game requester response model =
+onDNS : Config msg -> Requester -> Response -> Model -> UpdateResponse msg
+onDNS config requester response model =
     let
         dispatch =
             response
@@ -79,14 +92,14 @@ onDNS game requester response model =
 {-| Stores page reference and tries to login on server.
 -}
 onLogin :
-    Game.Model
+    Config msg
     -> Network.NIP
     -> Network.IP
     -> String
     -> Requester
     -> Model
-    -> UpdateResponse
-onLogin game nip remoteIp password requester model =
+    -> UpdateResponse msg
+onLogin config nip remoteIp password requester model =
     let
         gatewayIp =
             Network.getIp nip
@@ -115,11 +128,11 @@ onLogin game nip remoteIp password requester model =
 
 {-| Sets endpoint
 -}
-onJoinedServer : Game.Model -> Servers.CId -> Model -> UpdateResponse
-onJoinedServer game cid model =
+onJoinedServer : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+onJoinedServer config cid model =
     let
         servers =
-            Game.getServers game
+            config.servers
 
         nip =
             case (Servers.get cid servers) of
@@ -151,11 +164,11 @@ onJoinedServer game cid model =
 
 {-| Reports failure back to the loading page.
 -}
-handleJoinFailed : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleJoinFailed game cid model =
+handleJoinFailed : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+handleJoinFailed config cid model =
     let
         nip =
-            case Servers.get cid (Game.getServers game) of
+            case Servers.get cid config.servers of
                 Just server ->
                     Servers.getActiveNIP server
 
