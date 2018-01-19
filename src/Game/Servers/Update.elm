@@ -160,7 +160,7 @@ updateServer config game cid model msg server =
             updateServerRequest config (serverReceive data) server
 
         NotificationsMsg msg ->
-            onNotificationsMsg config game cid msg server
+            onNotificationsMsg config cid msg server
 
 
 handleSetBounce :
@@ -311,18 +311,22 @@ onTunnelsMsg config game cid msg server =
 
 onNotificationsMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> Notifications.Msg
     -> Server
     -> ServerUpdateResponse msg
-onNotificationsMsg config game cid =
-    Update.child
-        { get = .notifications
-        , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = NotificationsMsg >> ServerMsg cid >> config.toMsg
-        , update = (Notifications.update game (Notifications.Server cid))
-        }
+onNotificationsMsg config cid msg server =
+    let
+        config_ =
+            notificationsConfig cid config
+
+        ( notifications, cmd, dispatch ) =
+            Notifications.update config_ (Notifications.Server cid) msg <| getNotifications server
+
+        model_ =
+            setNotifications notifications server
+    in
+        ( model_, cmd, dispatch )
 
 
 updateServerRequest :

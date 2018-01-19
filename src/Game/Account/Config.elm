@@ -6,12 +6,14 @@ import Game.Account.Models exposing (..)
 import Game.Account.Bounces.Config as Bounces
 import Game.Account.Finances.Config as Finances
 import Game.Account.Database.Config as Database
+import Game.Notifications.Config as Notifications
 import Game.Account.Messages exposing (..)
 
 
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
+    , lastTick : Time
     }
 
 
@@ -34,4 +36,12 @@ bouncesConfig : Config msg -> Bounces.Config msg
 bouncesConfig config =
     { flags = config.flags
     , toMsg = BouncesMsg >> config.toMsg
+    }
+
+
+notificationsConfig : Config msg -> Notifications.Config msg
+notificationsConfig config =
+    { flags = config.flags
+    , toMsg = NotificationsMsg >> config.toMsg
+    , lastTick = config.lastTick
     }

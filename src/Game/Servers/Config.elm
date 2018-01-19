@@ -8,6 +8,7 @@ import Game.Servers.Logs.Config as Logs
 import Game.Servers.Filesystem.Config as Filesystem
 import Game.Servers.Tunnels.Config as Tunnels
 import Game.Servers.Hardware.Config as Hardware
+import Game.Notifications.Config as Notifications
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Shared exposing (..)
 
@@ -58,4 +59,12 @@ hardwareConfig cid nip config =
     { flags = config.flags
     , toMsg = HardwareMsg >> ServerMsg cid >> config.toMsg
     , cid = cid
+    }
+
+
+notificationsConfig : CId -> Config msg -> Notifications.Config msg
+notificationsConfig cid config =
+    { flags = config.flags
+    , toMsg = NotificationsMsg >> ServerMsg cid >> config.toMsg
+    , lastTick = config.lastTick
     }

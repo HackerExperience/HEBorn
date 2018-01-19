@@ -171,3 +171,13 @@ setInTutorial inTutorial model =
 getInTutorial : Model -> Bool
 getInTutorial =
     .inTutorial
+
+
+getNotifications : Model -> Notifications.Model
+getNotifications =
+    .notifications
+
+
+setNotifications : Notifications.Model -> Model -> Model
+setNotifications notifications model =
+    { model | notifications = notifications }

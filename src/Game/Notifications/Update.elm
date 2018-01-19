@@ -5,28 +5,27 @@ import Time exposing (Time)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Notifications as Notifications
-import Game.Models as Game
+import Game.Notifications.Config exposing (..)
 import Game.Notifications.Models exposing (..)
 import Game.Notifications.Source exposing (..)
 import Game.Notifications.Messages exposing (..)
-import Game.Meta.Models as Meta
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Model -> Source -> Msg -> Model -> UpdateResponse
-update game source msg model =
+update : Config msg -> Source -> Msg -> Model -> UpdateResponse msg
+update config source msg model =
     case msg of
         HandleReadAll ->
             handleReadAll model
 
         HandleInsert maybeTime content ->
-            handleInsert game source maybeTime content model
+            handleInsert config source maybeTime content model
 
 
-handleReadAll : Model -> UpdateResponse
+handleReadAll : Model -> UpdateResponse msg
 handleReadAll model =
     model
         |> Dict.map (\k v -> { v | isRead = True })
@@ -34,13 +33,13 @@ handleReadAll model =
 
 
 handleInsert :
-    Game.Model
+    Config msg
     -> Source
     -> Maybe Time
     -> Content
     -> Model
-    -> UpdateResponse
-handleInsert game source maybeTime content model =
+    -> UpdateResponse msg
+handleInsert config source maybeTime content model =
     let
         time =
             case maybeTime of
@@ -48,9 +47,7 @@ handleInsert game source maybeTime content model =
                     time
 
                 Nothing ->
-                    game
-                        |> Game.getMeta
-                        |> Meta.getLastTick
+                    config.lastTick
 
         model_ =
             insert time (Notification content False) model
