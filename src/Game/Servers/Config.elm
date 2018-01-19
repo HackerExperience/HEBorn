@@ -3,10 +3,11 @@ module Game.Servers.Config exposing (..)
 import Time exposing (Time)
 import Core.Flags as Core
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Servers.Logs.Config as Logs
 import Game.Servers.Processes.Config as Processes
+import Game.Servers.Logs.Config as Logs
 import Game.Servers.Filesystem.Config as Filesystem
 import Game.Servers.Tunnels.Config as Tunnels
+import Game.Servers.Hardware.Config as Hardware
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Shared exposing (..)
 
@@ -48,5 +49,13 @@ tunnelsConfig : CId -> Config msg -> Tunnels.Config msg
 tunnelsConfig cid config =
     { flags = config.flags
     , toMsg = TunnelsMsg >> ServerMsg cid >> config.toMsg
+    , cid = cid
+    }
+
+
+hardwareConfig : CId -> NIP -> Config msg -> Hardware.Config msg
+hardwareConfig cid nip config =
+    { flags = config.flags
+    , toMsg = HardwareMsg >> ServerMsg cid >> config.toMsg
     , cid = cid
     }

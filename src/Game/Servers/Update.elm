@@ -151,7 +151,7 @@ updateServer config game cid model msg server =
             onProcessesMsg config cid msg server
 
         HardwareMsg msg ->
-            onHardwareMsg config game cid msg server
+            onHardwareMsg config cid msg server
 
         TunnelsMsg msg ->
             onTunnelsMsg config game cid msg server
@@ -267,18 +267,25 @@ onProcessesMsg config cid msg server =
 
 onHardwareMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> Hardware.Msg
     -> Server
     -> ServerUpdateResponse msg
-onHardwareMsg config game cid =
-    Update.child
-        { get = .hardware
-        , set = (\hardware model -> { model | hardware = hardware })
-        , toMsg = HardwareMsg >> ServerMsg cid >> config.toMsg
-        , update = (Hardware.update game cid)
-        }
+onHardwareMsg config cid msg server =
+    let
+        nip =
+            getActiveNIP server
+
+        config_ =
+            hardwareConfig cid nip config
+
+        ( hardware, cmd, dispatch ) =
+            Hardware.update config_ msg <| getHardware server
+
+        server_ =
+            setHardware hardware server
+    in
+        ( server_, cmd, dispatch )
 
 
 onTunnelsMsg :
