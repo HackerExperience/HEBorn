@@ -9,7 +9,7 @@ import Json.Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Game.Servers.Shared exposing (CId)
-import Requests.Types exposing (ConfigSource, Code(..), ResponseType)
+import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Decoders.Processes
 import Game.Models as Game
 import Game.Account.Models as Account
@@ -29,7 +29,7 @@ request :
     -> Requester
     -> Account.ID
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request { fromBank, fromAcc, toBank, toAcc, password, value } requester accountId cid data =
     let

@@ -189,16 +189,18 @@ viewTaskRow data now (( _, process ) as entry) =
 
 viewTasksTable : GameData.Data -> Entries -> Time -> Html Msg
 viewTasksTable data entries now =
-    div [ class [ TaskTable ] ]
-        ([ div [ class [ EntryDivision ] ]
-            -- TODO: Hide when too small (responsive design)
-            [ div [] [ text "Process" ]
-            , div [] [ text "ETA" ]
-            , div [] [ text "Resources" ]
-            ]
-         ]
-            ++ (List.map (viewTaskRow data now) entries)
-        )
+    let
+        first =
+            div [ class [ EntryDivision ] ]
+                [ div [] [ text "Process" ]
+                , div [] [ text "ETA" ]
+                , div [] [ text "Resources" ]
+                ]
+    in
+        entries
+            |> List.map (viewTaskRow data now)
+            |> (::) first
+            |> div [ class [ TaskTable ] ]
 
 
 viewGraphUsage : String -> String -> List Float -> Html Msg

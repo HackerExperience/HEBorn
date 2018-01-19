@@ -4,7 +4,6 @@ import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Data as Game
-import Game.Models
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)

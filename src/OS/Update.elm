@@ -5,6 +5,7 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import OS.Header.Messages as Header
 import OS.Header.Update as Header
+import OS.Config exposing (..)
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
 import OS.Menu.Messages as Menu
@@ -16,24 +17,24 @@ import OS.Toasts.Messages as Toasts
 import OS.Toasts.Update as Toasts
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Game.Data -> Msg -> Model -> UpdateResponse msg
+update config data msg model =
     case msg of
         SessionManagerMsg msg ->
-            onSessionManagerMsg data msg model
+            onSessionManagerMsg config data msg model
 
         HeaderMsg msg ->
-            onHeaderMsg data msg model
+            onHeaderMsg config data msg model
 
         ToastsMsg msg ->
-            onToastsMsg data msg model
+            onToastsMsg config data msg model
 
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            Menu.actionHandler config data action model
 
         MenuMsg msg ->
             onMenuMsg data msg model
@@ -44,11 +45,12 @@ update data msg model =
 
 
 onSessionManagerMsg :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> SessionManager.Msg
     -> Model
-    -> UpdateResponse
-onSessionManagerMsg data msg model =
+    -> UpdateResponse msg
+onSessionManagerMsg config data msg model =
     Update.child
         { get = .session
         , set = (\session model -> { model | session = session })
@@ -60,11 +62,12 @@ onSessionManagerMsg data msg model =
 
 
 onHeaderMsg :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> Header.Msg
     -> Model
-    -> UpdateResponse
-onHeaderMsg data msg model =
+    -> UpdateResponse msg
+onHeaderMsg config data msg model =
     Update.child
         { get = .header
         , set = (\header model -> { model | header = header })
@@ -75,8 +78,8 @@ onHeaderMsg data msg model =
         model
 
 
-onToastsMsg : Game.Data -> Toasts.Msg -> Model -> UpdateResponse
-onToastsMsg data msg model =
+onToastsMsg : Config msg -> Game.Data -> Toasts.Msg -> Model -> UpdateResponse msg
+onToastsMsg config data msg model =
     Update.child
         { get = .toasts
         , set = (\toasts model -> { model | toasts = toasts })
@@ -87,8 +90,8 @@ onToastsMsg data msg model =
         model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Game.Data -> Menu.Msg -> Model -> UpdateResponse msg
+onMenuMsg config data msg model =
     let
         ( menu_, menu_cmd, dispatch_ ) =
             Menu.update data msg model.menu

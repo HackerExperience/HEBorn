@@ -1,7 +1,7 @@
 module Game.Servers.Filesystem.Update exposing (update)
 
 import Utils.Update as Update
-import Game.Models as Game
+import Game.Servers.Filesystem.Config exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Requests exposing (..)
@@ -9,56 +9,55 @@ import Game.Servers.Filesystem.Requests.Delete as Delete
 import Game.Servers.Filesystem.Requests.Move as Move
 import Game.Servers.Filesystem.Requests.Rename as Rename
 import Game.Servers.Filesystem.Requests.Create as Create
-import Game.Servers.Shared exposing (CId)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
 update :
-    Game.Model
-    -> CId
+    Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
-update game cid msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleDelete fileId ->
-            handleDelete game cid fileId model
+            handleDelete config fileId model
 
         HandleMove fileId newLocation ->
-            handleMove game cid fileId newLocation model
+            handleMove config fileId newLocation model
 
         HandleRename fileId newBaseName ->
-            handleRename game cid fileId newBaseName model
+            handleRename config fileId newBaseName model
 
         HandleNewTextFile path name ->
-            handleNewTextFile game cid path name model
+            handleNewTextFile config path name model
 
         HandleNewDir path name ->
-            handleNewDir game cid path name model
+            handleNewDir config path name model
 
         HandleAdded id file ->
             onHandleAdded id file model
 
         Request request ->
-            onRequest game cid (receive request) model
+            onRequest config (receive request) model
 
 
 
 -- internals
 
 
-handleDelete : Game.Model -> CId -> Id -> Model -> UpdateResponse
-handleDelete game cid id model =
+handleDelete : Config msg -> Id -> Model -> UpdateResponse msg
+handleDelete config id model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( deleteFile id model
-                    , Delete.request id cid game
+                    , Delete.request id config.cid config
+                        |> Cmd.map config.toMsg
                     )
 
                 Nothing ->
@@ -68,19 +67,19 @@ handleDelete game cid id model =
 
 
 handleMove :
-    Game.Model
-    -> CId
+    Config msg
     -> Id
     -> Path
     -> Model
-    -> UpdateResponse
-handleMove game cid id newPath model =
+    -> UpdateResponse msg
+handleMove config id newPath model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( moveFile id newPath model
-                    , Move.request newPath id cid game
+                    , Move.request newPath id config.cid config
+                        |> Cmd.map config.toMsg
                     )
 
                 Nothing ->
@@ -90,19 +89,19 @@ handleMove game cid id newPath model =
 
 
 handleRename :
-    Game.Model
-    -> CId
+    Config msg
     -> Id
     -> Name
     -> Model
-    -> UpdateResponse
-handleRename game cid id name model =
+    -> UpdateResponse msg
+handleRename config id name model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( renameFile id name model
-                    , Rename.request name id cid game
+                    , Rename.request name id config.cid config
+                        |> Cmd.map config.toMsg
                     )
 
                 Nothing ->
@@ -112,13 +111,12 @@ handleRename game cid id name model =
 
 
 handleNewTextFile :
-    Game.Model
-    -> CId
+    Config msg
     -> Path
     -> Name
     -> Model
-    -> UpdateResponse
-handleNewTextFile game cid path name model =
+    -> UpdateResponse msg
+handleNewTextFile config path name model =
     let
         fullpath =
             appendPath name path
@@ -131,7 +129,8 @@ handleNewTextFile game cid path name model =
     in
         if model /= model_ then
             ( model_
-            , Create.request "txt" name fullpath cid game
+            , Create.request "txt" name fullpath config.cid config
+                |> Cmd.map config.toMsg
             , Dispatch.none
             )
         else
@@ -139,27 +138,27 @@ handleNewTextFile game cid path name model =
 
 
 handleNewDir :
-    Game.Model
-    -> CId
+    Config msg
     -> Path
     -> Name
     -> Model
-    -> UpdateResponse
-handleNewDir game cid path name model =
+    -> UpdateResponse msg
+handleNewDir config path name model =
     let
         model_ =
             insertFolder path name model
     in
         if model /= model_ then
             ( model_
-            , Create.request "/" name path cid game
+            , Create.request "/" name path config.cid config
+                |> Cmd.map config.toMsg
             , Dispatch.none
             )
         else
             Update.fromModel model
 
 
-onHandleAdded : Id -> File -> Model -> UpdateResponse
+onHandleAdded : Id -> File -> Model -> UpdateResponse msg
 onHandleAdded id file model =
     ( insertFile id file model
     , Cmd.none
@@ -168,25 +167,23 @@ onHandleAdded id file model =
 
 
 onRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> Maybe Response
     -> Model
-    -> UpdateResponse
-onRequest cid game response model =
+    -> UpdateResponse msg
+onRequest config response model =
     case response of
         Just response ->
-            updateRequest cid game response model
+            updateRequest config response model
 
         Nothing ->
             Update.fromModel model
 
 
 updateRequest :
-    Game.Model
-    -> CId
+    Config msg
     -> Response
     -> Model
-    -> UpdateResponse
-updateRequest game cid data model =
+    -> UpdateResponse msg
+updateRequest config data model =
     Update.fromModel model

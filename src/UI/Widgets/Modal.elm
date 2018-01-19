@@ -9,18 +9,12 @@ module UI.Widgets.Modal
 
 import Dict exposing (Dict)
 import Html exposing (Html, Attribute, node, div, button, text, h3, span)
-import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Game.Servers.Models exposing (Storages)
 import OS.SessionManager.WindowManager.Resources exposing (..)
 
 
 -- example usage: `modal "Are you sure?" []`
-
-
-wmClass : List class -> Attribute msg
-wmClass =
-    .class <| Html.CssHelpers.withNamespace prefix
 
 
 modalPickStorage : Storages -> (Maybe String -> msg) -> Html msg

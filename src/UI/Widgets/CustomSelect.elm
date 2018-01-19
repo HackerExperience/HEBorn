@@ -26,12 +26,12 @@ customSelect attrs ( mouseEnter, mouseLeave ) msg open render opened active list
 
         customNode =
             node selectorNode <|
-                (++) attrs
-                    [ onMouseEnter mouseEnter
-                    , onMouseLeave mouseLeave
-                    , onClickMe open
-                    , boolAttr openAttrTag opened
-                    ]
+                attrs
+                    ++ [ onMouseEnter mouseEnter
+                       , onMouseLeave mouseLeave
+                       , onClickMe open
+                       , boolAttr openAttrTag opened
+                       ]
     in
         case render True active of
             Just activeNode ->

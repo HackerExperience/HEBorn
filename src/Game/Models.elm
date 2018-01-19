@@ -12,7 +12,9 @@ module Game.Models
         , setMeta
         , getStory
         , setStory
-        , getConfig
+        , getWeb
+        , setWeb
+        , getFlags
         , unsafeGetGateway
         , getGateway
         , setGateway
@@ -21,6 +23,7 @@ module Game.Models
         , getActiveServer
         , setActiveServer
         , getBounces
+        , fallToGateway
         )
 
 import Dict
@@ -35,7 +38,7 @@ import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
 import Game.Web.Models as Web
 import Game.LogStream.Models as LogStream
-import Core.Config exposing (Config)
+import Core.Flags exposing (Flags)
 
 
 type alias Model =
@@ -45,7 +48,7 @@ type alias Model =
     , meta : Meta.Model
     , story : Story.Model
     , web : Web.Model
-    , config : Config
+    , flags : Flags
     , backfeed : LogStream.Model
     }
 
@@ -58,9 +61,9 @@ initialModel :
     Account.ID
     -> Account.Username
     -> Account.Token
-    -> Config
+    -> Flags
     -> Model
-initialModel id username token config =
+initialModel id username token flags =
     { account = Account.initialModel id username token
     , inventory = Inventory.initialModel
     , servers = Servers.initialModel
@@ -68,7 +71,7 @@ initialModel id username token config =
     , story = Story.initialModel
     , web = Web.initialModel
     , backfeed = LogStream.initialModel
-    , config = config
+    , flags = flags
     }
 
 
@@ -136,9 +139,9 @@ setWeb web model =
     { model | web = web }
 
 
-getConfig : Model -> Config
-getConfig =
-    .config
+getFlags : Model -> Flags
+getFlags =
+    .flags
 
 
 
@@ -172,6 +175,24 @@ unsafeGetGateway model =
             "Player has no active gateway! [2]"
                 |> Error.astralProj
                 |> uncurry Native.Panic.crash
+
+
+fallToGateway : Model -> (Bool -> Account.Model) -> Account.Model
+fallToGateway model callback =
+    let
+        servers =
+            getServers model
+
+        endpoint =
+            model_
+                |> Account.getGateway
+                |> Maybe.andThen (flip Servers.get servers)
+                |> Maybe.andThen Servers.getEndpointCId
+
+        model_ =
+            getAccount model
+    in
+        callback <| Account.getContext model_ == Endpoint && endpoint == Nothing
 
 
 setGateway : Servers.Server -> Model -> Model

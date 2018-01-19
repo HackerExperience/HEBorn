@@ -2,6 +2,7 @@ module OS.SessionManager.Update exposing (update)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
+import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
@@ -12,7 +13,6 @@ import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.WindowManager.Messages as WM
 import Game.Meta.Types.Context exposing (Context(..))
-import OS.SessionManager.Types exposing (..)
 import Game.Data as Game
 import Game.Models
 import Game.Account.Models as Account
@@ -25,11 +25,12 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse
-update data msg model =
+update config data msg model =
     let
         id =
             toSessionID data
@@ -39,28 +40,29 @@ update data msg model =
     in
         case msg of
             HandleNewApp context params app ->
-                handleNewApp data id context params app model_
+                handleNewApp config data id context params app model_
 
             HandleOpenApp context params ->
-                handleOpenApp data id context params model_
+                handleOpenApp config data id context params model_
 
             WindowManagerMsg id msg ->
-                onWindowManagerMsg data id msg model_
+                onWindowManagerMsg config data id msg model_
 
             DockMsg msg ->
-                Dock.update data msg model_
+                Dock.update config data msg model_
 
             AppMsg ( sessionId, windowId ) context msg ->
-                onWindowManagerMsg data
+                onWindowManagerMsg config
+                    data
                     sessionId
                     (WM.AppMsg (WM.One context) windowId msg)
                     model
 
             EveryAppMsg msgs ->
-                onEveryAppMsg data msgs model_
+                onEveryAppMsg config data msgs model_
 
             TargetedAppMsg targetCid targetContext msgs ->
-                onTargetedAppMsg data targetCid targetContext msgs model_
+                onTargetedAppMsg config data targetCid targetContext msgs model_
 
 
 
@@ -72,14 +74,15 @@ type alias UpdateResponse =
 
 
 handleNewApp :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> ID
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> Apps.App
     -> Model
     -> UpdateResponse
-handleNewApp data id context params app model =
+handleNewApp config data id context params app model =
     let
         ip =
             data
@@ -93,13 +96,14 @@ handleNewApp data id context params app model =
 
 
 handleOpenApp :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> ID
     -> Maybe Context
     -> Apps.AppParams
     -> Model
     -> UpdateResponse
-handleOpenApp data id maybeContext params model =
+handleOpenApp config data id maybeContext params model =
     let
         app =
             Apps.paramsToApp params
@@ -133,12 +137,13 @@ handleOpenApp data id maybeContext params model =
 
 
 onWindowManagerMsg :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> ID
     -> WM.Msg
     -> Model
     -> UpdateResponse
-onWindowManagerMsg data id msg model =
+onWindowManagerMsg config data id msg model =
     let
         wm =
             case get id (ensureSession id model) of
@@ -163,11 +168,12 @@ onWindowManagerMsg data id msg model =
 {-| Sends messages to every opened app on every session
 -}
 onEveryAppMsg :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> List Apps.Msg
     -> Model
     -> UpdateResponse
-onEveryAppMsg data appMsgs model =
+onEveryAppMsg config data appMsgs model =
     let
         toWmMsg =
             WM.EveryAppMsg WM.All
@@ -183,13 +189,14 @@ onEveryAppMsg data appMsgs model =
 {-| Sends messages to apps inside related sessions
 -}
 onTargetedAppMsg :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> Servers.CId
     -> WM.TargetContext
     -> List Apps.Msg
     -> Model
     -> UpdateResponse
-onTargetedAppMsg data targetCid targetContext appMsgs model =
+onTargetedAppMsg config data targetCid targetContext appMsgs model =
     let
         servers =
             data
@@ -259,14 +266,15 @@ findApp app wm =
 {-| A reduce helper that routes messages to apps.
 -}
 reduceMessages :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> (Apps.Msg -> WM.Msg)
     -> ID
     -> WM.Model
     -> Apps.Msg
     -> ( Model, List (Cmd WM.Msg), List Dispatch )
     -> ( Model, List (Cmd WM.Msg), List Dispatch )
-reduceMessages data toWmMsg sid wm msg ( model, cmds, disps ) =
+reduceMessages config data toWmMsg sid wm msg ( model, cmds, disps ) =
     let
         msg_ =
             toWmMsg msg
@@ -289,14 +297,15 @@ reduceMessages data toWmMsg sid wm msg ( model, cmds, disps ) =
 {-| A reduce helper that routes messages to sessions.
 -}
 reduceSessions :
-    Game.Data
+    Config msg
+    -> Game.Data
     -> List Apps.Msg
     -> (Apps.Msg -> WM.Msg)
     -> ID
     -> WM.Model
     -> ( Model, Cmd Msg, Dispatch )
     -> ( Model, Cmd Msg, Dispatch )
-reduceSessions data appMsgs toWmMsg sid wm ( model, cmd, disp ) =
+reduceSessions config data appMsgs toWmMsg sid wm ( model, cmd, disp ) =
     let
         ( model_, cmds, disps ) =
             List.foldl (reduceMessages data toWmMsg sid wm)

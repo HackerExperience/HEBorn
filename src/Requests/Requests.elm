@@ -29,7 +29,7 @@ request :
     Topic
     -> (ResponseType -> msg)
     -> Encode.Value
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd msg
 request topic msg data source =
     case topic of
@@ -37,14 +37,14 @@ request topic msg data source =
             WebsocketDriver.send
                 (okWs msg)
                 (errorWs msg)
-                source.config.apiWsUrl
+                source.flags.apiWsUrl
                 (WebsocketDriver.getAddress channel)
                 path
                 data
 
         HttpTopic path ->
             HttpDriver.send (genericHttp msg)
-                source.config.apiHttpUrl
+                source.flags.apiHttpUrl
                 path
                 (Encode.encode 0 data)
 

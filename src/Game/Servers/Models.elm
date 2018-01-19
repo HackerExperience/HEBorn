@@ -1,8 +1,6 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
-import Native.Panic
-import Core.Error as Error
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs
@@ -439,6 +437,26 @@ getHardware server =
     server.hardware
 
 
+setHardware : Hardware.Model -> Server -> Server
+setHardware hardware server =
+    { server | hardware = hardware }
+
+
 getNotifications : Server -> Notifications.Model
 getNotifications =
     .notifications
+
+
+setNotifications : Notifications.Model -> Server -> Server
+setNotifications notifications server =
+    { server | notifications = notifications }
+
+
+getTunnels : Server -> Tunnels.Model
+getTunnels =
+    .tunnels
+
+
+setTunnels : Tunnels.Model -> Server -> Server
+setTunnels tunnels server =
+    { server | tunnels = tunnels }

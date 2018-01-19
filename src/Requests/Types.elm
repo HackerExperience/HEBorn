@@ -2,7 +2,7 @@ module Requests.Types
     exposing
         ( Driver(..)
         , Code(..)
-        , ConfigSource
+        , FlagsSource
         , ResponseType
         , WebsocketResponse
         , Context
@@ -12,11 +12,11 @@ module Requests.Types
 
 import Json.Decode exposing (Value)
 import Json.Encode as Encode
-import Core.Config exposing (Config)
+import Core.Flags as Core
 
 
-type alias ConfigSource a =
-    { a | config : Config }
+type alias FlagsSource a =
+    { a | flags : Core.Flags }
 
 
 type alias ResponseType =

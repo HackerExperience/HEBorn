@@ -15,6 +15,7 @@ import Game.Account.Models as Account
 import Game.Account.Update as Account
 import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
+import Game.Meta.Models as Meta
 import Game.Servers.Messages as Servers
 import Game.Servers.Update as Servers
 import Game.Servers.Shared as Servers
@@ -30,56 +31,57 @@ import Game.LogStream.Update as LogFlix
 import Game.Meta.Types.Network as Network
 import Game.Requests as Request exposing (Response)
 import Game.Requests.Resync as Resync
-import Game.Models exposing (..)
+import Game.Config exposing (..)
 import Game.Messages exposing (..)
+import Game.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Msg -> Model -> UpdateResponse
-update msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         AccountMsg msg ->
-            onAccount msg model
+            onAccount config msg model
 
         ServersMsg msg ->
-            onServers msg model
+            onServers config msg model
 
         MetaMsg msg ->
-            onMeta msg model
+            onMeta config msg model
 
         StoryMsg msg ->
-            onStory msg model
+            onStory config msg model
 
         InventoryMsg msg ->
-            onInventory msg model
+            onInventory config msg model
 
         WebMsg msg ->
-            onWeb msg model
+            onWeb config msg model
 
         LogFlixMsg msg ->
-            onLogFlix msg model
+            onLogFlix config msg model
 
         Resync ->
-            onResync model
+            onResync config model
 
         Request data ->
             Request.receive model data
-                |> Maybe.map (flip updateRequest model)
+                |> Maybe.map (flip (updateRequest config) model)
                 |> Maybe.withDefault (Update.fromModel model)
 
         HandleJoinedAccount value ->
-            handleJoinedAccount value model
+            handleJoinedAccount config value model
 
 
 
 -- internals
 
 
-onResync : Model -> UpdateResponse
-onResync model =
+onResync : Config msg -> Model -> UpdateResponse msg
+onResync config model =
     let
         accountId =
             model
@@ -87,7 +89,7 @@ onResync model =
                 |> Account.getId
 
         cmd =
-            Resync.request accountId model
+            Cmd.map config.toMsg <| Resync.request accountId model
     in
         ( model, cmd, Dispatch.none )
 
@@ -96,84 +98,125 @@ onResync model =
 -- childs
 
 
-onAccount : Account.Msg -> Model -> UpdateResponse
-onAccount msg game =
-    Update.child
-        { get = .account
-        , set = (\account game -> { game | account = account })
-        , toMsg = AccountMsg
-        , update = (Account.update game)
-        }
-        msg
-        game
+onAccount : Config msg -> Account.Msg -> Model -> UpdateResponse msg
+onAccount config msg model =
+    let
+        lastTick =
+            Meta.getLastTick (getMeta model)
+
+        fallbackGW =
+            fallToGateway model
+
+        config_ =
+            accountConfig fallbackGW lastTick (getFlags model) config
+
+        ( account, cmd, dispatch ) =
+            Account.update config_ msg <| getAccount model
+
+        model_ =
+            { model | account = account }
+    in
+        ( model_, cmd, dispatch )
 
 
-onMeta : Meta.Msg -> Model -> UpdateResponse
-onMeta msg game =
-    Update.child
-        { get = .meta
-        , set = (\meta game -> { game | meta = meta })
-        , toMsg = MetaMsg
-        , update = (Meta.update game)
-        }
-        msg
-        game
+onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg
+onMeta config msg model =
+    let
+        config_ =
+            metaConfig config
+
+        ( meta, cmd, dispatch ) =
+            Meta.update config_ msg <| getMeta model
+
+        model_ =
+            setMeta meta model
+    in
+        ( model_, cmd, dispatch )
 
 
-onStory : Story.Msg -> Model -> UpdateResponse
-onStory msg game =
-    Update.child
-        { get = .story
-        , set = (\story game -> { game | story = story })
-        , toMsg = StoryMsg
-        , update = (Story.update game)
-        }
-        msg
-        game
+onStory : Config msg -> Story.Msg -> Model -> UpdateResponse msg
+onStory config msg model =
+    let
+        accountId =
+            model
+                |> getAccount
+                |> Account.getId
+
+        config_ =
+            storyConfig accountId (getFlags model) config
+
+        ( story, cmd, dispatch ) =
+            Story.update config_ msg <| getStory model
+
+        model_ =
+            setStory story model
+    in
+        ( model_, cmd, dispatch )
 
 
-onInventory : Inventory.Msg -> Model -> UpdateResponse
-onInventory msg game =
-    Update.child
-        { get = .inventory
-        , set = (\inventory game -> { game | inventory = inventory })
-        , toMsg = InventoryMsg
-        , update = Inventory.update
-        }
-        msg
-        game
+onInventory : Config msg -> Inventory.Msg -> Model -> UpdateResponse msg
+onInventory config msg model =
+    let
+        config_ =
+            inventoryConfig (getFlags model) config
+
+        ( inventory, cmd, dispatch ) =
+            Inventory.update config_ msg <| getInventory model
+
+        model_ =
+            setInventory inventory model
+    in
+        ( model_, cmd, dispatch )
 
 
-onWeb : Web.Msg -> Model -> UpdateResponse
-onWeb msg game =
-    Update.child
-        { get = .web
-        , set = (\web game -> { game | web = web })
-        , toMsg = WebMsg
-        , update = (Web.update game)
-        }
-        msg
-        game
+onWeb : Config msg -> Web.Msg -> Model -> UpdateResponse msg
+onWeb config msg model =
+    let
+        servers =
+            getServers model
+
+        config_ =
+            webConfig (getFlags model) servers config
+
+        ( web, cmd, dispatch ) =
+            Web.update config_ msg <| getWeb model
+
+        model_ =
+            setWeb web model
+    in
+        ( model_, cmd, dispatch )
 
 
-onServers : Servers.Msg -> Model -> UpdateResponse
-onServers msg game =
-    Update.child
-        { get = .servers
-        , set = (\servers game -> { game | servers = servers })
-        , toMsg = ServersMsg
-        , update = (Servers.update game)
-        }
-        msg
-        game
+
+-- remember to remove Game.Model after refactoring Game.Servers
 
 
-onLogFlix : LogFlix.Msg -> Model -> UpdateResponse
-onLogFlix msg game =
+onServers : Config msg -> Servers.Msg -> Model -> UpdateResponse msg
+onServers config msg model =
+    let
+        lastTick =
+            Meta.getLastTick (getMeta model)
+
+        config_ =
+            serversConfig lastTick
+                (getFlags model)
+                config
+
+        ( servers, cmd, dispatch ) =
+            Servers.update config_ msg <| getServers model
+
+        model_ =
+            { model | servers = servers }
+    in
+        ( model_, cmd, dispatch )
+
+
+onLogFlix : Config msg -> LogFlix.Msg -> Model -> UpdateResponse msg
+onLogFlix config msg game =
     Update.child
         { get = .backfeed
         , set = (\backfeed game -> { game | backfeed = backfeed })
-        , toMsg = LogFlixMsg
+        , toMsg = LogFlixMsg >> config.toMsg
         , update = (LogFlix.update game)
         }
         msg
@@ -184,15 +227,19 @@ onLogFlix msg game =
 -- requests
 
 
-updateRequest : Response -> Model -> UpdateResponse
-updateRequest response model =
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config response model =
     case response of
         Request.Resync (Resync.Okay data) ->
-            uncurry (flip onResyncResponse) data
+            uncurry (flip <| onResyncResponse config) data
 
 
-onResyncResponse : Decoders.Game.ServersToJoin -> Model -> UpdateResponse
-onResyncResponse servers model =
+onResyncResponse :
+    Config msg
+    -> Decoders.Game.ServersToJoin
+    -> Model
+    -> UpdateResponse msg
+onResyncResponse config servers model =
     let
         dispatch =
             servers.player
@@ -206,8 +253,8 @@ onResyncResponse servers model =
 -- events
 
 
-handleJoinedAccount : Value -> Model -> UpdateResponse
-handleJoinedAccount value model =
+handleJoinedAccount : Config msg -> Value -> Model -> UpdateResponse msg
+handleJoinedAccount config value model =
     case Decode.decodeValue (Decoders.Game.bootstrap model) value of
         Ok ( model_, servers ) ->
             let

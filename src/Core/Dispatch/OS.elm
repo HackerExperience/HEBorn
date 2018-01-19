@@ -1,7 +1,6 @@
 module Core.Dispatch.OS exposing (..)
 
 import Game.Meta.Types.Context exposing (Context)
-import Apps.Apps exposing (App)
 import Apps.Reference exposing (Reference)
 import Apps.Apps exposing (App, AppParams)
 

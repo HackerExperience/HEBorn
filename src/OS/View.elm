@@ -9,7 +9,7 @@ import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Models as Storyline
-import Core.Config as Config
+import Core.Flags as Flags
 import OS.Models exposing (Model)
 import OS.Messages exposing (Msg(..))
 import OS.Resources as Res
@@ -41,8 +41,8 @@ view data model =
 
         version =
             game
-                |> Game.getConfig
-                |> Config.getVersion
+                |> Game.getFlags
+                |> Flags.getVersion
 
         context =
             game
@@ -72,27 +72,14 @@ view data model =
             (dynStyle :: osContent)
 
 
-viewDynStyle : Game.Model -> List (Html Msg)
-viewDynStyle game =
-    let
-        story =
-            game
-                |> Game.getStory
-    in
-        if Storyline.isActive story then
-            [ lazy DynamicStyle.view game ]
-        else
-            []
-
-
 viewOS : Game.Data -> Model -> List (Html Msg)
 viewOS data model =
     let
         version =
             data
                 |> Game.getGame
-                |> Game.getConfig
-                |> Config.getVersion
+                |> Game.getFlags
+                |> Flags.getVersion
     in
         [ viewHeader
             data

@@ -303,7 +303,7 @@ goTab nTab model =
                     model.rightTabs
 
             newLeft =
-                model.leftTabs ++ [ model.nowTab ] ++ wL
+                model.leftTabs ++ (model.nowTab :: wL)
         in
             { model
                 | leftTabs = newLeft
@@ -321,7 +321,7 @@ goTab nTab model =
                     model.leftTabs
 
             newRight =
-                wR ++ [ model.nowTab ] ++ model.rightTabs
+                wR ++ (model.nowTab :: model.rightTabs)
         in
             { model
                 | leftTabs = newLeft

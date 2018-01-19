@@ -13,7 +13,7 @@ import Decoders.Bank exposing (accountData)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Game.Servers.Shared exposing (CId)
-import Requests.Types exposing (ConfigSource, Code(..), ResponseType)
+import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Decoders.Processes
 import Game.Models as Game
 import Game.Account.Models as Account
@@ -33,7 +33,7 @@ request :
     -> Requester
     -> Account.ID
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request { bank, accountNum, password } requester accountId cid data =
     let
