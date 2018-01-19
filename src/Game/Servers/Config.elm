@@ -3,6 +3,7 @@ module Game.Servers.Config exposing (..)
 import Time exposing (Time)
 import Core.Flags as Core
 import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Notifications.Messages as Notifications
 import Game.Servers.Processes.Config as Processes
 import Game.Servers.Logs.Config as Logs
 import Game.Servers.Filesystem.Config as Filesystem
@@ -29,6 +30,11 @@ processesConfig cid nip config =
     , cid = cid
     , nip = nip
     , lastTick = config.lastTick
+    , notifyServer =
+        Notifications.HandleInsert Nothing
+            >> NotificationsMsg
+            >> ServerMsg cid
+            >> config.toMsg
     }
 
 

@@ -169,7 +169,8 @@ onReqDownload data source file storage model =
                 |> Game.Models.unsafeGetGateway
 
         startMsg =
-            Servers.NewPublicDownloadProcess source storage file
+            Servers.NewPublicDownloadProcess source storage <|
+                Filesystem.toId file
 
         dispatch =
             Dispatch.processes me startMsg

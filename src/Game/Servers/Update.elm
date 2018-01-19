@@ -237,13 +237,13 @@ onProcessesMsg config cid msg server =
         config_ =
             processesConfig cid nip config
 
-        ( processes, cmd, dispatch ) =
+        ( processes, cmd ) =
             Processes.update config_ msg <| getProcesses server
 
         server_ =
             setProcesses processes server
     in
-        ( server_, cmd, dispatch )
+        ( server_, cmd, Dispatch.none )
 
 
 onHardwareMsg :
