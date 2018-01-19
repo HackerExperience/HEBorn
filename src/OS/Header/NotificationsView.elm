@@ -6,7 +6,7 @@ import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
 import Game.Notifications.Models as Notifications exposing (Content(..))
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -109,20 +109,18 @@ renderContent content =
             , "Check on Thunderpigeon"
             )
 
-        DownloadStarted origin storage fileId ->
+        DownloadStarted origin storage fileEntry ->
             ( "New download started"
-            , fileId ++ " download started!"
-              --, ((Filesystem.getName <| Filesystem.toFile fileEntry)
-              --++ " download started!"
-              --)
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " download started!"
+              )
             )
 
-        DownloadConcluded origin storage fileId ->
+        DownloadConcluded origin storage fileEntry ->
             ( "New download concluded"
-            , fileId ++ " download concluded!"
-              --, ((Filesystem.getName <| Filesystem.toFile fileEntry)
-              --    ++ " download concluded!"
-              --  )
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " download concluded!"
+              )
             )
 
 

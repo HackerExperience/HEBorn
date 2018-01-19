@@ -6,7 +6,7 @@ import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Messages exposing (..)
-import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 request : String -> Id -> CId -> FlagsSource a -> Cmd Msg

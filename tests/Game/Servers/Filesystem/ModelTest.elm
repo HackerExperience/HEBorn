@@ -7,6 +7,7 @@ import Helper.Filesystem as Helper exposing (mkdirp)
 import Test exposing (Test, describe)
 import TestUtils exposing (fuzz, batch)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 all : Test

@@ -6,6 +6,7 @@ import Gen.Servers
 import Fuzz exposing (Fuzzer)
 import Game.Models as Game
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 import Random.Pcg as Random exposing (Generator)
 import Random.Pcg.Extra as RandomExtra exposing (andMap)
 import Game.Servers.Models as Servers exposing (..)

@@ -2,14 +2,14 @@ module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Account.Bounces.Models as Bounces
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
-import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Hardware.Models as Hardware
 import Game.Notifications.Models as Notifications
+import Game.Servers.Shared exposing (..)
 
 
 type alias Model =
