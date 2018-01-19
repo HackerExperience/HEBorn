@@ -25,8 +25,8 @@ type alias Notification =
 type Content
     = Simple String String -- Title Message
     | NewEmail String -- Person_ID
-    | DownloadStarted NIP Servers.StorageId Filesystem.FileEntry
-    | DownloadConcluded NIP Servers.StorageId Filesystem.FileEntry
+    | DownloadStarted NIP Servers.StorageId Filesystem.Id
+    | DownloadConcluded NIP Servers.StorageId Filesystem.Id
 
 
 initialModel : Model

@@ -79,8 +79,8 @@ type Processes
     | RemoveProcess Processes.ID
     | CompleteProcess Processes.ID
     | NewBruteforceProcess Network.IP
-    | NewDownloadProcess Network.NIP StorageId Filesystem.FileEntry
-    | NewPublicDownloadProcess Network.NIP StorageId Filesystem.FileEntry
+    | NewDownloadProcess Network.NIP StorageId Filesystem.Id
+    | NewPublicDownloadProcess Network.NIP StorageId Filesystem.Id
     | StartedProcess ProcessStarted.Data
     | ConcludedProcess ProcessConclusion.Data
     | ChangedProcesses ProcessesChanged.Data
