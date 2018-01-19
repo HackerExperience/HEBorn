@@ -47,22 +47,6 @@ subscriptions config data model =
             Database.subscriptions data model
                 |> Sub.map (DatabaseMsg >> config.toMsg)
 
-        ConnManagerModel model ->
-            ConnManager.subscriptions data model
-                |> Sub.map (ConnManagerMsg >> config.toMsg)
-
-        BounceManagerModel model ->
-            BounceManager.subscriptions data model
-                |> Sub.map (BounceManagerMsg >> config.toMsg)
-
-        FinanceModel model ->
-            Finance.subscriptions data model
-                |> Sub.map (FinanceMsg >> config.toMsg)
-
-        MusicModel model ->
-            Hebamp.subscriptions data model
-                |> Sub.map (MusicMsg >> config.toMsg)
-
         CtrlPanelModel model ->
             CtrlPanel.subscriptions data model
                 |> Sub.map (CtrlPanelMsg >> config.toMsg)
@@ -74,18 +58,6 @@ subscriptions config data model =
         LocationPickerModel model ->
             LocationPicker.subscriptions data model
                 |> Sub.map (LocationPickerMsg >> config.toMsg)
-
-        LanViewerModel model ->
-            LanViewer.subscriptions data model
-                |> Sub.map (LanViewerMsg >> config.toMsg)
-
-        EmailModel model ->
-            Email.subscriptions data model
-                |> Sub.map (EmailMsg >> config.toMsg)
-
-        BugModel model ->
-            Bug.subscriptions data model
-                |> Sub.map (BugMsg >> config.toMsg)
 
         BackFlixModel model ->
             BackFlix.subscriptions data model

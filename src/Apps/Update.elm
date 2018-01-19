@@ -176,19 +176,7 @@ update config data msg model =
                     ( model, Cmd.none, Dispatch.none )
 
         CtrlPanelMsg msg ->
-            case model of
-                CtrlPanelModel model ->
-                    let
-                        ( model_, cmd, dispatch ) =
-                            CtrlPanel.update data msg model
-
-                        cmd_ =
-                            Update.mapCmd (CtrlPanelMsg >> config.toMsg) ( model_, cmd, dispatch )
-                    in
-                        map config CtrlPanelModel CtrlPanelMsg cmd_
-
-                _ ->
-                    ( model, Cmd.none, Dispatch.none )
+            ( model, Cmd.none, Dispatch.none )
 
         ServersGearsMsg msg ->
             case model of
@@ -221,19 +209,7 @@ update config data msg model =
                     ( model, Cmd.none, Dispatch.none )
 
         LanViewerMsg msg ->
-            case model of
-                LanViewerModel model ->
-                    let
-                        ( model_, cmd, dispatch ) =
-                            LanViewer.update data msg model
-
-                        cmd_ =
-                            Update.mapCmd (LanViewerMsg >> config.toMsg) ( model_, cmd, dispatch )
-                    in
-                        map config LanViewerModel LanViewerMsg cmd_
-
-                _ ->
-                    ( model, Cmd.none, Dispatch.none )
+            ( model, Cmd.none, Dispatch.none )
 
         EmailMsg msg ->
             case model of

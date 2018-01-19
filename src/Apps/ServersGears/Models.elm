@@ -2,7 +2,6 @@ module Apps.ServersGears.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
-import Apps.ServersGears.Menu.Models as Menu
 import Game.Data as Game
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
@@ -15,8 +14,7 @@ import Game.Servers.Hardware.Models as Hardware
 
 
 type alias Model =
-    { menu : Menu.Model
-    , overrides : Overrides
+    { overrides : Overrides
     , selection : Maybe Selection
     , motherboard : Maybe Motherboard
     , highlight : Maybe Type
@@ -57,9 +55,7 @@ initialModel data =
                 |> Servers.getHardware
                 |> Hardware.getMotherboard
     in
-        { menu =
-            Menu.initialMenu
-        , overrides =
+        { overrides =
             findOverrides motherboard
         , selection =
             Nothing

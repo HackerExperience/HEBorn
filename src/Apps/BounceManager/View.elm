@@ -16,7 +16,6 @@ import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import Apps.BounceManager.Messages exposing (Msg(..))
 import Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Resources exposing (Classes(..), prefix)
-import Apps.BounceManager.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -117,5 +116,5 @@ view data ({ selected } as model) =
     in
         verticalSticked
             (Just [ viewTabs ])
-            [ viewData, menuView model ]
+            [ viewData ]
             Nothing

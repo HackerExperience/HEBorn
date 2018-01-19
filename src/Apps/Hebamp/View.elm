@@ -10,7 +10,6 @@ import Game.Data as Game
 import Apps.Hebamp.Messages exposing (Msg(..))
 import Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Resources exposing (Classes(..), prefix)
-import Apps.Hebamp.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -141,5 +140,4 @@ view data model =
             , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
             ]
         , nativeAudio model.playerId model.now
-        , menuView model
         ]

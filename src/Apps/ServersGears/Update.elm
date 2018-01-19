@@ -84,12 +84,6 @@ updateEndpoint data msg model =
 updateGeneric : Game.Data -> Msg -> Model -> UpdateResponse
 updateGeneric data msg model =
     case msg of
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         Select selection ->
             onSelectMsg data selection model
 
@@ -98,21 +92,6 @@ updateGeneric data msg model =
 
         _ ->
             Update.fromModel model
-
-
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, coreMsg )
 
 
 onSelectMsg : Game.Data -> Maybe Selection -> Model -> UpdateResponse

@@ -1,7 +1,5 @@
 module Apps.ConnManager.Models exposing (..)
 
-import Apps.ConnManager.Menu.Models as Menu
-
 
 type Sorting
     = DefaultSort
@@ -33,8 +31,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , filterText = ""
+    { filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort

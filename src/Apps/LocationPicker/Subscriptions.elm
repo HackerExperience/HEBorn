@@ -11,7 +11,6 @@ import Apps.LocationPicker.Menu.Subscriptions as Menu
 subscriptions : Game.Data -> Model -> Sub Msg
 subscriptions data model =
     Sub.batch
-        [ Sub.map MenuMsg (Menu.subscriptions model.menu)
-        , Map.mapClick MapClick
+        [ Map.mapClick MapClick
         , geoLocResp GeoResp
         ]

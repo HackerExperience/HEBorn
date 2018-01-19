@@ -13,7 +13,6 @@ import Game.Storyline.Emails.Contents as Emails
 import Apps.Email.Messages exposing (Msg(..))
 import Apps.Email.Models exposing (..)
 import Apps.Email.Resources exposing (Classes(..), prefix)
-import Apps.Email.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -35,10 +34,8 @@ view data model =
                 |> ul [ class [ Contacts ] ]
     in
         div
-            [ menuForDummy ]
-            [ contactList
-            , menuView model
-            ]
+            []
+            [ contactList ]
 
 
 contact :

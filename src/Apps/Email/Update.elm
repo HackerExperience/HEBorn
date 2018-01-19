@@ -9,9 +9,6 @@ import Game.Storyline.Emails.Models as Emails exposing (Person)
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.FloatingHeads.Models as FloatingHeads
-import Apps.Email.Menu.Messages as Menu
-import Apps.Email.Menu.Update as Menu
-import Apps.Email.Menu.Actions as Menu
 import Apps.Apps as Apps
 
 
@@ -27,32 +24,18 @@ update :
 update data msg model =
     case msg of
         -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         SelectContact email ->
             onSelectContact email model
-
-
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    Update.child
-        { get = .menu
-        , set = (\menu model -> { model | menu = menu })
-        , toMsg = MenuMsg
-        , update = (Menu.update data)
-        }
-        msg
-        model
 
 
 onSelectContact : String -> Model -> UpdateResponse
 onSelectContact email model =
     let
         dispatch =
-            Dispatch.os <| OS.OpenApp Nothing (Apps.FloatingHeadsParams <| FloatingHeads.OpenAtContact email)
+            email
+                |> FloatingHeads.OpenAtContact
+                |> Apps.FloatingHeadsParams
+                |> OS.OpenApp Nothin
+                |> Dispatch.os
     in
         ( model, Cmd.none, dispatch )

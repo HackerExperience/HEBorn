@@ -6,8 +6,7 @@ import Html.Events exposing (onClick)
 import Game.Data as Game
 import Apps.Bug.Messages exposing (Msg(..))
 import Apps.Bug.Models exposing (..)
-import Apps.Bug.Resources exposing (Classes(..), prefix)
-import Apps.Bug.Menu.View exposing (..)
+import Apps.Bug.Resources exposing (..)
 
 
 { id, class, classList } =
@@ -16,11 +15,10 @@ import Apps.Bug.Menu.View exposing (..)
 
 view : Game.Data -> Model -> Html Msg
 view data model =
-    div [ menuForDummy ]
+    div []
         [ ul []
             [ li [] [ button [ onClick DummyToast ] [ text "Spawn useless toast" ] ]
             , li [] [ button [ onClick UnpoliteCrash ] [ text "Test unpolite crash" ] ]
             , li [] [ button [ onClick PoliteCrash ] [ text "Test polite crash" ] ]
             ]
-        , menuView model
         ]

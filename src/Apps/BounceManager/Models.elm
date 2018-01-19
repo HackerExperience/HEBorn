@@ -1,7 +1,5 @@
 module Apps.BounceManager.Models exposing (..)
 
-import Apps.BounceManager.Menu.Models as Menu
-
 
 type MainTab
     = TabManage
@@ -31,8 +29,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , selected = TabManage
+    { selected = TabManage
     }
 
 

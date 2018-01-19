@@ -3,12 +3,10 @@ module Apps.LocationPicker.Models exposing (..)
 import Utils.Ports.Map exposing (Coordinates, mapInit)
 import Utils.Ports.Geolocation exposing (geoLocReq)
 import Apps.LocationPicker.Messages exposing (Msg)
-import Apps.LocationPicker.Menu.Models as Menu
 
 
 type alias Model =
-    { menu : Menu.Model
-    , self : String
+    { self : String
     , mapEId : String
     , coordinates : Maybe Coordinates
     }
@@ -31,8 +29,7 @@ icon =
 
 initialModel : String -> Model
 initialModel id =
-    { menu = Menu.initialMenu
-    , self = id
+    { self = id
     , mapEId = "map-" ++ id
     , coordinates = Nothing
     }

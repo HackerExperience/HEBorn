@@ -7,7 +7,6 @@ import Game.Data as Game
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
-import Apps.LocationPicker.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -39,5 +38,4 @@ view data model =
 
                 Nothing ->
                     [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
-        , menuView model
         ]
