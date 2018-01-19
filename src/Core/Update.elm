@@ -169,14 +169,17 @@ updateSetupWS msg stateModel =
 updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
 updateSetupSetup msg stateModel =
     let
-        ( setup, cmd, dispatch ) =
-            Setup.update stateModel.game msg stateModel.setup
+        config =
+            setupConfig
+                stateModel.game.account.id
+                stateModel.game.account.mainframe
+                stateModel.game.flags
+
+        ( setup, cmd_, dispatch ) =
+            Setup.update config msg stateModel.setup
 
         stateModel_ =
             { stateModel | setup = setup }
-
-        cmd_ =
-            Cmd.map SetupMsg cmd
     in
         ( stateModel_, cmd_, dispatch )
 

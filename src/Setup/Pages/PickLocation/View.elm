@@ -18,8 +18,8 @@ import Setup.Pages.PickLocation.Config exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Game.Model -> Model -> Html msg
-view config game model =
+view : Config msg -> Model -> Html msg
+view config model =
     withHeader [ class [ StepPickLocation ] ]
         [ div [] [ h2 [] [ text "Pick your location" ] ]
         , Native.Untouchable.node "hemap" mapId

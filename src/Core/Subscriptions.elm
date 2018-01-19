@@ -3,6 +3,7 @@ module Core.Subscriptions exposing (subscriptions)
 import Utils.Ports.OnLoad exposing (windowLoaded)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
+import Core.Config exposing (..)
 import Game.Models as Game
 import Game.Data as Game
 import Game.Subscriptions as Game
@@ -61,12 +62,16 @@ home model =
 
 
 setup : SetupModel -> Sub Msg
-setup model =
+setup ({ game, setup } as model) =
     let
+        config =
+            setupConfig
+                game.account.id
+                game.account.mainframe
+                game.flags
+
         setupSub =
-            model.setup
-                |> Setup.subscriptions
-                |> Sub.map SetupMsg
+            Setup.subscriptions config setup
     in
         Sub.batch
             [ websocket model.websocket

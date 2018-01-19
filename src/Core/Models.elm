@@ -183,20 +183,11 @@ initialHome =
 
 initialSetup : Ws.Model -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
 initialSetup ws game =
-    let
-        ( setup, cmd, msg ) =
-            Setup.initialModel game
-
-        cmd_ =
-            Cmd.map SetupMsg cmd
-
-        setup_ =
-            { websocket = ws
-            , game = game
-            , setup = setup
-            }
-    in
-        ( setup_, cmd_, msg )
+    { websocket = ws
+    , game = game
+    , setup = Setup.initialModel
+    }
+        |> Update.fromModel
 
 
 initialPlay : Ws.Model -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )

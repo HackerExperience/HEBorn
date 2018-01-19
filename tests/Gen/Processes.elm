@@ -240,11 +240,14 @@ genFullAccess =
         |> andMap genPriority
         |> andMap genResourcesUsage
         |> andMap (maybe genConnectionID)
+        |> andMap (maybe genConnectionID)
+        |> andMap (maybe genProcessFile)
 
 
 genPartialAccess : Generator PartialAccess
 genPartialAccess =
     map PartialAccess (maybe genConnectionID)
+        |> andMap (maybe genConnectionID)
 
 
 genPriority : Generator Priority
