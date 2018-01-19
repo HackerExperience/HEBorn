@@ -20,8 +20,9 @@ serversConfig lastTick flags config =
     }
 
 
-accountConfig : Core.Flags -> Config msg -> Account.Config msg
-accountConfig flags config =
+accountConfig : Time -> Core.Flags -> Config msg -> Account.Config msg
+accountConfig lastTick flags config =
     { flags = flags
     , toMsg = AccountMsg >> config.toMsg
+    , lastTick = lastTick
     }

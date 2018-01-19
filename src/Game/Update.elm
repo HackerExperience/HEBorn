@@ -101,8 +101,11 @@ onResync config model =
 onAccount : Config msg -> Account.Msg -> Model -> UpdateResponse msg
 onAccount config msg model =
     let
+        lastTick =
+            Meta.getLastTick (getMeta model)
+
         config_ =
-            accountConfig (getFlags model) config
+            accountConfig lastTick (getFlags model) config
 
         ( account, cmd, dispatch ) =
             Account.update config_ model msg <| getAccount model

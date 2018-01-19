@@ -45,7 +45,7 @@ update config game msg model =
             onDatabase config msg model
 
         NotificationsMsg msg ->
-            onNotifications config game msg model
+            onNotifications config msg model
 
         Request data ->
             data
@@ -164,16 +164,19 @@ onFinances config msg model =
         ( model_, cmd, dispatch )
 
 
-onNotifications : Config msg -> Game.Model -> Notifications.Msg -> Model -> UpdateResponse msg
-onNotifications config game msg model =
-    Update.child
-        { get = .notifications
-        , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = (NotificationsMsg >> config.toMsg)
-        , update = (Notifications.update game Notifications.Account)
-        }
-        msg
-        model
+onNotifications : Config msg -> Notifications.Msg -> Model -> UpdateResponse msg
+onNotifications config msg model =
+    let
+        config_ =
+            notificationsConfig config
+
+        ( notifications, cmd, dispatch ) =
+            Notifications.update config_ Notifications.Account msg <| getNotifications model
+
+        model_ =
+            setNotifications notifications model
+    in
+        ( model_, cmd, dispatch )
 
 
 handleLogout : Config msg -> Model -> UpdateResponse msg

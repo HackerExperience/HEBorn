@@ -447,6 +447,11 @@ getNotifications =
     .notifications
 
 
+setNotifications : Notifications.Model -> Server -> Server
+setNotifications notifications server =
+    { server | notifications = notifications }
+
+
 getTunnels : Server -> Tunnels.Model
 getTunnels =
     .tunnels
