@@ -36,13 +36,13 @@ update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
 update config game msg model =
     case msg of
         BouncesMsg msg ->
-            onBounce config game msg model
+            onBounces config msg model
 
         FinancesMsg msg ->
             onFinances config msg model
 
         DatabaseMsg msg ->
-            onDatabase config game msg model
+            onDatabase config msg model
 
         NotificationsMsg msg ->
             onNotifications config game msg model
@@ -134,16 +134,19 @@ handleSetContext config game context model =
         ( model_, Cmd.none, Dispatch.none )
 
 
-onDatabase : Config msg -> Game.Model -> Database.Msg -> Model -> UpdateResponse msg
-onDatabase config game msg model =
-    Update.child
-        { get = .database
-        , set = (\database model -> { model | database = database })
-        , toMsg = (DatabaseMsg >> config.toMsg)
-        , update = (Database.update game)
-        }
-        msg
-        model
+onDatabase : Config msg -> Database.Msg -> Model -> UpdateResponse msg
+onDatabase config msg model =
+    let
+        config_ =
+            databaseConfig config
+
+        ( database, cmd, dispatch ) =
+            Database.update config_ msg <| getDatabase model
+
+        model_ =
+            setDatabase database model
+    in
+        ( model_, cmd, dispatch )
 
 
 onFinances : Config msg -> Finances.Msg -> Model -> UpdateResponse msg
@@ -214,19 +217,19 @@ handleLogoutAndCrash config game error model =
         ( model_, cmd, Dispatch.none )
 
 
-onBounce : Config msg -> Game.Model -> Bounces.Msg -> Model -> UpdateResponse msg
-onBounce config game msg model =
+onBounces : Config msg -> Bounces.Msg -> Model -> UpdateResponse msg
+onBounces config msg model =
     let
-        ( bounces, cmd, dispatch ) =
-            Bounces.update game msg model.bounces
+        config_ =
+            bouncesConfig config
 
-        cmd_ =
-            Cmd.map (BouncesMsg >> config.toMsg) cmd
+        ( bounces, cmd, dispatch ) =
+            Bounces.update config_ msg <| getBounces model
 
         model_ =
-            { model | bounces = bounces }
+            setBounces bounces model
     in
-        ( model_, cmd_, dispatch )
+        ( model_, cmd, dispatch )
 
 
 updateRequest : Config msg -> Game.Model -> Response -> Model -> UpdateResponse msg
