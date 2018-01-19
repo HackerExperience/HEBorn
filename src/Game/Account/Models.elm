@@ -120,9 +120,19 @@ getDatabase =
     .database
 
 
+setDatabase : Database.Model -> Model -> Model
+setDatabase database model =
+    { model | database = database }
+
+
 getBounces : Model -> Bounces.Model
 getBounces =
     .bounces
+
+
+setBounces : Bounces.Model -> Model -> Model
+setBounces bounces model =
+    { model | bounces = bounces }
 
 
 getMainframe : Model -> Maybe Servers.CId
@@ -151,3 +161,13 @@ insertGateway id ({ gateways } as model) =
 getDock : Model -> Dock.Model
 getDock =
     .dock
+
+
+setInTutorial : Bool -> Model -> Model
+setInTutorial inTutorial model =
+    { model | inTutorial = inTutorial }
+
+
+getInTutorial : Model -> Bool
+getInTutorial =
+    .inTutorial
