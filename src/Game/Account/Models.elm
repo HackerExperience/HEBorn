@@ -110,6 +110,11 @@ getFinances =
     .finances
 
 
+setFinances : Finances.Model -> Model -> Model
+setFinances finances model =
+    { model | finances = finances }
+
+
 getDatabase : Model -> Database.Model
 getDatabase =
     .database
