@@ -1,6 +1,7 @@
 module Core.View exposing (view)
 
 import Html exposing (..)
+import Core.Config exposing (..)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Data as Game
@@ -16,8 +17,15 @@ view ({ state } as model) =
         Home home ->
             Html.map LandingMsg (Landing.view model home.landing)
 
-        Setup setup ->
-            Html.map SetupMsg (Setup.view setup.game setup.setup)
+        Setup { game, setup } ->
+            let
+                config =
+                    setupConfig
+                        game.account.id
+                        game.account.mainframe
+                        game.flags
+            in
+                Setup.view config setup
 
         Play play ->
             case Game.fromGateway play.game of

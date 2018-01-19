@@ -6,7 +6,7 @@ import Html.CssHelpers
 import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Setup.Resources exposing (..)
-import Setup.Pages.Configs as Configs
+import Setup.Config exposing (..)
 import Setup.Pages.Welcome.View as Welcome
 import Setup.Pages.CustomWelcome.View as CustomWelcome
 import Setup.Pages.Finish.View as Finish
@@ -19,20 +19,20 @@ import Setup.Pages.Mainframe.View as Mainframe
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Model -> Model -> Html Msg
-view game model =
+view : Config msg -> Model -> Html msg
+view config model =
     if isLoading model then
         loadingView
     else
         case model.page of
             Just page ->
-                setupView game page model
+                setupView config page model
 
             Nothing ->
                 loadingView
 
 
-loadingView : Html Msg
+loadingView : Html msg
 loadingView =
     div []
         [ p [] [ text "Keyboard not found" ]
@@ -43,16 +43,16 @@ loadingView =
         ]
 
 
-setupView : Game.Model -> PageModel -> Model -> Html Msg
-setupView game page model =
+setupView : Config msg -> PageModel -> Model -> Html msg
+setupView config page model =
     node setupNode
         []
         [ leftBar page model.pages
-        , viewPage game page
+        , viewPage config page
         ]
 
 
-leftBar : PageModel -> List String -> Html Msg
+leftBar : PageModel -> List String -> Html msg
 leftBar current others =
     let
         currentPageName =
@@ -67,33 +67,33 @@ leftBar current others =
             ]
 
 
-viewPage : Game.Model -> PageModel -> Html Msg
-viewPage game page =
+viewPage : Config msg -> PageModel -> Html msg
+viewPage ({ flags, mainframe } as config) page =
     case page of
         WelcomeModel ->
-            Welcome.view Configs.welcome
+            Welcome.view (welcomeConfig config)
 
         CustomWelcomeModel ->
-            CustomWelcome.view Configs.welcome
+            CustomWelcome.view (welcomeConfig config)
 
         MainframeModel model ->
-            Mainframe.view Configs.setMainframeName game model
+            Mainframe.view (mainframeConfig config) model
 
         PickLocationModel model ->
-            PickLocation.view Configs.pickLocation game model
+            PickLocation.view (pickLocationConfig config) model
 
         ChooseThemeModel ->
             -- TODO
             div [] []
 
         FinishModel ->
-            Finish.view Configs.finish
+            Finish.view (finishConfig config)
 
         CustomFinishModel ->
-            CustomFinish.view Configs.finish
+            CustomFinish.view (finishConfig config)
 
 
-stepMarker : String -> String -> Html Msg
+stepMarker : String -> String -> Html msg
 stepMarker active other =
     let
         isSelected =

@@ -17,8 +17,8 @@ import Setup.Pages.Mainframe.Config exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Game.Model -> Model -> Html msg
-view { toMsg, onNext, onPrevious } game model =
+view : Config msg -> Model -> Html msg
+view { toMsg, onNext, onPrevious } model =
     withHeader [ class [ StepWelcome ] ]
         [ div [] [ h2 [] [ text "Initial server name:" ] ]
         , hostnameInput toMsg model

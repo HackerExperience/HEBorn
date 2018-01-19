@@ -15,8 +15,8 @@ type alias UpdateResponse msg =
     ( Model, Cmd msg, Dispatch )
 
 
-update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
-update config game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         MapClick value ->
             onMapClick config value model
