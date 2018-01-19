@@ -29,11 +29,6 @@ import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 
 
--- Remove me after refactor
-
-import Game.Models as Game
-
-
 type alias UpdateResponse msg =
     ( Model, Cmd msg, Dispatch )
 
@@ -42,21 +37,17 @@ type alias ServerUpdateResponse msg =
     ( Server, Cmd msg, Dispatch )
 
 
-
--- remember to remove Game.Model after refactoring
-
-
-update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
-update config game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         ServerMsg cid msg ->
-            onServerMsg config game cid msg model
+            onServerMsg config cid msg model
 
         Resync cid ->
             onResync config cid model
 
         Request data ->
-            onRequest config game data model
+            onRequest config data model
 
         HandleJoinedServer cid value ->
             handleJoinedServer config cid value model
@@ -64,16 +55,15 @@ update config game msg model =
 
 onServerMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> ServerMsg
     -> Model
     -> UpdateResponse msg
-onServerMsg config game cid msg model =
+onServerMsg config cid msg model =
     case get cid model of
         Just server ->
             server
-                |> updateServer config game cid model msg
+                |> updateServer config cid model msg
                 |> Update.mapModel (flip (insert cid) model)
 
         Nothing ->
@@ -82,19 +72,13 @@ onServerMsg config game cid msg model =
 
 onRequest :
     Config msg
-    -> Game.Model
     -> RequestMsg
     -> Model
     -> UpdateResponse msg
-onRequest config game data model =
+onRequest config data model =
     let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-
         response =
-            receive lastTick data
+            receive config.lastTick data
     in
         case response of
             Just response ->
@@ -124,13 +108,12 @@ onResync config cid model =
 
 updateServer :
     Config msg
-    -> Game.Model
     -> CId
     -> Model
     -> ServerMsg
     -> Server
     -> ServerUpdateResponse msg
-updateServer config game cid model msg server =
+updateServer config cid model msg server =
     case msg of
         HandleSetBounce maybeBounceId ->
             handleSetBounce config cid maybeBounceId server
@@ -142,10 +125,10 @@ updateServer config game cid model msg server =
             handleSetActiveNIP config nip server
 
         FilesystemMsg storageId msg ->
-            onFilesystemMsg config game cid storageId msg server
+            onFilesystemMsg config cid storageId msg server
 
         LogsMsg msg ->
-            onLogsMsg config game cid msg server
+            onLogsMsg config cid msg server
 
         ProcessesMsg msg ->
             onProcessesMsg config cid msg server
@@ -154,7 +137,7 @@ updateServer config game cid model msg server =
             onHardwareMsg config cid msg server
 
         TunnelsMsg msg ->
-            onTunnelsMsg config game cid msg server
+            onTunnelsMsg config cid msg server
 
         ServerRequest data ->
             updateServerRequest config (serverReceive data) server
@@ -193,13 +176,12 @@ handleSetActiveNIP config nip server =
 
 onFilesystemMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> StorageId
     -> Filesystem.Msg
     -> Server
     -> ServerUpdateResponse msg
-onFilesystemMsg config game cid id msg server =
+onFilesystemMsg config cid id msg server =
     case getStorage id server of
         Just storage ->
             let
@@ -223,12 +205,11 @@ onFilesystemMsg config game cid id msg server =
 
 onLogsMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> Logs.Msg
     -> Server
     -> ServerUpdateResponse msg
-onLogsMsg config game cid msg server =
+onLogsMsg config cid msg server =
     let
         config_ =
             logsConfig cid config
@@ -290,12 +271,11 @@ onHardwareMsg config cid msg server =
 
 onTunnelsMsg :
     Config msg
-    -> Game.Model
     -> CId
     -> Tunnels.Msg
     -> Server
     -> ServerUpdateResponse msg
-onTunnelsMsg config game cid msg server =
+onTunnelsMsg config cid msg server =
     let
         config_ =
             tunnelsConfig cid config

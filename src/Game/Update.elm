@@ -180,7 +180,7 @@ onServers config msg model =
                 config
 
         ( servers, cmd, dispatch ) =
-            Servers.update config_ model msg <| getServers model
+            Servers.update config_ msg <| getServers model
 
         model_ =
             { model | servers = servers }
