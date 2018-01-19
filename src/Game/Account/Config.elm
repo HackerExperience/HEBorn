@@ -14,6 +14,7 @@ type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
     , lastTick : Time
+    , fallToGateway : (Bool -> Model) -> Model
     }
 
 
