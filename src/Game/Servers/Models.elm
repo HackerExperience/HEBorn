@@ -1,7 +1,7 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
-import Game.Account.Bounces.Models as Bounces
+import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Logs.Models as Logs

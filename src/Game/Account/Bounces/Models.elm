@@ -1,7 +1,6 @@
 module Game.Account.Bounces.Models
     exposing
         ( Model
-        , ID
         , Bounce
         , Path
         , initialModel
@@ -15,14 +14,11 @@ module Game.Account.Bounces.Models
 
 import Dict exposing (Dict)
 import Game.Meta.Types.Network as Network
+import Game.Account.Bounces.Shared exposing (..)
 
 
 type alias Model =
     Dict ID Bounce
-
-
-type alias ID =
-    String
 
 
 type alias Bounce =

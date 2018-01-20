@@ -1,13 +1,11 @@
 module Game.Servers.Update exposing (..)
 
-import Utils.Update as Update
 import Json.Decode as Decode exposing (Value)
 import Decoders.Servers
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Account as Account
-import Game.Account.Bounces.Models as Bounces
-import Game.Meta.Models as Meta
+import Utils.Cmd as Cmd
 import Game.Meta.Types.Network as Network
+import Game.Account.Bounces.Shared as Bounces
+import Game.Meta.Models as Meta
 import Game.Servers.Notifications.Messages as Notifications
 import Game.Servers.Notifications.Update as Notifications
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -20,20 +18,19 @@ import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Hardware.Update as Hardware
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Servers.Requests.Resync as Resync
+import Game.Servers.Requests.Resync exposing (resyncRequest)
 import Game.Servers.Config exposing (..)
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
-import Game.Servers.Requests exposing (..)
 import Game.Servers.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, Cmd msg )
 
 
 type alias ServerUpdateResponse msg =
-    ( Server, Cmd msg, Dispatch )
+    ( Server, Cmd msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -42,11 +39,11 @@ update config msg model =
         ServerMsg cid msg ->
             onServerMsg config cid msg model
 
-        Resync cid ->
-            onResync config cid model
+        Synced cid server ->
+            ( insert cid server model, Cmd.none )
 
-        Request data ->
-            onRequest config data model
+        HandleResync cid ->
+            onResync config cid model
 
         HandleJoinedServer cid value ->
             handleJoinedServer config cid value model
@@ -63,46 +60,31 @@ onServerMsg config cid msg model =
         Just server ->
             server
                 |> updateServer config cid model msg
-                |> Update.mapModel (flip (insert cid) model)
+                |> Tuple.mapFirst (flip (insert cid) model)
 
         Nothing ->
-            Update.fromModel model
-
-
-onRequest :
-    Config msg
-    -> RequestMsg
-    -> Model
-    -> UpdateResponse msg
-onRequest config data model =
-    let
-        response =
-            receive config.lastTick data
-    in
-        case response of
-            Just response ->
-                updateRequest config response model
-
-            Nothing ->
-                Update.fromModel model
-
-
-updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
-updateRequest config data model =
-    case data of
-        ResyncServer (Resync.Okay ( cid, server )) ->
-            Update.fromModel <| insert cid server model
+            ( model, Cmd.none )
 
 
 onResync : Config msg -> CId -> Model -> UpdateResponse msg
 onResync config cid model =
     let
+        handler result =
+            case result of
+                Ok ( cid, servers ) ->
+                    config.toMsg <| Synced cid servers
+
+                Err () ->
+                    config.batchMsg []
+
         cmd =
             config
-                |> Resync.request (getGatewayCache cid model) cid
-                |> Cmd.map config.toMsg
+                |> resyncRequest cid
+                    config.lastTick
+                    (getGatewayCache cid model)
+                |> Cmd.map handler
     in
-        ( model, cmd, Dispatch.none )
+        ( model, cmd )
 
 
 updateServer :
@@ -138,9 +120,6 @@ updateServer config cid model msg server =
         TunnelsMsg msg ->
             onTunnelsMsg config cid msg server
 
-        ServerRequest data ->
-            updateServerRequest config (serverReceive data) server
-
         NotificationsMsg msg ->
             onNotificationsMsg config cid msg server
 
@@ -152,7 +131,7 @@ handleSetBounce :
     -> Server
     -> ServerUpdateResponse msg
 handleSetBounce config cid maybeBounceId server =
-    Update.fromModel <| setBounce maybeBounceId server
+    ( setBounce maybeBounceId server, Cmd.none )
 
 
 handleSetEndpoint :
@@ -161,7 +140,7 @@ handleSetEndpoint :
     -> Server
     -> ServerUpdateResponse msg
 handleSetEndpoint config cid server =
-    Update.fromModel <| setEndpointCId cid server
+    ( setEndpointCId cid server, Cmd.none )
 
 
 handleSetActiveNIP :
@@ -170,7 +149,7 @@ handleSetActiveNIP :
     -> Server
     -> ServerUpdateResponse msg
 handleSetActiveNIP config nip server =
-    Update.fromModel <| setActiveNIP nip server
+    ( setActiveNIP nip server, Cmd.none )
 
 
 onFilesystemMsg :
@@ -196,10 +175,10 @@ onFilesystemMsg config cid id msg server =
                 server_ =
                     setStorage id storage_ server
             in
-                ( server_, cmd, Dispatch.none )
+                ( server_, cmd )
 
         Nothing ->
-            Update.fromModel server
+            ( server, Cmd.none )
 
 
 onLogsMsg :
@@ -213,13 +192,13 @@ onLogsMsg config cid msg server =
         config_ =
             logsConfig cid config
 
-        ( logs, cmd, dispatch ) =
+        ( logs, cmd ) =
             Logs.update config_ msg <| getLogs server
 
         server_ =
             setLogs logs server
     in
-        ( server_, cmd, dispatch )
+        ( server_, cmd )
 
 
 onProcessesMsg :
@@ -242,7 +221,7 @@ onProcessesMsg config cid msg server =
         server_ =
             setProcesses processes server
     in
-        ( server_, cmd, Dispatch.none )
+        ( server_, cmd )
 
 
 onHardwareMsg :
@@ -265,7 +244,7 @@ onHardwareMsg config cid msg server =
         server_ =
             setHardware hardware server
     in
-        ( server_, cmd, Dispatch.none )
+        ( server_, cmd )
 
 
 onTunnelsMsg :
@@ -279,13 +258,13 @@ onTunnelsMsg config cid msg server =
         config_ =
             tunnelsConfig cid config
 
-        ( tunnels, cmd, dispatch ) =
+        ( tunnels, cmd ) =
             Tunnels.update config_ msg <| getTunnels server
 
         server_ =
             setTunnels tunnels server
     in
-        ( server_, cmd, dispatch )
+        ( server_, cmd )
 
 
 onNotificationsMsg :
@@ -305,21 +284,7 @@ onNotificationsMsg config cid msg server =
         model_ =
             setNotifications notifications server
     in
-        ( model_, cmd, Dispatch.none )
-
-
-updateServerRequest :
-    Config msg
-    -> Maybe ServerResponse
-    -> Server
-    -> ServerUpdateResponse msg
-updateServerRequest config response server =
-    case response of
-        Just _ ->
-            Update.fromModel server
-
-        Nothing ->
-            Update.fromModel server
+        ( model_, cmd )
 
 
 handleJoinedServer :
@@ -337,29 +302,20 @@ handleJoinedServer config cid value model =
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
                 let
-                    dispatch =
-                        if isGateway server then
-                            cid
-                                |> Account.NewGateway
-                                |> Dispatch.account
-                        else
-                            Dispatch.none
-
                     model_ =
                         insert cid server model
 
-                    dispatch_ =
-                        Dispatch.batch
-                            [ dispatch
-
-                            --, Dispatch.web <| Web.JoinedServer cid
-                            ]
+                    cmd =
+                        if isGateway server then
+                            Cmd.fromMsg <| config.onNewGateway cid
+                        else
+                            Cmd.none
                 in
-                    ( model_, Cmd.none, dispatch_ )
+                    ( model_, cmd )
 
             Err reason ->
                 let
                     log =
                         Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
                 in
-                    Update.fromModel model
+                    ( model, Cmd.none )

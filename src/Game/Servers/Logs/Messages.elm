@@ -5,23 +5,9 @@ import Game.Servers.Logs.Models exposing (..)
 
 
 type Msg
-    = HandleDelete ID
+    = HandleCreated ID Log
+    | HandleUpdateContent ID String
     | HandleHide ID
-    | HandleCreated ID Log
-    | LogMsg ID LogMsg
-    | Request RequestMsg
-
-
-type LogMsg
-    = HandleUpdateContent String
-    | HandleEncrypt
-    | Decrypt String
-    | LogRequest LogRequestMsg
-
-
-type RequestMsg
-    = IndexRequest ResponseType
-
-
-type LogRequestMsg
-    = NoOp ResponseType
+    | HandleEncrypt ID
+    | HandleDecrypt ID String
+    | HandleDelete ID

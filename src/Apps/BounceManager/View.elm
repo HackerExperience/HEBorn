@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Account.Database.Models as Database exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
+import Game.Account.Bounces.Shared as Bounces
 import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account

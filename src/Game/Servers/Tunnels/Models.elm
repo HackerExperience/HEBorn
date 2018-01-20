@@ -1,7 +1,7 @@
 module Game.Servers.Tunnels.Models exposing (..)
 
 import Dict exposing (Dict)
-import Game.Account.Bounces.Models as Bounces
+import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network
 
 
