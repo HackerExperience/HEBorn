@@ -121,7 +121,7 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Processes.Download request" code flagsSrc
+                |> report_ "Processes.Download" code flagsSrc
                 |> Result.mapError (always Unknown)
                 |> Result.andThen Err
 
