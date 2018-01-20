@@ -202,13 +202,13 @@ onServers config msg model =
                 (getFlags model)
                 config
 
-        ( servers, cmd, dispatch ) =
+        ( servers, cmd ) =
             Servers.update config_ msg <| getServers model
 
         model_ =
             setServers servers model
     in
-        ( model_, cmd, dispatch )
+        ( model_, cmd, Dispatch.none )
 
 
 onBackFlix : Config msg -> BackFlix.Msg -> Model -> UpdateResponse msg

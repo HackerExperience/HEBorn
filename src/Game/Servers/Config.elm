@@ -22,6 +22,7 @@ type alias Config msg =
     , lastTick : Time
     , onInventoryFreed : Inventory.Entry -> msg
     , onInventoryUsed : Inventory.Entry -> msg
+    , onNewGateway : CId -> msg
     }
 
 
