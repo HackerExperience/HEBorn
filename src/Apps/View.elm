@@ -65,7 +65,11 @@ view config data model =
             Html.map (MusicMsg >> config.toMsg) (Hebamp.view data model)
 
         CtrlPanelModel model ->
-            Html.map (CtrlPanelMsg >> config.toMsg) (CtrlPanel.view data model)
+            let
+                config_ =
+                    ctrlPainelConfig config
+            in
+                CtrlPanel.view config_ model
 
         ServersGearsModel model ->
             Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view data model)
@@ -74,7 +78,11 @@ view config data model =
             Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view data model)
 
         LanViewerModel model ->
-            Html.map (LanViewerMsg >> config.toMsg) (LanViewer.view data model)
+            let
+                config_ =
+                    lanViewerConfig config
+            in
+                LanViewer.view config_ model
 
         EmailModel model ->
             Html.map (EmailMsg >> config.toMsg) (Email.view data model)

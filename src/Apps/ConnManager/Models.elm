@@ -6,8 +6,7 @@ type Sorting
 
 
 type alias Model =
-    { menu : Menu.Model
-    , filterText : String
+    { filterText : String
     , filterFlags : List Never
     , filterCache : List String
     , sorting : Sorting

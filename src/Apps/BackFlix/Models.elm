@@ -3,7 +3,6 @@ module Apps.BackFlix.Models exposing (..)
 import Dict exposing (Dict)
 import Game.Data as Game
 import Game.BackFlix.Models as BackFlix
-import Apps.BackFlix.Menu.Models as Menu
 
 
 type Sorting
@@ -12,8 +11,7 @@ type Sorting
 
 
 type alias Model =
-    { menu : Menu.Model
-    , filterText : String
+    { filterText : String
     , filterFlags : List Never
     , filterCache : List BackFlix.Id
     , sorting : Sorting
@@ -48,8 +46,7 @@ windowInitSize =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , filterText = ""
+    { filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort

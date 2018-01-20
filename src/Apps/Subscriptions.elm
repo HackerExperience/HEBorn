@@ -9,18 +9,7 @@ import Apps.TaskManager.Subscriptions as TaskManager
 import Apps.Browser.Subscriptions as Browser
 import Apps.Explorer.Subscriptions as Explorer
 import Apps.DBAdmin.Subscriptions as Database
-import Apps.ConnManager.Subscriptions as ConnManager
-import Apps.BounceManager.Subscriptions as BounceManager
-import Apps.Finance.Subscriptions as Finance
-import Apps.Hebamp.Subscriptions as Hebamp
-import Apps.CtrlPanel.Subscriptions as CtrlPanel
-import Apps.ServersGears.Subscriptions as ServersGears
 import Apps.LocationPicker.Subscriptions as LocationPicker
-import Apps.LanViewer.Subscriptions as LanViewer
-import Apps.Email.Subscriptions as Email
-import Apps.Bug.Subscriptions as Bug
-import Apps.Calculator.Subscriptions as Calculator
-import Apps.BackFlix.Subscriptions as BackFlix
 import Apps.FloatingHeads.Subscriptions as FloatingHeads
 
 
@@ -47,21 +36,9 @@ subscriptions config data model =
             Database.subscriptions data model
                 |> Sub.map (DatabaseMsg >> config.toMsg)
 
-        CtrlPanelModel model ->
-            CtrlPanel.subscriptions data model
-                |> Sub.map (CtrlPanelMsg >> config.toMsg)
-
-        ServersGearsModel model ->
-            ServersGears.subscriptions data model
-                |> Sub.map (ServersGearsMsg >> config.toMsg)
-
         LocationPickerModel model ->
             LocationPicker.subscriptions data model
                 |> Sub.map (LocationPickerMsg >> config.toMsg)
-
-        BackFlixModel model ->
-            BackFlix.subscriptions data model
-                |> Sub.map (BackFlixMsg >> config.toMsg)
 
         FloatingHeadsModel model ->
             FloatingHeads.subscriptions data model

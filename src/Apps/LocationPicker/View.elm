@@ -16,8 +16,7 @@ import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
 view : Game.Data -> Model -> Html Msg
 view data model =
     div
-        [ menuForDummy
-        , class [ Super ]
+        [ class [ Super ]
         ]
         [ div [ class [ Map ] ]
             [ Native.Untouchable.node "hemap" model.mapEId ]

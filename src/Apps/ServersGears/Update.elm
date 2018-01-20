@@ -8,9 +8,6 @@ import Game.Models as GameModels
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Apps.ServersGears.Menu.Messages as Menu
-import Apps.ServersGears.Menu.Update as Menu
-import Apps.ServersGears.Menu.Actions as Menu
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 

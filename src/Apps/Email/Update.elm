@@ -35,7 +35,7 @@ onSelectContact email model =
             email
                 |> FloatingHeads.OpenAtContact
                 |> Apps.FloatingHeadsParams
-                |> OS.OpenApp Nothin
+                |> OS.OpenApp Nothing
                 |> Dispatch.os
     in
         ( model, Cmd.none, dispatch )

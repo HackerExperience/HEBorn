@@ -6,9 +6,6 @@ import Game.Data as Game
 import Time exposing (Time)
 import Apps.Hebamp.Models exposing (Model)
 import Apps.Hebamp.Messages as Hebamp exposing (Msg(..))
-import Apps.Hebamp.Menu.Messages as Menu
-import Apps.Hebamp.Menu.Update as Menu
-import Apps.Hebamp.Menu.Actions as Menu
 
 
 type alias UpdateResponse =
@@ -22,13 +19,6 @@ update :
     -> UpdateResponse
 update data msg model =
     case msg of
-        -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         -- Intenals
         TimeUpdate playerId time ->
             onTimeUpdate playerId time model
@@ -41,21 +31,6 @@ update data msg model =
 
         SetCurrentTime time ->
             onSetCurrentTime time model
-
-
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, coreMsg )
 
 
 onTimeUpdate : String -> Float -> Model -> UpdateResponse

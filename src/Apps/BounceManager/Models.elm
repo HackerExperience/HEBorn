@@ -7,8 +7,7 @@ type MainTab
 
 
 type alias Model =
-    { menu : Menu.Model
-    , selected : MainTab
+    { selected : MainTab
     }
 
 

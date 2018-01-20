@@ -2,6 +2,7 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Native.Panic
+import ContextMenu exposing (ContextMenu)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
@@ -23,8 +24,8 @@ import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
 import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
-import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
+import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Actions as Menu
 import Apps.Browser.Pages.Configs exposing (..)
 import Apps.Browser.Messages exposing (..)
