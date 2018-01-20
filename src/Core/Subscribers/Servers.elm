@@ -122,10 +122,10 @@ fromLogs : CId -> Logs -> Subscribers
 fromLogs cid dispatch =
     case dispatch of
         UpdateLog a b ->
-            [ logs cid <| Logs.LogMsg a <| Logs.HandleUpdateContent b ]
+            [ logs cid <| Logs.HandleUpdateContent a b ]
 
         EncryptLog a ->
-            [ logs cid <| Logs.LogMsg a Logs.HandleEncrypt ]
+            [ logs cid <| Logs.HandleEncrypt a ]
 
         HideLog a ->
             [ logs cid <| Logs.HandleHide a ]

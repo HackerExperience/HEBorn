@@ -1,14 +1,8 @@
-module Game.Servers.Messages
-    exposing
-        ( Msg(..)
-        , ServerMsg(..)
-        , RequestMsg(..)
-        , ServerRequestMsg(..)
-        )
+module Game.Servers.Messages exposing (Msg(..), ServerMsg(..))
 
 import Json.Decode exposing (Value)
 import Requests.Types exposing (ResponseType)
-import Game.Account.Bounces.Models as Bounces
+import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Logs.Messages as Logs
@@ -25,13 +19,9 @@ import Game.Servers.Models exposing (..)
 
 type Msg
     = ServerMsg CId ServerMsg
-    | Resync CId
-    | Request RequestMsg
+    | Synced CId Server
+    | HandleResync CId
     | HandleJoinedServer CId Value
-
-
-type RequestMsg
-    = ResyncRequest (Maybe GatewayCache) CId ResponseType
 
 
 
@@ -47,9 +37,4 @@ type ServerMsg
     | ProcessesMsg Processes.Msg
     | HardwareMsg Hardware.Msg
     | TunnelsMsg Tunnels.Msg
-    | ServerRequest ServerRequestMsg
     | NotificationsMsg Notifications.Msg
-
-
-type ServerRequestMsg
-    = NoOp
