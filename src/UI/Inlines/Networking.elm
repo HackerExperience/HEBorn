@@ -1,7 +1,6 @@
 module UI.Inlines.Networking exposing (user, addr, file)
 
 import Html exposing (Html, Attribute, text, node)
-import Html.Attributes exposing (attribute)
 import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (boolAttr)
 import Game.Meta.Types.Network exposing (IP)

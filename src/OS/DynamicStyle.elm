@@ -7,10 +7,8 @@ import Json.Encode as Json
 import Css exposing (Stylesheet)
 import Css.File
 import OS.Config exposing (..)
-import Game.Models as Game
 import Game.Storyline.DynamicStyle as Storyline
 import Game.Storyline.Missions.DynamicStyle as Missions
-import UI.DynStyles.SimplePlan.Apps exposing (..)
 
 
 styleNode : String -> List Stylesheet -> Html msg
@@ -24,10 +22,6 @@ styleNode id_ stylesheet =
             |> property "innerHTML"
         ]
         []
-
-
-
---CONFREFACTOR : Remove Game.Model After Refactor
 
 
 view : Config msg -> Html msg

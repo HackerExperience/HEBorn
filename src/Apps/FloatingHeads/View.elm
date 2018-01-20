@@ -5,7 +5,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
-import Css.Utils exposing (styles)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Game.Data as Game
 import Game.Models as Game
