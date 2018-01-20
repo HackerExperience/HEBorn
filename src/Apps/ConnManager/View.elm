@@ -13,7 +13,6 @@ import UI.Entries.FilterHeader exposing (filterHeader)
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)
 import Apps.ConnManager.Resources exposing (Classes(..), prefix)
-import Apps.ConnManager.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -68,8 +67,8 @@ view data model =
         filterHeaderLayout =
             verticalList
                 [ filterHeader
-                    [ ( class [ IcoUp ], DummyNoOp, False )
-                    , ( class [ IcoDown ], DummyNoOp, False )
+                    [ ( class [ IcoUp ], FilterUp, False )
+                    , ( class [ IcoDown ], FilterDown, False )
                     ]
                     []
                     model.filterText
@@ -92,7 +91,5 @@ view data model =
     in
         verticalSticked
             (Just [ filterHeaderLayout ])
-            [ mainEntries
-            , menuView model
-            ]
+            [ mainEntries ]
             Nothing

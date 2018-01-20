@@ -14,10 +14,8 @@ import Apps.ConnManager.Update as ConnManager
 import Apps.BounceManager.Update as BounceManager
 import Apps.Finance.Update as Finance
 import Apps.Hebamp.Update as Hebamp
-import Apps.CtrlPanel.Update as CtrlPanel
 import Apps.ServersGears.Update as ServersGears
 import Apps.LocationPicker.Update as LocationPicker
-import Apps.LanViewer.Update as LanViewer
 import Apps.Email.Update as Email
 import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
@@ -175,21 +173,6 @@ update config data msg model =
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
 
-        CtrlPanelMsg msg ->
-            case model of
-                CtrlPanelModel model ->
-                    let
-                        ( model_, cmd, dispatch ) =
-                            CtrlPanel.update data msg model
-
-                        cmd_ =
-                            Update.mapCmd (CtrlPanelMsg >> config.toMsg) ( model_, cmd, dispatch )
-                    in
-                        map config CtrlPanelModel CtrlPanelMsg cmd_
-
-                _ ->
-                    ( model, Cmd.none, Dispatch.none )
-
         ServersGearsMsg msg ->
             case model of
                 ServersGearsModel model ->
@@ -216,21 +199,6 @@ update config data msg model =
                             Update.mapCmd (LocationPickerMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
                         map config LocationPickerModel LocationPickerMsg cmd_
-
-                _ ->
-                    ( model, Cmd.none, Dispatch.none )
-
-        LanViewerMsg msg ->
-            case model of
-                LanViewerModel model ->
-                    let
-                        ( model_, cmd, dispatch ) =
-                            LanViewer.update data msg model
-
-                        cmd_ =
-                            Update.mapCmd (LanViewerMsg >> config.toMsg) ( model_, cmd, dispatch )
-                    in
-                        map config LanViewerModel LanViewerMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )

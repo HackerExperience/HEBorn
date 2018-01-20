@@ -14,7 +14,6 @@ import Game.Account.Finances.Shared exposing (toMoney)
 import Apps.Finance.Messages exposing (Msg(..))
 import Apps.Finance.Models exposing (..)
 import Apps.Finance.Resources exposing (Classes(..), prefix)
-import Apps.Finance.Menu.View exposing (..)
 
 
 { id, class, classList } =

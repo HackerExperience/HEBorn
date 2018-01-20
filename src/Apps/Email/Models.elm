@@ -1,10 +1,8 @@
 module Apps.Email.Models exposing (..)
 
-import Apps.Email.Menu.Models as Menu
-
 
 type alias Model =
-    { menu : Menu.Model }
+    {}
 
 
 name : String
@@ -24,8 +22,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    }
+    {}
 
 
 windowInitSize : ( Float, Float )

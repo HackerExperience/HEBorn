@@ -1,11 +1,8 @@
 module Apps.Bug.Models exposing (..)
 
-import Apps.Bug.Menu.Models as Menu
-
 
 type alias Model =
-    { menu : Menu.Model
-    }
+    {}
 
 
 name : String
@@ -25,5 +22,4 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    }
+    {}

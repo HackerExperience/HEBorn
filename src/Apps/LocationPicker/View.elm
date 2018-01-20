@@ -7,7 +7,6 @@ import Game.Data as Game
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
-import Apps.LocationPicker.Menu.View exposing (..)
 
 
 { id, class, classList } =
@@ -17,8 +16,7 @@ import Apps.LocationPicker.Menu.View exposing (..)
 view : Game.Data -> Model -> Html Msg
 view data model =
     div
-        [ menuForDummy
-        , class [ Super ]
+        [ class [ Super ]
         ]
         [ div [ class [ Map ] ]
             [ Native.Untouchable.node "hemap" model.mapEId ]
@@ -39,5 +37,4 @@ view data model =
 
                 Nothing ->
                     [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
-        , menuView model
         ]

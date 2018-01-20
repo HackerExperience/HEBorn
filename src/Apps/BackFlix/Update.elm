@@ -5,9 +5,6 @@ import Utils.Update as Update
 import Game.Data as Game
 import Apps.BackFlix.Models exposing (..)
 import Apps.BackFlix.Messages as BackFlix exposing (Msg(..))
-import Apps.BackFlix.Menu.Messages as Menu
-import Apps.BackFlix.Menu.Update as Menu
-import Apps.BackFlix.Menu.Actions as Menu
 
 
 type alias UpdateResponse =
@@ -21,12 +18,6 @@ update :
     -> ( Model, Cmd BackFlix.Msg, Dispatch )
 update data msg model =
     case msg of
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         UpdateTextFilter filter ->
             onUpdateFilter data filter model
 
@@ -46,18 +37,3 @@ onGoTabs data tab model =
 onUpdateFilter : Game.Data -> String -> Model -> UpdateResponse
 onUpdateFilter data filter model =
     Update.fromModel model
-
-
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, dispatch ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, dispatch )

@@ -1,15 +1,12 @@
 module Apps.ConnManager.Models exposing (..)
 
-import Apps.ConnManager.Menu.Models as Menu
-
 
 type Sorting
     = DefaultSort
 
 
 type alias Model =
-    { menu : Menu.Model
-    , filterText : String
+    { filterText : String
     , filterFlags : List Never
     , filterCache : List String
     , sorting : Sorting
@@ -33,8 +30,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , filterText = ""
+    { filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort

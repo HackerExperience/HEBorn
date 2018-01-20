@@ -1,11 +1,8 @@
 module Apps.Finance.Models exposing (..)
 
-import Apps.Finance.Menu.Models as Menu
-
 
 type alias Model =
-    { menu : Menu.Model
-    , selected : MainTab
+    { selected : MainTab
     }
 
 
@@ -31,8 +28,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , selected = TabMoney
+    { selected = TabMoney
     }
 
 

@@ -11,7 +11,7 @@ import Core.Error as Error
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "hecalc"
+    Html.CssHelpers.withNamespace prefix
 
 
 view : Config msg -> Model -> Html msg
