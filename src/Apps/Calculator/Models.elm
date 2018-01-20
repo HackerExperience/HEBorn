@@ -1,7 +1,5 @@
 module Apps.Calculator.Models exposing (..)
 
-import Apps.Calculator.Menu.Models as Menu
-
 
 type Operator
     = Typing String
@@ -18,7 +16,6 @@ type Operator
 
 type alias Model =
     { display : Operator
-    , menu : Menu.Model
     }
 
 
@@ -45,5 +42,4 @@ icon =
 initialModel : Model
 initialModel =
     { display = Typing "0"
-    , menu = Menu.initialMenu
     }

@@ -1,13 +1,10 @@
 module Apps.Calculator.Subscriptions exposing (..)
 
-import Game.Data as Game
+import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (Model)
 import Apps.Calculator.Messages exposing (Msg(..))
-import Apps.Calculator.Menu.Subscriptions as Menu
 
 
-subscriptions : Game.Data -> Model -> Sub Msg
-subscriptions data model =
-    Sub.batch
-        [ Sub.map MenuMsg (Menu.subscriptions model.menu)
-        ]
+subscriptions : Config msg -> Model -> Sub Msg
+subscriptions config model =
+    Sub.none
