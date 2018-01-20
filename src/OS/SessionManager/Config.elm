@@ -9,7 +9,8 @@ import OS.SessionManager.Messages exposing (..)
 
 
 type alias Config msg =
-    { toMsg : Msg -> msg }
+    { toMsg : Msg -> msg
+    }
 
 
 wmConfig : String -> Config msg -> WindowManager.Config msg

@@ -3,7 +3,7 @@ module Apps.Calculator.View exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
+import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (..)
 import Apps.Calculator.Messages exposing (Msg(..))
 import Apps.Calculator.Resources exposing (..)
@@ -14,9 +14,9 @@ import Core.Error as Error
     Html.CssHelpers.withNamespace "hecalc"
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
-    render model
+view : Config msg -> Model -> Html msg
+view config model =
+    render config model
 
 
 renderTyping : Operator -> String
@@ -53,14 +53,14 @@ renderTyping op =
             "Error"
 
 
-render : Model -> Html Msg
-render model =
+render : Config msg -> Model -> Html msg
+render config model =
     let
         genBtn class_ action label =
             let
                 attrib =
                     [ class class_
-                    , onClick action
+                    , onClick (config.toMsg action)
                     ]
             in
                 button

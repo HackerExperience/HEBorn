@@ -12,6 +12,7 @@ import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
+import OS.SessionManager.Dock.Config exposing (..)
 import Apps.Models as Apps
 import Apps.Apps as Apps
 import Game.Data as Game
@@ -31,18 +32,18 @@ osClass =
     .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view game model =
+view : Config msg -> Game.Data -> Model -> Html Msg
+view config game model =
     div [ osClass [ OsRes.Dock ] ]
-        [ dock game model ]
+        [ dock config game model ]
 
 
 
 -- internals
 
 
-dock : Game.Data -> Model -> Html Msg
-dock data model =
+dock : Config msg -> Game.Data -> Model -> Html Msg
+dock config data model =
     let
         id =
             toSessionID data

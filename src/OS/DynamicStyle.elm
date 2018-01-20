@@ -6,14 +6,14 @@ import Html.Lazy exposing (lazy)
 import Json.Encode as Json
 import Css exposing (Stylesheet)
 import Css.File
+import OS.Config exposing (..)
 import Game.Models as Game
 import Game.Storyline.DynamicStyle as Storyline
 import Game.Storyline.Missions.DynamicStyle as Missions
-import OS.Messages exposing (Msg)
 import UI.DynStyles.SimplePlan.Apps exposing (..)
 
 
-styleNode : String -> List Stylesheet -> Html Msg
+styleNode : String -> List Stylesheet -> Html msg
 styleNode id_ stylesheet =
     node "style"
         [ id (id_ ++ "DynStyle")
@@ -26,7 +26,11 @@ styleNode id_ stylesheet =
         []
 
 
-view : Game.Model -> Html Msg
+
+--CONFREFACTOR : Remove Game.Model After Refactor
+
+
+view : Config msg -> Html msg
 view { story } =
     let
         missions_ =

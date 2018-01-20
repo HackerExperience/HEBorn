@@ -5,6 +5,7 @@ import Html.CssHelpers
 import Game.Data as Game
 import Dict
 import OS.Resources as OsRes
+import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
@@ -23,12 +24,16 @@ wmClass =
     .class <| Html.CssHelpers.withNamespace WmRes.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view game model =
+
+--CONFREFACT : Remove Game.Data after refact this area
+
+
+view : Config msg -> Game.Data -> Model -> Html msg
+view config game model =
     div
         [ osClass [ OsRes.Session ] ]
-        [ viewWM game model
-        , viewDock game model
+        [ viewWM config game model
+        , viewDock config game model
         ]
 
 
@@ -36,24 +41,29 @@ view game model =
 -- internals
 
 
-viewDock : Game.Data -> Model -> Html Msg
-viewDock game model =
-    model
-        |> Dock.view game
-        |> Html.map DockMsg
+viewDock : Config msg -> Game.Data -> Model -> Html msg
+viewDock config game model =
+    let
+        config_ =
+            dockConfig config
+    in
+        Dock.view config_ game model
+            |> Html.map (DockMsg >> config.toMsg)
 
 
-viewWM : Game.Data -> Model -> Html Msg
-viewWM data model =
+viewWM : Config msg -> Game.Data -> Model -> Html msg
+viewWM config data model =
     let
         id =
             toSessionID data
+
+        config_ =
+            wmConfig id config
     in
         case Dict.get id model.sessions of
             Just wm ->
                 wm
-                    |> WM.view data
-                    |> Html.map (WindowManagerMsg id)
+                    |> WM.view config_ data
 
             Nothing ->
                 div [ wmClass [ WmRes.Canvas ] ] []

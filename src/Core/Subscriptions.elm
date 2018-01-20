@@ -102,9 +102,12 @@ os : Game.Model -> OS.Model -> Sub Msg
 os game model =
     case Game.fromGateway game of
         Just data ->
-            model
-                |> OS.subscriptions data
-                |> Sub.map OSMsg
+            let
+                config =
+                    osConfig game.story
+            in
+                model
+                    |> OS.subscriptions config data
 
         Nothing ->
             Sub.none

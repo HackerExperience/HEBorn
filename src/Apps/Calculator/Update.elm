@@ -2,7 +2,6 @@ module Apps.Calculator.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Game.Data as Game
 import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (..)
 import Apps.Calculator.Messages exposing (..)
@@ -15,11 +14,10 @@ type alias UpdateResponse msg =
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse msg
-update config data msg model =
+update config msg model =
     case msg of
         Input n ->
             onInput n model
@@ -67,10 +65,6 @@ update config data msg model =
 
         KeyMsg code ->
             onKeyMsg code model
-                |> Update.fromModel
-
-        MenuMsg _ ->
-            model
                 |> Update.fromModel
 
 

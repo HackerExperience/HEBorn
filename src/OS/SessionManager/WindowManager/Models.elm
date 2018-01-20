@@ -35,7 +35,6 @@ module OS.SessionManager.WindowManager.Models
         , getAppModelFromWindow
         , group
         , title
-        , windowData
         , windowContext
         , realContext
         , initialPosition
@@ -557,36 +556,6 @@ title window =
     window
         |> getAppModelFromWindow
         |> Apps.title
-
-
-windowData :
-    Game.Data
-    -> Maybe Context
-    -> ID
-    -> Window
-    -> Model
-    -> Game.Data
-windowData data maybeContext id window model =
-    let
-        game =
-            Game.getGame data
-
-        servers =
-            Game.getServers game
-
-        context =
-            Maybe.withDefault (windowContext window) maybeContext
-    in
-        case context of
-            Gateway ->
-                game
-                    |> Game.fromGateway
-                    |> Maybe.withDefault data
-
-            Endpoint ->
-                window.endpoint
-                    |> Maybe.andThen (flip Game.fromServerCId game)
-                    |> Maybe.withDefault data
 
 
 initialPosition : Model -> Position

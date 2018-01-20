@@ -273,7 +273,7 @@ update config data msg model =
                             calculatorConfig config
 
                         update_ =
-                            (Calculator.update config_ data msg model)
+                            (Calculator.update config_ msg model)
                     in
                         map config CalculatorModel CalculatorMsg update_
 

@@ -241,8 +241,11 @@ updatePlayOS msg stateModel =
     case Game.fromGateway stateModel.game of
         Just data ->
             let
+                story =
+                    Game.getStory stateModel.game
+
                 ( os, cmd, dispatch ) =
-                    OS.update osConfig data msg stateModel.os
+                    OS.update (osConfig story) data msg stateModel.os
 
                 stateModel_ =
                     { stateModel | os = os }

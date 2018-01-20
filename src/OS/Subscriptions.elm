@@ -1,5 +1,6 @@
 module OS.Subscriptions exposing (subscriptions)
 
+import OS.Config exposing (..)
 import OS.Models exposing (..)
 import OS.Messages exposing (..)
 import Game.Data as Game
@@ -9,14 +10,14 @@ import OS.SessionManager.Models as SessionManager
 import OS.SessionManager.Subscriptions as SessionManager
 
 
-subscriptions : Game.Data -> Model -> Sub Msg
-subscriptions data model =
+subscriptions : Config msg -> Game.Data -> Model -> Sub msg
+subscriptions config data model =
     let
         menuSub =
-            menu model.menu
+            menu config model.menu
 
         sessionSub =
-            session data model.session
+            session config data model.session
     in
         Sub.batch
             [ menuSub
@@ -28,15 +29,18 @@ subscriptions data model =
 -- internals
 
 
-menu : Menu.Model -> Sub Msg
-menu model =
+menu : Config msg -> Menu.Model -> Sub msg
+menu config model =
     model
         |> Menu.subscriptions
-        |> Sub.map MenuMsg
+        |> Sub.map (MenuMsg >> config.toMsg)
 
 
-session : Game.Data -> SessionManager.Model -> Sub Msg
-session data model =
-    model
-        |> SessionManager.subscriptions data
-        |> Sub.map SessionManagerMsg
+session : Config msg -> Game.Data -> SessionManager.Model -> Sub msg
+session config data model =
+    let
+        config_ =
+            smConfig config
+    in
+        model
+            |> SessionManager.subscriptions config_ data
