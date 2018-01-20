@@ -6,7 +6,7 @@ import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Finances.Models as Finances
-import Game.Notifications.Models as Notifications
+import Game.Account.Notifications.Models as Notifications
 import Game.Meta.Types.Context exposing (..)
 
 

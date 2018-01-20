@@ -8,9 +8,8 @@ import Core.Dispatch.Account as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Meta.Models as Meta
 import Game.Meta.Types.Network as Network
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Update as Notifications
-import Game.Notifications.Source as Notifications
+import Game.Servers.Notifications.Messages as Notifications
+import Game.Servers.Notifications.Update as Notifications
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
@@ -237,13 +236,13 @@ onProcessesMsg config cid msg server =
         config_ =
             processesConfig cid nip config
 
-        ( processes, cmd, dispatch ) =
+        ( processes, cmd ) =
             Processes.update config_ msg <| getProcesses server
 
         server_ =
             setProcesses processes server
     in
-        ( server_, cmd, dispatch )
+        ( server_, cmd, Dispatch.none )
 
 
 onHardwareMsg :
@@ -300,13 +299,13 @@ onNotificationsMsg config cid msg server =
         config_ =
             notificationsConfig cid config
 
-        ( notifications, cmd, dispatch ) =
-            Notifications.update config_ (Notifications.Server cid) msg <| getNotifications server
+        ( notifications, cmd ) =
+            Notifications.update config_ msg <| getNotifications server
 
         model_ =
             setNotifications notifications server
     in
-        ( model_, cmd, dispatch )
+        ( model_, cmd, Dispatch.none )
 
 
 updateServerRequest :

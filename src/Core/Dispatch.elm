@@ -22,7 +22,6 @@ module Core.Dispatch
         , finances
         , database
         , logflix
-        , notifications
         )
 
 {-| Dispatch types and syntax sugar for dispatching things.
@@ -141,11 +140,6 @@ missions =
 websocket : Websocket.Dispatch -> Dispatch
 websocket =
     Websocket >> dispatch
-
-
-notifications : Notifications.Dispatch -> Dispatch
-notifications =
-    Notifications >> dispatch
 
 
 finances : Account.Finances -> Dispatch

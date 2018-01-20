@@ -1,9 +1,8 @@
-module Game.Notifications.Config exposing (Config)
+module Game.Servers.Notifications.Config exposing (..)
 
 import Time exposing (Time)
 import Core.Flags as Core
-import Game.Account.Models as Account
-import Game.Notifications.Messages exposing (..)
+import Game.Servers.Notifications.Messages exposing (..)
 
 
 type alias Config msg =

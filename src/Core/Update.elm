@@ -1,10 +1,10 @@
 module Core.Update exposing (update)
 
+import Landing.Messages as Landing
+import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
-import Landing.Messages as Landing
-import Landing.Update as Landing
 import Game.Data as Game
 import Game.Messages as Game
 import Game.Models as Game
@@ -19,6 +19,7 @@ import OS.SessionManager.Messages as SM
 import Apps.Messages as Apps
 import Apps.TaskManager.Messages as TaskManager
 import Core.Config exposing (..)
+import Core.Flags as Flags exposing (Flags)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
@@ -28,6 +29,27 @@ import Core.Subscribers as Subscribers
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
+        MultiMsg msgs ->
+            case msgs of
+                [ msg ] ->
+                    update msg model
+
+                msg :: msgs ->
+                    -- this will actually blow the stack when dispatching many
+                    -- things, but we shouldn't dispatch more than 3 messages,
+                    -- so whatever
+                    let
+                        ( model0, cmd0 ) =
+                            update msg model
+
+                        ( model_, cmd1 ) =
+                            update (MultiMsg msgs) model0
+                    in
+                        ( model_, Cmd.batch [ cmd0, cmd1 ] )
+
+                [] ->
+                    ( model, Cmd.none )
+
         HandleBoot id username token ->
             let
                 model_ =
@@ -321,13 +343,8 @@ updateWebsocket msg model =
 
 
 isDev : Model -> Bool
-isDev model =
-    let
-        { version } =
-            getFlags model
-    in
-        -- make this function return False to test the game on production mode
-        version == "dev"
+isDev =
+    getFlags >> Flags.isDev
 
 
 onDebug : Model -> (a -> a) -> a -> a

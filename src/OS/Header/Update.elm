@@ -5,7 +5,6 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
 import Core.Dispatch.Account as Account
 import Core.Dispatch.Servers as Servers
-import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
 import Game.Models as Game
 import Game.Meta.Types.Context exposing (Context)
@@ -16,7 +15,6 @@ import Game.Storyline.Models as Storyline
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import Game.Servers.Hardware.Models as Hardware
-import Game.Notifications.Models as NotificingOpen
 
 
 type alias UpdateResponse =
@@ -184,20 +182,22 @@ onTogglecampaign model =
 
 onServerReadAll : Servers.CId -> Model -> UpdateResponse
 onServerReadAll cid model =
-    let
-        dispatch =
-            Dispatch.notifications <| Notifications.ReadAllServer cid
-    in
-        ( model, Cmd.none, dispatch )
+    -- TODO: remember me
+    --let
+    --dispatch =
+    --    Dispatch.notifications <| Notifications.ReadAllServer cid
+    --in
+    ( model, Cmd.none, Dispatch.none )
 
 
 onAccountReadAll : Model -> UpdateResponse
 onAccountReadAll model =
-    let
-        dispatch =
-            Dispatch.notifications Notifications.ReadAllAccount
-    in
-        ( model, Cmd.none, dispatch )
+    -- TODO: remember me
+    --let
+    --    dispatch =
+    --        Dispatch.notifications Notifications.ReadAllAccount
+    --in
+    ( model, Cmd.none, Dispatch.none )
 
 
 onSelectNIP : Game.Data -> NIP -> Model -> UpdateResponse

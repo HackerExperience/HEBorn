@@ -1,6 +1,6 @@
 module Apps.Explorer.Lib exposing (..)
 
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 -- FILESYSTEM

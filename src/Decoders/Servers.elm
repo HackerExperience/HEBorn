@@ -34,12 +34,12 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Hardware.Models as Hardware
-import Game.Notifications.Models as Notifications
+import Game.Servers.Notifications.Models as Notifications
 import Game.Servers.Shared exposing (..)
 import Decoders.Network
 import Decoders.Processes
 import Decoders.Logs
-import Decoders.Notifications
+import Decoders.ServerNotifications
 import Decoders.Tunnels
 import Decoders.Filesystem
 import Decoders.Hardware
@@ -204,7 +204,7 @@ notifications =
         default =
             Notifications.initialModel
     in
-        optional "notifications" Decoders.Notifications.model default
+        optional "notifications" Decoders.ServerNotifications.model default
 
 
 cids : Decoder (List CId)

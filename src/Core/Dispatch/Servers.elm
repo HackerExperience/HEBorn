@@ -4,7 +4,7 @@ import Game.Account.Bounces.Models as Bounces
 import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Logs.Models as Logs
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Meta.Types.Network as Network
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)

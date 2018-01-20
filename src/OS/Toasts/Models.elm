@@ -1,8 +1,9 @@
 module OS.Toasts.Models exposing (..)
 
 import Dict exposing (Dict)
-import Game.Notifications.Source exposing (Source)
-import Game.Notifications.Models as Notifications
+import Game.Servers.Shared exposing (CId)
+import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Servers.Notifications.Shared as ServersNotifications
 
 
 type alias Model =
@@ -10,10 +11,14 @@ type alias Model =
 
 
 type alias Toast =
-    { notification : Notifications.Content
-    , parent : Maybe Source
+    { notification : Content
     , state : State
     }
+
+
+type Content
+    = Server CId ServersNotifications.Content
+    | Account AccountNotifications.Content
 
 
 type State

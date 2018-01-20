@@ -1,4 +1,4 @@
-module Core.Flags exposing (Flags, initFlags, getVersion)
+module Core.Flags exposing (..)
 
 
 type alias Flags =
@@ -19,3 +19,8 @@ initFlags apiHttpUrl apiWsUrl version =
 getVersion : Flags -> String
 getVersion =
     .version
+
+
+isDev : Flags -> Bool
+isDev { version } =
+    version == "dev"

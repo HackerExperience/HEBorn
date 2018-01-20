@@ -1,55 +1,57 @@
 module Game.Servers.Processes.Requests.Bruteforce
     exposing
-        ( Response(..)
-        , request
-        , receive
+        ( Data
+        , bruteforceRequest
         )
 
-import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
+import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Models exposing (..)
-import Game.Servers.Processes.Messages
-    exposing
-        ( Msg(Request)
-        , RequestMsg(BruteforceRequest)
-        )
 
 
-type Response
-    = Okay
+-- not a bool because we'll threat errors
 
 
-request :
-    ID
-    -> Network.ID
+type alias Data =
+    Result () ()
+
+
+bruteforceRequest :
+    Network.ID
     -> Network.IP
     -> CId
     -> FlagsSource a
-    -> Cmd Msg
-request optimistic network targetIp cid =
-    let
-        payload =
-            Encode.object
-                [ ( "network_id", Encode.string <| network )
-                , ( "ip", Encode.string <| targetIp )
-                , ( "bounces", Encode.list [] )
-                ]
-    in
-        Requests.request (Topics.bruteforce cid)
-            (BruteforceRequest optimistic >> Request)
-            payload
+    -> Cmd Data
+bruteforceRequest network targetIp cid flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.bruteforce cid)
+            (encoder network targetIp)
+        |> Cmd.map (uncurry receiver)
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
+
+-- internals
+
+
+encoder : Network.ID -> Network.IP -> Value
+encoder network targetIp =
+    Encode.object
+        [ ( "network_id", Encode.string <| network )
+        , ( "ip", Encode.string <| targetIp )
+        , ( "bounces", Encode.list [] )
+        ]
+
+
+receiver : Code -> Value -> Data
+receiver code json =
     case code of
         OkCode ->
-            Just Okay
+            Ok ()
 
         _ ->
-            Nothing
+            Err ()

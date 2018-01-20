@@ -3,9 +3,7 @@ module Apps.Bug.Update exposing (update)
 import Core.Error as Error
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
-import Core.Dispatch.Notifications as Notifications
 import Game.Data as Game
-import Game.Notifications.Models as Notifications
 import Native.Panic
 import Apps.Bug.Models exposing (Model)
 import Apps.Bug.Messages as Hackerbug exposing (Msg(..))
@@ -61,9 +59,11 @@ onDummyToast : Model -> UpdateResponse
 onDummyToast model =
     ( model
     , Cmd.none
-    , Notifications.Simple "Hi" "Hello"
-        |> Notifications.Toast Nothing
-        |> Dispatch.notifications
+    , Dispatch.none
+      -- REVIEW: Port me later
+      --, Notifications.Simple "Hi" "Hello"
+      --    |> Notifications.Toast Nothing
+      --    |> Dispatch.notifications
     )
 
 

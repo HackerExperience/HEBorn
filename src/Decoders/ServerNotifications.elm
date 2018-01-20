@@ -1,4 +1,4 @@
-module Decoders.Notifications exposing (..)
+module Decoders.ServerNotifications exposing (..)
 
 import Dict
 import Json.Decode
@@ -15,14 +15,16 @@ import Json.Decode
         , bool
         )
 import Json.Decode.Pipeline exposing (decode, optional, required)
-import Game.Notifications.Models exposing (..)
+import Game.Meta.Types.Notifications exposing (..)
+import Game.Servers.Notifications.Models exposing (..)
+import Game.Servers.Notifications.Shared exposing (..)
 
 
 {-| TODO: proposed for removal
 -}
 notificationsField : Decoder (Model -> b) -> Decoder b
 notificationsField =
-    optional "notifications" model initialModel
+    optional "notifications" model empty
 
 
 model : Decoder Model
@@ -30,7 +32,7 @@ model =
     map Dict.fromList (list notification)
 
 
-notification : Decoder ( ID, Notification )
+notification : Decoder ( Id, Notification Content )
 notification =
     field "type" string
         |> andThen content
@@ -41,7 +43,7 @@ content : String -> Decoder Content
 content type_ =
     case type_ of
         "simple" ->
-            decode (Simple)
+            decode Generic
                 |> required "title" string
                 |> required "msg" string
                 |> fromMeta
@@ -57,7 +59,7 @@ fromMeta =
     field "meta"
 
 
-base : Content -> Decoder ( ID, Notification )
+base : Content -> Decoder ( Id, Notification Content )
 base content =
     decode
         (\c r -> ( ( c, 0 ), Notification content r ))

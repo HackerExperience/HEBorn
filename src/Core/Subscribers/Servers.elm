@@ -2,8 +2,6 @@ module Core.Subscribers.Servers exposing (dispatch)
 
 import Core.Dispatch.Servers exposing (..)
 import Core.Subscribers.Helpers exposing (..)
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Models as Notifications
 import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Logs.Messages as Logs
@@ -159,16 +157,10 @@ fromProcesses id dispatch =
 
         NewDownloadProcess a b c ->
             [ processes id <| Processes.HandleStartDownload a b c
-            , serverNotif id <|
-                Notifications.HandleInsert Nothing <|
-                    Notifications.DownloadStarted a b c
             ]
 
         NewPublicDownloadProcess a b c ->
             [ processes id <| Processes.HandleStartPublicDownload a b c
-            , serverNotif id <|
-                Notifications.HandleInsert Nothing <|
-                    Notifications.DownloadStarted a b c
             ]
 
         StartedProcess a ->

@@ -16,6 +16,7 @@ import Game.Messages exposing (..)
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     }
 
 
@@ -23,6 +24,7 @@ serversConfig : Time -> Core.Flags -> Config msg -> Servers.Config msg
 serversConfig lastTick flags config =
     { flags = flags
     , toMsg = ServersMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , lastTick = lastTick
     }
 

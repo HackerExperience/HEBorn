@@ -1,7 +1,7 @@
 module Apps.Browser.Pages.Webserver.Config exposing (Config)
 
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages exposing (..)
 

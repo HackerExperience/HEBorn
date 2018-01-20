@@ -12,6 +12,7 @@ import OS.Config as OS
 gameConfig : Game.Config Msg
 gameConfig =
     { toMsg = GameMsg
+    , batchMsg = MultiMsg
     }
 
 

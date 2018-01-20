@@ -1,35 +1,28 @@
-module Game.Servers.Processes.Messages exposing (Msg(..), RequestMsg(..))
+module Game.Servers.Processes.Messages exposing (Msg(..))
 
-import Requests.Types exposing (ResponseType)
-import Game.Meta.Types.Network as Network
-import Game.Servers.Processes.Models exposing (..)
-import Game.Servers.Shared as Servers
-import Game.Servers.Filesystem.Models as Filesystem
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
+import Game.Meta.Types.Network as Network
+import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Processes.Requests.Download as Download
+import Game.Servers.Processes.Models exposing (..)
 
 
 type Msg
-    = HandlePause ID
+    = DownloadRequestFailed ID
+    | HandleStartDownload Network.NIP Download.StorageId Filesystem.FileEntry
+    | HandleStartPublicDownload Network.NIP Download.StorageId Filesystem.FileEntry
+    | BruteforceRequestFailed ID
+    | HandleStartBruteforce Network.IP
+    | HandleBruteforceFailed BruteforceFailed.Data
+    | HandleProcessStarted ProcessStarted.Data
+    | HandleProcessConclusion ProcessConclusion.Data
+    | HandleProcessesChanged ProcessesChanged.Data
+    | HandlePause ID
     | HandleResume ID
     | HandleRemove ID
     | HandleComplete ID -- may be removed
-    | HandleStartBruteforce Network.IP
-    | HandleStartDownload Network.NIP Servers.StorageId Filesystem.FileEntry
-    | HandleStartPublicDownload Network.NIP Servers.StorageId Filesystem.FileEntry
-      -- start may be removed if we provide a specific
-      -- function for every process type
+      -- to be deprecated
     | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )
-    | Request RequestMsg
-    | HandleProcessStarted ProcessStarted.Data
-    | HandleProcessConclusion ProcessConclusion.Data
-    | HandleBruteforceFailed BruteforceFailed.Data
-    | HandleProcessesChanged ProcessesChanged.Data
-    | HandleBruteforceSuccess ID
-
-
-type RequestMsg
-    = BruteforceRequest ID ResponseType
-    | DownloadRequest ID ResponseType

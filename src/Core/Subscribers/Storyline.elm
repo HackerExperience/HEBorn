@@ -4,8 +4,6 @@ import Core.Dispatch.Storyline exposing (..)
 import Core.Subscribers.Helpers exposing (..)
 import Events.Account.Story.NewEmail as StoryNewEmail
 import Events.Account.Story.Completed as StoryCompleted
-import Game.Notifications.Models as Notifications
-import Game.Notifications.Messages as Notifications
 import Game.Account.Messages as Account
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Emails.Messages as Emails
@@ -40,10 +38,12 @@ fromEmails dispatch =
 
         ReceivedEmail a ->
             [ emails <| Emails.HandleNewEmail a
-            , accountNotif <|
-                StoryNewEmail.notify Notifications.NewEmail
-                    Notifications.HandleInsert
-                    a
+
+            -- REVIEW: remember me
+            --, accountNotif <|
+            --    StoryNewEmail.notify Notifications.NewEmail
+            --        Notifications.HandleInsert
+            --        a
             ]
 
         UnlockedEmail a ->

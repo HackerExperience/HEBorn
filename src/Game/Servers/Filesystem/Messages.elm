@@ -1,7 +1,7 @@
 module Game.Servers.Filesystem.Messages exposing (..)
 
-import Game.Servers.Filesystem.Models exposing (..)
 import Requests.Types exposing (ResponseType)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 type Msg

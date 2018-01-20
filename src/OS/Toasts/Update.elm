@@ -30,9 +30,14 @@ update _ msg model =
         Fade id ->
             onFade id model
 
-        HandleInsert source content ->
+        HandleAccount content ->
             model
-                |> insert (Toast content source Alive)
+                |> insert (Toast (Account content) Alive)
+                |> uncurry waitFade
+
+        HandleServers cid content ->
+            model
+                |> insert (Toast (Server cid content) Alive)
                 |> uncurry waitFade
 
 
@@ -90,5 +95,4 @@ waitDeath id model =
 
 delay : Time -> msg -> Cmd msg
 delay time msg =
-    Process.sleep time
-        |> Task.perform (\_ -> msg)
+    Task.perform (\_ -> msg) <| Process.sleep time

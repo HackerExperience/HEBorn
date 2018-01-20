@@ -9,9 +9,9 @@ import Core.Dispatch.Websocket as Ws
 import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Source as Notifications
-import Game.Notifications.Update as Notifications
+import Game.Account.Notifications.Models as Notifications
+import Game.Account.Notifications.Messages as Notifications
+import Game.Account.Notifications.Update as Notifications
 import Game.Meta.Types.Context exposing (..)
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Messages as Finances
@@ -168,13 +168,13 @@ onNotifications config msg model =
         config_ =
             notificationsConfig config
 
-        ( notifications, cmd, dispatch ) =
-            Notifications.update config_ Notifications.Account msg <| getNotifications model
+        ( notifications, cmd ) =
+            Notifications.update config_ msg <| getNotifications model
 
         model_ =
             setNotifications notifications model
     in
-        ( model_, cmd, dispatch )
+        ( model_, cmd, Dispatch.none )
 
 
 handleLogout : Config msg -> Model -> UpdateResponse msg

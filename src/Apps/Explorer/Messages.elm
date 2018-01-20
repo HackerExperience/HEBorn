@@ -1,6 +1,6 @@
 module Apps.Explorer.Messages exposing (Msg(..))
 
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Shared exposing (StorageId)
 import Apps.Explorer.Menu.Messages as Menu
 import Apps.Explorer.Models exposing (..)

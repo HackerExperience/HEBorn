@@ -5,7 +5,7 @@ import Game.Web.Types exposing (Response)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Events.Account.PasswordAcquired as PasswordAcquired
 import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages as Webserver

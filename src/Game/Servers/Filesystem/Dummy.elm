@@ -1,7 +1,7 @@
 module Game.Servers.Filesystem.Dummy exposing (dummy)
 
-import Game.Servers.Filesystem.Shared exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 dummy : Filesystem

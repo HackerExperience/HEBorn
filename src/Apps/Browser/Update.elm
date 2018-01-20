@@ -13,7 +13,7 @@ import Game.Models
 import Game.Account.Finances.Models as Finances
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Types as Web
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network

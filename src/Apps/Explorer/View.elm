@@ -10,7 +10,7 @@ import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Menu.View
