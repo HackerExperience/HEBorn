@@ -1,23 +1,26 @@
-module Game.Servers.Filesystem.Requests.Rename exposing (..)
+module Game.Servers.Filesystem.Requests.Rename exposing (renameRequest)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (FlagsSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Game.Servers.Shared exposing (CId)
-import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-request : String -> Id -> CId -> FlagsSource a -> Cmd Msg
-request newBaseName id cid =
-    let
-        payload =
-            Encode.object
-                [ ( "file_id", Encode.string id )
-                , ( "basename", Encode.string newBaseName )
-                ]
-    in
-        Requests.request (Topics.fsRename cid)
-            (RenameRequest >> Request)
-            payload
+renameRequest : String -> Id -> CId -> FlagsSource a -> Cmd ResponseType
+renameRequest newBaseName id cid =
+    Requests.request_ (Topics.fsRename cid)
+        (encoder newBaseName id)
+
+
+
+-- internals
+
+
+encoder : String -> Id -> Value
+encoder newBaseName id =
+    Encode.object
+        [ ( "file_id", Encode.string id )
+        , ( "basename", Encode.string newBaseName )
+        ]
