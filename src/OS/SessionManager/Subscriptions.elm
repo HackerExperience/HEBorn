@@ -1,5 +1,6 @@
 module OS.SessionManager.Subscriptions exposing (..)
 
+import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
@@ -12,8 +13,8 @@ import Game.Data as Game
 -- TODO: this needs to change to add pinned window support
 
 
-subscriptions : Game.Data -> Model -> Sub Msg
-subscriptions data model =
+subscriptions : Config msg -> Game.Data -> Model -> Sub msg
+subscriptions config data model =
     let
         id =
             toSessionID data
@@ -21,7 +22,7 @@ subscriptions data model =
         windowManagerSub =
             model
                 |> get id
-                |> Maybe.map (windowManager data id)
+                |> Maybe.map (windowManager config data id)
                 |> defaultNone
     in
         Sub.batch [ windowManagerSub ]
@@ -31,13 +32,16 @@ subscriptions data model =
 -- internals
 
 
-windowManager : Game.Data -> ID -> WindowManager.Model -> Sub Msg
-windowManager data id model =
-    model
-        |> WindowManager.subscriptions data
-        |> Sub.map (WindowManagerMsg id)
+windowManager : Config msg -> Game.Data -> ID -> WindowManager.Model -> Sub msg
+windowManager config data id model =
+    let
+        config_ =
+            wmConfig id config
+    in
+        model
+            |> WindowManager.subscriptions config_ data
 
 
-defaultNone : Maybe (Sub Msg) -> Sub Msg
+defaultNone : Maybe (Sub msg) -> Sub msg
 defaultNone =
     Maybe.withDefault Sub.none

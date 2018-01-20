@@ -1,6 +1,7 @@
 module Apps.Subscriptions exposing (subscriptions)
 
 import Game.Data as Game
+import Apps.Config exposing (..)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.Subscriptions as LogViewer
@@ -23,77 +24,76 @@ import Apps.BackFlix.Subscriptions as BackFlix
 import Apps.FloatingHeads.Subscriptions as FloatingHeads
 
 
-subscriptions : Game.Data -> AppModel -> Sub Msg
-subscriptions data model =
+subscriptions : Config msg -> Game.Data -> AppModel -> Sub msg
+subscriptions config data model =
     case model of
         LogViewerModel model ->
             LogViewer.subscriptions data model
-                |> Sub.map LogViewerMsg
+                |> Sub.map (LogViewerMsg >> config.toMsg)
 
         TaskManagerModel model ->
             TaskManager.subscriptions data model
-                |> Sub.map TaskManagerMsg
+                |> Sub.map (TaskManagerMsg >> config.toMsg)
 
         BrowserModel model ->
             Browser.subscriptions data model
-                |> Sub.map BrowserMsg
+                |> Sub.map (BrowserMsg >> config.toMsg)
 
         ExplorerModel model ->
             Explorer.subscriptions data model
-                |> Sub.map ExplorerMsg
+                |> Sub.map (ExplorerMsg >> config.toMsg)
 
         DatabaseModel model ->
             Database.subscriptions data model
-                |> Sub.map DatabaseMsg
+                |> Sub.map (DatabaseMsg >> config.toMsg)
 
         ConnManagerModel model ->
             ConnManager.subscriptions data model
-                |> Sub.map ConnManagerMsg
+                |> Sub.map (ConnManagerMsg >> config.toMsg)
 
         BounceManagerModel model ->
             BounceManager.subscriptions data model
-                |> Sub.map BounceManagerMsg
+                |> Sub.map (BounceManagerMsg >> config.toMsg)
 
         FinanceModel model ->
             Finance.subscriptions data model
-                |> Sub.map FinanceMsg
+                |> Sub.map (FinanceMsg >> config.toMsg)
 
         MusicModel model ->
             Hebamp.subscriptions data model
-                |> Sub.map MusicMsg
+                |> Sub.map (MusicMsg >> config.toMsg)
 
         CtrlPanelModel model ->
             CtrlPanel.subscriptions data model
-                |> Sub.map CtrlPanelMsg
+                |> Sub.map (CtrlPanelMsg >> config.toMsg)
 
         ServersGearsModel model ->
             ServersGears.subscriptions data model
-                |> Sub.map ServersGearsMsg
+                |> Sub.map (ServersGearsMsg >> config.toMsg)
 
         LocationPickerModel model ->
             LocationPicker.subscriptions data model
-                |> Sub.map LocationPickerMsg
+                |> Sub.map (LocationPickerMsg >> config.toMsg)
 
         LanViewerModel model ->
             LanViewer.subscriptions data model
-                |> Sub.map LanViewerMsg
+                |> Sub.map (LanViewerMsg >> config.toMsg)
 
         EmailModel model ->
             Email.subscriptions data model
-                |> Sub.map EmailMsg
+                |> Sub.map (EmailMsg >> config.toMsg)
 
         BugModel model ->
             Bug.subscriptions data model
-                |> Sub.map BugMsg
-
-        CalculatorModel model ->
-            Calculator.subscriptions data model
-                |> Sub.map CalculatorMsg
+                |> Sub.map (BugMsg >> config.toMsg)
 
         BackFlixModel model ->
             BackFlix.subscriptions data model
-                |> Sub.map BackFlixMsg
+                |> Sub.map (BackFlixMsg >> config.toMsg)
 
         FloatingHeadsModel model ->
             FloatingHeads.subscriptions data model
-                |> Sub.map FloatingHeadsMsg
+                |> Sub.map (FloatingHeadsMsg >> config.toMsg)
+
+        _ ->
+            Sub.none

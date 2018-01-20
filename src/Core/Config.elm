@@ -4,6 +4,7 @@ import Core.Flags exposing (Flags)
 import Core.Messages exposing (..)
 import Setup.Config as Setup
 import Game.Config as Game
+import Game.Storyline.Models as Story
 import Game.Servers.Shared exposing (CId)
 import OS.Config as OS
 
@@ -23,7 +24,8 @@ setupConfig accountId mainframe flags =
     }
 
 
-osConfig : OS.Config Msg
-osConfig =
+osConfig : Story.Model -> OS.Config Msg
+osConfig story =
     { toMsg = OSMsg
+    , story = story
     }

@@ -12,10 +12,11 @@ import Core.Panic as Panic
 
 
 view : Model -> Html Msg
-view ({ state } as model) =
-    case state of
+view model =
+    case model.state of
         Home home ->
-            Html.map LandingMsg (Landing.view model home.landing)
+            Landing.view model home.landing
+                |> map LandingMsg
 
         Setup { game, setup } ->
             let
@@ -28,13 +29,28 @@ view ({ state } as model) =
                 Setup.view config setup
 
         Play play ->
-            case Game.fromGateway play.game of
-                Just inBieber ->
-                    Html.map OSMsg (OS.view inBieber play.os)
-
-                Nothing ->
-                    Panic.view "WTF_ASTRAL_PROJECTION"
-                        "Player has no active gateway!"
+            onPlay play model
 
         Panic code message ->
             Panic.view code message
+
+
+onPlay : PlayModel -> Model -> Html Msg
+onPlay play model =
+    let
+        state =
+            model.state
+
+        story =
+            play.game.story
+
+        config =
+            osConfig story
+    in
+        case Game.fromGateway play.game of
+            Just inBieber ->
+                OS.view config inBieber play.os
+
+            Nothing ->
+                Panic.view "WTF_ASTRAL_PROJECTION"
+                    "Player has no active gateway!"

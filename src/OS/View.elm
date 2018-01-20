@@ -1,7 +1,7 @@
 module OS.View exposing (view)
 
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (attribute)
+import Html as Html exposing (Html, div, text)
+import Html.Attributes as Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
@@ -10,6 +10,7 @@ import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Models as Storyline
 import Core.Flags as Flags
+import OS.Config exposing (..)
 import OS.Models exposing (Model)
 import OS.Messages exposing (Msg(..))
 import OS.Resources as Res
@@ -26,18 +27,18 @@ import OS.Console.View as Console
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Game.Data -> Model -> Html msg
+view config data model =
     let
         osContent =
-            viewOS data model
+            viewOS config data model
 
         game =
             data
                 |> Game.getGame
 
         dynStyle =
-            DynamicStyle.view game
+            DynamicStyle.view config
 
         version =
             game
@@ -64,7 +65,7 @@ view data model =
     in
         div
             [ id Res.Dashboard
-            , menuEmpty
+            , menuEmpty |> Attributes.map config.toMsg
             , attribute Res.gameVersionAttrTag version
             , attribute Res.gameModeAttrTag gameMode
             , activeContextAttr context
@@ -72,8 +73,8 @@ view data model =
             (dynStyle :: osContent)
 
 
-viewOS : Game.Data -> Model -> List (Html Msg)
-viewOS data model =
+viewOS : Config msg -> Game.Data -> Model -> List (Html msg)
+viewOS config data model =
     let
         version =
             data
@@ -82,44 +83,48 @@ viewOS data model =
                 |> Flags.getVersion
     in
         [ viewHeader
+            config
             data
             model.header
-        , console data model
-        , viewMain data model
-        , toasts data model
+        , console config data model
+        , viewMain config data model
+        , toasts config data model
         , lazy displayVersion
             version
-        , menuView model
+        , menuView model |> Html.map config.toMsg
         ]
 
 
-viewHeader : Game.Data -> Header.Model -> Html Msg
-viewHeader game header =
+viewHeader : Config msg -> Game.Data -> Header.Model -> Html msg
+viewHeader config game header =
     Header.view game header
-        |> Html.map HeaderMsg
+        |> Html.map (HeaderMsg >> config.toMsg)
 
 
-viewMain : Game.Data -> Model -> Html Msg
-viewMain game model =
-    model.session
-        |> SessionManager.view game
-        |> Html.map SessionManagerMsg
+viewMain : Config msg -> Game.Data -> Model -> Html msg
+viewMain config game model =
+    let
+        config_ =
+            smConfig config
+    in
+        model.session
+            |> SessionManager.view config_ game
 
 
-displayVersion : String -> Html Msg
+displayVersion : String -> Html msg
 displayVersion version =
     div
         [ class [ Res.Version ] ]
         [ text version ]
 
 
-toasts : Game.Data -> Model -> Html Msg
-toasts data model =
+toasts : Config msg -> Game.Data -> Model -> Html msg
+toasts config data model =
     model.toasts
         |> Toasts.view data
-        |> Html.map ToastsMsg
+        |> Html.map (ToastsMsg >> config.toMsg)
 
 
-console : Game.Data -> Model -> Html Msg
-console data model =
+console : Config msg -> Game.Data -> Model -> Html msg
+console config data model =
     Console.view data

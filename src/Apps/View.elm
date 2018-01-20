@@ -8,6 +8,7 @@ module Apps.View
 
 import Html exposing (Html)
 import Apps.Apps exposing (..)
+import Apps.Config exposing (..)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.View as LogViewer
@@ -33,62 +34,66 @@ import Apps.FloatingHeads.Messages as FloatingHeadsMessages
 import Game.Data as Game
 
 
-view : Game.Data -> AppModel -> Html Msg
-view data model =
+view : Config msg -> Game.Data -> AppModel -> Html msg
+view config data model =
     case model of
         LogViewerModel model ->
-            Html.map LogViewerMsg (LogViewer.view data model)
+            Html.map (LogViewerMsg >> config.toMsg) (LogViewer.view data model)
 
         TaskManagerModel model ->
-            Html.map TaskManagerMsg (TaskManager.view data model)
+            Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view data model)
 
         BrowserModel model ->
-            Html.map BrowserMsg (Browser.view data model)
+            Html.map (BrowserMsg >> config.toMsg) (Browser.view data model)
 
         ExplorerModel model ->
-            Html.map ExplorerMsg (Explorer.view data model)
+            Html.map (ExplorerMsg >> config.toMsg) (Explorer.view data model)
 
         DatabaseModel model ->
-            Html.map DatabaseMsg (Database.view data model)
+            Html.map (DatabaseMsg >> config.toMsg) (Database.view data model)
 
         ConnManagerModel model ->
-            Html.map ConnManagerMsg (ConnManager.view data model)
+            Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view data model)
 
         BounceManagerModel model ->
-            Html.map BounceManagerMsg (BounceManager.view data model)
+            Html.map (BounceManagerMsg >> config.toMsg) (BounceManager.view data model)
 
         FinanceModel model ->
-            Html.map FinanceMsg (Finance.view data model)
+            Html.map (FinanceMsg >> config.toMsg) (Finance.view data model)
 
         MusicModel model ->
-            Html.map MusicMsg (Hebamp.view data model)
+            Html.map (MusicMsg >> config.toMsg) (Hebamp.view data model)
 
         CtrlPanelModel model ->
-            Html.map CtrlPanelMsg (CtrlPanel.view data model)
+            Html.map (CtrlPanelMsg >> config.toMsg) (CtrlPanel.view data model)
 
         ServersGearsModel model ->
-            Html.map ServersGearsMsg (ServersGears.view data model)
+            Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view data model)
 
         LocationPickerModel model ->
-            Html.map LocationPickerMsg (LocationPicker.view data model)
+            Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view data model)
 
         LanViewerModel model ->
-            Html.map LanViewerMsg (LanViewer.view data model)
+            Html.map (LanViewerMsg >> config.toMsg) (LanViewer.view data model)
 
         EmailModel model ->
-            Html.map EmailMsg (Email.view data model)
+            Html.map (EmailMsg >> config.toMsg) (Email.view data model)
 
         BugModel model ->
-            Html.map BugMsg (Bug.view data model)
+            Html.map (BugMsg >> config.toMsg) (Bug.view data model)
 
         CalculatorModel model ->
-            Html.map CalculatorMsg (Calculator.view data model)
+            let
+                config_ =
+                    calculatorConfig config
+            in
+                Calculator.view config_ model
 
         BackFlixModel model ->
-            Html.map BackFlixMsg (BackFlix.view data model)
+            Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view data model)
 
         FloatingHeadsModel model ->
-            Html.map FloatingHeadsMsg (FloatingHeads.view data model)
+            Html.map (FloatingHeadsMsg >> config.toMsg) (FloatingHeads.view data model)
 
 
 isDecorated : App -> Bool
