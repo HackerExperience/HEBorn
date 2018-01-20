@@ -1,20 +1,17 @@
 module Game.Servers.Filesystem.Update exposing (update)
 
-import Utils.Update as Update
 import Game.Servers.Filesystem.Config exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
-import Game.Servers.Filesystem.Requests exposing (..)
-import Game.Servers.Filesystem.Requests.Delete as Delete
-import Game.Servers.Filesystem.Requests.Move as Move
-import Game.Servers.Filesystem.Requests.Rename as Rename
-import Game.Servers.Filesystem.Requests.Create as Create
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Servers.Filesystem.Requests.Delete exposing (deleteRequest)
+import Game.Servers.Filesystem.Requests.Move exposing (moveRequest)
+import Game.Servers.Filesystem.Requests.Rename exposing (renameRequest)
+import Game.Servers.Filesystem.Requests.Create exposing (createRequest)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, Cmd msg )
 
 
 update :
@@ -42,9 +39,6 @@ update config msg model =
         HandleAdded id file ->
             onHandleAdded id file model
 
-        Request request ->
-            onRequest config (receive request) model
-
 
 
 -- internals
@@ -57,14 +51,15 @@ handleDelete config id model =
             case getFile id model of
                 Just file ->
                     ( deleteFile id model
-                    , Delete.request id config.cid config
-                        |> Cmd.map config.toMsg
+                    , config
+                        |> deleteRequest id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleMove :
@@ -79,14 +74,15 @@ handleMove config id newPath model =
             case getFile id model of
                 Just file ->
                     ( moveFile id newPath model
-                    , Move.request newPath id config.cid config
-                        |> Cmd.map config.toMsg
+                    , config
+                        |> moveRequest newPath id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleRename :
@@ -101,14 +97,15 @@ handleRename config id name model =
             case getFile id model of
                 Just file ->
                     ( renameFile id name model
-                    , Rename.request name id config.cid config
-                        |> Cmd.map config.toMsg
+                    , config
+                        |> renameRequest name id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleNewTextFile :
@@ -130,12 +127,12 @@ handleNewTextFile config path name model =
     in
         if model /= model_ then
             ( model_
-            , Create.request "txt" name fullpath config.cid config
-                |> Cmd.map config.toMsg
-            , Dispatch.none
+            , config
+                |> createRequest "txt" name fullpath config.cid
+                |> Cmd.map (always <| config.batchMsg [])
             )
         else
-            Update.fromModel model
+            ( model, Cmd.none )
 
 
 handleNewDir :
@@ -151,40 +148,14 @@ handleNewDir config path name model =
     in
         if model /= model_ then
             ( model_
-            , Create.request "/" name path config.cid config
-                |> Cmd.map config.toMsg
-            , Dispatch.none
+            , config
+                |> createRequest "/" name path config.cid
+                |> Cmd.map (always <| config.batchMsg [])
             )
         else
-            Update.fromModel model
+            ( model, Cmd.none )
 
 
 onHandleAdded : Id -> File -> Model -> UpdateResponse msg
 onHandleAdded id file model =
-    ( insertFile id file model
-    , Cmd.none
-    , Dispatch.none
-    )
-
-
-onRequest :
-    Config msg
-    -> Maybe Response
-    -> Model
-    -> UpdateResponse msg
-onRequest config response model =
-    case response of
-        Just response ->
-            updateRequest config response model
-
-        Nothing ->
-            Update.fromModel model
-
-
-updateRequest :
-    Config msg
-    -> Response
-    -> Model
-    -> UpdateResponse msg
-updateRequest config data model =
-    Update.fromModel model
+    ( insertFile id file model, Cmd.none )
