@@ -5,7 +5,9 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Notifications.Models as Notifications
+import Game.Servers.Notifications.Shared as ServersNotifications
+import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Meta.Types.Notifications as Notifications
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.NotificationsView as Notifications
@@ -50,7 +52,8 @@ chat openMenu =
             Dict.empty
 
         view =
-            Notifications.view openMenu
+            Notifications.view (always ( "", "" ))
+                openMenu
                 ChatOpen
                 ChatIco
                 "Chat"
@@ -77,7 +80,8 @@ servers data openMenu =
             Game.getActiveCId data
 
         view =
-            Notifications.view openMenu
+            Notifications.view ServersNotifications.render
+                openMenu
                 ServersOpen
                 ServersIco
                 "This server"
@@ -96,8 +100,7 @@ account : Game.Data -> OpenMenu -> ( Html Msg, Html Msg )
 account data openMenu =
     let
         game =
-            data
-                |> Game.getGame
+            Game.getGame data
 
         view =
             Account.view openMenu game

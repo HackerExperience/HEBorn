@@ -22,7 +22,7 @@ import Game.Meta.Types.Network exposing (IP)
 import Game.Servers.Models exposing (..)
 import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Models as Tunnels
-import Game.Notifications.Models as Notifications
+import Game.Servers.Notifications.Models as Notifications
 import Game.Servers.Hardware.Models as Hardware
 import Gen.Network exposing (..)
 import Gen.Utils exposing (..)

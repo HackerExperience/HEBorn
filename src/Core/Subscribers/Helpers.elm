@@ -15,7 +15,6 @@ import Game.Account.Messages as Account
 import Game.Account.Finances.Messages as Finances
 import Game.BackFlix.Messages as BackFlix
 import Game.Account.Database.Messages as Database
-import Game.Notifications.Messages as Notifications
 import Game.Servers.Messages as Servers
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -116,16 +115,6 @@ inventory =
 toasts : Toasts.Msg -> Core.Msg
 toasts =
     OS.ToastsMsg >> os
-
-
-serverNotif : CId -> Notifications.Msg -> Core.Msg
-serverNotif id =
-    Servers.NotificationsMsg >> server id
-
-
-accountNotif : Notifications.Msg -> Core.Msg
-accountNotif =
-    Account.NotificationsMsg >> account
 
 
 accountFinances : Finances.Msg -> Core.Msg

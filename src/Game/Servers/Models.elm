@@ -8,7 +8,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Hardware.Models as Hardware
-import Game.Notifications.Models as Notifications
+import Game.Servers.Notifications.Models as Notifications
 import Game.Servers.Shared exposing (..)
 
 

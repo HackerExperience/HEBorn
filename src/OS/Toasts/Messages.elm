@@ -1,11 +1,13 @@
 module OS.Toasts.Messages exposing (Msg(..))
 
-import Game.Notifications.Source as Notifications
-import Game.Notifications.Models as Notifications
+import Game.Servers.Shared exposing (CId)
+import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Servers.Notifications.Shared as ServersNotifications
 
 
 type Msg
     = Remove Int
     | Trash Int
     | Fade Int
-    | HandleInsert (Maybe Notifications.Source) Notifications.Content
+    | HandleAccount AccountNotifications.Content
+    | HandleServers CId ServersNotifications.Content

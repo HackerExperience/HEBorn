@@ -5,7 +5,6 @@ import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
 import Events.Server.Processes.Changed as ProcessesChanged
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Notifications.Models as Notifications
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce exposing (bruteforceRequest)
@@ -109,15 +108,14 @@ handleStartDownload config transferType origin storageId file model =
         toMsg result =
             case result of
                 Ok () ->
-                    config.batchMsg []
+                    config.onDownloadStarted storageId file
 
                 Err error ->
                     config.batchMsg
                         [ config.toMsg <| DownloadRequestFailed id
-                        , error
-                            |> Download.errorToString
-                            |> Notifications.Simple "Couldn't start download"
-                            |> config.notifyServer
+                        , config.onDownloadFailed
+                            "Couldn't start download"
+                            (Download.errorToString error)
                         ]
 
         cmd =

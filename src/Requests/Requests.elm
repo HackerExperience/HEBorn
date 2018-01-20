@@ -19,7 +19,7 @@ import Requests.Topics as Topics exposing (Topic(..))
 import Requests.Types exposing (..)
 
 
--- remove underlines after deprecating legacy functions
+-- REVIEW: remove underlines after deprecating legacy functions
 
 
 request_ : Topic -> Encode.Value -> FlagsSource a -> Cmd ResponseType
@@ -49,7 +49,7 @@ report_ info code flagSrc result =
 
 
 
--- legacy functions
+-- REVIEW: legacy functions
 
 
 request :

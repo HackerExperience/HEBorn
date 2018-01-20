@@ -6,7 +6,7 @@ import Game.Meta.Types.Context exposing (..)
 import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
-import Game.Notifications.Messages as Notifications
+import Game.Account.Notifications.Messages as Notifications
 
 
 type Msg
