@@ -22,3 +22,6 @@ yarn.lock
 
 # Macintosh
 *.DS_Store
+
+.floo
+.flooignore
