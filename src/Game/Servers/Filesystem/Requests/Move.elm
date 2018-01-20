@@ -1,29 +1,33 @@
-module Game.Servers.Filesystem.Requests.Move exposing (..)
+module Game.Servers.Filesystem.Requests.Move exposing (moveRequest)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Requests.Types exposing (FlagsSource, Code(..))
+import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Game.Servers.Shared exposing (CId)
-import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-request : Path -> Id -> CId -> FlagsSource a -> Cmd Msg
-request path id cid =
+moveRequest : Path -> Id -> CId -> FlagsSource a -> Cmd ResponseType
+moveRequest path id cid =
+    Requests.request_ (Topics.fsMove cid)
+        (encoder path id)
+
+
+
+-- internals
+
+
+encoder : Path -> Id -> Value
+encoder path id =
     let
+        -- TODO: sending a flat string may be better
         destination =
-            -- TODO: sending a flat string may be better
             path
                 |> List.map Encode.string
                 |> Encode.list
-
-        payload =
-            Encode.object
-                [ ( "file_id", Encode.string id )
-                , ( "destination", destination )
-                ]
     in
-        Requests.request (Topics.fsMove cid)
-            (MoveRequest >> Request)
-            payload
+        Encode.object
+            [ ( "file_id", Encode.string id )
+            , ( "destination", destination )
+            ]

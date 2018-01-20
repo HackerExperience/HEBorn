@@ -187,7 +187,7 @@ onFilesystemMsg config cid id msg server =
                 config_ =
                     filesystemConfig cid id config
 
-                ( filesystem, cmd, dispatch ) =
+                ( filesystem, cmd ) =
                     Filesystem.update config_ msg <| getFilesystem storage
 
                 storage_ =
@@ -196,7 +196,7 @@ onFilesystemMsg config cid id msg server =
                 server_ =
                     setStorage id storage_ server
             in
-                ( server_, cmd, dispatch )
+                ( server_, cmd, Dispatch.none )
 
         Nothing ->
             Update.fromModel server
