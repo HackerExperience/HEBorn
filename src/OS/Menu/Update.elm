@@ -7,8 +7,12 @@ import OS.Menu.Messages exposing (Msg(..))
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : GameData.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update game msg model =
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
+
+
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         MenuMsg msg ->
             let

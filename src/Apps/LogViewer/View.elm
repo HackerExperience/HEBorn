@@ -34,8 +34,8 @@ import Apps.LogViewer.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         filterHeaderLayout =
             verticalList
@@ -47,14 +47,12 @@ view data model =
                     []
                     model.filterText
                     "Search..."
-                    UpdateTextFilter
+                    (UpdateTextFilter |> config.toMsg)
                 ]
 
         mainEntries =
             verticalList
-                (data
-                    |> Game.getActiveServer
-                    |> Servers.getLogs
+                (config.logs
                     |> applyFilter model
                     |> renderEntries model
                 )
@@ -62,7 +60,7 @@ view data model =
         verticalSticked
             (Just [ filterHeaderLayout ])
             [ mainEntries
-            , menuView model
+            , menuView config model
             ]
             Nothing
 
@@ -76,14 +74,14 @@ encrypted =
     "⠽⠕⠥ ⠚⠥⠎⠞ ⠇⠕⠎⠞ ⠠⠠⠞⠓⠑ ⠠⠠⠛⠁⠍⠑"
 
 
-renderEntries : Model -> Logs.Model -> List (Html Msg)
-renderEntries model logs =
+renderEntries : Config msg -> Model -> Logs.Model -> List (Html msg)
+renderEntries config model logs =
     getLogsfromDate logs
         |> List.map (uncurry <| renderEntry model)
 
 
-renderEntry : Model -> Logs.ID -> Logs.Log -> Html Msg
-renderEntry model id log =
+renderEntry : Config msg -> Model -> Logs.ID -> Logs.Log -> Html msg
+renderEntry config model id log =
     let
         expandedState =
             isEntryExpanded id model
@@ -94,19 +92,19 @@ renderEntry model id log =
         etop =
             [ div [] [ log.timestamp |> timestampToFullData |> text ]
             , spacer
-            , renderTopActions log
+            , renderTopActions config log
             ]
 
         data =
             [ div [ class [ ETop ] ] etop
-            , renderData id log model
-            , renderBottom id log model
+            , renderData config id log model
+            , renderBottom config id log model
             ]
     in
         toogableEntry
             (not editingState)
             (menuInclude id log model)
-            (ToogleExpand id)
+            (ToogleExpand id |> config.toMsg)
             expandedState
             data
 
@@ -121,14 +119,14 @@ isEntryEditing id model =
     Dict.member id model.editing
 
 
-renderFlag : Classes -> List (Html Msg)
+renderFlag : Classes -> List (Html msg)
 renderFlag flag =
     [ text " "
     , span [ class [ flag ] ] []
     ]
 
 
-renderFlags : List Classes -> List (Html Msg)
+renderFlags : List Classes -> List (Html msg)
 renderFlags =
     List.map renderFlag
         >> List.concat
@@ -136,8 +134,8 @@ renderFlags =
         >> Maybe.withDefault []
 
 
-renderContent : Logs.Log -> Html Msg
-renderContent log =
+renderContent : Config msg -> Logs.Log -> Html msg
+renderContent config log =
     let
         rendered =
             case Logs.getContent log of
@@ -150,40 +148,40 @@ renderContent log =
         div [] rendered
 
 
-renderMiniContent : Logs.Log -> Html Msg
-renderMiniContent =
-    renderContent
+renderMiniContent : Config msg -> Logs.Log -> Html msg
+renderMiniContent config =
+    renderContent config
 
 
-renderEditing : Logs.ID -> String -> Html Msg
-renderEditing logID src =
+renderEditing : Config msg -> Logs.ID -> String -> Html msg
+renderEditing config logID src =
     input
         [ class [ BoxifyMe ]
         , value src
-        , onInput (UpdateEditing logID)
+        , onInput (UpdateEditing logID |> config.toMsg)
         ]
         []
 
 
-renderTopActions : Logs.Log -> Html Msg
-renderTopActions log =
+renderTopActions : Config msg -> Logs.Log -> Html msg
+renderTopActions config log =
     -- TODO: Catch the flags for real
     div [] <| renderFlags [ BtnUser, BtnEdit, BtnCrypt ]
 
 
 btnsEditing : Logs.ID -> List ( Attribute Msg, Msg )
 btnsEditing logID =
-    [ ( class [ BtnApply, BottomButton ], ApplyEditing logID )
-    , ( class [ BtnCancel, BottomButton ], LeaveEditing logID )
+    [ ( class [ BtnApply, BottomButton ], (ApplyEditing logID |> config.toMsg) )
+    , ( class [ BtnCancel, BottomButton ], (LeaveEditing logID |> config.toMsg) )
     ]
 
 
-btnsNormal : Logs.ID -> List ( Attribute Msg, Msg )
-btnsNormal logID =
-    [ ( class [ BtnCrypt, BottomButton ], StartCrypting logID )
-    , ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnEdit, BottomButton ], EnterEditing logID )
-    , ( class [ BtnDelete, BottomButton ], StartDeleting logID )
+btnsNormal : Config msg -> Logs.ID -> List ( Attribute Msg, Msg )
+btnsNormal config logID =
+    [ ( class [ BtnCrypt, BottomButton ], (StartCrypting logID |> config.toMsg) )
+    , ( class [ BtnHide, BottomButton ], (StartHiding logID |> config.toMsg) )
+    , ( class [ BtnEdit, BottomButton ], (EnterEditing logID |> config.toMsg) )
+    , ( class [ BtnDelete, BottomButton ], (StartDeleting logID |> config.toMsg) )
     ]
 
 
@@ -194,12 +192,17 @@ btnsCryptographed logID =
     ]
 
 
-renderBottomActions : Logs.ID -> Logs.Log -> Model -> Html Msg
-renderBottomActions id log model =
+renderBottomActions :
+    Config msg
+    -> Logs.ID
+    -> Logs.Log
+    -> Model
+    -> Html msg
+renderBottomActions config id log model =
     let
         btns =
             if (isEntryEditing id model) then
-                btnsEditing id
+                btnsEditing config id
             else if (isEntryExpanded id model) then
                 case log.content of
                     Logs.NormalContent _ ->
@@ -213,8 +216,8 @@ renderBottomActions id log model =
         horizontalBtnPanel btns
 
 
-renderData : Logs.ID -> Logs.Log -> Model -> Html Msg
-renderData id log model =
+renderData : Config msg -> Logs.ID -> Logs.Log -> Model -> Html msg
+renderData config id log model =
     case (Dict.get id model.editing) of
         Just x ->
             renderEditing id x
@@ -226,14 +229,14 @@ renderData id log model =
                 renderMiniContent log
 
 
-renderBottom : Logs.ID -> Logs.Log -> Model -> Html Msg
-renderBottom id log model =
+renderBottom : Config msg -> Logs.ID -> Logs.Log -> Model -> Html msg
+renderBottom config id log model =
     let
         data =
             if (isEntryEditing id model) then
-                [ renderBottomActions id log model ]
+                [ renderBottomActions config id log model ]
             else if (isEntryExpanded id model) then
-                [ renderBottomActions id log model ]
+                [ renderBottomActions config id log model ]
             else
                 []
     in
@@ -275,28 +278,28 @@ getLogsfromDate logs =
     Dict.foldr (getLogsfromDateHelper logs.logs) [] logs.drawOrder
 
 
-render : Logs.Data -> List (Html Msg)
-render { format, raw } =
+render : Config msg -> Logs.Data -> List (Html msg)
+render config { format, raw } =
     case format of
         Just format ->
             case format of
                 LocalLoginFormat data ->
-                    [ addr (\_ -> DummyNoOp) data.from
+                    [ addr (\_ -> (DummyNoOp |> config.toMsg)) data.from
                     , text " logged in as "
                     , user data.user
                     ]
 
                 RemoteLoginFormat { into } ->
                     [ text "Logged into "
-                    , addr (\_ -> DummyNoOp) into
+                    , addr (\_ -> (DummyNoOp |> config.toMsg)) into
                     ]
 
                 ConnectionFormat { nip, from, to } ->
-                    [ addr (\_ -> DummyNoOp) nip
+                    [ addr (\_ -> (DummyNoOp |> config.toMsg)) nip
                     , text " bounced connection from "
-                    , addr (\_ -> DummyNoOp) from
+                    , addr (\_ -> (DummyNoOp |> config.toMsg)) from
                     , text " to "
-                    , addr (\_ -> DummyNoOp) to
+                    , addr (\_ -> (DummyNoOp |> config.toMsg)) to
                     ]
 
                 DownloadByFormat { filename, nip } ->
@@ -310,7 +313,7 @@ render { format, raw } =
                     [ text "File "
                     , file filename
                     , text " downloaded from "
-                    , addr (\_ -> DummyNoOp) nip
+                    , addr (\_ -> (DummyNoOp |> config.toMsg)) nip
                     ]
 
         Nothing ->

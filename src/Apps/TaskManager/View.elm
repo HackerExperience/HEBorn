@@ -17,23 +17,15 @@ import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
-view : GameData.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         tasks =
-            data
-                |> GameData.getActiveServer
-                |> Servers.getProcesses
+            config.processes
                 |> Processes.toList
-
-        lastTick =
-            data
-                |> GameData.getGame
-                |> GameModel.getMeta
-                |> Meta.getLastTick
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable data tasks lastTick
+            [ viewTasksTable config
             , viewTotalResources model
             , menuView model
             ]
@@ -52,7 +44,7 @@ maybe =
     Maybe.withDefault <| text ""
 
 
-viewTaskRowUsage : Processes.ResourcesUsage -> Html Msg
+viewTaskRowUsage : Processes.ResourcesUsage -> Html msg
 viewTaskRowUsage usage =
     let
         un =
@@ -66,7 +58,7 @@ viewTaskRowUsage usage =
             ]
 
 
-etaBar : Time -> Float -> Html Msg
+etaBar : Time -> Float -> Html msg
 etaBar secondsLeft progress =
     let
         formattedTime =
@@ -86,7 +78,7 @@ syncProgress now lastSync remaining lastProgress =
             + lastProgress
 
 
-viewState : Time -> Time -> Processes.Process -> Html Msg
+viewState : Time -> Time -> Processes.Process -> Html msg
 viewState now lastRecalc proc =
     case Processes.getState proc of
         Processes.Starting ->
@@ -131,7 +123,7 @@ viewState now lastRecalc proc =
             text "Completed (failure)"
 
 
-processMenu : ( Processes.ID, Processes.Process ) -> Attribute Msg
+processMenu : ( Processes.ID, Processes.Process ) -> Attribute msg
 processMenu ( id, process ) =
     let
         menu =
@@ -154,16 +146,13 @@ processMenu ( id, process ) =
 
 
 viewTaskRow :
-    GameData.Data
-    -> Time
+    Config msg
     -> ( Processes.ID, Processes.Process )
-    -> Html Msg
-viewTaskRow data now (( _, process ) as entry) =
+    -> Html msg
+viewTaskRow config (( _, process ) as entry) =
     let
         lastRecalc =
-            data
-                |> GameData.getActiveServer
-                |> Servers.getProcesses
+            config.processes
                 |> Processes.getLastModified
 
         usageView =
@@ -181,14 +170,14 @@ viewTaskRow data now (( _, process ) as entry) =
                 , br [] []
                 ]
             , div []
-                [ viewState now lastRecalc process ]
+                [ viewState config.lastTick lastRecalc process ]
             , div []
                 [ usageView ]
             ]
 
 
-viewTasksTable : GameData.Data -> Entries -> Time -> Html Msg
-viewTasksTable data entries now =
+viewTasksTable : Config msg -> Entries -> Html msg
+viewTasksTable config entries =
     let
         first =
             div [ class [ EntryDivision ] ]
@@ -198,12 +187,12 @@ viewTasksTable data entries now =
                 ]
     in
         entries
-            |> List.map (viewTaskRow data now)
+            |> List.map (viewTaskRow config)
             |> (::) first
             |> div [ class [ TaskTable ] ]
 
 
-viewGraphUsage : String -> String -> List Float -> Html Msg
+viewGraphUsage : String -> String -> List Float -> Html msg
 viewGraphUsage title color history =
     let
         sz =
@@ -222,7 +211,7 @@ viewGraphUsage title color history =
         lineGraph points color 50 True ( 3, 1 )
 
 
-viewTotalResources : Model -> Html Msg
+viewTotalResources : Model -> Html msg
 viewTotalResources { historyCPU, historyMem, historyDown, historyUp } =
     div [ class [ BottomGraphsRow ] ]
         [ viewGraphUsage "CPU" "green" historyCPU

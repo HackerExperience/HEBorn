@@ -38,16 +38,28 @@ view : Config msg -> Game.Data -> AppModel -> Html msg
 view config data model =
     case model of
         LogViewerModel model ->
-            Html.map (LogViewerMsg >> config.toMsg) (LogViewer.view data model)
+            let
+                config_ =
+                    logViewerConfig config
+            in
+                LogViewer.view config_ model
 
         TaskManagerModel model ->
-            Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view data model)
+            let
+                config_ =
+                    taskManConfig config
+            in
+                TaskManager.view config_ model
 
         BrowserModel model ->
             Html.map (BrowserMsg >> config.toMsg) (Browser.view data model)
 
         ExplorerModel model ->
-            Html.map (ExplorerMsg >> config.toMsg) (Explorer.view data model)
+            let
+                config_ =
+                    explorerConfig config
+            in
+                Explorer.view config_ model
 
         DatabaseModel model ->
             Html.map (DatabaseMsg >> config.toMsg) (Database.view data model)

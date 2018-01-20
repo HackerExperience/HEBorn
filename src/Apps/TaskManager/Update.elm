@@ -7,6 +7,7 @@ import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Messages as Processes
+import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
 import Apps.TaskManager.Menu.Messages as Menu
@@ -14,34 +15,34 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-type alias UpdateResponse =
-    ( Model, Cmd TaskManager.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
 update :
-    Game.Data
+    Config msg
     -> TaskManager.Msg
     -> Model
     -> UpdateResponse
-update data msg model =
+update config msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            Menu.actionHandler config action model
 
         MenuMsg msg ->
-            onMenuMsg data msg model
+            onMenuMsg config msg model
 
         --- Every update
         Tick now ->
-            onTick data now model
+            onTick config now model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg config msg model =
     let
         ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
+            Menu.update config msg model.menu
 
         cmd_ =
             Cmd.map MenuMsg cmd
@@ -52,11 +53,11 @@ onMenuMsg data msg model =
         ( model_, cmd_, coreMsg )
 
 
-onTick : Game.Data -> Time -> Model -> UpdateResponse
-onTick data now model =
+onTick : Config msg -> Time -> Model -> UpdateResponse
+onTick config now model =
     let
         activeServer =
-            Game.getActiveServer data
+            config.activeCId
 
         model_ =
             updateTasks
@@ -66,11 +67,11 @@ onTick data now model =
         ( model_, Cmd.none, Dispatch.none )
 
 
-updateTasks : Servers.Server -> Model -> Model
-updateTasks server old =
+updateTasks : Config msg -> Model -> Model
+updateTasks config old =
     let
         tasks =
-            Servers.getProcesses server
+            config.processes
 
         reduce process sum =
             process

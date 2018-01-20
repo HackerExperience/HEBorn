@@ -17,21 +17,25 @@ import Apps.LogViewer.Menu.Actions as Menu
         )
 
 
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
+
+
 update :
-    Game.Data
-    -> LogViewer.Msg
+    Config msg
+    -> Msg
     -> Model
-    -> ( Model, Cmd LogViewer.Msg, Dispatch )
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            Menu.actionHandler config action model
 
         MenuMsg msg ->
             let
                 ( menu_, cmd, dispatch ) =
-                    Menu.update data msg model.menu
+                    Menu.update config msg model.menu
 
                 cmd_ =
                     Cmd.map MenuMsg cmd
@@ -76,7 +80,7 @@ update data msg model =
                     leaveEditing id model
 
                 cid =
-                    Game.getActiveCId data
+                    config.activeCId
 
                 dispatch =
                     case edited of

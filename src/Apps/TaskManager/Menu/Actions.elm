@@ -3,16 +3,21 @@ module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Data as Game
+import Apps.TaskManager.Config
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)
 import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 
 
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
+
+
 actionHandler :
-    Game.Data
+    Config msg
     -> MenuAction
     -> Model
-    -> ( Model, Cmd TaskManager.Msg, Dispatch )
+    -> UpdateResponse msg
 actionHandler data action model =
     case action of
         PauseProcess pID ->
@@ -20,7 +25,7 @@ actionHandler data action model =
                 gameMsg =
                     pID
                         |> Servers.PauseProcess
-                        |> Dispatch.processes (Game.getActiveCId data)
+                        |> Dispatch.processes config.activeCId
             in
                 ( model, Cmd.none, gameMsg )
 
@@ -29,7 +34,7 @@ actionHandler data action model =
                 gameMsg =
                     pID
                         |> Servers.ResumeProcess
-                        |> Dispatch.processes (Game.getActiveCId data)
+                        |> Dispatch.processes config.activeCId
             in
                 ( model, Cmd.none, gameMsg )
 
@@ -38,6 +43,6 @@ actionHandler data action model =
                 gameMsg =
                     pID
                         |> Servers.RemoveProcess
-                        |> Dispatch.processes (Game.getActiveCId data)
+                        |> Dispatch.processes config.activeCId
             in
                 ( model, Cmd.none, gameMsg )

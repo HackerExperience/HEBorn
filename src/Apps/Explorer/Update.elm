@@ -3,10 +3,10 @@ module Apps.Explorer.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
+import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -14,15 +14,15 @@ import Apps.Explorer.Menu.Update as Menu
 import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, Cmd msg, Dispatch )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     let
         server =
-            Game.getActiveServer data
+            config.activeCId
 
         maybeFs =
             model
@@ -35,14 +35,14 @@ update data msg model =
                 case msg of
                     -- Menu
                     MenuMsg (Menu.MenuClick action) ->
-                        actionHandler data action model
+                        actionHandler config action model
 
                     MenuMsg msg ->
-                        onMenuMsg data msg model
+                        onMenuMsg config msg model
 
                     -- General Acts
                     GoPath newPath ->
-                        onGoPath data newPath fs model
+                        onGoPath config newPath fs model
 
                     GoStorage newStorageId ->
                         onGoStorage newStorageId model
@@ -51,10 +51,10 @@ update data msg model =
                         onUpdateEditing newState model
 
                     EnterRename id ->
-                        onEnterRename data id fs model
+                        onEnterRename config id fs model
 
                     ApplyEdit ->
-                        onApplyEdit data fs model
+                        onApplyEdit config fs model
 
                     _ ->
                         -- TODO: implement folder operation requests
@@ -64,11 +64,11 @@ update data msg model =
                 Update.fromModel model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
+onMenuMsg config msg model =
     let
         ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
+            Menu.update config msg model.menu
 
         cmd_ =
             Cmd.map MenuMsg cmd
@@ -80,22 +80,22 @@ onMenuMsg data msg model =
 
 
 onGoPath :
-    Game.Data
+    Config msg
     -> Filesystem.Path
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse
-onGoPath data newPath fs model =
+    -> UpdateResponse msg
+onGoPath config newPath fs model =
     Update.fromModel <| changePath newPath fs model
 
 
-onGoStorage : String -> Model -> UpdateResponse
+onGoStorage : String -> Model -> UpdateResponse msg
 onGoStorage newStorageId model =
     { model | storageId = Just newStorageId, path = [ "" ] }
         |> Update.fromModel
 
 
-onUpdateEditing : EditingStatus -> Model -> UpdateResponse
+onUpdateEditing : EditingStatus -> Model -> UpdateResponse msg
 onUpdateEditing newState model =
     let
         model_ =
@@ -105,12 +105,12 @@ onUpdateEditing newState model =
 
 
 onEnterRename :
-    Game.Data
+    Config msg
     -> Filesystem.Id
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse
-onEnterRename data id fs model =
+    -> UpdateResponse msg
+onEnterRename config id fs model =
     let
         file =
             Filesystem.getFile id fs
@@ -127,14 +127,14 @@ onEnterRename data id fs model =
         Update.fromModel model_
 
 
-onApplyEdit : Game.Data -> Filesystem.Model -> Model -> UpdateResponse
-onApplyEdit data fs model =
+onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse msg
+onApplyEdit config fs model =
     let
         storageId =
-            getStorage (Game.getActiveServer data) model
+            getStorage config.activeCId model
 
         fsMsg =
-            Dispatch.filesystem (Game.getActiveCId data) storageId
+            Dispatch.filesystem config.activeCId storageId
 
         gameMsg =
             case model.editing of
