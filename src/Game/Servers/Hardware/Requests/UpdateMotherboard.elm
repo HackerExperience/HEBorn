@@ -1,8 +1,8 @@
 module Game.Servers.Hardware.Requests.UpdateMotherboard
     exposing
-        ( Response(..)
-        , request
-        , receive
+        ( Data
+        , Errors(..)
+        , updateMotherboardRequest
         )
 
 import Json.Decode as Decode
@@ -13,19 +13,21 @@ import Json.Decode as Decode
         , succeed
         , fail
         )
-import Utils.Json.Decode exposing (commonError)
-import Requests.Requests as Requests
+import Utils.Json.Decode exposing (commonError, message)
+import Requests.Requests as Requests exposing (report_)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
+import Decoders.Hardware
 import Game.Servers.Shared exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Game.Servers.Hardware.Messages exposing (..)
-import Decoders.Hardware
 
 
-type Response
-    = Okay Motherboard
-    | PorraKress
+type alias Data =
+    Result Errors Motherboard
+
+
+type Errors
+    = PorraKress
     | NaughtySlot
     | UnhealthyFriends
     | CoitusInterruptus
@@ -34,70 +36,75 @@ type Response
     | RobinHood
     | ConnectionRequired
     | WrongToolForTheJob
-    | Error
+    | Unknown
 
 
-request : Motherboard -> CId -> FlagsSource a -> Cmd Msg
-request motherboard cid =
-    Requests.request (Topics.updateMotherboard cid)
-        (UpdateMotherboardRequest >> Request)
-    <|
-        Motherboard.encode motherboard
+updateMotherboardRequest : Motherboard -> CId -> FlagsSource a -> Cmd Data
+updateMotherboardRequest motherboard cid flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.updateMotherboard cid)
+            (Motherboard.encode motherboard)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
+
+-- internals
+
+
+receiver : FlagsSource a -> Code -> Value -> Data
+receiver flagsSrc code value =
     case code of
         OkCode ->
-            json
+            value
                 |> decodeValue Decoders.Hardware.motherboard
-                |> Requests.report
-                |> Maybe.map Okay
-
-        ErrorCode ->
-            Requests.decodeGenericError
-                json
-                decodeErrorMessage
+                |> report_ "Hardware.UpdateMotherboard" code flagsSrc
+                |> Result.mapError (always Unknown)
 
         _ ->
-            Just Error
+            value
+                |> decodeValue errorMessage
+                |> report_ "Hardware.UpdateMotherboard" code flagsSrc
+                |> Result.mapError (always Unknown)
+                |> Result.andThen Err
 
 
-decodeErrorMessage : String -> Decoder Response
-decodeErrorMessage str =
-    case str of
-        "bad_src" ->
-            succeed PorraKress
+errorMessage : Decoder Errors
+errorMessage =
+    message <|
+        \str ->
+            case str of
+                "bad_src" ->
+                    succeed PorraKress
 
-        "bad_slot_data" ->
-            succeed NaughtySlot
+                "bad_slot_data" ->
+                    succeed NaughtySlot
 
-        "bad_network_connections" ->
-            succeed UnhealthyFriends
+                "bad_network_connections" ->
+                    succeed UnhealthyFriends
 
-        "motherboard_missing_initial_components" ->
-            succeed CoitusInterruptus
+                "motherboard_missing_initial_components" ->
+                    succeed CoitusInterruptus
 
-        "component_not_found" ->
-            succeed TryinToUseGod
+                "component_not_found" ->
+                    succeed TryinToUseGod
 
-        "motherboard_wrong_slot_type" ->
-            succeed WrongHole
+                "motherboard_wrong_slot_type" ->
+                    succeed WrongHole
 
-        "motherboard_bad_slot" ->
-            succeed NaughtySlot
+                "motherboard_bad_slot" ->
+                    succeed NaughtySlot
 
-        "component_not_belongs" ->
-            succeed RobinHood
+                "component_not_belongs" ->
+                    succeed RobinHood
 
-        "network_connection_not_belongs" ->
-            succeed RobinHood
+                "network_connection_not_belongs" ->
+                    succeed RobinHood
 
-        "motherboard_missing_public_nip" ->
-            succeed ConnectionRequired
+                "motherboard_missing_public_nip" ->
+                    succeed ConnectionRequired
 
-        "component_not_motherboard" ->
-            succeed WrongToolForTheJob
+                "component_not_motherboard" ->
+                    succeed WrongToolForTheJob
 
-        value ->
-            fail <| commonError "mobo update error message" value
+                value ->
+                    fail <| commonError "mobo update error message" value

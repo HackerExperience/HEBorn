@@ -8,6 +8,7 @@ import Game.BackFlix.Config as BackFlix
 import Game.Servers.Config as Servers
 import Game.Servers.Models as Servers
 import Game.Inventory.Config as Inventory
+import Game.Inventory.Messages as Inventory
 import Game.Web.Config as Web
 import Game.Storyline.Config as Story
 import Game.Meta.Config as Meta
@@ -26,6 +27,10 @@ serversConfig lastTick flags config =
     , toMsg = ServersMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , lastTick = lastTick
+    , onInventoryUsed =
+        Inventory.HandleComponentUsed >> InventoryMsg >> config.toMsg
+    , onInventoryFreed =
+        Inventory.HandleComponentFreed >> InventoryMsg >> config.toMsg
     }
 
 

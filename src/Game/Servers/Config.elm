@@ -2,6 +2,7 @@ module Game.Servers.Config exposing (..)
 
 import Time exposing (Time)
 import Core.Flags as Core
+import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Notifications.Messages as Notifications
 import Game.Servers.Notifications.Config as Notifications
@@ -19,6 +20,8 @@ type alias Config msg =
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , lastTick : Time
+    , onInventoryFreed : Inventory.Entry -> msg
+    , onInventoryUsed : Inventory.Entry -> msg
     }
 
 
@@ -75,7 +78,10 @@ hardwareConfig : CId -> NIP -> Config msg -> Hardware.Config msg
 hardwareConfig cid nip config =
     { flags = config.flags
     , toMsg = HardwareMsg >> ServerMsg cid >> config.toMsg
+    , batchMsg = config.batchMsg
     , cid = cid
+    , onInventoryFreed = config.onInventoryFreed
+    , onInventoryUsed = config.onInventoryUsed
     }
 
 

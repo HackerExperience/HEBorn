@@ -259,13 +259,13 @@ onHardwareMsg config cid msg server =
         config_ =
             hardwareConfig cid nip config
 
-        ( hardware, cmd, dispatch ) =
+        ( hardware, cmd ) =
             Hardware.update config_ msg <| getHardware server
 
         server_ =
             setHardware hardware server
     in
-        ( server_, cmd, dispatch )
+        ( server_, cmd, Dispatch.none )
 
 
 onTunnelsMsg :
