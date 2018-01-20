@@ -26,7 +26,6 @@ import Apps.Email.Models as Email
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.BackFlix.Models as BackFlix
-import Apps.FloatingHeads.Models as FloatingHeads
 import Apps.FloatingHeads.Messages as FloatingHeads
 import Apps.FloatingHeads.Launch as FloatingHeads
 
@@ -99,7 +98,7 @@ launch data ({ windowId } as reference) maybeParams app =
                 |> Update.fromModel
 
         MusicApp ->
-            Hebamp.initialModel windowId
+            Hebamp.initialModel windowId []
                 |> MusicModel
                 |> Update.fromModel
 

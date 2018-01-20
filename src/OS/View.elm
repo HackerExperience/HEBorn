@@ -17,7 +17,6 @@ import OS.Resources as Res
 import OS.DynamicStyle as DynamicStyle
 import OS.Header.View as Header
 import OS.Header.Models as Header
-import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 import OS.Toasts.View as Toasts
 import OS.Console.View as Console
@@ -65,7 +64,6 @@ view config data model =
     in
         div
             [ id Res.Dashboard
-            , menuEmpty |> Attributes.map config.toMsg
             , attribute Res.gameVersionAttrTag version
             , attribute Res.gameModeAttrTag gameMode
             , activeContextAttr context
@@ -91,7 +89,6 @@ viewOS config data model =
         , toasts config data model
         , lazy displayVersion
             version
-        , menuView model |> Html.map config.toMsg
         ]
 
 

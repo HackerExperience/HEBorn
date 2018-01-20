@@ -1,17 +1,12 @@
 module OS.Header.NetworkView exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (attribute)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
-import Utils.Html exposing (spacer)
 import Utils.Html.Attributes exposing (boolAttr)
 import Utils.List as List
 import Game.Data exposing (Data)
-import Game.Models as Game
-import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network
-import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)

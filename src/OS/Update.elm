@@ -8,9 +8,6 @@ import OS.Header.Update as Header
 import OS.Config exposing (..)
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
-import OS.Menu.Messages as Menu
-import OS.Menu.Update as Menu
-import OS.Menu.Actions as Menu
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Update as SessionManager
 import OS.Toasts.Messages as Toasts
@@ -32,13 +29,6 @@ update config data msg model =
 
         ToastsMsg msg ->
             onToastsMsg config data msg model
-
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-                |> Update.mapCmd config.toMsg
-
-        MenuMsg msg ->
-            onMenuMsg config data msg model
 
 
 
@@ -92,21 +82,3 @@ onToastsMsg config data msg model =
         }
         msg
         model
-
-
-onMenuMsg : Config msg -> Game.Data -> Menu.Msg -> Model -> UpdateResponse msg
-onMenuMsg config data msg model =
-    let
-        ( menu_, menu_cmd, dispatch_ ) =
-            Menu.update config msg model.menu
-
-        ( modelHeader, _, _ ) =
-            onHeaderMsg config data Header.CheckMenus model
-
-        cmd_ =
-            Cmd.map (MenuMsg >> config.toMsg) menu_cmd
-
-        model_ =
-            { modelHeader | menu = menu_ }
-    in
-        ( model_, cmd_, dispatch_ )

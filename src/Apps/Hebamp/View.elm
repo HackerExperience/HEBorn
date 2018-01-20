@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick)
 import Game.Data as Game
 import Apps.Hebamp.Messages exposing (Msg(..))
 import Apps.Hebamp.Models exposing (..)
+import Apps.Hebamp.Shared exposing (..)
 import Apps.Hebamp.Resources exposing (Classes(..), prefix)
 
 

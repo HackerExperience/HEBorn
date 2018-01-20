@@ -2,7 +2,6 @@ module OS.SessionManager.Subscriptions exposing (..)
 
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
-import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Models as WindowManager
