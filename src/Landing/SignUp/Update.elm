@@ -1,34 +1,32 @@
 module Landing.SignUp.Update exposing (update)
 
-import Utils.Update as Update
-import Landing.SignUp.Models exposing (Model, FormError)
-import Landing.SignUp.Messages exposing (Msg(..))
+import Utils.React as React exposing (React)
 import Landing.SignUp.Requests exposing (..)
 import Landing.SignUp.Requests.SignUp as SignUp
-import Core.Models as Core
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import Landing.SignUp.Config exposing (..)
+import Landing.SignUp.Messages exposing (..)
+import Landing.SignUp.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Core.Model -> Msg -> Model -> UpdateResponse
-update core msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         SubmitForm ->
-            let
-                cmd =
-                    SignUp.request
-                        model.email
-                        model.username
-                        model.password
-                        core
-            in
-                ( model, cmd, Dispatch.none )
+            ( model
+            , config
+                |> SignUp.request model.email model.username model.password
+                |> Cmd.map config.toMsg
+                |> React.cmd
+            )
 
         SetUsername username ->
-            ( { model | username = username, usernameTaken = False }, Cmd.none, Dispatch.none )
+            ( { model | username = username, usernameTaken = False }
+            , React.none
+            )
 
         ValidateUsername ->
             let
@@ -41,10 +39,14 @@ update core msg model =
                 newFormErrors =
                     { usernameErrors = newUsernameErrors, passwordErrors = passwordErrors, emailErrors = emailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
+                ( { model | formErrors = newFormErrors }
+                , React.none
+                )
 
         SetPassword password ->
-            ( { model | password = password }, Cmd.none, Dispatch.none )
+            ( { model | password = password }
+            , React.none
+            )
 
         ValidatePassword ->
             let
@@ -57,10 +59,14 @@ update core msg model =
                 newFormErrors =
                     { usernameErrors = usernameErrors, passwordErrors = newPasswordErrors, emailErrors = emailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
+                ( { model | formErrors = newFormErrors }
+                , React.none
+                )
 
         SetEmail email ->
-            ( { model | email = email }, Cmd.none, Dispatch.none )
+            ( { model | email = email }
+            , React.none
+            )
 
         ValidateEmail ->
             let
@@ -73,35 +79,37 @@ update core msg model =
                 newFormErrors =
                     { usernameErrors = usernameErrors, passwordErrors = passwordErrors, emailErrors = newEmailErrors }
             in
-                ( { model | formErrors = newFormErrors }, Cmd.none, Dispatch.none )
+                ( { model | formErrors = newFormErrors }
+                , React.none
+                )
 
         Request data ->
-            onRequest core (receive data) model
+            onRequest config (receive data) model
 
 
 
 -- internals
 
 
-onRequest : Core.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest core response model =
+onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
+onRequest config response model =
     case response of
         Just response ->
-            updateRequest core response model
+            updateRequest config response model
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-updateRequest : Core.Model -> Response -> Model -> UpdateResponse
-updateRequest core response model =
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config response model =
     case response of
         -- TODO: add more types to match response status
         SignUpResponse (SignUp.Okay _ _ _) ->
-            Update.fromModel model
+            ( model, React.none )
 
         _ ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 getErrorsUsername : Model -> String

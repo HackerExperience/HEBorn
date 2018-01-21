@@ -3,6 +3,7 @@ module Core.Config exposing (..)
 import Time exposing (Time)
 import Driver.Websocket.Channels exposing (Channel(ServerChannel, AccountChannel))
 import Driver.Websocket.Messages as Ws
+import Landing.Config as Landing
 import Setup.Config as Setup
 import OS.Config as OS
 import OS.Messages as OS
@@ -76,6 +77,15 @@ gameConfig =
     , onBALoginFailed = (\a -> MultiMsg [])
     , onBATransferSuccess = (\a -> MultiMsg [])
     , onBATransferFailed = (\a -> MultiMsg [])
+    }
+
+
+landingConfig : Bool -> Flags -> Landing.Config Msg
+landingConfig windowLoaded flags =
+    { flags = flags
+    , toMsg = LandingMsg
+    , onLogin = HandleBoot
+    , windowLoaded = windowLoaded
     }
 
 

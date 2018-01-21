@@ -5,8 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Html.CssHelpers
 import Landing.Resources as Res
-import Landing.Login.Messages exposing (Msg(..))
-import Landing.Login.Models exposing (Model)
+import Landing.Login.Messages exposing (..)
+import Landing.Login.Models exposing (..)
 
 
 landClass : List class -> Attribute msg
@@ -14,8 +14,8 @@ landClass =
     (.class) <| Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Model -> Html Msg
-view model =
+view : (Msg -> msg) -> Model -> Html msg
+view toMsg model =
     Html.form
         [ id "login-form"
         , action "javascript:void(0);"
@@ -48,6 +48,7 @@ view model =
         , br [] []
         , button [ class ("signup-button " ++ buttonClass model), onClick SubmitLogin ] [ text "Login" ]
         ]
+        |> Html.map toMsg
 
 
 viewErrorsUsername : Model -> String
