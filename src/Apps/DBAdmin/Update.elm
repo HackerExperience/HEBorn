@@ -1,11 +1,9 @@
 module Apps.DBAdmin.Update exposing (update)
 
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
-import Game.Models as Game
-import Game.Account.Models as Account
 import Game.Servers.Logs.Models exposing (ID)
+import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Tabs exposing (..)
 import Apps.DBAdmin.Messages as DBAdmin exposing (Msg(..))
@@ -15,39 +13,43 @@ import Apps.DBAdmin.Menu.Actions as Menu
 import Apps.DBAdmin.Tabs.Servers.Helpers as Servers
 
 
-type alias UpdateResponse =
-    ( Model, Cmd DBAdmin.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> DBAdmin.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            let
+                config_ =
+                    menuConfig config
+            in
+                Menu.actionHandler config_ action model
 
         MenuMsg msg ->
-            onMenuMsg data msg model
+            onMenuMsg config msg model
 
         -- -- Real acts
         ToogleExpand tab itemId ->
             onToogleExpand tab itemId model
 
         EnterEditing tab itemId ->
-            onEnterEditing data tab itemId model
+            onEnterEditing config tab itemId model
 
         LeaveEditing tab itemId ->
             onLeaveEditing tab itemId model
 
         UpdateTextFilter tab filter ->
-            onUpdateTextFilter data tab filter model
+            onUpdateTextFilter config tab filter model
 
         EnterSelectingVirus serverIp ->
-            onEnterSelectingVirus data serverIp model
+            onEnterSelectingVirus config serverIp model
 
         UpdateServersSelectVirus serverIp virusId ->
             onUpdateServersSelectVirus serverIp virusId model
@@ -56,98 +58,82 @@ update data msg model =
             onGoTab tab model
 
         _ ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
+onMenuMsg config msg model =
     let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
+        config_ =
+            menuConfig config
 
-        cmd_ =
-            Cmd.map MenuMsg cmd
+        ( menu_, react ) =
+            Menu.update config_ msg model.menu
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, cmd_, coreMsg )
+        ( model_, react )
 
 
-onToogleExpand : MainTab -> ID -> Model -> UpdateResponse
+onToogleExpand : MainTab -> ID -> Model -> UpdateResponse msg
 onToogleExpand tab itemId model =
-    model
-        |> toggleExpand itemId tab
-        |> Update.fromModel
-
-
-onEnterEditing : Game.Data -> MainTab -> ID -> Model -> UpdateResponse
-onEnterEditing data tab itemId model =
     let
-        database =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDatabase
+        model_ =
+            toggleExpand itemId tab model
     in
-        model
-            |> enterEditing
-                itemId
-                tab
-                database
-            |> Update.fromModel
+        ( model_, React.none )
 
 
-onLeaveEditing : MainTab -> ID -> Model -> UpdateResponse
+onEnterEditing : Config msg -> MainTab -> ID -> Model -> UpdateResponse msg
+onEnterEditing config tab itemId model =
+    let
+        model_ =
+            enterEditing itemId tab config.database model
+    in
+        ( model_, React.none )
+
+
+onLeaveEditing : MainTab -> ID -> Model -> UpdateResponse msg
 onLeaveEditing tab itemId model =
-    model
-        |> leaveEditing itemId tab
-        |> Update.fromModel
-
-
-onUpdateTextFilter : Game.Data -> MainTab -> String -> Model -> UpdateResponse
-onUpdateTextFilter data tab filter model =
     let
-        database =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDatabase
+        model_ =
+            leaveEditing itemId tab model
     in
-        model
-            |> updateTextFilter
-                filter
-                tab
-                database
-            |> Update.fromModel
+        ( model_, React.none )
 
 
-onEnterSelectingVirus : Game.Data -> ID -> Model -> UpdateResponse
-onEnterSelectingVirus data serverIp model =
+onUpdateTextFilter : Config msg -> MainTab -> String -> Model -> UpdateResponse msg
+onUpdateTextFilter config tab filter model =
     let
-        database =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDatabase
+        model_ =
+            updateTextFilter filter tab config.database model
     in
-        model
-            |> Servers.enterSelectingVirus
-                serverIp
-                database
-            |> Update.fromModel
+        ( model_, React.none )
 
 
-onUpdateServersSelectVirus : ID -> ID -> Model -> UpdateResponse
+onEnterSelectingVirus : Config msg -> ID -> Model -> UpdateResponse msg
+onEnterSelectingVirus config serverIp model =
+    let
+        model_ =
+            Servers.enterSelectingVirus serverIp config.database model
+    in
+        ( model_, React.none )
+
+
+onUpdateServersSelectVirus : ID -> ID -> Model -> UpdateResponse msg
 onUpdateServersSelectVirus serverIp virusId model =
-    model
-        |> Servers.updateSelectingVirus
-            virusId
-            serverIp
-        |> Update.fromModel
+    let
+        model_ =
+            Servers.updateSelectingVirus virusId serverIp model
+    in
+        ( model_, React.none )
 
 
-onGoTab : MainTab -> Model -> UpdateResponse
+onGoTab : MainTab -> Model -> UpdateResponse msg
 onGoTab tab model =
-    { model | selected = tab }
-        |> Update.fromModel
+    let
+        model_ =
+            { model | selected = tab }
+    in
+        ( model_, React.none )

@@ -8,8 +8,8 @@ import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
-import Game.Data as Game
 import Game.BackFlix.Models as BackFlix
+import Apps.BackFlix.Config exposing (..)
 import Apps.BackFlix.Messages exposing (Msg(..))
 import Apps.BackFlix.Models exposing (..)
 import Apps.BackFlix.Resources exposing (Classes(..), prefix)
@@ -19,11 +19,11 @@ import Apps.BackFlix.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
-        data_ =
-            Game.getBackFlix data
+        data =
+            config.backFlix
 
         filterHeaderLayout =
             verticalList
@@ -39,10 +39,10 @@ view data model =
         viewData =
             case model.selected of
                 TabAll ->
-                    viewTabAll data_
+                    viewTabAll data
 
                 TabSimple ->
-                    viewTabSimple data_
+                    viewTabSimple data
     in
         verticalSticked
             (Just [ filterHeaderLayout ])

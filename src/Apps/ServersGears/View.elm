@@ -7,7 +7,6 @@ import Html.Attributes exposing (disabled)
 import Html.Lazy exposing (lazy, lazy2)
 import Html.CssHelpers
 import Utils.Html.Events exposing (onClickMe)
-import Game.Data as Game
 import Game.Models as GameModels
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
@@ -16,6 +15,7 @@ import Game.Meta.Types.Components as Components exposing (Components)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Network.Connections as NetConnections exposing (Connections)
+import Apps.ServersGears.Config exposing (..)
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 import Apps.ServersGears.Resources exposing (Classes(..), prefix)
@@ -26,34 +26,31 @@ import UI.Widgets.Motherboard exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
         isGateway =
-            data
-                |> Game.getActiveServer
+            config.activeServer
                 |> Servers.isGateway
     in
         if isGateway then
-            editablePanel data model
+            editablePanel config model
         else
-            readonlyPanel data model
+            readonlyPanel config model
 
 
-readonlyPanel : Game.Data -> Model -> Html Msg
-readonlyPanel data model =
+readonlyPanel : Config msg -> Model -> Html Msg
+readonlyPanel config model =
     -- TODO: when totals are available
     div [ class [ WindowRO ] ]
         []
 
 
-editablePanel : Game.Data -> Model -> Html Msg
-editablePanel data model =
+editablePanel : Config msg -> Model -> Html Msg
+editablePanel config model =
     let
         inventory =
-            data
-                |> Game.getGame
-                |> GameModels.getInventory
+            config.inventory
     in
         case getMotherboard model of
             Just motherboard ->

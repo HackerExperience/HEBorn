@@ -1,31 +1,33 @@
 module Apps.Finance.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
 import Game.Data as Game
+import Apps.Finance.Config exposing (..)
 import Apps.Finance.Models exposing (Model, MainTab)
 import Apps.Finance.Messages as Finance exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Finance.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> Finance.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         GoTab tab ->
-            onGoTabs data tab model
+            onGoTabs config tab model
 
 
-onGoTabs : Game.Data -> MainTab -> Model -> UpdateResponse
-onGoTabs data tab model =
+onGoTabs : Config msg -> MainTab -> Model -> UpdateResponse msg
+onGoTabs config tab model =
     let
         model_ =
             { model | selected = tab }
     in
-        Update.fromModel model_
+        ( model_, React.none )

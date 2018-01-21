@@ -1,23 +1,25 @@
 module Apps.Hebamp.Update exposing (update)
 
 import Utils.Ports.Audio exposing (..)
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Time exposing (Time)
+import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Models exposing (Model)
 import Apps.Hebamp.Messages as Hebamp exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Hebamp.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> Hebamp.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- Intenals
         TimeUpdate playerId time ->
@@ -33,7 +35,7 @@ update data msg model =
             onSetCurrentTime time model
 
 
-onTimeUpdate : String -> Float -> Model -> UpdateResponse
+onTimeUpdate : String -> Float -> Model -> UpdateResponse msg
 onTimeUpdate playerId time model =
     let
         model_ =
@@ -42,31 +44,31 @@ onTimeUpdate playerId time model =
             else
                 model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
-onPlay : Model -> UpdateResponse
+onPlay : Model -> UpdateResponse msg
 onPlay model =
     let
-        cmd =
-            play model.playerId
+        react =
+            React.cmd (play model.playerId)
     in
-        ( model, cmd, Dispatch.none )
+        ( model, react )
 
 
-onPause : Model -> UpdateResponse
+onPause : Model -> UpdateResponse msg
 onPause model =
     let
-        cmd =
-            pause model.playerId
+        react =
+            React.cmd (pause model.playerId)
     in
-        ( model, cmd, Dispatch.none )
+        ( model, react )
 
 
-onSetCurrentTime : Time -> Model -> UpdateResponse
+onSetCurrentTime : Time -> Model -> UpdateResponse msg
 onSetCurrentTime time model =
     let
-        cmd =
-            setCurrentTime ( model.playerId, time )
+        react =
+            React.cmd <| setCurrentTime ( model.playerId, time )
     in
-        ( model, cmd, Dispatch.none )
+        ( model, react )

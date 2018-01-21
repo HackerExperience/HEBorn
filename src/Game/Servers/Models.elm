@@ -9,6 +9,7 @@ import Game.Servers.Processes.Models as Processes
 import Game.Servers.Tunnels.Models as Tunnels
 import Game.Servers.Hardware.Models as Hardware
 import Game.Servers.Notifications.Models as Notifications
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared exposing (..)
 
 
@@ -460,3 +461,31 @@ getTunnels =
 setTunnels : Tunnels.Model -> Server -> Server
 setTunnels tunnels server =
     { server | tunnels = tunnels }
+
+
+getContextServer : Maybe Context -> Model -> Server -> Server
+getContextServer maybeContext servers gateway =
+    let
+        endpointCId =
+            getEndpointCId gateway
+
+        maybeEndpoint =
+            Maybe.andThen (flip get servers) endpointCId
+
+        endPointGetter =
+            case maybeEndpoint of
+                Just endpoint ->
+                    endpoint
+
+                _ ->
+                    gateway
+    in
+        case maybeContext of
+            Just Gateway ->
+                gateway
+
+            Just Endpoint ->
+                endPointGetter
+
+            Nothing ->
+                gateway

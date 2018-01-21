@@ -1,10 +1,11 @@
 module Apps.Launch exposing (launch, launchEvent)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (Context)
+import Utils.React as React exposing (React)
 import Utils.Update as Update
 import Apps.Apps exposing (..)
+import Apps.Config exposing (..)
 import Apps.Messages exposing (..)
 import Apps.Models exposing (..)
 import Apps.Reference exposing (..)
@@ -30,29 +31,29 @@ import Apps.FloatingHeads.Messages as FloatingHeads
 import Apps.FloatingHeads.Launch as FloatingHeads
 
 
---CONFREFACT : Remove Game.Data from Here after refactor
-
-
 launch :
-    Game.Data
+    Config msg
     -> Reference
     -> Maybe AppParams
     -> App
-    -> ( AppModel, Cmd Msg, Dispatch )
-launch data ({ windowId } as reference) maybeParams app =
+    -> ( AppModel, React msg )
+launch config ({ windowId } as reference) maybeParams app =
     case app of
         LogViewerApp ->
             LogViewer.initialModel
                 |> LogViewerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         TaskManagerApp ->
             TaskManager.initialModel
                 |> TaskManagerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         BrowserApp ->
             let
+                config_ =
+                    browserConfig config
+
                 params =
                     case maybeParams of
                         Just (BrowserParams params) ->
@@ -61,57 +62,61 @@ launch data ({ windowId } as reference) maybeParams app =
                         _ ->
                             Nothing
 
-                ( model, cmd, dispatch ) =
-                    Browser.launch data params reference
+                ( model, react ) =
+                    Browser.launch config_ params reference
 
                 model_ =
                     BrowserModel model
-
-                cmd_ =
-                    Cmd.map BrowserMsg cmd
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
         ExplorerApp ->
             Explorer.initialModel
                 |> ExplorerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         DatabaseApp ->
             Database.initialModel
                 |> DatabaseModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         ConnManagerApp ->
             ConnManager.initialModel
                 |> ConnManagerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         BounceManagerApp ->
             BounceManager.initialModel
                 |> BounceManagerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         FinanceApp ->
             Finance.initialModel
                 |> FinanceModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         MusicApp ->
             Hebamp.initialModel windowId []
                 |> MusicModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         CtrlPanelApp ->
             CtrlPanel.initialModel
                 |> CtrlPanelModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         ServersGearsApp ->
-            data
-                |> ServersGears.initialModel
-                |> ServersGearsModel
-                |> Update.fromModel
+            let
+                config_ =
+                    serversGearsConfig config
+
+                mobo =
+                    config_.mobo
+            in
+                mobo
+                    |> ServersGears.initialModel
+                    |> ServersGearsModel
+                    |> flip (,) React.none
 
         LocationPickerApp ->
             let
@@ -125,35 +130,38 @@ launch data ({ windowId } as reference) maybeParams app =
                     LocationPicker.startCmd pureModel
                         |> Cmd.map LocationPickerMsg
             in
-                ( model, cmd, Dispatch.none )
+                ( model, React.map config.toMsg <| React.cmd cmd )
 
         LanViewerApp ->
             LanViewer.initialModel
                 |> LanViewerModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         EmailApp ->
             Email.initialModel
                 |> EmailModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         BugApp ->
             Bug.initialModel
                 |> BugModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         CalculatorApp ->
             Calculator.initialModel
                 |> CalculatorModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         BackFlixApp ->
             BackFlix.initialModel
                 |> BackFlixModel
-                |> Update.fromModel
+                |> flip (,) React.none
 
         FloatingHeadsApp ->
             let
+                config_ =
+                    floatingHeadsConfig config
+
                 params =
                     case maybeParams of
                         Just (FloatingHeadsParams params) ->
@@ -162,16 +170,13 @@ launch data ({ windowId } as reference) maybeParams app =
                         _ ->
                             Nothing
 
-                ( model, cmd, dispatch ) =
-                    FloatingHeads.launch data params reference
+                ( model, react ) =
+                    FloatingHeads.launch config_ params reference
 
                 model_ =
                     FloatingHeadsModel model
-
-                cmd_ =
-                    Cmd.map FloatingHeadsMsg cmd
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
 
 launchEvent : Context -> AppParams -> Msg

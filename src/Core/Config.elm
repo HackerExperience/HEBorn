@@ -71,6 +71,16 @@ import OS.SessionManager.Messages as SessionManager
 import OS.Toasts.Messages as Toast
 import Apps.Messages as Apps
 import Apps.Browser.Messages as Browser
+import Game.Config as Game
+import Game.Account.Models as Account
+import Game.BackFlix.Models as BackFlix
+import Game.Inventory.Models as Inventory
+import Game.Servers.Models as Servers
+import Game.Servers.Shared exposing (CId)
+import Game.Storyline.Models as Story
+import Core.Flags exposing (Flags)
+import Core.Error as Error exposing (Error)
+import Core.Messages exposing (..)
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -277,12 +287,14 @@ osConfig game (( cid, _ ) as srv) ctx gtw =
     { toMsg = OSMsg
     , flags = Game.getFlags game
     , account = Game.getAccount game
+    , servers = Game.getServers game
     , story = Game.getStory game
+    , inventory = Game.getInventory game
+    , backFlix = .logs <| Game.getBackFlix game
+    , lastTick = Meta.getLastTick <| Game.getMeta <| game
     , activeServer = srv
     , activeContext = ctx
     , activeGateway = gtw
-    , servers = Game.getServers game
-    , lastTick = Meta.getLastTick <| Game.getMeta <| game
     , onLogout =
         Account.HandleLogout
             |> Game.AccountMsg
@@ -324,6 +336,7 @@ osConfig game (( cid, _ ) as srv) ctx gtw =
             >> Servers.ServerMsg cid
             >> Game.ServersMsg
             >> GameMsg
+    , batchMsg = BatchMsg
     }
 
 

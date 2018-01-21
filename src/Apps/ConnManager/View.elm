@@ -10,6 +10,7 @@ import Game.Meta.Types.Network exposing (NIP)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Entries.FilterHeader exposing (filterHeader)
+import Apps.ConnManager.Config exposing (..)
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)
 import Apps.ConnManager.Resources exposing (Classes(..), prefix)
@@ -17,6 +18,38 @@ import Apps.ConnManager.Resources exposing (Classes(..), prefix)
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
+
+
+view : Config msg -> Model -> Html Msg
+view config model =
+    let
+        filterHeaderLayout =
+            verticalList
+                [ filterHeader
+                    [ ( class [ IcoUp ], FilterUp, False )
+                    , ( class [ IcoDown ], FilterDown, False )
+                    ]
+                    []
+                    model.filterText
+                    "Search..."
+                    UpdateTextFilter
+                ]
+
+        nip =
+            config.activeServer
+                |> Servers.getActiveNIP
+
+        mainEntries =
+            config.activeServer
+                |> .tunnels
+                |> Dict.toList
+                |> List.map (tunnelView nip)
+                |> verticalList
+    in
+        verticalSticked
+            (Just [ filterHeaderLayout ])
+            [ mainEntries ]
+            Nothing
 
 
 connView : Tunnels.Connection -> Html Msg
@@ -59,37 +92,3 @@ connTypeToString src =
 
         _ ->
             "*UNKNOWN*"
-
-
-view : Game.Data -> Model -> Html Msg
-view data model =
-    let
-        filterHeaderLayout =
-            verticalList
-                [ filterHeader
-                    [ ( class [ IcoUp ], FilterUp, False )
-                    , ( class [ IcoDown ], FilterDown, False )
-                    ]
-                    []
-                    model.filterText
-                    "Search..."
-                    UpdateTextFilter
-                ]
-
-        nip =
-            data
-                |> Game.getActiveServer
-                |> Servers.getActiveNIP
-
-        mainEntries =
-            data
-                |> Game.getActiveServer
-                |> .tunnels
-                |> Dict.toList
-                |> List.map (tunnelView nip)
-                |> verticalList
-    in
-        verticalSticked
-            (Just [ filterHeaderLayout ])
-            [ mainEntries ]
-            Nothing

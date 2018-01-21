@@ -9,6 +9,7 @@ module Apps.LogViewer.Menu.Actions
         )
 
 import Dict
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Data as Game
@@ -23,57 +24,56 @@ import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 --CONFREFACT : Fix these dispatches
 
 
+type alias UpdateResponse msg =
+    ( Model, React msg )
+
+
 actionHandler :
     Config msg
     -> MenuAction
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
+    -> UpdateResponse msg
 actionHandler config action model =
     case action of
         NormalEntryEdit logId ->
-            enterEditing config logId model
-                |> Update.fromModel
+            ( enterEditing config logId model, React.none )
 
         EdittingEntryApply logId ->
-            model
-                |> enterEditing config logId
-                |> Update.fromModel
+            ( enterEditing config logId model, React.none )
 
         EdittingEntryCancel logId ->
-            model
-                |> leaveEditing logId
-                |> Update.fromModel
+            ( leaveEditing logId model, React.none )
 
         EncryptEntry logId ->
-            let
-                dispatch =
-                    startCrypting logId config model
-            in
-                ( model, Cmd.none, dispatch )
+            --let
+            --    dispatch =
+            --        startCrypting logId config model
+            --in
+            startCrypting logId config model
 
         DecryptEntry logId ->
-            let
-                dispatch =
-                    startDecrypting logId model
-            in
-                ( model, Cmd.none, dispatch )
+            --let
+            --    dispatch =
+            --        startDecrypting logId model
+            --in
+            startDecrypting logId model
 
         HideEntry logId ->
-            let
-                dispatch =
-                    startHiding logId config model
-            in
-                ( model, Cmd.none, dispatch )
+            --let
+            --    dispatch =
+            --        startHiding logId config model
+            --in
+            startHiding logId config model
 
         DeleteEntry logId ->
-            let
-                dispatch =
-                    startDeleting logId config model
-            in
-                ( model, Cmd.none, dispatch )
+            --let
+            --    dispatch =
+            --        startDeleting logId config model
+            --in
+            startDeleting logId config model
 
 
-startCrypting : Logs.ID -> Config msg -> Model -> Dispatch
+startCrypting : Logs.ID -> Config msg -> Model -> UpdateResponse msg
 startCrypting id config model =
     --let
     --    dispatch =
@@ -82,15 +82,15 @@ startCrypting id config model =
     --            |> Dispatch.logs config.activeCId
     --in
     --    dispatch
-    Dispatch.none
+    ( model, React.none )
 
 
-startDecrypting : Logs.ID -> Model -> Dispatch
+startDecrypting : Logs.ID -> Model -> UpdateResponse msg
 startDecrypting id model =
-    Dispatch.none
+    ( model, React.none )
 
 
-startHiding : Logs.ID -> Config msg -> Model -> Dispatch
+startHiding : Logs.ID -> Config msg -> Model -> UpdateResponse msg
 startHiding id config model =
     --let
     --    dispatch =
@@ -99,10 +99,10 @@ startHiding id config model =
     --            |> Dispatch.logs config.activeCId
     --in
     --    dispatch
-    Dispatch.none
+    ( model, React.none )
 
 
-startDeleting : Logs.ID -> Config msg -> Model -> Dispatch
+startDeleting : Logs.ID -> Config msg -> Model -> UpdateResponse msg
 startDeleting id config model =
     --let
     --    dispatch =
@@ -111,7 +111,7 @@ startDeleting id config model =
     --            |> Dispatch.logs config.activeCId
     --in
     --    dispatch
-    Dispatch.none
+    ( model, React.none )
 
 
 enterEditing : Config msg -> Logs.ID -> Model -> Model

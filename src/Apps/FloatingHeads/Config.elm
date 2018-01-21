@@ -9,9 +9,12 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , emails : Emails.Model
     , username : String
+    , batchMsg : List msg -> msg
     }
 
 
-contentConfig : Config msg -> Content.Config
-contentConfig { username } =
-    { username = username }
+contentConfig : Config msg -> Content.Config msg
+contentConfig config =
+    { username = config.username
+    , batchMsg = config.batchMsg
+    }

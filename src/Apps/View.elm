@@ -31,11 +31,10 @@ import Apps.Calculator.Messages as CalculatorMessages
 import Apps.BackFlix.View as BackFlix
 import Apps.FloatingHeads.View as FloatingHeads
 import Apps.FloatingHeads.Messages as FloatingHeadsMessages
-import Game.Data as Game
 
 
-view : Config msg -> Game.Data -> AppModel -> Html msg
-view config data model =
+view : Config msg -> AppModel -> Html msg
+view config model =
     case model of
         LogViewerModel model ->
             let
@@ -52,7 +51,11 @@ view config data model =
                 Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view config_ model)
 
         BrowserModel model ->
-            Html.map (BrowserMsg >> config.toMsg) (Browser.view data model)
+            let
+                config_ =
+                    browserConfig config
+            in
+                Html.map (BrowserMsg >> config.toMsg) (Browser.view config_ model)
 
         ExplorerModel model ->
             let
@@ -62,19 +65,39 @@ view config data model =
                 Html.map (ExplorerMsg >> config.toMsg) (Explorer.view config_ model)
 
         DatabaseModel model ->
-            Html.map (DatabaseMsg >> config.toMsg) (Database.view data model)
+            let
+                config_ =
+                    dbAdminConfig config
+            in
+                Html.map (DatabaseMsg >> config.toMsg) (Database.view config_ model)
 
         ConnManagerModel model ->
-            Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view data model)
+            let
+                config_ =
+                    connManagerConfig config
+            in
+                Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view config_ model)
 
         BounceManagerModel model ->
-            Html.map (BounceManagerMsg >> config.toMsg) (BounceManager.view data model)
+            let
+                config_ =
+                    bounceManConfig config
+            in
+                Html.map (BounceManagerMsg >> config.toMsg) (BounceManager.view config_ model)
 
         FinanceModel model ->
-            Html.map (FinanceMsg >> config.toMsg) (Finance.view data model)
+            let
+                config_ =
+                    financeConfig config
+            in
+                Html.map (FinanceMsg >> config.toMsg) (Finance.view config_ model)
 
         MusicModel model ->
-            Html.map (MusicMsg >> config.toMsg) (Hebamp.view data model)
+            let
+                config_ =
+                    hebampConfig config
+            in
+                Html.map (MusicMsg >> config.toMsg) (Hebamp.view config_ model)
 
         CtrlPanelModel model ->
             let
@@ -84,10 +107,18 @@ view config data model =
                 CtrlPanel.view config_ model
 
         ServersGearsModel model ->
-            Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view data model)
+            let
+                config_ =
+                    serversGearsConfig config
+            in
+                Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view config_ model)
 
         LocationPickerModel model ->
-            Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view data model)
+            let
+                config_ =
+                    locationPickerConfig config
+            in
+                Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view config_ model)
 
         LanViewerModel model ->
             let
@@ -104,7 +135,11 @@ view config data model =
                 Html.map (EmailMsg >> config.toMsg) (Email.view config_ model)
 
         BugModel model ->
-            Html.map (BugMsg >> config.toMsg) (Bug.view data model)
+            let
+                config_ =
+                    bugConfig config
+            in
+                Html.map (BugMsg >> config.toMsg) (Bug.view config_ model)
 
         CalculatorModel model ->
             let
@@ -114,7 +149,11 @@ view config data model =
                 Calculator.view config_ model
 
         BackFlixModel model ->
-            Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view data model)
+            let
+                config_ =
+                    backFlixConfig config
+            in
+                Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view config_ model)
 
         FloatingHeadsModel model ->
             let

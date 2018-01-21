@@ -147,7 +147,7 @@ os game os =
                     config =
                         osConfig game srv ctx gtw
                 in
-                    OS.subscriptions config data os
+                    OS.subscriptions config os
 
 
 websocket : Ws.Model Msg -> Sub Msg

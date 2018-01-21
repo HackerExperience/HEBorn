@@ -25,10 +25,10 @@ import Apps.TaskManager.Messages as TaskManager
 import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Flags as Flags exposing (Flags)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Subscribers as Subscribers
+import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 -- TODO: Use onSth pattern
@@ -307,13 +307,13 @@ updatePlayOS msg ({ game, os } as state) =
                     config =
                         osConfig game srv ctx gtw
 
-                    ( os_, react, dispatch ) =
-                        OS.update config data msg os
+                    ( os_, react ) =
+                        OS.update config msg os
 
                     state_ =
                         { state | os = os_ }
                 in
-                    ( state_, React.toCmd react, dispatch )
+                    ( state_, React.toCmd react, Dispatch.none )
 
             _ ->
                 ( state, Cmd.none, Dispatch.none )

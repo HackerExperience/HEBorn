@@ -7,6 +7,7 @@ import Html.Attributes exposing (src, type_, controls, style)
 import Html.CssHelpers
 import Html.Events exposing (on, onClick)
 import Game.Data as Game
+import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Messages exposing (Msg(..))
 import Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Shared exposing (..)
@@ -15,6 +16,41 @@ import Apps.Hebamp.Resources exposing (Classes(..), prefix)
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
+
+
+view : Config msg -> Model -> Html Msg
+view config model =
+    div
+        [ class [ Container ] ]
+        [ div [ class [ Header ] ] [ text ":" ]
+        , div [ class [ Player ] ]
+            [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
+            , div [ class [ Vis, Title ] ] [ songTitle model.now ]
+            , div [ class [ Inf ] ] []
+            , div [ class [ Inf, KHz ] ] []
+            , div [ class [ MonoStereo ] ] [ text "mono" ]
+            , div [ class [ Bar, Volume ] ] []
+            , div [ class [ Bar, Balanced ] ] []
+            , div [ class [ Btn, Ext, Left ] ] [ text "EQ" ]
+            , div [ class [ Btn, Ext ] ] [ text "PL" ]
+            , div [ class [ Slidebar ] ]
+                [ span
+                    [ class [ Pointer ]
+                    , sliderStyle model.now model.currentTime
+                    ]
+                    []
+                ]
+            , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconStepBackward ] ] [] ]
+            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPlay ], onClick Play ] [] ]
+            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPause ], onClick Pause ] [] ]
+            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStop ], onClick Pause ] [] ]
+            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStepForward ] ] [] ]
+            , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconEject ], onClick Pause ] [] ]
+            , div [ class [ Btn, Ext, Left ] ] [ text "SHUFFLE" ]
+            , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
+            ]
+        , nativeAudio model.playerId model.now
+        ]
 
 
 targetCurrentTime : Json.Decoder Float
@@ -107,38 +143,3 @@ nativeAudio playerId audioData =
                     []
     in
         audio (staticAttr ++ dynamicAttr) []
-
-
-view : Game.Data -> Model -> Html Msg
-view data model =
-    div
-        [ class [ Container ] ]
-        [ div [ class [ Header ] ] [ text ":" ]
-        , div [ class [ Player ] ]
-            [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
-            , div [ class [ Vis, Title ] ] [ songTitle model.now ]
-            , div [ class [ Inf ] ] []
-            , div [ class [ Inf, KHz ] ] []
-            , div [ class [ MonoStereo ] ] [ text "mono" ]
-            , div [ class [ Bar, Volume ] ] []
-            , div [ class [ Bar, Balanced ] ] []
-            , div [ class [ Btn, Ext, Left ] ] [ text "EQ" ]
-            , div [ class [ Btn, Ext ] ] [ text "PL" ]
-            , div [ class [ Slidebar ] ]
-                [ span
-                    [ class [ Pointer ]
-                    , sliderStyle model.now model.currentTime
-                    ]
-                    []
-                ]
-            , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconStepBackward ] ] [] ]
-            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPlay ], onClick Play ] [] ]
-            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPause ], onClick Pause ] [] ]
-            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStop ], onClick Pause ] [] ]
-            , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStepForward ] ] [] ]
-            , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconEject ], onClick Pause ] [] ]
-            , div [ class [ Btn, Ext, Left ] ] [ text "SHUFFLE" ]
-            , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
-            ]
-        , nativeAudio model.playerId model.now
-        ]
