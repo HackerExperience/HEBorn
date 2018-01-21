@@ -1,10 +1,4 @@
-module OS.Models
-    exposing
-        ( Model
-        , initialModel
-        , getSessionManager
-        , setSessionManager
-        )
+module OS.Models exposing (..)
 
 import OS.SessionManager.Models as SessionManager
 import OS.Header.Models as Header
@@ -34,3 +28,13 @@ getSessionManager =
 setSessionManager : SessionManager.Model -> Model -> Model
 setSessionManager sm model =
     { model | session = sm }
+
+
+getHeader : Model -> Header.Model
+getHeader =
+    .header
+
+
+setHeader : Header.Model -> Model -> Model
+setHeader header model =
+    { model | header = header }

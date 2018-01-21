@@ -1,6 +1,6 @@
 module OS.Header.Update exposing (update)
 
-import Utils.Cmd as Cmd
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared as Servers
@@ -13,14 +13,14 @@ import Game.Servers.Hardware.Models as Hardware
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
         Logout ->
-            onLogout model
+            onLogout config model
 
         ToggleMenus next ->
             onToggleMenus next model
@@ -44,27 +44,29 @@ update config msg model =
             onSelectNIP config nip model
 
         ContextTo context ->
-            onContextTo context model
+            onContextTo config context model
 
         CheckMenus ->
             onCheckMenus model
 
-        ToggleCampaign ->
-            onTogglecampaign model
+        ToggleCampaign toStory ->
+            onTogglecampaign config toStory model
 
-        ServerReadAll cid ->
-            onServerReadAll cid model
+        ServerReadAll ->
+            onServerReadAll config model
 
         ChatReadAll ->
-            Update.fromModel model
+            ( model, React.none )
 
         AccountReadAll ->
-            onAccountReadAll model
+            onAccountReadAll config model
 
 
 onLogout : Config msg -> Model -> UpdateResponse msg
 onLogout { onLogout } model =
-    ( model, Cmd.fromMsg onLogout )
+    onLogout
+        |> React.msg
+        |> (,) model
 
 
 onToggleMenus : OpenMenu -> Model -> UpdateResponse msg
@@ -79,7 +81,7 @@ onToggleMenus next ({ openMenu } as model) =
         model_ =
             { model | openMenu = openMenu_ }
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onMouseEnterDropdown : Model -> UpdateResponse msg
@@ -88,7 +90,7 @@ onMouseEnterDropdown model =
         model_ =
             { model | mouseSomewhereInside = True }
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onMouseLeavesDropdown : Model -> UpdateResponse msg
@@ -97,7 +99,7 @@ onMouseLeavesDropdown model =
         model_ =
             { model | mouseSomewhereInside = False }
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onSelectGateway : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
@@ -108,10 +110,10 @@ onSelectGateway { onSetGateway } cid model =
                 Just cid ->
                     cid
                         |> onSetGateway
-                        |> Cmd.fromMsg
+                        |> React.msg
 
                 Nothing ->
-                    Cmd.none
+                    React.none
 
         model_ =
             { model | openMenu = NothingOpen }
@@ -121,35 +123,26 @@ onSelectGateway { onSetGateway } cid model =
 
 onSelectBounce : Config msg -> Maybe String -> Model -> UpdateResponse msg
 onSelectBounce { onSetBounce } id model =
-    let
-        cmd =
-            Cmd.fromMsg <| onSetBounce id
-
-        model_ =
-            { model | openMenu = NothingOpen }
-    in
-        ( model_, cmd )
+    id
+        |> onSetBounce
+        |> React.msg
+        |> (,) (dropMenu model)
 
 
 onSelectEndpoint : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
 onSelectEndpoint { onSetEndpoint } cid model =
-    let
-        dispatch =
-            Cmd.fromMsg <| onSetEndpoint cid
-
-        model_ =
-            { model | openMenu = NothingOpen }
-    in
-        ( model_, Cmd.none, dispatch )
+    cid
+        |> onSetEndpoint
+        |> React.msg
+        |> (,) (dropMenu model)
 
 
-onContextTo : Context -> Model -> UpdateResponse msg
-onContextTo { onSetContext } model =
-    let
-        dispatch =
-            Cmd.fromMsg <| onSetContext context
-    in
-        ( model, Cmd.none, dispatch )
+onContextTo : Config msg -> Context -> Model -> UpdateResponse msg
+onContextTo { onSetContext } context model =
+    context
+        |> onSetContext
+        |> React.msg
+        |> (,) model
 
 
 onCheckMenus : Model -> UpdateResponse msg
@@ -157,44 +150,38 @@ onCheckMenus ({ mouseSomewhereInside } as model) =
     let
         model_ =
             if not mouseSomewhereInside then
-                { model | openMenu = NothingOpen }
+                dropMenu model
             else
                 model
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onTogglecampaign : Config msg -> Bool -> Model -> UpdateResponse msg
 onTogglecampaign { onSetStoryMode } mode model =
-    let
-        cmd =
-            Cmd.fromMsg <| onSwitchStorymode mode
-    in
-        ( model, cmd )
+    mode
+        |> onSetStoryMode
+        |> React.msg
+        |> (,) model
 
 
 onServerReadAll : Config msg -> Model -> UpdateResponse msg
 onServerReadAll { onReadAllServerNotifications } model =
-    let
-        cmd =
-            Cmd.fromMsg onReadAllServerNotifications
-    in
-        ( model, cmd )
+    onReadAllServerNotifications
+        |> React.msg
+        |> (,) model
 
 
 onAccountReadAll : Config msg -> Model -> UpdateResponse msg
 onAccountReadAll { onReadAllAccountNotifications } model =
-    let
-        cmd =
-            Cmd.fromMsg onReadAllAccountNotifications
-    in
-        ( model, cmd )
+    onReadAllAccountNotifications
+        |> React.msg
+        |> (,) model
 
 
 onSelectNIP : Config msg -> NIP -> Model -> UpdateResponse msg
 onSelectNIP { onSetActiveNIP } nip model =
-    let
-        cmd =
-            Cmd.fromMsg onSetActiveNIP nip
-    in
-        ( model, cmd )
+    nip
+        |> onSetActiveNIP
+        |> React.msg
+        |> (,) model

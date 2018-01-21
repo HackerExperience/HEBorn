@@ -1,6 +1,7 @@
 module OS.Update exposing (update)
 
 import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import OS.Header.Messages as Header
@@ -15,7 +16,7 @@ import OS.Toasts.Update as Toasts
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg, Dispatch )
 
 
 update : Config msg -> Game.Data -> Msg -> Model -> UpdateResponse msg
@@ -25,7 +26,7 @@ update config data msg model =
             onSessionManagerMsg config data msg model
 
         HeaderMsg msg ->
-            onHeaderMsg config data msg model
+            onHeaderMsg config msg model
 
         ToastsMsg msg ->
             onToastsMsg config data msg model
@@ -52,24 +53,30 @@ onSessionManagerMsg config data msg model =
         model_ =
             setSessionManager sm model
     in
-        ( model_, cmd, dispatch )
+        ( model_, React.cmd cmd, dispatch )
 
 
 onHeaderMsg :
     Config msg
-    -> Game.Data
     -> Header.Msg
     -> Model
     -> UpdateResponse msg
-onHeaderMsg config data msg model =
-    Update.child
-        { get = .header
-        , set = (\header model -> { model | header = header })
-        , toMsg = (HeaderMsg >> config.toMsg)
-        , update = (Header.update data)
-        }
-        msg
-        model
+onHeaderMsg config msg model =
+    let
+        config_ =
+            smConfig config
+
+        ( header, react ) =
+            Header.update
+                (headerConfig config)
+                msg
+                (getHeader model)
+
+        model_ =
+            setHeader header model
+    in
+        -- CONFREFACT: Passthrough react
+        ( model_, react, Dispatch.none )
 
 
 onToastsMsg : Config msg -> Game.Data -> Toasts.Msg -> Model -> UpdateResponse msg
@@ -82,3 +89,4 @@ onToastsMsg config data msg model =
         }
         msg
         model
+        |> \( a, b, c ) -> ( a, React.cmd b, c )

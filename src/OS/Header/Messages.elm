@@ -17,7 +17,7 @@ type Msg
     | SelectNIP NIP
     | CheckMenus
     | ContextTo Context
-    | ToggleCampaign
-    | ServerReadAll Servers.CId
+    | ToggleCampaign Bool
+    | ServerReadAll
     | ChatReadAll
     | AccountReadAll
