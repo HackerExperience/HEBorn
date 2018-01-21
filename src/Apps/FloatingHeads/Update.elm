@@ -10,6 +10,7 @@ import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
 import Game.Storyline.Emails.Contents.Messages as Contents
 import Game.Storyline.Emails.Contents.Update as Contents
+import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
@@ -21,36 +22,39 @@ type alias UpdateResponse =
 
 
 update :
-    Game.Data
+    Config msg
     -> FloatingHeads.Msg
     -> Model
     -> UpdateResponse
-update data msg model =
+update config msg model =
     case msg of
         ContentMsg msg ->
-            onContentMsg data msg model
+            onContentMsg config msg model
 
         Reply content ->
-            onReply data content model
+            onReply config content model
 
         HandleSelectContact contact ->
-            handleSelectContact data contact model
+            handleSelectContact config contact model
 
         ToggleMode ->
-            onToggleMode data model
+            onToggleMode config model
 
         Close ->
-            onClose data model
+            onClose config model
 
         LaunchApp context params ->
-            onLaunchApp data context params model
+            onLaunchApp config context params model
 
 
-onContentMsg : Game.Data -> Contents.Msg -> Model -> UpdateResponse
-onContentMsg data msg model =
+onContentMsg : Config msg -> Contents.Msg -> Model -> UpdateResponse
+onContentMsg config msg model =
     let
+        config_ =
+            contentConfig config
+
         ( cmd, dispatch ) =
-            Contents.update data msg
+            Contents.update config_ msg
 
         cmd_ =
             Cmd.map ContentMsg cmd
@@ -58,8 +62,8 @@ onContentMsg data msg model =
         ( model, cmd_, dispatch )
 
 
-onReply : Game.Data -> Content -> Model -> UpdateResponse
-onReply data content model =
+onReply : Config msg -> Content -> Model -> UpdateResponse
+onReply config content model =
     let
         dispatch =
             content
@@ -69,8 +73,8 @@ onReply data content model =
         ( model, Cmd.none, dispatch )
 
 
-handleSelectContact : Game.Data -> ID -> Model -> UpdateResponse
-handleSelectContact data contact model =
+handleSelectContact : Config msg -> ID -> Model -> UpdateResponse
+handleSelectContact config contact model =
     let
         model_ =
             { model | activeContact = contact }
@@ -78,8 +82,8 @@ handleSelectContact data contact model =
         Update.fromModel model_
 
 
-onToggleMode : Game.Data -> Model -> UpdateResponse
-onToggleMode data model =
+onToggleMode : Config msg -> Model -> UpdateResponse
+onToggleMode config model =
     let
         model_ =
             case model.mode of
@@ -92,8 +96,8 @@ onToggleMode data model =
         Update.fromModel model_
 
 
-onClose : Game.Data -> Model -> UpdateResponse
-onClose data model =
+onClose : Config msg -> Model -> UpdateResponse
+onClose config model =
     let
         dispatch =
             Dispatch.os <| OS.CloseApp model.me
@@ -101,8 +105,8 @@ onClose data model =
         ( model, Cmd.none, dispatch )
 
 
-onLaunchApp : Game.Data -> Context -> Params -> Model -> UpdateResponse
-onLaunchApp data context params model =
+onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse
+onLaunchApp config context params model =
     case params of
         OpenAtContact contact ->
             Update.fromModel <| setActiveContact contact model

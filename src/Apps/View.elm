@@ -97,7 +97,11 @@ view config data model =
                 LanViewer.view config_ model
 
         EmailModel model ->
-            Html.map (EmailMsg >> config.toMsg) (Email.view data model)
+            let
+                config_ =
+                    emailConfig config
+            in
+                Html.map (EmailMsg >> config.toMsg) (Email.view config_ model)
 
         BugModel model ->
             Html.map (BugMsg >> config.toMsg) (Bug.view data model)
@@ -113,7 +117,12 @@ view config data model =
             Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view data model)
 
         FloatingHeadsModel model ->
-            Html.map (FloatingHeadsMsg >> config.toMsg) (FloatingHeads.view data model)
+            let
+                config_ =
+                    floatingHeadsConfig config
+            in
+                (FloatingHeads.view config_ model)
+                    |> Html.map (FloatingHeadsMsg >> config.toMsg)
 
 
 isDecorated : App -> Bool

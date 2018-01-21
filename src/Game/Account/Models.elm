@@ -85,7 +85,7 @@ getId =
     .id
 
 
-getUsername : Model -> ID
+getUsername : Model -> String
 getUsername =
     .username
 

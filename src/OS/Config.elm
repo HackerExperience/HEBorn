@@ -18,10 +18,11 @@ type alias Config msg =
 
 
 smConfig : Config msg -> SessionManager.Config msg
-smConfig { account, activeServer, lastTick, toMsg } =
+smConfig { account, story, activeServer, lastTick, toMsg } =
     { toMsg = SessionManagerMsg >> toMsg
     , lastTick = lastTick
     , account = account
+    , story = story
     , activeServer = activeServer
     , activeContext = Account.getContext account
     }

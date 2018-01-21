@@ -5,7 +5,10 @@ import Apps.Messages exposing (..)
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
+import Game.Storyline.Models as Storyline
 import Apps.Explorer.Config as Explorer
+import Apps.Email.Config as Email
+import Apps.FloatingHeads.Config as FloatingHeads
 import Apps.LogViewer.Config as LogViewer
 import Apps.CtrlPanel.Config as CtrlPanel
 import Apps.LanViewer.Config as LanViewer
@@ -18,6 +21,7 @@ type alias Config msg =
     , lastTick : Time
     , account : Account.Model
     , activeServer : Servers.Server
+    , story : Storyline.Model
     }
 
 
@@ -45,6 +49,21 @@ explorerConfig : Config msg -> Explorer.Config msg
 explorerConfig { toMsg, activeServer } =
     { toMsg = ExplorerMsg >> toMsg
     , activeServer = activeServer
+    }
+
+
+emailConfig : Config msg -> Email.Config msg
+emailConfig { toMsg, story } =
+    { toMsg = EmailMsg >> toMsg
+    , emails = Storyline.getEmails story
+    }
+
+
+floatingHeadsConfig : Config msg -> FloatingHeads.Config msg
+floatingHeadsConfig { toMsg, story, account } =
+    { toMsg = FloatingHeadsMsg >> toMsg
+    , emails = Storyline.getEmails story
+    , username = Account.getUsername account
     }
 
 

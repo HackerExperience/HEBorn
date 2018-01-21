@@ -210,13 +210,14 @@ update config data msg model =
             case model of
                 EmailModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Email.update data msg model
+                        config_ =
+                            emailConfig config
 
-                        cmd_ =
-                            Update.mapCmd (EmailMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Email.update config_ msg model
+                                |> Update.mapCmd (EmailMsg >> config.toMsg)
                     in
-                        map EmailModel EmailMsg cmd_
+                        map EmailModel EmailMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -270,13 +271,14 @@ update config data msg model =
             case model of
                 FloatingHeadsModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            FloatingHeads.update data msg model
+                        config_ =
+                            floatingHeadsConfig config
 
-                        cmd_ =
-                            Update.mapCmd (FloatingHeadsMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            FloatingHeads.update config_ msg model
+                                |> Update.mapCmd (FloatingHeadsMsg >> config.toMsg)
                     in
-                        map FloatingHeadsModel FloatingHeadsMsg cmd_
+                        map FloatingHeadsModel FloatingHeadsMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )

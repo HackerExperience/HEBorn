@@ -3,6 +3,7 @@ module OS.SessionManager.Config exposing (..)
 import Time exposing (Time)
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import Game.Storyline.Models as Story
 import Game.Meta.Types.Context exposing (Context(..))
 import OS.SessionManager.WindowManager.Config as WindowManager
 import OS.SessionManager.Dock.Config as Dock
@@ -17,13 +18,15 @@ type alias Config msg =
     , account : Account.Model
     , activeServer : Servers.Server
     , activeContext : Context
+    , story : Story.Model
     }
 
 
 wmConfig : String -> Config msg -> WindowManager.Config msg
-wmConfig sessionId { toMsg, lastTick, account, activeServer } =
+wmConfig sessionId { toMsg, lastTick, account, activeServer, story } =
     { toMsg = WindowManagerMsg sessionId >> toMsg
     , lastTick = lastTick
+    , story = story
     , account = account
     , activeServer = activeServer
     }
