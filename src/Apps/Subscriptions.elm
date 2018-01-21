@@ -10,7 +10,6 @@ import Apps.Browser.Subscriptions as Browser
 import Apps.Explorer.Subscriptions as Explorer
 import Apps.DBAdmin.Subscriptions as Database
 import Apps.LocationPicker.Subscriptions as LocationPicker
-import Apps.FloatingHeads.Subscriptions as FloatingHeads
 
 
 subscriptions : Config msg -> Game.Data -> AppModel -> Sub msg
@@ -39,10 +38,6 @@ subscriptions config data model =
         LocationPickerModel model ->
             LocationPicker.subscriptions data model
                 |> Sub.map (LocationPickerMsg >> config.toMsg)
-
-        FloatingHeadsModel model ->
-            FloatingHeads.subscriptions data model
-                |> Sub.map (FloatingHeadsMsg >> config.toMsg)
 
         _ ->
             Sub.none

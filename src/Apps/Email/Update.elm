@@ -4,8 +4,8 @@ import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.OS as OS
 import Core.Dispatch.Storyline as Storyline
-import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (Person)
+import Apps.Email.Config exposing (..)
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))
 import Apps.FloatingHeads.Models as FloatingHeads
@@ -17,11 +17,11 @@ type alias UpdateResponse =
 
 
 update :
-    Game.Data
+    Config msg
     -> Email.Msg
     -> Model
     -> UpdateResponse
-update data msg model =
+update config msg model =
     case msg of
         -- -- Context
         SelectContact email ->

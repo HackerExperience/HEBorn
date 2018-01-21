@@ -10,6 +10,7 @@ import Game.Models as Game
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
 import Game.Storyline.Emails.Contents as Emails
+import Apps.Email.Config exposing (..)
 import Apps.Email.Messages exposing (Msg(..))
 import Apps.Email.Models exposing (..)
 import Apps.Email.Resources exposing (Classes(..), prefix)
@@ -19,14 +20,11 @@ import Apps.Email.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
         emails =
-            data
-                |> Game.getGame
-                |> Game.getStory
-                |> Storyline.getEmails
+            config.emails
 
         contactList =
             emails
