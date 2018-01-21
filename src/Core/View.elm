@@ -7,6 +7,7 @@ import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Data as GameD
 import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Meta.Models as Meta
 import OS.View as OS
 import Landing.View as Landing
@@ -21,60 +22,72 @@ view model =
             Landing.view (landingConfig model.windowLoaded model.flags)
                 home.landing
 
-        Setup { game, setup } ->
-            let
-                config =
-                    setupConfig
-                        game.account.id
-                        game.account.mainframe
-                        game.flags
-            in
-                Setup.view config setup
+        Setup setup ->
+            onSetup setup model
 
         Play play ->
-            onPlay play model
+            onPlay play
 
         Panic code message ->
             Panic.view code message
 
 
-onPlay : PlayModel -> Model -> Html Msg
-onPlay play model =
+onSetup : SetupModel -> Model -> Html Msg
+onSetup { game, setup } model =
+    case game.account.mainframe of
+        Just inBieber ->
+            let
+                config =
+                    setupConfig
+                        game.account.id
+                        inBieber
+                        game.flags
+            in
+                Setup.view config setup
+
+        Nothing ->
+            "Player doesn't have a Mainframe [View.setup]"
+                |> Error.astralProj
+                |> uncurry Panic.view
+
+
+onPlay : PlayModel -> Html Msg
+onPlay { game, os } =
+    -- CONFREFACT: Get rid of `data`
     let
-        state =
-            model.state
+        volatile_ =
+            ( Game.getGateway game
+            , Game.getActiveServer game
+            , GameD.fromGateway game
+            )
 
-        game =
-            play.game
-
-        activeServer =
-            case Game.getActiveServer play.game of
-                Just ( _, activeServer ) ->
-                    activeServer
-
-                Nothing ->
-                    "Player has no active Server"
-                        |> Error.astralProj
-                        |> uncurry Native.Panic.crash
-
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-
-        account =
-            Game.getAccount game
-
-        story =
-            Game.getStory game
-
-        config =
-            osConfig account story lastTick activeServer
+        ctx =
+            Account.getContext <| Game.getAccount game
     in
-        case GameD.fromGateway game of
-            Just inBieber ->
-                OS.view config inBieber play.os
+        case volatile_ of
+            ( Nothing, _, _ ) ->
+                "Player doesn't have a Gateway [View.play]"
+                    |> Error.astralProj
+                    |> uncurry Panic.view
 
-            Nothing ->
-                Panic.view "WTF_ASTRAL_PROJECTION"
-                    "Player has no active gateway!"
+            ( _, Nothing, _ ) ->
+                "Player doesn't have an active server [View.play]"
+                    |> Error.astralProj
+                    |> uncurry Panic.view
+
+            ( _, _, Nothing ) ->
+                "COULDN'T GENERATE DATA"
+                    |> Error.astralProj
+                    |> uncurry Panic.view
+
+            ( Just gtw, Just srv, Just data ) ->
+                let
+                    lastTick =
+                        game
+                            |> Game.getMeta
+                            |> Meta.getLastTick
+
+                    config =
+                        osConfig game srv ctx gtw
+                in
+                    OS.view config data os

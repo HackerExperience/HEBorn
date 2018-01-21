@@ -20,6 +20,9 @@ update config msg model =
         HandleToggle ->
             handleToggle model
 
+        HandleSetMode enable ->
+            handleSet enable model
+
         MissionsMsg msg ->
             onMission config msg model
 
@@ -32,6 +35,15 @@ handleToggle model =
     let
         model_ =
             { model | enabled = (not model.enabled) }
+    in
+        ( model_, React.none )
+
+
+handleSet : Bool -> Model -> UpdateResponse msg
+handleSet enable model =
+    let
+        model_ =
+            { model | enabled = enable }
     in
         ( model_, React.none )
 

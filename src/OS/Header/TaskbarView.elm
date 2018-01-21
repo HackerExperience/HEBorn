@@ -76,16 +76,13 @@ servers data openMenu =
                 |> Game.getActiveServer
                 |> Servers.getNotifications
 
-        cid =
-            Game.getActiveCId data
-
         view =
             Notifications.view ServersNotifications.render
                 openMenu
                 ServersOpen
                 ServersIco
                 "This server"
-                (ServerReadAll cid)
+                ServerReadAll
                 notifications
 
         bubble_ =

@@ -23,3 +23,8 @@ initialModel =
     { openMenu = NothingOpen
     , mouseSomewhereInside = False
     }
+
+
+dropMenu : Model -> Model
+dropMenu model =
+    { model | openMenu = NothingOpen }

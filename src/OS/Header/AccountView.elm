@@ -64,7 +64,11 @@ toggleCampaignBtn account { enabled } =
             text getButtonName
                 |> List.singleton
                 |> button
-                    [ onClick ToggleCampaign ]
+                    [ enabled
+                        |> not
+                        |> ToggleCampaign
+                        |> onClick
+                    ]
                 |> List.singleton
                 |> li []
         else

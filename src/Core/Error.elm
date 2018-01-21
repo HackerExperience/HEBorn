@@ -7,6 +7,7 @@ type alias Error =
 
 fakeTest : String -> Error
 fakeTest =
+    -- Dummy error code
     (,) "FAKE_TEST"
 
 
@@ -28,29 +29,35 @@ requestCode name code =
 
 astralProj : String -> Error
 astralProj =
+    -- FOR MISSING ACTIVE SERVER OR GATEWAY
     (,) "WTF_ASTRAL_PROJECTION"
 
 
 impossible : String -> Error
 impossible =
+    -- ???
     (,) "WTF_IMPOSSIBLE"
 
 
 neeiae : String -> Error
 neeiae =
-    (,) "ERR_NONEXISTINGENDPOINT_ISACTIVEENDPOINT"
+    -- You received an endpoint but Servers.get failed
+    someGetReturnedNothing
+
+
+notInServers : String -> Error
+notInServers =
+    -- ULTRA IMPORTANT Servers.get failed
+    someGetReturnedNothing
 
 
 someGetReturnedNothing : String -> Error
 someGetReturnedNothing =
+    -- ULTRA IMPORTANT Dict.get failed
     (,) "PAGE_FAULT_IN_NONPAGED_AREA"
 
 
 porra : String -> Error
 porra =
+    -- Json was not as expected
     (,) "ERR_PORRA_RENATO"
-
-
-notInServers : String -> Error
-notInServers =
-    (,) "ERR_NONEXISTINGSERVER"

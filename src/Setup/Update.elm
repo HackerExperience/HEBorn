@@ -223,18 +223,13 @@ handleJoinedServer { mainframe } cid model =
             else
                 Dispatch.core Core.Play
     in
-        case mainframe of
-            Just mainframe ->
-                if mainframe == cid then
-                    ( doneLoading model
-                    , Cmd.none
-                    , dispatch
-                    )
-                else
-                    Update.fromModel model
-
-            Nothing ->
-                Update.fromModel model
+        if mainframe == cid then
+            ( doneLoading model
+            , Cmd.none
+            , dispatch
+            )
+        else
+            Update.fromModel model
 
 
 
@@ -256,37 +251,32 @@ locationPickerCmd model =
 
 setRequest : Config msg -> Model -> ( Model, Cmd Msg )
 setRequest ({ mainframe } as config) model =
-    case mainframe of
-        Just mainframe ->
-            let
-                settings =
-                    model
-                        |> getDone
-                        |> List.concatMap Tuple.second
-                        |> Settings.groupSettings
+    let
+        settings =
+            model
+                |> getDone
+                |> List.concatMap Tuple.second
+                |> Settings.groupSettings
 
-                model_ =
-                    List.foldl (Tuple.first >> flip setTopicsDone False)
-                        model
-                        settings
+        model_ =
+            List.foldl (Tuple.first >> flip setTopicsDone False)
+                model
+                settings
 
-                cid =
-                    mainframe
+        cid =
+            mainframe
 
-                request ( type_, settings ) =
-                    case type_ of
-                        Settings.ServerTopic ->
-                            SetServer.request settings cid config
+        request ( type_, settings ) =
+            case type_ of
+                Settings.ServerTopic ->
+                    SetServer.request settings cid config
 
-                        Settings.AccountTopic ->
-                            Cmd.none
+                Settings.AccountTopic ->
+                    Cmd.none
 
-                cmd =
-                    settings
-                        |> List.map request
-                        |> Cmd.batch
-            in
-                ( model_, cmd )
-
-        Nothing ->
-            ( model, Cmd.none )
+        cmd =
+            settings
+                |> List.map request
+                |> Cmd.batch
+    in
+        ( model_, cmd )

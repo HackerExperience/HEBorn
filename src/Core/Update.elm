@@ -13,6 +13,7 @@ import Game.Models as Game
 import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
 import Game.Update as Game
+import Game.Account.Models as Account
 import Setup.Messages as Setup
 import Setup.Update as Setup
 import OS.Messages as OS
@@ -28,6 +29,9 @@ import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Subscribers as Subscribers
+
+
+-- TODO: Use onSth pattern
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -211,20 +215,25 @@ updateSetupWS flags msg stateModel =
 
 updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
 updateSetupSetup msg stateModel =
-    let
-        config =
-            setupConfig
-                stateModel.game.account.id
-                stateModel.game.account.mainframe
-                stateModel.game.flags
+    case stateModel.game.account.mainframe of
+        Just mainframe ->
+            let
+                config =
+                    setupConfig
+                        stateModel.game.account.id
+                        mainframe
+                        stateModel.game.flags
 
-        ( setup, cmd_, dispatch ) =
-            Setup.update config msg stateModel.setup
+                ( setup, cmd_, dispatch ) =
+                    Setup.update config msg stateModel.setup
 
-        stateModel_ =
-            { stateModel | setup = setup }
-    in
-        ( stateModel_, cmd_, dispatch )
+                stateModel_ =
+                    { stateModel | setup = setup }
+            in
+                ( stateModel_, cmd_, dispatch )
+
+        Nothing ->
+            ( stateModel, Cmd.none, Dispatch.none )
 
 
 updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
@@ -284,44 +293,39 @@ updatePlayWS flags msg stateModel =
 
 
 updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
-updatePlayOS msg stateModel =
-    case GameD.fromGateway stateModel.game of
-        Just data ->
-            let
-                activeServer =
-                    case Game.getActiveServer stateModel.game of
-                        Just ( _, activeServer ) ->
-                            activeServer
+updatePlayOS msg ({ game, os } as state) =
+    -- CONFREFACT: Get rid of `dipatch`
+    let
+        volatile_ =
+            ( Game.getGateway game
+            , Game.getActiveServer game
+            , GameD.fromGateway game
+            )
 
-                        Nothing ->
-                            "Player has no active Server"
-                                |> Error.astralProj
-                                |> uncurry Native.Panic.crash
+        ctx =
+            Account.getContext <| Game.getAccount game
+    in
+        case volatile_ of
+            ( Just gtw, Just srv, Just data ) ->
+                let
+                    lastTick =
+                        game
+                            |> Game.getMeta
+                            |> Meta.getLastTick
 
-                lastTick =
-                    stateModel.game
-                        |> Game.getMeta
-                        |> Meta.getLastTick
+                    config =
+                        osConfig game srv ctx gtw
 
-                config =
-                    osConfig account story lastTick activeServer
+                    ( os_, react, dispatch ) =
+                        OS.update config data msg os
 
-                account =
-                    Game.getAccount stateModel.game
+                    state_ =
+                        { state | os = os_ }
+                in
+                    ( state_, React.toCmd react, dispatch )
 
-                story =
-                    Game.getStory stateModel.game
-
-                ( os, cmd, dispatch ) =
-                    OS.update config data msg stateModel.os
-
-                stateModel_ =
-                    { stateModel | os = os }
-            in
-                ( stateModel_, cmd, dispatch )
-
-        Nothing ->
-            ( stateModel, Cmd.none, Dispatch.none )
+            _ ->
+                ( state, Cmd.none, Dispatch.none )
 
 
 updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
