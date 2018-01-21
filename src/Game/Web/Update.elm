@@ -1,5 +1,6 @@
 module Game.Web.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Websocket as Ws
 import Core.Dispatch.Servers as Servers
@@ -19,7 +20,7 @@ import Game.Meta.Types.Requester exposing (Requester)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg, Dispatch )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -58,6 +59,7 @@ onFetchUrl config url networkId cid requester model =
         cmd =
             DNS.request url networkId cid requester config
                 |> Cmd.map config.toMsg
+                |> React.cmd
     in
         ( model, cmd, Dispatch.none )
 
@@ -73,7 +75,7 @@ updateRequest config response model =
             onDNS config requester response model
 
         Nothing ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none, Dispatch.none )
 
 
 {-| Reports back the site information to the page.
@@ -86,7 +88,7 @@ onDNS config requester response model =
                 |> Servers.FetchedUrl requester
                 |> Dispatch.servers
     in
-        ( model, Cmd.none, dispatch )
+        ( model, React.none, dispatch )
 
 
 {-| Stores page reference and tries to login on server.
@@ -123,7 +125,7 @@ onLogin config nip remoteIp password requester model =
         model_ =
             startLoading remoteNip requester model
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, React.none, dispatch )
 
 
 {-| Sets endpoint
@@ -159,7 +161,7 @@ onJoinedServer config cid model =
                 Nothing ->
                     Dispatch.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, React.none, dispatch )
 
 
 {-| Reports failure back to the loading page.
@@ -189,4 +191,4 @@ handleJoinFailed config cid model =
                 Nothing ->
                     Dispatch.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, React.none, dispatch )

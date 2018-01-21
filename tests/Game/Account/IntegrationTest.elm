@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
+import Utils.React as React exposing (React)
 import Json.Decode as Decode
 import TestUtils exposing (fuzz, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
@@ -79,8 +80,7 @@ passwordAcquired =
                         |> fromJust ("Testing " ++ name)
             in
                 dispatch
-                    |> gameDispatcher game Cmd.none
-                    |> Tuple.first
+                    |> gameDispatcher game React.none
                     |> Game.getAccount
                     |> Account.getDatabase
                     |> getHackedServers
@@ -124,8 +124,7 @@ replyUnlocked =
                         |> fromJust ("Testing " ++ name)
             in
                 dispatch
-                    |> gameDispatcher game Cmd.none
-                    |> Tuple.first
+                    |> gameDispatcher game React.none
                     |> Game.getStory
                     |> Story.getEmails
                     |> Emails.getPerson ("kress")

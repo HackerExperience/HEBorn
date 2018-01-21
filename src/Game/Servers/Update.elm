@@ -1,8 +1,8 @@
 module Game.Servers.Update exposing (..)
 
+import Utils.React as React exposing (React)
 import Json.Decode as Decode exposing (Value)
 import Decoders.Servers
-import Utils.Cmd as Cmd
 import Game.Meta.Types.Network as Network
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Models as Meta
@@ -26,11 +26,11 @@ import Game.Servers.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 type alias ServerUpdateResponse msg =
-    ( Server, Cmd msg )
+    ( Server, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -40,7 +40,7 @@ update config msg model =
             onServerMsg config cid msg model
 
         Synced cid server ->
-            ( insert cid server model, Cmd.none )
+            ( insert cid server model, React.none )
 
         HandleResync cid ->
             onResync config cid model
@@ -63,7 +63,7 @@ onServerMsg config cid msg model =
                 |> Tuple.mapFirst (flip (insert cid) model)
 
         Nothing ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
 onResync : Config msg -> CId -> Model -> UpdateResponse msg
@@ -83,6 +83,7 @@ onResync config cid model =
                     config.lastTick
                     (getGatewayCache cid model)
                 |> Cmd.map handler
+                |> React.cmd
     in
         ( model, cmd )
 
@@ -131,7 +132,7 @@ handleSetBounce :
     -> Server
     -> ServerUpdateResponse msg
 handleSetBounce config cid maybeBounceId server =
-    ( setBounce maybeBounceId server, Cmd.none )
+    ( setBounce maybeBounceId server, React.none )
 
 
 handleSetEndpoint :
@@ -140,7 +141,7 @@ handleSetEndpoint :
     -> Server
     -> ServerUpdateResponse msg
 handleSetEndpoint config cid server =
-    ( setEndpointCId cid server, Cmd.none )
+    ( setEndpointCId cid server, React.none )
 
 
 handleSetActiveNIP :
@@ -149,7 +150,7 @@ handleSetActiveNIP :
     -> Server
     -> ServerUpdateResponse msg
 handleSetActiveNIP config nip server =
-    ( setActiveNIP nip server, Cmd.none )
+    ( setActiveNIP nip server, React.none )
 
 
 onFilesystemMsg :
@@ -178,7 +179,7 @@ onFilesystemMsg config cid id msg server =
                 ( server_, cmd )
 
         Nothing ->
-            ( server, Cmd.none )
+            ( server, React.none )
 
 
 onLogsMsg :
@@ -307,9 +308,9 @@ handleJoinedServer config cid value model =
 
                     cmd =
                         if isGateway server then
-                            Cmd.fromMsg <| config.onNewGateway cid
+                            React.msg <| config.onNewGateway cid
                         else
-                            Cmd.none
+                            React.none
                 in
                     ( model_, cmd )
 
@@ -318,4 +319,4 @@ handleJoinedServer config cid value model =
                     log =
                         Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
                 in
-                    ( model, Cmd.none )
+                    ( model, React.none )

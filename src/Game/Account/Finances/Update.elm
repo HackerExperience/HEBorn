@@ -1,6 +1,6 @@
 module Game.Account.Finances.Update exposing (update)
 
-import Utils.Cmd as Cmd
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Web.Models as Web
@@ -13,7 +13,7 @@ import Game.Account.Finances.Requests.Transfer as Transfer
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -37,12 +37,12 @@ update config msg model =
 
 handleBankAccountClosed : AccountId -> Model -> UpdateResponse msg
 handleBankAccountClosed accountId model =
-    ( removeBankAccount accountId model, Cmd.none )
+    ( removeBankAccount accountId model, React.none )
 
 
 handleBankAccountUpdated : AccountId -> BankAccount -> Model -> UpdateResponse msg
 handleBankAccountUpdated accountId bankAccount model =
-    ( insertBankAccount accountId bankAccount model, Cmd.none )
+    ( insertBankAccount accountId bankAccount model, React.none )
 
 
 handleBankAccountLogin :
@@ -58,6 +58,7 @@ handleBankAccountLogin config request requester cid model =
             config
                 |> Login.request request requester config.accountId cid
                 |> Cmd.map config.toMsg
+                |> React.cmd
     in
         ( model, request_ )
 
@@ -74,6 +75,7 @@ handleBankAccountTransfer config request requester cid model =
         request_ =
             Transfer.request request requester config.accountId cid config
                 |> Cmd.map config.toMsg
+                |> React.cmd
     in
         ( model, request_ )
 
@@ -99,17 +101,15 @@ onBankLogin config requester cid response model =
     case response of
         Valid data ->
             ( model
-            , Cmd.fromMsg <|
-                config.onBALoginSuccess requester data
+            , React.msg <| config.onBALoginSuccess requester data
             )
 
         DecodeFailed ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
         Invalid ->
             ( model
-            , Cmd.fromMsg <|
-                config.onBALoginFailed requester
+            , React.msg <| config.onBALoginFailed requester
             )
 
 
@@ -124,12 +124,10 @@ onBankTransfer config requester cid response model =
     case response of
         Successful ->
             ( model
-            , Cmd.fromMsg <|
-                config.onBATransferSuccess requester
+            , React.msg <| config.onBATransferSuccess requester
             )
 
         Error ->
             ( model
-            , Cmd.fromMsg <|
-                config.onBATransferFailed requester
+            , React.msg <| config.onBATransferFailed requester
             )

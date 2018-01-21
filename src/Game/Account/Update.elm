@@ -1,6 +1,6 @@
 module Game.Account.Update exposing (update)
 
-import Utils.Cmd as Cmd
+import Utils.React as React exposing (React)
 import Core.Error as Error exposing (Error)
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
@@ -22,7 +22,7 @@ import Game.Account.Models exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -75,7 +75,7 @@ update config msg model =
 handleSetGateway : Config msg -> Servers.CId -> Model -> UpdateResponse msg
 handleSetGateway config cid model =
     ( { model | activeGateway = Just cid }
-    , Cmd.none
+    , React.none
     )
 
 
@@ -89,13 +89,13 @@ handleSetEndpoint config cid model =
     case getGateway model of
         Just gateway ->
             let
-                cmd =
+                react =
                     case getGateway model of
                         Just gatewayId ->
-                            Cmd.fromMsg <| config.onSetEndpoint gatewayId cid
+                            React.msg <| config.onSetEndpoint gatewayId cid
 
                         Nothing ->
-                            Cmd.none
+                            React.none
 
                 model_ =
                     if cid == Nothing then
@@ -103,10 +103,10 @@ handleSetEndpoint config cid model =
                     else
                         config.fallToGateway (fallToGateway model)
             in
-                ( model_, cmd )
+                ( model_, react )
 
         Nothing ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
 handleSetContext : Config msg -> Context -> Model -> UpdateResponse msg
@@ -118,7 +118,7 @@ handleSetContext config context model =
         model_ =
             config.fallToGateway (fallToGateway model1)
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onDatabase : Config msg -> Database.Msg -> Model -> UpdateResponse msg
@@ -127,13 +127,13 @@ onDatabase config msg model =
         config_ =
             databaseConfig config
 
-        ( database, cmd ) =
+        ( database, react ) =
             Database.update config_ msg <| getDatabase model
 
         model_ =
             setDatabase database model
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 onFinances : Config msg -> Finances.Msg -> Model -> UpdateResponse msg
@@ -142,13 +142,13 @@ onFinances config msg model =
         config_ =
             financesConfig model.id config
 
-        ( finances, cmd ) =
+        ( finances, react ) =
             Finances.update config_ msg <| getFinances model
 
         model_ =
             setFinances finances model
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 onNotifications : Config msg -> Notifications.Msg -> Model -> UpdateResponse msg
@@ -157,13 +157,13 @@ onNotifications config msg model =
         config_ =
             notificationsConfig config
 
-        ( notifications, cmd ) =
+        ( notifications, react ) =
             Notifications.update config_ msg <| getNotifications model
 
         model_ =
             setNotifications notifications model
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 handleLogout : Config msg -> Model -> UpdateResponse msg
@@ -175,18 +175,19 @@ handleLogout config model =
         token =
             getToken model
 
-        cmd =
+        react =
             config
                 |> logoutRequest token model.id
                 |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 handleTutorialCompleted : Config msg -> Bool -> Model -> UpdateResponse msg
 handleTutorialCompleted config bool model =
     ( { model | inTutorial = bool }
-    , Cmd.none
+    , React.none
     )
 
 
@@ -199,12 +200,13 @@ handleLogoutAndCrash config error model =
         token =
             getToken model
 
-        cmd =
+        react =
             config
                 |> logoutRequest token model.id
                 |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 onBounces : Config msg -> Bounces.Msg -> Model -> UpdateResponse msg
@@ -213,37 +215,37 @@ onBounces config msg model =
         config_ =
             bouncesConfig config
 
-        ( bounces, cmd ) =
+        ( bounces, react ) =
             Bounces.update config_ msg <| getBounces model
 
         model_ =
             setBounces bounces model
     in
-        ( model_, cmd )
+        ( model_, react )
 
 
 handleNewGateway : Servers.CId -> Model -> UpdateResponse msg
 handleNewGateway cid model =
-    ( insertGateway cid model, Cmd.none )
+    ( insertGateway cid model, React.none )
 
 
 handleConnected : Config msg -> Model -> UpdateResponse msg
 handleConnected config model =
-    ( model, Cmd.fromMsg <| config.onConnected (model.id) )
+    ( model, React.msg <| config.onConnected (model.id) )
 
 
 handleDisconnected : Config msg -> Model -> UpdateResponse msg
 handleDisconnected config model =
     let
-        cmd =
+        react =
             case model.logout of
                 ToLanding ->
-                    Cmd.fromMsg <| config.onDisconnected
+                    React.msg <| config.onDisconnected
 
                 ToCrash error ->
-                    Cmd.fromMsg <| config.onError error
+                    React.msg <| config.onError error
 
                 _ ->
-                    Cmd.none
+                    React.none
     in
-        ( model, cmd )
+        ( model, react )

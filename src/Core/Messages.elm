@@ -1,4 +1,4 @@
-module Core.Messages exposing (Msg(..))
+module Core.Messages exposing (Msg(..), unroll)
 
 import Game.Messages as Game
 import Game.Account.Models as Account
@@ -22,3 +22,28 @@ type Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
     | LoadingEnd Int
+
+
+unroll : Msg -> List Msg
+unroll msg =
+    case msg of
+        MultiMsg list ->
+            unrollHelper [] list
+
+        _ ->
+            [ msg ]
+
+
+unrollHelper : List Msg -> List Msg -> List Msg
+unrollHelper accum list =
+    case list of
+        msg :: remains ->
+            case msg of
+                MultiMsg list ->
+                    unrollHelper accum list ++ accum
+
+                _ ->
+                    unrollHelper (msg :: accum) remains
+
+        [] ->
+            accum

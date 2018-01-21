@@ -1,5 +1,6 @@
 module Game.Account.Database.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Events.Account.PasswordAcquired as PasswordAcquired
 import Game.Account.Database.Config exposing (..)
 import Game.Account.Database.Models exposing (..)
@@ -7,7 +8,7 @@ import Game.Account.Database.Messages exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -39,7 +40,7 @@ handlePasswordAcquired data model =
                 |> flip (insertServer data.nip) servers
                 |> flip setHackedServers model
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onHandleDatabaseAccountRemoved :
@@ -51,7 +52,7 @@ onHandleDatabaseAccountRemoved id model =
         model_ =
             { model | bankAccounts = removeBankAccount id model.bankAccounts }
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )
 
 
 onHandleDatabaseAccountUpdated :
@@ -66,4 +67,4 @@ onHandleDatabaseAccountUpdated id account model =
                 | bankAccounts = insertBankAccount id account model.bankAccounts
             }
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )

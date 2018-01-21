@@ -1,17 +1,18 @@
 module Game.Servers.Filesystem.Update exposing (update)
 
-import Game.Servers.Filesystem.Config exposing (..)
-import Game.Servers.Filesystem.Messages exposing (..)
-import Game.Servers.Filesystem.Models exposing (..)
-import Game.Servers.Filesystem.Shared exposing (..)
+import Utils.React as React exposing (React)
 import Game.Servers.Filesystem.Requests.Delete exposing (deleteRequest)
 import Game.Servers.Filesystem.Requests.Move exposing (moveRequest)
 import Game.Servers.Filesystem.Requests.Rename exposing (renameRequest)
 import Game.Servers.Filesystem.Requests.Create exposing (createRequest)
+import Game.Servers.Filesystem.Config exposing (..)
+import Game.Servers.Filesystem.Messages exposing (..)
+import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update :
@@ -54,10 +55,11 @@ handleDelete config id model =
                     , config
                         |> deleteRequest id config.cid
                         |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
         ( model_, cmd )
 
@@ -77,10 +79,11 @@ handleMove config id newPath model =
                     , config
                         |> moveRequest newPath id config.cid
                         |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
         ( model_, cmd )
 
@@ -100,10 +103,11 @@ handleRename config id name model =
                     , config
                         |> renameRequest name id config.cid
                         |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
         ( model_, cmd )
 
@@ -130,9 +134,10 @@ handleNewTextFile config path name model =
             , config
                 |> createRequest "txt" name fullpath config.cid
                 |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
             )
         else
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
 handleNewDir :
@@ -151,11 +156,12 @@ handleNewDir config path name model =
             , config
                 |> createRequest "/" name path config.cid
                 |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
             )
         else
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
 onHandleAdded : Id -> File -> Model -> UpdateResponse msg
 onHandleAdded id file model =
-    ( insertFile id file model, Cmd.none )
+    ( insertFile id file model, React.none )
