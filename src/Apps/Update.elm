@@ -42,13 +42,14 @@ update config data msg model =
             case model of
                 LogViewerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            LogViewer.update data msg model
+                        config_ =
+                            logViewerConfig config
 
-                        cmd_ =
-                            Update.mapCmd (LogViewerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            LogViewer.update config_ msg model
+                                |> Update.mapCmd (LogViewerMsg >> config.toMsg)
                     in
-                        map config LogViewerModel LogViewerMsg cmd_
+                        map LogViewerModel LogViewerMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -57,13 +58,14 @@ update config data msg model =
             case model of
                 TaskManagerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            TaskManager.update data msg model
+                        config_ =
+                            taskManConfig config
 
-                        cmd_ =
-                            Update.mapCmd (TaskManagerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            TaskManager.update config_ msg model
+                                |> Update.mapCmd (TaskManagerMsg >> config.toMsg)
                     in
-                        map config TaskManagerModel TaskManagerMsg cmd_
+                        map TaskManagerModel TaskManagerMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -78,7 +80,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (BrowserMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config BrowserModel BrowserMsg cmd_
+                        map BrowserModel BrowserMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -87,13 +89,14 @@ update config data msg model =
             case model of
                 ExplorerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Explorer.update data msg model
+                        config_ =
+                            explorerConfig config
 
-                        cmd_ =
-                            Update.mapCmd (ExplorerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Explorer.update config_ msg model
+                                |> Update.mapCmd (ExplorerMsg >> config.toMsg)
                     in
-                        map config ExplorerModel ExplorerMsg cmd_
+                        map ExplorerModel ExplorerMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -108,7 +111,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (DatabaseMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config DatabaseModel DatabaseMsg cmd_
+                        map DatabaseModel DatabaseMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -123,7 +126,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (ConnManagerMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config ConnManagerModel ConnManagerMsg cmd_
+                        map ConnManagerModel ConnManagerMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -138,7 +141,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (BounceManagerMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config BounceManagerModel BounceManagerMsg cmd_
+                        map BounceManagerModel BounceManagerMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -153,7 +156,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (FinanceMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config FinanceModel FinanceMsg cmd_
+                        map FinanceModel FinanceMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -168,7 +171,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (MusicMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config MusicModel MusicMsg cmd_
+                        map MusicModel MusicMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -183,7 +186,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (ServersGearsMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config ServersGearsModel ServersGearsMsg cmd_
+                        map ServersGearsModel ServersGearsMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -198,7 +201,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (LocationPickerMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config LocationPickerModel LocationPickerMsg cmd_
+                        map LocationPickerModel LocationPickerMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -213,7 +216,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (EmailMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config EmailModel EmailMsg cmd_
+                        map EmailModel EmailMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -228,7 +231,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (BugMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config BugModel BugMsg cmd_
+                        map BugModel BugMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -243,7 +246,7 @@ update config data msg model =
                         update_ =
                             (Calculator.update config_ msg model)
                     in
-                        map config CalculatorModel CalculatorMsg update_
+                        map CalculatorModel CalculatorMsg update_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -258,7 +261,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (BackFlixMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config BackFlixModel BackFlixMsg cmd_
+                        map BackFlixModel BackFlixMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -273,7 +276,7 @@ update config data msg model =
                         cmd_ =
                             Update.mapCmd (FloatingHeadsMsg >> config.toMsg) ( model_, cmd, dispatch )
                     in
-                        map config FloatingHeadsModel FloatingHeadsMsg cmd_
+                        map FloatingHeadsModel FloatingHeadsMsg cmd_
 
                 _ ->
                     ( model, Cmd.none, Dispatch.none )
@@ -320,12 +323,11 @@ update config data msg model =
 
 
 map :
-    Config msg
-    -> (model -> AppModel)
+    (model -> AppModel)
     -> (appMsg -> Msg)
     -> ( model, Cmd msg, Dispatch )
     -> ( AppModel, Cmd msg, Dispatch )
-map config wrapModel wrapMsg ( model, cmd, dispatch ) =
+map wrapModel wrapMsg ( model, cmd, dispatch ) =
     let
         update_ =
             ( wrapModel model, cmd, dispatch )

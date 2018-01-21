@@ -1,9 +1,8 @@
 module Apps.LogViewer.Models exposing (..)
 
 import Dict exposing (Dict)
-import Game.Data as Game
-import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Logs.Models as Logs
+import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
 
 
@@ -101,30 +100,6 @@ applyFilter model logs =
         { logs | logs = Logs.filter filterer logs }
 
 
-enterEditing : Game.Data -> Logs.ID -> Model -> Model
-enterEditing data id model =
-    let
-        logs =
-            data
-                |> Game.getActiveServer
-                |> Servers.getLogs
-
-        model_ =
-            case Dict.get id logs.logs of
-                Just log ->
-                    case Logs.getContent log of
-                        Logs.NormalContent data ->
-                            Just <| updateEditing id data.raw model
-
-                        Logs.Encrypted ->
-                            Nothing
-
-                _ ->
-                    Nothing
-    in
-        Maybe.withDefault model model_
-
-
 updateEditing : Logs.ID -> String -> Model -> Model
 updateEditing id value model =
     let
@@ -157,27 +132,3 @@ leaveEditing id model =
 getEdit : Logs.ID -> Model -> Maybe Logs.ID
 getEdit id model =
     Dict.get id model.editing
-
-
-updateTextFilter : Game.Data -> String -> Model -> Model
-updateTextFilter data filter model =
-    let
-        filterer id log =
-            case Logs.getContent log of
-                Logs.NormalContent data ->
-                    String.contains filter data.raw
-
-                Logs.Encrypted ->
-                    False
-
-        filterCache =
-            data
-                |> Game.getActiveServer
-                |> Servers.getLogs
-                |> Logs.filter filterer
-                |> Dict.keys
-    in
-        { model
-            | filterText = filter
-            , filterCache = filterCache
-        }

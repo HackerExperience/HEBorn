@@ -3,10 +3,10 @@ module Apps.Explorer.Update exposing (update)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
+import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Messages as Menu
@@ -18,11 +18,11 @@ type alias UpdateResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse
+update config msg model =
     let
         server =
-            Game.getActiveServer data
+            config.activeServer
 
         maybeFs =
             model
@@ -35,14 +35,18 @@ update data msg model =
                 case msg of
                     -- Menu
                     MenuMsg (Menu.MenuClick action) ->
-                        actionHandler data action model
+                        let
+                            config_ =
+                                menuConfig config
+                        in
+                            actionHandler config action model
 
                     MenuMsg msg ->
-                        onMenuMsg data msg model
+                        onMenuMsg config msg model
 
                     -- General Acts
                     GoPath newPath ->
-                        onGoPath data newPath fs model
+                        onGoPath config newPath fs model
 
                     GoStorage newStorageId ->
                         onGoStorage newStorageId model
@@ -51,10 +55,10 @@ update data msg model =
                         onUpdateEditing newState model
 
                     EnterRename id ->
-                        onEnterRename data id fs model
+                        onEnterRename config id fs model
 
                     ApplyEdit ->
-                        onApplyEdit data fs model
+                        onApplyEdit config fs model
 
                     _ ->
                         -- TODO: implement folder operation requests
@@ -64,28 +68,25 @@ update data msg model =
                 Update.fromModel model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg config msg model =
     let
         ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
+            Menu.update (menuConfig config) msg model.menu
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, cmd_, coreMsg )
+        ( model_, Cmd.map MenuMsg cmd, coreMsg )
 
 
 onGoPath :
-    Game.Data
+    Config msg
     -> Filesystem.Path
     -> Filesystem.Model
     -> Model
     -> UpdateResponse
-onGoPath data newPath fs model =
+onGoPath config newPath fs model =
     Update.fromModel <| changePath newPath fs model
 
 
@@ -105,12 +106,12 @@ onUpdateEditing newState model =
 
 
 onEnterRename :
-    Game.Data
+    Config msg
     -> Filesystem.Id
     -> Filesystem.Model
     -> Model
     -> UpdateResponse
-onEnterRename data id fs model =
+onEnterRename config id fs model =
     let
         file =
             Filesystem.getFile id fs
@@ -127,46 +128,39 @@ onEnterRename data id fs model =
         Update.fromModel model_
 
 
-onApplyEdit : Game.Data -> Filesystem.Model -> Model -> UpdateResponse
-onApplyEdit data fs model =
+onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse
+onApplyEdit config fs model =
     let
         storageId =
-            getStorage (Game.getActiveServer data) model
+            getStorage config.activeServer model
 
-        fsMsg =
-            Dispatch.filesystem (Game.getActiveCId data) storageId
-
-        gameMsg =
-            case model.editing of
-                NotEditing ->
-                    Dispatch.none
-
-                CreatingFile fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.NewTextFile model.path fName
-
-                CreatingPath fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.NewDir model.path fName
-
-                Moving fID ->
-                    fsMsg <| Servers.MoveFile fID model.path
-
-                Renaming fID fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.RenameFile fID fName
-
-                _ ->
-                    -- TODO: implement folder operation requests
-                    Dispatch.none
-
+        --fsMsg =
+        --    Dispatch.filesystem config.activeCId storageId
+        --gameMsg =
+        --    case model.editing of
+        --        NotEditing ->
+        --            Dispatch.none
+        --        CreatingFile fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.NewTextFile model.path fName
+        --        CreatingPath fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.NewDir model.path fName
+        --        Moving fID ->
+        --            fsMsg <| Servers.MoveFile fID model.path
+        --        Renaming fID fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.RenameFile fID fName
+        --        _ ->
+        --            -- TODO: implement folder operation requests
+        --            Dispatch.none
         model_ =
             setEditing NotEditing model
     in
-        ( model_, Cmd.none, gameMsg )
+        ( model_, Cmd.none, Dispatch.none )

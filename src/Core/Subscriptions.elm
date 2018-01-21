@@ -1,11 +1,13 @@
 module Core.Subscriptions exposing (subscriptions)
 
 import Utils.Ports.OnLoad exposing (windowLoaded)
+import Core.Error as Error
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Config exposing (..)
+import Game.Data as GameD
 import Game.Models as Game
-import Game.Data as Game
+import Game.Meta.Models as Meta
 import Game.Subscriptions as Game
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Subscriptions as Ws
@@ -100,11 +102,32 @@ play model =
 
 os : Game.Model -> OS.Model -> Sub Msg
 os game model =
-    case Game.fromGateway game of
+    case GameD.fromGateway game of
         Just data ->
             let
+                activeServer =
+                    case Game.getActiveServer game of
+                        Just ( _, activeServer ) ->
+                            activeServer
+
+                        Nothing ->
+                            "Player has no active Server"
+                                |> Error.astralProj
+                                |> uncurry Native.Panic.crash
+
+                lastTick =
+                    game
+                        |> Game.getMeta
+                        |> Meta.getLastTick
+
+                account =
+                    Game.getAccount game
+
+                story =
+                    Game.getStory game
+
                 config =
-                    osConfig game.story
+                    osConfig account story lastTick activeServer
             in
                 model
                     |> OS.subscriptions config data

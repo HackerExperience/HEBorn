@@ -16,6 +16,7 @@ import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (Format(..))
+import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Menu.View
@@ -34,8 +35,8 @@ import Apps.LogViewer.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
         filterHeaderLayout =
             verticalList
@@ -47,17 +48,14 @@ view data model =
                     []
                     model.filterText
                     "Search..."
-                    UpdateTextFilter
+                    (UpdateTextFilter)
                 ]
 
         mainEntries =
-            verticalList
-                (data
-                    |> Game.getActiveServer
-                    |> Servers.getLogs
-                    |> applyFilter model
-                    |> renderEntries model
-                )
+            config.logs
+                |> applyFilter model
+                |> renderEntries config model
+                |> verticalList
     in
         verticalSticked
             (Just [ filterHeaderLayout ])
@@ -76,14 +74,14 @@ encrypted =
     "⠽⠕⠥ ⠚⠥⠎⠞ ⠇⠕⠎⠞ ⠠⠠⠞⠓⠑ ⠠⠠⠛⠁⠍⠑"
 
 
-renderEntries : Model -> Logs.Model -> List (Html Msg)
-renderEntries model logs =
+renderEntries : Config msg -> Model -> Logs.Model -> List (Html Msg)
+renderEntries config model logs =
     getLogsfromDate logs
-        |> List.map (uncurry <| renderEntry model)
+        |> List.map (uncurry <| renderEntry config model)
 
 
-renderEntry : Model -> Logs.ID -> Logs.Log -> Html Msg
-renderEntry model id log =
+renderEntry : Config msg -> Model -> Logs.ID -> Logs.Log -> Html Msg
+renderEntry config model id log =
     let
         expandedState =
             isEntryExpanded id model
@@ -94,12 +92,12 @@ renderEntry model id log =
         etop =
             [ div [] [ log.timestamp |> timestampToFullData |> text ]
             , spacer
-            , renderTopActions log
+            , renderTopActions config log
             ]
 
         data =
             [ div [ class [ ETop ] ] etop
-            , renderData id log model
+            , renderData config id log model
             , renderBottom id log model
             ]
     in
@@ -155,8 +153,8 @@ renderMiniContent =
     renderContent
 
 
-renderEditing : Logs.ID -> String -> Html Msg
-renderEditing logID src =
+renderEditing : Config msg -> Logs.ID -> String -> Html Msg
+renderEditing config logID src =
     input
         [ class [ BoxifyMe ]
         , value src
@@ -165,8 +163,8 @@ renderEditing logID src =
         []
 
 
-renderTopActions : Logs.Log -> Html Msg
-renderTopActions log =
+renderTopActions : Config msg -> Logs.Log -> Html Msg
+renderTopActions config log =
     -- TODO: Catch the flags for real
     div [] <| renderFlags [ BtnUser, BtnEdit, BtnCrypt ]
 
@@ -194,7 +192,11 @@ btnsCryptographed logID =
     ]
 
 
-renderBottomActions : Logs.ID -> Logs.Log -> Model -> Html Msg
+renderBottomActions :
+    Logs.ID
+    -> Logs.Log
+    -> Model
+    -> Html Msg
 renderBottomActions id log model =
     let
         btns =
@@ -213,11 +215,11 @@ renderBottomActions id log model =
         horizontalBtnPanel btns
 
 
-renderData : Logs.ID -> Logs.Log -> Model -> Html Msg
-renderData id log model =
+renderData : Config msg -> Logs.ID -> Logs.Log -> Model -> Html Msg
+renderData config id log model =
     case (Dict.get id model.editing) of
         Just x ->
-            renderEditing id x
+            renderEditing config id x
 
         Nothing ->
             if (isEntryExpanded id model) then

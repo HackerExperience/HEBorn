@@ -11,31 +11,23 @@ import Game.Models as GameModel
 import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
+import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
-view : GameData.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
-        tasks =
-            data
-                |> GameData.getActiveServer
-                |> Servers.getProcesses
-                |> Processes.toList
-
-        lastTick =
-            data
-                |> GameData.getGame
-                |> GameModel.getMeta
-                |> Meta.getLastTick
+        config_ =
+            menuConfig config
     in
         div [ class [ MainLayout ] ]
-            [ viewTasksTable data tasks lastTick
+            [ viewTasksTable config
             , viewTotalResources model
-            , menuView model
+            , menuView config_ model
             ]
 
 
@@ -47,7 +39,7 @@ view data model =
     Html.CssHelpers.withNamespace prefix
 
 
-maybe : Maybe (Html msg) -> Html msg
+maybe : Maybe (Html Msg) -> Html Msg
 maybe =
     Maybe.withDefault <| text ""
 
@@ -131,8 +123,8 @@ viewState now lastRecalc proc =
             text "Completed (failure)"
 
 
-processMenu : ( Processes.ID, Processes.Process ) -> Attribute Msg
-processMenu ( id, process ) =
+processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute Msg
+processMenu config ( id, process ) =
     let
         menu =
             case Processes.getAccess process of
@@ -150,20 +142,17 @@ processMenu ( id, process ) =
                 Processes.Partial _ ->
                     menuForPartial
     in
-        menu id
+        menu (menuConfig config) id
 
 
 viewTaskRow :
-    GameData.Data
-    -> Time
+    Config msg
     -> ( Processes.ID, Processes.Process )
     -> Html Msg
-viewTaskRow data now (( _, process ) as entry) =
+viewTaskRow config (( _, process ) as entry) =
     let
         lastRecalc =
-            data
-                |> GameData.getActiveServer
-                |> Servers.getProcesses
+            config.processes
                 |> Processes.getLastModified
 
         usageView =
@@ -172,7 +161,7 @@ viewTaskRow data now (( _, process ) as entry) =
                 |> Maybe.map (viewTaskRowUsage)
                 |> maybe
     in
-        div [ class [ EntryDivision ], (processMenu entry) ]
+        div [ class [ EntryDivision ], (processMenu config entry) ]
             [ div []
                 [ text <| Processes.getName process
                 , br [] []
@@ -181,14 +170,14 @@ viewTaskRow data now (( _, process ) as entry) =
                 , br [] []
                 ]
             , div []
-                [ viewState now lastRecalc process ]
+                [ viewState config.lastTick lastRecalc process ]
             , div []
                 [ usageView ]
             ]
 
 
-viewTasksTable : GameData.Data -> Entries -> Time -> Html Msg
-viewTasksTable data entries now =
+viewTasksTable : Config msg -> Html Msg
+viewTasksTable config =
     let
         first =
             div [ class [ EntryDivision ] ]
@@ -196,9 +185,13 @@ viewTasksTable data entries now =
                 , div [] [ text "ETA" ]
                 , div [] [ text "Resources" ]
                 ]
+
+        tasks =
+            config.processes
+                |> Processes.toList
     in
-        entries
-            |> List.map (viewTaskRow data now)
+        tasks
+            |> List.map (viewTaskRow config)
             |> (::) first
             |> div [ class [ TaskTable ] ]
 
