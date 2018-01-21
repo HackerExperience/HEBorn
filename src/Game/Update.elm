@@ -110,13 +110,13 @@ onAccount config msg model =
         config_ =
             accountConfig fallbackGW lastTick (getFlags model) config
 
-        ( account, cmd, dispatch ) =
+        ( account, cmd ) =
             Account.update config_ msg <| getAccount model
 
         model_ =
             { model | account = account }
     in
-        ( model_, cmd, dispatch )
+        ( model_, cmd, Dispatch.none )
 
 
 onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg

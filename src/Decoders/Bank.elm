@@ -10,7 +10,7 @@ import Json.Decode as Decode
         , field
         )
 import Json.Decode.Pipeline exposing (decode, required)
-import Game.Account.Finances.Models exposing (BankAccountData)
+import Game.Account.Finances.Shared exposing (BankAccountData)
 
 
 accountData : Decoder BankAccountData

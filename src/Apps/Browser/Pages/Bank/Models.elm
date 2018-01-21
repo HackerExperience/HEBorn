@@ -8,7 +8,8 @@ module Apps.Browser.Pages.Bank.Models
 
 import Game.Web.Types as Web
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Account.Finances.Models exposing (AccountNumber, BankAccountData)
+import Game.Account.Finances.Models exposing (AccountNumber)
+import Game.Account.Finances.Shared exposing (BankAccountData)
 
 
 type alias Model =
