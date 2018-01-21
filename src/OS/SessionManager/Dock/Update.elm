@@ -1,7 +1,6 @@
 module OS.SessionManager.Dock.Update exposing (update)
 
 import Dict
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.SessionManager.Dock.Config exposing (..)
@@ -23,37 +22,32 @@ type alias UpdateResponse =
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse
-update config data msg ({ sessions } as model) =
+update config msg ({ sessions } as model) =
     let
         id =
-            toSessionID data
+            config.sessionId
     in
         case msg of
             OpenApp app ->
                 let
                     ip =
-                        data
-                            |> Game.getActiveServer
-                            |> Servers.getEndpointCId
+                        config.endpointCId
 
                     ( model_, cmd, dispatch ) =
-                        openApp data Nothing Nothing id ip app model
+                        openApp config.wmConfig Nothing Nothing id ip app model
                 in
                     ( model_, cmd, dispatch )
 
             AppButton app ->
                 let
                     ip =
-                        data
-                            |> Game.getActiveServer
-                            |> Servers.getEndpointCId
+                        config.endpointCId
 
                     ( model_, cmd, dispatch ) =
-                        openOrRestoreApp data Nothing Nothing id ip app model
+                        openOrRestoreApp config.wmConfig Nothing Nothing id ip app model
                 in
                     ( model_, cmd, dispatch )
 

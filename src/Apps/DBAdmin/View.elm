@@ -9,6 +9,7 @@ import Game.Account.Models as Account
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
@@ -21,14 +22,11 @@ import Game.Account.Database.Models as Database
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data ({ selected } as model) =
+view : Config msg -> Model -> Html Msg
+view config ({ selected } as model) =
     let
         database =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDatabase
+            config.database
 
         viewData =
             case selected of
@@ -36,10 +34,10 @@ view data ({ selected } as model) =
                     (Servers.view database model model)
 
                 TabBankAccs ->
-                    renderBankAccounts data database model
+                    renderBankAccounts database model
 
                 TabWallets ->
-                    renderBitcoinAccounts data database model
+                    renderBitcoinAccounts database model
 
         viewTabs =
             hzTabs (compareTabs selected) viewTabLabel GoTab tabs
@@ -95,8 +93,8 @@ renderBitcoinAccount address account acc =
         content :: acc
 
 
-renderBitcoinAccounts : Game.Data -> Database.Model -> Model -> Html Msg
-renderBitcoinAccounts data database model =
+renderBitcoinAccounts : Database.Model -> Model -> Html Msg
+renderBitcoinAccounts database model =
     database
         |> Database.getBitcoinWallets
         |> Dict.foldl renderBitcoinAccount []
@@ -129,8 +127,8 @@ renderBankAccount id account acc =
         content :: acc
 
 
-renderBankAccounts : Game.Data -> Database.Model -> Model -> Html Msg
-renderBankAccounts data database model =
+renderBankAccounts : Database.Model -> Model -> Html Msg
+renderBankAccounts database model =
     database
         |> Database.getBankAccounts
         |> Dict.foldl renderBankAccount []

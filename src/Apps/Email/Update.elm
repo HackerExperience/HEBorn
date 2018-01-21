@@ -1,6 +1,6 @@
 module Apps.Email.Update exposing (update)
 
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.OS as OS
 import Core.Dispatch.Storyline as Storyline
@@ -12,15 +12,15 @@ import Apps.FloatingHeads.Models as FloatingHeads
 import Apps.Apps as Apps
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
     Config msg
     -> Email.Msg
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 update config msg model =
     case msg of
         -- -- Context
@@ -28,14 +28,18 @@ update config msg model =
             onSelectContact email model
 
 
-onSelectContact : String -> Model -> UpdateResponse
+
+-- CONFREFACT : Dispatch this properly
+
+
+onSelectContact : String -> Model -> UpdateResponse msg
 onSelectContact email model =
-    let
-        dispatch =
-            email
-                |> FloatingHeads.OpenAtContact
-                |> Apps.FloatingHeadsParams
-                |> OS.OpenApp Nothing
-                |> Dispatch.os
-    in
-        ( model, Cmd.none, dispatch )
+    --let
+    --  dispatch =
+    --     email
+    --      |> FloatingHeads.OpenAtContact
+    --      |> Apps.FloatingHeadsParams
+    --      |> OS.OpenApp Nothing
+    --      |> Dispatch.os
+    --in
+    ( model, React.none )

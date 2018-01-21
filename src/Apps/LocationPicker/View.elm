@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Native.Untouchable
 import Game.Data as Game
+import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
@@ -13,8 +14,8 @@ import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     div
         [ class [ Super ]
         ]

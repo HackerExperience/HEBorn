@@ -1,10 +1,10 @@
 module Apps.Launch exposing (launch, launchEvent)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (Context)
 import Utils.Update as Update
 import Apps.Apps exposing (..)
+import Apps.Config exposing (..)
 import Apps.Messages exposing (..)
 import Apps.Models exposing (..)
 import Apps.Reference exposing (..)
@@ -30,16 +30,13 @@ import Apps.FloatingHeads.Messages as FloatingHeads
 import Apps.FloatingHeads.Launch as FloatingHeads
 
 
---CONFREFACT : Remove Game.Data from Here after refactor
-
-
 launch :
-    Game.Data
+    Config msg
     -> Reference
     -> Maybe AppParams
     -> App
     -> ( AppModel, Cmd Msg, Dispatch )
-launch data ({ windowId } as reference) maybeParams app =
+launch config ({ windowId } as reference) maybeParams app =
     case app of
         LogViewerApp ->
             LogViewer.initialModel
@@ -53,6 +50,9 @@ launch data ({ windowId } as reference) maybeParams app =
 
         BrowserApp ->
             let
+                config_ =
+                    browserConfig config
+
                 params =
                     case maybeParams of
                         Just (BrowserParams params) ->
@@ -62,7 +62,7 @@ launch data ({ windowId } as reference) maybeParams app =
                             Nothing
 
                 ( model, cmd, dispatch ) =
-                    Browser.launch data params reference
+                    Browser.launch config_ params reference
 
                 model_ =
                     BrowserModel model
@@ -108,10 +108,17 @@ launch data ({ windowId } as reference) maybeParams app =
                 |> Update.fromModel
 
         ServersGearsApp ->
-            data
-                |> ServersGears.initialModel
-                |> ServersGearsModel
-                |> Update.fromModel
+            let
+                config_ =
+                    serversGearsConfig config
+
+                mobo =
+                    config_.mobo
+            in
+                mobo
+                    |> ServersGears.initialModel
+                    |> ServersGearsModel
+                    |> Update.fromModel
 
         LocationPickerApp ->
             let
@@ -154,6 +161,9 @@ launch data ({ windowId } as reference) maybeParams app =
 
         FloatingHeadsApp ->
             let
+                config_ =
+                    floatingHeadsConfig config
+
                 params =
                     case maybeParams of
                         Just (FloatingHeadsParams params) ->
@@ -163,7 +173,7 @@ launch data ({ windowId } as reference) maybeParams app =
                             Nothing
 
                 ( model, cmd, dispatch ) =
-                    FloatingHeads.launch data params reference
+                    FloatingHeads.launch config_ params reference
 
                 model_ =
                     FloatingHeadsModel model

@@ -1,7 +1,6 @@
 module Apps.Update exposing (update)
 
-import Utils.Update as Update
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Apps.Config exposing (..)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
@@ -21,22 +20,19 @@ import Apps.Bug.Update as Bug
 import Apps.Calculator.Update as Calculator
 import Apps.BackFlix.Update as BackFlix
 import Apps.FloatingHeads.Update as FloatingHeads
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 -- HACK : Elm's Tuple Pattern Matching is slow
 -- https://groups.google.com/forum/#!topic/elm-dev/QGmwWH6V8-c
 --------------------------------------------------------------
--- CONFREFACT: remove Game.Data after refactor
 
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> AppModel
-    -> ( AppModel, Cmd msg, Dispatch )
-update config data msg model =
+    -> ( AppModel, React msg )
+update config msg model =
     case msg of
         LogViewerMsg msg ->
             case model of
@@ -52,7 +48,7 @@ update config data msg model =
                         map LogViewerModel LogViewerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         TaskManagerMsg msg ->
             case model of
@@ -68,22 +64,23 @@ update config data msg model =
                         map TaskManagerModel TaskManagerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         BrowserMsg msg ->
             case model of
                 BrowserModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Browser.update data msg model
+                        config_ =
+                            browserConfig config
 
                         cmd_ =
-                            Update.mapCmd (BrowserMsg >> config.toMsg) ( model_, cmd, dispatch )
+                            Browser.update config_ msg model
+                                |> Update.mapCmd (BrowserMsg >> config.toMsg)
                     in
                         map BrowserModel BrowserMsg cmd_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         ExplorerMsg msg ->
             case model of
@@ -99,112 +96,119 @@ update config data msg model =
                         map ExplorerModel ExplorerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         DatabaseMsg msg ->
             case model of
                 DatabaseModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Database.update data msg model
+                        config_ =
+                            dbAdminConfig config
 
-                        cmd_ =
-                            Update.mapCmd (DatabaseMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Database.update config_ msg model
+                                |> Update.mapCmd (DatabaseMsg >> config.toMsg)
                     in
-                        map DatabaseModel DatabaseMsg cmd_
+                        map DatabaseModel DatabaseMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         ConnManagerMsg msg ->
             case model of
                 ConnManagerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            ConnManager.update data msg model
+                        config_ =
+                            connManagerConfig config
 
-                        cmd_ =
-                            Update.mapCmd (ConnManagerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            ConnManager.update config_ msg model
+                                |> Update.mapCmd (ConnManagerMsg >> config.toMsg)
                     in
-                        map ConnManagerModel ConnManagerMsg cmd_
+                        map ConnManagerModel ConnManagerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         BounceManagerMsg msg ->
             case model of
                 BounceManagerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            BounceManager.update data msg model
+                        config_ =
+                            bounceManConfig config
 
-                        cmd_ =
-                            Update.mapCmd (BounceManagerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            BounceManager.update config_ msg model
+                                |> Update.mapCmd (BounceManagerMsg >> config.toMsg)
                     in
-                        map BounceManagerModel BounceManagerMsg cmd_
+                        map BounceManagerModel BounceManagerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         FinanceMsg msg ->
             case model of
                 FinanceModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Finance.update data msg model
+                        config_ =
+                            financeConfig config
 
-                        cmd_ =
-                            Update.mapCmd (FinanceMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Finance.update config_ msg model
+                                |> Update.mapCmd (FinanceMsg >> config.toMsg)
                     in
-                        map FinanceModel FinanceMsg cmd_
+                        map FinanceModel FinanceMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         MusicMsg msg ->
             case model of
                 MusicModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Hebamp.update data msg model
+                        config_ =
+                            hebampConfig config
 
-                        cmd_ =
-                            Update.mapCmd (MusicMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Hebamp.update config_ msg model
+                                |> Update.mapCmd (MusicMsg >> config.toMsg)
                     in
-                        map MusicModel MusicMsg cmd_
+                        map MusicModel MusicMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         ServersGearsMsg msg ->
             case model of
                 ServersGearsModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            ServersGears.update data msg model
+                        config_ =
+                            serversGearsConfig config
 
-                        cmd_ =
-                            Update.mapCmd (ServersGearsMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            ServersGears.update config_ msg model
+                                |> Update.mapCmd (ServersGearsMsg >> config.toMsg)
                     in
-                        map ServersGearsModel ServersGearsMsg cmd_
+                        map ServersGearsModel ServersGearsMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         LocationPickerMsg msg ->
             case model of
                 LocationPickerModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            LocationPicker.update data msg model
+                        config_ =
+                            locationPickerConfig config
 
-                        cmd_ =
-                            Update.mapCmd (LocationPickerMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            LocationPicker.update config_ msg model
+                                |> Update.mapCmd (LocationPickerMsg >> config.toMsg)
                     in
-                        map LocationPickerModel LocationPickerMsg cmd_
+                        map LocationPickerModel LocationPickerMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         EmailMsg msg ->
             case model of
@@ -220,22 +224,23 @@ update config data msg model =
                         map EmailModel EmailMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         BugMsg msg ->
             case model of
                 BugModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            Bug.update data msg model
+                        config_ =
+                            bugConfig config
 
-                        cmd_ =
-                            Update.mapCmd (BugMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            Bug.update config_ msg model
+                                |> Update.mapCmd (BugMsg >> config.toMsg)
                     in
-                        map BugModel BugMsg cmd_
+                        map BugModel BugMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         CalculatorMsg msg ->
             case model of
@@ -250,22 +255,23 @@ update config data msg model =
                         map CalculatorModel CalculatorMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         BackFlixMsg msg ->
             case model of
                 BackFlixModel model ->
                     let
-                        ( model_, cmd, dispatch ) =
-                            BackFlix.update data msg model
+                        config_ =
+                            backFlixConfig config
 
-                        cmd_ =
-                            Update.mapCmd (BackFlixMsg >> config.toMsg) ( model_, cmd, dispatch )
+                        update_ =
+                            BackFlix.update config_ msg model
+                                |> Update.mapCmd (BackFlixMsg >> config.toMsg)
                     in
-                        map BackFlixModel BackFlixMsg cmd_
+                        map BackFlixModel BackFlixMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
         FloatingHeadsMsg msg ->
             case model of
@@ -281,7 +287,7 @@ update config data msg model =
                         map FloatingHeadsModel FloatingHeadsMsg update_
 
                 _ ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
 
 
@@ -327,8 +333,8 @@ update config data msg model =
 map :
     (model -> AppModel)
     -> (appMsg -> Msg)
-    -> ( model, Cmd msg, Dispatch )
-    -> ( AppModel, Cmd msg, Dispatch )
+    -> ( model, React msg )
+    -> ( AppModel, React msg )
 map wrapModel wrapMsg ( model, cmd, dispatch ) =
     let
         update_ =

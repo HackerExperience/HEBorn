@@ -1,5 +1,6 @@
 module Apps.Explorer.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Utils.Update as Update
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
@@ -14,11 +15,11 @@ import Apps.Explorer.Menu.Update as Menu
 import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Config msg -> Msg -> Model -> UpdateResponse
+update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     let
         server =
@@ -62,22 +63,22 @@ update config msg model =
 
                     _ ->
                         -- TODO: implement folder operation requests
-                        Update.fromModel model
+                        ( model, React.none )
 
             Nothing ->
-                Update.fromModel model
+                ( model, React.none )
 
 
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
 onMenuMsg config msg model =
     let
-        ( menu_, cmd, coreMsg ) =
+        ( menu_, react ) =
             Menu.update (menuConfig config) msg model.menu
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, Cmd.map MenuMsg cmd, coreMsg )
+        ( model_, react )
 
 
 onGoPath :
@@ -85,24 +86,31 @@ onGoPath :
     -> Filesystem.Path
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onGoPath config newPath fs model =
-    Update.fromModel <| changePath newPath fs model
+    let
+        model_ =
+            changePath newPath fs model
+    in
+        ( model_, React.none )
 
 
-onGoStorage : String -> Model -> UpdateResponse
+onGoStorage : String -> Model -> UpdateResponse msg
 onGoStorage newStorageId model =
-    { model | storageId = Just newStorageId, path = [ "" ] }
-        |> Update.fromModel
+    let
+        model_ =
+            { model | storageId = Just newStorageId, path = [ "" ] }
+    in
+        ( model_, React.none )
 
 
-onUpdateEditing : EditingStatus -> Model -> UpdateResponse
+onUpdateEditing : EditingStatus -> Model -> UpdateResponse msg
 onUpdateEditing newState model =
     let
         model_ =
             setEditing newState model
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 onEnterRename :
@@ -110,7 +118,7 @@ onEnterRename :
     -> Filesystem.Id
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onEnterRename config id fs model =
     let
         file =
@@ -125,10 +133,10 @@ onEnterRename config id fs model =
         model_ =
             setEditing editing_ model
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse
+onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse msg
 onApplyEdit config fs model =
     let
         storageId =
@@ -163,4 +171,4 @@ onApplyEdit config fs model =
         model_ =
             setEditing NotEditing model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )

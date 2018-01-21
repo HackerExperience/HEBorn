@@ -1,11 +1,12 @@
 module Apps.Browser.Pages.Bank.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Game.Data as Game
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest
+import Apps.Browser.Config as BrowserConfig
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
@@ -15,130 +16,122 @@ import Requests.Types exposing (ResponseType)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse msg
-update config data msg model =
+update config msg model =
     case msg of
         HandleLogin accData ->
-            handleLogin config data accData model
+            handleLogin config accData model
 
         HandleLoginError ->
-            handleLoginError config data model
+            handleLoginError config model
 
         HandleTransfer ->
-            handleTransfer config data model
+            handleTransfer config model
 
         HandleTransferError ->
-            handleTransferError config data model
+            handleTransferError config model
 
         UpdateLoginField str ->
-            onUpdateLoginField config data str model
+            onUpdateLoginField config str model
 
         UpdatePasswordField str ->
-            onUpdatePasswordField config data str model
+            onUpdatePasswordField config str model
 
         UpdateTransferBankField str ->
-            onUpdateTransferBankField config data str model
+            onUpdateTransferBankField config str model
 
         UpdateTransferAccountField str ->
-            onUpdateTransferAccountField config data str model
+            onUpdateTransferAccountField config str model
 
         UpdateTransferValueField str ->
-            onUpdateTransferValueField config data str model
+            onUpdateTransferValueField config str model
 
 
 onUpdateLoginField :
     Config msg
-    -> Game.Data
     -> String
     -> Model
     -> UpdateResponse msg
-onUpdateLoginField config data str model =
+onUpdateLoginField config str model =
     if (String.contains "-" str) then
-        Update.fromModel model
+        ( model, React.none )
     else
         case (String.toInt str) of
             Result.Ok num ->
-                Update.fromModel { model | accountNum = Just num }
+                ( { model | accountNum = Just num }, React.none )
 
             Result.Err _ ->
-                Update.fromModel model
+                ( model, React.none )
 
 
 onUpdatePasswordField :
     Config msg
-    -> Game.Data
     -> String
     -> Model
     -> UpdateResponse msg
-onUpdatePasswordField config data str model =
-    Update.fromModel
-        { model | password = Just str }
+onUpdatePasswordField config str model =
+    ( { model | password = Just str }, React.none )
 
 
 onUpdateTransferBankField :
     Config msg
-    -> Game.Data
     -> String
     -> Model
     -> UpdateResponse msg
-onUpdateTransferBankField config data str model =
+onUpdateTransferBankField config str model =
     if (String.contains "-" str) then
-        Update.fromModel model
+        ( model, React.none )
     else
-        Update.fromModel { model | toBankTransfer = Just (Network.fromString str) }
+        ( { model | toBankTransfer = Just (Network.fromString str) }, React.none )
 
 
 onUpdateTransferAccountField :
     Config msg
-    -> Game.Data
     -> String
     -> Model
     -> UpdateResponse msg
-onUpdateTransferAccountField config data str model =
+onUpdateTransferAccountField config str model =
     if (String.contains "-" str) then
-        Update.fromModel model
+        ( model, React.none )
     else
         case (String.toInt str) of
             Result.Ok num ->
-                Update.fromModel { model | toAccountTransfer = Just num }
+                ( { model | toAccountTransfer = Just num }, React.none )
 
             Result.Err _ ->
-                Update.fromModel model
+                ( model, React.none )
 
 
 onUpdateTransferValueField :
     Config msg
-    -> Game.Data
     -> String
     -> Model
     -> UpdateResponse msg
-onUpdateTransferValueField config data str model =
+onUpdateTransferValueField config str model =
     if (String.contains "-" str) then
-        Update.fromModel model
+        ( model, React.none )
     else
         case (String.toInt str) of
             Result.Ok num ->
-                Update.fromModel { model | transferValue = Just num }
+                ( { model | transferValue = Just num }, React.none )
 
             Result.Err _ ->
-                Update.fromModel model
+                ( model, React.none )
 
 
 handleLogin :
     Config msg
-    -> Game.Data
     -> BankAccountData
     -> Model
     -> UpdateResponse msg
-handleLogin config data accData model =
+handleLogin config accData model =
     let
         model_ =
             { model
@@ -148,43 +141,40 @@ handleLogin config data accData model =
                 , error = Nothing
             }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 handleLoginError :
     Config msg
-    -> Game.Data
     -> Model
     -> UpdateResponse msg
-handleLoginError config data model =
+handleLoginError config model =
     let
         model_ =
             { model | error = Just "Invalid Login Information" }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 handleTransfer :
     Config msg
-    -> Game.Data
     -> Model
     -> UpdateResponse msg
-handleTransfer config data model =
+handleTransfer config model =
     let
         model_ =
             { model | bankState = Transfer }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 handleTransferError :
     Config msg
-    -> Game.Data
     -> Model
     -> UpdateResponse msg
-handleTransferError config data model =
+handleTransferError config model =
     let
         model_ =
             { model | error = Just "Transfer Error" }
     in
-        Update.fromModel model_
+        ( model_, React.none )

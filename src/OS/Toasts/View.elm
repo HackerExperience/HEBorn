@@ -4,7 +4,6 @@ import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
 import OS.Resources as Res
-import Game.Data as Game
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
@@ -16,8 +15,8 @@ import OS.Toasts.Models exposing (..)
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view _ model =
+view : Model -> Html Msg
+view model =
     model
         |> Dict.foldl
             (\k v acu ->

@@ -82,12 +82,7 @@ onPlay { game, os } =
 
             ( Just gtw, Just srv, Just data ) ->
                 let
-                    lastTick =
-                        game
-                            |> Game.getMeta
-                            |> Meta.getLastTick
-
                     config =
                         osConfig game srv ctx gtw
                 in
-                    OS.view config data os
+                    OS.view config os

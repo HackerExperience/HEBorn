@@ -1,11 +1,11 @@
 module Apps.Explorer.Subscriptions exposing (..)
 
-import Game.Data as Game
+import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Models exposing (Model)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Menu.Subscriptions as Menu
 
 
-subscriptions : Game.Data -> Model -> Sub Msg
-subscriptions data model =
+subscriptions : Config msg -> Model -> Sub Msg
+subscriptions config model =
     Sub.map MenuMsg (Menu.subscriptions model.menu)

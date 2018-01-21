@@ -1,24 +1,26 @@
 module Apps.Bug.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Error as Error
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Native.Panic
+import Apps.Bug.Config exposing (..)
 import Apps.Bug.Models exposing (Model)
 import Apps.Bug.Messages as Hackerbug exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Hackerbug.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> Hackerbug.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- -- Context
         DummyToast ->
@@ -31,11 +33,10 @@ update data msg model =
             onUnpoliteCrash model
 
 
-onDummyToast : Model -> UpdateResponse
+onDummyToast : Model -> UpdateResponse msg
 onDummyToast model =
     ( model
-    , Cmd.none
-    , Dispatch.none
+    , React.none
       -- REVIEW: Port me later
       --, Notifications.Simple "Hi" "Hello"
       --    |> Notifications.Toast Nothing
@@ -43,19 +44,23 @@ onDummyToast model =
     )
 
 
-onPoliteCrash : Model -> UpdateResponse
+onPoliteCrash : Model -> UpdateResponse msg
 onPoliteCrash model =
     ( model
-    , Cmd.none
-    , "This is a polite crash."
-        |> Error.fakeTest
-        |> Account.LogoutAndCrash
-        |> Dispatch.account
+    , React.none
+      --, "This is a polite crash."
+      --    |> Error.fakeTest
+      --    |> Account.LogoutAndCrash
+      --    |> Dispatch.account
     )
 
 
-onUnpoliteCrash : Model -> UpdateResponse
+onUnpoliteCrash : Model -> UpdateResponse msg
 onUnpoliteCrash model =
-    "This is an unpolite crash."
-        |> Error.fakeTest
-        |> uncurry Native.Panic.crash
+    ( model, React.none )
+
+
+
+--"This is an unpolite crash."
+--    |> Error.fakeTest
+--    |> uncurry Native.Panic.crash

@@ -2,7 +2,7 @@ module Apps.LocationPicker.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates, mapInit)
 import Utils.Ports.Geolocation exposing (geoLocReq)
-import Apps.LocationPicker.Messages exposing (Msg)
+import Utils.React as React
 
 
 type alias Model =
@@ -35,7 +35,7 @@ initialModel id =
     }
 
 
-startCmd : Model -> Cmd Msg
+startCmd : Model -> Cmd msg
 startCmd model =
     Cmd.batch
         [ mapInit model.mapEId

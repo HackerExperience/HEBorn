@@ -1,5 +1,6 @@
 module Apps.Explorer.Menu.Actions exposing (actionHandler)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Game.Servers.Models as Servers
@@ -11,15 +12,15 @@ import Apps.Explorer.Messages exposing (..)
 import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 actionHandler :
     Config msg
     -> MenuAction
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 actionHandler config action model =
     case action of
         Menu.Delete id ->
@@ -35,14 +36,14 @@ actionHandler config action model =
             onEnterRename config id model
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
 
 onDelete :
     Config msg
     -> String
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onDelete config id model =
     let
         storage =
@@ -53,14 +54,14 @@ onDelete config id model =
         --        |> Servers.DeleteFile
         --        |> Dispatch.filesystem config.activeCId storage
     in
-        ( model, Cmd.none, Dispatch.none )
+        ( model, React.none )
 
 
 onGoPath :
     Config msg
     -> Filesystem.Path
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onGoPath config path model =
     let
         server =
@@ -77,30 +78,27 @@ onGoPath config path model =
         case maybeFs of
             Just fs ->
                 if Filesystem.isFolder path fs then
-                    ( changePath path fs model
-                    , Cmd.none
-                    , Dispatch.none
-                    )
+                    ( changePath path fs model, React.none )
                 else
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, React.none )
 
             Nothing ->
-                ( model, Cmd.none, Dispatch.none )
+                ( model, React.none )
 
 
 onUpdateEditing :
     EditingStatus
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onUpdateEditing state_ model =
-    ( setEditing state_ model, Cmd.none, Dispatch.none )
+    ( setEditing state_ model, React.none )
 
 
 onEnterRename :
     Config msg
     -> Filesystem.Id
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onEnterRename config id model =
     let
         server =
@@ -125,10 +123,10 @@ onEnterRename config id model =
                                     |> Renaming id
                                     |> ((flip setEditing) model)
                         in
-                            ( model, Cmd.none, Dispatch.none )
+                            ( model, React.none )
 
                     Nothing ->
-                        ( model, Cmd.none, Dispatch.none )
+                        ( model, React.none )
 
             Nothing ->
-                ( model, Cmd.none, Dispatch.none )
+                ( model, React.none )

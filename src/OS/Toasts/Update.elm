@@ -1,95 +1,102 @@
 module OS.Toasts.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Process
 import Task
 import Time exposing (Time)
 import Utils.Update as Update
-import Game.Data as Game
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import OS.Toasts.Config exposing (..)
 import OS.Toasts.Messages exposing (..)
 import OS.Toasts.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
-update _ msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         Remove id ->
-            onRemove id model
+            onRemove config id model
 
         Trash id ->
-            onTrash id model
+            onTrash config id model
 
         Fade id ->
-            onFade id model
+            onFade config id model
 
         HandleAccount content ->
             model
                 |> insert (Toast (Account content) Alive)
-                |> uncurry waitFade
+                |> uncurry (waitFade config)
 
         HandleServers cid content ->
             model
                 |> insert (Toast (Server cid content) Alive)
-                |> uncurry waitFade
+                |> uncurry (waitFade config)
 
 
-onRemove : Int -> Model -> UpdateResponse
-onRemove id model =
-    model
-        |> remove id
-        |> Update.fromModel
+onRemove : Config msg -> Int -> Model -> UpdateResponse msg
+onRemove config id model =
+    let
+        model_ =
+            remove id model
+    in
+        ( model_, React.none )
 
 
-onTrash : Int -> Model -> UpdateResponse
-onTrash id model =
-    model
-        |> get id
-        |> Maybe.map
-            (setState Garbage >> flip (replace id) model)
-        |> Maybe.withDefault model
-        |> Update.fromModel
+onTrash : Config msg -> Int -> Model -> UpdateResponse msg
+onTrash config id model =
+    let
+        setState_ =
+            setState Garbage >> flip (replace id) model
+
+        model_ =
+            Maybe.map setState_ (get id model)
+                |> Maybe.withDefault model
+    in
+        ( model_, React.none )
 
 
-onFade : Int -> Model -> UpdateResponse
-onFade id model =
-    model
-        |> get id
-        |> Maybe.map (\elem -> fade id elem model)
-        |> Maybe.withDefault (Update.fromModel model)
+onFade : Config msg -> Int -> Model -> UpdateResponse msg
+onFade config id model =
+    let
+        fade_ elem =
+            fade config id elem model
+    in
+        Maybe.map fade_ (get id model)
+            |> Maybe.withDefault ( model, React.none )
 
 
-fade : Int -> Toast -> Model -> UpdateResponse
-fade id elem model =
-    if elem.state == Garbage then
-        onRemove id model
-    else
-        elem
-            |> setState Fading
-            |> flip (replace id) model
-            |> waitDeath id
+fade : Config msg -> Int -> Toast -> Model -> UpdateResponse msg
+fade config id elem model =
+    let
+        setState_ =
+            setState Garbage >> flip (replace id) model
+    in
+        if elem.state == Garbage then
+            onRemove config id model
+        else
+            setState_ elem
+                |> waitDeath config id
 
 
-waitFade : Int -> Model -> UpdateResponse
-waitFade id model =
+waitFade : Config msg -> Int -> Model -> UpdateResponse msg
+waitFade config id model =
     ( model
-    , delay (3 * Time.second) (Fade id)
-    , Dispatch.none
+    , React.map config.toMsg <| React.cmd <| delay (3 * Time.second) (Fade id)
     )
 
 
-waitDeath : Int -> Model -> UpdateResponse
-waitDeath id model =
+waitDeath : Config msg -> Int -> Model -> UpdateResponse msg
+waitDeath config id model =
     ( model
-    , delay (0.5 * Time.second) (Remove id)
-    , Dispatch.none
+    , React.map config.toMsg <| React.cmd <| delay (0.5 * Time.second) (Remove id)
     )
 
 

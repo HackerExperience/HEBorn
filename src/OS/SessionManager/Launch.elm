@@ -2,12 +2,13 @@ module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import Game.Servers.Shared as Servers
+import OS.SessionManager.Config exposing (..)
+import OS.SessionManager.WindowManager.Config as WM
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Types exposing (..)
@@ -22,7 +23,7 @@ type alias UpdateResponse =
 
 
 openApp :
-    Game.Data
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
@@ -35,7 +36,7 @@ openApp =
 
 
 openOrRestoreApp :
-    Game.Data
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
@@ -47,8 +48,8 @@ openOrRestoreApp =
     helper WM.resert
 
 
-type alias Action =
-    Game.Data
+type alias Action msg =
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> String
@@ -59,8 +60,8 @@ type alias Action =
 
 
 helper :
-    Action
-    -> Game.Data
+    Action msg
+    -> WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
@@ -68,7 +69,7 @@ helper :
     -> Apps.App
     -> Model
     -> UpdateResponse
-helper action data maybeContext maybeParams id serverCId app model0 =
+helper action config maybeContext maybeParams id serverCId app model0 =
     case get id model0 of
         Just wm ->
             let
@@ -76,7 +77,7 @@ helper action data maybeContext maybeParams id serverCId app model0 =
                     getUID model0
 
                 ( wm_, cmd, dispatch ) =
-                    action data
+                    action config
                         maybeContext
                         maybeParams
                         uuid
@@ -90,20 +91,20 @@ helper action data maybeContext maybeParams id serverCId app model0 =
                 model_ =
                     refresh id wm_ model
 
-                dispatch_ =
-                    Dispatch.batch
-                        [ dispatch
-                        , data
-                            |> Game.getGame
-                            |> Game.getAccount
-                            |> Account.getContext
-                            |> GoApp app
-                            |> Storyline.ActionDone
-                            |> Storyline.Missions
-                            |> Dispatch.storyline
-                        ]
+                --dispatch_ =
+                --    Dispatch.batch
+                --        [ dispatch
+                --        , data
+                --            |> Game.getGame
+                --            |> Game.getAccount
+                --            |> Account.getContext
+                --            |> GoApp app
+                --            |> Storyline.ActionDone
+                --            |> Storyline.Missions
+                --            |> Dispatch.storyline
+                --        ]
             in
-                ( model_, cmd_, dispatch_ )
+                ( model_, cmd_, Dispatch.none )
 
         Nothing ->
             ( model0, Cmd.none, Dispatch.none )

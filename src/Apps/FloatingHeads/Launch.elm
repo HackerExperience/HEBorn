@@ -7,6 +7,7 @@ import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
+import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages exposing (..)
 
@@ -15,18 +16,18 @@ type alias LaunchResponse =
     ( Model, Cmd Msg, Dispatch )
 
 
-launch : Game.Data -> Maybe Params -> Reference -> LaunchResponse
-launch data maybeParams me =
+launch : Config msg -> Maybe Params -> Reference -> LaunchResponse
+launch config maybeParams me =
     case maybeParams of
         Just (OpenAtContact contact) ->
-            launchOpenAtContact data contact me
+            launchOpenAtContact config contact me
 
         Nothing ->
             Update.fromModel <| initialModel Nothing me
 
 
-launchOpenAtContact : Game.Data -> String -> Reference -> LaunchResponse
-launchOpenAtContact data contact me =
+launchOpenAtContact : Config msg -> String -> Reference -> LaunchResponse
+launchOpenAtContact config contact me =
     let
         model =
             initialModel (Just contact) me

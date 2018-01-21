@@ -1,6 +1,7 @@
 module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Dict
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
 import Draggable
@@ -8,7 +9,6 @@ import Draggable.Events as Draggable
 import Utils.Update as Update
 import Apps.Update as Apps
 import Apps.Messages as Apps
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import OS.SessionManager.WindowManager.Config exposing (..)
@@ -17,28 +17,23 @@ import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
-
--- CONFREFACT: remove Game.Data after refactor
--- CONFREFACT: give WindowManager a real config and get rid of data
-
-
-update : Config msg -> Game.Data -> Msg -> Model -> UpdateResponse msg
-update config data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         AppMsg targetContext id msg ->
-            onAppMsg config data targetContext id msg model
+            onAppMsg config targetContext id msg model
 
         EveryAppMsg context msg ->
-            onEveryAppMsg config data context msg model
+            onEveryAppMsg config context msg model
 
         SetContext wId context_ ->
-            onSetContext config data context_ wId model
+            onSetContext config context_ wId model
 
         UpdateFocusTo maybeWId ->
-            onUpdateFocustTo config data maybeWId model
+            onUpdateFocustTo config maybeWId model
 
         Close wId ->
             onClose wId model
@@ -68,17 +63,16 @@ update config data msg model =
 
 onAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> ID
     -> Apps.Msg
     -> Model
     -> ( Model, Cmd msg, Dispatch )
-onAppMsg config data targetContext wId msg ({ windows } as model) =
+onAppMsg config targetContext wId msg ({ windows } as model) =
     case Dict.get wId windows of
         Just window ->
             model
-                |> appsMsg config data msg targetContext wId window
+                |> appsMsg config msg targetContext wId window
                 |> Update.mapModel
                     ((flip (Dict.insert wId) windows)
                         >> (\windows_ -> { model | windows = windows_ })
@@ -90,25 +84,24 @@ onAppMsg config data targetContext wId msg ({ windows } as model) =
 
 appsMsg :
     Config msg
-    -> Game.Data
     -> Apps.Msg
     -> TargetContext
     -> ID
     -> Window
     -> Model
     -> ( Window, Cmd msg, Dispatch )
-appsMsg config data msg targetContext wId window model =
+appsMsg config msg targetContext wId window model =
     case ( targetContext, window.instance ) of
         ( All, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
                 ( g_, cmdG, dispatchG ) =
-                    Apps.update config_ data msg g
+                    Apps.update config_ msg g
 
                 ( e_, cmdE, dispatchE ) =
-                    Apps.update config_ data msg e
+                    Apps.update config_ msg e
 
                 cmd =
                     [ cmdG, cmdE ]
@@ -125,10 +118,10 @@ appsMsg config data msg targetContext wId window model =
         ( One Gateway, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
                 ( g_, cmd, dispatch ) =
-                    Apps.update config_ data msg g
+                    Apps.update config_ msg g
 
                 window_ =
                     { window | instance = DoubleContext a g_ e }
@@ -138,10 +131,10 @@ appsMsg config data msg targetContext wId window model =
         ( One Endpoint, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
                 ( e_, cmd, dispatch ) =
-                    Apps.update config_ data msg e
+                    Apps.update config_ msg e
 
                 window_ =
                     { window | instance = DoubleContext a g e_ }
@@ -149,15 +142,15 @@ appsMsg config data msg targetContext wId window model =
                 ( window_, cmd, dispatch )
 
         ( Active, DoubleContext active _ _ ) ->
-            appsMsg config data msg (One active) wId window model
+            appsMsg config msg (One active) wId window model
 
         ( _, SingleContext g ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig Nothing wId targetContext config
 
                 ( g_, cmd, dispatch ) =
-                    Apps.update config_ data msg g
+                    Apps.update config_ msg g
 
                 window_ =
                     { window | instance = SingleContext g_ }
@@ -167,7 +160,6 @@ appsMsg config data msg targetContext wId window model =
 
 reduceAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> Apps.Msg
     -> Model
@@ -175,10 +167,10 @@ reduceAppMsg :
     -> Window
     -> ( Windows, Cmd msg, Dispatch )
     -> ( Windows, Cmd msg, Dispatch )
-reduceAppMsg config data context msg model wId window ( windows, cmd0, dispatch0 ) =
+reduceAppMsg config context msg model wId window ( windows, cmd0, dispatch0 ) =
     let
         ( window_, cmd1, dispatch1 ) =
-            appsMsg config data msg context wId window model
+            appsMsg config msg context wId window model
 
         windows_ =
             Dict.insert wId window windows
@@ -194,22 +186,21 @@ reduceAppMsg config data context msg model wId window ( windows, cmd0, dispatch0
 
 onEveryAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> Apps.Msg
     -> Model
     -> UpdateResponse msg
-onEveryAppMsg config data context msg model =
+onEveryAppMsg config context msg model =
     model.windows
         |> Dict.foldl
-            (reduceAppMsg config data context msg model)
+            (reduceAppMsg config context msg model)
             ( Dict.empty, Cmd.none, Dispatch.none )
         |> Update.mapModel
             (\windows_ -> { model | windows = windows_ })
 
 
-onSetContext : Config msg -> Game.Data -> Context -> ID -> Model -> UpdateResponse msg
-onSetContext config data context_ wId ({ windows } as model) =
+onSetContext : Config msg -> Context -> ID -> Model -> UpdateResponse msg
+onSetContext config context_ wId ({ windows } as model) =
     case Dict.get wId windows of
         Just ({ instance, app } as window) ->
             case instance of
@@ -240,8 +231,8 @@ onSetContext config data context_ wId ({ windows } as model) =
             Update.fromModel model
 
 
-onUpdateFocustTo : Config msg -> Game.Data -> Maybe String -> Model -> UpdateResponse msg
-onUpdateFocustTo config data maybeWId model =
+onUpdateFocustTo : Config msg -> Maybe String -> Model -> UpdateResponse msg
+onUpdateFocustTo config maybeWId model =
     case maybeWId of
         Just id ->
             case Dict.get id model.windows of

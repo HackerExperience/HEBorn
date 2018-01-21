@@ -2,6 +2,8 @@ module OS.SessionManager.Update exposing (update)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
+import Core.Error as Error
+import Utils.React as React exposing (React)
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
@@ -14,8 +16,6 @@ import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.WindowManager.Messages as WM
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Data as Game
-import Game.Models
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
@@ -25,48 +25,44 @@ import Apps.Launch as Apps
 import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
--- CONFREFACT: remove Game.Data after refactor
-
-
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse msg
-update config data msg model =
+update config msg model =
     let
         id =
-            toSessionID data
+            getSessionID config
 
         model_ =
             ensureSession id model
     in
         case msg of
             HandleNewApp context params app ->
-                handleNewApp config data id context params app model_
+                handleNewApp config id context params app model_
 
             HandleOpenApp context params ->
-                handleOpenApp config data id context params model_
+                handleOpenApp config id context params model_
 
             WindowManagerMsg id msg ->
-                onWindowManagerMsg config data id msg model_
+                onWindowManagerMsg config id msg model_
 
             DockMsg msg ->
-                onDockMsg config data msg model_
+                onDockMsg config id msg model_
 
             AppMsg ( sessionId, windowId ) context msg ->
-                onWindowManagerMsg config
-                    data
+                onWindowManagerMsg
+                    config
                     sessionId
                     (WM.AppMsg (WM.One context) windowId msg)
                     model
 
             EveryAppMsg msgs ->
-                onEveryAppMsg config data msgs model_
+                onEveryAppMsg config msgs model_
 
             TargetedAppMsg targetCid targetContext msgs ->
-                onTargetedAppMsg config data targetCid targetContext msgs model_
+                onTargetedAppMsg config targetCid targetContext msgs model_
 
 
 
@@ -74,27 +70,27 @@ update config data msg model =
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 handleNewApp :
     Config msg
-    -> Game.Data
     -> ID
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> Apps.App
     -> Model
     -> UpdateResponse msg
-handleNewApp config data id context params app model =
+handleNewApp config id context params app model =
     let
         ip =
-            data
-                |> Game.getActiveServer
-                |> Servers.getEndpointCId
+            config.endpointCId
+
+        config_ =
+            wmConfig id config
 
         ( model_, cmd, dispatch ) =
-            openApp data context params id ip app model
+            openApp config_ context params id ip app model
 
         cmd_ =
             Cmd.map config.toMsg cmd
@@ -104,13 +100,12 @@ handleNewApp config data id context params app model =
 
 handleOpenApp :
     Config msg
-    -> Game.Data
     -> ID
     -> Maybe Context
     -> Apps.AppParams
     -> Model
     -> UpdateResponse msg
-handleOpenApp config data id maybeContext params model =
+handleOpenApp config id maybeContext params model =
     let
         app =
             Apps.paramsToApp params
@@ -134,20 +129,19 @@ handleOpenApp config data id maybeContext params model =
                 params
                     |> Apps.launchEvent context
                     |> WM.AppMsg (WM.One context) windowId
-                    |> flip (onWindowManagerMsg config data id) model
+                    |> flip (onWindowManagerMsg config id) model
 
             Nothing ->
-                handleNewApp config data id maybeContext (Just params) app model
+                handleNewApp config id maybeContext (Just params) app model
 
 
 onWindowManagerMsg :
     Config msg
-    -> Game.Data
     -> ID
     -> WM.Msg
     -> Model
     -> UpdateResponse msg
-onWindowManagerMsg config data id msg model =
+onWindowManagerMsg config id msg model =
     let
         wm =
             case get id (ensureSession id model) of
@@ -161,7 +155,7 @@ onWindowManagerMsg config data id msg model =
             wmConfig id config
 
         ( wm_, cmd, dispatch ) =
-            WM.update config_ data msg wm
+            WM.update config_ msg wm
 
         model_ =
             refresh id wm_ model
@@ -169,14 +163,14 @@ onWindowManagerMsg config data id msg model =
         ( model_, cmd, dispatch )
 
 
-onDockMsg : Config msg -> Game.Data -> Dock.Msg -> Model -> UpdateResponse msg
-onDockMsg config data msg model_ =
+onDockMsg : Config msg -> ID -> Dock.Msg -> Model -> UpdateResponse msg
+onDockMsg config id msg model_ =
     let
         config_ =
-            dockConfig config
+            dockConfig id config
 
         ( model, cmd, dispatch ) =
-            Dock.update config_ data msg model_
+            Dock.update config_ msg model_
 
         cmd_ =
             Cmd.map config.toMsg cmd
@@ -188,17 +182,16 @@ onDockMsg config data msg model_ =
 -}
 onEveryAppMsg :
     Config msg
-    -> Game.Data
     -> List Apps.Msg
     -> Model
     -> UpdateResponse msg
-onEveryAppMsg config data appMsgs model =
+onEveryAppMsg config appMsgs model =
     let
         toWmMsg =
             WM.EveryAppMsg WM.All
 
         ( model_, cmd, dispatch ) =
-            Dict.foldl (reduceSessions config data appMsgs toWmMsg)
+            Dict.foldl (reduceSessions config appMsgs toWmMsg)
                 ( model, Cmd.none, Dispatch.none )
                 model.sessions
     in
@@ -209,18 +202,15 @@ onEveryAppMsg config data appMsgs model =
 -}
 onTargetedAppMsg :
     Config msg
-    -> Game.Data
     -> Servers.CId
     -> WM.TargetContext
     -> List Apps.Msg
     -> Model
     -> UpdateResponse msg
-onTargetedAppMsg config data targetCid targetContext appMsgs model =
+onTargetedAppMsg config targetCid targetContext appMsgs model =
     let
         servers =
-            data
-                |> Game.getGame
-                |> Game.Models.getServers
+            config.servers
 
         filterer =
             case targetContext of
@@ -245,7 +235,7 @@ onTargetedAppMsg config data targetCid targetContext appMsgs model =
             WM.EveryAppMsg targetContext
 
         foldl =
-            Dict.foldl (reduceSessions config data appMsgs toWmMsg)
+            Dict.foldl (reduceSessions config appMsgs toWmMsg)
                 ( model, Cmd.none, Dispatch.none )
 
         -- filter sessions and apply the messages
@@ -286,14 +276,13 @@ findApp app wm =
 -}
 reduceMessages :
     Config msg
-    -> Game.Data
     -> (Apps.Msg -> WM.Msg)
     -> ID
     -> WM.Model
     -> Apps.Msg
     -> ( Model, List (Cmd msg), List Dispatch )
     -> ( Model, List (Cmd msg), List Dispatch )
-reduceMessages config data toWmMsg sid wm msg ( model, cmds, disps ) =
+reduceMessages config toWmMsg sid wm msg ( model, cmds, disps ) =
     let
         msg_ =
             toWmMsg msg
@@ -302,7 +291,7 @@ reduceMessages config data toWmMsg sid wm msg ( model, cmds, disps ) =
             wmConfig sid config
 
         ( wm_, cmd, disp ) =
-            WM.update config_ data msg_ wm
+            WM.update config_ msg_ wm
 
         model_ =
             refresh sid wm_ model
@@ -320,17 +309,16 @@ reduceMessages config data toWmMsg sid wm msg ( model, cmds, disps ) =
 -}
 reduceSessions :
     Config msg
-    -> Game.Data
     -> List Apps.Msg
     -> (Apps.Msg -> WM.Msg)
     -> ID
     -> WM.Model
     -> ( Model, Cmd msg, Dispatch )
     -> ( Model, Cmd msg, Dispatch )
-reduceSessions config data appMsgs toWmMsg sid wm ( model, cmd, disp ) =
+reduceSessions config appMsgs toWmMsg sid wm ( model, cmd, disp ) =
     let
         ( model_, cmds, disps ) =
-            List.foldl (reduceMessages config data toWmMsg sid wm)
+            List.foldl (reduceMessages config toWmMsg sid wm)
                 ( model, [], [] )
                 appMsgs
 
@@ -413,3 +401,29 @@ filterEndpointRelatedSessions servers targetCid cid wm =
 
                 Nothing ->
                     False
+
+
+getSessionID : Config msg -> ID
+getSessionID config =
+    case config.activeContext of
+        Gateway ->
+            config.activeServer
+                |> Tuple.first
+                |> Servers.toSessionId
+
+        Endpoint ->
+            let
+                endpointSessionId =
+                    config.activeServer
+                        |> Tuple.second
+                        |> Servers.getEndpointCId
+                        |> Maybe.map Servers.toSessionId
+            in
+                case endpointSessionId of
+                    Just endpointSessionId ->
+                        endpointSessionId
+
+                    Nothing ->
+                        "U = {x}, ∄ x ⊂ U"
+                            |> Error.neeiae
+                            |> uncurry Native.Panic.crash

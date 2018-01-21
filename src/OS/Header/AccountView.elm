@@ -6,6 +6,7 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Models as Story
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -15,19 +16,17 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : OpenMenu -> Game.Model -> Html Msg
-view openMenu game =
+view : Config msg -> OpenMenu -> Html Msg
+view config openMenu =
     if openMenu == AccountOpen then
-        visibleAccountGear game
+        visibleAccountGear config
     else
         invisibleAccountGear
 
 
-visibleAccountGear : Game.Model -> Html Msg
-visibleAccountGear { account, story } =
-    [ toggleCampaignBtn account story
-    , logoutBtn
-    ]
+visibleAccountGear : Config msg -> Html Msg
+visibleAccountGear config =
+    [ logoutBtn ]
         |> ul []
         |> List.singleton
         |> div
@@ -46,33 +45,6 @@ invisibleAccountGear =
         , onClick <| ToggleMenus AccountOpen
         ]
         []
-
-
-toggleCampaignBtn : Account.Model -> Story.Model -> Html Msg
-toggleCampaignBtn account { enabled } =
-    let
-        canSwitch =
-            not account.inTutorial
-
-        getButtonName =
-            if enabled then
-                "Go Multiplayer"
-            else
-                "Go Campaign"
-    in
-        if canSwitch then
-            text getButtonName
-                |> List.singleton
-                |> button
-                    [ enabled
-                        |> not
-                        |> ToggleCampaign
-                        |> onClick
-                    ]
-                |> List.singleton
-                |> li []
-        else
-            text ""
 
 
 logoutBtn : Html Msg

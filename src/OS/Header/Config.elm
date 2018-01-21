@@ -6,6 +6,7 @@ import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Models as Servers exposing (Server)
+import Game.Servers.Notifications.Models as Notifications
 import OS.Header.Messages exposing (Msg)
 
 
@@ -29,4 +30,7 @@ type alias Config msg =
     , activeGateway : ( CId, Server )
     , activeBounce : Maybe Bounces.ID
     , activeContext : Context
+    , serversNotifications : Notifications.Model
+    , activeNIP : NIP
+    , nips : List NIP
     }

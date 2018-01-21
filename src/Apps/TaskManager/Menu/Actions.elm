@@ -1,5 +1,6 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
 import Apps.TaskManager.Menu.Config exposing (..)
@@ -8,8 +9,8 @@ import Apps.TaskManager.Messages as TaskManager exposing (Msg)
 import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 
@@ -20,7 +21,7 @@ actionHandler :
     Config msg
     -> MenuAction
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 actionHandler config action model =
     case action of
         PauseProcess pID ->
@@ -30,7 +31,7 @@ actionHandler config action model =
             --            |> Servers.PauseProcess
             --            |> Dispatch.processes config.activeCId
             --in
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
         ResumeProcess pID ->
             --let
@@ -39,7 +40,7 @@ actionHandler config action model =
             --            |> Servers.ResumeProcess
             --            |> Dispatch.processes config.activeCId
             --in
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
         RemoveProcess pID ->
             --  let
@@ -48,4 +49,4 @@ actionHandler config action model =
             --              |> Servers.RemoveProcess
             --              |> Dispatch.processes config.activeCId
             --  in
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )

@@ -25,10 +25,10 @@ import Apps.TaskManager.Messages as TaskManager
 import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Flags as Flags exposing (Flags)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Subscribers as Subscribers
+import Core.Dispatch exposing (Dispatch)
 
 
 -- TODO: Use onSth pattern
