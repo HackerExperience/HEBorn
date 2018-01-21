@@ -4,6 +4,7 @@ import Dict as Dict exposing (Dict)
 import Game.Servers.Shared exposing (Id)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Components as Components
+import Game.Account.Finances.Shared exposing (..)
 
 
 type alias Model =
@@ -84,11 +85,6 @@ type PaymentType
 
 
 -- BankAccountData is what comes from backend when the user get logged on a bank
-
-
-type alias BankAccountData =
-    { balance : Int
-    }
 
 
 initialModel : Model

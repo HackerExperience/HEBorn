@@ -2,12 +2,16 @@ module Game.Config exposing (..)
 
 import Time exposing (Time)
 import Core.Flags as Core
+import Core.Error as Error exposing (Error)
+import Game.Meta.Types.Requester exposing (Requester)
+import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Config as Account
 import Game.Account.Models as Account
 import Game.Account.Messages as Account
 import Game.BackFlix.Config as BackFlix
 import Game.Servers.Config as Servers
 import Game.Servers.Models as Servers
+import Game.Servers.Messages as Servers
 import Game.Inventory.Config as Inventory
 import Game.Inventory.Messages as Inventory
 import Game.Web.Config as Web
@@ -19,6 +23,17 @@ import Game.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
+
+    -- account
+    , onConnected : String -> msg
+    , onDisconnected : msg
+    , onError : Error -> msg
+
+    -- account.finances
+    , onBALoginSuccess : Requester -> BankAccountData -> msg
+    , onBALoginFailed : Requester -> msg
+    , onBATransferSuccess : Requester -> msg
+    , onBATransferFailed : Requester -> msg
     }
 
 
@@ -46,8 +61,24 @@ accountConfig :
 accountConfig fallToGateway lastTick flags config =
     { flags = flags
     , toMsg = AccountMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , lastTick = lastTick
     , fallToGateway = fallToGateway
+    , onConnected = config.onConnected
+    , onDisconnected = config.onDisconnected
+    , onError = config.onError
+    , onSetEndpoint =
+        \cid param ->
+            Servers.HandleSetEndpoint param
+                |> Servers.ServerMsg cid
+                |> ServersMsg
+                |> config.toMsg
+
+    -- account.finances
+    , onBALoginSuccess = config.onBALoginSuccess
+    , onBALoginFailed = config.onBALoginFailed
+    , onBATransferSuccess = config.onBATransferSuccess
+    , onBATransferFailed = config.onBATransferFailed
     }
 
 

@@ -12,6 +12,7 @@ import Core.Error as Error
 import Game.Data as Game
 import Game.Models
 import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Shared as Finances
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem

@@ -2,7 +2,9 @@ module TestUtils exposing (..)
 
 import Expect exposing (Expectation)
 import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.React as React exposing (React)
 import Core.Subscribers as Subscribers
+import Core.Config as Core
 import Core.Messages as Core
 import Game.Messages as Game
 import Game.Config as Game
@@ -19,22 +21,6 @@ once param =
 
 fuzz param =
     fuzzWith { runs = Config.baseFuzzRuns } param
-
-
-gameConfig : Game.Config Game.Msg
-gameConfig =
-    let
-        workaround list =
-            case list of
-                item :: _ ->
-                    item
-
-                _ ->
-                    Debug.crash "This crash comes from testing gameConfig"
-    in
-        { toMsg = identity
-        , batchMsg = workaround
-        }
 
 
 batch : List Expectation -> Expectation
@@ -65,12 +51,9 @@ updateGame : Game.Msg -> Game.Model -> Game.Model
 updateGame msg0 model0 =
     let
         ( model1, cmd, dispatch ) =
-            Game.update gameConfig msg0 model0
-
-        ( model2, _ ) =
-            gameDispatcher model1 cmd dispatch
+            Game.update Core.gameConfig msg0 model0
     in
-        model2
+        gameDispatcher model1 cmd dispatch
 
 
 fromJust : String -> Maybe a -> a
@@ -110,22 +93,49 @@ hint str =
 -- REPLICANTS FROM CORE.UPDATE MODIFIED TO USE GAME.MODEL
 
 
-gameDispatcher : Game.Model -> Cmd Game.Msg -> Dispatch -> ( Game.Model, Cmd Game.Msg )
-gameDispatcher model cmd dispatch =
-    dispatch
-        |> Subscribers.dispatch
-        |> List.foldl gameReducer ( model, cmd )
-
-
-gameReducer : Core.Msg -> ( Game.Model, Cmd Game.Msg ) -> ( Game.Model, Cmd Game.Msg )
-gameReducer msg ( model, cmd ) =
+gameDispatcher :
+    Game.Model
+    -> React Core.Msg
+    -> Dispatch
+    -> Game.Model
+gameDispatcher model react dispatch =
     let
-        ( model_, cmd_, _ ) =
-            case msg of
-                Core.GameMsg msg ->
-                    Game.update gameConfig msg model
+        msgs =
+            react
+                |> React.split
+                |> Tuple.first
+                |> Maybe.map Core.unroll
+                |> Maybe.withDefault []
 
-                _ ->
-                    ( model, cmd, Dispatch.none )
+        msgs_ =
+            msgs ++ Subscribers.dispatch dispatch
+
+        ( model_, react_, dispatch_ ) =
+            List.foldl gameReducer ( model, React.none, Dispatch.none ) msgs_
     in
-        ( model_, Cmd.batch [ cmd, cmd_ ] )
+        case msgs_ of
+            [] ->
+                model
+
+            list ->
+                gameDispatcher model_ react_ dispatch_
+
+
+gameReducer :
+    Core.Msg
+    -> ( Game.Model, React Core.Msg, Dispatch )
+    -> ( Game.Model, React Core.Msg, Dispatch )
+gameReducer msg ( model, react, dispatch ) =
+    case msg of
+        Core.GameMsg msg ->
+            let
+                ( model_, react_, dispatch_ ) =
+                    Game.update Core.gameConfig msg model
+            in
+                ( model_
+                , React.batch Core.MultiMsg [ react, react_ ]
+                , Dispatch.batch [ dispatch, dispatch_ ]
+                )
+
+        _ ->
+            ( model, react, dispatch )

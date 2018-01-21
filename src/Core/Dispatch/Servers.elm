@@ -2,6 +2,7 @@ module Core.Dispatch.Servers exposing (..)
 
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Shared as Finances
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Filesystem.Shared as Filesystem

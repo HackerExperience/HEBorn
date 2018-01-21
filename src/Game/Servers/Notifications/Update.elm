@@ -1,5 +1,6 @@
 module Game.Servers.Notifications.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Notifications exposing (..)
 import Game.Servers.Notifications.Config exposing (..)
 import Game.Servers.Notifications.Messages exposing (..)
@@ -8,10 +9,10 @@ import Game.Servers.Notifications.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
-update : Config msg -> Msg -> Model -> ( Model, Cmd msg )
+update : Config msg -> Msg -> Model -> ( Model, React msg )
 update config msg model =
     case msg of
         HandleDownloadStarted nip storage entry ->
@@ -30,14 +31,14 @@ update config msg model =
             handleNewNotification config (Generic title content) model
 
         HandleReadAll ->
-            ( readAll model, Cmd.none )
+            ( readAll model, React.none )
 
 
 handleNewNotification :
     Config msg
     -> Content
     -> Model
-    -> ( Model, Cmd msg )
+    -> UpdateResponse msg
 handleNewNotification config content model =
     let
         model_ =
@@ -47,4 +48,4 @@ handleNewNotification config content model =
         --    Dispatch.notifications <|
         --        Notifications.Toast (Just source) content
     in
-        ( model_, Cmd.none )
+        ( model_, React.none )

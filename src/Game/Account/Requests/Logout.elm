@@ -1,20 +1,38 @@
-module Game.Account.Requests.Logout exposing (request)
+module Game.Account.Requests.Logout exposing (logoutRequest)
 
 import Json.Encode as Encode exposing (Value)
-import Game.Account.Messages exposing (..)
-import Game.Account.Models exposing (..)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
+import Game.Account.Models exposing (..)
 
 
-request : String -> ID -> FlagsSource a -> Cmd Msg
-request token id =
-    let
-        payload =
-            Encode.object
-                [ ( "token", Encode.string token ) ]
-    in
-        Requests.request (Topics.logout id)
-            (LogoutRequest >> Request)
-            payload
+type alias Data =
+    Result () ()
+
+
+logoutRequest : String -> ID -> FlagsSource a -> Cmd Data
+logoutRequest token id flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.logout id) (encoder token)
+        |> Cmd.map (uncurry receiver)
+
+
+
+-- internals
+
+
+encoder : String -> Value
+encoder token =
+    Encode.object
+        [ ( "token", Encode.string token ) ]
+
+
+receiver : Code -> Value -> Result () ()
+receiver code _ =
+    case code of
+        OkCode ->
+            Ok ()
+
+        _ ->
+            Err ()

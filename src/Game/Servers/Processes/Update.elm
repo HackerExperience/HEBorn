@@ -1,5 +1,6 @@
 module Game.Servers.Processes.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Events.Server.Processes.Started as ProcessStarted
 import Events.Server.Processes.Conclusion as ProcessConclusion
 import Events.Server.Processes.BruteforceFailed as BruteforceFailed
@@ -19,7 +20,7 @@ import Game.Servers.Processes.Models exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update :
@@ -30,7 +31,7 @@ update :
 update config msg model =
     case msg of
         DownloadRequestFailed id ->
-            ( remove id model, Cmd.none )
+            ( remove id model, React.none )
 
         HandleStartDownload origin storage id ->
             handleStartDownload config PrivateFTP origin storage id model
@@ -39,7 +40,7 @@ update config msg model =
             handleStartDownload config PublicFTP origin storage id model
 
         BruteforceRequestFailed id ->
-            ( remove id model, Cmd.none )
+            ( remove id model, React.none )
 
         HandleStartBruteforce data ->
             handleStartBruteforce config data model
@@ -122,6 +123,7 @@ handleStartDownload config transferType origin storageId file model =
             config
                 |> perform origin (Filesystem.toId file) storageId config.cid
                 |> Cmd.map toMsg
+                |> React.cmd
     in
         ( model_, cmd )
 
@@ -161,6 +163,7 @@ handleStartBruteforce config target model =
             config
                 |> bruteforceRequest tid tip config.cid
                 |> Cmd.map toMsg
+                |> React.cmd
     in
         ( model_, cmd )
 
@@ -172,7 +175,7 @@ handleBruteforceFailed data model =
             model
                 |> insert data.processId
                     (whenStarted (conclude (Just False)) process)
-                |> flip (,) Cmd.none
+                |> flip (,) React.none
     in
         updateOrSync update data.processId model
 
@@ -181,7 +184,7 @@ handleProcessStarted : ProcessStarted.Data -> Model -> UpdateResponse msg
 handleProcessStarted ( id, process ) model =
     model
         |> insert id process
-        |> flip (,) Cmd.none
+        |> flip (,) React.none
 
 
 handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse msg
@@ -190,7 +193,7 @@ handleProcessConclusion id model =
         update process =
             model
                 |> insert id (whenStarted (conclude (Just True)) process)
-                |> flip (,) Cmd.none
+                |> flip (,) React.none
     in
         updateOrSync update id model
 
@@ -202,7 +205,7 @@ handleProcessesChanged :
     -> UpdateResponse msg
 handleProcessesChanged config processes model =
     ( { model | processes = processes, lastModified = config.lastTick }
-    , Cmd.none
+    , React.none
     )
 
 
@@ -212,7 +215,7 @@ handlePause config id model =
         update process =
             model
                 |> insert id (whenStarted pause process)
-                |> flip (,) Cmd.none
+                |> flip (,) React.none
     in
         updateOrSync update id model
 
@@ -223,14 +226,14 @@ handleResume config id model =
         update process =
             model
                 |> insert id (whenStarted resume process)
-                |> flip (,) Cmd.none
+                |> flip (,) React.none
     in
         updateOrSync update id model
 
 
 handleRemove : Config msg -> ID -> Model -> UpdateResponse msg
 handleRemove config id model =
-    ( remove id model, Cmd.none )
+    ( remove id model, React.none )
 
 
 handleComplete :
@@ -243,7 +246,7 @@ handleComplete config id model =
         update process =
             model
                 |> insert id (whenStarted (conclude Nothing) process)
-                |> flip (,) Cmd.none
+                |> flip (,) React.none
     in
         updateOrSync update id model
 
@@ -280,11 +283,12 @@ handleStart config process model =
                         config
                             |> bruteforceRequest tid tip config.cid
                             |> Cmd.map toMsg
+                            |> React.cmd
                 in
                     ( model_, cmd )
 
             _ ->
-                ( model_, Cmd.none )
+                ( model_, React.none )
 
 
 
@@ -305,4 +309,4 @@ updateOrSync func id model =
             func process
 
         Nothing ->
-            ( model, Cmd.none )
+            ( model, React.none )

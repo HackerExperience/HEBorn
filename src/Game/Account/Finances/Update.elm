@@ -1,8 +1,6 @@
 module Game.Account.Finances.Update exposing (update)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Web.Models as Web
@@ -15,7 +13,7 @@ import Game.Account.Finances.Requests.Transfer as Transfer
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -39,12 +37,12 @@ update config msg model =
 
 handleBankAccountClosed : AccountId -> Model -> UpdateResponse msg
 handleBankAccountClosed accountId model =
-    Update.fromModel <| removeBankAccount accountId model
+    ( removeBankAccount accountId model, React.none )
 
 
 handleBankAccountUpdated : AccountId -> BankAccount -> Model -> UpdateResponse msg
 handleBankAccountUpdated accountId bankAccount model =
-    Update.fromModel <| insertBankAccount accountId bankAccount model
+    ( insertBankAccount accountId bankAccount model, React.none )
 
 
 handleBankAccountLogin :
@@ -57,10 +55,12 @@ handleBankAccountLogin :
 handleBankAccountLogin config request requester cid model =
     let
         request_ =
-            Login.request request requester config.accountId cid config
+            config
+                |> Login.request request requester config.accountId cid
                 |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, request_, Dispatch.none )
+        ( model, request_ )
 
 
 handleBankAccountTransfer :
@@ -75,8 +75,9 @@ handleBankAccountTransfer config request requester cid model =
         request_ =
             Transfer.request request requester config.accountId cid config
                 |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, request_, Dispatch.none )
+        ( model, request_ )
 
 
 onRequest : Config msg -> RequestMsg -> Model -> UpdateResponse msg
@@ -99,23 +100,17 @@ onBankLogin :
 onBankLogin config requester cid response model =
     case response of
         Valid data ->
-            let
-                dispatch =
-                    Servers.BankAccountLoginSuccessful requester data
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBALoginSuccess requester data
+            )
 
         DecodeFailed ->
-            Update.fromModel model
+            ( model, React.none )
 
         Invalid ->
-            let
-                dispatch =
-                    Servers.BankAccountLoginError requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBALoginFailed requester
+            )
 
 
 onBankTransfer :
@@ -128,17 +123,11 @@ onBankTransfer :
 onBankTransfer config requester cid response model =
     case response of
         Successful ->
-            let
-                dispatch =
-                    Servers.BankAccountTransferSuccessful requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBATransferSuccess requester
+            )
 
         Error ->
-            let
-                dispatch =
-                    Servers.BankAccountTransferError requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBATransferFailed requester
+            )

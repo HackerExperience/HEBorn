@@ -1,7 +1,6 @@
 module Game.Storyline.Missions.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Game.Storyline.Missions.Config exposing (..)
 import Game.Storyline.Missions.Actions exposing (..)
 import Game.Storyline.Missions.Models exposing (..)
@@ -10,7 +9,7 @@ import Game.Storyline.Missions.StepGen exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -29,11 +28,11 @@ handleActionDone action model =
         |> getActions
         |> List.filter ((/=) action)
         |> flip setActions model
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onStepProceed : ID -> Model -> UpdateResponse msg
 onStepProceed stepId model =
-    model
-        |> setStep (Just (Step stepId (fromStep model.mission stepId)))
-        |> Update.fromModel
+    ( setStep (Just (Step stepId (fromStep model.mission stepId))) model
+    , React.none
+    )

@@ -9,7 +9,8 @@ import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Account.Finances.Models exposing (AccountNumber, BankAccountData)
+import Game.Account.Finances.Models exposing (AccountNumber)
+import Game.Account.Finances.Shared exposing (BankAccountData)
 import Requests.Types exposing (ResponseType)
 
 

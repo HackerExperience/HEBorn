@@ -3,6 +3,7 @@ module Game.Servers.Processes.IntegrationTest exposing (all)
 import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
+import Utils.React as React exposing (React)
 import Json.Decode as Decode
 import TestUtils exposing (fuzz, updateGame, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
@@ -103,8 +104,7 @@ eventTests =
                         |> fromJust ("Testing " ++ name)
             in
                 dispatch
-                    |> gameDispatcher game Cmd.none
-                    |> Tuple.first
+                    |> gameDispatcher game React.none
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.started fetching serverId"
@@ -158,8 +158,7 @@ eventTests =
                         |> fromJust ("Testing " ++ name)
             in
                 dispatch
-                    |> gameDispatcher game1 Cmd.none
-                    |> Tuple.first
+                    |> gameDispatcher game1 React.none
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.conclusion fetching serverId"
@@ -215,8 +214,7 @@ eventTests =
                         |> fromJust ("Testing " ++ name)
             in
                 dispatch
-                    |> gameDispatcher game1 Cmd.none
-                    |> Tuple.first
+                    |> gameDispatcher game1 React.none
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "bruteforce_failed fetching serverId"

@@ -1,6 +1,7 @@
 module Apps.Browser.Messages exposing (..)
 
 import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Shared as Finances
 import Game.Web.Types exposing (Response)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
