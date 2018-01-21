@@ -1,6 +1,6 @@
 module Game.Servers.Hardware.Update exposing (update)
 
-import Utils.Cmd as Cmd
+import Utils.React as React exposing (React)
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
@@ -11,7 +11,7 @@ import Game.Servers.Hardware.Messages exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -24,7 +24,7 @@ update config msg model =
             handleMotherboardUpdated config model_ model
 
         SetMotherboard motherboard ->
-            ( setMotherboard (Just motherboard) model, Cmd.none )
+            ( setMotherboard (Just motherboard) model, React.none )
 
 
 handleMotherboardUpdate :
@@ -46,6 +46,7 @@ handleMotherboardUpdate config motherboard model =
             config
                 |> updateMotherboardRequest motherboard config.cid
                 |> Cmd.map handler
+                |> React.cmd
     in
         ( model, cmd )
 
@@ -73,6 +74,6 @@ handleMotherboardUpdated config model_ model =
                     (List.map config.onInventoryFreed >> config.batchMsg)
 
         cmd =
-            Cmd.fromMsg <| config.batchMsg [ used, freed ]
+            React.msg <| config.batchMsg [ used, freed ]
     in
         ( model_, cmd )

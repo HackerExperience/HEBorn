@@ -1,5 +1,6 @@
 module Game.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Dict exposing (Dict)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
@@ -37,7 +38,7 @@ import Game.Models exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg, Dispatch )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -70,7 +71,7 @@ update config msg model =
         Request data ->
             Request.receive model data
                 |> Maybe.map (flip (updateRequest config) model)
-                |> Maybe.withDefault (Update.fromModel model)
+                |> Maybe.withDefault ( model, React.none, Dispatch.none )
 
         HandleJoinedAccount value ->
             handleJoinedAccount config value model
@@ -88,10 +89,13 @@ onResync config model =
                 |> getAccount
                 |> Account.getId
 
-        cmd =
-            Cmd.map config.toMsg <| Resync.request accountId model
+        react =
+            model
+                |> Resync.request accountId
+                |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, cmd, Dispatch.none )
+        ( model, react, Dispatch.none )
 
 
 
@@ -110,13 +114,13 @@ onAccount config msg model =
         config_ =
             accountConfig fallbackGW lastTick (getFlags model) config
 
-        ( account, cmd ) =
+        ( account, react ) =
             Account.update config_ msg <| getAccount model
 
         model_ =
             { model | account = account }
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react, Dispatch.none )
 
 
 onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg
@@ -125,13 +129,13 @@ onMeta config msg model =
         config_ =
             metaConfig config
 
-        ( meta, cmd, dispatch ) =
+        ( meta, react ) =
             Meta.update config_ msg <| getMeta model
 
         model_ =
             setMeta meta model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, Dispatch.none )
 
 
 onStory : Config msg -> Story.Msg -> Model -> UpdateResponse msg
@@ -145,13 +149,13 @@ onStory config msg model =
         config_ =
             storyConfig accountId (getFlags model) config
 
-        ( story, cmd, dispatch ) =
+        ( story, react, dispatch ) =
             Story.update config_ msg <| getStory model
 
         model_ =
             setStory story model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, dispatch )
 
 
 onInventory : Config msg -> Inventory.Msg -> Model -> UpdateResponse msg
@@ -160,13 +164,13 @@ onInventory config msg model =
         config_ =
             inventoryConfig (getFlags model) config
 
-        ( inventory, cmd, dispatch ) =
+        ( inventory, react ) =
             Inventory.update config_ msg <| getInventory model
 
         model_ =
             setInventory inventory model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, Dispatch.none )
 
 
 onWeb : Config msg -> Web.Msg -> Model -> UpdateResponse msg
@@ -178,13 +182,13 @@ onWeb config msg model =
         config_ =
             webConfig (getFlags model) servers config
 
-        ( web, cmd, dispatch ) =
+        ( web, react, dispatch ) =
             Web.update config_ msg <| getWeb model
 
         model_ =
             setWeb web model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, dispatch )
 
 
 
@@ -202,13 +206,13 @@ onServers config msg model =
                 (getFlags model)
                 config
 
-        ( servers, cmd ) =
+        ( servers, react ) =
             Servers.update config_ msg <| getServers model
 
         model_ =
             setServers servers model
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react, Dispatch.none )
 
 
 onBackFlix : Config msg -> BackFlix.Msg -> Model -> UpdateResponse msg
@@ -217,13 +221,13 @@ onBackFlix config msg model =
         config_ =
             backFlixConfig config
 
-        ( backflix_, cmd, dispatch ) =
+        ( backflix_, react ) =
             BackFlix.update config_ msg <| getBackFlix model
 
         model_ =
             setBackFlix backflix_ model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, Dispatch.none )
 
 
 
@@ -249,7 +253,7 @@ onResyncResponse config servers model =
                 |> List.map (bootstrapJoin servers.remote)
                 |> Dispatch.batch
     in
-        ( model, Cmd.none, dispatch )
+        ( model, React.none, dispatch )
 
 
 
@@ -266,7 +270,7 @@ handleJoinedAccount config value model =
                         |> List.map (bootstrapJoin servers.remote)
                         |> Dispatch.batch
             in
-                ( model_, Cmd.none, dispatch )
+                ( model_, React.none, dispatch )
 
         Err reason ->
             let
@@ -278,7 +282,7 @@ handleJoinedAccount config value model =
                         |> Core.Crash
                         |> Dispatch.core
             in
-                ( model, Cmd.none, dispatch )
+                ( model, React.none, dispatch )
 
 
 bootstrapJoin :

@@ -1,6 +1,7 @@
 module Apps.FloatingHeads.Update exposing (update)
 
 import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline

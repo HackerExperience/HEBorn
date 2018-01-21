@@ -1,5 +1,6 @@
 module Core.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Landing.Messages as Landing
 import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
@@ -346,7 +347,11 @@ updateLanding msg model ({ landing } as stateModel) =
 
 updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
 updateGame msg model =
-    Game.update gameConfig msg model
+    let
+        ( model_, react, dispatch ) =
+            Game.update gameConfig msg model
+    in
+        ( model_, React.toCmd react, dispatch )
 
 
 updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )

@@ -1,6 +1,6 @@
 module Game.Inventory.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.React as React exposing (React)
 import Utils.Update as Update
 import Game.Inventory.Config exposing (..)
 import Game.Inventory.Messages exposing (..)
@@ -9,7 +9,7 @@ import Game.Inventory.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -24,13 +24,9 @@ update config msg model =
 
 handleComponentUsed : Config msg -> Entry -> Model -> UpdateResponse msg
 handleComponentUsed config entry model =
-    model
-        |> setAvailability False entry
-        |> Update.fromModel
+    ( setAvailability False entry model, React.none )
 
 
 handleComponentFreed : Config msg -> Entry -> Model -> UpdateResponse msg
 handleComponentFreed config entry model =
-    model
-        |> setAvailability True entry
-        |> Update.fromModel
+    ( setAvailability True entry model, React.none )

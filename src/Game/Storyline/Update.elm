@@ -1,7 +1,7 @@
 module Game.Storyline.Update exposing (update)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Game.Storyline.Config exposing (..)
 import Game.Storyline.Models exposing (..)
 import Game.Storyline.Messages exposing (..)
@@ -12,7 +12,7 @@ import Game.Storyline.Emails.Update as Emails
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg, Dispatch )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -34,7 +34,7 @@ handleToggle model =
         model_ =
             { model | enabled = (not model.enabled) }
     in
-        Update.fromModel model_
+        ( model_, React.none, Dispatch.none )
 
 
 onMission : Config msg -> Missions.Msg -> Model -> UpdateResponse msg
@@ -43,13 +43,13 @@ onMission config msg model =
         config_ =
             missionsConfig config
 
-        ( missions, cmd, dispatch ) =
+        ( missions, react ) =
             Missions.update config_ msg <| getMissions model
 
         model_ =
             setMissions missions model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, Dispatch.none )
 
 
 onEmail : Config msg -> Emails.Msg -> Model -> UpdateResponse msg
@@ -58,10 +58,10 @@ onEmail config msg model =
         config_ =
             emailsConfig config
 
-        ( emails, cmd, dispatch ) =
+        ( emails, react, dispatch ) =
             Emails.update config_ msg <| getEmails model
 
         model_ =
             setEmails emails model
     in
-        ( model_, cmd, dispatch )
+        ( model_, react, dispatch )
