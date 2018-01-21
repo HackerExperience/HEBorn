@@ -18,8 +18,8 @@ view : Model -> Html Msg
 view model =
     case model.state of
         Home home ->
-            Landing.view model home.landing
-                |> map LandingMsg
+            Landing.view (landingConfig model.windowLoaded model.flags)
+                home.landing
 
         Setup { game, setup } ->
             let
