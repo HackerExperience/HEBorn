@@ -1,4 +1,9 @@
-module Game.Account.Finances.Shared exposing (toMoney)
+module Game.Account.Finances.Shared exposing (..)
+
+
+type alias BankAccountData =
+    { balance : Int
+    }
 
 
 toMoney : Int -> String
