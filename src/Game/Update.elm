@@ -5,10 +5,7 @@ import Dict exposing (Dict)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Error as Error
-import Core.Dispatch.Websocket as Ws
-import Core.Dispatch.Core as Core
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Decoders.Game
 import Game.Account.Messages as Account
@@ -38,7 +35,7 @@ import Game.Models exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, React msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -71,7 +68,7 @@ update config msg model =
         Request data ->
             Request.receive model data
                 |> Maybe.map (flip (updateRequest config) model)
-                |> Maybe.withDefault ( model, React.none, Dispatch.none )
+                |> Maybe.withDefault ( model, React.none )
 
         HandleJoinedAccount value ->
             handleJoinedAccount config value model
@@ -95,7 +92,7 @@ onResync config model =
                 |> Cmd.map config.toMsg
                 |> React.cmd
     in
-        ( model, react, Dispatch.none )
+        ( model, react )
 
 
 
@@ -120,7 +117,7 @@ onAccount config msg model =
         model_ =
             { model | account = account }
     in
-        ( model_, react, Dispatch.none )
+        ( model_, react )
 
 
 onMeta : Config msg -> Meta.Msg -> Model -> UpdateResponse msg
@@ -135,7 +132,7 @@ onMeta config msg model =
         model_ =
             setMeta meta model
     in
-        ( model_, react, Dispatch.none )
+        ( model_, react )
 
 
 onStory : Config msg -> Story.Msg -> Model -> UpdateResponse msg
@@ -149,13 +146,13 @@ onStory config msg model =
         config_ =
             storyConfig accountId (getFlags model) config
 
-        ( story, react, dispatch ) =
+        ( story, react ) =
             Story.update config_ msg <| getStory model
 
         model_ =
             setStory story model
     in
-        ( model_, react, dispatch )
+        ( model_, react )
 
 
 onInventory : Config msg -> Inventory.Msg -> Model -> UpdateResponse msg
@@ -170,7 +167,7 @@ onInventory config msg model =
         model_ =
             setInventory inventory model
     in
-        ( model_, react, Dispatch.none )
+        ( model_, react )
 
 
 onWeb : Config msg -> Web.Msg -> Model -> UpdateResponse msg
@@ -182,13 +179,13 @@ onWeb config msg model =
         config_ =
             webConfig (getFlags model) servers config
 
-        ( web, react, dispatch ) =
+        ( web, react ) =
             Web.update config_ msg <| getWeb model
 
         model_ =
             setWeb web model
     in
-        ( model_, react, dispatch )
+        ( model_, react )
 
 
 
@@ -212,7 +209,7 @@ onServers config msg model =
         model_ =
             setServers servers model
     in
-        ( model_, react, Dispatch.none )
+        ( model_, react )
 
 
 onBackFlix : Config msg -> BackFlix.Msg -> Model -> UpdateResponse msg
@@ -227,7 +224,7 @@ onBackFlix config msg model =
         model_ =
             setBackFlix backflix_ model
     in
-        ( model_, react, Dispatch.none )
+        ( model_, react )
 
 
 
@@ -248,12 +245,13 @@ onResyncResponse :
     -> UpdateResponse msg
 onResyncResponse config servers model =
     let
-        dispatch =
+        react =
             servers.player
-                |> List.map (bootstrapJoin servers.remote)
-                |> Dispatch.batch
+                |> List.map (bootstrapJoin config servers.remote)
+                |> config.batchMsg
+                |> React.msg
     in
-        ( model, React.none, dispatch )
+        ( model, React.none )
 
 
 
@@ -264,57 +262,58 @@ handleJoinedAccount : Config msg -> Value -> Model -> UpdateResponse msg
 handleJoinedAccount config value model =
     case Decode.decodeValue (Decoders.Game.bootstrap model) value of
         Ok ( model_, servers ) ->
-            let
-                dispatch =
-                    servers.player
-                        |> List.map (bootstrapJoin servers.remote)
-                        |> Dispatch.batch
-            in
-                ( model_, React.none, dispatch )
+            ( model_
+            , servers.player
+                |> List.map (bootstrapJoin config servers.remote)
+                |> config.batchMsg
+                |> React.msg
+            )
 
         Err reason ->
             let
+                -- TODO: use a better error reporting function that checks
+                -- for development mode
                 msg =
                     Debug.log "▶ " ("Bootstrap Error:\n" ++ reason)
-
-                dispatch =
-                    Error.porra msg
-                        |> Core.Crash
-                        |> Dispatch.core
             in
-                ( model, React.none, dispatch )
+                ( model, React.msg <| config.onError (Error.porra msg) )
 
 
 bootstrapJoin :
-    Decoders.Game.RemoteServers
+    Config msg
+    -> Decoders.Game.RemoteServers
     -> Decoders.Game.Player
-    -> Dispatch
-bootstrapJoin remoteServers playerServer =
+    -> msg
+bootstrapJoin config remoteServers playerServer =
     let
-        myDispatch =
-            joinPlayer playerServer
+        msg1 =
+            joinPlayer config playerServer
 
-        otherDispatches =
+        msg2 =
             playerServer.endpoints
                 |> List.filterMap
                     (Servers.toSessionId >> flip Dict.get remoteServers)
-                |> List.map (joinRemote playerServer)
+                |> List.filterMap (joinRemote config playerServer)
+                |> config.batchMsg
     in
-        Dispatch.batch (myDispatch :: otherDispatches)
+        config.batchMsg [ msg1, msg2 ]
 
 
-joinPlayer : Decoders.Game.Player -> Dispatch
-joinPlayer server =
+joinPlayer : Config msg -> Decoders.Game.Player -> msg
+joinPlayer config server =
     let
         cid =
             Servers.GatewayCId server.serverId
     in
-        Dispatch.websocket <|
-            Ws.Join (ServerChannel cid) Nothing
+        config.onJoinServer cid Nothing
 
 
-joinRemote : Decoders.Game.Player -> Decoders.Game.Remote -> Dispatch
-joinRemote fromServer toServer =
+joinRemote :
+    Config msg
+    -> Decoders.Game.Player
+    -> Decoders.Game.Remote
+    -> Maybe msg
+joinRemote config fromServer toServer =
     let
         maybeFromIp =
             fromServer.nips
@@ -325,10 +324,9 @@ joinRemote fromServer toServer =
         case maybeFromIp of
             Just fromIp ->
                 let
-                    channel =
-                        ServerChannel <|
-                            Servers.EndpointCId <|
-                                Network.toNip toServer.networkId toServer.ip
+                    cid =
+                        Servers.EndpointCId <|
+                            Network.toNip toServer.networkId toServer.ip
 
                     payload =
                         -- TODO: include bounce_id after settling
@@ -338,9 +336,7 @@ joinRemote fromServer toServer =
                             , ( "password", Encode.string toServer.password )
                             ]
                 in
-                    Dispatch.websocket <|
-                        Ws.Join channel <|
-                            Just payload
+                    Just <| config.onJoinServer cid (Just payload)
 
             Nothing ->
-                Dispatch.none
+                Nothing

@@ -54,13 +54,11 @@ onContentMsg config msg model =
         config_ =
             contentConfig config
 
-        ( cmd, dispatch ) =
-            Contents.update config_ msg
-
-        cmd_ =
-            Cmd.map ContentMsg cmd
+        cmd =
+            -- HACK
+            Cmd.map ContentMsg <| React.toCmd <| Contents.update config_ msg
     in
-        ( model, cmd_, dispatch )
+        ( model, cmd, Dispatch.none )
 
 
 onReply : Config msg -> Content -> Model -> UpdateResponse

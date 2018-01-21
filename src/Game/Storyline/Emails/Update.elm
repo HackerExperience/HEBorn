@@ -1,7 +1,6 @@
 module Game.Storyline.Emails.Update exposing (update)
 
 import Dict
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.React as React exposing (React)
 import Game.Storyline.Emails.Config exposing (..)
 import Game.Storyline.Emails.Models exposing (..)
@@ -14,7 +13,7 @@ import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
 
 
 type alias UpdateResponse msg =
-    ( Model, React msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -38,7 +37,7 @@ update config msg model =
 
 onChanged : Model -> Model -> UpdateResponse msg
 onChanged newModel oldModel =
-    ( newModel, React.none, Dispatch.none )
+    ( newModel, React.none )
 
 
 handleReply : Config msg -> Content -> Model -> UpdateResponse msg
@@ -55,7 +54,7 @@ handleReply config content model =
                 |> Cmd.map config.toMsg
                 |> React.cmd
     in
-        ( model, cmd, Dispatch.none )
+        ( model, cmd )
 
 
 handleNewEmail : Config msg -> StoryNewEmail.Data -> Model -> UpdateResponse msg
@@ -95,7 +94,7 @@ handleNewEmail config data model =
         model_ =
             setPerson personId person_ model
     in
-        ( model_, React.none, Dispatch.none )
+        ( model_, React.none )
 
 
 handleReplyUnlocked :
@@ -130,7 +129,7 @@ handleReplyUnlocked config { personId, replies } model =
         model_ =
             setPerson personId person_ model
     in
-        ( model_, React.none, Dispatch.none )
+        ( model_, React.none )
 
 
 
@@ -144,9 +143,9 @@ onRequest config response model =
             updateRequest config response model
 
         Nothing ->
-            ( model, React.none, Dispatch.none )
+            ( model, React.none )
 
 
 updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
 updateRequest config response model =
-    ( model, React.none, Dispatch.none )
+    ( model, React.none )

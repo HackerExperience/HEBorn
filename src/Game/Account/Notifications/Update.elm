@@ -31,12 +31,6 @@ handleNewNotification :
     -> Model
     -> ( Model, React msg )
 handleNewNotification config content model =
-    let
-        model_ =
-            insert config.lastTick (Notification content False) model
-
-        --dispatch =
-        --    Dispatch.notifications <|
-        --        Notifications.Toast (Just source) content
-    in
-        ( model_, React.none )
+    ( insert config.lastTick (Notification content False) model
+    , React.msg <| config.onToast content
+    )

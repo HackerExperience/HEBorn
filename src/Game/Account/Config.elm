@@ -11,6 +11,7 @@ import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Finances.Config as Finances
 import Game.Account.Database.Config as Database
 import Game.Account.Notifications.Config as Notifications
+import Game.Account.Notifications.Shared as Notifications
 import Game.Account.Messages exposing (..)
 
 
@@ -24,10 +25,15 @@ type alias Config msg =
     , onError : Error -> msg
     , onSetEndpoint : CId -> Maybe CId -> msg
     , fallToGateway : (Bool -> Model) -> Model
+
+    -- account.finances
     , onBALoginSuccess : Requester -> BankAccountData -> msg
     , onBALoginFailed : Requester -> msg
     , onBATransferSuccess : Requester -> msg
     , onBATransferFailed : Requester -> msg
+
+    -- account.notifications
+    , onToast : Notifications.Content -> msg
     }
 
 
@@ -62,4 +68,5 @@ notificationsConfig config =
     { flags = config.flags
     , toMsg = NotificationsMsg >> config.toMsg
     , lastTick = config.lastTick
+    , onToast = config.onToast
     }

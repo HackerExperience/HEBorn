@@ -4,6 +4,7 @@ import Time exposing (Time)
 import Core.Flags as Core
 import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Servers.Notifications.Shared as Notifications
 import Game.Servers.Notifications.Messages as Notifications
 import Game.Servers.Notifications.Config as Notifications
 import Game.Servers.Processes.Config as Processes
@@ -23,6 +24,9 @@ type alias Config msg =
     , onInventoryFreed : Inventory.Entry -> msg
     , onInventoryUsed : Inventory.Entry -> msg
     , onNewGateway : CId -> msg
+
+    -- account.notifications
+    , onToast : CId -> Notifications.Content -> msg
     }
 
 
@@ -91,4 +95,5 @@ notificationsConfig cid config =
     { flags = config.flags
     , toMsg = NotificationsMsg >> ServerMsg cid >> config.toMsg
     , lastTick = config.lastTick
+    , onToast = config.onToast cid
     }

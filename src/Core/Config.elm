@@ -1,11 +1,16 @@
 module Core.Config exposing (..)
 
 import Time exposing (Time)
-import Driver.Websocket.Channels exposing (Channel(AccountChannel))
+import Driver.Websocket.Channels exposing (Channel(ServerChannel, AccountChannel))
 import Driver.Websocket.Messages as Ws
-import Game.Config as Game
 import Setup.Config as Setup
 import OS.Config as OS
+import OS.Messages as OS
+import OS.SessionManager.Messages as SessionManager
+import OS.Toasts.Messages as Toast
+import Apps.Messages as Apps
+import Apps.Browser.Messages as Browser
+import Game.Config as Game
 import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
@@ -20,6 +25,33 @@ gameConfig =
     { toMsg = GameMsg
     , batchMsg = MultiMsg
 
+    -- game & web
+    , onJoinServer =
+        \cid payload ->
+            payload
+                |> Ws.HandleJoin (ServerChannel cid)
+                |> WebsocketMsg
+    , onError =
+        HandleCrash
+
+    -- web
+    , onDNS =
+        \response { sessionId, windowId, context, tabId } ->
+            Browser.HandleFetched response
+                |> Browser.SomeTabMsg tabId
+                |> Apps.BrowserMsg
+                |> SessionManager.AppMsg ( sessionId, windowId ) context
+                |> OS.SessionManagerMsg
+                |> OSMsg
+    , onJoinFailed =
+        \{ sessionId, windowId, context, tabId } ->
+            Browser.LoginFailed
+                |> Browser.SomeTabMsg tabId
+                |> Apps.BrowserMsg
+                |> SessionManager.AppMsg ( sessionId, windowId ) context
+                |> OS.SessionManagerMsg
+                |> OSMsg
+
     --- account
     , onConnected =
         \accountId ->
@@ -27,7 +59,17 @@ gameConfig =
                 |> Ws.HandleJoin (AccountChannel accountId)
                 |> WebsocketMsg
     , onDisconnected = HandleShutdown
-    , onError = HandleCrash
+
+    -- account.notifications
+    , onAccountToast =
+        Toast.HandleAccount
+            >> OS.ToastsMsg
+            >> OSMsg
+    , onServerToast =
+        \cid ->
+            Toast.HandleServers cid
+                >> OS.ToastsMsg
+                >> OSMsg
 
     -- account.finances
     , onBALoginSuccess = (\a b -> MultiMsg [])

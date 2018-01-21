@@ -1,9 +1,6 @@
 module Game.Web.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Websocket as Ws
-import Core.Dispatch.Servers as Servers
 import Core.Error as Error
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Game.Web.Config exposing (..)
@@ -20,7 +17,7 @@ import Game.Meta.Types.Requester exposing (Requester)
 
 
 type alias UpdateResponse msg =
-    ( Model, React msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -55,13 +52,11 @@ onFetchUrl :
     -> Model
     -> UpdateResponse msg
 onFetchUrl config url networkId cid requester model =
-    let
-        cmd =
-            DNS.request url networkId cid requester config
-                |> Cmd.map config.toMsg
-                |> React.cmd
-    in
-        ( model, cmd, Dispatch.none )
+    ( model
+    , DNS.request url networkId cid requester config
+        |> Cmd.map config.toMsg
+        |> React.cmd
+    )
 
 
 updateRequest :
@@ -72,23 +67,19 @@ updateRequest :
 updateRequest config response model =
     case response of
         Just (Requests.DNS requester response) ->
-            onDNS config requester response model
+            ( model, React.none )
 
         Nothing ->
-            ( model, React.none, Dispatch.none )
+            ( model, React.none )
 
 
-{-| Reports back the site information to the page.
--}
+
+--| Reports back the site information to the page.
+
+
 onDNS : Config msg -> Requester -> Response -> Model -> UpdateResponse msg
 onDNS config requester response model =
-    let
-        dispatch =
-            response
-                |> Servers.FetchedUrl requester
-                |> Dispatch.servers
-    in
-        ( model, React.none, dispatch )
+    ( model, React.msg <| config.onDNS response requester )
 
 
 {-| Stores page reference and tries to login on server.
@@ -118,14 +109,10 @@ onLogin config nip remoteIp password requester model =
                 , ( "password", Encode.string password )
                 ]
 
-        dispatch =
-            Dispatch.websocket <|
-                Ws.Join (ServerChannel remoteCid) (Just payload)
-
         model_ =
             startLoading remoteNip requester model
     in
-        ( model_, React.none, dispatch )
+        ( model_, React.msg <| config.onLogin remoteCid (Just payload) )
 
 
 {-| Sets endpoint
@@ -152,16 +139,15 @@ onJoinedServer config cid model =
         serverCid =
             Maybe.map (.sessionId >> Servers.fromKey) maybeRequester
 
-        dispatch =
+        react =
             case serverCid of
                 Just serverCid ->
-                    Dispatch.server serverCid <|
-                        Servers.SetEndpoint (Just cid)
+                    React.msg <| config.onJoinedServer serverCid cid
 
                 Nothing ->
-                    Dispatch.none
+                    React.none
     in
-        ( model_, React.none, dispatch )
+        ( model_, react )
 
 
 {-| Reports failure back to the loading page.
@@ -182,13 +168,12 @@ handleJoinFailed config cid model =
         ( maybeRequester, model_ ) =
             finishLoading nip model
 
-        dispatch =
+        react =
             case maybeRequester of
                 Just requester ->
-                    Servers.FailLogin requester
-                        |> Dispatch.servers
+                    React.msg <| config.onJoinFailed requester
 
                 Nothing ->
-                    Dispatch.none
+                    React.none
     in
-        ( model_, React.none, dispatch )
+        ( model_, react )
