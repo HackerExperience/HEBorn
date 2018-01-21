@@ -43,10 +43,11 @@ update config data msg model =
                 LogViewerModel model ->
                     let
                         config_ =
-                            logviewerConfig config
+                            logViewerConfig config
 
                         update_ =
                             LogViewer.update config_ msg model
+                                |> Update.mapCmd (LogViewerMsg >> config.toMsg)
                     in
                         map LogViewerModel LogViewerMsg update_
 
@@ -58,10 +59,11 @@ update config data msg model =
                 TaskManagerModel model ->
                     let
                         config_ =
-                            taskmanConfig config
+                            taskManConfig config
 
                         update_ =
                             TaskManager.update config_ msg model
+                                |> Update.mapCmd (TaskManagerMsg >> config.toMsg)
                     in
                         map TaskManagerModel TaskManagerMsg update_
 
@@ -92,6 +94,7 @@ update config data msg model =
 
                         update_ =
                             Explorer.update config_ msg model
+                                |> Update.mapCmd (ExplorerMsg >> config.toMsg)
                     in
                         map ExplorerModel ExplorerMsg update_
 

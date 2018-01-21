@@ -1,7 +1,10 @@
 module Core.Config exposing (..)
 
+import Time exposing (Time)
 import Core.Flags exposing (Flags)
 import Core.Messages exposing (..)
+import Game.Account.Models as Account
+import Game.Servers.Models as Servers
 import Setup.Config as Setup
 import Game.Config as Game
 import Game.Storyline.Models as Story
@@ -25,8 +28,11 @@ setupConfig accountId mainframe flags =
     }
 
 
-osConfig : Story.Model -> OS.Config Msg
-osConfig story =
+osConfig : Account.Model -> Story.Model -> Time -> Servers.Server -> OS.Config Msg
+osConfig account story lastTick activeServer =
     { toMsg = OSMsg
+    , account = account
+    , activeServer = activeServer
     , story = story
+    , lastTick = lastTick
     }

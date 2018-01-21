@@ -32,20 +32,23 @@ import Apps.Explorer.Resources exposing (Classes(..), prefix, idAttrKey)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html msg
+view : Config msg -> Model -> Html Msg
 view config ({ editing, path } as model) =
     let
         server =
-            config.activeCId
+            config.activeServer
+
+        config_ =
+            menuConfig config
     in
         div [ class [ Window ] ]
             [ explorerColumn config server model
             , explorerMain config editing path server model
-            , menuView config model
+            , menuView config_ model
             ]
 
 
-idAttr : String -> Attribute msg
+idAttr : String -> Attribute Msg
 idAttr =
     attribute idAttrKey
 
@@ -71,7 +74,7 @@ entryIcon entry =
                 GenericArchiveIcon
 
 
-fileVerToText : Maybe Filesystem.Version -> Html msg
+fileVerToText : Maybe Filesystem.Version -> Html Msg
 fileVerToText ver =
     ver
         |> Maybe.map toString
@@ -79,14 +82,14 @@ fileVerToText ver =
         |> text
 
 
-moduleVerToText : Filesystem.Version -> Html msg
+moduleVerToText : Filesystem.Version -> Html Msg
 moduleVerToText ver =
     ver
         |> toString
         |> text
 
 
-sizeToText : Filesystem.Size -> Html msg
+sizeToText : Filesystem.Size -> Html Msg
 sizeToText size =
     size
         |> toFloat
@@ -95,22 +98,27 @@ sizeToText size =
 
 
 module_ :
-    Filesystem.Id
+    Config msg
+    -> Filesystem.Id
     -> Filesystem.Type
     -> ( String, Filesystem.Version, Classes )
-    -> Html msg
-module_ fileID type_ ( name, version, iconClass ) =
-    div [ menuActiveAction fileID ]
-        [ span [ class [ iconClass ] ] []
-        , span [] [ text name ]
-        , span [] [ moduleVerToText version ]
-        , span [] []
-        ]
+    -> Html Msg
+module_ config fileID type_ ( name, version, iconClass ) =
+    let
+        config_ =
+            menuConfig config
+    in
+        div [ menuActiveAction config_ fileID ]
+            [ span [ class [ iconClass ] ] []
+            , span [] [ text name ]
+            , span [] [ moduleVerToText version ]
+            , span [] []
+            ]
 
 
-moduleList : Filesystem.Id -> Filesystem.Type -> List (Html msg)
-moduleList fileID type_ =
-    List.map (module_ fileID type_) <|
+moduleList : Config msg -> Filesystem.Id -> Filesystem.Type -> List (Html Msg)
+moduleList config fileID type_ =
+    List.map (module_ config fileID type_) <|
         modulesOfType type_
 
 
@@ -167,9 +175,12 @@ modulesOfType type_ =
                 []
 
 
-treeEntry : Server -> Filesystem.Entry -> Model -> Html msg
-treeEntry server file model =
+treeEntry : Config msg -> Server -> Filesystem.Entry -> Model -> Html Msg
+treeEntry config server file model =
     let
+        config_ =
+            menuConfig config
+
         icon =
             span [ class [ NavIcon, entryIcon file ] ] []
 
@@ -187,14 +198,14 @@ treeEntry server file model =
                         Just fs ->
                             div
                                 [ class [ NavEntry, EntryDir, EntryExpanded ]
-                                , menuTreeDir fullpath
+                                , menuTreeDir config_ fullpath
                                 , onClick <| GoPath fullpath
                                 ]
                                 [ div
                                     [ class [ EntryView ] ]
                                     [ icon, label ]
                                 , div [ class [ EntryChilds ] ] <|
-                                    treeEntryPath server fullpath model
+                                    treeEntryPath config server fullpath model
                                 ]
 
                         Nothing ->
@@ -203,98 +214,102 @@ treeEntry server file model =
             Filesystem.FileEntry id file ->
                 div
                     [ class [ NavEntry, EntryArchive ]
-                    , menuTreeArchive id
+                    , menuTreeArchive config_ id
                     ]
                     [ icon, label ]
 
 
-treeEntryPath : Server -> Filesystem.Path -> Model -> List (Html msg)
-treeEntryPath server path model =
+treeEntryPath : Config msg -> Server -> Filesystem.Path -> Model -> List (Html Msg)
+treeEntryPath config server path model =
     model
         |> resolvePath path server
-        |> List.map (flip (treeEntry server) model)
+        |> List.map (flip (treeEntry config server) model)
 
 
-detailedEntry : Config msg -> Server -> Filesystem.Entry -> Model -> Html msg
+detailedEntry : Config msg -> Server -> Filesystem.Entry -> Model -> Html Msg
 detailedEntry config server entry model =
-    case entry of
-        Filesystem.FolderEntry path name ->
-            let
-                path_ =
-                    Filesystem.appendPath name path
-            in
-                case getFilesystem server model of
-                    Just fs ->
-                        div
-                            [ class [ CntListEntry, EntryDir ]
-                            , menuMainDir path_
-                            , onClick <| config.toMsg <| GoPath path_
-                            , idAttr <| Filesystem.joinPath path_
-                            ]
-                            [ span [ class [ DirIcon ] ] []
-                            , span [] [ text name ]
-                            ]
-
-                    Nothing ->
-                        div [] []
-
-        Filesystem.FileEntry id file ->
-            case Filesystem.getType file of
-                Filesystem.Text ->
-                    div
-                        [ class [ CntListEntry, EntryArchive ]
-                        , menuMainArchive id
-                        , idAttr id
-                        ]
-                        [ span [ class [ entryIcon entry ] ] []
-                        , span [] [ text <| Filesystem.getName file ]
-                        , span []
-                            [ fileVerToText <|
-                                Filesystem.getMeanVersion file
-                            ]
-                        , span []
-                            [ sizeToText <|
-                                Filesystem.getSize file
-                            ]
-                        ]
-
-                _ ->
-                    let
-                        baseEntry =
+    let
+        config_ =
+            menuConfig config
+    in
+        case entry of
+            Filesystem.FolderEntry path name ->
+                let
+                    path_ =
+                        Filesystem.appendPath name path
+                in
+                    case getFilesystem server model of
+                        Just fs ->
                             div
-                                [ class [ CntListEntry, EntryArchive ]
-                                , menuExecutable id
-                                , idAttr id
+                                [ class [ CntListEntry, EntryDir ]
+                                , menuMainDir config_ path_
+                                , onClick <| GoPath path_
+                                , idAttr <| Filesystem.joinPath path_
                                 ]
-                                [ span [ class [ entryIcon entry ] ] []
-                                , span [] [ text <| Filesystem.getName file ]
-                                , span []
-                                    [ fileVerToText <|
-                                        Filesystem.getMeanVersion file
+                                [ span [ class [ DirIcon ] ] []
+                                , span [] [ text name ]
+                                ]
+
+                        Nothing ->
+                            div [] []
+
+            Filesystem.FileEntry id file ->
+                case Filesystem.getType file of
+                    Filesystem.Text ->
+                        div
+                            [ class [ CntListEntry, EntryArchive ]
+                            , menuMainArchive config_ id
+                            , idAttr id
+                            ]
+                            [ span [ class [ entryIcon entry ] ] []
+                            , span [] [ text <| Filesystem.getName file ]
+                            , span []
+                                [ fileVerToText <|
+                                    Filesystem.getMeanVersion file
+                                ]
+                            , span []
+                                [ sizeToText <|
+                                    Filesystem.getSize file
+                                ]
+                            ]
+
+                    _ ->
+                        let
+                            baseEntry =
+                                div
+                                    [ class [ CntListEntry, EntryArchive ]
+                                    , menuExecutable config_ id
+                                    , idAttr id
                                     ]
-                                , span []
-                                    [ sizeToText <|
-                                        Filesystem.getSize file
+                                    [ span [ class [ entryIcon entry ] ] []
+                                    , span [] [ text <| Filesystem.getName file ]
+                                    , span []
+                                        [ fileVerToText <|
+                                            Filesystem.getMeanVersion file
+                                        ]
+                                    , span []
+                                        [ sizeToText <|
+                                            Filesystem.getSize file
+                                        ]
                                     ]
-                                ]
-                    in
-                        if Filesystem.hasModules file then
-                            div [ class [ CntListContainer ] ]
-                                [ baseEntry
-                                , div [ class [ CntListChilds ] ] <|
-                                    moduleList id <|
-                                        Filesystem.getType file
-                                ]
-                        else
-                            baseEntry
+                        in
+                            if Filesystem.hasModules file then
+                                div [ class [ CntListContainer ] ]
+                                    [ baseEntry
+                                    , div [ class [ CntListChilds ] ] <|
+                                        moduleList config id <|
+                                            Filesystem.getType file
+                                    ]
+                            else
+                                baseEntry
 
 
-detailedEntryList : Config msg -> Server -> List Filesystem.Entry -> Model -> List (Html msg)
+detailedEntryList : Config msg -> Server -> List Filesystem.Entry -> Model -> List (Html Msg)
 detailedEntryList config server list model =
     List.map (flip (detailedEntry config server) model) list
 
 
-usage : Float -> Float -> Html msg
+usage : Float -> Float -> Html Msg
 usage min max =
     let
         usage =
@@ -322,7 +337,7 @@ usage min max =
             ]
 
 
-explorerColumn : Config msg -> Server -> Model -> Html msg
+explorerColumn : Config msg -> Server -> Model -> Html Msg
 explorerColumn config { storages, mainStorage } model =
     div
         [ class [ Nav ]
@@ -338,8 +353,8 @@ storageTreeEntry :
     -> Servers.StorageId
     -> Servers.StorageId
     -> Servers.Storage
-    -> List (Html msg)
-    -> List (Html msg)
+    -> List (Html Msg)
+    -> List (Html Msg)
 storageTreeEntry config mainStorage storageId { name } acu =
     let
         activeAttributeValue =
@@ -359,27 +374,28 @@ storageTreeEntry config mainStorage storageId { name } acu =
     in
         (div
             [ class [ NavEntry, EntryArchive ]
-            , onClick <| config.toMsg <| GoStorage storageId
+            , onClick <| GoStorage storageId
             ]
             [ icon, label ]
         )
             :: acu
 
 
-breadcrumbItem : Config msg -> Filesystem.Path -> String -> Html msg
+breadcrumbItem : Config msg -> Filesystem.Path -> String -> Html Msg
 breadcrumbItem config path label =
     span
         [ class [ BreadcrumbItem ]
-        , onClick <| config.toMsg <| GoPath path
+        , onClick <| GoPath path
         ]
         [ text label ]
 
 
 breadcrumbFold :
-    Filesystem.Name
-    -> ( List (Html msg), Filesystem.Path )
-    -> ( List (Html msg), Filesystem.Path )
-breadcrumbFold item ( htmlElems, pathAcu ) =
+    Config msg
+    -> Filesystem.Name
+    -> ( List (Html Msg), Filesystem.Path )
+    -> ( List (Html Msg), Filesystem.Path )
+breadcrumbFold config item ( htmlElems, pathAcu ) =
     if (String.length item) < 1 then
         ( htmlElems, pathAcu )
     else
@@ -389,49 +405,49 @@ breadcrumbFold item ( htmlElems, pathAcu ) =
 
             newElems =
                 item
-                    |> breadcrumbItem fullPath
+                    |> breadcrumbItem config fullPath
                     |> (flip (::)) htmlElems
         in
             ( newElems, fullPath )
 
 
-breadcrumb : Filesystem.Path -> Html msg
-breadcrumb path =
+breadcrumb : Config msg -> Filesystem.Path -> Html Msg
+breadcrumb config path =
     path
-        |> List.foldl breadcrumbFold ( [], [ "" ] )
+        |> List.foldl (breadcrumbFold config) ( [], [ "" ] )
         |> Tuple.first
         |> List.reverse
-        |> (::) (breadcrumbItem [ "" ] "DISK")
+        |> (::) (breadcrumbItem config [ "" ] "DISK")
         |> div [ class [ LocBar ] ]
 
 
-explorerMainHeader : Config msg -> Filesystem.Path -> Html msg
+explorerMainHeader : Config msg -> Filesystem.Path -> Html Msg
 explorerMainHeader config path =
     div
         [ class [ ContentHeader ] ]
-        [ breadcrumb path
+        [ breadcrumb config path
         , div
             [ class [ ActBtns ] ]
             [ span
                 [ class [ GoUpBtn ]
-                , onClick <| config.toMsg <| GoPath <| Filesystem.parentPath path
+                , onClick <| GoPath (Filesystem.parentPath path)
                 ]
                 []
             , span
                 [ class [ DocBtn, NewBtn ]
-                , onClick <| config.toMsg <| UpdateEditing <| CreatingFile ""
+                , onClick <| UpdateEditing (CreatingFile "")
                 ]
                 []
             , span
                 [ class [ DirBtn, NewBtn ]
-                , onClick <| config.toMsg <| UpdateEditing <| CreatingPath ""
+                , onClick <| UpdateEditing (CreatingPath "")
                 ]
                 []
             ]
         ]
 
 
-explorerMainDinamycContent : Config msg -> EditingStatus -> Html msg
+explorerMainDinamycContent : Config msg -> EditingStatus -> Html Msg
 explorerMainDinamycContent config editing =
     div [] <|
         case editing of
@@ -441,32 +457,32 @@ explorerMainDinamycContent config editing =
             CreatingFile nowName ->
                 [ input
                     [ value nowName
-                    , onInput <| config.toMsg <| CreatingFile >> UpdateEditing
+                    , onInput <| (CreatingFile >> UpdateEditing)
                     ]
                     []
-                , button [ onClick <| config.toMsg ApplyEdit ] [ text "CREATE FILE" ]
+                , button [ onClick <| ApplyEdit ] [ text "CREATE FILE" ]
                 ]
 
             CreatingPath nowName ->
                 [ input
                     [ value nowName
-                    , onInput <| config.toMsg <| CreatingPath >> UpdateEditing
+                    , onInput <| (CreatingPath >> UpdateEditing)
                     ]
                     []
-                , button [ onClick <| config.toMsg ApplyEdit ] [ text "CREATE PATH" ]
+                , button [ onClick <| ApplyEdit ] [ text "CREATE PATH" ]
                 ]
 
             Moving fileID ->
-                [ button [ onClick <| config.toMsg ApplyEdit ] [ text "MOVE HERE" ]
+                [ button [ onClick <| ApplyEdit ] [ text "MOVE HERE" ]
                 ]
 
             Renaming fileID newName ->
                 [ input
                     [ value newName
-                    , onInput <| config.toMsg <| (Renaming fileID) >> UpdateEditing
+                    , onInput <| (Renaming fileID) >> UpdateEditing
                     ]
                     []
-                , button [ onClick <| config.toMsg ApplyEdit ] [ text "RENAME" ]
+                , button [ onClick <| ApplyEdit ] [ text "RENAME" ]
                 ]
 
             -- TODO: add folder features
@@ -480,7 +496,7 @@ explorerMain :
     -> Filesystem.Path
     -> Server
     -> Model
-    -> Html msg
+    -> Html Msg
 explorerMain config editing path server model =
     div
         [ class
@@ -490,6 +506,6 @@ explorerMain config editing path server model =
         , explorerMainDinamycContent config editing
         , model
             |> resolvePath path server
-            |> flip (detailedEntryList server) model
+            |> flip (detailedEntryList config server) model
             |> div [ class [ ContentList ] ]
         ]

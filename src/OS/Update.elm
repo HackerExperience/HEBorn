@@ -98,7 +98,7 @@ onMenuMsg : Config msg -> Game.Data -> Menu.Msg -> Model -> UpdateResponse msg
 onMenuMsg config data msg model =
     let
         ( menu_, menu_cmd, dispatch_ ) =
-            Menu.update data msg model.menu
+            Menu.update config msg model.menu
 
         ( modelHeader, _, _ ) =
             onHeaderMsg config data Header.CheckMenus model

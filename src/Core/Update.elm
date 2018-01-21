@@ -5,9 +5,10 @@ import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
-import Game.Data as Game
 import Game.Messages as Game
+import Game.Data as GameD
 import Game.Models as Game
+import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
 import Game.Update as Game
 import Setup.Messages as Setup
@@ -18,6 +19,7 @@ import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.Messages as SM
 import Apps.Messages as Apps
 import Apps.TaskManager.Messages as TaskManager
+import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Flags as Flags exposing (Flags)
 import Core.Dispatch as Dispatch exposing (Dispatch)
@@ -260,14 +262,35 @@ updatePlayWS msg stateModel =
 
 updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
 updatePlayOS msg stateModel =
-    case Game.fromGateway stateModel.game of
+    case GameD.fromGateway stateModel.game of
         Just data ->
             let
+                activeServer =
+                    case Game.getActiveServer stateModel.game of
+                        Just ( _, activeServer ) ->
+                            activeServer
+
+                        Nothing ->
+                            "Player has no active Server"
+                                |> Error.astralProj
+                                |> uncurry Native.Panic.crash
+
+                lastTick =
+                    stateModel.game
+                        |> Game.getMeta
+                        |> Meta.getLastTick
+
+                config =
+                    osConfig account story lastTick activeServer
+
+                account =
+                    Game.getAccount stateModel.game
+
                 story =
                     Game.getStory stateModel.game
 
                 ( os, cmd, dispatch ) =
-                    OS.update (osConfig story) data msg stateModel.os
+                    OS.update config data msg stateModel.os
 
                 stateModel_ =
                     { stateModel | os = os }

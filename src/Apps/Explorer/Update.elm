@@ -14,15 +14,15 @@ import Apps.Explorer.Menu.Update as Menu
 import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
-type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
 
 
-update : Config msg -> Msg -> Model -> UpdateResponse msg
+update : Config msg -> Msg -> Model -> UpdateResponse
 update config msg model =
     let
         server =
-            config.activeCId
+            config.activeServer
 
         maybeFs =
             model
@@ -35,7 +35,11 @@ update config msg model =
                 case msg of
                     -- Menu
                     MenuMsg (Menu.MenuClick action) ->
-                        actionHandler config action model
+                        let
+                            config_ =
+                                menuConfig config
+                        in
+                            actionHandler config action model
 
                     MenuMsg msg ->
                         onMenuMsg config msg model
@@ -64,19 +68,16 @@ update config msg model =
                 Update.fromModel model
 
 
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
 onMenuMsg config msg model =
     let
         ( menu_, cmd, coreMsg ) =
-            Menu.update config msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
+            Menu.update (menuConfig config) msg model.menu
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, cmd_, coreMsg )
+        ( model_, Cmd.map MenuMsg cmd, coreMsg )
 
 
 onGoPath :
@@ -84,18 +85,18 @@ onGoPath :
     -> Filesystem.Path
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse msg
+    -> UpdateResponse
 onGoPath config newPath fs model =
     Update.fromModel <| changePath newPath fs model
 
 
-onGoStorage : String -> Model -> UpdateResponse msg
+onGoStorage : String -> Model -> UpdateResponse
 onGoStorage newStorageId model =
     { model | storageId = Just newStorageId, path = [ "" ] }
         |> Update.fromModel
 
 
-onUpdateEditing : EditingStatus -> Model -> UpdateResponse msg
+onUpdateEditing : EditingStatus -> Model -> UpdateResponse
 onUpdateEditing newState model =
     let
         model_ =
@@ -109,7 +110,7 @@ onEnterRename :
     -> Filesystem.Id
     -> Filesystem.Model
     -> Model
-    -> UpdateResponse msg
+    -> UpdateResponse
 onEnterRename config id fs model =
     let
         file =
@@ -127,46 +128,39 @@ onEnterRename config id fs model =
         Update.fromModel model_
 
 
-onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse msg
+onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse
 onApplyEdit config fs model =
     let
         storageId =
-            getStorage config.activeCId model
+            getStorage config.activeServer model
 
-        fsMsg =
-            Dispatch.filesystem config.activeCId storageId
-
-        gameMsg =
-            case model.editing of
-                NotEditing ->
-                    Dispatch.none
-
-                CreatingFile fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.NewTextFile model.path fName
-
-                CreatingPath fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.NewDir model.path fName
-
-                Moving fID ->
-                    fsMsg <| Servers.MoveFile fID model.path
-
-                Renaming fID fName ->
-                    if Filesystem.isValidFilename fName then
-                        Dispatch.none
-                    else
-                        fsMsg <| Servers.RenameFile fID fName
-
-                _ ->
-                    -- TODO: implement folder operation requests
-                    Dispatch.none
-
+        --fsMsg =
+        --    Dispatch.filesystem config.activeCId storageId
+        --gameMsg =
+        --    case model.editing of
+        --        NotEditing ->
+        --            Dispatch.none
+        --        CreatingFile fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.NewTextFile model.path fName
+        --        CreatingPath fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.NewDir model.path fName
+        --        Moving fID ->
+        --            fsMsg <| Servers.MoveFile fID model.path
+        --        Renaming fID fName ->
+        --            if Filesystem.isValidFilename fName then
+        --                Dispatch.none
+        --            else
+        --                fsMsg <| Servers.RenameFile fID fName
+        --        _ ->
+        --            -- TODO: implement folder operation requests
+        --            Dispatch.none
         model_ =
             setEditing NotEditing model
     in
-        ( model_, Cmd.none, gameMsg )
+        ( model_, Cmd.none, Dispatch.none )

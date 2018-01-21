@@ -1,10 +1,13 @@
 module Core.View exposing (view)
 
 import Html exposing (..)
+import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import Game.Data as Game
+import Game.Data as GameD
+import Game.Models as Game
+import Game.Meta.Models as Meta
 import OS.View as OS
 import Landing.View as Landing
 import Setup.View as Setup
@@ -41,13 +44,34 @@ onPlay play model =
         state =
             model.state
 
+        game =
+            play.game
+
+        activeServer =
+            case Game.getActiveServer play.game of
+                Just ( _, activeServer ) ->
+                    activeServer
+
+                Nothing ->
+                    "Player has no active Server"
+                        |> Error.astralProj
+                        |> uncurry Native.Panic.crash
+
+        lastTick =
+            game
+                |> Game.getMeta
+                |> Meta.getLastTick
+
+        account =
+            Game.getAccount game
+
         story =
-            play.game.story
+            Game.getStory game
 
         config =
-            osConfig story
+            osConfig account story lastTick activeServer
     in
-        case Game.fromGateway play.game of
+        case GameD.fromGateway game of
             Just inBieber ->
                 OS.view config inBieber play.os
 

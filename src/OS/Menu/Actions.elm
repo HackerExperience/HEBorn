@@ -7,6 +7,9 @@ import OS.Messages exposing (..)
 import OS.Menu.Messages exposing (MenuAction(..))
 
 
+--CONFREFACT : Remove Game.Data from here
+
+
 actionHandler : GameData.Data -> MenuAction -> Model -> ( Model, Cmd Msg, Dispatch )
 actionHandler game action model =
     case action of

@@ -121,10 +121,7 @@ handleOpenApp config data id maybeContext params model =
                     context
 
                 Nothing ->
-                    data
-                        |> Game.getGame
-                        |> Game.Models.getAccount
-                        |> Account.getContext
+                    config.activeContext
 
         maybeWm =
             get id model

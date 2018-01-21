@@ -18,150 +18,150 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         ( menuForCreator
         , menuViewCreator
         )
-import Apps.Explorer.Config exposing (..)
+import Apps.Explorer.Menu.Config exposing (..)
 import Apps.Explorer.Models exposing (Model, EditingStatus(..))
 import Apps.Explorer.Messages as ExplorerMsg
 import Apps.Explorer.Menu.Messages exposing (Msg(..), MenuAction(..))
 import Apps.Explorer.Menu.Models exposing (Menu(..))
 
 
-menuView : Config msg -> Model -> Html msg
-menuView config model =
+menuView : Config msg -> Model -> Html ExplorerMsg.Msg
+menuView { toMsg } model =
     menuViewCreator
         ExplorerMsg.MenuMsg
         model
         model.menu
         MenuMsg
-        (menu config)
+        menu
 
 
-menuFor : Menu -> Html.Attribute msg
-menuFor context =
+menuFor : Config msg -> Menu -> Html.Attribute ExplorerMsg.Msg
+menuFor { toMsg } context =
     menuForCreator ExplorerMsg.MenuMsg MenuMsg context
 
 
-menu : Config msg -> Model -> Menu -> List (List ( ContextMenu.Item, msg ))
-menu config model context =
+menu : Model -> Menu -> List (List ( ContextMenu.Item, Msg ))
+menu model context =
     case context of
         MenuMainDir path ->
             [ [ ( ContextMenu.item "Enter"
-                , config.toMsg <| MenuClick <| GoPath path
+                , MenuClick (GoPath path)
                 )
               , ( ContextMenu.item "Rename"
-                , config.toMsg <| MenuClick <| EnterRenameDir path
+                , MenuClick (EnterRenameDir path)
                 )
               , ( ContextMenu.item "Move"
-                , config.toMsg <| MenuClick <| UpdateEditing <| MovingDir path
+                , MenuClick <| UpdateEditing (MovingDir path)
                 )
               , ( ContextMenu.item "Delete"
-                , config.toMsg <| MenuClick <| DeleteDir path
+                , MenuClick (DeleteDir path)
                 )
               ]
             ]
 
         MenuTreeDir path ->
             [ [ ( ContextMenu.item "Toogle expansion"
-                , config.toMsg <| MenuClick Dummy
+                , MenuClick Dummy
                 )
               , ( ContextMenu.item "Rename"
-                , config.toMsg <| MenuClick <| EnterRenameDir path
+                , MenuClick (EnterRenameDir path)
                 )
               , ( ContextMenu.item "Delete Link"
-                , config.toMsg <| MenuClick Dummy
+                , MenuClick Dummy
                 )
               ]
             ]
 
         MenuMainArchive fileID ->
             [ [ ( ContextMenu.item "Rename"
-                , config.toMsg <| MenuClick <| EnterRename fileID
+                , MenuClick (EnterRename fileID)
                 )
               , ( ContextMenu.item "Move"
-                , config.toMsg <| MenuClick <| UpdateEditing <| Moving fileID
+                , MenuClick <| UpdateEditing (Moving fileID)
                 )
               , ( ContextMenu.item "Delete"
-                , config.toMsg <| MenuClick <| Delete fileID
+                , MenuClick (Delete fileID)
                 )
               ]
             ]
 
         MenuTreeArchive fileID ->
             [ [ ( ContextMenu.item "Rename"
-                , config.toMsg <| MenuClick <| EnterRename fileID
+                , MenuClick (EnterRename fileID)
                 )
               , ( ContextMenu.item "Delete"
-                , config.toMsg <| MenuClick <| Delete fileID
+                , MenuClick (Delete fileID)
                 )
               ]
             ]
 
         MenuExecutable fileID ->
             [ [ ( ContextMenu.item "Run"
-                , config.toMsg <| MenuClick <| Run fileID
+                , MenuClick (Run fileID)
                 )
               , ( ContextMenu.item "Research"
-                , config.toMsg <| MenuClick <| Research fileID
+                , MenuClick (Research fileID)
                 )
               , ( ContextMenu.item "Rename"
-                , config.toMsg <| MenuClick <| EnterRename fileID
+                , MenuClick (EnterRename fileID)
                 )
               , ( ContextMenu.item "Move"
-                , config.toMsg <| MenuClick <| UpdateEditing <| Moving fileID
+                , MenuClick <| UpdateEditing (Moving fileID)
                 )
               , ( ContextMenu.item "Delete"
-                , config.toMsg <| MenuClick <| Delete fileID
+                , MenuClick (Delete fileID)
                 )
               ]
             ]
 
         MenuActiveAction fileID ->
             [ [ ( ContextMenu.item "Run"
-                , config.toMsg <| MenuClick <| Run fileID
+                , MenuClick (Run fileID)
                 )
               ]
             ]
 
         MenuPassiveAction fileID ->
             [ [ ( ContextMenu.item "Start"
-                , config.toMsg <| MenuClick <| Start fileID
+                , MenuClick (Start fileID)
                 )
               , ( ContextMenu.item "Stop"
-                , config.toMsg <| MenuClick <| Stop fileID
+                , MenuClick (Stop fileID)
                 )
               ]
             ]
 
 
-menuMainDir : Filesystem.Path -> Html.Attribute msg
-menuMainDir path =
-    menuFor (MenuMainDir path)
+menuMainDir : Config msg -> Filesystem.Path -> Html.Attribute ExplorerMsg.Msg
+menuMainDir config path =
+    menuFor config (MenuMainDir path)
 
 
-menuTreeDir : Filesystem.Path -> Html.Attribute msg
-menuTreeDir path =
-    menuFor (MenuTreeDir path)
+menuTreeDir : Config msg -> Filesystem.Path -> Html.Attribute ExplorerMsg.Msg
+menuTreeDir config path =
+    menuFor config (MenuTreeDir path)
 
 
-menuMainArchive : Filesystem.Id -> Html.Attribute msg
-menuMainArchive id =
-    menuFor (MenuMainArchive id)
+menuMainArchive : Config msg -> Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuMainArchive config id =
+    menuFor config (MenuMainArchive id)
 
 
-menuTreeArchive : Filesystem.Id -> Html.Attribute msg
-menuTreeArchive id =
-    menuFor (MenuTreeArchive id)
+menuTreeArchive : Config msg -> Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuTreeArchive config id =
+    menuFor config (MenuTreeArchive id)
 
 
-menuExecutable : Filesystem.Id -> Html.Attribute msg
-menuExecutable id =
-    menuFor (MenuExecutable id)
+menuExecutable : Config msg -> Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuExecutable config id =
+    menuFor config (MenuExecutable id)
 
 
-menuPassiveAction : Filesystem.Id -> Html.Attribute msg
-menuPassiveAction id =
-    menuFor (MenuPassiveAction id)
+menuPassiveAction : Config msg -> Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuPassiveAction config id =
+    menuFor config (MenuPassiveAction id)
 
 
-menuActiveAction : Filesystem.Id -> Html.Attribute msg
-menuActiveAction id =
-    menuFor (MenuActiveAction id)
+menuActiveAction : Config msg -> Filesystem.Id -> Html.Attribute ExplorerMsg.Msg
+menuActiveAction config id =
+    menuFor config (MenuActiveAction id)

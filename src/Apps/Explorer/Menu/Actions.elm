@@ -2,10 +2,10 @@ module Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
+import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (..)
 import Apps.Explorer.Menu.Messages as Menu exposing (MenuAction)
@@ -16,55 +16,55 @@ type alias UpdateResponse =
 
 
 actionHandler :
-    Game.Data
+    Config msg
     -> MenuAction
     -> Model
     -> UpdateResponse
-actionHandler data action model =
+actionHandler config action model =
     case action of
         Menu.Delete id ->
-            onDelete data id model
+            onDelete config id model
 
         Menu.GoPath path ->
-            onGoPath data path model
+            onGoPath config path model
 
         Menu.UpdateEditing state ->
             onUpdateEditing state model
 
         Menu.EnterRename id ->
-            onEnterRename data id model
+            onEnterRename config id model
 
         _ ->
             ( model, Cmd.none, Dispatch.none )
 
 
 onDelete :
-    Game.Data
+    Config msg
     -> String
     -> Model
     -> UpdateResponse
-onDelete data id model =
+onDelete config id model =
     let
         storage =
-            getStorage (Game.getActiveServer data) model
+            getStorage config.activeServer model
 
-        gameMsg =
-            id
-                |> Servers.DeleteFile
-                |> Dispatch.filesystem (Game.getActiveCId data) storage
+        --gameMsg =
+        --    id
+        --        |> Servers.DeleteFile
+        --        |> Dispatch.filesystem config.activeCId storage
     in
-        ( model, Cmd.none, gameMsg )
+        ( model, Cmd.none, Dispatch.none )
 
 
 onGoPath :
-    Game.Data
+    Config msg
     -> Filesystem.Path
     -> Model
     -> UpdateResponse
-onGoPath data path model =
+onGoPath config path model =
     let
         server =
-            Game.getActiveServer data
+            config.activeServer
 
         storage =
             getStorage server model
@@ -97,14 +97,14 @@ onUpdateEditing state_ model =
 
 
 onEnterRename :
-    Game.Data
+    Config msg
     -> Filesystem.Id
     -> Model
     -> UpdateResponse
-onEnterRename data id model =
+onEnterRename config id model =
     let
         server =
-            Game.getActiveServer data
+            config.activeServer
 
         storage =
             getStorage server model

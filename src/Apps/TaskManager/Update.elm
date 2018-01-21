@@ -3,8 +3,6 @@ module Apps.TaskManager.Update exposing (update)
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
-import Game.Servers.Shared as Servers
-import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Messages as Processes
 import Apps.TaskManager.Config exposing (..)
@@ -15,8 +13,8 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+type alias UpdateResponse =
+    ( Model, Cmd Msg, Dispatch )
 
 
 update :
@@ -28,7 +26,11 @@ update config msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler config action model
+            let
+                config_ =
+                    menuConfig config
+            in
+                Menu.actionHandler config_ action model
 
         MenuMsg msg ->
             onMenuMsg config msg model
@@ -41,8 +43,11 @@ update config msg model =
 onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
 onMenuMsg config msg model =
     let
+        config_ =
+            menuConfig config
+
         ( menu_, cmd, coreMsg ) =
-            Menu.update config msg model.menu
+            Menu.update config_ msg model.menu
 
         cmd_ =
             Cmd.map MenuMsg cmd
@@ -56,12 +61,9 @@ onMenuMsg config msg model =
 onTick : Config msg -> Time -> Model -> UpdateResponse
 onTick config now model =
     let
-        activeServer =
-            config.activeCId
-
         model_ =
             updateTasks
-                activeServer
+                config
                 model
     in
         ( model_, Cmd.none, Dispatch.none )

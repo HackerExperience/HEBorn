@@ -42,14 +42,14 @@ view config data model =
                 config_ =
                     logViewerConfig config
             in
-                LogViewer.view config_ model
+                Html.map (LogViewerMsg >> config.toMsg) (LogViewer.view config_ model)
 
         TaskManagerModel model ->
             let
                 config_ =
                     taskManConfig config
             in
-                TaskManager.view config_ model
+                Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view config_ model)
 
         BrowserModel model ->
             Html.map (BrowserMsg >> config.toMsg) (Browser.view data model)
@@ -59,7 +59,7 @@ view config data model =
                 config_ =
                     explorerConfig config
             in
-                Explorer.view config_ model
+                Html.map (ExplorerMsg >> config.toMsg) (Explorer.view config_ model)
 
         DatabaseModel model ->
             Html.map (DatabaseMsg >> config.toMsg) (Database.view data model)

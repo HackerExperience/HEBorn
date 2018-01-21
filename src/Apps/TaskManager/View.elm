@@ -11,23 +11,23 @@ import Game.Models as GameModel
 import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
 import Game.Servers.Processes.Models as Processes
+import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
-view : Config msg -> Model -> Html msg
+view : Config msg -> Model -> Html Msg
 view config model =
     let
-        tasks =
-            config.processes
-                |> Processes.toList
+        config_ =
+            menuConfig config
     in
         div [ class [ MainLayout ] ]
             [ viewTasksTable config
             , viewTotalResources model
-            , menuView model
+            , menuView config_ model
             ]
 
 
@@ -39,12 +39,12 @@ view config model =
     Html.CssHelpers.withNamespace prefix
 
 
-maybe : Maybe (Html msg) -> Html msg
+maybe : Maybe (Html Msg) -> Html Msg
 maybe =
     Maybe.withDefault <| text ""
 
 
-viewTaskRowUsage : Processes.ResourcesUsage -> Html msg
+viewTaskRowUsage : Processes.ResourcesUsage -> Html Msg
 viewTaskRowUsage usage =
     let
         un =
@@ -58,7 +58,7 @@ viewTaskRowUsage usage =
             ]
 
 
-etaBar : Time -> Float -> Html msg
+etaBar : Time -> Float -> Html Msg
 etaBar secondsLeft progress =
     let
         formattedTime =
@@ -78,7 +78,7 @@ syncProgress now lastSync remaining lastProgress =
             + lastProgress
 
 
-viewState : Time -> Time -> Processes.Process -> Html msg
+viewState : Time -> Time -> Processes.Process -> Html Msg
 viewState now lastRecalc proc =
     case Processes.getState proc of
         Processes.Starting ->
@@ -123,8 +123,8 @@ viewState now lastRecalc proc =
             text "Completed (failure)"
 
 
-processMenu : ( Processes.ID, Processes.Process ) -> Attribute msg
-processMenu ( id, process ) =
+processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute Msg
+processMenu config ( id, process ) =
     let
         menu =
             case Processes.getAccess process of
@@ -142,13 +142,13 @@ processMenu ( id, process ) =
                 Processes.Partial _ ->
                     menuForPartial
     in
-        menu id
+        menu (menuConfig config) id
 
 
 viewTaskRow :
     Config msg
     -> ( Processes.ID, Processes.Process )
-    -> Html msg
+    -> Html Msg
 viewTaskRow config (( _, process ) as entry) =
     let
         lastRecalc =
@@ -161,7 +161,7 @@ viewTaskRow config (( _, process ) as entry) =
                 |> Maybe.map (viewTaskRowUsage)
                 |> maybe
     in
-        div [ class [ EntryDivision ], (processMenu entry) ]
+        div [ class [ EntryDivision ], (processMenu config entry) ]
             [ div []
                 [ text <| Processes.getName process
                 , br [] []
@@ -176,8 +176,8 @@ viewTaskRow config (( _, process ) as entry) =
             ]
 
 
-viewTasksTable : Config msg -> Entries -> Html msg
-viewTasksTable config entries =
+viewTasksTable : Config msg -> Html Msg
+viewTasksTable config =
     let
         first =
             div [ class [ EntryDivision ] ]
@@ -185,14 +185,18 @@ viewTasksTable config entries =
                 , div [] [ text "ETA" ]
                 , div [] [ text "Resources" ]
                 ]
+
+        tasks =
+            config.processes
+                |> Processes.toList
     in
-        entries
+        tasks
             |> List.map (viewTaskRow config)
             |> (::) first
             |> div [ class [ TaskTable ] ]
 
 
-viewGraphUsage : String -> String -> List Float -> Html msg
+viewGraphUsage : String -> String -> List Float -> Html Msg
 viewGraphUsage title color history =
     let
         sz =
@@ -211,7 +215,7 @@ viewGraphUsage title color history =
         lineGraph points color 50 True ( 3, 1 )
 
 
-viewTotalResources : Model -> Html msg
+viewTotalResources : Model -> Html Msg
 viewTotalResources { historyCPU, historyMem, historyDown, historyUp } =
     div [ class [ BottomGraphsRow ] ]
         [ viewGraphUsage "CPU" "green" historyCPU
