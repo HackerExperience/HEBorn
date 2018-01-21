@@ -348,10 +348,10 @@ updateLanding msg model ({ landing } as stateModel) =
 updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
 updateGame msg model =
     let
-        ( model_, react, dispatch ) =
+        ( model_, react ) =
             Game.update gameConfig msg model
     in
-        ( model_, React.toCmd react, dispatch )
+        ( model_, React.toCmd react, Dispatch.none )
 
 
 updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )

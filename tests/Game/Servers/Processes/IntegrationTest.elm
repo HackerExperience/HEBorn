@@ -4,6 +4,8 @@ import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
 import Utils.React as React exposing (React)
+import Core.Subscribers as Subscribers
+import Core.Messages as Core
 import Json.Decode as Decode
 import TestUtils exposing (fuzz, updateGame, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
@@ -99,12 +101,15 @@ eventTests =
                         }
                         """
 
-                dispatch =
+                react =
                     Events.events channel name json
                         |> fromJust ("Testing " ++ name)
+                        |> Subscribers.dispatch
+                        |> Core.MultiMsg
+                        |> React.msg
             in
-                dispatch
-                    |> gameDispatcher game React.none
+                react
+                    |> gameDispatcher game
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.started fetching serverId"
@@ -153,12 +158,15 @@ eventTests =
                         { "process_id": "id" }
                         """
 
-                dispatch =
+                react =
                     Events.events channel name json
                         |> fromJust ("Testing " ++ name)
+                        |> Subscribers.dispatch
+                        |> Core.MultiMsg
+                        |> React.msg
             in
-                dispatch
-                    |> gameDispatcher game1 React.none
+                react
+                    |> gameDispatcher game1
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.conclusion fetching serverId"
@@ -209,12 +217,15 @@ eventTests =
                         }
                         """
 
-                dispatch =
+                react =
                     Events.events channel name json
                         |> fromJust ("Testing " ++ name)
+                        |> Subscribers.dispatch
+                        |> Core.MultiMsg
+                        |> React.msg
             in
-                dispatch
-                    |> gameDispatcher game1 React.none
+                react
+                    |> gameDispatcher game1
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "bruteforce_failed fetching serverId"

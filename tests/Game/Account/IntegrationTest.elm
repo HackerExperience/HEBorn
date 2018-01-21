@@ -5,6 +5,8 @@ import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
 import Utils.React as React exposing (React)
+import Core.Subscribers as Subscribers
+import Core.Messages as Core
 import Json.Decode as Decode
 import TestUtils exposing (fuzz, gameDispatcher, fromJust, fromOk, toValue)
 import Requests.Types exposing (Code(OkCode))
@@ -75,12 +77,15 @@ passwordAcquired =
                         }
                         """
 
-                dispatch =
+                react =
                     Events.events channel name json
                         |> fromJust ("Testing " ++ name)
+                        |> Subscribers.dispatch
+                        |> Core.MultiMsg
+                        |> React.msg
             in
-                dispatch
-                    |> gameDispatcher game React.none
+                react
+                    |> gameDispatcher game
                     |> Game.getAccount
                     |> Account.getDatabase
                     |> getHackedServers
@@ -119,12 +124,15 @@ replyUnlocked =
                         }
                         """
 
-                dispatch =
+                react =
                     Events.events channel name json
                         |> fromJust ("Testing " ++ name)
+                        |> Subscribers.dispatch
+                        |> Core.MultiMsg
+                        |> React.msg
             in
-                dispatch
-                    |> gameDispatcher game React.none
+                react
+                    |> gameDispatcher game
                     |> Game.getStory
                     |> Story.getEmails
                     |> Emails.getPerson ("kress")

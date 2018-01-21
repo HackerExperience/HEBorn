@@ -1,7 +1,6 @@
 module TestUtils exposing (..)
 
 import Expect exposing (Expectation)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.React as React exposing (React)
 import Core.Subscribers as Subscribers
 import Core.Config as Core
@@ -50,10 +49,10 @@ ensureDifferentSeed seed =
 updateGame : Game.Msg -> Game.Model -> Game.Model
 updateGame msg0 model0 =
     let
-        ( model1, cmd, dispatch ) =
+        ( model1, cmd ) =
             Game.update Core.gameConfig msg0 model0
     in
-        gameDispatcher model1 cmd dispatch
+        gameDispatcher model1 cmd
 
 
 fromJust : String -> Maybe a -> a
@@ -96,9 +95,8 @@ hint str =
 gameDispatcher :
     Game.Model
     -> React Core.Msg
-    -> Dispatch
     -> Game.Model
-gameDispatcher model react dispatch =
+gameDispatcher model react =
     let
         msgs =
             react
@@ -107,35 +105,31 @@ gameDispatcher model react dispatch =
                 |> Maybe.map Core.unroll
                 |> Maybe.withDefault []
 
-        msgs_ =
-            msgs ++ Subscribers.dispatch dispatch
-
-        ( model_, react_, dispatch_ ) =
-            List.foldl gameReducer ( model, React.none, Dispatch.none ) msgs_
+        ( model_, react_ ) =
+            List.foldl gameReducer ( model, React.none ) msgs
     in
-        case msgs_ of
+        case msgs of
             [] ->
                 model
 
             list ->
-                gameDispatcher model_ react_ dispatch_
+                gameDispatcher model_ react_
 
 
 gameReducer :
     Core.Msg
-    -> ( Game.Model, React Core.Msg, Dispatch )
-    -> ( Game.Model, React Core.Msg, Dispatch )
-gameReducer msg ( model, react, dispatch ) =
+    -> ( Game.Model, React Core.Msg )
+    -> ( Game.Model, React Core.Msg )
+gameReducer msg ( model, react ) =
     case msg of
         Core.GameMsg msg ->
             let
-                ( model_, react_, dispatch_ ) =
+                ( model_, react_ ) =
                     Game.update Core.gameConfig msg model
             in
                 ( model_
                 , React.batch Core.MultiMsg [ react, react_ ]
-                , Dispatch.batch [ dispatch, dispatch_ ]
                 )
 
         _ ->
-            ( model, react, dispatch )
+            ( model, react )
