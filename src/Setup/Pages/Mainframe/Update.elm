@@ -1,17 +1,15 @@
 module Setup.Pages.Mainframe.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Utils.Maybe as Maybe
+import Utils.React as React exposing (React)
+import Game.Account.Models as Account
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
 import Setup.Requests.Check as Check
-import Game.Account.Models as Account
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -24,15 +22,15 @@ update config msg model =
             onValidate config model
 
         Checked True ->
-            Update.fromModel <| setOkay model
+            ( setOkay model, React.none )
 
         Checked False ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 onMainframe : String -> Model -> UpdateResponse msg
 onMainframe str model =
-    Update.fromModel <| setMainframeName str model
+    ( setMainframeName str model, React.none )
 
 
 onValidate : Config msg -> Model -> UpdateResponse msg
@@ -42,11 +40,14 @@ onValidate ({ toMsg, mainframe } as config) model =
             getHostname model
 
         cmd =
-            case Maybe.uncurry mainframe hostname of
-                Just ( cid, name ) ->
-                    Check.serverName (Checked >> toMsg) name cid config
+            case hostname of
+                Just name ->
+                    Check.serverName (Checked >> toMsg)
+                        name
+                        mainframe
+                        config
 
                 Nothing ->
                     Cmd.none
     in
-        ( model, cmd, Dispatch.none )
+        ( model, React.cmd cmd )

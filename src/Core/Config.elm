@@ -231,11 +231,19 @@ gameConfig =
 
 setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
-    { toMsg = SetupMsg
-    , accountId = accountId
-    , mainframe = mainframe
-    , flags = flags
-    }
+    case mainframe of
+        Just cid ->
+            { toMsg = SetupMsg
+            , accountId = accountId
+            , mainframe = cid
+            , flags = flags
+            , onError = HandleCrash
+            , onPlay = HandlePlay
+            }
+
+        Nothing ->
+            Debug.crash
+                "Impossible: Going to setup before account bootstrap"
 
 
 osConfig :
@@ -387,5 +395,4 @@ app :
     -> Apps.Msg
     -> Msg
 app windowRef context =
-    SessionManager.AppMsg windowRef context
-        >> sessionManager
+    SessionManager.AppMsg windowRef context >> sessionManager

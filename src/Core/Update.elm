@@ -195,7 +195,7 @@ updateSetupWS :
     Flags
     -> Ws.Msg
     -> SetupModel
-    -> ( SetupModel, Cmd Msg, Dispatch )
+    -> ( SetupModel, Cmd Msg )
 updateSetupWS flags msg stateModel =
     let
         ( websocket, cmd ) =
@@ -206,10 +206,10 @@ updateSetupWS flags msg stateModel =
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, Dispatch.none )
+        ( stateModel_, cmd )
 
 
-updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
 updateSetupSetup msg stateModel =
     let
         config =
@@ -218,16 +218,16 @@ updateSetupSetup msg stateModel =
                 stateModel.game.account.mainframe
                 stateModel.game.flags
 
-        ( setup, cmd_, dispatch ) =
+        ( setup, react ) =
             Setup.update config msg stateModel.setup
 
         stateModel_ =
             { stateModel | setup = setup }
     in
-        ( stateModel_, cmd_, dispatch )
+        ( stateModel_, React.toCmd react )
 
 
-updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
 updateSetupGame msg stateModel =
     let
         ( game, cmd ) =
@@ -238,16 +238,12 @@ updateSetupGame msg stateModel =
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, Dispatch.none )
+        ( stateModel_, cmd )
 
 
-finishSetupUpdate : Model -> ( SetupModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
-finishSetupUpdate model ( stateModel, cmd, dispatch ) =
-    let
-        model_ =
-            { model | state = Setup stateModel }
-    in
-        dispatcher model_ cmd dispatch
+finishSetupUpdate : Model -> ( SetupModel, Cmd Msg ) -> ( Model, Cmd Msg )
+finishSetupUpdate model ( stateModel, cmd ) =
+    ( { model | state = Setup stateModel }, cmd )
 
 
 updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )

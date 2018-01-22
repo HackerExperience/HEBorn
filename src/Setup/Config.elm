@@ -1,6 +1,7 @@
 module Setup.Config exposing (..)
 
 import Core.Flags as Core
+import Core.Error as Core
 import Game.Servers.Shared exposing (CId)
 import Setup.Messages exposing (..)
 import Setup.Pages.PickLocation.Config as PickLocation
@@ -10,8 +11,10 @@ import Setup.Pages.Mainframe.Config as Mainframe
 type alias Config msg =
     { toMsg : Msg -> msg
     , accountId : String
-    , mainframe : Maybe CId
+    , mainframe : CId
     , flags : Core.Flags
+    , onError : Core.Error -> msg
+    , onPlay : msg
     }
 
 
