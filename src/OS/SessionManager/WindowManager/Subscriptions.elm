@@ -2,7 +2,6 @@ module OS.SessionManager.WindowManager.Subscriptions exposing (subscriptions)
 
 import Dict
 import Draggable
-import Game.Data as Game
 import Apps.Subscriptions as Apps
 import OS.SessionManager.WindowManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
@@ -16,9 +15,6 @@ subscriptions config model =
         , appSubcriptions config model
         ]
 
-
-
---CONFREFACT : Remove Game.Data from here after refactor
 
 
 appSubcriptions : Config msg -> Model -> Sub msg

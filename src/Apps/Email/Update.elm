@@ -1,9 +1,6 @@
 module Apps.Email.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.OS as OS
-import Core.Dispatch.Storyline as Storyline
 import Game.Storyline.Emails.Models as Emails exposing (Person)
 import Apps.Email.Config exposing (..)
 import Apps.Email.Models exposing (..)
@@ -25,21 +22,15 @@ update config msg model =
     case msg of
         -- -- Context
         SelectContact email ->
-            onSelectContact email model
+            onSelectContact config email model
 
 
 
--- CONFREFACT : Dispatch this properly
-
-
-onSelectContact : String -> Model -> UpdateResponse msg
-onSelectContact email model =
-    --let
-    --  dispatch =
-    --     email
-    --      |> FloatingHeads.OpenAtContact
-    --      |> Apps.FloatingHeadsParams
-    --      |> OS.OpenApp Nothing
-    --      |> Dispatch.os
-    --in
-    ( model, React.none )
+onSelectContact : Config msg -> String -> Model -> UpdateResponse msg
+onSelectContact {onOpenApp} email model =
+    email
+        |> FloatingHeads.OpenAtContact
+        |> Apps.FloatingHeadsParams
+        |> onOpenApp Nothing
+        |> React.msg
+        |> (,) model

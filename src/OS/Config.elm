@@ -2,15 +2,19 @@ module OS.Config exposing (..)
 
 import Time exposing (Time)
 import Core.Flags exposing (Flags)
-import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Models as Account
+import Game.Account.Bounces.Shared as Bounces
+import Game.Account.Finances.Models as Finances
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
+import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Servers.Models as Servers
+import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Processes.Requests.Download as Download
 import Game.Storyline.Models as Story
 import OS.SessionManager.Config as SessionManager
 import OS.Messages exposing (..)
@@ -21,8 +25,11 @@ import OS.Toasts.Config as Toasts
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , flags : Flags
     , account : Account.Model
+    , backFlix : BackFlix.BackFlix
+    , inventory : Inventory.Model
     , servers : Servers.Model
     , story : Story.Model
     , activeServer : ( CId, Server )
@@ -38,15 +45,16 @@ type alias Config msg =
     , onReadAllAccountNotifications : msg
     , onReadAllServerNotifications : msg
     , onSetActiveNIP : NIP -> msg
-    , inventory : Inventory.Model
-    , backFlix : BackFlix.BackFlix
-    , batchMsg : List msg -> msg
+    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
+    , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
     }
 
 
 smConfig : Config msg -> SessionManager.Config msg
 smConfig config =
     { toMsg = SessionManagerMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , lastTick = config.lastTick
     , story = config.story
     , servers = config.servers
@@ -61,7 +69,9 @@ smConfig config =
             |> Tuple.second
             |> Servers.getEndpointCId
     , onSetBounce = config.onSetBounce
-    , batchMsg = config.batchMsg
+    , onNewPublicDownload = config.onNewPublicDownload
+    , onBankAccountLogin = config.onBankAccountLogin
+    , onBankAccountTransfer = config.onBankAccountTransfer
     }
 
 

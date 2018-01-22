@@ -152,9 +152,6 @@ fromProcesses id dispatch =
         RemoveProcess a ->
             [ processes id <| Processes.HandleRemove a ]
 
-        CompleteProcess a ->
-            [ processes id <| Processes.HandleComplete a ]
-
         NewBruteforceProcess a ->
             [ processes id <| Processes.HandleStartBruteforce a ]
 
@@ -166,16 +163,6 @@ fromProcesses id dispatch =
             [ processes id <| Processes.HandleStartPublicDownload a b c
             ]
 
-
-
---StartedProcess a ->
---    [ processes id <| Processes.HandleProcessStarted a ]
---ConcludedProcess a ->
---    [ processes id <| Processes.HandleProcessConclusion a ]
---ChangedProcesses a ->
---[ processes id <| Processes.HandleProcessesChanged a ]
---FailedBruteforceProcess a ->
---    [ processes id <| Processes.HandleBruteforceFailed a ]
 
 
 fromHardware : CId -> Hardware -> Subscribers

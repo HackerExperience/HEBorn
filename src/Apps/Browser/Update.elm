@@ -164,23 +164,11 @@ onReqDownload :
     -> StorageId
     -> Model
     -> UpdateResponse msg
-onReqDownload config source file storage model =
-    --let
-    --    ( me, _ ) =
-    --        data
-    --            |> Game.getGame
-    --            |> Game.Models.unsafeGetGateway
-    --    startMsg =
-    --        Servers.NewPublicDownloadProcess source storage file
-    --    dispatch =
-    --        Dispatch.processes me startMsg
-    --    model_ =
-    --        model
-    --            |> getNowTab
-    --            |> leaveModal
-    --            |> flip setNowTab model
-    --in
-    ( model, React.none )
+onReqDownload { onNewPublicDownload } source file storage model =
+    file
+        |> onNewPublicDownload source storage
+        |> React.msg
+        |> (,) model
 
 
 onBankLogin :
@@ -189,23 +177,15 @@ onBankLogin :
     -> Reference
     -> Model
     -> UpdateResponse msg
-onBankLogin config request { sessionId, windowId, context } model =
-    --let
-    --    cid =
-    --        data
-    --            |> Game.getActiveCId
-    --    requester =
-    --        { sessionId = sessionId
-    --        , windowId = windowId
-    --        , context = context
-    --        , tabId = model.nowTab
-    --        }
-    --    loginMsg =
-    --        Account.BankAccountLogin request requester cid
-    --    dispatch =
-    --        Dispatch.finances loginMsg
-    --in
-    ( model, React.none )
+onBankLogin { onBankAccountLogin } request { sessionId, windowId, context } model =
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = model.nowTab
+    }
+        |> onBankAccountLogin request
+        |> React.msg
+        |> (,) model
 
 
 onBankTransfer :
@@ -214,27 +194,20 @@ onBankTransfer :
     -> Reference
     -> Model
     -> UpdateResponse msg
-onBankTransfer config request { sessionId, windowId, context } model =
-    --let
-    --    cid =
-    --        data
-    --            |> Game.getActiveCId
-    --    requester =
-    --        { sessionId = sessionId
-    --        , windowId = windowId
-    --        , context = context
-    --        , tabId = model.nowTab
-    --        }
-    --    transferMsg =
-    --        Account.BankAccountTransfer request requester cid
-    --    dispatch =
-    --        Dispatch.finances transferMsg
-    --in
-    ( model, React.none )
+onBankTransfer { onBankAccountTransfer } request { sessionId, windowId, context } model =
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = model.nowTab
+    }
+        |> onBankAccountTransfer request
+        |> React.msg
+        |> (,) model
 
 
 onBankLogout : Config msg -> Model -> UpdateResponse msg
 onBankLogout config model =
+    -- TODO: Bank Logout Request
     ( model, React.none )
 
 
@@ -287,12 +260,9 @@ reduceTabMsg config msg model tabId tab ( tabs, react0 ) =
             Dict.insert tabId tab tabs
 
         react =
-            --React.batch
-            --    config.batchMsg
-            --    [ react0
-            --    , react1
-            --    ]
-            React.none
+            React.batch
+                config.batchMsg
+                [ react0, react1 ]
     in
         ( tabs_, react )
 

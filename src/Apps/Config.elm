@@ -1,14 +1,21 @@
 module Apps.Config exposing (..)
 
 import Time exposing (Time)
-import Apps.Messages exposing (..)
 import Game.Account.Models as Account
+import Game.Account.Finances.Models as Finances
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
+import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
-import Game.Storyline.Models as Storyline
 import Game.Servers.Hardware.Models as Hardware
+import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Processes.Requests.Download as Download
+import Game.Storyline.Models as Storyline
+import Apps.Apps as Apps
+import Apps.Messages exposing (..)
 import Apps.Bug.Config as Bug
 import Apps.Email.Config as Email
 import Apps.Hebamp.Config as Hebamp
@@ -38,6 +45,11 @@ type alias Config msg =
     , activeServer : Servers.Server
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
+    , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
+    , onOpenApp : Maybe Context -> Apps.AppParams -> msg
+    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
+    , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
     }
 
 
@@ -78,6 +90,7 @@ emailConfig config =
     { toMsg = EmailMsg >> config.toMsg
     , emails = Storyline.getEmails config.story
     , batchMsg = config.batchMsg
+    , onOpenApp = config.onOpenApp
     }
 
 
@@ -112,9 +125,13 @@ serversGearsConfig config =
 browserConfig : Config msg -> Browser.Config msg
 browserConfig config =
     { toMsg = BrowserMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , activeServer = config.activeServer
     , endpoints = Servers.getEndpoints config.activeServer
-    , batchMsg = config.batchMsg
+    , onNewApp = config.onNewApp
+    , onNewPublicDownload = config.onNewPublicDownload
+    , onBankAccountLogin = config.onBankAccountLogin
+    , onBankAccountTransfer = config.onBankAccountTransfer
     }
 
 

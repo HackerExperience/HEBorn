@@ -67,7 +67,6 @@ type Processes
     = PauseProcess Processes.ID
     | ResumeProcess Processes.ID
     | RemoveProcess Processes.ID
-    | CompleteProcess Processes.ID
     | NewBruteforceProcess Network.IP
     | NewDownloadProcess Network.NIP StorageId Filesystem.FileEntry
     | NewPublicDownloadProcess Network.NIP StorageId Filesystem.FileEntry

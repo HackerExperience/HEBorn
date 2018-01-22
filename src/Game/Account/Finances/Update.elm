@@ -28,10 +28,10 @@ update config msg model =
         HandleBankAccountUpdated accountId account ->
             handleBankAccountUpdated accountId account model
 
-        HandleBankAccountLogin request requester cid ->
+        HandleBankAccountLogin cid request requester ->
             handleBankAccountLogin config request requester cid model
 
-        HandleBankAccountTransfer request requester cid ->
+        HandleBankAccountTransfer cid request requester ->
             handleBankAccountTransfer config request requester cid model
 
 
