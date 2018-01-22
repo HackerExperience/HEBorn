@@ -70,18 +70,10 @@ view config model =
             ServersGears.view (serversGearsConfig config) model
 
         LocationPickerModel model ->
-            let
-                config_ =
-                    locationPickerConfig config
-            in
-                Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view config_ model)
+            LocationPicker.view (locationPickerConfig config) model
 
         LanViewerModel model ->
-            let
-                config_ =
-                    lanViewerConfig config
-            in
-                LanViewer.view config_ model
+            LanViewer.view (lanViewerConfig config) model
 
         EmailModel model ->
             let
