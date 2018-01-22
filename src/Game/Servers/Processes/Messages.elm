@@ -23,6 +23,4 @@ type Msg
     | HandlePause ID
     | HandleResume ID
     | HandleRemove ID
-    | HandleComplete ID -- may be removed
-      -- to be deprecated
-    | Start Type Network.IP ( Maybe FileID, Maybe Version, FileName )
+    
