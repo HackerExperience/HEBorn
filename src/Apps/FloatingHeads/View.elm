@@ -22,19 +22,22 @@ import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         person =
             config.emails
                 |> Emails.getPerson model.activeContact
-    in
-        case model.mode of
-            Compact ->
-                viewCompact person model
 
-            Expanded ->
-                viewExpanded config person model
+        view_ =
+            case model.mode of
+                Compact ->
+                    viewCompact person model
+
+                Expanded ->
+                    viewExpanded config person model
+    in
+        Html.map config.toMsg <| view_
 
 
 viewExpanded : Config msg -> Maybe Person -> Model -> Html Msg
