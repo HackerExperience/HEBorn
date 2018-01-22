@@ -66,6 +66,8 @@ update config msg model =
         HandleRemove id ->
             handleRemove config id model
 
+
+
 -- internals
 
 

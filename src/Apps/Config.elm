@@ -3,6 +3,7 @@ module Apps.Config exposing (..)
 import Time exposing (Time)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
+import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Meta.Types.Context exposing (Context)
@@ -12,6 +13,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Hardware.Models as Hardware
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Servers.Processes.Requests.Download as Download
 import Game.Storyline.Models as Storyline
 import Apps.Apps as Apps
@@ -50,6 +52,9 @@ type alias Config msg =
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
+    , onServerToast : ServersNotifications.Content -> msg
+    , onPoliteCrash : ( String, String ) -> msg
     }
 
 
@@ -107,6 +112,9 @@ bugConfig : Config msg -> Bug.Config msg
 bugConfig config =
     { toMsg = BugMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , onAccountToast = config.onAccountToast
+    , onServerToast = config.onServerToast
+    , onPoliteCrash = config.onPoliteCrash
     }
 
 

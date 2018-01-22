@@ -300,6 +300,12 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onBankAccountTransfer =
         Finances.HandleBankAccountTransfer sCId
             >>> finances
+    , onAccountToast =
+        Toast.HandleAccount >> toast
+    , onServerToast =
+        Toast.HandleServers >>> toast
+    , onPoliteCrash =
+        HandleLogoutAndCrash >> account
     }
 
 

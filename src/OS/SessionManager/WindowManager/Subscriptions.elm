@@ -16,7 +16,6 @@ subscriptions config model =
         ]
 
 
-
 appSubcriptions : Config msg -> Model -> Sub msg
 appSubcriptions config ({ visible, windows } as model) =
     let

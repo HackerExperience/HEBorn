@@ -48,6 +48,9 @@ type alias Config msg =
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
+    , onServerToast : CId -> ServersNotifications.Content -> msg
+    , onPoliteCrash : ( String, String ) -> msg
     }
 
 
@@ -72,6 +75,9 @@ smConfig config =
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onAccountToast = config.onAccountToast
+    , onServerToast = config.onServerToast
+    , onPoliteCrash = config.onPoliteCrash
     }
 
 

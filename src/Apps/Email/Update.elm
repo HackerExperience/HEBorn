@@ -25,9 +25,8 @@ update config msg model =
             onSelectContact config email model
 
 
-
 onSelectContact : Config msg -> String -> Model -> UpdateResponse msg
-onSelectContact {onOpenApp} email model =
+onSelectContact { onOpenApp } email model =
     email
         |> FloatingHeads.OpenAtContact
         |> Apps.FloatingHeadsParams

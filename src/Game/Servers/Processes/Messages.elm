@@ -23,4 +23,3 @@ type Msg
     | HandlePause ID
     | HandleResume ID
     | HandleRemove ID
-    

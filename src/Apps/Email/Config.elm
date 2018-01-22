@@ -10,5 +10,5 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , emails : Emails.Model
-    , onOpenApp : (Maybe Context) -> Apps.AppParams -> msg
+    , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     }

@@ -3,6 +3,7 @@ module OS.SessionManager.WindowManager.Config exposing (..)
 import Time exposing (Time)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
+import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Meta.Types.Context exposing (Context(..))
@@ -11,6 +12,7 @@ import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Servers.Processes.Requests.Download as Download
 import Game.Storyline.Models as Story
 import OS.SessionManager.Types exposing (..)
@@ -37,6 +39,9 @@ type alias Config msg =
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
+    , onServerToast : ServersNotifications.Content -> msg
+    , onPoliteCrash : ( String, String ) -> msg
     }
 
 
@@ -59,4 +64,7 @@ appsConfig maybeContext wId targetContext config =
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onAccountToast = config.onAccountToast
+    , onServerToast = config.onServerToast
+    , onPoliteCrash = config.onPoliteCrash
     }

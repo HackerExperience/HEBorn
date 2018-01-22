@@ -164,7 +164,6 @@ fromProcesses id dispatch =
             ]
 
 
-
 fromHardware : CId -> Hardware -> Subscribers
 fromHardware id dispatch =
     case dispatch of
