@@ -18,7 +18,7 @@ import Apps.Finance.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         moneyTotal =
@@ -51,6 +51,7 @@ view config model =
                     ]
     in
         verticalSticked (Just viewHeader) viewData Nothing
+            |> Html.map config.toMsg
 
 
 compareTabs : MainTab -> MainTab -> Bool

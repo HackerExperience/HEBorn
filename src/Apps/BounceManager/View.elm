@@ -24,7 +24,7 @@ import Apps.BounceManager.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config ({ selected } as model) =
     let
         contentStc =
@@ -45,10 +45,11 @@ view config ({ selected } as model) =
         viewTabs =
             hzTabs (compareTabs selected) viewTabLabel GoTab tabs
     in
-        verticalSticked
-            (Just [ viewTabs ])
-            [ viewData ]
-            Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ viewTabs ])
+                [ viewData ]
+                Nothing
 
 
 tabs : List MainTab

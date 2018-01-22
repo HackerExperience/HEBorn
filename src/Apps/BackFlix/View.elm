@@ -19,10 +19,10 @@ import Apps.BackFlix.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
-        data =
+        backFlix =
             config.backFlix
 
         filterHeaderLayout =
@@ -39,15 +39,16 @@ view config model =
         viewData =
             case model.selected of
                 TabAll ->
-                    viewTabAll data
+                    viewTabAll backFlix
 
                 TabSimple ->
-                    viewTabSimple data
+                    viewTabSimple backFlix
     in
-        verticalSticked
-            (Just [ filterHeaderLayout ])
-            [ viewData ]
-            Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ filterHeaderLayout ])
+                [ viewData ]
+                Nothing
 
 
 compareTabs : MainTab -> MainTab -> Bool
@@ -131,7 +132,7 @@ renderEntry useString id log =
             ]
 
 
-setTypeLog : BackFlix.Log -> List (Html.Attribute msg)
+setTypeLog : BackFlix.Log -> List (Html.Attribute Msg)
 setTypeLog log =
     case log.type_ of
         BackFlix.Request ->

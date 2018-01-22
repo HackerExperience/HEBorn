@@ -37,131 +37,58 @@ view : Config msg -> AppModel -> Html msg
 view config model =
     case model of
         LogViewerModel model ->
-            let
-                config_ =
-                    logViewerConfig config
-            in
-                Html.map (LogViewerMsg >> config.toMsg) (LogViewer.view config_ model)
+            LogViewer.view (logViewerConfig config) model
 
         TaskManagerModel model ->
-            let
-                config_ =
-                    taskManConfig config
-            in
-                Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view config_ model)
+            TaskManager.view (taskManConfig config) model
 
         BrowserModel model ->
-            let
-                config_ =
-                    browserConfig config
-            in
-                Html.map (BrowserMsg >> config.toMsg) (Browser.view config_ model)
+            Browser.view (browserConfig config) model
 
         ExplorerModel model ->
-            let
-                config_ =
-                    explorerConfig config
-            in
-                Html.map (ExplorerMsg >> config.toMsg) (Explorer.view config_ model)
+            Explorer.view (explorerConfig config) model
 
         DatabaseModel model ->
-            let
-                config_ =
-                    dbAdminConfig config
-            in
-                Html.map (DatabaseMsg >> config.toMsg) (Database.view config_ model)
+            Database.view (dbAdminConfig config) model
 
         ConnManagerModel model ->
-            let
-                config_ =
-                    connManagerConfig config
-            in
-                Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view config_ model)
+            ConnManager.view (connManagerConfig config) model
 
         BounceManagerModel model ->
-            let
-                config_ =
-                    bounceManConfig config
-            in
-                Html.map (BounceManagerMsg >> config.toMsg) (BounceManager.view config_ model)
+            BounceManager.view (bounceManConfig config) model
 
         FinanceModel model ->
-            let
-                config_ =
-                    financeConfig config
-            in
-                Html.map (FinanceMsg >> config.toMsg) (Finance.view config_ model)
+            Finance.view (financeConfig config) model
 
         MusicModel model ->
-            let
-                config_ =
-                    hebampConfig config
-            in
-                Html.map (MusicMsg >> config.toMsg) (Hebamp.view config_ model)
+            Hebamp.view (hebampConfig config) model
 
         CtrlPanelModel model ->
-            let
-                config_ =
-                    ctrlPainelConfig config
-            in
-                CtrlPanel.view config_ model
+            CtrlPanel.view (ctrlPainelConfig config) model
 
         ServersGearsModel model ->
-            let
-                config_ =
-                    serversGearsConfig config
-            in
-                Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view config_ model)
+            ServersGears.view (serversGearsConfig config) model
 
         LocationPickerModel model ->
-            let
-                config_ =
-                    locationPickerConfig config
-            in
-                Html.map (LocationPickerMsg >> config.toMsg) (LocationPicker.view config_ model)
+            LocationPicker.view (locationPickerConfig config) model
 
         LanViewerModel model ->
-            let
-                config_ =
-                    lanViewerConfig config
-            in
-                LanViewer.view config_ model
+            LanViewer.view (lanViewerConfig config) model
 
         EmailModel model ->
-            let
-                config_ =
-                    emailConfig config
-            in
-                Html.map (EmailMsg >> config.toMsg) (Email.view config_ model)
+            Email.view (emailConfig config) model
 
         BugModel model ->
-            let
-                config_ =
-                    bugConfig config
-            in
-                Html.map (BugMsg >> config.toMsg) (Bug.view config_ model)
+            Bug.view (bugConfig config) model
 
         CalculatorModel model ->
-            let
-                config_ =
-                    calculatorConfig config
-            in
-                Calculator.view config_ model
+            Calculator.view (calculatorConfig config) model
 
         BackFlixModel model ->
-            let
-                config_ =
-                    backFlixConfig config
-            in
-                Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view config_ model)
+            BackFlix.view (backFlixConfig config) model
 
         FloatingHeadsModel model ->
-            let
-                config_ =
-                    floatingHeadsConfig config
-            in
-                (FloatingHeads.view config_ model)
-                    |> Html.map (FloatingHeadsMsg >> config.toMsg)
+            FloatingHeads.view (floatingHeadsConfig config) model
 
 
 isDecorated : App -> Bool

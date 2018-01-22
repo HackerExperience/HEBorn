@@ -14,28 +14,29 @@ import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
-    div
-        [ class [ Super ]
-        ]
-        [ div [ class [ Map ] ]
-            [ Native.Untouchable.node "hemap" model.mapEId ]
-        , div [ class [ Interactive ] ] <|
-            case model.coordinates of
-                Just coord ->
-                    [ text "COORDENADAS"
-                    , br [] []
-                    , text " LAT: "
-                    , text <| toString coord.lat
-                    , br [] []
-                    , text " LNG: "
-                    , text <| toString coord.lng
-                    , br [] []
-                    , br [] []
-                    , text "CLIQUE NO MAPA PARA MUDAR SUA LOCALIZAÇÃO!"
-                    ]
+    Html.map config.toMsg <|
+        div
+            [ class [ Super ]
+            ]
+            [ div [ class [ Map ] ]
+                [ Native.Untouchable.node "hemap" model.mapEId ]
+            , div [ class [ Interactive ] ] <|
+                case model.coordinates of
+                    Just coord ->
+                        [ text "COORDENADAS"
+                        , br [] []
+                        , text " LAT: "
+                        , text <| toString coord.lat
+                        , br [] []
+                        , text " LNG: "
+                        , text <| toString coord.lng
+                        , br [] []
+                        , br [] []
+                        , text "CLIQUE NO MAPA PARA MUDAR SUA LOCALIZAÇÃO!"
+                        ]
 
-                Nothing ->
-                    [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
-        ]
+                    Nothing ->
+                        [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
+            ]

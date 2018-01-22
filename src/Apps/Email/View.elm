@@ -20,7 +20,7 @@ import Apps.Email.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         emails =
@@ -31,9 +31,10 @@ view config model =
                 |> Dict.foldr contact []
                 |> ul [ class [ Contacts ] ]
     in
-        div
-            []
-            [ contactList ]
+        Html.map config.toMsg <|
+            div
+                []
+                [ contactList ]
 
 
 contact :

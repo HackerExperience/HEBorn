@@ -35,7 +35,7 @@ import Apps.LogViewer.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         filterHeaderLayout =
@@ -57,12 +57,13 @@ view config model =
                 |> renderEntries config model
                 |> verticalList
     in
-        verticalSticked
-            (Just [ filterHeaderLayout ])
-            [ mainEntries
-            , menuView model
-            ]
-            Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ filterHeaderLayout ])
+                [ mainEntries
+                , menuView model
+                ]
+                Nothing
 
 
 
