@@ -262,19 +262,13 @@ gameConfig =
 
 setupConfig : String -> CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
-    case mainframe of
-        Just cid ->
-            { toMsg = SetupMsg
-            , accountId = accountId
-            , mainframe = cid
-            , flags = flags
-            , onError = HandleCrash
-            , onPlay = HandlePlay
-            }
-
-        Nothing ->
-            Debug.crash
-                "Impossible: Going to setup before account bootstrap"
+    { toMsg = SetupMsg
+    , accountId = accountId
+    , mainframe = mainframe
+    , flags = flags
+    , onError = HandleCrash
+    , onPlay = HandlePlay
+    }
 
 
 osConfig :
