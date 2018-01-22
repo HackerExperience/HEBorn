@@ -17,9 +17,6 @@ import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
---CONFREFACT : Fix these dispatches
-
-
 type alias UpdateResponse msg =
     ( Model, React msg )
 
@@ -41,73 +38,45 @@ actionHandler config action model =
             ( leaveEditing logId model, React.none )
 
         EncryptEntry logId ->
-            --let
-            --    dispatch =
-            --        startCrypting logId config model
-            --in
-            startCrypting logId config model
+            startCrypting config logId model
 
         DecryptEntry logId ->
-            --let
-            --    dispatch =
-            --        startDecrypting logId model
-            --in
-            startDecrypting logId model
+            startDecrypting config logId model
 
         HideEntry logId ->
-            --let
-            --    dispatch =
-            --        startHiding logId config model
-            --in
-            startHiding logId config model
+            startHiding config logId model
 
         DeleteEntry logId ->
-            --let
-            --    dispatch =
-            --        startDeleting logId config model
-            --in
-            startDeleting logId config model
+            startDeleting config logId model
 
 
-startCrypting : Logs.ID -> Config msg -> Model -> UpdateResponse msg
-startCrypting id config model =
-    --let
-    --    dispatch =
-    --        id
-    --            |> Servers.EncryptLog
-    --            |> Dispatch.logs config.activeCId
-    --in
-    --    dispatch
+startCrypting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startCrypting { onEncryptLog } id model =
+    id
+        |> onEncryptLog
+        |> React.msg
+        |> (,) model
+
+
+startDecrypting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startDecrypting config id model =
     ( model, React.none )
 
 
-startDecrypting : Logs.ID -> Model -> UpdateResponse msg
-startDecrypting id model =
-    ( model, React.none )
+startHiding : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startHiding { onHideLog } id model =
+    id
+        |> onHideLog
+        |> React.msg
+        |> (,) model
 
 
-startHiding : Logs.ID -> Config msg -> Model -> UpdateResponse msg
-startHiding id config model =
-    --let
-    --    dispatch =
-    --        id
-    --            |> Servers.HideLog
-    --            |> Dispatch.logs config.activeCId
-    --in
-    --    dispatch
-    ( model, React.none )
-
-
-startDeleting : Logs.ID -> Config msg -> Model -> UpdateResponse msg
-startDeleting id config model =
-    --let
-    --    dispatch =
-    --        id
-    --            |> Servers.DeleteLog
-    --            |> Dispatch.logs config.activeCId
-    --in
-    --    dispatch
-    ( model, React.none )
+startDeleting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startDeleting { onDeleteLog } id model =
+    id
+        |> onDeleteLog
+        |> React.msg
+        |> (,) model
 
 
 enterEditing : Config msg -> Logs.ID -> Model -> Model

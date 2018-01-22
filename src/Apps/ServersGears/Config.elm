@@ -12,4 +12,5 @@ type alias Config msg =
     , activeServer : Servers.Server
     , mobo : Maybe Motherboard
     , batchMsg : List msg -> msg
+    , onMotherboardUpdate : Motherboard -> msg
     }

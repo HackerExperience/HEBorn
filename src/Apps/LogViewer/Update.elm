@@ -74,30 +74,29 @@ update config msg model =
                 model_ =
                     leaveEditing id model
 
-                --cid =
-                --    config.activeCId
-                --dispatch =
-                --    case edited of
-                --        Just edited ->
-                --            edited
-                --                |> Servers.UpdateLog id
-                --                |> Dispatch.logs cid
-                --        Nothing ->
-                --            Dispatch.none
+                react =
+                    case edited of
+                        Just edited ->
+                            edited
+                                |> config.onUpdateLog id
+                                |> React.msg
+
+                        Nothing ->
+                            React.none
             in
-                ( model_, React.none )
+                ( model_, react )
 
         StartCrypting id ->
-            startCrypting id (menuConfig config) model
+            startCrypting (menuConfig config) id model
 
         StartDecrypting id ->
-            startDecrypting id model
+            startDecrypting (menuConfig config) id model
 
         StartHiding id ->
-            startHiding id (menuConfig config) model
+            startHiding (menuConfig config) id model
 
         StartDeleting id ->
-            startDeleting id (menuConfig config) model
+            startDeleting (menuConfig config) id model
 
         DummyNoOp ->
             ( model, React.none )

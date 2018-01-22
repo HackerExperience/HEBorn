@@ -314,6 +314,22 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         \cid stg -> Filesystem.HandleMove >>> filesystem cid stg
     , onRenameFile =
         \cid stg -> Filesystem.HandleRename >>> filesystem cid stg
+    , onUpdateLog =
+        \cid -> Logs.HandleUpdateContent >>> logs cid
+    , onEncryptLog =
+        \cid -> Logs.HandleEncrypt >> logs cid
+    , onHideLog =
+        \cid -> Logs.HandleHide >> logs cid
+    , onDeleteLog =
+        \cid -> Logs.HandleDelete >> logs cid
+    , onMotherboardUpdate =
+        \cid -> Hardware.HandleMotherboardUpdate >> hardware cid
+    , onPauseProcess =
+        \cid -> Processes.HandlePause >> processes cid
+    , onResumeProcess =
+        \cid -> Processes.HandleResume >> processes cid
+    , onRemoveProcess =
+        \cid -> Processes.HandleRemove >> processes cid
     }
 
 

@@ -6,6 +6,7 @@ import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
+import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
@@ -13,6 +14,8 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Hardware.Models as Hardware
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Logs.Models as Logs
+import Game.Servers.Processes.Models as Processes
 import Game.Storyline.Models as Storyline
 import Apps.Apps as Apps
 import Apps.Messages exposing (..)
@@ -56,6 +59,14 @@ type alias Config msg =
     , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onUpdateLog : Logs.ID -> String -> msg
+    , onEncryptLog : Logs.ID -> msg
+    , onHideLog : Logs.ID -> msg
+    , onDeleteLog : Logs.ID -> msg
+    , onMotherboardUpdate : Motherboard -> msg
+    , onPauseProcess : Processes.ID -> msg
+    , onResumeProcess : Processes.ID -> msg
+    , onRemoveProcess : Processes.ID -> msg
     }
 
 
@@ -75,6 +86,9 @@ taskManConfig config =
             |> Servers.getProcesses
     , lastTick = config.lastTick
     , batchMsg = config.batchMsg
+    , onPauseProcess = config.onPauseProcess
+    , onResumeProcess = config.onResumeProcess
+    , onRemoveProcess = config.onRemoveProcess
     }
 
 
@@ -86,6 +100,10 @@ logViewerConfig config =
             |> Tuple.second
             |> Servers.getLogs
     , batchMsg = config.batchMsg
+    , onUpdateLog = config.onUpdateLog
+    , onEncryptLog = config.onEncryptLog
+    , onHideLog = config.onHideLog
+    , onDeleteLog = config.onDeleteLog
     }
 
 
@@ -139,6 +157,7 @@ serversGearsConfig config =
             |> Servers.getHardware
             |> Hardware.getMotherboard
     , batchMsg = config.batchMsg
+    , onMotherboardUpdate = config.onMotherboardUpdate
     }
 
 

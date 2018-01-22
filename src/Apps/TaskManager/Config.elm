@@ -12,6 +12,9 @@ type alias Config msg =
     , processes : Processes.Model
     , lastTick : Time
     , batchMsg : List msg -> msg
+    , onPauseProcess : Processes.ID -> msg
+    , onResumeProcess : Processes.ID -> msg
+    , onRemoveProcess : Processes.ID -> msg
     }
 
 
@@ -19,4 +22,7 @@ menuConfig : Config msg -> Menu.Config msg
 menuConfig config =
     { toMsg = MenuMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , onPauseProcess = config.onPauseProcess
+    , onResumeProcess = config.onResumeProcess
+    , onRemoveProcess = config.onRemoveProcess
     }
