@@ -1,15 +1,20 @@
 module Apps.Explorer.Config exposing (..)
 
 import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared exposing (CId, StorageId)
+import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Menu.Config as Menu
 import Apps.Explorer.Messages exposing (..)
 
 
 type alias Config msg =
     { toMsg : Msg -> msg
-    , activeServer : Servers.Server
     , batchMsg : List msg -> msg
+    , activeServer : Servers.Server
+    , onNewTextFile : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
+    , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
     }
 
 

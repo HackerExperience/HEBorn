@@ -13,9 +13,7 @@ import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Notifications.Shared as ServersNotifications
-import Game.Servers.Processes.Requests.Download as Download
-import Game.Servers.Shared as Servers
+import Game.Servers.Shared as Servers exposing (CId, StorageId)
 import Game.Storyline.Models as Story
 import OS.SessionManager.WindowManager.Config as WindowManager
 import OS.SessionManager.Dock.Config as Dock
@@ -38,12 +36,15 @@ type alias Config msg =
     , backFlix : BackFlix.BackFlix
     , endpointCId : Maybe Servers.CId
     , onSetBounce : Maybe Bounces.ID -> msg
-    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
     , onAccountToast : AccountNotifications.Content -> msg
-    , onServerToast : ServersNotifications.Content -> msg
     , onPoliteCrash : ( String, String ) -> msg
+    , onNewTextFile : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
+    , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
     }
 
 
@@ -66,8 +67,11 @@ wmConfig sessionId config =
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
     , onAccountToast = config.onAccountToast
-    , onServerToast = config.onServerToast
     , onPoliteCrash = config.onPoliteCrash
+    , onNewTextFile = config.onNewTextFile
+    , onNewDir = config.onNewDir
+    , onMoveFile = config.onMoveFile
+    , onRenameFile = config.onRenameFile
     }
 
 

@@ -10,11 +10,9 @@ import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Hardware.Models as Hardware
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Notifications.Shared as ServersNotifications
-import Game.Servers.Processes.Requests.Download as Download
 import Game.Storyline.Models as Storyline
 import Apps.Apps as Apps
 import Apps.Messages exposing (..)
@@ -44,17 +42,20 @@ type alias Config msg =
     , story : Storyline.Model
     , account : Account.Model
     , inventory : Inventory.Model
-    , activeServer : Servers.Server
+    , activeServer : ( CId, Servers.Server )
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
-    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
     , onAccountToast : AccountNotifications.Content -> msg
-    , onServerToast : ServersNotifications.Content -> msg
     , onPoliteCrash : ( String, String ) -> msg
+    , onNewTextFile : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
+    , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
     }
 
 
@@ -68,7 +69,10 @@ calculatorConfig config =
 taskManConfig : Config msg -> TaskManager.Config msg
 taskManConfig config =
     { toMsg = TaskManagerMsg >> config.toMsg
-    , processes = Servers.getProcesses config.activeServer
+    , processes =
+        config.activeServer
+            |> Tuple.second
+            |> Servers.getProcesses
     , lastTick = config.lastTick
     , batchMsg = config.batchMsg
     }
@@ -77,7 +81,10 @@ taskManConfig config =
 logViewerConfig : Config msg -> LogViewer.Config msg
 logViewerConfig config =
     { toMsg = LogViewerMsg >> config.toMsg
-    , logs = Servers.getLogs config.activeServer
+    , logs =
+        config.activeServer
+            |> Tuple.second
+            |> Servers.getLogs
     , batchMsg = config.batchMsg
     }
 
@@ -85,8 +92,12 @@ logViewerConfig config =
 explorerConfig : Config msg -> Explorer.Config msg
 explorerConfig config =
     { toMsg = ExplorerMsg >> config.toMsg
-    , activeServer = config.activeServer
     , batchMsg = config.batchMsg
+    , activeServer = Tuple.second config.activeServer
+    , onNewTextFile = config.onNewTextFile
+    , onNewDir = config.onNewDir
+    , onMoveFile = config.onMoveFile
+    , onRenameFile = config.onRenameFile
     }
 
 
@@ -113,7 +124,6 @@ bugConfig config =
     { toMsg = BugMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , onAccountToast = config.onAccountToast
-    , onServerToast = config.onServerToast
     , onPoliteCrash = config.onPoliteCrash
     }
 
@@ -122,9 +132,11 @@ serversGearsConfig : Config msg -> ServersGears.Config msg
 serversGearsConfig config =
     { toMsg = ServersGearsMsg >> config.toMsg
     , inventory = config.inventory
-    , activeServer = config.activeServer
+    , activeServer = Tuple.second config.activeServer
     , mobo =
-        Servers.getHardware config.activeServer
+        config.activeServer
+            |> Tuple.second
+            |> Servers.getHardware
             |> Hardware.getMotherboard
     , batchMsg = config.batchMsg
     }
@@ -134,8 +146,11 @@ browserConfig : Config msg -> Browser.Config msg
 browserConfig config =
     { toMsg = BrowserMsg >> config.toMsg
     , batchMsg = config.batchMsg
-    , activeServer = config.activeServer
-    , endpoints = Servers.getEndpoints config.activeServer
+    , activeServer = Tuple.second config.activeServer
+    , endpoints =
+        config.activeServer
+            |> Tuple.second
+            |> Servers.getEndpoints
     , onNewApp = config.onNewApp
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
@@ -171,7 +186,7 @@ lanViewerConfig { toMsg } =
 connManagerConfig : Config msg -> ConnManager.Config msg
 connManagerConfig config =
     { toMsg = ConnManagerMsg >> config.toMsg
-    , activeServer = config.activeServer
+    , activeServer = Tuple.second config.activeServer
     , batchMsg = config.batchMsg
     }
 
