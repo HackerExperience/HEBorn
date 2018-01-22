@@ -30,7 +30,7 @@ osClass =
     .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     div [ osClass [ OsRes.Dock ] ]
         [ dock config model ]
@@ -40,7 +40,7 @@ view config model =
 -- internals
 
 
-dock : Config msg -> Model -> Html Msg
+dock : Config msg -> Model -> Html msg
 dock config model =
     let
         id =
@@ -53,14 +53,14 @@ dock config model =
             config.accountDock
 
         content =
-            icons dock wm
+            icons config dock wm
     in
         div [ class [ Res.Container ] ]
             [ div [ class [ Res.Main ] ] [ content ] ]
 
 
-icons : List Apps.App -> WM.Model -> Html Msg
-icons apps wm =
+icons : Config msg -> List Apps.App -> WM.Model -> Html msg
+icons config apps wm =
     let
         group =
             WM.group wm
@@ -71,13 +71,13 @@ icons apps wm =
                     hasAppOpened app group
 
                 item =
-                    icon app group wm
+                    icon config app group wm
 
                 content =
                     if isNotEmpty then
                         let
                             menu =
-                                options app group
+                                options config app group
                         in
                             [ item, menu ]
                     else
@@ -101,19 +101,19 @@ icons apps wm =
         div [ class [ Res.Main ] ] content
 
 
-icon : Apps.App -> WM.GroupedWindows -> WM.Model -> Html Msg
-icon app group wm =
+icon : Config msg -> Apps.App -> WM.GroupedWindows -> WM.Model -> Html msg
+icon config app group wm =
     div
         [ class [ Res.ItemIco ]
-        , onClick (AppButton app)
+        , onClick (config.toMsg <| AppButton app)
         , attribute Res.appIconAttrTag (Apps.icon app)
         , title (Apps.name app)
         ]
         []
 
 
-options : Apps.App -> WM.GroupedWindows -> Html Msg
-options app { visible, hidden } =
+options : Config msg -> Apps.App -> WM.GroupedWindows -> Html msg
+options config app { visible, hidden } =
     let
         appName =
             Apps.name app
@@ -128,18 +128,18 @@ options app { visible, hidden } =
             visible
                 |> Dict.get appName
                 |> defaultToEmptyList
-                |> windowList FocusWindow "OPEN WINDOWS"
+                |> windowList (FocusWindow >> config.toMsg) "OPEN WINDOWS"
 
         hidden_ =
             hidden
                 |> Dict.get appName
                 |> defaultToEmptyList
-                |> windowList RestoreWindow "HIDDEN LINUXES"
+                |> windowList (RestoreWindow >> config.toMsg) "HIDDEN LINUXES"
 
         batchActions =
-            [ subMenuAction "New window" (OpenApp app)
-            , subMenuAction "Minimize all" (MinimizeApps app)
-            , subMenuAction "Close all" (CloseApps app)
+            [ subMenuAction "New window" (config.toMsg <| OpenApp app)
+            , subMenuAction "Minimize all" (config.toMsg <| MinimizeApps app)
+            , subMenuAction "Close all" (config.toMsg <| CloseApps app)
             ]
 
         menu_ =
@@ -187,10 +187,10 @@ subMenuAction label event =
 
 
 windowList :
-    (String -> Msg)
+    (String -> msg)
     -> String
     -> List ( String, WM.Window )
-    -> List (Html Msg)
+    -> List (Html msg)
 windowList event label list =
     let
         titleAndID ( id, window ) =
@@ -203,7 +203,7 @@ windowList event label list =
             |> (::) (li [] [ text label ])
 
 
-listItem : (String -> Msg) -> Int -> ( String, WM.Window ) -> Html Msg
+listItem : (String -> msg) -> Int -> ( String, WM.Window ) -> Html msg
 listItem event index ( id, window ) =
     li
         [ class [ Res.ClickableWindow ]
@@ -213,7 +213,7 @@ listItem event index ( id, window ) =
         [ (windowLabel index window) ]
 
 
-windowLabel : Int -> WM.Window -> Html Msg
+windowLabel : Int -> WM.Window -> Html msg
 windowLabel index window =
     let
         andThen =
