@@ -18,15 +18,15 @@ import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Reference exposing (Reference)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd FloatingHeads.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
     Config msg
     -> FloatingHeads.Msg
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 update config msg model =
     case msg of
         ContentMsg msg ->
@@ -48,20 +48,19 @@ update config msg model =
             onLaunchApp config context params model
 
 
-onContentMsg : Config msg -> Contents.Msg -> Model -> UpdateResponse
+onContentMsg : Config msg -> Contents.Msg -> Model -> UpdateResponse msg
 onContentMsg config msg model =
     let
         config_ =
             contentConfig config
 
-        cmd =
-            -- HACK
-            Cmd.map ContentMsg <| React.toCmd <| Contents.update config_ msg
+        react =
+            Contents.update config_ msg
     in
-        ( model, cmd, Dispatch.none )
+        ( model, React.map (ContentMsg >> config.toMsg) react )
 
 
-onReply : Config msg -> Content -> Model -> UpdateResponse
+onReply : Config msg -> Content -> Model -> UpdateResponse msg
 onReply config content model =
     let
         dispatch =
@@ -69,19 +68,19 @@ onReply config content model =
                 |> Storyline.ReplyEmail
                 |> Dispatch.emails
     in
-        ( model, Cmd.none, dispatch )
+        ( model, React.none )
 
 
-handleSelectContact : Config msg -> ID -> Model -> UpdateResponse
+handleSelectContact : Config msg -> ID -> Model -> UpdateResponse msg
 handleSelectContact config contact model =
     let
         model_ =
             { model | activeContact = contact }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onToggleMode : Config msg -> Model -> UpdateResponse
+onToggleMode : Config msg -> Model -> UpdateResponse msg
 onToggleMode config model =
     let
         model_ =
@@ -92,20 +91,24 @@ onToggleMode config model =
                 Expanded ->
                     { model | mode = Compact }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onClose : Config msg -> Model -> UpdateResponse
+onClose : Config msg -> Model -> UpdateResponse msg
 onClose config model =
     let
         dispatch =
             Dispatch.os <| OS.CloseApp model.me
     in
-        ( model, Cmd.none, dispatch )
+        ( model, React.none )
 
 
-onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse
+onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg
 onLaunchApp config context params model =
     case params of
         OpenAtContact contact ->
-            Update.fromModel <| setActiveContact contact model
+            let
+                model_ =
+                    setActiveContact contact model
+            in
+                ( model_, React.none )

@@ -1,6 +1,7 @@
 module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Dict
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
 import Draggable
@@ -8,7 +9,6 @@ import Draggable.Events as Draggable
 import Utils.Update as Update
 import Apps.Update as Apps
 import Apps.Messages as Apps
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import OS.SessionManager.WindowManager.Config exposing (..)
@@ -17,28 +17,23 @@ import OS.SessionManager.WindowManager.Messages exposing (Msg(..))
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
-
--- CONFREFACT: remove Game.Data after refactor
--- CONFREFACT: give WindowManager a real config and get rid of data
-
-
-update : Config msg -> Game.Data -> Msg -> Model -> UpdateResponse msg
-update config data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         AppMsg targetContext id msg ->
-            onAppMsg config data targetContext id msg model
+            onAppMsg config targetContext id msg model
 
         EveryAppMsg context msg ->
-            onEveryAppMsg config data context msg model
+            onEveryAppMsg config context msg model
 
         SetContext wId context_ ->
-            onSetContext config data context_ wId model
+            onSetContext config context_ wId model
 
         UpdateFocusTo maybeWId ->
-            onUpdateFocustTo config data maybeWId model
+            onUpdateFocustTo config maybeWId model
 
         Close wId ->
             onClose wId model
@@ -68,148 +63,141 @@ update config data msg model =
 
 onAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> ID
     -> Apps.Msg
     -> Model
-    -> ( Model, Cmd msg, Dispatch )
-onAppMsg config data targetContext wId msg ({ windows } as model) =
+    -> ( Model, React msg )
+onAppMsg config targetContext wId msg ({ windows } as model) =
     case Dict.get wId windows of
         Just window ->
             model
-                |> appsMsg config data msg targetContext wId window
-                |> Update.mapModel
+                |> appsMsg config msg targetContext wId window
+                |> Tuple.mapFirst
                     ((flip (Dict.insert wId) windows)
                         >> (\windows_ -> { model | windows = windows_ })
                     )
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 appsMsg :
     Config msg
-    -> Game.Data
     -> Apps.Msg
     -> TargetContext
     -> ID
     -> Window
     -> Model
-    -> ( Window, Cmd msg, Dispatch )
-appsMsg config data msg targetContext wId window model =
+    -> ( Window, React msg )
+appsMsg config msg targetContext wId window model =
     case ( targetContext, window.instance ) of
         ( All, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
-                ( g_, cmdG, dispatchG ) =
-                    Apps.update config_ data msg g
+                ( g_, reactG ) =
+                    Apps.update config_ msg g
 
-                ( e_, cmdE, dispatchE ) =
-                    Apps.update config_ data msg e
+                ( e_, reactE ) =
+                    Apps.update config_ msg e
 
-                cmd =
-                    [ cmdG, cmdE ]
-                        |> Cmd.batch
-
-                dispatch =
-                    Dispatch.batch [ dispatchG, dispatchE ]
+                react =
+                    [ reactG, reactE ]
+                        |> React.batch config.batchMsg
 
                 window_ =
                     { window | instance = DoubleContext a g_ e_ }
             in
-                ( window_, cmd, dispatch )
+                ( window_, react )
 
         ( One Gateway, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
-                ( g_, cmd, dispatch ) =
-                    Apps.update config_ data msg g
+                ( g_, react ) =
+                    Apps.update config_ msg g
 
                 window_ =
                     { window | instance = DoubleContext a g_ e }
             in
-                ( window_, cmd, dispatch )
+                ( window_, react )
 
         ( One Endpoint, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig (Just a) wId targetContext config
 
-                ( e_, cmd, dispatch ) =
-                    Apps.update config_ data msg e
+                ( e_, react ) =
+                    Apps.update config_ msg e
 
                 window_ =
                     { window | instance = DoubleContext a g e_ }
             in
-                ( window_, cmd, dispatch )
+                ( window_, react )
 
         ( Active, DoubleContext active _ _ ) ->
-            appsMsg config data msg (One active) wId window model
+            appsMsg config msg (One active) wId window model
 
         ( _, SingleContext g ) ->
             let
                 config_ =
-                    appsConfig wId targetContext config
+                    appsConfig Nothing wId targetContext config
 
-                ( g_, cmd, dispatch ) =
-                    Apps.update config_ data msg g
+                ( g_, react ) =
+                    Apps.update config_ msg g
 
                 window_ =
                     { window | instance = SingleContext g_ }
             in
-                ( window_, cmd, dispatch )
+                ( window_, react )
 
 
 reduceAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> Apps.Msg
     -> Model
     -> ID
     -> Window
-    -> ( Windows, Cmd msg, Dispatch )
-    -> ( Windows, Cmd msg, Dispatch )
-reduceAppMsg config data context msg model wId window ( windows, cmd0, dispatch0 ) =
+    -> ( Windows, React msg )
+    -> ( Windows, React msg )
+reduceAppMsg config context msg model wId window ( windows, react0 ) =
     let
-        ( window_, cmd1, dispatch1 ) =
-            appsMsg config data msg context wId window model
+        ( window_, react1 ) =
+            appsMsg config msg context wId window model
 
         windows_ =
             Dict.insert wId window windows
 
-        cmd =
-            Cmd.batch [ cmd0, cmd1 ]
+        react =
+            React.batch config.batchMsg [ react0, react1 ]
 
-        dispatch =
-            Dispatch.batch [ dispatch0, dispatch1 ]
+        --dispatch =
+        --    Dispatch.batch [ dispatch0, dispatch1 ]
     in
-        ( windows_, cmd, dispatch )
+        ( windows_, react )
 
 
 onEveryAppMsg :
     Config msg
-    -> Game.Data
     -> TargetContext
     -> Apps.Msg
     -> Model
     -> UpdateResponse msg
-onEveryAppMsg config data context msg model =
+onEveryAppMsg config context msg model =
     model.windows
         |> Dict.foldl
-            (reduceAppMsg config data context msg model)
-            ( Dict.empty, Cmd.none, Dispatch.none )
-        |> Update.mapModel
+            (reduceAppMsg config context msg model)
+            ( Dict.empty, React.none )
+        |> Tuple.mapFirst
             (\windows_ -> { model | windows = windows_ })
 
 
-onSetContext : Config msg -> Game.Data -> Context -> ID -> Model -> UpdateResponse msg
-onSetContext config data context_ wId ({ windows } as model) =
+onSetContext : Config msg -> Context -> ID -> Model -> UpdateResponse msg
+onSetContext config context_ wId ({ windows } as model) =
     case Dict.get wId windows of
         Just ({ instance, app } as window) ->
             case instance of
@@ -224,24 +212,24 @@ onSetContext config data context_ wId ({ windows } as model) =
                         model_ =
                             { model | windows = windows_ }
 
-                        dispatch =
-                            context_
-                                |> GoApp app
-                                |> Storyline.ActionDone
-                                |> Storyline.Missions
-                                |> Dispatch.storyline
+                        --dispatch =
+                        --    context_
+                        --        |> GoApp app
+                        --        |> Storyline.ActionDone
+                        --        |> Storyline.Missions
+                        --        |> Dispatch.storyline
                     in
-                        ( model_, Cmd.none, dispatch )
+                        ( model_, React.none )
 
                 SingleContext _ ->
-                    Update.fromModel model
+                    ( model, React.none )
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-onUpdateFocustTo : Config msg -> Game.Data -> Maybe String -> Model -> UpdateResponse msg
-onUpdateFocustTo config data maybeWId model =
+onUpdateFocustTo : Config msg -> Maybe String -> Model -> UpdateResponse msg
+onUpdateFocustTo config maybeWId model =
     case maybeWId of
         Just id ->
             case Dict.get id model.windows of
@@ -258,7 +246,7 @@ onUpdateFocustTo config data maybeWId model =
                                 |> Storyline.Missions
                                 |> Dispatch.storyline
                     in
-                        ( model_, Cmd.none, dispatch )
+                        ( model_, React.none )
 
                 Nothing ->
                     onUnfocus model
@@ -271,33 +259,33 @@ onUnfocus : Model -> UpdateResponse msg
 onUnfocus model =
     model
         |> unfocus
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onClose : ID -> Model -> UpdateResponse msg
 onClose wId model =
     model
         |> remove wId
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onToggleMaximize : ID -> Model -> UpdateResponse msg
 onToggleMaximize wId model =
     model
         |> toggleMaximize wId
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onMinimize : ID -> Model -> UpdateResponse msg
 onMinimize wId model =
     model
         |> minimize wId
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onDragBy : Draggable.Delta -> Model -> UpdateResponse msg
 onDragBy ( x, y ) model =
-    Update.fromModel <|
+    flip (,) React.none <|
         case model.focusing of
             Just id ->
                 move id x y model
@@ -318,21 +306,21 @@ onDragMsg config msg model =
         ( model_, cmd ) =
             Draggable.update dragConfig msg model
 
-        cmd_ =
-            Cmd.map config.toMsg cmd
+        react_ =
+            React.cmd <| Cmd.map config.toMsg cmd
     in
-        ( model_, cmd_, Dispatch.none )
+        ( model_, react_ )
 
 
 onStartDragging : ID -> Model -> UpdateResponse msg
 onStartDragging wId model =
     model
         |> startDragging wId
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onStopDragging : Model -> UpdateResponse msg
 onStopDragging model =
     model
         |> stopDragging
-        |> Update.fromModel
+        |> flip (,) React.none

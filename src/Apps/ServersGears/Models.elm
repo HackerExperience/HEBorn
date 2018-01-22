@@ -46,14 +46,11 @@ icon =
     "srvgr"
 
 
-initialModel : Game.Data -> Model
-initialModel data =
+initialModel : Maybe Motherboard -> Model
+initialModel mobo =
     let
         motherboard =
-            data
-                |> Game.getActiveServer
-                |> Servers.getHardware
-                |> Hardware.getMotherboard
+            mobo
     in
         { overrides =
             findOverrides motherboard

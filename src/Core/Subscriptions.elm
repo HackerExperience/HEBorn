@@ -9,6 +9,7 @@ import Game.Data as GameD
 import Game.Models as Game
 import Game.Meta.Models as Meta
 import Game.Subscriptions as Game
+import Game.Account.Models as Account
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Subscriptions as Ws
 import Landing.Subscriptions as Landing
@@ -65,20 +66,27 @@ home model =
 
 setup : SetupModel -> Sub Msg
 setup ({ game, setup } as model) =
-    let
-        config =
-            setupConfig
-                game.account.id
-                game.account.mainframe
-                game.flags
+    case game.account.mainframe of
+        Just mainframe ->
+            let
+                config =
+                    setupConfig
+                        game.account.id
+                        mainframe
+                        game.flags
 
-        setupSub =
-            Setup.subscriptions config setup
-    in
-        Sub.batch
-            [ websocket model.websocket
-            , setupSub
-            ]
+                setupSub =
+                    Setup.subscriptions config setup
+            in
+                Sub.batch
+                    [ websocket model.websocket
+                    , setupSub
+                    ]
+
+        Nothing ->
+            "Player is in setup without a mainframe. [Subscriptions.setup]"
+                |> Error.astralProj
+                |> uncurry Native.Panic.crash
 
 
 play : PlayModel -> Sub Msg
@@ -101,39 +109,45 @@ play model =
 
 
 os : Game.Model -> OS.Model -> Sub Msg
-os game model =
-    case GameD.fromGateway game of
-        Just data ->
-            let
-                activeServer =
-                    case Game.getActiveServer game of
-                        Just ( _, activeServer ) ->
-                            activeServer
+os game os =
+    -- CONFREFACT: Get rid of `data`
+    let
+        volatile_ =
+            ( Game.getGateway game
+            , Game.getActiveServer game
+            , GameD.fromGateway game
+            )
 
-                        Nothing ->
-                            "Player has no active Server"
-                                |> Error.astralProj
-                                |> uncurry Native.Panic.crash
+        ctx =
+            Account.getContext <| Game.getAccount game
+    in
+        case volatile_ of
+            ( Nothing, _, _ ) ->
+                "Player doesn't have a Gateway [Subscriptions.os]"
+                    |> Error.astralProj
+                    |> uncurry Native.Panic.crash
 
-                lastTick =
-                    game
-                        |> Game.getMeta
-                        |> Meta.getLastTick
+            ( _, Nothing, _ ) ->
+                "Player doesn't have an active server [Subscriptions.os]"
+                    |> Error.astralProj
+                    |> uncurry Native.Panic.crash
 
-                account =
-                    Game.getAccount game
+            ( _, _, Nothing ) ->
+                "COULDN'T GENERATE DATA"
+                    |> Error.astralProj
+                    |> uncurry Native.Panic.crash
 
-                story =
-                    Game.getStory game
+            ( Just gtw, Just srv, Just data ) ->
+                let
+                    lastTick =
+                        game
+                            |> Game.getMeta
+                            |> Meta.getLastTick
 
-                config =
-                    osConfig account story lastTick activeServer
-            in
-                model
-                    |> OS.subscriptions config data
-
-        Nothing ->
-            Sub.none
+                    config =
+                        osConfig game srv ctx gtw
+                in
+                    OS.subscriptions config os
 
 
 websocket : Ws.Model Msg -> Sub Msg

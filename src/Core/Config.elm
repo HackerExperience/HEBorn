@@ -50,6 +50,37 @@ import Setup.Messages as Setup
 import Core.Flags exposing (Flags)
 import Core.Error as Error exposing (Error)
 import Core.Messages exposing (..)
+import Setup.Config as Setup
+import Game.Config as Game
+import Game.Messages as Game
+import Game.Models as Game
+import Game.Account.Models as Account
+import Game.Account.Messages as Account
+import Game.Account.Notifications.Messages as AccNotif
+import Game.Meta.Models as Meta
+import Game.Meta.Types.Context exposing (..)
+import Game.Servers.Messages as Servers
+import Game.Servers.Models as Servers exposing (Server)
+import Game.Servers.Shared exposing (CId)
+import Game.Servers.Notifications.Messages as SrvNotif
+import Game.Storyline.Messages as Story
+import Game.Storyline.Models as Story
+import OS.Config as OS
+import OS.Messages as OS
+import OS.SessionManager.Messages as SessionManager
+import OS.Toasts.Messages as Toast
+import Apps.Messages as Apps
+import Apps.Browser.Messages as Browser
+import Game.Config as Game
+import Game.Account.Models as Account
+import Game.BackFlix.Models as BackFlix
+import Game.Inventory.Models as Inventory
+import Game.Servers.Models as Servers
+import Game.Servers.Shared exposing (CId)
+import Game.Storyline.Models as Story
+import Core.Flags exposing (Flags)
+import Core.Error as Error exposing (Error)
+import Core.Messages exposing (..)
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -229,35 +260,77 @@ gameConfig =
     }
 
 
-setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
+setupConfig : String -> CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
-    case mainframe of
-        Just cid ->
-            { toMsg = SetupMsg
-            , accountId = accountId
-            , mainframe = cid
-            , flags = flags
-            , onError = HandleCrash
-            , onPlay = HandlePlay
-            }
-
-        Nothing ->
-            Debug.crash
-                "Impossible: Going to setup before account bootstrap"
+    { toMsg = SetupMsg
+    , accountId = accountId
+    , mainframe = mainframe
+    , flags = flags
+    , onError = HandleCrash
+    , onPlay = HandlePlay
+    }
 
 
 osConfig :
-    Account.Model
-    -> Storyline.Model
-    -> Time
-    -> Servers.Server
+    Game.Model
+    -> ( CId, Server )
+    -> Context
+    -> ( CId, Server )
     -> OS.Config Msg
-osConfig account story lastTick activeServer =
+osConfig game (( cid, _ ) as srv) ctx gtw =
     { toMsg = OSMsg
-    , account = account
-    , activeServer = activeServer
-    , story = story
-    , lastTick = lastTick
+    , flags = Game.getFlags game
+    , account = Game.getAccount game
+    , servers = Game.getServers game
+    , story = Game.getStory game
+    , inventory = Game.getInventory game
+    , backFlix = .logs <| Game.getBackFlix game
+    , lastTick = Meta.getLastTick <| Game.getMeta <| game
+    , activeServer = srv
+    , activeContext = ctx
+    , activeGateway = gtw
+    , onLogout =
+        Account.HandleLogout
+            |> Game.AccountMsg
+            |> GameMsg
+    , onSetGateway =
+        Account.HandleSetGateway
+            >> Game.AccountMsg
+            >> GameMsg
+    , onSetEndpoint =
+        Account.HandleSetEndpoint
+            >> Game.AccountMsg
+            >> GameMsg
+    , onSetContext =
+        Account.HandleSetContext
+            >> Game.AccountMsg
+            >> GameMsg
+    , onSetBounce =
+        Servers.HandleSetBounce
+            >> Servers.ServerMsg cid
+            >> Game.ServersMsg
+            >> GameMsg
+    , onSetStoryMode =
+        Story.HandleSetMode
+            >> Game.StoryMsg
+            >> GameMsg
+    , onReadAllAccountNotifications =
+        AccNotif.HandleReadAll
+            |> Account.NotificationsMsg
+            |> Game.AccountMsg
+            |> GameMsg
+    , onReadAllServerNotifications =
+        SrvNotif.HandleReadAll
+            |> Servers.NotificationsMsg
+            |> Servers.ServerMsg cid
+            |> Game.ServersMsg
+            |> GameMsg
+    , onSetActiveNIP =
+        Servers.HandleSetActiveNIP
+            >> Servers.ServerMsg cid
+            >> Game.ServersMsg
+            >> GameMsg
+    , batchMsg = BatchMsg
     }
 
 

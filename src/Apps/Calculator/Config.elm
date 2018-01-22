@@ -5,4 +5,5 @@ import Apps.Calculator.Messages exposing (..)
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     }

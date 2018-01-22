@@ -5,7 +5,7 @@ import Game.Storyline.Emails.Contents.Config exposing (..)
 import Game.Storyline.Emails.Contents.Messages exposing (..)
 
 
-update : Config -> Msg -> React Msg
+update : Config msg -> Msg -> React Msg
 update config msg =
     case msg of
         OpenAddr ip ->

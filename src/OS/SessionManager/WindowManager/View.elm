@@ -12,10 +12,8 @@ import Utils.Html.Attributes exposing (appAttr, boolAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Models as Apps
 import Apps.View as Apps
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (..)
 import OS.SessionManager.WindowManager.Config exposing (..)
-import OS.SessionManager.WindowManager.Helpers exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res
@@ -25,18 +23,21 @@ import OS.SessionManager.WindowManager.Resources as Res
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Config msg -> Game.Data -> Model -> Html msg
-view config data ({ windows, visible } as model) =
+view : Config msg -> Model -> Html msg
+view config ({ windows, visible } as model) =
     let
-        config_ id =
-            appsConfig id Active config
+        context window =
+            Just (windowContext window)
+
+        config_ id window =
+            appsConfig (context window) id Active config
 
         mapper id =
             case Dict.get id windows of
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.view (config_ id) (windowData config data Nothing id window model)
+                        |> Apps.view (config_ id window)
                         |> windowWrapper config id window
                         |> (,) id
                         |> Just

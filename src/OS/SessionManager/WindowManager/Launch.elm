@@ -1,12 +1,13 @@
 module OS.SessionManager.WindowManager.Launch exposing (resert, insert)
 
 import Dict
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared as Servers
+import OS.SessionManager.WindowManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import Apps.Apps as Apps
@@ -14,29 +15,26 @@ import Apps.Models as Apps
 import Apps.Launch as Apps
 
 
-fallbackContext : Game.Data -> Maybe Context -> Context
-fallbackContext data maybeContext =
+fallbackContext : Config msg -> Maybe Context -> Context
+fallbackContext config maybeContext =
     case maybeContext of
         Just context ->
             context
 
         Nothing ->
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getContext
+            config.activeContext
 
 
 resert :
-    Game.Data
+    Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> String
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-resert data maybeContext maybeParams id serverCId app model =
+    -> ( Model, React msg )
+resert config maybeContext maybeParams id serverCId app model =
     -- TODO: maybe check if the opened window has the current endpoint, focus
     -- it if this is the case
     let
@@ -63,31 +61,31 @@ resert data maybeContext maybeParams id serverCId app model =
                         |> List.filter (filterApp app windows)
                         |> List.foldl restore model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
         else
-            insert data maybeContext maybeParams id serverCId app model
+            insert config maybeContext maybeParams id serverCId app model
 
 
 insert :
-    Game.Data
+    Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-insert data maybeContext maybeParams id serverCId app model =
+    -> ( Model, React msg )
+insert config maybeContext maybeParams id serverCId app model =
     let
         { windows, visible, parentSession } =
             model
 
-        ( instance, cmd, dispatch ) =
+        ( instance, react ) =
             case Apps.contexts app of
                 Apps.ContextualApp ->
                     let
                         context =
-                            fallbackContext data maybeContext
+                            fallbackContext config maybeContext
 
                         ( gatewayParams, endpointParams ) =
                             case context of
@@ -97,8 +95,14 @@ insert data maybeContext maybeParams id serverCId app model =
                                 Endpoint ->
                                     ( Nothing, maybeParams )
 
-                        ( modelG, cmdG, dispatchG ) =
-                            Apps.launch data
+                        gatewayConfig =
+                            appsConfig (Just Gateway) id (One Gateway) config
+
+                        endpointConfig =
+                            appsConfig (Just Endpoint) id (One Endpoint) config
+
+                        ( modelG, reactG ) =
+                            Apps.launch gatewayConfig
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Gateway
@@ -106,14 +110,8 @@ insert data maybeContext maybeParams id serverCId app model =
                                 gatewayParams
                                 app
 
-                        data_ =
-                            data
-                                |> Game.getGame
-                                |> Game.fromEndpoint
-                                |> Maybe.withDefault data
-
-                        ( modelE, cmdE, dispatchE ) =
-                            Apps.launch data_
+                        ( modelE, reactE ) =
+                            Apps.launch endpointConfig
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Endpoint
@@ -121,21 +119,21 @@ insert data maybeContext maybeParams id serverCId app model =
                                 endpointParams
                                 app
 
-                        cmd =
-                            Cmd.batch [ cmdG, cmdE ]
-
-                        dispatch =
-                            Dispatch.batch [ dispatchG, dispatchE ]
+                        react =
+                            React.batch config.batchMsg [ reactG, reactE ]
 
                         model =
                             DoubleContext context modelG modelE
                     in
-                        ( model, cmd, dispatch )
+                        ( model, react )
 
                 Apps.ContextlessApp ->
                     let
-                        ( model, cmd, dispatch ) =
-                            Apps.launch data
+                        config_ =
+                            appsConfig (Just Gateway) id (One Gateway) config
+
+                        ( model, react ) =
+                            Apps.launch config_
                                 { sessionId = parentSession
                                 , windowId = id
                                 , context = Gateway
@@ -143,10 +141,7 @@ insert data maybeContext maybeParams id serverCId app model =
                                 maybeParams
                                 app
                     in
-                        ( SingleContext model, cmd, dispatch )
-
-        cmd_ =
-            Cmd.map (AppMsg Active id) cmd
+                        ( SingleContext model, react )
 
         window =
             Window
@@ -171,4 +166,4 @@ insert data maybeContext maybeParams id serverCId app model =
                 , focusing = Just id
             }
     in
-        ( model_, cmd_, dispatch )
+        ( model_, react )

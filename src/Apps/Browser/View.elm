@@ -24,6 +24,7 @@ import Apps.Browser.Pages.Bithub.View as Bithub
 import Apps.Browser.Pages.MissionCenter.View as MissionCenter
 import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
 import Apps.Browser.Pages.Configs exposing (..)
+import Apps.Browser.Config exposing (..)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -38,8 +39,8 @@ styles =
     Css.asPairs >> style
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     let
         tab =
             getNowTab model
@@ -49,7 +50,7 @@ view data model =
             ]
             [ viewTabs model
             , viewToolbar tab
-            , viewPg data tab
+            , viewPg config tab
             , menuView model
             ]
 
@@ -146,17 +147,16 @@ viewTabs b =
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
-viewPg : Game.Data -> Tab -> Html Msg
-viewPg data { page, modal } =
+viewPg : Config msg -> Tab -> Html Msg
+viewPg config { page, modal } =
     div
         [ class [ PageContent ] ]
-        [ viewPage data page
+        [ viewPage config page
         , case modal of
             Just (ForDownload source file) ->
                 let
                     storages =
-                        data
-                            |> Game.getActiveServer
+                        config.activeServer
                             |> .storages
 
                     onPick chosen =
@@ -172,8 +172,8 @@ viewPg data { page, modal } =
         ]
 
 
-viewPage : Game.Data -> Page -> Html Msg
-viewPage data page =
+viewPage : Config msg -> Page -> Html Msg
+viewPage config page =
     case page of
         NotFoundModel _ ->
             NotFound.view
@@ -182,7 +182,7 @@ viewPage data page =
             Home.view homeConfig
 
         WebserverModel page ->
-            Webserver.view webserverConfig data page
+            Webserver.view (webserverConfig config) page
 
         ProfileModel ->
             Profile.view
@@ -191,7 +191,7 @@ viewPage data page =
             Whois.view
 
         DownloadCenterModel page ->
-            DownloadCenter.view downloadCenterConfig data page
+            DownloadCenter.view (downloadCenterConfig config) page
 
         ISPModel ->
             ISP.view

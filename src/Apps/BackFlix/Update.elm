@@ -1,39 +1,40 @@
 module Apps.BackFlix.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.Update as Update
-import Game.Data as Game
+import Apps.BackFlix.Config exposing (..)
 import Apps.BackFlix.Models exposing (..)
 import Apps.BackFlix.Messages as BackFlix exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> BackFlix.Msg
     -> Model
-    -> ( Model, Cmd BackFlix.Msg, Dispatch )
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         UpdateTextFilter filter ->
-            onUpdateFilter data filter model
+            onUpdateFilter config filter model
 
         GoTab tab ->
-            onGoTabs data tab model
+            onGoTabs config tab model
 
 
-onGoTabs : Game.Data -> MainTab -> Model -> UpdateResponse
-onGoTabs data tab model =
+onGoTabs : Config msg -> MainTab -> Model -> UpdateResponse msg
+onGoTabs config tab model =
     let
         model_ =
             { model | selected = tab }
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
-onUpdateFilter : Game.Data -> String -> Model -> UpdateResponse
-onUpdateFilter data filter model =
-    Update.fromModel model
+onUpdateFilter : Config msg -> String -> Model -> UpdateResponse msg
+onUpdateFilter config filter model =
+    ( model, React.none )

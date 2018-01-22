@@ -1,30 +1,30 @@
 module Apps.BounceManager.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
+import Utils.React as React exposing (React)
+import Apps.BounceManager.Config exposing (..)
 import Apps.BounceManager.Models exposing (Model, MainTab)
 import Apps.BounceManager.Messages as BounceManager exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd BounceManager.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> BounceManager.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         GoTab tab ->
             onGoTab tab model
 
 
-onGoTab : MainTab -> Model -> UpdateResponse
+onGoTab : MainTab -> Model -> UpdateResponse msg
 onGoTab tab model =
     let
         model_ =
             { model | selected = tab }
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )

@@ -9,11 +9,13 @@ import Apps.Explorer.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , activeServer : Servers.Server
+    , batchMsg : List msg -> msg
     }
 
 
 menuConfig : Config msg -> Menu.Config msg
-menuConfig { toMsg, activeServer } =
-    { toMsg = MenuMsg >> toMsg
-    , activeServer = activeServer
+menuConfig config =
+    { toMsg = MenuMsg >> config.toMsg
+    , activeServer = config.activeServer
+    , batchMsg = config.batchMsg
     }

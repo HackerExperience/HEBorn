@@ -10,7 +10,7 @@ import Game.Storyline.Emails.Contents.Messages exposing (..)
 import UI.Inlines.Networking exposing (..)
 
 
-view : Config -> Content -> List (Html Msg)
+view : Config msg -> Content -> List (Html Msg)
 view config content =
     case content of
         HelloWorld some ->

@@ -1,11 +1,11 @@
 module OS.Console.View exposing (view)
 
 import Dict exposing (Dict)
-import Game.Data as Game
 import Game.BackFlix.Models as BackFlix
 import Html exposing (Html, div, span, text)
 import Html.CssHelpers
 import UI.ToString exposing (timestampToFullData)
+import OS.Console.Config exposing (..)
 import OS.Resources exposing (..)
 
 
@@ -13,11 +13,11 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace "os"
 
 
-view : Game.Data -> Html msg
-view data =
+view : Config -> Html msg
+view config =
     let
         view_ =
-            viewLogs (Game.getBackFlix data) ++ [ text "elliot@localhost_>" ]
+            viewLogs config.backFlix ++ [ text "elliot@localhost_>" ]
     in
         div [ class [ LogConsole ] ]
             view_

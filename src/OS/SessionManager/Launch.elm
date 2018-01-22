@@ -2,12 +2,14 @@ module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Storyline as Storyline
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import Game.Servers.Shared as Servers
+import OS.SessionManager.Config exposing (..)
+import OS.SessionManager.WindowManager.Config as WM
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Types exposing (..)
@@ -17,66 +19,66 @@ import OS.SessionManager.WindowManager.Messages as WM
 import Apps.Apps as Apps
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 openApp :
-    Game.Data
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 openApp =
     helper WM.insert
 
 
 openOrRestoreApp :
-    Game.Data
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 openOrRestoreApp =
     helper WM.resert
 
 
-type alias Action =
-    Game.Data
+type alias Action msg =
+    WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> String
     -> Maybe Servers.CId
     -> Apps.App
     -> WM.Model
-    -> ( WM.Model, Cmd WM.Msg, Dispatch )
+    -> ( WM.Model, React msg )
 
 
 helper :
-    Action
-    -> Game.Data
+    Action msg
+    -> WM.Config msg
     -> Maybe Context
     -> Maybe Apps.AppParams
     -> ID
     -> Maybe Servers.CId
     -> Apps.App
     -> Model
-    -> UpdateResponse
-helper action data maybeContext maybeParams id serverCId app model0 =
+    -> UpdateResponse msg
+helper action config maybeContext maybeParams id serverCId app model0 =
     case get id model0 of
         Just wm ->
             let
                 ( model, uuid ) =
                     getUID model0
 
-                ( wm_, cmd, dispatch ) =
-                    action data
+                ( wm_, react ) =
+                    action config
                         maybeContext
                         maybeParams
                         uuid
@@ -84,26 +86,23 @@ helper action data maybeContext maybeParams id serverCId app model0 =
                         app
                         wm
 
-                cmd_ =
-                    Cmd.map (WindowManagerMsg id) cmd
-
                 model_ =
                     refresh id wm_ model
 
-                dispatch_ =
-                    Dispatch.batch
-                        [ dispatch
-                        , data
-                            |> Game.getGame
-                            |> Game.getAccount
-                            |> Account.getContext
-                            |> GoApp app
-                            |> Storyline.ActionDone
-                            |> Storyline.Missions
-                            |> Dispatch.storyline
-                        ]
+                --dispatch_ =
+                --    Dispatch.batch
+                --        [ dispatch
+                --        , data
+                --            |> Game.getGame
+                --            |> Game.getAccount
+                --            |> Account.getContext
+                --            |> GoApp app
+                --            |> Storyline.ActionDone
+                --            |> Storyline.Missions
+                --            |> Dispatch.storyline
+                --        ]
             in
-                ( model_, cmd_, dispatch_ )
+                ( model_, react )
 
         Nothing ->
-            ( model0, Cmd.none, Dispatch.none )
+            ( model0, React.none )

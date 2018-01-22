@@ -8,4 +8,5 @@ import Apps.Explorer.Menu.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , activeServer : Servers.Server
+    , batchMsg : List msg -> msg
     }

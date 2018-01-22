@@ -9,10 +9,10 @@ import Html.CssHelpers
 import OS.Resources as OsRes
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Helpers exposing (..)
+import OS.SessionManager.Dock.Config exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
-import OS.SessionManager.Dock.Config exposing (..)
 import Apps.Models as Apps
 import Apps.Apps as Apps
 import Game.Data as Game
@@ -32,30 +32,27 @@ osClass =
     .class <| Html.CssHelpers.withNamespace OsRes.prefix
 
 
-view : Config msg -> Game.Data -> Model -> Html Msg
-view config game model =
+view : Config msg -> Model -> Html Msg
+view config model =
     div [ osClass [ OsRes.Dock ] ]
-        [ dock config game model ]
+        [ dock config model ]
 
 
 
 -- internals
 
 
-dock : Config msg -> Game.Data -> Model -> Html Msg
-dock config data model =
+dock : Config msg -> Model -> Html Msg
+dock config model =
     let
         id =
-            toSessionID data
+            config.sessionId
 
         wm =
             Maybe.withDefault (WM.initialModel id) (get id model)
 
         dock =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDock
+            config.accountDock
 
         content =
             icons dock wm

@@ -2,7 +2,7 @@ module Apps.TaskManager.Update exposing (update)
 
 import Time exposing (Time)
 import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Messages as Processes
 import Apps.TaskManager.Config exposing (..)
@@ -13,15 +13,15 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse cmd =
+    ( Model, React cmd )
 
 
 update :
     Config msg
     -> TaskManager.Msg
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 update config msg model =
     case msg of
         -- -- Context
@@ -29,8 +29,11 @@ update config msg model =
             let
                 config_ =
                     menuConfig config
+
+                ( model_, react ) =
+                    Menu.actionHandler config_ action model
             in
-                Menu.actionHandler config_ action model
+                ( model_, react )
 
         MenuMsg msg ->
             onMenuMsg config msg model
@@ -40,25 +43,22 @@ update config msg model =
             onTick config now model
 
 
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
 onMenuMsg config msg model =
     let
         config_ =
             menuConfig config
 
-        ( menu_, cmd, coreMsg ) =
+        ( menu_, react ) =
             Menu.update config_ msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, cmd_, coreMsg )
+        ( model_, react )
 
 
-onTick : Config msg -> Time -> Model -> UpdateResponse
+onTick : Config msg -> Time -> Model -> UpdateResponse msg
 onTick config now model =
     let
         model_ =
@@ -66,7 +66,7 @@ onTick config now model =
                 config
                 model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
 updateTasks : Config msg -> Model -> Model

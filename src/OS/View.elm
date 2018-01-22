@@ -5,7 +5,6 @@ import Html.Attributes as Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Models as Storyline
@@ -17,7 +16,6 @@ import OS.Resources as Res
 import OS.DynamicStyle as DynamicStyle
 import OS.Header.View as Header
 import OS.Header.Models as Header
-import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 import OS.Toasts.View as Toasts
 import OS.Console.View as Console
@@ -27,36 +25,27 @@ import OS.Console.View as Console
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Config msg -> Game.Data -> Model -> Html msg
-view config data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         osContent =
-            viewOS config data model
-
-        game =
-            data
-                |> Game.getGame
+            viewOS config model
 
         dynStyle =
             DynamicStyle.view config
 
         version =
-            game
-                |> Game.getFlags
+            config.flags
                 |> Flags.getVersion
 
         context =
-            game
-                |> Game.getAccount
-                |> Account.getContext
+            config.activeContext
 
         story =
-            game
-                |> Game.getStory
-                |> Storyline.isActive
+            config.story
 
         gameMode =
-            case story of
+            case Storyline.isActive story of
                 True ->
                     Res.campaignMode
 
@@ -65,7 +54,6 @@ view config data model =
     in
         div
             [ id Res.Dashboard
-            , menuEmpty |> Attributes.map config.toMsg
             , attribute Res.gameVersionAttrTag version
             , attribute Res.gameModeAttrTag gameMode
             , activeContextAttr context
@@ -73,42 +61,40 @@ view config data model =
             (dynStyle :: osContent)
 
 
-viewOS : Config msg -> Game.Data -> Model -> List (Html msg)
-viewOS config data model =
+viewOS : Config msg -> Model -> List (Html msg)
+viewOS config model =
     let
         version =
-            data
-                |> Game.getGame
-                |> Game.getFlags
+            config.flags
                 |> Flags.getVersion
     in
-        [ viewHeader
-            config
-            data
-            model.header
-        , console config data model
-        , viewMain config data model
-        , toasts config data model
+        [ viewHeader config model.header
+        , console config
+        , viewMain config model
+        , toasts config model
         , lazy displayVersion
             version
-        , menuView model |> Html.map config.toMsg
         ]
 
 
-viewHeader : Config msg -> Game.Data -> Header.Model -> Html msg
-viewHeader config game header =
-    Header.view game header
-        |> Html.map (HeaderMsg >> config.toMsg)
+viewHeader : Config msg -> Header.Model -> Html msg
+viewHeader config header =
+    let
+        config_ =
+            headerConfig config
+    in
+        Header.view config_ header
+            |> Html.map (HeaderMsg >> config.toMsg)
 
 
-viewMain : Config msg -> Game.Data -> Model -> Html msg
-viewMain config game model =
+viewMain : Config msg -> Model -> Html msg
+viewMain config model =
     let
         config_ =
             smConfig config
     in
         model.session
-            |> SessionManager.view config_ game
+            |> SessionManager.view config_
 
 
 displayVersion : String -> Html msg
@@ -118,13 +104,17 @@ displayVersion version =
         [ text version ]
 
 
-toasts : Config msg -> Game.Data -> Model -> Html msg
-toasts config data model =
+toasts : Config msg -> Model -> Html msg
+toasts config model =
     model.toasts
-        |> Toasts.view data
+        |> Toasts.view
         |> Html.map (ToastsMsg >> config.toMsg)
 
 
-console : Config msg -> Game.Data -> Model -> Html msg
-console config data model =
-    Console.view data
+console : Config msg -> Html msg
+console config =
+    let
+        config_ =
+            consoleConfig config
+    in
+        Console.view config_

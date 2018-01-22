@@ -3,7 +3,7 @@ module Apps.LogViewer.Update exposing (update)
 import Dict
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Dispatch.Servers as Servers
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Models exposing (..)
@@ -20,15 +20,15 @@ import Apps.LogViewer.Menu.Actions as Menu
         )
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
     Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 update config msg model =
     case msg of
         -- Context
@@ -44,42 +44,29 @@ update config msg model =
                 config_ =
                     menuConfig config
 
-                ( menu_, cmd, dispatch ) =
+                ( menu_, react ) =
                     Menu.update config_ msg model.menu
-
-                cmd_ =
-                    Cmd.map MenuMsg cmd
 
                 model_ =
                     { model | menu = menu_ }
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
         -- -- Real acts
         ToogleExpand id ->
-            model
-                |> toggleExpand id
-                |> Update.fromModel
+            ( toggleExpand id model, React.none )
 
         UpdateTextFilter filter ->
-            model
-                |> updateTextFilter config filter
-                |> Update.fromModel
+            ( updateTextFilter config filter model, React.none )
 
         EnterEditing id ->
-            model
-                |> enterEditing (menuConfig config) id
-                |> Update.fromModel
+            ( enterEditing (menuConfig config) id model, React.none )
 
         UpdateEditing id input ->
-            model
-                |> updateEditing id input
-                |> Update.fromModel
+            ( updateEditing id input model, React.none )
 
         LeaveEditing id ->
-            model
-                |> leaveEditing id
-                |> Update.fromModel
+            ( leaveEditing id model, React.none )
 
         ApplyEditing id ->
             let
@@ -100,38 +87,22 @@ update config msg model =
                 --        Nothing ->
                 --            Dispatch.none
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
 
         StartCrypting id ->
-            let
-                dispatch =
-                    startCrypting id (menuConfig config) model
-            in
-                ( model, Cmd.none, dispatch )
+            startCrypting id (menuConfig config) model
 
         StartDecrypting id ->
-            let
-                dispatch =
-                    startDecrypting id model
-            in
-                ( model, Cmd.none, dispatch )
+            startDecrypting id model
 
         StartHiding id ->
-            let
-                dispatch =
-                    startHiding id (menuConfig config) model
-            in
-                ( model, Cmd.none, dispatch )
+            startHiding id (menuConfig config) model
 
         StartDeleting id ->
-            let
-                dispatch =
-                    startDeleting id (menuConfig config) model
-            in
-                ( model, Cmd.none, dispatch )
+            startDeleting id (menuConfig config) model
 
         DummyNoOp ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
 
 updateTextFilter : Config msg -> String -> Model -> Model

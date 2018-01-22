@@ -100,6 +100,11 @@ getGateway =
     .activeGateway
 
 
+getGateways : Model -> List Servers.CId
+getGateways =
+    .gateways
+
+
 getContext : Model -> Context
 getContext =
     .context

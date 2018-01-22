@@ -8,4 +8,5 @@ import Apps.LogViewer.Menu.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , logs : Logs.Model
+    , batchMsg : List msg -> msg
     }

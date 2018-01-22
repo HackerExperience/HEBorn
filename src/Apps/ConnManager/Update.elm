@@ -1,23 +1,25 @@
 module Apps.ConnManager.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Data as Game
 import Utils.Update as Update
+import Apps.ConnManager.Config exposing (..)
 import Apps.ConnManager.Models exposing (Model)
 import Apps.ConnManager.Messages as ConnManager exposing (Msg(..))
 
 
-type alias UpdateResponse =
-    ( Model, Cmd ConnManager.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> ConnManager.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- TODO: Filter
         _ ->
-            Update.fromModel model
+            ( model, React.none )

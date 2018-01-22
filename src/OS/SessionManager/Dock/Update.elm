@@ -1,7 +1,7 @@
 module OS.SessionManager.Dock.Update exposing (update)
 
 import Dict
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
 import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.SessionManager.Dock.Config exposing (..)
@@ -13,8 +13,8 @@ import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Messages as SessionManager
 
 
-type alias UpdateResponse =
-    ( Model, Cmd SessionManager.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 
@@ -23,39 +23,34 @@ type alias UpdateResponse =
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
-    -> UpdateResponse
-update config data msg ({ sessions } as model) =
+    -> UpdateResponse msg
+update config msg ({ sessions } as model) =
     let
         id =
-            toSessionID data
+            config.sessionId
     in
         case msg of
             OpenApp app ->
                 let
                     ip =
-                        data
-                            |> Game.getActiveServer
-                            |> Servers.getEndpointCId
+                        config.endpointCId
 
-                    ( model_, cmd, dispatch ) =
-                        openApp data Nothing Nothing id ip app model
+                    ( model_, react ) =
+                        openApp config.wmConfig Nothing Nothing id ip app model
                 in
-                    ( model_, cmd, dispatch )
+                    ( model_, react )
 
             AppButton app ->
                 let
                     ip =
-                        data
-                            |> Game.getActiveServer
-                            |> Servers.getEndpointCId
+                        config.endpointCId
 
-                    ( model_, cmd, dispatch ) =
-                        openOrRestoreApp data Nothing Nothing id ip app model
+                    ( model_, react ) =
+                        openOrRestoreApp config.wmConfig Nothing Nothing id ip app model
                 in
-                    ( model_, cmd, dispatch )
+                    ( model_, react )
 
             _ ->
                 case Dict.get id sessions of
@@ -70,10 +65,10 @@ update config data msg ({ sessions } as model) =
                             model_ =
                                 { model | sessions = sessions_ }
                         in
-                            ( model_, Cmd.none, Dispatch.none )
+                            ( model_, React.none )
 
                     Nothing ->
-                        ( model, Cmd.none, Dispatch.none )
+                        ( model, React.none )
 
 
 

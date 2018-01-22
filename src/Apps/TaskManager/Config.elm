@@ -11,10 +11,12 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , processes : Processes.Model
     , lastTick : Time
+    , batchMsg : List msg -> msg
     }
 
 
 menuConfig : Config msg -> Menu.Config msg
-menuConfig { toMsg } =
-    { toMsg = MenuMsg >> toMsg
+menuConfig config =
+    { toMsg = MenuMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     }

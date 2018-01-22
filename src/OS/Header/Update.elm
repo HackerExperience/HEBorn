@@ -1,12 +1,6 @@
 module OS.Header.Update exposing (update)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Storyline as Storyline
-import Core.Dispatch.Account as Account
-import Core.Dispatch.Servers as Servers
-import Game.Data as Game
-import Game.Models as Game
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared as Servers
@@ -14,18 +8,19 @@ import Game.Servers.Models as Servers
 import Game.Storyline.Models as Storyline
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
+import OS.Header.Config exposing (..)
 import Game.Servers.Hardware.Models as Hardware
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Logout ->
-            onLogout model
+            onLogout config model
 
         ToggleMenus next ->
             onToggleMenus next model
@@ -37,46 +32,44 @@ update data msg model =
             onMouseLeavesDropdown model
 
         SelectGateway cid ->
-            onSelectGateway data cid model
+            onSelectGateway config cid model
 
         SelectBounce id ->
-            onSelectBounce data id model
+            onSelectBounce config id model
 
         SelectEndpoint cid ->
-            onSelectEndpoint data cid model
+            onSelectEndpoint config cid model
 
         SelectNIP nip ->
-            onSelectNIP data nip model
+            onSelectNIP config nip model
 
         ContextTo context ->
-            onContextTo context model
+            onContextTo config context model
 
         CheckMenus ->
             onCheckMenus model
 
-        ToggleCampaign ->
-            onTogglecampaign model
+        ToggleCampaign toStory ->
+            onTogglecampaign config toStory model
 
-        ServerReadAll cid ->
-            onServerReadAll cid model
+        ServerReadAll ->
+            onServerReadAll config model
 
         ChatReadAll ->
-            Update.fromModel model
+            ( model, React.none )
 
         AccountReadAll ->
-            onAccountReadAll model
+            onAccountReadAll config model
 
 
-onLogout : Model -> UpdateResponse
-onLogout model =
-    let
-        dispatch =
-            Dispatch.account Account.Logout
-    in
-        ( model, Cmd.none, dispatch )
+onLogout : Config msg -> Model -> UpdateResponse msg
+onLogout { onLogout } model =
+    onLogout
+        |> React.msg
+        |> (,) model
 
 
-onToggleMenus : OpenMenu -> Model -> UpdateResponse
+onToggleMenus : OpenMenu -> Model -> UpdateResponse msg
 onToggleMenus next ({ openMenu } as model) =
     let
         openMenu_ =
@@ -84,175 +77,111 @@ onToggleMenus next ({ openMenu } as model) =
                 NothingOpen
             else
                 next
-    in
-        Update.fromModel
+
+        model_ =
             { model | openMenu = openMenu_ }
+    in
+        ( model_, React.none )
 
 
-onMouseEnterDropdown : Model -> UpdateResponse
+onMouseEnterDropdown : Model -> UpdateResponse msg
 onMouseEnterDropdown model =
-    Update.fromModel
-        { model | mouseSomewhereInside = True }
-
-
-onMouseLeavesDropdown : Model -> UpdateResponse
-onMouseLeavesDropdown model =
-    Update.fromModel
-        { model | mouseSomewhereInside = False }
-
-
-onSelectGateway : Game.Data -> Maybe Servers.CId -> Model -> UpdateResponse
-onSelectGateway data cid model =
     let
-        dispatch =
+        model_ =
+            { model | mouseSomewhereInside = True }
+    in
+        ( model_, React.none )
+
+
+onMouseLeavesDropdown : Model -> UpdateResponse msg
+onMouseLeavesDropdown model =
+    let
+        model_ =
+            { model | mouseSomewhereInside = False }
+    in
+        ( model_, React.none )
+
+
+onSelectGateway : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
+onSelectGateway { onSetGateway } cid model =
+    let
+        cmd =
             case cid of
                 Just cid ->
-                    Dispatch.batch
-                        [ -- Change selected server
-                          Dispatch.account <| Account.SetGateway cid
-
-                        -- Switch game mode depending on Server.type
-                        , switchGameMode data cid
-                        ]
+                    cid
+                        |> onSetGateway
+                        |> React.msg
 
                 Nothing ->
-                    Dispatch.none
+                    React.none
 
         model_ =
             { model | openMenu = NothingOpen }
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, cmd )
 
 
-onSelectBounce : Game.Data -> Maybe String -> Model -> UpdateResponse
-onSelectBounce data id model =
-    let
-        dispatch =
-            Dispatch.server
-                (Game.getActiveCId data)
-                (Servers.SetBounce id)
-
-        model_ =
-            { model | openMenu = NothingOpen }
-    in
-        ( model_, Cmd.none, dispatch )
+onSelectBounce : Config msg -> Maybe String -> Model -> UpdateResponse msg
+onSelectBounce { onSetBounce } id model =
+    id
+        |> onSetBounce
+        |> React.msg
+        |> (,) (dropMenu model)
 
 
-onSelectEndpoint : Game.Data -> Maybe Servers.CId -> Model -> UpdateResponse
-onSelectEndpoint data cid model =
-    let
-        dispatch =
-            Dispatch.account <| Account.SetEndpoint cid
-
-        model_ =
-            { model | openMenu = NothingOpen }
-    in
-        ( model_, Cmd.none, dispatch )
+onSelectEndpoint : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
+onSelectEndpoint { onSetEndpoint } cid model =
+    cid
+        |> onSetEndpoint
+        |> React.msg
+        |> (,) (dropMenu model)
 
 
-onContextTo : Context -> Model -> UpdateResponse
-onContextTo context model =
-    let
-        dispatch =
-            Dispatch.account <| Account.SetContext context
-    in
-        ( model, Cmd.none, dispatch )
+onContextTo : Config msg -> Context -> Model -> UpdateResponse msg
+onContextTo { onSetContext } context model =
+    context
+        |> onSetContext
+        |> React.msg
+        |> (,) model
 
 
-onCheckMenus : Model -> UpdateResponse
+onCheckMenus : Model -> UpdateResponse msg
 onCheckMenus ({ mouseSomewhereInside } as model) =
     let
         model_ =
             if not mouseSomewhereInside then
-                { model | openMenu = NothingOpen }
+                dropMenu model
             else
                 model
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onTogglecampaign : Model -> UpdateResponse
-onTogglecampaign model =
-    let
-        dispatch =
-            Dispatch.storyline <| Storyline.Toggle
-    in
-        ( model, Cmd.none, dispatch )
+onTogglecampaign : Config msg -> Bool -> Model -> UpdateResponse msg
+onTogglecampaign { onSetStoryMode } mode model =
+    mode
+        |> onSetStoryMode
+        |> React.msg
+        |> (,) model
 
 
-onServerReadAll : Servers.CId -> Model -> UpdateResponse
-onServerReadAll cid model =
-    -- TODO: remember me
-    --let
-    --dispatch =
-    --    Dispatch.notifications <| Notifications.ReadAllServer cid
-    --in
-    ( model, Cmd.none, Dispatch.none )
+onServerReadAll : Config msg -> Model -> UpdateResponse msg
+onServerReadAll { onReadAllServerNotifications } model =
+    onReadAllServerNotifications
+        |> React.msg
+        |> (,) model
 
 
-onAccountReadAll : Model -> UpdateResponse
-onAccountReadAll model =
-    -- TODO: remember me
-    --let
-    --    dispatch =
-    --        Dispatch.notifications Notifications.ReadAllAccount
-    --in
-    ( model, Cmd.none, Dispatch.none )
+onAccountReadAll : Config msg -> Model -> UpdateResponse msg
+onAccountReadAll { onReadAllAccountNotifications } model =
+    onReadAllAccountNotifications
+        |> React.msg
+        |> (,) model
 
 
-onSelectNIP : Game.Data -> NIP -> Model -> UpdateResponse
-onSelectNIP data nip model =
-    let
-        dispatcher =
-            data
-                |> Game.getActiveCId
-                |> Dispatch.server
-
-        dispatch =
-            dispatcher <| Servers.SetActiveNIP nip
-    in
-        ( model, Cmd.none, dispatch )
-
-
-
--- internals
-
-
-switchGameMode : Game.Data -> Servers.CId -> Dispatch
-switchGameMode data cid =
-    let
-        server =
-            data
-                |> Game.getGame
-                |> Game.getServers
-                |> Servers.get cid
-
-        isStoryModeActive =
-            data
-                |> Game.getGame
-                |> Game.getStory
-                |> Storyline.isActive
-    in
-        case server of
-            Just server ->
-                case server.type_ of
-                    Servers.DesktopCampaign ->
-                        if isStoryModeActive then
-                            Dispatch.none
-                        else
-                            Dispatch.storyline <| Storyline.Toggle
-
-                    Servers.Desktop ->
-                        if isStoryModeActive then
-                            Dispatch.storyline <| Storyline.Toggle
-                        else
-                            Dispatch.none
-
-                    Servers.Mobile ->
-                        if isStoryModeActive then
-                            Dispatch.storyline <| Storyline.Toggle
-                        else
-                            Dispatch.none
-
-            Nothing ->
-                Dispatch.none
+onSelectNIP : Config msg -> NIP -> Model -> UpdateResponse msg
+onSelectNIP { onSetActiveNIP } nip model =
+    nip
+        |> onSetActiveNIP
+        |> React.msg
+        |> (,) model

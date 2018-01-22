@@ -9,11 +9,13 @@ import Apps.LogViewer.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , logs : Logs.Model
+    , batchMsg : List msg -> msg
     }
 
 
 menuConfig : Config msg -> Menu.Config msg
-menuConfig { toMsg, logs } =
-    { toMsg = MenuMsg >> toMsg
-    , logs = logs
+menuConfig config =
+    { toMsg = MenuMsg >> config.toMsg
+    , logs = config.logs
+    , batchMsg = config.batchMsg
     }

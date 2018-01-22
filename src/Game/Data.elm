@@ -5,7 +5,6 @@ module Game.Data
         , getActiveServer
         , getGame
         , getEndpoints
-        , usanfeFromGateway
         , fromGateway
         , fromEndpoint
         , fromServerCId
@@ -53,13 +52,6 @@ fromGateway model =
     model
         |> getGateway
         |> Maybe.map (fromServer True model)
-
-
-usanfeFromGateway : Model -> Data
-usanfeFromGateway model =
-    model
-        |> unsafeGetGateway
-        |> fromServer True model
 
 
 fromEndpoint : Model -> Maybe Data

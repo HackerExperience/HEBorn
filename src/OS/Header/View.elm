@@ -2,7 +2,7 @@ module OS.Header.View exposing (view)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -15,13 +15,13 @@ import OS.Header.NetworkView as NetworkTongue
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html Msg
+view config model =
     div [ class [ Header ] ]
         [ logo
-        , ConnBar.view data model
-        , Taskbar.view data model
-        , NetworkTongue.view data (model.openMenu == NetworkOpen)
+        , ConnBar.view config model
+        , Taskbar.view config model
+        , NetworkTongue.view config (model.openMenu == NetworkOpen)
         ]
 
 
