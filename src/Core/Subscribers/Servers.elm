@@ -111,11 +111,12 @@ fromFilesystem cid id dispatch =
         NewDir a b ->
             [ filesystem cid id <| Filesystem.HandleNewDir a b ]
 
-        FileAdded ( a, b ) ->
-            [ filesystem cid id <| Filesystem.HandleAdded a b ]
 
-        FileDownloaded _ ->
-            []
+
+--FileAdded ( a, b ) ->
+--    [ filesystem cid id <| Filesystem.HandleAdded a b ]
+--FileDownloaded _ ->
+--    []
 
 
 fromLogs : CId -> Logs -> Subscribers
@@ -133,8 +134,10 @@ fromLogs cid dispatch =
         DeleteLog a ->
             [ logs cid <| Logs.HandleDelete a ]
 
-        CreatedLog ( id, content ) ->
-            [ logs cid <| Logs.HandleCreated id content ]
+
+
+--CreatedLog ( id, content ) ->
+--    [ logs cid <| Logs.HandleCreated id content ]
 
 
 fromProcesses : CId -> Processes -> Subscribers
@@ -163,24 +166,22 @@ fromProcesses id dispatch =
             [ processes id <| Processes.HandleStartPublicDownload a b c
             ]
 
-        StartedProcess a ->
-            [ processes id <| Processes.HandleProcessStarted a ]
 
-        ConcludedProcess a ->
-            [ processes id <| Processes.HandleProcessConclusion a ]
 
-        ChangedProcesses a ->
-            [ processes id <| Processes.HandleProcessesChanged a ]
-
-        FailedBruteforceProcess a ->
-            [ processes id <| Processes.HandleBruteforceFailed a ]
+--StartedProcess a ->
+--    [ processes id <| Processes.HandleProcessStarted a ]
+--ConcludedProcess a ->
+--    [ processes id <| Processes.HandleProcessConclusion a ]
+--ChangedProcesses a ->
+--[ processes id <| Processes.HandleProcessesChanged a ]
+--FailedBruteforceProcess a ->
+--    [ processes id <| Processes.HandleBruteforceFailed a ]
 
 
 fromHardware : CId -> Hardware -> Subscribers
 fromHardware id dispatch =
     case dispatch of
-        MotherboardUpdated a ->
-            [ hardware id <| Hardware.HandleMotherboardUpdated a ]
-
+        --MotherboardUpdated a ->
+        --    [ hardware id <| Hardware.HandleMotherboardUpdated a ]
         MotherboardUpdate a ->
             [ hardware id <| Hardware.HandleMotherboardUpdate a ]

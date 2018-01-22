@@ -14,17 +14,18 @@ module Core.Models
         , setupToPlay
         )
 
+import Utils.Update as Update
+import Landing.Models as Landing
+import Driver.Websocket.Launch as Ws
 import Driver.Websocket.Models as Ws
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Dummy as Game
-import OS.Models as OS
-import Utils.Update as Update
-import Landing.Models as Landing
 import Setup.Models as Setup
+import OS.Models as OS
+import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
@@ -44,20 +45,20 @@ type State
 
 type alias HomeModel =
     { landing : Landing.Model
-    , websocket : Maybe Ws.Model
+    , websocket : Maybe (Ws.Model Msg)
     , connecting : Maybe Connecting
     }
 
 
 type alias SetupModel =
-    { websocket : Ws.Model
+    { websocket : Ws.Model Msg
     , game : Game.Model
     , setup : Setup.Model
     }
 
 
 type alias PlayModel =
-    { websocket : Ws.Model
+    { websocket : Ws.Model Msg
     , game : Game.Model
     , os : OS.Model
     }
@@ -88,7 +89,7 @@ connect id username token ({ state, flags } as model) =
                     Just <| Connecting id username token
 
                 websocket =
-                    Just <| Ws.initialModel flags.apiWsUrl token "web1"
+                    Just <| Ws.launch WebsocketMsg flags.apiWsUrl token "web1"
 
                 home_ =
                     { home | websocket = websocket, connecting = connecting }
@@ -115,7 +116,11 @@ login ({ state, flags } as model) =
                     let
                         websocket_ =
                             Maybe.withDefault
-                                (Ws.initialModel flags.apiWsUrl token "web1")
+                                (Ws.launch WebsocketMsg
+                                    flags.apiWsUrl
+                                    token
+                                    "web1"
+                                )
                                 websocket
 
                         game =
@@ -181,7 +186,7 @@ initialHome =
     }
 
 
-initialSetup : Ws.Model -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
+initialSetup : Ws.Model Msg -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
 initialSetup ws game =
     { websocket = ws
     , game = game
@@ -190,7 +195,7 @@ initialSetup ws game =
         |> Update.fromModel
 
 
-initialPlay : Ws.Model -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )
+initialPlay : Ws.Model Msg -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )
 initialPlay ws game =
     let
         play_ =

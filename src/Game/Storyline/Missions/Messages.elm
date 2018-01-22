@@ -1,7 +1,7 @@
 module Game.Storyline.Missions.Messages exposing (Msg(..))
 
 import Game.Storyline.Missions.Actions exposing (Action)
-import Events.Account.Story.StepProceeded as StoryStepProceeded
+import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
 
 
 type Msg

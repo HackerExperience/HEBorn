@@ -9,14 +9,6 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Models as Processes
 import Game.Meta.Types.Network as Network
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Events.Server.Filesystem.Added as FileAdded
-import Events.Server.Filesystem.Downloaded as FileDownloaded
-import Events.Server.Processes.Started as ProcessStarted
-import Events.Server.Processes.Conclusion as ProcessConclusion
-import Events.Server.Processes.BruteforceFailed as BruteforceFailed
-import Events.Server.Processes.Changed as ProcessesChanged
-import Events.Server.Logs.Created as LogCreated
-import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
 import Apps.Browser.Pages.Bank.Models as Bank
 import Game.Web.Models as Web
 import Game.Web.Types as Web
@@ -58,8 +50,6 @@ type Filesystem
     | RenameFile Filesystem.Id String
     | NewTextFile Filesystem.Path Filesystem.Name
     | NewDir Filesystem.Path Filesystem.Name
-    | FileAdded FileAdded.Data
-    | FileDownloaded FileDownloaded.Data
 
 
 {-| Messages related to server's logs.
@@ -69,7 +59,6 @@ type Logs
     | EncryptLog Logs.ID
     | HideLog Logs.ID
     | DeleteLog Logs.ID
-    | CreatedLog LogCreated.Data
 
 
 {-| Messages related to server's processes.
@@ -82,12 +71,7 @@ type Processes
     | NewBruteforceProcess Network.IP
     | NewDownloadProcess Network.NIP StorageId Filesystem.FileEntry
     | NewPublicDownloadProcess Network.NIP StorageId Filesystem.FileEntry
-    | StartedProcess ProcessStarted.Data
-    | ConcludedProcess ProcessConclusion.Data
-    | ChangedProcesses ProcessesChanged.Data
-    | FailedBruteforceProcess BruteforceFailed.Data
 
 
 type Hardware
-    = MotherboardUpdated MotherboardUpdated.Data
-    | MotherboardUpdate Motherboard
+    = MotherboardUpdate Motherboard

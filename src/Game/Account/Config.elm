@@ -27,7 +27,7 @@ type alias Config msg =
     , fallToGateway : (Bool -> Model) -> Model
 
     -- account.finances
-    , onBALoginSuccess : Requester -> BankAccountData -> msg
+    , onBALoginSuccess : BankAccountData -> Requester -> msg
     , onBALoginFailed : Requester -> msg
     , onBATransferSuccess : Requester -> msg
     , onBATransferFailed : Requester -> msg

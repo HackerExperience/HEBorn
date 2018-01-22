@@ -7,7 +7,7 @@ import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
-import Events.Account.PasswordAcquired as PasswordAcquired
+import Events.Account.Handlers.ServerPasswordAcquired as PasswordAcquired
 import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter

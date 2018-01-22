@@ -8,8 +8,8 @@ import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents exposing (Content)
 import Game.Storyline.Emails.Requests exposing (Response, receive)
 import Game.Storyline.Emails.Requests.Reply as Reply
-import Events.Account.Story.NewEmail as StoryNewEmail
-import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
+import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
+import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
 
 
 type alias UpdateResponse msg =
@@ -57,7 +57,7 @@ handleReply config content model =
         ( model, cmd )
 
 
-handleNewEmail : Config msg -> StoryNewEmail.Data -> Model -> UpdateResponse msg
+handleNewEmail : Config msg -> StoryEmailSent.Data -> Model -> UpdateResponse msg
 handleNewEmail config data model =
     let
         { personId, messageNode, replies, createNotification } =
@@ -99,7 +99,7 @@ handleNewEmail config data model =
 
 handleReplyUnlocked :
     Config msg
-    -> StoryReplyUnlocked.Data
+    -> StoryEmailReplyUnlocked.Data
     -> Model
     -> UpdateResponse msg
 handleReplyUnlocked config { personId, replies } model =
