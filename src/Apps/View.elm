@@ -51,11 +51,7 @@ view config model =
                 Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view config_ model)
 
         BrowserModel model ->
-            let
-                config_ =
-                    browserConfig config
-            in
-                Html.map (BrowserMsg >> config.toMsg) (Browser.view config_ model)
+            Browser.view (browserConfig config) model
 
         ExplorerModel model ->
             let
@@ -138,11 +134,7 @@ view config model =
                 Html.map (BugMsg >> config.toMsg) (Bug.view config_ model)
 
         CalculatorModel model ->
-            let
-                config_ =
-                    calculatorConfig config
-            in
-                Calculator.view config_ model
+            Calculator.view (calculatorConfig config) model
 
         BackFlixModel model ->
             BackFlix.view (backFlixConfig config) model

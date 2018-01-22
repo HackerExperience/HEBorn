@@ -16,7 +16,7 @@ import Core.Error as Error
 
 view : Config msg -> Model -> Html msg
 view config model =
-    render config model
+    Html.map config.toMsg <| render config model
 
 
 renderTyping : Operator -> String
@@ -53,7 +53,7 @@ renderTyping op =
             "Error"
 
 
-render : Config msg -> Model -> Html msg
+render : Config msg -> Model -> Html Msg
 render config model =
     let
         genBtn class_ action label =

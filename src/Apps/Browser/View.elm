@@ -39,20 +39,21 @@ styles =
     Css.asPairs >> style
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         tab =
             getNowTab model
     in
-        div
-            [ class [ Window, Content, Client ]
-            ]
-            [ viewTabs model
-            , viewToolbar tab
-            , viewPg config tab
-            , menuView model
-            ]
+        Html.map config.toMsg <|
+            div
+                [ class [ Window, Content, Client ]
+                ]
+                [ viewTabs model
+                , viewToolbar tab
+                , viewPg config tab
+                , menuView model
+                ]
 
 
 renderToolbarBtn : Bool -> String -> msg -> Html msg
