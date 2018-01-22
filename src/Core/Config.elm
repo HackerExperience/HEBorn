@@ -68,7 +68,7 @@ websocketConfig flags =
     , toMsg =
         WebsocketMsg
     , onConnected =
-        MultiMsg
+        BatchMsg
             [ HandleConnected
             , account Account.HandleConnected
             ]
@@ -76,13 +76,13 @@ websocketConfig flags =
         account <| Account.HandleDisconnected
     , onJoinedAccount =
         \value ->
-            MultiMsg
+            BatchMsg
                 [ game <| Game.HandleJoinedAccount value
                 , setup <| Setup.HandleJoinedAccount value
                 ]
     , onJoinedServer =
         \cid value ->
-            MultiMsg
+            BatchMsg
                 [ servers <| Servers.HandleJoinedServer cid value
                 , setup <| Setup.HandleJoinedServer cid
                 ]
@@ -90,7 +90,7 @@ websocketConfig flags =
         Web.HandleJoinServerFailed >> web
     , onLeaved =
         \_ _ ->
-            MultiMsg []
+            BatchMsg []
     , onEvent =
         HandleEvent
     }
@@ -101,7 +101,7 @@ eventsConfig =
     { forAccount =
         { onServerPasswordAcquired =
             \data ->
-                MultiMsg
+                BatchMsg
                     [ database <| Database.HandlePasswordAcquired data
                     , data
                         |> Browser.HandlePasswordAcquired
@@ -113,7 +113,7 @@ eventsConfig =
             Missions.HandleStepProceeded >> missions
         , onStoryEmailSent =
             \data ->
-                MultiMsg
+                BatchMsg
                     [ emails <| Emails.HandleNewEmail data
                     , data.personId
                         |> AccountNotifications.HandleNewEmail
@@ -142,7 +142,7 @@ eventsConfig =
                 filesystem cid id <| uncurry Filesystem.HandleAdded data
         , onFileDownloaded =
             -- not implemented yet
-            \cid ( id, data ) -> MultiMsg []
+            \cid ( id, data ) -> BatchMsg []
         , onProcessCreated =
             \cid data ->
                 processes cid <| Processes.HandleProcessStarted data
@@ -168,7 +168,7 @@ eventsConfig =
 gameConfig : Game.Config Msg
 gameConfig =
     { toMsg = GameMsg
-    , batchMsg = MultiMsg
+    , batchMsg = BatchMsg
 
     -- game & web
     , onJoinServer =
@@ -192,7 +192,7 @@ gameConfig =
     --- account
     , onConnected =
         \accountId ->
-            MultiMsg
+            BatchMsg
                 [ ws <| Ws.HandleJoin (AccountChannel accountId) Nothing
                 , ws <| Ws.HandleJoin BackFlixChannel Nothing
                 ]

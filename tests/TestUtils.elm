@@ -107,7 +107,7 @@ gameReducer msg ( model, react ) =
                     Game.update Core.gameConfig msg model
             in
                 ( model_
-                , React.batch Core.MultiMsg [ react, react_ ]
+                , React.batch Core.BatchMsg [ react, react_ ]
                 )
 
         _ ->

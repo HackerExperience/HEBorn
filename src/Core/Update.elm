@@ -33,7 +33,7 @@ import Core.Subscribers as Subscribers
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
-        MultiMsg msgs ->
+        BatchMsg msgs ->
             case msgs of
                 [ msg ] ->
                     update msg model
@@ -47,7 +47,7 @@ update msg model =
                             update msg model
 
                         ( model_, cmd1 ) =
-                            update (MultiMsg msgs) model0
+                            update (BatchMsg msgs) model0
                     in
                         ( model_, Cmd.batch [ cmd0, cmd1 ] )
 

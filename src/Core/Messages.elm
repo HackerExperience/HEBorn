@@ -12,7 +12,7 @@ import Core.Error as Error exposing (Error)
 
 
 type Msg
-    = MultiMsg (List Msg)
+    = BatchMsg (List Msg)
     | HandleConnected
     | HandleBoot Account.ID Account.Username Account.Token
     | HandleShutdown
@@ -30,7 +30,7 @@ type Msg
 unroll : Msg -> List Msg
 unroll msg =
     case msg of
-        MultiMsg list ->
+        BatchMsg list ->
             unrollHelper [] list
 
         _ ->
@@ -42,7 +42,7 @@ unrollHelper accum list =
     case list of
         msg :: remains ->
             case msg of
-                MultiMsg list ->
+                BatchMsg list ->
                     unrollHelper accum list ++ accum
 
                 _ ->
