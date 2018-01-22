@@ -4,7 +4,6 @@ import Utils.React as React exposing (React)
 import Dict exposing (Dict)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
-import Utils.Update as Update
 import Core.Error as Error
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Decoders.Game

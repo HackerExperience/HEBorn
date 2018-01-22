@@ -4,11 +4,6 @@ import Dict
 import Native.Panic
 import Utils.React as React exposing (React)
 import ContextMenu exposing (ContextMenu)
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Core.Dispatch.Account as Account
-import Core.Dispatch.OS as OS
 import Core.Error as Error
 import Game.Models
 import Game.Account.Finances.Models as Finances

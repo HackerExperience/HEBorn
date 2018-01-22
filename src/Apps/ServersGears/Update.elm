@@ -1,9 +1,6 @@
 module Apps.ServersGears.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as ServersDispatch
-import Utils.Update as Update
 import Game.Models as GameModels
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware

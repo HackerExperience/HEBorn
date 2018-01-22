@@ -4,7 +4,6 @@ import Utils.React as React exposing (React)
 import Process
 import Task
 import Time exposing (Time)
-import Utils.Update as Update
 import OS.Toasts.Config exposing (..)
 import OS.Toasts.Messages exposing (..)
 import OS.Toasts.Models exposing (..)

@@ -1,9 +1,6 @@
 module Apps.Explorer.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem

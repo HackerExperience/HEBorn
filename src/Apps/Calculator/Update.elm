@@ -1,6 +1,5 @@
 module Apps.Calculator.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Utils.React as React exposing (React)
 import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (..)

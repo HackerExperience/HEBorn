@@ -3,8 +3,6 @@ module Apps.Bug.Update exposing (update)
 import Native.Panic
 import Utils.React as React exposing (React)
 import Core.Error as Error
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Account as Account
 import Game.Data as Game
 import Game.Account.Notifications.Shared as AccountNotifications
 import Apps.Bug.Config exposing (..)

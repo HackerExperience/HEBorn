@@ -5,7 +5,6 @@ import Utils.React as React exposing (React)
 import Apps.DBAdmin.Menu.Config exposing (..)
 import Apps.DBAdmin.Menu.Models exposing (Model)
 import Apps.DBAdmin.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update : Config msg -> Msg -> Model -> ( Model, React msg )

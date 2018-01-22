@@ -1,7 +1,6 @@
 module Game.Inventory.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Utils.Update as Update
 import Game.Inventory.Config exposing (..)
 import Game.Inventory.Messages exposing (..)
 import Game.Inventory.Models exposing (..)

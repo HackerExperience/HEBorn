@@ -22,7 +22,6 @@ import Game.Servers.Shared as Servers
 import Apps.Messages as Apps
 import Apps.Apps as Apps
 import Apps.Launch as Apps
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update :

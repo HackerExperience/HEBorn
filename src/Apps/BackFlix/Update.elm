@@ -1,8 +1,6 @@
 module Apps.BackFlix.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
 import Apps.BackFlix.Config exposing (..)
 import Apps.BackFlix.Models exposing (..)
 import Apps.BackFlix.Messages as BackFlix exposing (Msg(..))

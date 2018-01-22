@@ -3,7 +3,6 @@ module TestUtils exposing (..)
 import Expect exposing (Expectation)
 import Utils.React as React exposing (React)
 import Driver.Websocket.Channels as Ws
-import Core.Subscribers as Subscribers
 import Core.Config as Core
 import Core.Messages as Core
 import Game.Messages as Game

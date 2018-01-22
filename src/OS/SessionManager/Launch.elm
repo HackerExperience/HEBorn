@@ -1,7 +1,5 @@
 module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Storyline as Storyline
 import Utils.React as React exposing (React)
 import Game.Models as Game
 import Game.Account.Models as Account

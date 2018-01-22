@@ -5,7 +5,6 @@ import ContextMenu exposing (ContextMenu)
 import Apps.TaskManager.Menu.Config exposing (..)
 import Apps.TaskManager.Menu.Models exposing (Model)
 import Apps.TaskManager.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias UpdateResponse msg =

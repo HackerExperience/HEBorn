@@ -1,8 +1,6 @@
 module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
 import Apps.TaskManager.Menu.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg)

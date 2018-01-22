@@ -5,7 +5,6 @@ import ContextMenu exposing (ContextMenu)
 import Apps.LogViewer.Menu.Config exposing (..)
 import Apps.LogViewer.Menu.Models exposing (Model)
 import Apps.LogViewer.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update : Config msg -> Msg -> Model -> ( Model, React msg )

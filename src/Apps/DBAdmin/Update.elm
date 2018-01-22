@@ -1,7 +1,6 @@
 module Apps.DBAdmin.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Servers.Logs.Models exposing (ID)
 import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Models exposing (..)

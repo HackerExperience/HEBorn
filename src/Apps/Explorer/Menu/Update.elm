@@ -6,7 +6,6 @@ import Game.Data as Game
 import Apps.Explorer.Menu.Config exposing (..)
 import Apps.Explorer.Menu.Models exposing (Model)
 import Apps.Explorer.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias UpdateResponse msg =

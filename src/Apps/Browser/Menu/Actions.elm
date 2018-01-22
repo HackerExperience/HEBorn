@@ -5,7 +5,6 @@ import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (Msg)
 import Apps.Browser.Menu.Config exposing (..)
 import Apps.Browser.Menu.Messages exposing (MenuAction(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 actionHandler :

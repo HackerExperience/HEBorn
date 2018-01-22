@@ -2,7 +2,6 @@ module OS.SessionManager.WindowManager.Launch exposing (resert, insert)
 
 import Dict
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types.Context exposing (Context(..))

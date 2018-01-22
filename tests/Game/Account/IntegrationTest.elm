@@ -5,7 +5,6 @@ import Expect
 import Fuzz exposing (tuple, tuple3)
 import Test exposing (Test, describe)
 import Utils.React as React exposing (React)
-import Core.Subscribers as Subscribers
 import Core.Messages as Core
 import Json.Decode as Decode
 import TestUtils exposing (fuzz, gameDispatcher, fromJust, toValue, applyEvent)
