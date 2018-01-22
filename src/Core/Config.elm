@@ -326,13 +326,10 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         \cid -> Hardware.HandleMotherboardUpdate >> hardware cid
     , onPauseProcess =
         \cid -> Processes.HandlePause >> processes cid
-
     , onResumeProcess =
         \cid -> Processes.HandleResume >> processes cid
-
     , onRemoveProcess =
         \cid -> Processes.HandleRemove >> processes cid
-
     }
 
 

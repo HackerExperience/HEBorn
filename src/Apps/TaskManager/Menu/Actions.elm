@@ -10,6 +10,7 @@ import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 type alias UpdateResponse msg =
     ( Model, React msg )
 
+
 actionHandler :
     Config msg
     -> MenuAction

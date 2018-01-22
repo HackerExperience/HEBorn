@@ -80,6 +80,7 @@ update config msg model =
                             edited
                                 |> config.onUpdateLog id
                                 |> React.msg
+
                         Nothing ->
                             React.none
             in

@@ -17,9 +17,6 @@ import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
---CONFREFACT : Fix these dispatches
-
-
 type alias UpdateResponse msg =
     ( Model, React msg )
 
@@ -53,8 +50,8 @@ actionHandler config action model =
             startDeleting config logId model
 
 
-startCrypting :  Config msg-> Logs.ID -> Model -> UpdateResponse msg
-startCrypting {onEncryptLog} id model =
+startCrypting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startCrypting { onEncryptLog } id model =
     id
         |> onEncryptLog
         |> React.msg
@@ -67,15 +64,15 @@ startDecrypting config id model =
 
 
 startHiding : Config msg -> Logs.ID -> Model -> UpdateResponse msg
-startHiding {onHideLog} id model =
+startHiding { onHideLog } id model =
     id
         |> onHideLog
         |> React.msg
         |> (,) model
 
 
-startDeleting : Config msg -> Logs.ID ->  Model -> UpdateResponse msg
-startDeleting {onDeleteLog} id model =
+startDeleting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startDeleting { onDeleteLog } id model =
     id
         |> onDeleteLog
         |> React.msg
