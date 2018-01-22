@@ -6,7 +6,6 @@ import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Models as Emails exposing (ID, Person)

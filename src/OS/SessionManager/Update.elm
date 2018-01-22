@@ -7,7 +7,6 @@ import Utils.React as React exposing (React)
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
-import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Launch exposing (..)
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.Dock.Update as Dock

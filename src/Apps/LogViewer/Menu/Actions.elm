@@ -10,7 +10,6 @@ module Apps.LogViewer.Menu.Actions
 
 import Dict
 import Utils.React as React exposing (React)
-import Game.Data as Game
 import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Menu.Config exposing (..)
 import Apps.LogViewer.Models exposing (..)

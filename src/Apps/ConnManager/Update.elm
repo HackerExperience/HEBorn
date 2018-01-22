@@ -1,7 +1,6 @@
 module Apps.ConnManager.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Data as Game
 import Apps.ConnManager.Config exposing (..)
 import Apps.ConnManager.Models exposing (Model)
 import Apps.ConnManager.Messages as ConnManager exposing (Msg(..))

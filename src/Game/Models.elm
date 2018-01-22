@@ -80,7 +80,6 @@ initialModel id username token flags =
 
 -- Getters + Setters
 
-
 getAccount : Model -> Account.Model
 getAccount =
     .account

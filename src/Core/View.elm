@@ -5,7 +5,6 @@ import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import Game.Data as GameD
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Models as Meta
@@ -58,31 +57,21 @@ onPlay { game, os } =
         volatile_ =
             ( Game.getGateway game
             , Game.getActiveServer game
-            , GameD.fromGateway game
             )
 
         ctx =
             Account.getContext <| Game.getAccount game
     in
         case volatile_ of
-            ( Nothing, _, _ ) ->
+            ( Just gtw, Just srv ) ->
+                OS.view (osConfig game srv ctx gtw) os
+
+            ( Nothing, _ ) ->
                 "Player doesn't have a Gateway [View.play]"
                     |> Error.astralProj
                     |> uncurry Panic.view
 
-            ( _, Nothing, _ ) ->
+            ( _, Nothing ) ->
                 "Player doesn't have an active server [View.play]"
                     |> Error.astralProj
                     |> uncurry Panic.view
-
-            ( _, _, Nothing ) ->
-                "COULDN'T GENERATE DATA"
-                    |> Error.astralProj
-                    |> uncurry Panic.view
-
-            ( Just gtw, Just srv, Just data ) ->
-                let
-                    config =
-                        osConfig game srv ctx gtw
-                in
-                    OS.view config os

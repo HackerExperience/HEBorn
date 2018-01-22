@@ -8,7 +8,6 @@ import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
 import Game.Messages as Game
-import Game.Data as GameD
 import Game.Models as Game
 import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
@@ -286,14 +285,13 @@ updatePlayOS msg ({ game, os } as state) =
         volatile_ =
             ( Game.getGateway game
             , Game.getActiveServer game
-            , GameD.fromGateway game
             )
 
         ctx =
             Account.getContext <| Game.getAccount game
     in
         case volatile_ of
-            ( Just gtw, Just srv, Just data ) ->
+            ( Just gtw, Just srv ) ->
                 let
                     lastTick =
                         game

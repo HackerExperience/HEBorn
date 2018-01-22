@@ -1,6 +1,5 @@
 module Apps.DBAdmin.Subscriptions exposing (..)
 
-import Game.Data as Game
 import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Models exposing (Model)
 import Apps.DBAdmin.Messages exposing (Msg(..))

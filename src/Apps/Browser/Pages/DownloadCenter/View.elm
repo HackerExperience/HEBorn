@@ -2,7 +2,6 @@ module Apps.Browser.Pages.DownloadCenter.View exposing (view)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
 import Apps.Browser.Config as BrowserConfig

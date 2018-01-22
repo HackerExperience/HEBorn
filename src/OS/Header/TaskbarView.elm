@@ -3,7 +3,6 @@ module OS.Header.TaskbarView exposing (view)
 import Dict
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Account.Notifications.Shared as AccountNotifications

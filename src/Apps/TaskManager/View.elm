@@ -6,7 +6,6 @@ import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
-import Game.Data as GameData
 import Game.Models as GameModel
 import Game.Meta.Models as Meta
 import Game.Servers.Models as Servers
