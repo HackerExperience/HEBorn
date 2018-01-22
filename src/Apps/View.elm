@@ -37,18 +37,10 @@ view : Config msg -> AppModel -> Html msg
 view config model =
     case model of
         LogViewerModel model ->
-            let
-                config_ =
-                    logViewerConfig config
-            in
-                Html.map (LogViewerMsg >> config.toMsg) (LogViewer.view config_ model)
+            LogViewer.view (logViewerConfig config) model
 
         TaskManagerModel model ->
-            let
-                config_ =
-                    taskManConfig config
-            in
-                Html.map (TaskManagerMsg >> config.toMsg) (TaskManager.view config_ model)
+            TaskManager.view (taskManConfig config) model
 
         BrowserModel model ->
             Browser.view (browserConfig config) model

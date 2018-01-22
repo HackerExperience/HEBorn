@@ -18,17 +18,18 @@ import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 import Apps.TaskManager.Menu.View exposing (..)
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         config_ =
             menuConfig config
     in
-        div [ class [ MainLayout ] ]
-            [ viewTasksTable config
-            , viewTotalResources model
-            , menuView config_ model
-            ]
+        Html.map config.toMsg <|
+            div [ class [ MainLayout ] ]
+                [ viewTasksTable config
+                , viewTotalResources model
+                , menuView config_ model
+                ]
 
 
 
