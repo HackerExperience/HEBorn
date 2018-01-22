@@ -42,9 +42,12 @@ onValidate ({ toMsg, mainframe } as config) model =
             getHostname model
 
         cmd =
-            case Maybe.uncurry mainframe hostname of
-                Just ( cid, name ) ->
-                    Check.serverName (Checked >> toMsg) name cid config
+            case hostname of
+                Just name ->
+                    Check.serverName (Checked >> toMsg)
+                        name
+                        mainframe
+                        config
 
                 Nothing ->
                     Cmd.none

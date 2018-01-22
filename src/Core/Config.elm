@@ -231,11 +231,17 @@ gameConfig =
 
 setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
-    { toMsg = SetupMsg
-    , accountId = accountId
-    , mainframe = mainframe
-    , flags = flags
-    }
+    case mainframe of
+        Just cid ->
+            { toMsg = SetupMsg
+            , accountId = accountId
+            , mainframe = cid
+            , flags = flags
+            }
+
+        Nothing ->
+            Debug.crash
+                "Impossible: Going to setup before account bootstrap"
 
 
 osConfig :

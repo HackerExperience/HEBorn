@@ -10,7 +10,7 @@ import Setup.Pages.Mainframe.Config as Mainframe
 type alias Config msg =
     { toMsg : Msg -> msg
     , accountId : String
-    , mainframe : Maybe CId
+    , mainframe : CId
     , flags : Core.Flags
     }
 
