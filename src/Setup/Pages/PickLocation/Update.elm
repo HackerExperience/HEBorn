@@ -1,18 +1,17 @@
 module Setup.Pages.PickLocation.Update exposing (update)
 
 import Json.Decode as Decode exposing (Value)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Models as Game
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
+import Game.Models as Game
 import Setup.Pages.PickLocation.Config exposing (..)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -31,7 +30,7 @@ update config msg model =
             onResetLocation model
 
         Checked maybeLabel ->
-            Update.fromModel <| setAreaLabel maybeLabel model
+            ( setAreaLabel maybeLabel model, React.none )
 
 
 onMapClick : Config msg -> Value -> Model -> UpdateResponse msg
@@ -52,7 +51,7 @@ onMapClick config value model =
                 _ ->
                     Cmd.none
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, React.cmd cmd )
 
 
 onGeoLocResp : Config msg -> Value -> Model -> UpdateResponse msg
@@ -80,7 +79,7 @@ onGeoLocResp config value model =
                 Nothing ->
                     Cmd.none
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, React.cmd cmd )
 
 
 onGeoRevResp : Config msg -> Value -> Model -> UpdateResponse msg
@@ -89,9 +88,9 @@ onGeoRevResp config value model =
         |> decodeLabel
         |> Result.toMaybe
         |> flip setAreaLabel model
-        |> Update.fromModel
+        |> flip (,) React.none
 
 
 onResetLocation : Model -> UpdateResponse msg
 onResetLocation model =
-    ( setAreaLabel Nothing model, Cmd.none, Dispatch.none )
+    ( setAreaLabel Nothing model, React.none )

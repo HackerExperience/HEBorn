@@ -237,6 +237,8 @@ setupConfig accountId mainframe flags =
             , accountId = accountId
             , mainframe = cid
             , flags = flags
+            , onError = HandleCrash
+            , onPlay = HandlePlay
             }
 
         Nothing ->
@@ -393,5 +395,4 @@ app :
     -> Apps.Msg
     -> Msg
 app windowRef context =
-    SessionManager.AppMsg windowRef context
-        >> sessionManager
+    SessionManager.AppMsg windowRef context >> sessionManager

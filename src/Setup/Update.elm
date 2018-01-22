@@ -1,30 +1,28 @@
 module Setup.Update exposing (update)
 
 import Json.Decode as Decode exposing (Value)
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Core as Core
+import Utils.React as React exposing (React)
+import Utils.Ports.Map as Map
+import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
+import Decoders.Client
 import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Servers.Shared as Servers
-import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
-import Setup.Config exposing (..)
-import Setup.Models exposing (..)
-import Setup.Messages exposing (..)
-import Setup.Requests exposing (..)
-import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Update as PickLocation
 import Setup.Pages.PickLocation.Messages as PickLocation
 import Setup.Pages.Mainframe.Update as Mainframe
 import Setup.Pages.Mainframe.Messages as Mainframe
 import Setup.Requests.Setup as Setup
 import Setup.Requests.SetServer as SetServer
-import Decoders.Client
+import Setup.Settings as Settings exposing (Settings)
+import Setup.Config exposing (..)
+import Setup.Models exposing (..)
+import Setup.Messages exposing (..)
+import Setup.Requests exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
@@ -44,15 +42,15 @@ update config msg model =
 
         HandleJoinedAccount value ->
             if isLoading model then
-                handleJoinedAccount value model
+                handleJoinedAccount config value model
             else
-                Update.fromModel model
+                ( model, React.none )
 
         HandleJoinedServer cid ->
             if isLoading model then
                 handleJoinedServer config cid model
             else
-                Update.fromModel model
+                ( model, React.none )
 
         Request data ->
             updateRequest config (receive data) model
@@ -70,15 +68,12 @@ onNextPage config settings model0 =
     in
         if doneSetup model then
             let
-                ( model_, cmd ) =
+                ( model_, react ) =
                     setRequest config model
-
-                cmd_ =
-                    Cmd.map config.toMsg cmd
             in
-                ( model_, cmd_, Dispatch.none )
+                ( model_, react )
         else
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
 
 onPreviousPage : Config msg -> Model -> UpdateResponse msg
@@ -87,11 +82,12 @@ onPreviousPage { toMsg } model =
         model_ =
             previousPage model
 
-        cmd =
+        react =
             locationPickerCmd model_
                 |> Cmd.map toMsg
+                |> React.cmd
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react )
 
 
 
@@ -103,16 +99,16 @@ onMainframeMsg config msg model =
     case model.page of
         Just (MainframeModel page) ->
             let
-                ( page_, cmd_, dispatch ) =
+                ( page_, react ) =
                     Mainframe.update (mainframeConfig config) msg page
 
                 model_ =
                     setPage (MainframeModel page_) model
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
         _ ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 onPickLocationMsg : Config msg -> PickLocation.Msg -> Model -> UpdateResponse msg
@@ -120,16 +116,16 @@ onPickLocationMsg config msg model =
     case model.page of
         Just (PickLocationModel page) ->
             let
-                ( page_, cmd_, dispatch ) =
+                ( page_, react ) =
                     PickLocation.update (pickLocationConfig config) msg page
 
                 model_ =
                     setPage (PickLocationModel page_) model
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
         _ ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 
@@ -146,7 +142,7 @@ updateRequest config response model =
             onSetup config status model
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 onGenericSet : Config msg -> List Settings -> Model -> UpdateResponse msg
@@ -160,7 +156,7 @@ onGenericSet ({ accountId } as config) list model =
             , config
                 |> Setup.request (List.map Tuple.first model.done) accountId
                 |> Cmd.map config.toMsg
-            , Dispatch.none
+                |> React.cmd
             )
         else
             let
@@ -176,67 +172,63 @@ onGenericSet ({ accountId } as config) list model =
                 model_
                     |> setBadPages (List.filterMap keepBadPages model.done)
                     |> undoPages
-                    |> Update.fromModel
+                    |> flip (,) React.none
 
 
 onSetup : Config msg -> Setup.Response -> Model -> UpdateResponse msg
-onSetup _ status model =
+onSetup config status model =
     case status of
         Setup.Okay ->
-            ( model, Cmd.none, Dispatch.core Core.Play )
+            ( model, React.msg config.onPlay )
 
         Setup.Error ->
             -- TODO: decide what to do
-            Update.fromModel model
+            ( model, React.none )
 
 
 
 -- event handlers
 
 
-handleJoinedAccount : Value -> Model -> UpdateResponse msg
-handleJoinedAccount value model =
+handleJoinedAccount : Config msg -> Value -> Model -> UpdateResponse msg
+handleJoinedAccount config value model =
     case Decode.decodeValue Decoders.Client.setupPages value of
         Ok pages ->
             ( setPages pages model
-            , Cmd.none
-            , Dispatch.none
+            , React.none
             )
 
         Err reason ->
             let
-                dispatch =
+                react =
                     ("Can't decide setup pages: " ++ reason)
                         |> Error.porra
-                        |> Core.Crash
-                        |> Dispatch.core
+                        |> config.onError
+                        |> React.msg
             in
-                ( model, Cmd.none, dispatch )
+                ( model, react )
 
 
 handleJoinedServer : Config msg -> Servers.CId -> Model -> UpdateResponse msg
-handleJoinedServer { mainframe } cid model =
+handleJoinedServer config cid model =
     let
-        dispatch =
+        react =
             if hasPages model then
-                Dispatch.none
+                React.none
             else
-                Dispatch.core Core.Play
+                React.msg config.onPlay
     in
-        if mainframe == cid then
-            ( doneLoading model
-            , Cmd.none
-            , dispatch
-            )
+        if config.mainframe == cid then
+            ( doneLoading model, react )
         else
-            Update.fromModel model
+            ( model, React.none )
 
 
 
 -- helpers
 
 
-locationPickerCmd : Model -> Cmd Msg
+locationPickerCmd : Model -> Cmd msg
 locationPickerCmd model =
     case model.page of
         Just (PickLocationModel _) ->
@@ -249,8 +241,8 @@ locationPickerCmd model =
             Cmd.none
 
 
-setRequest : Config msg -> Model -> ( Model, Cmd Msg )
-setRequest ({ mainframe } as config) model =
+setRequest : Config msg -> Model -> UpdateResponse msg
+setRequest config model =
     let
         settings =
             model
@@ -264,19 +256,21 @@ setRequest ({ mainframe } as config) model =
                 settings
 
         cid =
-            mainframe
+            config.mainframe
 
         request ( type_, settings ) =
             case type_ of
                 Settings.ServerTopic ->
-                    SetServer.request settings cid config
+                    Cmd.map config.toMsg <|
+                        SetServer.request settings cid config
 
                 Settings.AccountTopic ->
                     Cmd.none
 
-        cmd =
+        react =
             settings
                 |> List.map request
                 |> Cmd.batch
+                |> React.cmd
     in
-        ( model_, cmd )
+        ( model_, react )
