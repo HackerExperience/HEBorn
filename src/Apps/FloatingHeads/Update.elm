@@ -1,12 +1,7 @@
 module Apps.FloatingHeads.Update exposing (update)
 
-import Utils.Update as Update
 import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Storyline as Storyline
-import Core.Dispatch.OS as OS
-import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
 import Game.Storyline.Emails.Contents.Messages as Contents
@@ -62,13 +57,13 @@ onContentMsg config msg model =
 
 onReply : Config msg -> Content -> Model -> UpdateResponse msg
 onReply config content model =
-    let
-        dispatch =
-            content
-                |> Storyline.ReplyEmail
-                |> Dispatch.emails
-    in
-        ( model, React.none )
+    --let
+    --    dispatch =
+    --        content
+    --            |> Storyline.ReplyEmail
+    --            |> Dispatch.emails
+    --in
+    ( model, React.none )
 
 
 handleSelectContact : Config msg -> ID -> Model -> UpdateResponse msg
@@ -96,11 +91,11 @@ onToggleMode config model =
 
 onClose : Config msg -> Model -> UpdateResponse msg
 onClose config model =
-    let
-        dispatch =
-            Dispatch.os <| OS.CloseApp model.me
-    in
-        ( model, React.none )
+    --let
+    --    dispatch =
+    --        Dispatch.os <| OS.CloseApp model.me
+    --in
+    ( model, React.none )
 
 
 onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg

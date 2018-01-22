@@ -8,7 +8,6 @@ import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
 import Game.Messages as Game
-import Game.Data as GameD
 import Game.Models as Game
 import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
@@ -27,8 +26,6 @@ import Core.Config exposing (..)
 import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import Core.Subscribers as Subscribers
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 -- TODO: Use onSth pattern
@@ -81,13 +78,10 @@ update msg model =
 
         HandlePlay ->
             let
-                ( state, cmd, dispatch ) =
+                ( state, cmd ) =
                     setupToPlay model.state
-
-                model_ =
-                    { model | state = state }
             in
-                dispatcher model_ cmd dispatch
+                ( { model | state = state }, cmd )
 
         HandleEvent channel value ->
             case Events.handler eventsConfig channel value of
@@ -134,18 +128,14 @@ updateHome msg model stateModel =
     case msg of
         HandleConnected ->
             let
-                ( modelLogin, cmdLogin, dispatch ) =
+                ( modelLogin, cmdLogin ) =
                     login model
 
-                -- not tail recursive, but should only do a single recursion
-                ( modelLogin_, cmdLogin_ ) =
-                    dispatcher modelLogin cmdLogin dispatch
-
                 ( model_, cmdNext ) =
-                    updateState msg modelLogin_
+                    updateState msg modelLogin
 
                 cmd =
-                    Cmd.batch [ cmdLogin_, cmdNext ]
+                    Cmd.batch [ cmdLogin, cmdNext ]
             in
                 ( model_, cmd )
 
@@ -274,7 +264,7 @@ updatePlay msg model stateModel =
             ( model, Cmd.none )
 
 
-updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
 updatePlayWS flags msg stateModel =
     let
         ( websocket, cmd ) =
@@ -285,24 +275,23 @@ updatePlayWS flags msg stateModel =
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, Dispatch.none )
+        ( stateModel_, cmd )
 
 
-updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
 updatePlayOS msg ({ game, os } as state) =
     -- CONFREFACT: Get rid of `dipatch`
     let
         volatile_ =
             ( Game.getGateway game
             , Game.getActiveServer game
-            , GameD.fromGateway game
             )
 
         ctx =
             Account.getContext <| Game.getAccount game
     in
         case volatile_ of
-            ( Just gtw, Just srv, Just data ) ->
+            ( Just gtw, Just srv ) ->
                 let
                     lastTick =
                         game
@@ -318,13 +307,13 @@ updatePlayOS msg ({ game, os } as state) =
                     state_ =
                         { state | os = os_ }
                 in
-                    ( state_, React.toCmd react, Dispatch.none )
+                    ( state_, React.toCmd react )
 
             _ ->
-                ( state, Cmd.none, Dispatch.none )
+                ( state, Cmd.none )
 
 
-updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
 updatePlayGame msg stateModel =
     let
         ( game, cmd ) =
@@ -335,16 +324,12 @@ updatePlayGame msg stateModel =
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, Dispatch.none )
+        ( stateModel_, cmd )
 
 
-finishPlayUpdate : Model -> ( PlayModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
-finishPlayUpdate model ( stateModel, cmd, dispatch ) =
-    let
-        model_ =
-            { model | state = Play stateModel }
-    in
-        dispatcher model_ cmd dispatch
+finishPlayUpdate : Model -> ( PlayModel, Cmd Msg ) -> ( Model, Cmd Msg )
+finishPlayUpdate model ( stateModel, cmd ) =
+    ( { model | state = Play stateModel }, cmd )
 
 
 updateLanding :
@@ -365,11 +350,11 @@ updateLanding msg model ({ landing } as stateModel) =
         model_ =
             { model | state = Home stateModel_ }
     in
-        dispatcher model_ (React.toCmd react) Dispatch.none
+        ( model_, (React.toCmd react) )
 
 
 
--- dispatcher code
+-- code
 
 
 isDev : Model -> Bool
@@ -410,19 +395,3 @@ sent =
     -- uncomment this line to see sent messages
     --Debug.log "◀ Message"
     identity
-
-
-dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
-dispatcher model cmd dispatch =
-    dispatch
-        |> Subscribers.dispatch
-        |> List.foldl (sent >> reducer) ( model, cmd )
-
-
-reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-reducer msg ( model, cmd ) =
-    let
-        ( model_, cmd_ ) =
-            update msg model
-    in
-        ( model_, Cmd.batch [ cmd, cmd_ ] )

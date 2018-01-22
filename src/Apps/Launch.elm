@@ -1,9 +1,7 @@
 module Apps.Launch exposing (launch, launchEvent)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Game.Meta.Types.Context exposing (Context)
 import Utils.React as React exposing (React)
-import Utils.Update as Update
 import Apps.Apps exposing (..)
 import Apps.Config exposing (..)
 import Apps.Messages exposing (..)

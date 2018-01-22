@@ -14,7 +14,6 @@ module Core.Models
         , setupToPlay
         )
 
-import Utils.Update as Update
 import Landing.Models as Landing
 import Driver.Websocket.Launch as Ws
 import Driver.Websocket.Models as Ws
@@ -23,7 +22,6 @@ import Game.Account.Models as Account
 import Game.Dummy as Game
 import Setup.Models as Setup
 import OS.Models as OS
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)
 
@@ -106,7 +104,7 @@ connect id username token ({ state, flags } as model) =
             model
 
 
-login : Model -> ( Model, Cmd Msg, Dispatch )
+login : Model -> ( Model, Cmd Msg )
 login ({ state, flags } as model) =
     case state of
         Home ({ connecting, websocket } as home) ->
@@ -126,20 +124,19 @@ login ({ state, flags } as model) =
                         game =
                             initialGame connecting flags
 
-                        ( state_, cmd, dispatch ) =
+                        ( state_, cmd ) =
                             initialSetup websocket_ game
-                                |> Update.mapModel Setup
 
                         model_ =
-                            { model | state = state_ }
+                            { model | state = Setup state_ }
                     in
-                        ( model_, cmd, dispatch )
+                        ( model_, cmd )
 
                 Nothing ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, Cmd.none )
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, Cmd.none )
 
 
 logout : Model -> Model
@@ -157,21 +154,21 @@ getFlags =
     .flags
 
 
-setupToPlay : State -> ( State, Cmd Msg, Dispatch )
+setupToPlay : State -> ( State, Cmd Msg )
 setupToPlay state =
     case state of
         Setup { websocket, game } ->
             let
-                ( play, cmd, dispatch ) =
+                ( play, cmd ) =
                     initialPlay websocket game
 
                 state_ =
                     Play play
             in
-                ( state_, cmd, dispatch )
+                ( state_, cmd )
 
         _ ->
-            ( state, Cmd.none, Dispatch.none )
+            ( state, Cmd.none )
 
 
 
@@ -186,16 +183,17 @@ initialHome =
     }
 
 
-initialSetup : Ws.Model Msg -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
+initialSetup : Ws.Model Msg -> Game.Model -> ( SetupModel, Cmd Msg )
 initialSetup ws game =
-    { websocket = ws
-    , game = game
-    , setup = Setup.initialModel
-    }
-        |> Update.fromModel
+    ( { websocket = ws
+      , game = game
+      , setup = Setup.initialModel
+      }
+    , Cmd.none
+    )
 
 
-initialPlay : Ws.Model Msg -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )
+initialPlay : Ws.Model Msg -> Game.Model -> ( PlayModel, Cmd Msg )
 initialPlay ws game =
     let
         play_ =
@@ -204,7 +202,7 @@ initialPlay ws game =
             , os = OS.initialModel
             }
     in
-        ( play_, Cmd.none, Dispatch.none )
+        ( play_, Cmd.none )
 
 
 initialGame : Connecting -> Flags -> Game.Model

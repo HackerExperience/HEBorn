@@ -3,11 +3,9 @@ module OS.SessionManager.Dock.Update exposing (update)
 import Dict
 import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import OS.SessionManager.Dock.Config exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Models exposing (..)
-import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Launch exposing (..)
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Messages as SessionManager

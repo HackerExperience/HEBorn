@@ -1,8 +1,6 @@
 module Apps.Browser.Pages.Bank.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest

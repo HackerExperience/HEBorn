@@ -2,11 +2,8 @@ module OS.SessionManager.WindowManager.Update exposing (..)
 
 import Dict
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Storyline as Storyline
 import Draggable
 import Draggable.Events as Draggable
-import Utils.Update as Update
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import Game.Meta.Types.Context exposing (Context(..))
@@ -238,13 +235,13 @@ onUpdateFocustTo config maybeWId model =
                         model_ =
                             focus id model
 
-                        dispatch =
-                            window
-                                |> windowContext
-                                |> GoApp window.app
-                                |> Storyline.ActionDone
-                                |> Storyline.Missions
-                                |> Dispatch.storyline
+                        --dispatch =
+                        --    window
+                        --        |> windowContext
+                        --        |> GoApp window.app
+                        --        |> Storyline.ActionDone
+                        --        |> Storyline.Missions
+                        --        |> Dispatch.storyline
                     in
                         ( model_, React.none )
 

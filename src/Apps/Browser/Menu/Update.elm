@@ -5,7 +5,6 @@ import ContextMenu exposing (ContextMenu)
 import Apps.Browser.Menu.Config exposing (..)
 import Apps.Browser.Menu.Models exposing (Model)
 import Apps.Browser.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 update : Config msg -> Msg -> Model -> ( Model, React msg )

@@ -8,14 +8,12 @@ import Utils.Html.Attributes exposing (..)
 import Html.CssHelpers
 import OS.Resources as OsRes
 import OS.SessionManager.Models exposing (..)
-import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Dock.Config exposing (..)
 import OS.SessionManager.Dock.Messages exposing (..)
 import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
 import Apps.Models as Apps
 import Apps.Apps as Apps
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 

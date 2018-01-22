@@ -7,7 +7,6 @@ import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
-import Game.Data as Game
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Shared as Filesystem

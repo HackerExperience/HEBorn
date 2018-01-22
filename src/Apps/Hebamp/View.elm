@@ -6,7 +6,6 @@ import Html exposing (..)
 import Html.Attributes exposing (src, type_, controls, style)
 import Html.CssHelpers
 import Html.Events exposing (on, onClick)
-import Game.Data as Game
 import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Messages exposing (Msg(..))
 import Apps.Hebamp.Models exposing (..)

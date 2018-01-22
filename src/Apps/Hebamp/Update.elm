@@ -2,8 +2,6 @@ module Apps.Hebamp.Update exposing (update)
 
 import Utils.Ports.Audio exposing (..)
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 import Time exposing (Time)
 import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Models exposing (Model)

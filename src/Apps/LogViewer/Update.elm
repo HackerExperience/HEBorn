@@ -1,8 +1,6 @@
 module Apps.LogViewer.Update exposing (update)
 
 import Dict
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
 import Utils.React as React exposing (React)
 import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Config exposing (..)

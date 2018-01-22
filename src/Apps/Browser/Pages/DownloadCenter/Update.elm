@@ -1,8 +1,6 @@
 module Apps.Browser.Pages.DownloadCenter.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.DownloadCenter.Config exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)

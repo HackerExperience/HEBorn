@@ -1,6 +1,5 @@
 module Apps.LogViewer.Subscriptions exposing (..)
 
-import Game.Data as Game
 import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Models exposing (Model)
 import Apps.LogViewer.Messages exposing (Msg(..))

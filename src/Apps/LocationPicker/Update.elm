@@ -4,8 +4,6 @@ import Utils.React as React exposing (React)
 import Json.Decode exposing (Value)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation as Gloc
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
 import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Messages as LocationPicker exposing (Msg(..))

@@ -1,7 +1,6 @@
 module Game.Storyline.Emails.Contents.View exposing (..)
 
 import Html exposing (Html, text)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Emails.Contents exposing (Content(..))
