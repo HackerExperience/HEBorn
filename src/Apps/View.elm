@@ -58,18 +58,10 @@ view config model =
             BounceManager.view (bounceManConfig config) model
 
         FinanceModel model ->
-            let
-                config_ =
-                    financeConfig config
-            in
-                Html.map (FinanceMsg >> config.toMsg) (Finance.view config_ model)
+            Finance.view (financeConfig config) model
 
         MusicModel model ->
-            let
-                config_ =
-                    hebampConfig config
-            in
-                Html.map (MusicMsg >> config.toMsg) (Hebamp.view config_ model)
+            Hebamp.view (hebampConfig config) model
 
         CtrlPanelModel model ->
             let
