@@ -2,10 +2,12 @@ module Driver.Websocket.Subscriptions exposing (subscriptions)
 
 import Dict exposing (Dict)
 import Phoenix
-import Driver.Websocket.Models exposing (Model)
-import Driver.Websocket.Messages exposing (Msg)
+import Driver.Websocket.Models exposing (..)
+import Driver.Websocket.Messages exposing (..)
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model msg -> Sub msg
 subscriptions model =
-    Phoenix.connect model.socket (Dict.values model.channels)
+    model.channels
+        |> Dict.values
+        |> Phoenix.connect model.socket

@@ -1,7 +1,7 @@
 module Driver.Websocket.Messages exposing (..)
 
 import Driver.Websocket.Channels exposing (..)
-import Json.Encode exposing (Value)
+import Json.Decode exposing (Value)
 
 
 type alias Token =
@@ -18,6 +18,5 @@ type Msg
     | Joined Channel Value
     | JoinFailed Channel Value
     | Leaved Channel Value
-    | Event Channel Value
     | HandleJoin Channel (Maybe Value)
     | HandleLeave Channel

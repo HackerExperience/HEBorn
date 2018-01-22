@@ -2,7 +2,7 @@ module Driver.Websocket.Websocket exposing (send)
 
 import Phoenix
 import Phoenix.Push as Push
-import Json.Encode exposing (Value)
+import Json.Decode exposing (Value)
 
 
 send :

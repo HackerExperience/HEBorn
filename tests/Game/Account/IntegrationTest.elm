@@ -8,12 +8,11 @@ import Utils.React as React exposing (React)
 import Core.Subscribers as Subscribers
 import Core.Messages as Core
 import Json.Decode as Decode
-import TestUtils exposing (fuzz, gameDispatcher, fromJust, fromOk, toValue)
+import TestUtils exposing (fuzz, gameDispatcher, fromJust, toValue, applyEvent)
 import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
-import Events.Events as Events
 import Game.Messages as Game
 import Game.Models as Game
 import Game.Account.Messages as Account
@@ -67,8 +66,7 @@ passwordAcquired =
                     "server_password_acquired"
 
                 json =
-                    toValue
-                        """
+                    """
                         { "server_ip": "phoebe"
                         , "password": "asdfasdf"
                         , "network_id": "id"
@@ -76,16 +74,9 @@ passwordAcquired =
                         , "gateway_ip": "ip"
                         }
                         """
-
-                react =
-                    Events.events channel name json
-                        |> fromJust ("Testing " ++ name)
-                        |> Subscribers.dispatch
-                        |> Core.MultiMsg
-                        |> React.msg
             in
-                react
-                    |> gameDispatcher game
+                game
+                    |> applyEvent name json channel
                     |> Game.getAccount
                     |> Account.getDatabase
                     |> getHackedServers
@@ -114,8 +105,7 @@ replyUnlocked =
                     "story_email_reply_unlocked"
 
                 json =
-                    toValue
-                        """
+                    """
                         { "contact_id": "kress"
                         , "replies":
                             [ { "id": "helloworld"
@@ -123,16 +113,9 @@ replyUnlocked =
                             } ]
                         }
                         """
-
-                react =
-                    Events.events channel name json
-                        |> fromJust ("Testing " ++ name)
-                        |> Subscribers.dispatch
-                        |> Core.MultiMsg
-                        |> React.msg
             in
-                react
-                    |> gameDispatcher game
+                game
+                    |> applyEvent name json channel
                     |> Game.getStory
                     |> Story.getEmails
                     |> Emails.getPerson ("kress")

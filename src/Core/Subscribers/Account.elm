@@ -31,11 +31,10 @@ dispatch dispatch =
         NewGateway a ->
             [ account <| Account.HandleNewGateway a ]
 
-        PasswordAcquired a ->
-            [ database <| Database.HandlePasswordAcquired a
-            , apps [ Apps.BrowserMsg <| Browser.HandlePasswordAcquired a ]
-            ]
-
+        --PasswordAcquired a ->
+        --    [ database <| Database.HandlePasswordAcquired a
+        --    , apps [ Apps.BrowserMsg <| Browser.HandlePasswordAcquired a ]
+        --    ]
         LogoutAndCrash a ->
             [ account <| Account.HandleLogoutAndCrash a ]
 

@@ -1,10 +1,10 @@
 module Game.Servers.Processes.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Events.Server.Processes.Started as ProcessStarted
-import Events.Server.Processes.Conclusion as ProcessConclusion
-import Events.Server.Processes.BruteforceFailed as BruteforceFailed
-import Events.Server.Processes.Changed as ProcessesChanged
+import Events.Server.Handlers.ProcessCreated as ProcessStarted
+import Events.Server.Handlers.ProcessCompleted as ProcessConclusion
+import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
+import Events.Server.Handlers.ProcessesRecalcado as ProcessesChanged
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem

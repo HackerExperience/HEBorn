@@ -1,7 +1,7 @@
 module Game.Account.Database.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Events.Account.PasswordAcquired as PasswordAcquired
+import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
 import Game.Account.Database.Config exposing (..)
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
@@ -27,7 +27,10 @@ update config msg model =
 {-| Saves password for that server, inserts a new server entry
 if none is found.
 -}
-handlePasswordAcquired : PasswordAcquired.Data -> Model -> UpdateResponse msg
+handlePasswordAcquired :
+    ServerPasswordAcquired.Data
+    -> Model
+    -> UpdateResponse msg
 handlePasswordAcquired data model =
     let
         servers =

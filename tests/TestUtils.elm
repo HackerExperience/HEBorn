@@ -2,6 +2,7 @@ module TestUtils exposing (..)
 
 import Expect exposing (Expectation)
 import Utils.React as React exposing (React)
+import Driver.Websocket.Channels as Ws
 import Core.Subscribers as Subscribers
 import Core.Config as Core
 import Core.Messages as Core
@@ -10,6 +11,7 @@ import Game.Config as Game
 import Game.Models as Game
 import Game.Update as Game
 import Json.Decode as Decode
+import Events.Handler as Events
 import Test exposing (..)
 import Config
 
@@ -27,32 +29,26 @@ batch =
     List.map always >> flip Expect.all ()
 
 
-ensureDifferentSeed : ( Int, Int ) -> ( Int, Int )
-ensureDifferentSeed seed =
+applyEvent : String -> String -> Ws.Channel -> Game.Model -> Game.Model
+applyEvent name data channel model =
     let
-        ( seed1, seed2 ) =
-            seed
-
-        seed_ =
-            if seed1 == seed2 then
-                ( seed1, seed1 + seed2 + 1 )
-            else if seed1 == (seed2 * (-1)) then
-                -- On (x, -x) seeds we've been having trouble because of our
-                -- Gen.Utils generators
-                ( seed1, seed2 + 1 )
-            else
-                seed
+        result =
+            ( name, toValue data )
+                |> Ok
+                |> Events.handler Core.eventsConfig channel
+                |> Result.map React.msg
     in
-        seed_
+        case result of
+            Ok msg ->
+                gameDispatcher model msg
+
+            Err error ->
+                always model <| Debug.log (Events.report error) ""
 
 
-updateGame : Game.Msg -> Game.Model -> Game.Model
-updateGame msg0 model0 =
-    let
-        ( model1, cmd ) =
-            Game.update Core.gameConfig msg0 model0
-    in
-        gameDispatcher model1 cmd
+toValue : String -> Decode.Value
+toValue =
+    Decode.decodeString Decode.value >> fromOk "invalid json"
 
 
 fromJust : String -> Maybe a -> a
@@ -73,23 +69,6 @@ fromOk tip m =
 
         Err _ ->
             Debug.crash ("fromOk called with Err" ++ hint tip)
-
-
-toValue : String -> Decode.Value
-toValue =
-    Decode.decodeString Decode.value >> fromOk "invalid json"
-
-
-hint : String -> String
-hint str =
-    if str == "" then
-        ""
-    else
-        " (" ++ str ++ ")"
-
-
-
--- REPLICANTS FROM CORE.UPDATE MODIFIED TO USE GAME.MODEL
 
 
 gameDispatcher :
@@ -133,3 +112,43 @@ gameReducer msg ( model, react ) =
 
         _ ->
             ( model, react )
+
+
+hint : String -> String
+hint str =
+    if str == "" then
+        ""
+    else
+        " (" ++ str ++ ")"
+
+
+
+-- legacy helpers
+
+
+ensureDifferentSeed : ( Int, Int ) -> ( Int, Int )
+ensureDifferentSeed seed =
+    let
+        ( seed1, seed2 ) =
+            seed
+
+        seed_ =
+            if seed1 == seed2 then
+                ( seed1, seed1 + seed2 + 1 )
+            else if seed1 == (seed2 * (-1)) then
+                -- On (x, -x) seeds we've been having trouble because of our
+                -- Gen.Utils generators
+                ( seed1, seed2 + 1 )
+            else
+                seed
+    in
+        seed_
+
+
+updateGame : Game.Msg -> Game.Model -> Game.Model
+updateGame msg0 model0 =
+    let
+        ( model1, cmd ) =
+            Game.update Core.gameConfig msg0 model0
+    in
+        gameDispatcher model1 cmd

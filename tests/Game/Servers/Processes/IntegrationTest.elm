@@ -7,12 +7,11 @@ import Utils.React as React exposing (React)
 import Core.Subscribers as Subscribers
 import Core.Messages as Core
 import Json.Decode as Decode
-import TestUtils exposing (fuzz, updateGame, gameDispatcher, fromJust, fromOk, toValue)
+import TestUtils exposing (fuzz, updateGame, gameDispatcher, fromJust, applyEvent)
 import Requests.Types exposing (Code(OkCode))
 import Gen.Processes as GenProcesses
 import Gen.Game as GenGame
 import Driver.Websocket.Channels exposing (Channel(..))
-import Events.Events as Events
 import Game.Messages as Game
 import Game.Models as Game
 import Game.Servers.Messages as Servers
@@ -58,8 +57,7 @@ eventTests =
                     "process_created"
 
                 json =
-                    toValue
-                        """
+                    """
                         { "type" : "cracker"
                         , "access" :
                             { "origin_ip" : "id"
@@ -100,16 +98,9 @@ eventTests =
                         , "process_id" : "id"
                         }
                         """
-
-                react =
-                    Events.events channel name json
-                        |> fromJust ("Testing " ++ name)
-                        |> Subscribers.dispatch
-                        |> Core.MultiMsg
-                        |> React.msg
             in
-                react
-                    |> gameDispatcher game
+                game
+                    |> applyEvent name json channel
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.started fetching serverId"
@@ -153,20 +144,12 @@ eventTests =
                     "process_completed"
 
                 json =
-                    toValue
-                        """
+                    """
                         { "process_id": "id" }
                         """
-
-                react =
-                    Events.events channel name json
-                        |> fromJust ("Testing " ++ name)
-                        |> Subscribers.dispatch
-                        |> Core.MultiMsg
-                        |> React.msg
             in
-                react
-                    |> gameDispatcher game1
+                game1
+                    |> applyEvent name json channel
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "process.conclusion fetching serverId"
@@ -210,22 +193,14 @@ eventTests =
                     "bruteforce_failed"
 
                 json =
-                    toValue
-                        """
+                    """
                         { "process_id": "id"
                         , "reason": "any"
                         }
                         """
-
-                react =
-                    Events.events channel name json
-                        |> fromJust ("Testing " ++ name)
-                        |> Subscribers.dispatch
-                        |> Core.MultiMsg
-                        |> React.msg
             in
-                react
-                    |> gameDispatcher game1
+                game1
+                    |> applyEvent name json channel
                     |> Game.getServers
                     |> Servers.get serverId
                     |> fromJust "bruteforce_failed fetching serverId"

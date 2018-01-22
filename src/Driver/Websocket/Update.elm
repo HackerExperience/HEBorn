@@ -1,119 +1,116 @@
 module Driver.Websocket.Update exposing (update)
 
 import Dict exposing (Dict)
-import Json.Decode exposing (Value, decodeValue, value, string)
+import Json.Decode exposing (Value, decodeValue, value, string, field)
 import Json.Decode.Pipeline exposing (decode, required)
 import Phoenix.Channel as Channel
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Websocket as Ws
+import Utils.React as React exposing (React)
+import Driver.Websocket.Config exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages exposing (..)
 import Driver.Websocket.Models exposing (..)
-import Events.Events as Events
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model msg, React msg )
 
 
-update : Msg -> Model -> UpdateResponse
-update msg model =
+update : Config msg -> Msg -> Model msg -> UpdateResponse msg
+update config msg model =
     case msg of
         Connected token _ ->
-            ( model, Cmd.none, Dispatch.websocket <| Ws.Connected token )
+            ( model, React.msg <| config.onConnected )
 
         Disconnected ->
-            ( model, Cmd.none, Dispatch.websocket Ws.Disconnected )
+            ( model, React.msg <| config.onDisconnected )
 
         Joined channel value ->
-            onJoined channel value model
+            onJoined config channel value model
 
         JoinFailed channel value ->
-            onJoinFailed channel value model
+            onJoinFailed config channel value model
 
         Leaved channel value ->
-            handleLeave channel (Just value) model
-
-        Event channel value ->
-            onEvent channel value model
+            handleLeave config channel (Just value) model
 
         HandleJoin channel payload ->
-            handleJoin channel payload model
+            handleJoin config channel payload model
 
         HandleLeave channel ->
-            handleLeave channel Nothing model
+            handleLeave config channel Nothing model
 
 
 
 -- internals
 
 
-onJoined : Channel -> Value -> Model -> UpdateResponse
-onJoined channel payload model =
+onJoined : Config msg -> Channel -> Value -> Model msg -> UpdateResponse msg
+onJoined config channel payload model =
     let
-        -- silent fallback because requests
         payload_ =
             payload
                 |> decodeJoined
                 |> Result.withDefault payload
 
-        dispatch =
-            Dispatch.websocket <|
-                Ws.Joined channel payload_
+        react =
+            case channel of
+                AccountChannel _ ->
+                    React.msg <| config.onJoinedAccount payload_
+
+                ServerChannel cid ->
+                    React.msg <| config.onJoinedServer cid payload_
+
+                BackFlixChannel ->
+                    React.none
     in
-        ( model, Cmd.none, dispatch )
+        ( model, react )
 
 
-onJoinFailed : Channel -> Value -> Model -> UpdateResponse
-onJoinFailed channel payload model =
+onJoinFailed : Config msg -> Channel -> Value -> Model msg -> UpdateResponse msg
+onJoinFailed config channel payload model =
     case decodeJoinFailed payload of
         Ok payload ->
             let
-                dispatch =
-                    Dispatch.websocket <|
-                        Ws.JoinFailed channel payload
+                react =
+                    case channel of
+                        ServerChannel cid ->
+                            React.msg <| config.onJoinFailedServer cid
+
+                        _ ->
+                            React.none
             in
-                ( model, Cmd.none, dispatch )
+                ( model, react )
 
         Err err ->
             let
                 _ =
                     Debug.log "▶ JoinFailed decode error" err
             in
-                Update.fromModel model
+                ( model, React.none )
 
 
-onEvent : Channel -> Value -> Model -> UpdateResponse
-onEvent channel value model =
-    case decodeEvent value of
-        Ok { event, data } ->
-            let
-                dispatch =
-                    data
-                        |> Events.events channel event
-                        |> Maybe.withDefault Dispatch.none
-            in
-                ( model, Cmd.none, dispatch )
-
-        Err _ ->
-            Update.fromModel model
-
-
-handleJoin : Channel -> Maybe Value -> Model -> UpdateResponse
-handleJoin channel payload model =
+handleJoin :
+    Config msg
+    -> Channel
+    -> Maybe Value
+    -> Model msg
+    -> UpdateResponse msg
+handleJoin config channel payload model =
     let
         channelAddress =
             getAddress channel
 
+        eventHandler =
+            decodeEvent >> config.onEvent channel
+
         driverChannel =
             channelAddress
                 |> Channel.init
-                |> Channel.onJoin (Joined channel)
-                |> Channel.onJoinError (JoinFailed channel)
-                |> Channel.onLeave (Leaved channel)
-                |> Channel.on "event" (Event channel)
-                |> Channel.on "event_marote" (Event channel)
+                |> Channel.onJoin (Joined channel >> config.toMsg)
+                |> Channel.onJoinError (JoinFailed channel >> config.toMsg)
+                |> Channel.onLeave (Leaved channel >> config.toMsg)
+                |> Channel.on "event" eventHandler
+                |> Channel.on "event_marote" eventHandler
 
         driverChannel_ =
             case payload of
@@ -126,57 +123,45 @@ handleJoin channel payload model =
         channels =
             Dict.insert channelAddress driverChannel_ model.channels
     in
-        Update.fromModel { model | channels = channels }
+        ( { model | channels = channels }, React.none )
 
 
-handleLeave : Channel -> Maybe Value -> Model -> UpdateResponse
-handleLeave channel payload model =
+handleLeave :
+    Config msg
+    -> Channel
+    -> Maybe Value
+    -> Model msg
+    -> UpdateResponse msg
+handleLeave config channel payload model =
     let
         channelAddress =
             getAddress channel
 
         channels =
             Dict.remove channelAddress model.channels
-
-        model_ =
-            { model | channels = channels }
-
-        dispatch =
-            Dispatch.websocket <| Ws.Leaved channel payload
     in
-        ( model_, Cmd.none, dispatch )
+        ( { model | channels = channels }
+        , React.msg <| config.onLeaved channel payload
+        )
 
 
 
 -- helpers
 
 
-decodeEvent : Value -> Result String EventBase
-decodeEvent =
-    let
-        decoder =
-            decode EventBase
-                |> required "data" value
-                |> required "event" string
-    in
-        decodeValue decoder
-
-
 decodeJoined : Value -> Result String Value
 decodeJoined =
-    let
-        decoder =
-            decode identity
-                |> required "data" value
-    in
-        decodeValue decoder
+    decodeValue <| field "data" value
 
 
 decodeJoinFailed : Value -> Result String Value
 decodeJoinFailed =
-    let
-        decoder =
-            decode identity
-                |> required "data" value
-    in
-        decodeValue decoder
+    decodeValue <| field "data" value
+
+
+decodeEvent : Value -> Result String ( String, Value )
+decodeEvent =
+    decode (,)
+        |> required "event" string
+        |> required "data" value
+        |> decodeValue

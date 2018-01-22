@@ -1,6 +1,6 @@
 module Game.Account.Database.Messages exposing (Msg(..))
 
-import Events.Account.PasswordAcquired as PasswordAcquired
+import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
 import Game.Account.Database.Models
     exposing
         ( HackedBankAccountID
@@ -9,6 +9,6 @@ import Game.Account.Database.Models
 
 
 type Msg
-    = HandlePasswordAcquired PasswordAcquired.Data
+    = HandlePasswordAcquired ServerPasswordAcquired.Data
     | HandleDatabaseAccountRemoved HackedBankAccountID
     | HandleDatabaseAccountUpdated HackedBankAccountID HackedBankAccount

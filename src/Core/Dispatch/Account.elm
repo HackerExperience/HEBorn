@@ -16,7 +16,6 @@ import Game.Account.Database.Models
         ( HackedBankAccountID
         , HackedBankAccount
         )
-import Events.Account.PasswordAcquired as PasswordAcquired
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Web.Models as Web
@@ -29,7 +28,6 @@ type Dispatch
     | SetEndpoint (Maybe Servers.CId)
     | SetContext Context
     | NewGateway Servers.CId
-    | PasswordAcquired PasswordAcquired.Data
     | Finances Finances
     | Database Database
     | LogoutAndCrash ( String, String )

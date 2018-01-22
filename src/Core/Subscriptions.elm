@@ -136,11 +136,9 @@ os game model =
             Sub.none
 
 
-websocket : Ws.Model -> Sub Msg
+websocket : Ws.Model Msg -> Sub Msg
 websocket model =
-    model
-        |> Ws.subscriptions
-        |> Sub.map WebsocketMsg
+    Ws.subscriptions model
 
 
 game : Game.Model -> Sub Msg

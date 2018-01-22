@@ -14,7 +14,7 @@ type alias Config msg =
     , accountId : Account.ID
 
     -- TODO: replace Success/Error with Result
-    , onBALoginSuccess : Requester -> BankAccountData -> msg
+    , onBALoginSuccess : BankAccountData -> Requester -> msg
     , onBALoginFailed : Requester -> msg
     , onBATransferSuccess : Requester -> msg
     , onBATransferFailed : Requester -> msg

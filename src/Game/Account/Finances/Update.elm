@@ -101,7 +101,7 @@ onBankLogin config requester cid response model =
     case response of
         Valid data ->
             ( model
-            , React.msg <| config.onBALoginSuccess requester data
+            , React.msg <| config.onBALoginSuccess data requester
             )
 
         DecodeFailed ->

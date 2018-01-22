@@ -1,6 +1,7 @@
 module Core.Update exposing (update)
 
 import Utils.React as React exposing (React)
+import Events.Handler as Events
 import Landing.Messages as Landing
 import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
@@ -84,6 +85,15 @@ update msg model =
             in
                 dispatcher model_ cmd dispatch
 
+        HandleEvent channel value ->
+            case Events.handler eventsConfig channel value of
+                Ok msg ->
+                    ( model, React.toCmd <| React.msg msg )
+
+                Err error ->
+                    always ( model, Cmd.none ) <|
+                        Debug.log (Events.report error) ""
+
         LoadingEnd z ->
             let
                 model_ =
@@ -139,8 +149,10 @@ updateHome msg model stateModel =
             case stateModel.websocket of
                 Just websocket ->
                     let
-                        ( websocket_, cmd, dispatch ) =
-                            updateWebsocket msg websocket
+                        ( websocket_, cmd ) =
+                            websocket
+                                |> Ws.update (websocketConfig model.flags) msg
+                                |> Tuple.mapSecond React.toCmd
 
                         stateModel_ =
                             { stateModel | websocket = Just websocket_ }
@@ -148,7 +160,7 @@ updateHome msg model stateModel =
                         model_ =
                             { model | state = Home stateModel_ }
                     in
-                        dispatcher model_ cmd dispatch
+                        ( model_, cmd )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -164,7 +176,7 @@ updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
 updateSetup msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updateSetupWS msg stateModel
+            updateSetupWS model.flags msg stateModel
                 |> finishSetupUpdate model
 
         SetupMsg msg ->
@@ -179,16 +191,22 @@ updateSetup msg model stateModel =
             ( model, Cmd.none )
 
 
-updateSetupWS : Ws.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
-updateSetupWS msg stateModel =
+updateSetupWS :
+    Flags
+    -> Ws.Msg
+    -> SetupModel
+    -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupWS flags msg stateModel =
     let
-        ( websocket, cmd, dispatch ) =
-            updateWebsocket msg stateModel.websocket
+        ( websocket, cmd ) =
+            stateModel.websocket
+                |> Ws.update (websocketConfig flags) msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd, Dispatch.none )
 
 
 updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
@@ -212,13 +230,15 @@ updateSetupSetup msg stateModel =
 updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
 updateSetupGame msg stateModel =
     let
-        ( game, cmd, dispatch ) =
-            updateGame msg stateModel.game
+        ( game, cmd ) =
+            stateModel.game
+                |> Game.update gameConfig msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd, Dispatch.none )
 
 
 finishSetupUpdate : Model -> ( SetupModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
@@ -234,7 +254,7 @@ updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
 updatePlay msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updatePlayWS msg stateModel
+            updatePlayWS model.flags msg stateModel
                 |> finishPlayUpdate model
 
         OSMsg msg ->
@@ -249,16 +269,18 @@ updatePlay msg model stateModel =
             ( model, Cmd.none )
 
 
-updatePlayWS : Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
-updatePlayWS msg stateModel =
+updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayWS flags msg stateModel =
     let
-        ( websocket, cmd, dispatch ) =
-            updateWebsocket msg stateModel.websocket
+        ( websocket, cmd ) =
+            stateModel.websocket
+                |> Ws.update (websocketConfig flags) msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd, Dispatch.none )
 
 
 updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
@@ -305,13 +327,15 @@ updatePlayOS msg stateModel =
 updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
 updatePlayGame msg stateModel =
     let
-        ( game, cmd, dispatch ) =
-            updateGame msg stateModel.game
+        ( game, cmd ) =
+            stateModel.game
+                |> Game.update gameConfig msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd, Dispatch.none )
 
 
 finishPlayUpdate : Model -> ( PlayModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
@@ -342,27 +366,6 @@ updateLanding msg model ({ landing } as stateModel) =
             { model | state = Home stateModel_ }
     in
         dispatcher model_ (React.toCmd react) Dispatch.none
-
-
-updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
-updateGame msg model =
-    let
-        ( model_, react ) =
-            Game.update gameConfig msg model
-    in
-        ( model_, React.toCmd react, Dispatch.none )
-
-
-updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )
-updateWebsocket msg model =
-    let
-        ( model_, cmd, dispatch ) =
-            Ws.update msg model
-
-        cmd_ =
-            Cmd.map WebsocketMsg cmd
-    in
-        ( model_, cmd_, dispatch )
 
 
 
