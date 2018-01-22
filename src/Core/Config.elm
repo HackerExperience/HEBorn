@@ -17,6 +17,7 @@ import Driver.Websocket.Channels exposing (Channel(..))
 import Driver.Websocket.Messages as Ws
 import Game.Config as Game
 import Game.Messages as Game
+import Game.Meta.Types.Context exposing (Context)
 import Game.BackFlix.Messages as BackFlix
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
@@ -26,7 +27,7 @@ import Game.Account.Database.Messages as Database
 import Game.Account.Database.Models as Database
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Logs.Messages as Logs
@@ -42,16 +43,13 @@ import Landing.Config as Landing
 import OS.Config as OS
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
+import OS.SessionManager.Types as SessionManager
 import OS.Toasts.Messages as Toast
 import Setup.Config as Setup
 import Setup.Messages as Setup
 import Core.Flags exposing (Flags)
 import Core.Error as Error exposing (Error)
 import Core.Messages exposing (..)
-
-
--- this module may be optimized using the same techniques
--- used in the old Subscribers.Helpers
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -65,44 +63,36 @@ landingConfig windowLoaded flags =
 
 websocketConfig : Flags -> Ws.Config Msg
 websocketConfig flags =
-    { flags = flags
-    , toMsg = WebsocketMsg
+    { flags =
+        flags
+    , toMsg =
+        WebsocketMsg
     , onConnected =
         MultiMsg
             [ HandleConnected
-            , Account.HandleConnected
-                |> Game.AccountMsg
-                |> GameMsg
+            , account Account.HandleConnected
             ]
     , onDisconnected =
-        Account.HandleDisconnected
-            |> Game.AccountMsg
-            |> GameMsg
+        account <| Account.HandleDisconnected
     , onJoinedAccount =
         \value ->
             MultiMsg
-                [ value
-                    |> Game.HandleJoinedAccount
-                    |> GameMsg
-                , value
-                    |> Setup.HandleJoinedAccount
-                    |> SetupMsg
+                [ game <| Game.HandleJoinedAccount value
+                , setup <| Setup.HandleJoinedAccount value
                 ]
     , onJoinedServer =
         \cid value ->
             MultiMsg
-                [ value
-                    |> Servers.HandleJoinedServer cid
-                    |> Game.ServersMsg
-                    |> GameMsg
-                , SetupMsg <| Setup.HandleJoinedServer cid
+                [ servers <| Servers.HandleJoinedServer cid value
+                , setup <| Setup.HandleJoinedServer cid
                 ]
     , onJoinFailedServer =
-        Web.HandleJoinServerFailed
-            >> Game.WebMsg
-            >> GameMsg
-    , onLeaved = (always <| always <| MultiMsg [])
-    , onEvent = HandleEvent
+        Web.HandleJoinServerFailed >> web
+    , onLeaved =
+        \_ _ ->
+            MultiMsg []
+    , onEvent =
+        HandleEvent
     }
 
 
@@ -112,135 +102,65 @@ eventsConfig =
         { onServerPasswordAcquired =
             \data ->
                 MultiMsg
-                    [ data
-                        |> Database.HandlePasswordAcquired
-                        |> Account.DatabaseMsg
-                        |> Game.AccountMsg
-                        |> GameMsg
+                    [ database <| Database.HandlePasswordAcquired data
                     , data
                         |> Browser.HandlePasswordAcquired
                         |> Apps.BrowserMsg
                         |> List.singleton
-                        |> SessionManager.EveryAppMsg
-                        |> OS.SessionManagerMsg
-                        |> OSMsg
+                        |> apps
                     ]
         , onStoryStepProceeded =
-            Missions.HandleStepProceeded
-                >> Storyline.MissionsMsg
-                >> Game.StoryMsg
-                >> GameMsg
+            Missions.HandleStepProceeded >> missions
         , onStoryEmailSent =
             \data ->
                 MultiMsg
-                    [ data
-                        |> Emails.HandleNewEmail
-                        |> Storyline.EmailsMsg
-                        |> Game.StoryMsg
-                        |> GameMsg
+                    [ emails <| Emails.HandleNewEmail data
                     , data.personId
                         |> AccountNotifications.HandleNewEmail
-                        |> Account.NotificationsMsg
-                        |> Game.AccountMsg
-                        |> GameMsg
+                        |> accountNotif
                     ]
         , onStoryEmailReplyUnlocked =
-            Emails.HandleReplyUnlocked
-                >> Storyline.EmailsMsg
-                >> Game.StoryMsg
-                >> GameMsg
+            Emails.HandleReplyUnlocked >> emails
         , onBankAccountUpdated =
-            uncurry Finances.HandleBankAccountUpdated
-                >> Account.FinancesMsg
-                >> Game.AccountMsg
-                >> GameMsg
+            uncurry Finances.HandleBankAccountUpdated >> finances
         , onBankAccountClosed =
-            Finances.HandleBankAccountClosed
-                >> Account.FinancesMsg
-                >> Game.AccountMsg
-                >> GameMsg
+            Finances.HandleBankAccountClosed >> finances
         , onDbAccountUpdated =
-            uncurry Database.HandleDatabaseAccountUpdated
-                >> Account.DatabaseMsg
-                >> Game.AccountMsg
-                >> GameMsg
+            uncurry Database.HandleDatabaseAccountUpdated >> database
         , onDbAccountRemoved =
-            Database.HandleDatabaseAccountRemoved
-                >> Account.DatabaseMsg
-                >> Game.AccountMsg
-                >> GameMsg
+            Database.HandleDatabaseAccountRemoved >> database
         , onTutorialFinished =
-            .completed
-                >> Account.HandleTutorialCompleted
-                >> Game.AccountMsg
-                >> GameMsg
+            .completed >> Account.HandleTutorialCompleted >> account
         }
     , forBackFlix =
         { onNewLog =
-            BackFlix.HandleCreate
-                >> Game.BackFlixMsg
-                >> GameMsg
+            BackFlix.HandleCreate >> backflix
         }
     , forServer =
         { onFileAdded =
-            \cid ( storageId, data ) ->
-                data
-                    |> uncurry Filesystem.HandleAdded
-                    |> Servers.FilesystemMsg storageId
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+            \cid ( id, data ) ->
+                filesystem cid id <| uncurry Filesystem.HandleAdded data
         , onFileDownloaded =
             -- not implemented yet
-            \cid ( storageId, data ) -> MultiMsg []
+            \cid ( id, data ) -> MultiMsg []
         , onProcessCreated =
             \cid data ->
-                data
-                    |> Processes.HandleProcessStarted
-                    |> Servers.ProcessesMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                processes cid <| Processes.HandleProcessStarted data
         , onProcessCompleted =
             \cid data ->
-                data
-                    |> Processes.HandleProcessConclusion
-                    |> Servers.ProcessesMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                processes cid <| Processes.HandleProcessConclusion data
         , onProcessesRecalcado =
             \cid data ->
-                data
-                    |> Processes.HandleProcessesChanged
-                    |> Servers.ProcessesMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                processes cid <| Processes.HandleProcessesChanged data
         , onBruteforceFailed =
             \cid data ->
-                data
-                    |> Processes.HandleBruteforceFailed
-                    |> Servers.ProcessesMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                processes cid <| Processes.HandleBruteforceFailed data
         , onLogCreated =
             \cid data ->
-                data
-                    |> uncurry Logs.HandleCreated
-                    |> Servers.LogsMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                logs cid <| uncurry Logs.HandleCreated data
         , onMotherboardUpdated =
             \cid data ->
-                data
-                    |> Hardware.HandleMotherboardUpdated
-                    |> Servers.HardwareMsg
-                    |> Servers.ServerMsg cid
-                    |> Game.ServersMsg
-                    |> GameMsg
+                hardware cid <| Hardware.HandleMotherboardUpdated data
         }
     }
 
@@ -253,9 +173,7 @@ gameConfig =
     -- game & web
     , onJoinServer =
         \cid payload ->
-            payload
-                |> Ws.HandleJoin (ServerChannel cid)
-                |> WebsocketMsg
+            ws <| Ws.HandleJoin (ServerChannel cid) payload
     , onError =
         HandleCrash
 
@@ -264,77 +182,50 @@ gameConfig =
         \response { sessionId, windowId, context, tabId } ->
             Browser.HandleFetched response
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
     , onJoinFailed =
         \{ sessionId, windowId, context, tabId } ->
             Browser.LoginFailed
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
 
     --- account
     , onConnected =
         \accountId ->
             MultiMsg
-                [ Nothing
-                    |> Ws.HandleJoin (AccountChannel accountId)
-                    |> WebsocketMsg
-                , Nothing
-                    |> Ws.HandleJoin BackFlixChannel
-                    |> WebsocketMsg
+                [ ws <| Ws.HandleJoin (AccountChannel accountId) Nothing
+                , ws <| Ws.HandleJoin BackFlixChannel Nothing
                 ]
     , onDisconnected =
         HandleShutdown
 
     -- account.notifications
     , onAccountToast =
-        Toast.HandleAccount
-            >> OS.ToastsMsg
-            >> OSMsg
+        Toast.HandleAccount >> toast
     , onServerToast =
-        \cid ->
-            Toast.HandleServers cid
-                >> OS.ToastsMsg
-                >> OSMsg
+        \cid -> Toast.HandleServers cid >> toast
 
-    -- account.finances -- REVIEW
+    -- account.finances
     , onBALoginSuccess =
         \data { sessionId, windowId, context, tabId } ->
             Browser.LoginFailed
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
     , onBALoginFailed =
         \{ sessionId, windowId, context, tabId } ->
             Browser.HandleBankLoginError
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
     , onBATransferSuccess =
         \{ sessionId, windowId, context, tabId } ->
             Browser.HandleBankTransfer
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
     , onBATransferFailed =
         \{ sessionId, windowId, context, tabId } ->
             Browser.HandleBankTransferError
                 |> Browser.SomeTabMsg tabId
-                |> Apps.BrowserMsg
-                |> SessionManager.AppMsg ( sessionId, windowId ) context
-                |> OS.SessionManagerMsg
-                |> OSMsg
+                |> browser ( sessionId, windowId ) context
     }
 
 
@@ -360,3 +251,141 @@ osConfig account story lastTick activeServer =
     , story = story
     , lastTick = lastTick
     }
+
+
+
+-- helpers
+
+
+ws : Ws.Msg -> Msg
+ws =
+    WebsocketMsg
+
+
+setup : Setup.Msg -> Msg
+setup =
+    SetupMsg
+
+
+game : Game.Msg -> Msg
+game =
+    GameMsg
+
+
+backflix : BackFlix.Msg -> Msg
+backflix =
+    Game.BackFlixMsg >> game
+
+
+account : Account.Msg -> Msg
+account =
+    Game.AccountMsg >> game
+
+
+accountNotif : AccountNotifications.Msg -> Msg
+accountNotif =
+    Account.NotificationsMsg >> account
+
+
+database : Database.Msg -> Msg
+database =
+    Account.DatabaseMsg >> account
+
+
+servers : Servers.Msg -> Msg
+servers =
+    Game.ServersMsg >> game
+
+
+server : CId -> Servers.ServerMsg -> Msg
+server cid =
+    Servers.ServerMsg cid >> servers
+
+
+serverNotif : CId -> ServersNotifications.Msg -> Msg
+serverNotif cid =
+    Servers.NotificationsMsg >> server cid
+
+
+filesystem : CId -> Servers.StorageId -> Filesystem.Msg -> Msg
+filesystem cid id =
+    Servers.FilesystemMsg id >> server cid
+
+
+processes : CId -> Processes.Msg -> Msg
+processes id =
+    Servers.ProcessesMsg >> server id
+
+
+hardware : CId -> Hardware.Msg -> Msg
+hardware id =
+    Servers.HardwareMsg >> server id
+
+
+logs : CId -> Logs.Msg -> Msg
+logs id =
+    Servers.LogsMsg >> server id
+
+
+web : Web.Msg -> Msg
+web =
+    Game.WebMsg >> game
+
+
+storyline : Storyline.Msg -> Msg
+storyline =
+    Game.StoryMsg >> game
+
+
+missions : Missions.Msg -> Msg
+missions =
+    Storyline.MissionsMsg >> storyline
+
+
+emails : Emails.Msg -> Msg
+emails =
+    Storyline.EmailsMsg >> storyline
+
+
+finances : Finances.Msg -> Msg
+finances =
+    Account.FinancesMsg >> account
+
+
+sessionManager : SessionManager.Msg -> Msg
+sessionManager =
+    OS.SessionManagerMsg >> os
+
+
+os : OS.Msg -> Msg
+os =
+    OSMsg
+
+
+toast : Toast.Msg -> Msg
+toast =
+    OS.ToastsMsg >> os
+
+
+apps : List Apps.Msg -> Msg
+apps =
+    SessionManager.EveryAppMsg >> sessionManager
+
+
+browser :
+    SessionManager.WindowRef
+    -> Context
+    -> Browser.Msg
+    -> Msg
+browser windowRef context =
+    Apps.BrowserMsg >> app windowRef context
+
+
+app :
+    SessionManager.WindowRef
+    -> Context
+    -> Apps.Msg
+    -> Msg
+app windowRef context =
+    SessionManager.AppMsg windowRef context
+        >> sessionManager
