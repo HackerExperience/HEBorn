@@ -64,18 +64,10 @@ view config model =
             Hebamp.view (hebampConfig config) model
 
         CtrlPanelModel model ->
-            let
-                config_ =
-                    ctrlPainelConfig config
-            in
-                CtrlPanel.view config_ model
+            CtrlPanel.view (ctrlPainelConfig config) model
 
         ServersGearsModel model ->
-            let
-                config_ =
-                    serversGearsConfig config
-            in
-                Html.map (ServersGearsMsg >> config.toMsg) (ServersGears.view config_ model)
+            ServersGears.view (serversGearsConfig config) model
 
         LocationPickerModel model ->
             let

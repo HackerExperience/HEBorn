@@ -26,7 +26,7 @@ import UI.Widgets.Motherboard exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         isGateway =
@@ -34,9 +34,9 @@ view config model =
                 |> Servers.isGateway
     in
         if isGateway then
-            editablePanel config model
+            Html.map config.toMsg <| editablePanel config model
         else
-            readonlyPanel config model
+            Html.map config.toMsg <| readonlyPanel config model
 
 
 readonlyPanel : Config msg -> Model -> Html Msg
