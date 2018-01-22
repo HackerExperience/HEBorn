@@ -139,36 +139,43 @@ onEnterRename config id fs model =
 onApplyEdit : Config msg -> Filesystem.Model -> Model -> UpdateResponse msg
 onApplyEdit config fs model =
     let
+        { onNewTextFile, onNewDir, onMoveFile, onRenameFile } =
+            config
+
         storageId =
             getStorage config.activeServer model
 
-        --fsMsg =
-        --    Dispatch.filesystem config.activeCId storageId
-        --gameMsg =
-        --    case model.editing of
-        --        NotEditing ->
-        --            Dispatch.none
-        --        CreatingFile fName ->
-        --            if Filesystem.isValidFilename fName then
-        --                Dispatch.none
-        --            else
-        --                fsMsg <| Servers.NewTextFile model.path fName
-        --        CreatingPath fName ->
-        --            if Filesystem.isValidFilename fName then
-        --                Dispatch.none
-        --            else
-        --                fsMsg <| Servers.NewDir model.path fName
-        --        Moving fID ->
-        --            fsMsg <| Servers.MoveFile fID model.path
-        --        Renaming fID fName ->
-        --            if Filesystem.isValidFilename fName then
-        --                Dispatch.none
-        --            else
-        --                fsMsg <| Servers.RenameFile fID fName
-        --        _ ->
-        --            -- TODO: implement folder operation requests
-        --            Dispatch.none
+        react =
+            case model.editing of
+                NotEditing ->
+                    React.none
+
+                CreatingFile fName ->
+                    if Filesystem.isValidFilename fName then
+                        React.none
+                    else
+                        React.msg <| onNewTextFile storageId model.path fName
+
+                CreatingPath fName ->
+                    if Filesystem.isValidFilename fName then
+                        React.none
+                    else
+                        React.msg <| onNewDir storageId model.path fName
+
+                Moving fID ->
+                    React.msg <| onMoveFile storageId fID model.path
+
+                Renaming fID fName ->
+                    if Filesystem.isValidFilename fName then
+                        React.none
+                    else
+                        React.msg <| onRenameFile storageId fID fName
+
+                _ ->
+                    -- TODO: implement folder operation requests
+                    React.none
+
         model_ =
             setEditing NotEditing model
     in
-        ( model_, React.none )
+        ( model_, react )

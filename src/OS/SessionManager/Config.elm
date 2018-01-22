@@ -5,16 +5,16 @@ import Utils.Core exposing (..)
 import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Finances.Models as Finances
+import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
-import Game.Servers.Models as Servers
-import Game.Servers.Shared as Servers
-import Game.Storyline.Models as Story
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Processes.Requests.Download as Download
+import Game.Servers.Shared as Servers exposing (CId, StorageId)
+import Game.Storyline.Models as Story
 import OS.SessionManager.WindowManager.Config as WindowManager
 import OS.SessionManager.Dock.Config as Dock
 import OS.SessionManager.Types exposing (..)
@@ -36,9 +36,15 @@ type alias Config msg =
     , backFlix : BackFlix.BackFlix
     , endpointCId : Maybe Servers.CId
     , onSetBounce : Maybe Bounces.ID -> msg
-    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
+    , onPoliteCrash : ( String, String ) -> msg
+    , onNewTextFile : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
+    , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
     }
 
 
@@ -60,6 +66,12 @@ wmConfig sessionId config =
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onAccountToast = config.onAccountToast
+    , onPoliteCrash = config.onPoliteCrash
+    , onNewTextFile = config.onNewTextFile
+    , onNewDir = config.onNewDir
+    , onMoveFile = config.onMoveFile
+    , onRenameFile = config.onRenameFile
     }
 
 

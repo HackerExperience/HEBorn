@@ -44,10 +44,10 @@ module OS.SessionManager.WindowManager.Models
 
 import Dict exposing (Dict)
 import Draggable
-import Apps.Apps as Apps
-import Apps.Models as Apps
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (..)
+import Apps.Apps as Apps
+import Apps.Models as Apps
 
 
 type alias Model =

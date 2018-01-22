@@ -1,6 +1,8 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
+import Utils.Maybe as Maybe
+import Core.Error as Error
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem
@@ -463,29 +465,18 @@ setTunnels tunnels server =
     { server | tunnels = tunnels }
 
 
-getContextServer : Maybe Context -> Model -> Server -> Server
-getContextServer maybeContext servers gateway =
+getContextServer : Context -> Model -> ( CId, Server ) -> Maybe ( CId, Server )
+getContextServer context servers ( gatewayCId, gateway ) =
     let
         endpointCId =
             getEndpointCId gateway
 
         maybeEndpoint =
             Maybe.andThen (flip get servers) endpointCId
-
-        endPointGetter =
-            case maybeEndpoint of
-                Just endpoint ->
-                    endpoint
-
-                _ ->
-                    gateway
     in
-        case maybeContext of
-            Just Gateway ->
-                gateway
+        case context of
+            Gateway ->
+                Just ( gatewayCId, gateway )
 
-            Just Endpoint ->
-                endPointGetter
-
-            Nothing ->
-                gateway
+            Endpoint ->
+                Maybe.uncurry endpointCId maybeEndpoint

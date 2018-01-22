@@ -15,16 +15,6 @@ import Apps.Models as Apps
 import Apps.Launch as Apps
 
 
-fallbackContext : Config msg -> Maybe Context -> Context
-fallbackContext config maybeContext =
-    case maybeContext of
-        Just context ->
-            context
-
-        Nothing ->
-            config.activeContext
-
-
 resert :
     Config msg
     -> Maybe Context
@@ -96,10 +86,14 @@ insert config maybeContext maybeParams id serverCId app model =
                                     ( Nothing, maybeParams )
 
                         gatewayConfig =
-                            appsConfig (Just Gateway) id (One Gateway) config
+                            appsConfig config.activeGateway id (One Gateway) config
 
                         endpointConfig =
-                            appsConfig (Just Endpoint) id (One Endpoint) config
+                            appsConfig
+                                (unsafeContextServer config context)
+                                id
+                                (One Endpoint)
+                                config
 
                         ( modelG, reactG ) =
                             Apps.launch gatewayConfig
@@ -130,7 +124,7 @@ insert config maybeContext maybeParams id serverCId app model =
                 Apps.ContextlessApp ->
                     let
                         config_ =
-                            appsConfig (Just Gateway) id (One Gateway) config
+                            appsConfig config.activeGateway id (One Gateway) config
 
                         ( model, react ) =
                             Apps.launch config_
@@ -167,3 +161,17 @@ insert config maybeContext maybeParams id serverCId app model =
             }
     in
         ( model_, react )
+
+
+
+-- helpers
+
+
+fallbackContext : Config msg -> Maybe Context -> Context
+fallbackContext config maybeContext =
+    case maybeContext of
+        Just context ->
+            context
+
+        Nothing ->
+            config.activeContext

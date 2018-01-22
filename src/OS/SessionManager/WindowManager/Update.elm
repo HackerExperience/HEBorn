@@ -95,7 +95,7 @@ appsMsg config msg targetContext wId window model =
         ( All, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig (Just a) wId targetContext config
+                    appsConfig (unsafeContextServer config a) wId targetContext config
 
                 ( g_, reactG ) =
                     Apps.update config_ msg g
@@ -115,7 +115,7 @@ appsMsg config msg targetContext wId window model =
         ( One Gateway, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig (Just a) wId targetContext config
+                    appsConfig (unsafeContextServer config a) wId targetContext config
 
                 ( g_, react ) =
                     Apps.update config_ msg g
@@ -128,7 +128,7 @@ appsMsg config msg targetContext wId window model =
         ( One Endpoint, DoubleContext a g e ) ->
             let
                 config_ =
-                    appsConfig (Just a) wId targetContext config
+                    appsConfig (unsafeContextServer config a) wId targetContext config
 
                 ( e_, react ) =
                     Apps.update config_ msg e
@@ -144,7 +144,7 @@ appsMsg config msg targetContext wId window model =
         ( _, SingleContext g ) ->
             let
                 config_ =
-                    appsConfig Nothing wId targetContext config
+                    appsConfig config.activeGateway wId targetContext config
 
                 ( g_, react ) =
                     Apps.update config_ msg g

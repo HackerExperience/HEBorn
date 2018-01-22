@@ -26,11 +26,12 @@ import OS.SessionManager.WindowManager.Resources as Res
 view : Config msg -> Model -> Html msg
 view config ({ windows, visible } as model) =
     let
-        context window =
-            Just (windowContext window)
-
         config_ id window =
-            appsConfig (context window) id Active config
+            appsConfig
+                (unsafeContextServer config (windowContext window))
+                id
+                Active
+                config
 
         mapper id =
             case Dict.get id windows of

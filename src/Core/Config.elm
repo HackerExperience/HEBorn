@@ -300,6 +300,20 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onBankAccountTransfer =
         Finances.HandleBankAccountTransfer sCId
             >>> finances
+    , onAccountToast =
+        Toast.HandleAccount >> toast
+    , onServerToast =
+        Toast.HandleServers >>> toast
+    , onPoliteCrash =
+        Account.HandleLogoutAndCrash >> account
+    , onNewTextFile =
+        \cid stg -> Filesystem.HandleNewTextFile >>> filesystem cid stg
+    , onNewDir =
+        \cid stg -> Filesystem.HandleNewDir >>> filesystem cid stg
+    , onMoveFile =
+        \cid stg -> Filesystem.HandleMove >>> filesystem cid stg
+    , onRenameFile =
+        \cid stg -> Filesystem.HandleRename >>> filesystem cid stg
     }
 
 

@@ -1,17 +1,20 @@
 module OS.SessionManager.WindowManager.Config exposing (..)
 
 import Time exposing (Time)
+import Native.Panic
+import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
+import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
-import Game.Servers.Models as Servers
-import Game.Servers.Shared as Servers
+import Game.Servers.Models as Servers exposing (Server)
+import Game.Servers.Shared as Servers exposing (CId, StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Processes.Requests.Download as Download
+import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Storyline.Models as Story
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
@@ -34,22 +37,24 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
-    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
+    , onPoliteCrash : ( String, String ) -> msg
+    , onNewTextFile : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
+    , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
+    , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
     }
 
 
-appsConfig : Maybe Context -> WM.ID -> WM.TargetContext -> Config msg -> Apps.Config msg
-appsConfig maybeContext wId targetContext config =
+appsConfig : ( CId, Server ) -> WM.ID -> WM.TargetContext -> Config msg -> Apps.Config msg
+appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     { toMsg = AppMsg targetContext wId >> config.toMsg
     , lastTick = config.lastTick
     , account = config.account
-    , activeServer =
-        Servers.getContextServer
-            maybeContext
-            config.servers
-            (Tuple.second config.activeGateway)
+    , activeServer = appServer
     , inventory = config.inventory
     , story = config.story
     , backFlix = config.backFlix
@@ -59,4 +64,22 @@ appsConfig maybeContext wId targetContext config =
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onAccountToast = config.onAccountToast
+    , onPoliteCrash = config.onPoliteCrash
+    , onNewTextFile = config.onNewTextFile appCId
+    , onNewDir = config.onNewDir appCId
+    , onMoveFile = config.onMoveFile appCId
+    , onRenameFile = config.onRenameFile appCId
     }
+
+
+unsafeContextServer : Config msg -> Context -> ( CId, Server )
+unsafeContextServer { servers, activeGateway } context =
+    case (Servers.getContextServer context servers activeGateway) of
+        Just sth ->
+            sth
+
+        Nothing ->
+            -- TODO<Issue#421>: Implement onDeuMerda
+            Error.neeiae "Missing onDeuMerda"
+                |> Native.Panic.crash

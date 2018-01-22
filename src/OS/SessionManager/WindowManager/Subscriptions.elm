@@ -16,15 +16,15 @@ subscriptions config model =
         ]
 
 
-
 appSubcriptions : Config msg -> Model -> Sub msg
 appSubcriptions config ({ visible, windows } as model) =
     let
-        context window =
-            Just (windowContext window)
-
         config_ id window =
-            appsConfig (context window) id Active config
+            appsConfig
+                (unsafeContextServer config (windowContext window))
+                id
+                Active
+                config
 
         mapper id =
             case Dict.get id windows of
