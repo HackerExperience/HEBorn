@@ -44,17 +44,11 @@ updateGateway config motherboard msg model =
 
 
 onSave : Config msg -> Motherboard -> Model -> UpdateResponse msg
-onSave config motherboard model =
-    --let
-    --    cid =
-    --        Game.getActiveCId game
-    --    dispatch =
-    --        Dispatch.hardware cid <|
-    --            ServersDispatch.MotherboardUpdate motherboard
-    --    model_ =
-    --        { model | anyChange = False }
-    --in
-    ( model, React.none )
+onSave {onMotherboardUpdate} motherboard model =
+    motherboard
+        |> onMotherboardUpdate
+        |> React.msg
+        |> (,) model
 
 
 

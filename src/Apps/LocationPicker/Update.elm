@@ -62,10 +62,9 @@ geoResp config value model =
         react =
             case newPos of
                 Just { lat, lng } ->
-                    --[ Map.mapCenter ( model.mapEId, lat, lng, 18 ) ]
-                    --    |> List.map React.cmd
-                    --    |> React.batch config.batchMsg
-                    React.none
+                    [ Map.mapCenter ( model.mapEId, lat, lng, 18 ) ]
+                        |> List.map React.cmd
+                        |> React.batch config.batchMsg
 
                 Nothing ->
                     React.none

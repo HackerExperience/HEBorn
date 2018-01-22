@@ -8,11 +8,14 @@ import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
+import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Models as Servers
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Logs.Models as Logs
+import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared as Servers exposing (CId, StorageId)
 import Game.Storyline.Models as Story
 import OS.SessionManager.WindowManager.Config as WindowManager
@@ -45,6 +48,14 @@ type alias Config msg =
     , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onUpdateLog : CId -> Logs.ID -> String -> msg
+    , onEncryptLog : CId -> Logs.ID -> msg
+    , onHideLog : CId -> Logs.ID -> msg
+    , onDeleteLog : CId -> Logs.ID -> msg
+    , onMotherboardUpdate : CId -> Motherboard -> msg
+    , onPauseProcess : CId -> Processes.ID -> msg
+    , onResumeProcess : CId -> Processes.ID -> msg
+    , onRemoveProcess : CId -> Processes.ID -> msg
     }
 
 
@@ -72,6 +83,14 @@ wmConfig sessionId config =
     , onNewDir = config.onNewDir
     , onMoveFile = config.onMoveFile
     , onRenameFile = config.onRenameFile
+    , onUpdateLog = config.onUpdateLog
+    , onEncryptLog = config.onEncryptLog
+    , onHideLog = config.onHideLog
+    , onDeleteLog = config.onDeleteLog
+    , onMotherboardUpdate = config.onMotherboardUpdate
+    , onPauseProcess = config.onPauseProcess
+    , onResumeProcess = config.onResumeProcess
+    , onRemoveProcess = config.onRemoveProcess
     }
 
 
