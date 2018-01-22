@@ -2,7 +2,6 @@ module Apps.ServersGears.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
-import Game.Data as Game
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
 import Game.Meta.Types.Components as Components

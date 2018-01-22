@@ -8,7 +8,6 @@ import OS.Resources as OsRes
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
-import OS.SessionManager.Helpers exposing (..)
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.View as WM
 import OS.SessionManager.WindowManager.Resources as WmRes

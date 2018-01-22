@@ -1,7 +1,6 @@
 module Apps.FloatingHeads.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Game.Data as Game
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)

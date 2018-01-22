@@ -2,7 +2,6 @@ module Apps.FloatingHeads.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
-import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
 import Game.Storyline.Emails.Contents.Messages as Contents

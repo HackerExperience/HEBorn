@@ -5,7 +5,6 @@ import Core.Error as Error
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Core.Config exposing (..)
-import Game.Data as GameD
 import Game.Models as Game
 import Game.Meta.Models as Meta
 import Game.Subscriptions as Game
@@ -115,29 +114,13 @@ os game os =
         volatile_ =
             ( Game.getGateway game
             , Game.getActiveServer game
-            , GameD.fromGateway game
             )
 
         ctx =
             Account.getContext <| Game.getAccount game
     in
         case volatile_ of
-            ( Nothing, _, _ ) ->
-                "Player doesn't have a Gateway [Subscriptions.os]"
-                    |> Error.astralProj
-                    |> uncurry Native.Panic.crash
-
-            ( _, Nothing, _ ) ->
-                "Player doesn't have an active server [Subscriptions.os]"
-                    |> Error.astralProj
-                    |> uncurry Native.Panic.crash
-
-            ( _, _, Nothing ) ->
-                "COULDN'T GENERATE DATA"
-                    |> Error.astralProj
-                    |> uncurry Native.Panic.crash
-
-            ( Just gtw, Just srv, Just data ) ->
+            ( Just gtw, Just srv ) ->
                 let
                     lastTick =
                         game
@@ -148,6 +131,16 @@ os game os =
                         osConfig game srv ctx gtw
                 in
                     OS.subscriptions config os
+
+            ( Nothing, _ ) ->
+                "Player doesn't have a Gateway [Subscriptions.os]"
+                    |> Error.astralProj
+                    |> uncurry Native.Panic.crash
+
+            ( _, Nothing ) ->
+                "Player doesn't have an active server [Subscriptions.os]"
+                    |> Error.astralProj
+                    |> uncurry Native.Panic.crash
 
 
 websocket : Ws.Model Msg -> Sub Msg

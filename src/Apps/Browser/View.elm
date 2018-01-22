@@ -5,7 +5,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
-import Game.Data as Game
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import UI.Widgets.Modal exposing (modalPickStorage)
 import Apps.Browser.Pages.NotFound.View as NotFound

@@ -1,7 +1,6 @@
 module Apps.Finance.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Data as Game
 import Apps.Finance.Config exposing (..)
 import Apps.Finance.Models exposing (Model, MainTab)
 import Apps.Finance.Messages as Finance exposing (Msg(..))

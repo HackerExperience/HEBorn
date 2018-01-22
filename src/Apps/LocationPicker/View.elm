@@ -3,7 +3,6 @@ module Apps.LocationPicker.View exposing (view)
 import Html exposing (..)
 import Html.CssHelpers
 import Native.Untouchable
-import Game.Data as Game
 import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)

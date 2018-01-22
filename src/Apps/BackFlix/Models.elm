@@ -1,7 +1,6 @@
 module Apps.BackFlix.Models exposing (..)
 
 import Dict exposing (Dict)
-import Game.Data as Game
 import Game.BackFlix.Models as BackFlix
 
 
@@ -115,21 +114,3 @@ applyFilter model =
                 True
     in
         BackFlix.filter filterer
-
-
-updateTextFilter : Game.Data -> String -> Model -> Model
-updateTextFilter data filter model =
-    let
-        filterer id log =
-            String.contains filter <| toString log.data
-
-        filterCache =
-            data
-                |> Game.getBackFlix
-                |> BackFlix.filter filterer
-                |> Dict.keys
-    in
-        { model
-            | filterText = filter
-            , filterCache = filterCache
-        }
