@@ -19,35 +19,39 @@ import Apps.BackFlix.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
-        data =
+        backFlix =
             config.backFlix
+
+        goTab_ =
+            config.toMsg GoTab
 
         filterHeaderLayout =
             verticalList
-                [ hzTabs (compareTabs model.selected) viewTabLabel GoTab tabs
+                [ hzTabs (compareTabs model.selected) viewTabLabel goTab_ tabs
                 , filterHeader
                     []
                     []
                     model.filterText
                     "Search..."
-                    UpdateTextFilter
+                    (config.toMsg UpdateTextFilter)
                 ]
 
         viewData =
             case model.selected of
                 TabAll ->
-                    viewTabAll data
+                    viewTabAll backFlix
 
                 TabSimple ->
-                    viewTabSimple data
+                    viewTabSimple backFlix
     in
-        verticalSticked
-            (Just [ filterHeaderLayout ])
-            [ viewData ]
-            Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ filterHeaderLayout ])
+                [ viewData ]
+                Nothing
 
 
 compareTabs : MainTab -> MainTab -> Bool
@@ -71,12 +75,12 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : BackFlix.BackFlix -> Html Msg
+viewTabAll : BackFlix.BackFlix -> Html msg
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : BackFlix.BackFlix -> Html Msg
+viewTabSimple : BackFlix.BackFlix -> Html msg
 viewTabSimple model =
     let
         filter id log =
@@ -131,7 +135,7 @@ renderEntry useString id log =
             ]
 
 
-setTypeLog : BackFlix.Log -> List (Html.Attribute msg)
+setTypeLog : BackFlix.Log -> List (Html.Attribute Msg)
 setTypeLog log =
     case log.type_ of
         BackFlix.Request ->

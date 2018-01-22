@@ -79,11 +79,7 @@ view config model =
                 Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view config_ model)
 
         BounceManagerModel model ->
-            let
-                config_ =
-                    bounceManConfig config
-            in
-                Html.map (BounceManagerMsg >> config.toMsg) (BounceManager.view config_ model)
+            BounceManager.view (bounceManConfig config) model
 
         FinanceModel model ->
             let
@@ -149,11 +145,7 @@ view config model =
                 Calculator.view config_ model
 
         BackFlixModel model ->
-            let
-                config_ =
-                    backFlixConfig config
-            in
-                Html.map (BackFlixMsg >> config.toMsg) (BackFlix.view config_ model)
+            BackFlix.view (backFlixConfig config) model
 
         FloatingHeadsModel model ->
             let
