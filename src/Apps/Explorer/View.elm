@@ -32,7 +32,7 @@ import Apps.Explorer.Resources exposing (Classes(..), prefix, idAttrKey)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config ({ editing, path } as model) =
     let
         server =
@@ -41,11 +41,12 @@ view config ({ editing, path } as model) =
         config_ =
             menuConfig config
     in
-        div [ class [ Window ] ]
-            [ explorerColumn config server model
-            , explorerMain config editing path server model
-            , menuView config_ model
-            ]
+        Html.map config.toMsg <|
+            div [ class [ Window ] ]
+                [ explorerColumn config server model
+                , explorerMain config editing path server model
+                , menuView config_ model
+                ]
 
 
 idAttr : String -> Attribute Msg

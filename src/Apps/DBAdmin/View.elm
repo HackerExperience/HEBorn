@@ -22,7 +22,7 @@ import Game.Account.Database.Models as Database
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config ({ selected } as model) =
     let
         database =
@@ -42,10 +42,11 @@ view config ({ selected } as model) =
         viewTabs =
             hzTabs (compareTabs selected) viewTabLabel GoTab tabs
     in
-        verticalSticked
-            (Just [ viewTabs ])
-            [ viewData ]
-            Maybe.Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ viewTabs ])
+                [ viewData ]
+                Maybe.Nothing
 
 
 tabs : List MainTab

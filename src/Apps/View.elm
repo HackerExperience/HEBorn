@@ -54,18 +54,10 @@ view config model =
             Browser.view (browserConfig config) model
 
         ExplorerModel model ->
-            let
-                config_ =
-                    explorerConfig config
-            in
-                Html.map (ExplorerMsg >> config.toMsg) (Explorer.view config_ model)
+            Explorer.view (explorerConfig config) model
 
         DatabaseModel model ->
-            let
-                config_ =
-                    dbAdminConfig config
-            in
-                Html.map (DatabaseMsg >> config.toMsg) (Database.view config_ model)
+            Database.view (dbAdminConfig config) model
 
         ConnManagerModel model ->
             ConnManager.view (connManagerConfig config) model
