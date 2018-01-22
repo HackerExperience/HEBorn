@@ -19,8 +19,8 @@ type Msg
     = Request RequestMsg
     | HandleBankAccountClosed AccountId
     | HandleBankAccountUpdated AccountId BankAccount
-    | HandleBankAccountLogin BankLoginRequest Requester CId
-    | HandleBankAccountTransfer BankTransferRequest Requester CId
+    | HandleBankAccountLogin CId BankLoginRequest Requester
+    | HandleBankAccountTransfer CId BankTransferRequest Requester
 
 
 type RequestMsg

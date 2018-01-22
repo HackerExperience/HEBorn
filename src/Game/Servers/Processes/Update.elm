@@ -66,16 +66,6 @@ update config msg model =
         HandleRemove id ->
             handleRemove config id model
 
-        HandleComplete id ->
-            handleComplete config id model
-
-        Start type_ target file ->
-            handleStart config
-                (newOptimistic type_ config.nip target (newProcessFile file))
-                model
-
-
-
 -- internals
 
 

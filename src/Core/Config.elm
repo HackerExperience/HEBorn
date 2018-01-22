@@ -9,78 +9,52 @@ module Core.Config
         )
 
 import Time exposing (Time)
-import Events.Config as Events
-import Apps.Messages as Apps
-import Apps.Browser.Messages as Browser
 import Driver.Websocket.Config as Ws
 import Driver.Websocket.Channels exposing (Channel(..))
 import Driver.Websocket.Messages as Ws
+import Utils.Core exposing (..)
+import Core.Error as Error exposing (Error)
+import Core.Flags exposing (Flags)
+import Core.Messages exposing (..)
+import Events.Config as Events
+import Landing.Config as Landing
+import Setup.Config as Setup
+import Setup.Messages as Setup
 import Game.Config as Game
 import Game.Messages as Game
-import Game.Meta.Types.Context exposing (Context)
-import Game.BackFlix.Messages as BackFlix
+import Game.Models as Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
-import Game.Account.Finances.Messages as Finances
-import Game.Account.Notifications.Messages as AccountNotifications
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Models as Database
+import Game.Account.Finances.Messages as Finances
+import Game.Account.Notifications.Messages as AccountNotifications
+import Game.BackFlix.Messages as BackFlix
+import Game.BackFlix.Models as BackFlix
+import Game.Inventory.Models as Inventory
+import Game.Meta.Models as Meta
+import Game.Meta.Types.Context exposing (Context)
 import Game.Servers.Messages as Servers
-import Game.Servers.Models as Servers
-import Game.Servers.Shared as Servers exposing (CId)
+import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Messages as Filesystem
-import Game.Servers.Processes.Messages as Processes
-import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Hardware.Messages as Hardware
-import Game.Servers.Notifications.Messages as ServersNotifications
+import Game.Servers.Logs.Messages as Logs
+import Game.Servers.Notifications.Messages as ServerNotifications
+import Game.Servers.Processes.Messages as Processes
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Models as Storyline
-import Game.Storyline.Missions.Messages as Missions
 import Game.Storyline.Emails.Messages as Emails
+import Game.Storyline.Missions.Messages as Missions
 import Game.Web.Config as Web
 import Game.Web.Messages as Web
-import Landing.Config as Landing
 import OS.Config as OS
 import OS.Messages as OS
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Types as SessionManager
 import OS.Toasts.Messages as Toast
-import Setup.Config as Setup
-import Setup.Messages as Setup
-import Core.Flags exposing (Flags)
-import Core.Error as Error exposing (Error)
-import Core.Messages exposing (..)
-import Setup.Config as Setup
-import Game.Config as Game
-import Game.Messages as Game
-import Game.Models as Game
-import Game.Account.Models as Account
-import Game.Account.Messages as Account
-import Game.Account.Notifications.Messages as AccNotif
-import Game.Meta.Models as Meta
-import Game.Meta.Types.Context exposing (..)
-import Game.Servers.Messages as Servers
-import Game.Servers.Models as Servers exposing (Server)
-import Game.Servers.Shared exposing (CId)
-import Game.Servers.Notifications.Messages as SrvNotif
-import Game.Storyline.Messages as Story
-import Game.Storyline.Models as Story
-import OS.Config as OS
-import OS.Messages as OS
-import OS.SessionManager.Messages as SessionManager
-import OS.Toasts.Messages as Toast
 import Apps.Messages as Apps
 import Apps.Browser.Messages as Browser
-import Game.Config as Game
-import Game.Account.Models as Account
-import Game.BackFlix.Models as BackFlix
-import Game.Inventory.Models as Inventory
-import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
-import Game.Storyline.Models as Story
-import Core.Flags exposing (Flags)
-import Core.Error as Error exposing (Error)
-import Core.Messages exposing (..)
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -234,7 +208,7 @@ gameConfig =
     , onAccountToast =
         Toast.HandleAccount >> toast
     , onServerToast =
-        \cid -> Toast.HandleServers cid >> toast
+        Toast.HandleServers >>> toast
 
     -- account.finances
     , onBALoginSuccess =
@@ -277,8 +251,9 @@ osConfig :
     -> Context
     -> ( CId, Server )
     -> OS.Config Msg
-osConfig game (( cid, _ ) as srv) ctx gtw =
+osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     { toMsg = OSMsg
+    , batchMsg = BatchMsg
     , flags = Game.getFlags game
     , account = Game.getAccount game
     , servers = Game.getServers game
@@ -291,46 +266,40 @@ osConfig game (( cid, _ ) as srv) ctx gtw =
     , activeGateway = gtw
     , onLogout =
         Account.HandleLogout
-            |> Game.AccountMsg
-            |> GameMsg
+            |> account
     , onSetGateway =
         Account.HandleSetGateway
-            >> Game.AccountMsg
-            >> GameMsg
+            >> account
     , onSetEndpoint =
         Account.HandleSetEndpoint
-            >> Game.AccountMsg
-            >> GameMsg
+            >> account
     , onSetContext =
         Account.HandleSetContext
-            >> Game.AccountMsg
-            >> GameMsg
+            >> account
     , onSetBounce =
         Servers.HandleSetBounce
-            >> Servers.ServerMsg cid
-            >> Game.ServersMsg
-            >> GameMsg
+            >> server sCId
     , onSetStoryMode =
-        Story.HandleSetMode
-            >> Game.StoryMsg
-            >> GameMsg
+        Storyline.HandleSetMode
+            >> storyline
     , onReadAllAccountNotifications =
-        AccNotif.HandleReadAll
-            |> Account.NotificationsMsg
-            |> Game.AccountMsg
-            |> GameMsg
+        AccountNotifications.HandleReadAll
+            |> accountNotif
     , onReadAllServerNotifications =
-        SrvNotif.HandleReadAll
-            |> Servers.NotificationsMsg
-            |> Servers.ServerMsg cid
-            |> Game.ServersMsg
-            |> GameMsg
+        ServerNotifications.HandleReadAll
+            |> serverNotif sCId
     , onSetActiveNIP =
         Servers.HandleSetActiveNIP
-            >> Servers.ServerMsg cid
-            >> Game.ServersMsg
-            >> GameMsg
-    , batchMsg = BatchMsg
+            >> server sCId
+    , onNewPublicDownload =
+        Processes.HandleStartPublicDownload
+            >>>> processes gCId
+    , onBankAccountLogin =
+        Finances.HandleBankAccountLogin sCId
+            >>> finances
+    , onBankAccountTransfer =
+        Finances.HandleBankAccountTransfer sCId
+            >>> finances
     }
 
 
@@ -383,7 +352,7 @@ server cid =
     Servers.ServerMsg cid >> servers
 
 
-serverNotif : CId -> ServersNotifications.Msg -> Msg
+serverNotif : CId -> ServerNotifications.Msg -> Msg
 serverNotif cid =
     Servers.NotificationsMsg >> server cid
 
