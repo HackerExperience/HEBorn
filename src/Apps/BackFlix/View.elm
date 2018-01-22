@@ -25,18 +25,15 @@ view config model =
         backFlix =
             config.backFlix
 
-        goTab_ =
-            config.toMsg GoTab
-
         filterHeaderLayout =
             verticalList
-                [ hzTabs (compareTabs model.selected) viewTabLabel goTab_ tabs
+                [ hzTabs (compareTabs model.selected) viewTabLabel GoTab tabs
                 , filterHeader
                     []
                     []
                     model.filterText
                     "Search..."
-                    (config.toMsg UpdateTextFilter)
+                    UpdateTextFilter
                 ]
 
         viewData =
@@ -75,12 +72,12 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : BackFlix.BackFlix -> Html msg
+viewTabAll : BackFlix.BackFlix -> Html Msg
 viewTabAll model =
     renderEntries model True
 
 
-viewTabSimple : BackFlix.BackFlix -> Html msg
+viewTabSimple : BackFlix.BackFlix -> Html Msg
 viewTabSimple model =
     let
         filter id log =

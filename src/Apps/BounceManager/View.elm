@@ -43,7 +43,7 @@ view config ({ selected } as model) =
                     (viewTabCreate hckdServers)
 
         viewTabs =
-            hzTabs (compareTabs selected) viewTabLabel (config.toMsg GoTab) tabs
+            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
     in
         Html.map config.toMsg <|
             verticalSticked
