@@ -20,7 +20,7 @@ import Apps.ConnManager.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
     let
         filterHeaderLayout =
@@ -46,10 +46,11 @@ view config model =
                 |> List.map (tunnelView nip)
                 |> verticalList
     in
-        verticalSticked
-            (Just [ filterHeaderLayout ])
-            [ mainEntries ]
-            Nothing
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ filterHeaderLayout ])
+                [ mainEntries ]
+                Nothing
 
 
 connView : Tunnels.Connection -> Html Msg

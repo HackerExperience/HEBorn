@@ -68,11 +68,7 @@ view config model =
                 Html.map (DatabaseMsg >> config.toMsg) (Database.view config_ model)
 
         ConnManagerModel model ->
-            let
-                config_ =
-                    connManagerConfig config
-            in
-                Html.map (ConnManagerMsg >> config.toMsg) (ConnManager.view config_ model)
+            ConnManager.view (connManagerConfig config) model
 
         BounceManagerModel model ->
             BounceManager.view (bounceManConfig config) model
@@ -127,11 +123,7 @@ view config model =
                 Html.map (EmailMsg >> config.toMsg) (Email.view config_ model)
 
         BugModel model ->
-            let
-                config_ =
-                    bugConfig config
-            in
-                Html.map (BugMsg >> config.toMsg) (Bug.view config_ model)
+            Bug.view (bugConfig config) model
 
         CalculatorModel model ->
             Calculator.view (calculatorConfig config) model

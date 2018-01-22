@@ -13,12 +13,13 @@ import Apps.Bug.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
-    div []
-        [ ul []
-            [ li [] [ button [ onClick DummyToast ] [ text "Spawn useless toast" ] ]
-            , li [] [ button [ onClick UnpoliteCrash ] [ text "Test unpolite crash" ] ]
-            , li [] [ button [ onClick PoliteCrash ] [ text "Test polite crash" ] ]
+    Html.map config.toMsg <|
+        div []
+            [ ul []
+                [ li [] [ button [ onClick DummyToast ] [ text "Spawn useless toast" ] ]
+                , li [] [ button [ onClick UnpoliteCrash ] [ text "Test unpolite crash" ] ]
+                , li [] [ button [ onClick PoliteCrash ] [ text "Test polite crash" ] ]
+                ]
             ]
-        ]
