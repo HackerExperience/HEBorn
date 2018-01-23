@@ -27,11 +27,6 @@ view config { openMenu } =
         activeGatewayCId =
             config.activeGateway
                 |> Tuple.first
-                |> Just
-
-        gateways =
-            config.gateways
-                |> List.map Just
 
         activeBounce =
             config.activeBounce
@@ -70,7 +65,7 @@ view config { openMenu } =
     in
         div [ class [ Connection ] ]
             [ contextToggler onGateway (ContextTo Gateway) activeEndpointCId
-            , gatewaySelector servers openMenu activeGatewayCId gateways
+            , gatewaySelector servers openMenu activeGatewayCId config.gateways
             , bounceSelector bounces openMenu activeBounce gatewayBounces
             , endpointSelector servers openMenu activeEndpointCId endpoints
             , contextToggler
@@ -146,17 +141,23 @@ selector classes wrapper kind render open active list =
 gatewaySelector :
     Servers.Model
     -> OpenMenu
-    -> Maybe Servers.CId
-    -> List (Maybe Servers.CId)
+    -> Servers.CId
+    -> List Servers.CId
     -> Html Msg
-gatewaySelector servers =
+gatewaySelector servers open =
     let
-        view cid =
+        render_ _ cid =
             servers
                 |> Servers.get cid
                 |> Maybe.map gatewayLabel
     in
-        selector [ SGateway ] SelectGateway GatewayOpen view
+        customSelect
+            [ class [ SGateway ] ]
+            ( MouseEnterDropdown, MouseLeavesDropdown )
+            SelectGateway
+            (ToggleMenus GatewayOpen)
+            render_
+            (open == GatewayOpen)
 
 
 gatewayLabel : Servers.Server -> Html Msg

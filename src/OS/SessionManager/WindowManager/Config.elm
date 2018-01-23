@@ -29,6 +29,7 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , lastTick : Time
     , story : Story.Model
+    , isCampaign : Bool
     , account : Account.Model
     , backFlix : BackFlix.BackFlix
     , servers : Servers.Model

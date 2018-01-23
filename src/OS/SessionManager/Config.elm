@@ -30,6 +30,7 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , lastTick : Time
     , story : Story.Model
+    , isCampaign : Bool
     , servers : Servers.Model
     , account : Account.Model
     , activeServer : ( Servers.CId, Servers.Server )
@@ -71,6 +72,7 @@ wmConfig sessionId config =
     { toMsg = WindowManagerMsg sessionId >> config.toMsg
     , lastTick = config.lastTick
     , story = config.story
+    , isCampaign = config.isCampaign
     , account = config.account
     , servers = config.servers
     , activeServer = config.activeServer

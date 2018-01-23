@@ -46,9 +46,6 @@ update config msg model =
         CheckMenus ->
             onCheckMenus model
 
-        ToggleCampaign toStory ->
-            onTogglecampaign config toStory model
-
         ServerReadAll ->
             onServerReadAll config model
 
@@ -99,23 +96,12 @@ onMouseLeavesDropdown model =
         ( model_, React.none )
 
 
-onSelectGateway : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
-onSelectGateway { onSetGateway } cid model =
-    let
-        cmd =
-            case cid of
-                Just cid ->
-                    cid
-                        |> onSetGateway
-                        |> React.msg
-
-                Nothing ->
-                    React.none
-
-        model_ =
-            { model | openMenu = NothingOpen }
-    in
-        ( model_, cmd )
+onSelectGateway : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+onSelectGateway { onSetGateway, servers } cid model =
+    cid
+        |> onSetGateway
+        |> React.msg
+        |> (,) (dropMenu model)
 
 
 onSelectBounce : Config msg -> Maybe String -> Model -> UpdateResponse msg
@@ -152,14 +138,6 @@ onCheckMenus ({ mouseSomewhereInside } as model) =
                 model
     in
         ( model_, React.none )
-
-
-onTogglecampaign : Config msg -> Bool -> Model -> UpdateResponse msg
-onTogglecampaign { onSetStoryMode } mode model =
-    mode
-        |> onSetStoryMode
-        |> React.msg
-        |> (,) model
 
 
 onServerReadAll : Config msg -> Model -> UpdateResponse msg

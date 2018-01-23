@@ -11,13 +11,12 @@ type Msg
     | ToggleMenus OpenMenu
     | MouseEnterDropdown
     | MouseLeavesDropdown
-    | SelectGateway (Maybe Servers.CId)
+    | SelectGateway Servers.CId
     | SelectBounce (Maybe String)
     | SelectEndpoint (Maybe Servers.CId)
     | SelectNIP NIP
     | CheckMenus
     | ContextTo Context
-    | ToggleCampaign Bool
     | ServerReadAll
     | ChatReadAll
     | AccountReadAll

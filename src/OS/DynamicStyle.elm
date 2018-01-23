@@ -25,7 +25,7 @@ styleNode id_ stylesheet =
 
 
 view : Config msg -> Html msg
-view { story } =
+view { story, isCampaign } =
     let
         missions_ =
             Missions.dynCss
@@ -36,7 +36,7 @@ view { story } =
                 >> styleNode "storyline"
 
         ( storyStyles, missionsStyles ) =
-            if story.enabled then
+            if isCampaign then
                 ( lazy story_ story
                 , lazy missions_ story.missions
                 )

@@ -12,15 +12,6 @@ import OS.Header.Messages exposing (Msg)
 
 type alias Config msg =
     { toMsg : Msg -> msg
-    , onLogout : msg
-    , onSetGateway : CId -> msg
-    , onSetEndpoint : Maybe CId -> msg
-    , onSetContext : Context -> msg
-    , onSetBounce : Maybe Bounces.ID -> msg
-    , onSetStoryMode : Bool -> msg
-    , onReadAllAccountNotifications : msg
-    , onReadAllServerNotifications : msg
-    , onSetActiveNIP : NIP -> msg
     , bounces : Bounces.Model
     , gateways : List CId
     , endpoints : Maybe (List CId)
@@ -33,4 +24,12 @@ type alias Config msg =
     , serversNotifications : Notifications.Model
     , activeNIP : NIP
     , nips : List NIP
+    , onLogout : msg
+    , onSetGateway : CId -> msg
+    , onSetEndpoint : Maybe CId -> msg
+    , onSetContext : Context -> msg
+    , onSetBounce : Maybe Bounces.ID -> msg
+    , onReadAllAccountNotifications : msg
+    , onReadAllServerNotifications : msg
+    , onSetActiveNIP : NIP -> msg
     }

@@ -43,7 +43,7 @@ view config model =
             config.story
 
         gameMode =
-            case Storyline.isActive story of
+            case config.isCampaign of
                 True ->
                     Res.campaignMode
 
