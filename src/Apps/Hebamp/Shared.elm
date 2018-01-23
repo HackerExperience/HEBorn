@@ -7,3 +7,7 @@ type alias AudioData =
     , label : String
     , duration : Float
     }
+
+
+type Params
+    = OpenPlaylist (List AudioData)

@@ -2,11 +2,13 @@ module Apps.Browser.Pages.Home.View exposing (view)
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import Apps.Apps as Apps
 import Apps.Browser.Pages.Home.Config exposing (..)
+import Apps.Hebamp.Shared as Hebamp
 
 
 view : Config msg -> Html msg
-view { onNewTabIn, onGoAddress } =
+view { onNewTabIn, onGoAddress, onOpenApp } =
     div []
         [ node "center"
             []
@@ -34,5 +36,18 @@ view { onNewTabIn, onGoAddress } =
             , li
                 [ onClick <| onGoAddress "lulapresoamanha.dmy" ]
                 [ text "News" ]
+            , li
+                [ { mediaUrl = "https://archive.org/download/vitas_201706/vitas.ogg"
+                  , mediaType = "audio/ogg"
+                  , label = "7th Element by Vitas"
+                  , duration = 247
+                  }
+                    |> List.singleton
+                    |> Hebamp.OpenPlaylist
+                    |> Apps.MusicParams
+                    |> onOpenApp Nothing
+                    |> onClick
+                ]
+                [ text "Blblbl" ]
             ]
         ]
