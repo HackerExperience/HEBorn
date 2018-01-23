@@ -22,7 +22,7 @@ update config msg model =
             onValidate config model
 
         Checked True ->
-            ( setOkay model, React.none )
+            onChecked config model
 
         Checked False ->
             ( model, React.none )
@@ -48,3 +48,12 @@ onValidate ({ toMsg, mainframe } as config) model =
                     Cmd.none
     in
         ( model, React.cmd cmd )
+
+
+onChecked : Config msg -> Model -> UpdateResponse msg
+onChecked { onNext } model =
+    model
+        |> settings
+        |> onNext
+        |> React.msg
+        |> (,) (setOkay model)

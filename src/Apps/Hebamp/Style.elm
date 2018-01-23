@@ -86,6 +86,7 @@ css =
                     , position absolute
                     , marginRight (px 6)
                     , marginTop (px -1)
+                    , right (px 0)
                     ]
                 ]
             ]

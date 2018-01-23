@@ -17,13 +17,13 @@ import Setup.Pages.Mainframe.Config exposing (..)
 
 
 view : Config msg -> Model -> Html msg
-view { toMsg, onNext, onPrevious } model =
+view ({ toMsg, onPrevious } as config) model =
     withHeader [ class [ StepWelcome ] ]
         [ div [] [ h2 [] [ text "Initial server name:" ] ]
         , hostnameInput toMsg model
         , div []
             [ button [ onClick onPrevious ] [ text "BACK" ]
-            , nextBtn onNext model
+            , nextBtn config model
             ]
         ]
 
@@ -32,19 +32,18 @@ hostnameInput : (Msg -> msg) -> Model -> Html msg
 hostnameInput toMsg model =
     input
         [ onInput <| Mainframe >> toMsg
-        , onBlur <| toMsg Validate
-        , placeholder "hostname"
+        , placeholder "Hostname"
         ]
         [ text <| Maybe.withDefault "" model.hostname ]
 
 
-nextBtn : (List Settings -> msg) -> Model -> Html msg
-nextBtn onNext model =
-    let
-        attrs =
+nextBtn : Config msg -> Model -> Html msg
+nextBtn { toMsg, onNext } model =
+    button
+        [ onClick <|
             if isOkay model then
-                [ onClick <| onNext <| settings model ]
+                onNext <| settings model
             else
-                [ disabled True ]
-    in
-        button attrs [ text "NEXT" ]
+                toMsg <| Validate
+        ]
+        [ text "NEXT" ]
