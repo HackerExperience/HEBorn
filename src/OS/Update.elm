@@ -71,7 +71,6 @@ onHeaderMsg config msg model =
         model_ =
             setHeader header model
     in
-        -- CONFREFACT: Passthrough react
         ( model_, react )
 
 

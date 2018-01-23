@@ -10,7 +10,7 @@ import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Context exposing (..)
-import Game.Meta.Types.Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Models as Servers exposing (Server)
@@ -19,6 +19,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Storyline.Models as Story
+import Game.Storyline.Emails.Contents as Emails
 import OS.Messages exposing (..)
 import OS.Console.Config as Console
 import OS.Header.Config as Header
@@ -66,6 +67,10 @@ type alias Config msg =
     , onPauseProcess : CId -> Processes.ID -> msg
     , onResumeProcess : CId -> Processes.ID -> msg
     , onRemoveProcess : CId -> Processes.ID -> msg
+    , onNewBruteforceProcess : CId -> Network.IP -> msg
+    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onReplyEmail : Emails.Content -> msg
     }
 
 
@@ -104,6 +109,11 @@ smConfig config =
     , onPauseProcess = config.onPauseProcess
     , onResumeProcess = config.onResumeProcess
     , onRemoveProcess = config.onRemoveProcess
+    , onSetContext = config.onSetContext
+    , onNewBruteforceProcess = config.onNewBruteforceProcess
+    , onWebLogin = config.onWebLogin
+    , onFetchUrl = config.onFetchUrl
+    , onReplyEmail = config.onReplyEmail
     }
 
 

@@ -50,20 +50,19 @@ onContentMsg config msg model =
             contentConfig config
 
         react =
-            Contents.update config_ msg
+            msg
+                |> Contents.update config_
+                |> React.map (ContentMsg >> config.toMsg)
     in
-        ( model, React.map (ContentMsg >> config.toMsg) react )
+        ( model, react )
 
 
 onReply : Config msg -> Content -> Model -> UpdateResponse msg
-onReply config content model =
-    --let
-    --    dispatch =
-    --        content
-    --            |> Storyline.ReplyEmail
-    --            |> Dispatch.emails
-    --in
-    ( model, React.none )
+onReply { onReplyEmail } content model =
+    content
+        |> onReplyEmail
+        |> React.msg
+        |> (,) model
 
 
 handleSelectContact : Config msg -> ID -> Model -> UpdateResponse msg
@@ -78,24 +77,25 @@ handleSelectContact config contact model =
 onToggleMode : Config msg -> Model -> UpdateResponse msg
 onToggleMode config model =
     let
-        model_ =
+        mode_ =
             case model.mode of
                 Compact ->
-                    { model | mode = Expanded }
+                    Expanded
 
                 Expanded ->
-                    { model | mode = Compact }
+                    Compact
+
+        model_ =
+            { model | mode = mode_ }
     in
         ( model_, React.none )
 
 
 onClose : Config msg -> Model -> UpdateResponse msg
-onClose config model =
-    --let
-    --    dispatch =
-    --        Dispatch.os <| OS.CloseApp model.me
-    --in
-    ( model, React.none )
+onClose { onCloseApp } model =
+    onCloseApp
+        |> React.msg
+        |> (,) model
 
 
 onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg

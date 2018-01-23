@@ -34,6 +34,7 @@ import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
 import Game.Meta.Models as Meta
 import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Network as Network
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -330,6 +331,15 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         \cid -> Processes.HandleResume >> processes cid
     , onRemoveProcess =
         \cid -> Processes.HandleRemove >> processes cid
+    , onWebLogin =
+        Web.Login >>>>> web
+    , onFetchUrl =
+        \cid nId nIp r ->
+            web <| Web.FetchUrl nIp nId cid r
+    , onNewBruteforceProcess =
+        \cid -> Processes.HandleStartBruteforce >> processes cid
+    , onReplyEmail =
+        Emails.HandleReply >> emails
     }
 
 

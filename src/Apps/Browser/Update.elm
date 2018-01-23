@@ -1,10 +1,8 @@
 module Apps.Browser.Update exposing (update)
 
 import Dict
-import Native.Panic
 import Utils.React as React exposing (React)
 import ContextMenu exposing (ContextMenu)
-import Core.Error as Error
 import Game.Models
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Shared as Finances
@@ -23,7 +21,6 @@ import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
 import Apps.Browser.Menu.Update as Menu
 import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Actions as Menu
-import Apps.Browser.Pages.Configs exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -295,14 +292,12 @@ processTabMsg config tabId msg tab model =
 
         NewApp params ->
             ( tab
-            , React.none
-              --            , Dispatch.os <| OS.NewApp Nothing Nothing params
+            , React.msg <| config.onNewApp Nothing Nothing params
             )
 
         SelectEndpoint ->
             ( tab
-            , React.none
-              --, Dispatch.account <| Account.SetContext Endpoint
+            , React.msg <| config.onSetContext Endpoint
             )
 
         HandleBankLogin accountData ->
@@ -365,10 +360,6 @@ onHandleFetched response tab =
             ( tab, React.none )
 
 
-
--- CONFREFACT : make this dispatch with the new method
-
-
 onGoAddress :
     Config msg
     -> String
@@ -377,37 +368,26 @@ onGoAddress :
     -> Tab
     -> TabUpdateResponse msg
 onGoAddress config url { sessionId, windowId, context } tabId tab =
-    --let
-    --    cid =
-    --        Game.getActiveCId data
-    --    servers =
-    --        data
-    --            |> Game.getGame
-    --            |> Game.Models.getServers
-    --    networkId =
-    --        servers
-    --            |> Servers.get cid
-    --            |> Maybe.map
-    --                (Servers.getActiveNIP
-    --                    >> Network.getId
-    --                )
-    --            |> Maybe.withDefault "::"
-    --    requester =
-    --        { sessionId = sessionId
-    --        , windowId = windowId
-    --        , context = context
-    --        , tabId = tabId
-    --        }
-    --    dispatch =
-    --        Dispatch.server cid <|
-    --            Servers.FetchUrl url
-    --                networkId
-    --                requester
-    --    tab_ =
-    --        gotoPage url (LoadingModel url) tab
-    --in
-    --( tab_, Cmd.none, dispatch )
-    ( tab, React.none )
+    let
+        networkId =
+            config.activeServer
+                |> Servers.getActiveNIP
+                |> Network.getId
+
+        requester =
+            { sessionId = sessionId
+            , windowId = windowId
+            , context = context
+            , tabId = tabId
+            }
+
+        react =
+            React.msg <| config.onFetchUrl networkId url requester
+
+        tab_ =
+            gotoPage url (LoadingModel url) tab
+    in
+        ( tab_, react )
 
 
 onLogin :
@@ -419,46 +399,26 @@ onLogin :
     -> Tab
     -> TabUpdateResponse msg
 onLogin config remoteNip password { sessionId, windowId, context } tabId tab =
-    --let
-    --    servers =
-    --        config.servers
-    --    requester =
-    --        { sessionId = sessionId
-    --        , windowId = windowId
-    --        , context = context
-    --        , tabId = tabId
-    --        }
-    --    gatewayNip =
-    --        Servers.get (Game.getActiveCId data) servers
-    --            |> Maybe.map (Servers.getActiveNIP)
-    --    remoteIp =
-    --        Network.getIp remoteNip
-    --    dispatch =
-    --        case gatewayNip of
-    --            Just gatewayNip ->
-    --                Dispatch.servers <|
-    --                    Servers.Login gatewayNip remoteIp password requester
-    --            Nothing ->
-    --                -- You don't have a Gateway?
-    --                "A gateway is required for everything!"
-    --                    |> Error.astralProj
-    --                    |> uncurry Native.Panic.crash
-    --in
-    ( tab, React.none )
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = tabId
+    }
+        |> config.onWebLogin
+            (Servers.getActiveNIP config.activeGateway)
+            (Network.getIp remoteNip)
+            password
+        |> React.msg
+        |> (,) tab
 
 
 onCrack : Config msg -> Network.NIP -> Tab -> TabUpdateResponse msg
-onCrack config nip tab =
-    --let
-    --    serverId =
-    --        Game.getActiveCId data
-    --    targetIp =
-    --        Network.getIp nip
-    --    dispatch =
-    --        Dispatch.processes serverId <|
-    --            Servers.NewBruteforceProcess targetIp
-    --in
-    ( tab, React.none )
+onCrack { onNewBruteforceProcess } nip tab =
+    nip
+        |> Network.getIp
+        |> onNewBruteforceProcess
+        |> React.msg
+        |> (,) tab
 
 
 onPageMsg : Config msg -> TabMsg -> Tab -> TabUpdateResponse msg
@@ -485,21 +445,21 @@ updatePage config msg tab =
                 ( tab_, react ) =
                     Webserver.update (webserverConfig config) msg page
             in
-                ( WebserverModel tab_, React.map config.toMsg react )
+                ( WebserverModel tab_, react )
 
         ( BankModel page, BankMsg msg ) ->
             let
                 ( tab_, react ) =
-                    Bank.update bankConfig msg page
+                    Bank.update (bankConfig config) msg page
             in
-                ( BankModel tab_, React.map config.toMsg react )
+                ( BankModel tab_, react )
 
         ( DownloadCenterModel page, DownloadCenterMsg msg ) ->
             let
                 ( tab_, react ) =
                     DownloadCenter.update (downloadCenterConfig config) msg page
             in
-                ( DownloadCenterModel tab_, React.map config.toMsg react )
+                ( DownloadCenterModel tab_, react )
 
         _ ->
             ( tab, React.none )
