@@ -18,6 +18,7 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Notifications.Shared as ServersNotifications
+import Game.Storyline.Missions.Actions as MissionsActions
 import Game.Storyline.Models as Story
 import Game.Storyline.Emails.Contents as Emails
 import OS.SessionManager.Types exposing (..)
@@ -65,6 +66,7 @@ type alias Config msg =
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
+    , onActionDone : Apps.App -> Context -> msg
     }
 
 

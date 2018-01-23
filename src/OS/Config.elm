@@ -1,6 +1,7 @@
 module OS.Config exposing (..)
 
 import Time exposing (Time)
+import Apps.Apps as Apps
 import Core.Flags exposing (Flags)
 import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
@@ -8,6 +9,7 @@ import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
+import Game.Storyline.Missions.Actions as MissionsActions
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network exposing (NIP)
@@ -72,6 +74,7 @@ type alias Config msg =
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
+    , onActionDone : Apps.App -> Context -> msg
     }
 
 
@@ -116,6 +119,7 @@ smConfig config =
     , onWebLogin = config.onWebLogin
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
+    , onActionDone = config.onActionDone
     }
 
 

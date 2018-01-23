@@ -43,6 +43,7 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Notifications.Messages as ServerNotifications
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared as Servers exposing (CId)
+import Game.Storyline.Missions.Actions as MissionsActions
 import Game.Storyline.Messages as Storyline
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Messages as Emails
@@ -342,6 +343,12 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         \cid -> Processes.HandleStartBruteforce >> processes cid
     , onReplyEmail =
         Emails.HandleReply >> emails
+    , onActionDone =
+        \app context ->
+            context
+                |> MissionsActions.GoApp app
+                |> Missions.HandleActionDone
+                |> missions
     }
 
 

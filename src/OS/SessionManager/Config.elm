@@ -17,12 +17,14 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared as Servers exposing (CId, StorageId)
+import Game.Storyline.Missions.Actions as MissionsActions
 import Game.Storyline.Models as Story
 import Game.Storyline.Emails.Contents as Emails
 import OS.SessionManager.WindowManager.Config as WindowManager
 import OS.SessionManager.Dock.Config as Dock
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.Messages exposing (..)
+import Apps.Apps as Apps
 import Apps.Config as Apps
 
 
@@ -63,6 +65,7 @@ type alias Config msg =
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
+    , onActionDone : Apps.App -> Context -> msg
     }
 
 
@@ -104,6 +107,7 @@ wmConfig sessionId config =
     , onNewBruteforceProcess = config.onNewBruteforceProcess
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
+    , onActionDone = config.onActionDone
     }
 
 
