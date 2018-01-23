@@ -11,10 +11,12 @@ import Setup.Pages.Mainframe.Config as Mainframe
 type alias Config msg =
     { toMsg : Msg -> msg
     , accountId : String
-    , mainframe : CId
     , flags : Core.Flags
     , onError : Core.Error -> msg
     , onPlay : msg
+
+    -- TODO: remove, we're already receiving it using events
+    , mainframe : Maybe CId
     }
 
 

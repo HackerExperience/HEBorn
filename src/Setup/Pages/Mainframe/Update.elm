@@ -1,5 +1,6 @@
 module Setup.Pages.Mainframe.Update exposing (update)
 
+import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
 import Game.Account.Models as Account
 import Setup.Pages.Mainframe.Models exposing (..)
@@ -36,12 +37,9 @@ onMainframe str model =
 onValidate : Config msg -> Model -> UpdateResponse msg
 onValidate ({ toMsg, mainframe } as config) model =
     let
-        hostname =
-            getHostname model
-
         cmd =
-            case hostname of
-                Just name ->
+            case Maybe.uncurry (getHostname model) mainframe of
+                Just ( name, mainframe ) ->
                     Check.serverName (Checked >> toMsg)
                         name
                         mainframe

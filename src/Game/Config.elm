@@ -35,6 +35,9 @@ type alias Config msg =
     , onDNS : Web.Response -> Requester -> msg
     , onJoinFailed : Requester -> msg
 
+    -- servers
+    , onNewGateway : CId -> msg
+
     -- account
     , onConnected : String -> msg
     , onDisconnected : msg
@@ -62,7 +65,11 @@ serversConfig lastTick flags config =
     , onInventoryFreed =
         Inventory.HandleComponentFreed >> InventoryMsg >> config.toMsg
     , onNewGateway =
-        Account.HandleNewGateway >> AccountMsg >> config.toMsg
+        \cid ->
+            config.batchMsg <|
+                [ config.onNewGateway cid
+                , config.toMsg <| AccountMsg <| Account.HandleNewGateway cid
+                ]
     , onToast = config.onServerToast
     }
 
