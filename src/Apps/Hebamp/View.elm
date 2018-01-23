@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (src, type_, controls, style)
 import Html.CssHelpers
 import Html.Events exposing (on, onClick)
+import Utils.Html.Events exposing (onClickMe)
 import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Messages exposing (Msg(..))
 import Apps.Hebamp.Models exposing (..)
@@ -22,7 +23,10 @@ view config model =
     Html.map config.toMsg <|
         div
             [ class [ Container ] ]
-            [ div [ class [ Header ] ] [ text ":" ]
+            [ div [ class [ Header ] ]
+                [ text ":"
+                , span [ class [ IconClose ], onClickMe (Close) ] []
+                ]
             , div [ class [ Player ] ]
                 [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
                 , div [ class [ Vis, Title ] ] [ songTitle model.now ]

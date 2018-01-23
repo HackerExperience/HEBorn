@@ -40,13 +40,13 @@ type alias Config msg =
     , activeServer : ( CId, Server )
     , activeContext : Context
     , activeGateway : ( CId, Server )
+    , isCampaign : Bool
     , lastTick : Time
     , onLogout : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
     , onSetContext : Context -> msg
     , onSetBounce : Maybe Bounces.ID -> msg
-    , onSetStoryMode : Bool -> msg
     , onReadAllAccountNotifications : msg
     , onReadAllServerNotifications : msg
     , onSetActiveNIP : NIP -> msg
@@ -83,6 +83,7 @@ smConfig config =
     , batchMsg = config.batchMsg
     , lastTick = config.lastTick
     , story = config.story
+    , isCampaign = config.isCampaign
     , servers = config.servers
     , account = config.account
     , activeServer = config.activeServer
@@ -135,8 +136,6 @@ headerConfig config =
         config.onSetContext
     , onSetBounce =
         config.onSetBounce
-    , onSetStoryMode =
-        config.onSetStoryMode
     , onReadAllAccountNotifications =
         config.onReadAllAccountNotifications
     , onReadAllServerNotifications =

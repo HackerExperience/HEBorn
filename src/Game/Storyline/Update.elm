@@ -17,35 +17,11 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        HandleToggle ->
-            handleToggle model
-
-        HandleSetMode enable ->
-            handleSet enable model
-
         MissionsMsg msg ->
             onMission config msg model
 
         EmailsMsg msg ->
             onEmail config msg model
-
-
-handleToggle : Model -> UpdateResponse msg
-handleToggle model =
-    let
-        model_ =
-            { model | enabled = (not model.enabled) }
-    in
-        ( model_, React.none )
-
-
-handleSet : Bool -> Model -> UpdateResponse msg
-handleSet enable model =
-    let
-        model_ =
-            { model | enabled = enable }
-    in
-        ( model_, React.none )
 
 
 onMission : Config msg -> Missions.Msg -> Model -> UpdateResponse msg

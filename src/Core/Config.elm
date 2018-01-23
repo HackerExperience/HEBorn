@@ -257,6 +257,11 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , activeServer = srv
     , activeContext = ctx
     , activeGateway = gtw
+    , isCampaign =
+        gtw
+            |> Tuple.second
+            |> Servers.getType
+            |> (==) Servers.DesktopCampaign
     , onLogout =
         Account.HandleLogout
             |> account
@@ -272,9 +277,6 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onSetBounce =
         Servers.HandleSetBounce
             >> server sCId
-    , onSetStoryMode =
-        Storyline.HandleSetMode
-            >> storyline
     , onReadAllAccountNotifications =
         AccountNotifications.HandleReadAll
             |> accountNotif

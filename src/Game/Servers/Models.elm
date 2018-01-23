@@ -479,3 +479,8 @@ getContextServer context servers ( gatewayCId, gateway ) =
 
             Endpoint ->
                 Maybe.uncurry endpointCId maybeEndpoint
+
+
+getType : Server -> ServerType
+getType =
+    .type_
