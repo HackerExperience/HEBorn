@@ -19,11 +19,13 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Storyline.Models as Story
+import Game.Storyline.Emails.Contents as Emails
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WM
 import Apps.Apps as Apps
 import Apps.Config as Apps
+import Apps.Reference exposing (Reference)
 
 
 type alias Config msg =
@@ -57,6 +59,11 @@ type alias Config msg =
     , onPauseProcess : CId -> Processes.ID -> msg
     , onResumeProcess : CId -> Processes.ID -> msg
     , onRemoveProcess : CId -> Processes.ID -> msg
+    , onSetContext : Context -> msg
+    , onNewBruteforceProcess : CId -> Network.IP -> msg
+    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onReplyEmail : Emails.Content -> msg
     }
 
 
@@ -66,6 +73,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , lastTick = config.lastTick
     , account = config.account
     , activeServer = appServer
+    , activeGateway = config.activeGateway
     , inventory = config.inventory
     , story = config.story
     , backFlix = config.backFlix
@@ -89,6 +97,12 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , onPauseProcess = config.onPauseProcess appCId
     , onResumeProcess = config.onResumeProcess appCId
     , onRemoveProcess = config.onRemoveProcess appCId
+    , onSetContext = config.onSetContext
+    , onNewBruteforceProcess = config.onNewBruteforceProcess
+    , onWebLogin = config.onWebLogin
+    , onFetchUrl = config.onFetchUrl
+    , onReplyEmail = config.onReplyEmail
+    , onCloseApp = Close wId |> config.toMsg
     }
 
 

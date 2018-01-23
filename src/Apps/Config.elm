@@ -17,8 +17,10 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Storyline.Models as Storyline
+import Game.Storyline.Emails.Contents as Emails
 import Apps.Apps as Apps
 import Apps.Messages exposing (..)
+import Apps.Reference exposing (Reference)
 import Apps.Bug.Config as Bug
 import Apps.Email.Config as Email
 import Apps.Hebamp.Config as Hebamp
@@ -46,6 +48,7 @@ type alias Config msg =
     , account : Account.Model
     , inventory : Inventory.Model
     , activeServer : ( CId, Servers.Server )
+    , activeGateway : ( CId, Servers.Server )
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
@@ -67,6 +70,12 @@ type alias Config msg =
     , onPauseProcess : Processes.ID -> msg
     , onResumeProcess : Processes.ID -> msg
     , onRemoveProcess : Processes.ID -> msg
+    , onSetContext : Context -> msg
+    , onNewBruteforceProcess : CId -> Network.IP -> msg
+    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onReplyEmail : Emails.Content -> msg
+    , onCloseApp : msg
     }
 
 
@@ -131,9 +140,11 @@ emailConfig config =
 floatingHeadsConfig : Config msg -> FloatingHeads.Config msg
 floatingHeadsConfig config =
     { toMsg = FloatingHeadsMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , emails = Storyline.getEmails config.story
     , username = Account.getUsername config.account
-    , batchMsg = config.batchMsg
+    , onReplyEmail = config.onReplyEmail
+    , onCloseApp = config.onCloseApp
     }
 
 
@@ -166,6 +177,7 @@ browserConfig config =
     { toMsg = BrowserMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , activeServer = Tuple.second config.activeServer
+    , activeGateway = Tuple.second config.activeGateway
     , endpoints =
         config.activeServer
             |> Tuple.second
@@ -174,6 +186,16 @@ browserConfig config =
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onSetContext = config.onSetContext
+    , onNewBruteforceProcess =
+        config.activeServer
+            |> Tuple.first
+            |> config.onNewBruteforceProcess
+    , onWebLogin = config.onWebLogin
+    , onFetchUrl =
+        config.activeServer
+            |> Tuple.first
+            |> config.onFetchUrl
     }
 
 

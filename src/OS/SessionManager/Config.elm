@@ -18,6 +18,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Shared as Servers exposing (CId, StorageId)
 import Game.Storyline.Models as Story
+import Game.Storyline.Emails.Contents as Emails
 import OS.SessionManager.WindowManager.Config as WindowManager
 import OS.SessionManager.Dock.Config as Dock
 import OS.SessionManager.Types exposing (..)
@@ -56,6 +57,11 @@ type alias Config msg =
     , onPauseProcess : CId -> Processes.ID -> msg
     , onResumeProcess : CId -> Processes.ID -> msg
     , onRemoveProcess : CId -> Processes.ID -> msg
+    , onSetContext : Context -> msg
+    , onNewBruteforceProcess : CId -> Network.IP -> msg
+    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onReplyEmail : Emails.Content -> msg
     }
 
 
@@ -91,6 +97,11 @@ wmConfig sessionId config =
     , onPauseProcess = config.onPauseProcess
     , onResumeProcess = config.onResumeProcess
     , onRemoveProcess = config.onRemoveProcess
+    , onSetContext = config.onSetContext
+    , onWebLogin = config.onWebLogin
+    , onNewBruteforceProcess = config.onNewBruteforceProcess
+    , onFetchUrl = config.onFetchUrl
+    , onReplyEmail = config.onReplyEmail
     }
 
 

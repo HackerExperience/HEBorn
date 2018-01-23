@@ -4,6 +4,7 @@ import Utils.React as React exposing (React)
 import Game.Models
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
+import Game.Storyline.Emails.Contents as Emails
 import Apps.Reference exposing (..)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -42,12 +43,13 @@ launchOpenAtUrl config url me =
             , tabId = model.lastTab
             }
 
-        --dispatch =
-        --    Dispatch.server cid <| Servers.FetchUrl url nid reference
+        react =
+            React.msg <| config.onFetchUrl url nid reference
+
         model_ =
             model
                 |> getNowTab
                 |> gotoPage url (LoadingModel url)
                 |> flip setNowTab model
     in
-        ( model_, React.none )
+        ( model_, react )
