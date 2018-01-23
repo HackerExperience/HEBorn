@@ -5,7 +5,10 @@ import Css.Namespace exposing (namespace)
 import Css.Colors exposing (black, lime)
 import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
 import Css.FontAwesome.Icons as FA
+import Css.Icons as Icon
+import Css.Icons as Icon
 import Apps.Hebamp.Resources exposing (Classes(..), prefix)
+import UI.Colors as Color
 
 
 -- Based on this: https://codepen.io/pedox/pen/ndpfD
@@ -69,6 +72,21 @@ css =
                 , backgroundColor (hex "353551")
                 , padding (px 0)
                 , width (px 55)
+                ]
+            , children
+                [ class IconClose
+                    [ before
+                        [ Icon.windowClose ]
+                    , color (hex "f25156")
+                    , Icon.fontFamily
+                    , textShadow4 (px 1) (px 0) (px 3) Color.black
+                    , zIndex (int 2)
+                    , lineHeight (px 16)
+                    , fontSize (px 14)
+                    , position absolute
+                    , marginRight (px 6)
+                    , marginTop (px -1)
+                    ]
                 ]
             ]
         , class Vis

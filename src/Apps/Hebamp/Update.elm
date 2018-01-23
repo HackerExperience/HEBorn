@@ -32,6 +32,9 @@ update config msg model =
         SetCurrentTime time ->
             onSetCurrentTime time model
 
+        Close ->
+            onClose config model
+
 
 onTimeUpdate : String -> Float -> Model -> UpdateResponse msg
 onTimeUpdate playerId time model =
@@ -61,6 +64,13 @@ onPause model =
             React.cmd (pause model.playerId)
     in
         ( model, react )
+
+
+onClose : Config msg -> Model -> UpdateResponse msg
+onClose { onCloseApp } model =
+    onCloseApp
+        |> React.msg
+        |> (,) model
 
 
 onSetCurrentTime : Time -> Model -> UpdateResponse msg

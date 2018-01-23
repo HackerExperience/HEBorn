@@ -6,3 +6,4 @@ type Msg
     | Play
     | Pause
     | SetCurrentTime Float
+    | Close

@@ -256,6 +256,7 @@ hebampConfig : Config msg -> Hebamp.Config msg
 hebampConfig config =
     { toMsg = MusicMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , onCloseApp = config.onCloseApp
     }
 
 

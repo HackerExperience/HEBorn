@@ -27,6 +27,7 @@ type Classes
     | IconStop
     | IconPause
     | IconEject
+    | IconClose
 
 
 prefix : String
