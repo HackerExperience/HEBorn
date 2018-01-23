@@ -171,9 +171,6 @@ reduceAppMsg config context msg model wId window ( windows, react0 ) =
 
         react =
             React.batch config.batchMsg [ react0, react1 ]
-
-        --dispatch =
-        --    Dispatch.batch [ dispatch0, dispatch1 ]
     in
         ( windows_, react )
 
@@ -209,14 +206,10 @@ onSetContext config context_ wId ({ windows } as model) =
                         model_ =
                             { model | windows = windows_ }
 
-                        --dispatch =
-                        --    context_
-                        --        |> GoApp app
-                        --        |> Storyline.ActionDone
-                        --        |> Storyline.Missions
-                        --        |> Dispatch.storyline
+                        react =
+                            React.msg <| config.onActionDone app context_
                     in
-                        ( model_, React.none )
+                        ( model_, react )
 
                 SingleContext _ ->
                     ( model, React.none )
@@ -235,15 +228,13 @@ onUpdateFocustTo config maybeWId model =
                         model_ =
                             focus id model
 
-                        --dispatch =
-                        --    window
-                        --        |> windowContext
-                        --        |> GoApp window.app
-                        --        |> Storyline.ActionDone
-                        --        |> Storyline.Missions
-                        --        |> Dispatch.storyline
+                        react =
+                            window
+                                |> windowContext
+                                |> config.onActionDone window.app
+                                |> React.msg
                     in
-                        ( model_, React.none )
+                        ( model_, react )
 
                 Nothing ->
                     onUnfocus model

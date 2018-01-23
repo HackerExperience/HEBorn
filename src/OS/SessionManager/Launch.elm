@@ -87,20 +87,15 @@ helper action config maybeContext maybeParams id serverCId app model0 =
                 model_ =
                     refresh id wm_ model
 
-                --dispatch_ =
-                --    Dispatch.batch
-                --        [ dispatch
-                --        , data
-                --            |> Game.getGame
-                --            |> Game.getAccount
-                --            |> Account.getContext
-                --            |> GoApp app
-                --            |> Storyline.ActionDone
-                --            |> Storyline.Missions
-                --            |> Dispatch.storyline
-                --        ]
+                react_ =
+                    React.batch config.batchMsg
+                        [ react
+                        , config.activeContext
+                            |> config.onActionDone app
+                            |> React.msg
+                        ]
             in
-                ( model_, react )
+                ( model_, react_ )
 
         Nothing ->
             ( model0, React.none )
