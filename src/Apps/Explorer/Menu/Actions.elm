@@ -42,17 +42,15 @@ onDelete :
     -> String
     -> Model
     -> UpdateResponse msg
-onDelete config id model =
+onDelete { onDeleteFile, activeServer } id model =
     let
         storage =
-            getStorage config.activeServer model
-
-        --gameMsg =
-        --    id
-        --        |> Servers.DeleteFile
-        --        |> Dispatch.filesystem config.activeCId storage
+            getStorage activeServer model
     in
-        ( model, React.none )
+        id
+            |> onDeleteFile storage
+            |> React.msg
+            |> (,) model
 
 
 onGoPath :

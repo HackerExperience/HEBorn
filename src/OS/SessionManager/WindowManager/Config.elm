@@ -51,6 +51,7 @@ type alias Config msg =
     , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onDeleteFile : CId -> StorageId -> Filesystem.Id -> msg
     , onUpdateLog : CId -> Logs.ID -> String -> msg
     , onEncryptLog : CId -> Logs.ID -> msg
     , onHideLog : CId -> Logs.ID -> msg
@@ -89,6 +90,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , onNewDir = config.onNewDir appCId
     , onMoveFile = config.onMoveFile appCId
     , onRenameFile = config.onRenameFile appCId
+    , onDeleteFile = config.onDeleteFile appCId
     , onUpdateLog = config.onUpdateLog appCId
     , onEncryptLog = config.onEncryptLog appCId
     , onHideLog = config.onHideLog appCId

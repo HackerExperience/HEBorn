@@ -49,6 +49,7 @@ type alias Config msg =
     , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onDeleteFile : CId -> StorageId -> Filesystem.Id -> msg
     , onUpdateLog : CId -> Logs.ID -> String -> msg
     , onEncryptLog : CId -> Logs.ID -> msg
     , onHideLog : CId -> Logs.ID -> msg
@@ -89,6 +90,7 @@ wmConfig sessionId config =
     , onNewDir = config.onNewDir
     , onMoveFile = config.onMoveFile
     , onRenameFile = config.onRenameFile
+    , onDeleteFile = config.onDeleteFile
     , onUpdateLog = config.onUpdateLog
     , onEncryptLog = config.onEncryptLog
     , onHideLog = config.onHideLog
