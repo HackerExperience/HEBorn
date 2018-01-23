@@ -1,7 +1,7 @@
 module Apps.Browser.Config exposing (..)
 
 import Utils.Core exposing (..)
-import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
@@ -9,7 +9,6 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Download as Download
-import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Apps as Apps
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Menu.Config as Menu
@@ -27,8 +26,8 @@ type alias Config msg =
     , activeGateway : Servers.Server
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
-    , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
-    , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
+    , onBankAccountLogin : BankLoginRequest -> Requester -> msg
+    , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
     , onSetContext : Context -> msg
     , onNewBruteforceProcess : Network.IP -> msg
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg

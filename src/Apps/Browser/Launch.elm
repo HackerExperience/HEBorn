@@ -1,7 +1,6 @@
 module Apps.Browser.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Game.Models
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
 import Game.Storyline.Emails.Contents as Emails

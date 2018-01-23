@@ -73,15 +73,6 @@ updateRequest config response model =
             ( model, React.none )
 
 
-
---| Reports back the site information to the page.
-
-
-onDNS : Config msg -> Requester -> Response -> Model -> UpdateResponse msg
-onDNS config requester response model =
-    ( model, React.msg <| config.onDNS response requester )
-
-
 {-| Stores page reference and tries to login on server.
 -}
 onLogin :

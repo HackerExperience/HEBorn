@@ -1,7 +1,6 @@
 module OS.Header.ConnectionBarView exposing (view)
 
 import Dict
-import Native.Panic
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)

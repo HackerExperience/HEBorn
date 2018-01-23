@@ -382,10 +382,3 @@ received msg =
 
         _ ->
             Debug.log "▶ Message" msg
-
-
-sent : a -> a
-sent =
-    -- uncomment this line to see sent messages
-    --Debug.log "◀ Message"
-    identity
