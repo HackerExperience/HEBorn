@@ -15,10 +15,6 @@ type alias UpdateResponse msg =
     ( Model, React msg )
 
 
-
--- CONFREFACT: give Dock a real config and get rid of data
-
-
 update :
     Config msg
     -> Msg

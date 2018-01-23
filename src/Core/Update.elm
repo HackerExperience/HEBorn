@@ -280,7 +280,6 @@ updatePlayWS flags msg stateModel =
 
 updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
 updatePlayOS msg ({ game, os } as state) =
-    -- CONFREFACT: Get rid of `dipatch`
     let
         volatile_ =
             ( Game.getGateway game

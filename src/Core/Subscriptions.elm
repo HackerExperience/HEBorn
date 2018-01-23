@@ -109,7 +109,6 @@ play model =
 
 os : Game.Model -> OS.Model -> Sub Msg
 os game os =
-    -- CONFREFACT: Get rid of `data`
     let
         volatile_ =
             ( Game.getGateway game
