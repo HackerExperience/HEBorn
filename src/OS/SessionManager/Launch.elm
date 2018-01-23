@@ -1,19 +1,13 @@
 module OS.SessionManager.Launch exposing (openApp, openOrRestoreApp)
 
 import Utils.React as React exposing (React)
-import Game.Models as Game
-import Game.Account.Models as Account
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import Game.Servers.Shared as Servers
-import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Config as WM
 import OS.SessionManager.Models exposing (..)
-import OS.SessionManager.Messages exposing (..)
 import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Launch as WM
 import OS.SessionManager.WindowManager.Models as WM
-import OS.SessionManager.WindowManager.Messages as WM
 import Apps.Apps as Apps
 
 

@@ -4,7 +4,6 @@ import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
 import OS.Resources as Res
-import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
 import OS.Toasts.Messages exposing (..)

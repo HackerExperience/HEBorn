@@ -6,7 +6,6 @@ import Events.Server.Handlers.ProcessCompleted as ProcessConclusion
 import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesChanged
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce exposing (bruteforceRequest)
 import Game.Servers.Processes.Requests.Download as Download

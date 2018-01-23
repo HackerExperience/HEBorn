@@ -11,7 +11,6 @@ import Json.Decode as Decode
         , list
         )
 import Json.Decode.Pipeline exposing (decode, required, custom)
-import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Account.Finances.Models
     exposing
         ( BankAccounts

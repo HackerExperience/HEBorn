@@ -3,7 +3,6 @@ module Apps.Browser.Widgets.PublicFiles.View exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
-import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Widgets.PublicFiles.Model exposing (..)

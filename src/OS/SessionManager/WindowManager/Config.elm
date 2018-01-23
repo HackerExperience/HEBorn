@@ -17,16 +17,12 @@ import Game.Servers.Shared as Servers exposing (CId, StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
-import Game.Servers.Notifications.Shared as ServersNotifications
-import Game.Storyline.Missions.Actions as MissionsActions
 import Game.Storyline.Models as Story
 import Game.Storyline.Emails.Contents as Emails
-import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models as WM
 import Apps.Apps as Apps
 import Apps.Config as Apps
-import Apps.Reference exposing (Reference)
 
 
 type alias Config msg =

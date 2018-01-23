@@ -6,7 +6,6 @@ import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
 import Decoders.Client
 import Core.Error as Error
-import Game.Account.Models as Account
 import Game.Servers.Shared as Servers
 import Setup.Pages.PickLocation.Update as PickLocation
 import Setup.Pages.PickLocation.Messages as PickLocation

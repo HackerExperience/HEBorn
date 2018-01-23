@@ -1,9 +1,7 @@
 module Setup.View exposing (view)
 
-import Game.Models as Game
 import Html exposing (..)
 import Html.CssHelpers
-import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Setup.Resources exposing (..)
 import Setup.Config exposing (..)

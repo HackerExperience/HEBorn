@@ -1,6 +1,5 @@
 module Apps.LogViewer.Menu.Config exposing (..)
 
-import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Menu.Messages exposing (..)
 

@@ -2,7 +2,6 @@ module Apps.LogViewer.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Servers.Logs.Models as Logs
-import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Menu.Models as Menu
 
 

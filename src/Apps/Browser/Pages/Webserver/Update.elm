@@ -1,7 +1,6 @@
 module Apps.Browser.Pages.Webserver.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Apps.Browser.Config as BrowserConfig
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.Webserver.Config exposing (..)
 import Apps.Browser.Pages.Webserver.Messages exposing (..)

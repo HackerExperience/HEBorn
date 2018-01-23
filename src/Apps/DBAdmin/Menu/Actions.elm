@@ -3,7 +3,6 @@ module Apps.DBAdmin.Menu.Actions exposing (actionHandler)
 import Utils.React as React exposing (React)
 import Apps.DBAdmin.Menu.Config exposing (..)
 import Apps.DBAdmin.Models exposing (..)
-import Apps.DBAdmin.Messages as DBAdmin exposing (Msg(..))
 import Apps.DBAdmin.Menu.Messages exposing (MenuAction(..))
 
 

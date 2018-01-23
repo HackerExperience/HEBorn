@@ -1,7 +1,6 @@
 module Apps.Browser.Pages.Bank.Config exposing (Config)
 
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Meta.Types.Network as Network
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 
 

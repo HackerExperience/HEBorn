@@ -12,7 +12,6 @@ import Json.Decode as Decode
         , list
         , andThen
         )
-import Time exposing (Time)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom, hardcoded)
 import Game.Servers.Logs.Models exposing (..)
 

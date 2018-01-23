@@ -24,7 +24,6 @@ import Requests.Requests as Requests exposing (report_)
 import Requests.Topics as Topics
 import Requests.Types exposing (Code(..), FlagsSource)
 import Game.Servers.Shared exposing (CId)
-import Game.Servers.Processes.Models exposing (..)
 
 
 type alias Data =

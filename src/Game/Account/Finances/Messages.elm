@@ -7,9 +7,7 @@ module Game.Account.Finances.Messages
         )
 
 import Requests.Types exposing (ResponseType)
-import Game.Web.Models as Web
 import Game.Servers.Shared exposing (CId)
-import Game.Meta.Types.Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Account.Finances.Models exposing (..)
 import Game.Account.Finances.Shared exposing (..)

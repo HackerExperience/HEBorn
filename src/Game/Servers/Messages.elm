@@ -1,7 +1,6 @@
 module Game.Servers.Messages exposing (Msg(..), ServerMsg(..))
 
 import Json.Decode exposing (Value)
-import Requests.Types exposing (ResponseType)
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network
 import Game.Servers.Filesystem.Messages as Filesystem

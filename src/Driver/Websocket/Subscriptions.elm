@@ -3,7 +3,6 @@ module Driver.Websocket.Subscriptions exposing (subscriptions)
 import Dict exposing (Dict)
 import Phoenix
 import Driver.Websocket.Models exposing (..)
-import Driver.Websocket.Messages exposing (..)
 
 
 subscriptions : Model msg -> Sub msg

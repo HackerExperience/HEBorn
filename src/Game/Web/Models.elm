@@ -8,7 +8,6 @@ module Game.Web.Models
         )
 
 import Dict exposing (Dict)
-import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network
 

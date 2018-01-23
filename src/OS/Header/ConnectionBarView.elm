@@ -7,7 +7,6 @@ import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (boolAttr)
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network
-import Game.Account.Models as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Models as Servers exposing (Servers)
 import Game.Servers.Shared as Servers

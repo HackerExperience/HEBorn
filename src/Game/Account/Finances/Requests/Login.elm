@@ -6,13 +6,11 @@ module Game.Account.Finances.Requests.Login
 
 import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
-import Core.Error as Error
 import Decoders.Bank exposing (accountData)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Game.Servers.Shared exposing (CId)
 import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
-import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances exposing (BankLoginRequest)
 import Game.Account.Finances.Messages

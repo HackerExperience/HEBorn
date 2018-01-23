@@ -3,7 +3,6 @@ module Apps.TaskManager.Menu.Actions exposing (actionHandler)
 import Utils.React as React exposing (React)
 import Apps.TaskManager.Menu.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
-import Apps.TaskManager.Messages as TaskManager exposing (Msg)
 import Apps.TaskManager.Menu.Messages exposing (MenuAction(..))
 
 

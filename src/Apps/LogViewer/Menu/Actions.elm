@@ -13,7 +13,6 @@ import Utils.React as React exposing (React)
 import Game.Servers.Logs.Models as Logs
 import Apps.LogViewer.Menu.Config exposing (..)
 import Apps.LogViewer.Models exposing (..)
-import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 

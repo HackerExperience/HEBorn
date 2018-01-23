@@ -5,7 +5,6 @@ import Json.Decode as Decode exposing (Value)
 import Decoders.Servers
 import Game.Meta.Types.Network as Network
 import Game.Account.Bounces.Shared as Bounces
-import Game.Meta.Models as Meta
 import Game.Servers.Notifications.Messages as Notifications
 import Game.Servers.Notifications.Update as Notifications
 import Game.Servers.Filesystem.Messages as Filesystem

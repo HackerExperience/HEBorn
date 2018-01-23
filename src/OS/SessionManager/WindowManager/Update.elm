@@ -7,7 +7,6 @@ import Draggable.Events as Draggable
 import Apps.Update as Apps
 import Apps.Messages as Apps
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Storyline.Missions.Actions exposing (Action(GoApp))
 import OS.SessionManager.WindowManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (Msg(..))

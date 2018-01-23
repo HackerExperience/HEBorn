@@ -1,7 +1,6 @@
 module Game.Servers.Hardware.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
 import Game.Servers.Hardware.Requests.UpdateMotherboard as UpdateMotherboard exposing (updateMotherboardRequest)
