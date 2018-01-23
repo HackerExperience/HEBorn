@@ -47,12 +47,7 @@ initialModel : String -> List AudioData -> Model
 initialModel id playlist =
     let
         ( now, next ) =
-            case playlist of
-                head :: tail ->
-                    ( Just head, tail )
-
-                [] ->
-                    ( Nothing, [] )
+            splitPlayList playlist
     in
         { playerId = "audio-" ++ id
         , now = now
@@ -60,3 +55,27 @@ initialModel id playlist =
         , next = next
         , currentTime = 0
         }
+
+
+setPlaylist : List AudioData -> Model -> Model
+setPlaylist playlist model =
+    let
+        ( now, next ) =
+            splitPlayList playlist
+    in
+        { model
+            | now = now
+            , prev = []
+            , next = next
+            , currentTime = 0
+        }
+
+
+splitPlayList : List AudioData -> ( Maybe AudioData, List AudioData )
+splitPlayList playlist =
+    case playlist of
+        head :: tail ->
+            ( Just head, tail )
+
+        [] ->
+            ( Nothing, [] )

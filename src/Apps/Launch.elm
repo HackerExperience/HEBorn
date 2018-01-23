@@ -16,6 +16,8 @@ import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
 import Apps.BounceManager.Models as BounceManager
 import Apps.Finance.Models as Finance
+import Apps.Hebamp.Launch as Hebamp
+import Apps.Hebamp.Messages as Hebamp
 import Apps.Hebamp.Models as Hebamp
 import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
@@ -94,9 +96,25 @@ launch config ({ windowId } as reference) maybeParams app =
                 |> flip (,) React.none
 
         MusicApp ->
-            Hebamp.initialModel windowId []
-                |> MusicModel
-                |> flip (,) React.none
+            let
+                config_ =
+                    hebampConfig config
+
+                params =
+                    case maybeParams of
+                        Just (MusicParams params) ->
+                            Just params
+
+                        _ ->
+                            Nothing
+
+                ( model, react ) =
+                    Hebamp.launch config_ params reference
+
+                model_ =
+                    MusicModel model
+            in
+                ( model_, react )
 
         CtrlPanelApp ->
             CtrlPanel.initialModel
@@ -185,3 +203,6 @@ launchEvent context params =
 
         FloatingHeadsParams params ->
             FloatingHeadsMsg <| FloatingHeads.LaunchApp context params
+
+        MusicParams params ->
+            MusicMsg <| Hebamp.LaunchApp context params

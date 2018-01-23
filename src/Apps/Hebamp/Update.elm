@@ -1,11 +1,12 @@
 module Apps.Hebamp.Update exposing (update)
 
-import Utils.Ports.Audio exposing (..)
-import Utils.React as React exposing (React)
 import Time exposing (Time)
+import Utils.React as React exposing (React)
+import Utils.Ports.Audio exposing (..)
 import Apps.Hebamp.Config exposing (..)
-import Apps.Hebamp.Models exposing (Model)
+import Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Messages as Hebamp exposing (Msg(..))
+import Apps.Hebamp.Shared exposing (..)
 
 
 type alias UpdateResponse msg =
@@ -34,6 +35,9 @@ update config msg model =
 
         Close ->
             onClose config model
+
+        LaunchApp _ params ->
+            onLaunchApp config params model
 
 
 onTimeUpdate : String -> Float -> Model -> UpdateResponse msg
@@ -80,3 +84,14 @@ onSetCurrentTime time model =
             React.cmd <| setCurrentTime ( model.playerId, time )
     in
         ( model, react )
+
+
+onLaunchApp : Config msg -> Params -> Model -> UpdateResponse msg
+onLaunchApp config params model =
+    case params of
+        OpenPlaylist playlist ->
+            let
+                model_ =
+                    setPlaylist playlist model
+            in
+                ( model_, React.none )

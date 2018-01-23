@@ -186,6 +186,7 @@ browserConfig config =
             |> Tuple.second
             |> Servers.getEndpoints
     , onNewApp = config.onNewApp
+    , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
