@@ -1,9 +1,6 @@
 module Apps.ServersGears.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Models as GameModels
-import Game.Servers.Models as Servers
-import Game.Servers.Hardware.Models as Hardware
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Apps.ServersGears.Config exposing (..)
 import Apps.ServersGears.Messages exposing (..)

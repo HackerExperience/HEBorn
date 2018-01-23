@@ -2,7 +2,6 @@ module Game.Web.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Core.Error as Error
-import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Game.Web.Config exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)

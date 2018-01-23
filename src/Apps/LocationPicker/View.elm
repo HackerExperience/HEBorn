@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.CssHelpers
 import Native.Untouchable
 import Apps.LocationPicker.Config exposing (..)
-import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
 

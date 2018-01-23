@@ -1,10 +1,6 @@
 module Apps.Browser.Pages.Bank.Messages exposing (Msg(..))
 
-import Apps.Browser.Pages.Bank.Models exposing (..)
-import Game.Account.Finances.Models exposing (AccountNumber)
 import Game.Account.Finances.Shared exposing (BankAccountData)
-import Game.Meta.Types.Network exposing (NIP)
-import Requests.Types exposing (ResponseType)
 
 
 type Msg

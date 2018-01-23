@@ -5,7 +5,6 @@ import Html.Events exposing (onClick)
 import Html.Attributes exposing (disabled)
 import Html.CssHelpers
 import Native.Untouchable
-import Game.Models as Game
 import Setup.Resources exposing (..)
 import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.Helpers exposing (withHeader)

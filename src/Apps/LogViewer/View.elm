@@ -13,7 +13,6 @@ import UI.Entries.FilterHeader exposing (filterHeader)
 import UI.Inlines.Networking as Inlines exposing (user, addr, file)
 import UI.Entries.Toogable exposing (toogableEntry)
 import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
-import Game.Servers.Models as Servers
 import Game.Servers.Logs.Models as Logs exposing (Format(..))
 import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Messages exposing (Msg(..))

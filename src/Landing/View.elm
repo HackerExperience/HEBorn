@@ -5,7 +5,6 @@ import Html.CssHelpers
 import Landing.Login.View as Login
 import Landing.SignUp.View as SignUp
 import Landing.Config exposing (..)
-import Landing.Messages exposing (..)
 import Landing.Models exposing (..)
 import Landing.Resources exposing (..)
 

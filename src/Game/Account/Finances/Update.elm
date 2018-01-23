@@ -1,9 +1,7 @@
 module Game.Account.Finances.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
-import Game.Web.Models as Web
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Account.Finances.Config exposing (..)
 import Game.Account.Finances.Models exposing (..)

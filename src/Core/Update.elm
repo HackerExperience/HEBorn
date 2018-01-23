@@ -5,7 +5,6 @@ import Events.Handler as Events
 import Landing.Messages as Landing
 import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
-import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
 import Game.Messages as Game
 import Game.Models as Game
@@ -21,7 +20,6 @@ import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.Messages as SM
 import Apps.Messages as Apps
 import Apps.TaskManager.Messages as TaskManager
-import Core.Error as Error
 import Core.Config exposing (..)
 import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)

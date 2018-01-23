@@ -1,6 +1,5 @@
 module Game.Account.Finances.Config exposing (Config)
 
-import Time exposing (Time)
 import Core.Flags as Core
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Account.Models as Account

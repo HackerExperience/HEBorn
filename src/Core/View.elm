@@ -7,7 +7,6 @@ import Core.Messages exposing (..)
 import Core.Models exposing (..)
 import Game.Models as Game
 import Game.Account.Models as Account
-import Game.Meta.Models as Meta
 import OS.View as OS
 import Landing.View as Landing
 import Setup.View as Setup

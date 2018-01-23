@@ -30,7 +30,6 @@ import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
 import Apps.BackFlix.View as BackFlix
 import Apps.FloatingHeads.View as FloatingHeads
-import Apps.FloatingHeads.Messages as FloatingHeadsMessages
 
 
 view : Config msg -> AppModel -> Html msg

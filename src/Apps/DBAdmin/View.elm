@@ -3,8 +3,6 @@ module Apps.DBAdmin.View exposing (view)
 import Dict as Dict exposing (Dict)
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Models as Game
-import Game.Account.Models as Account
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)

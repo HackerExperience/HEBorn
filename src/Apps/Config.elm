@@ -20,7 +20,6 @@ import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Contents as Emails
 import Apps.Apps as Apps
 import Apps.Messages exposing (..)
-import Apps.Reference exposing (Reference)
 import Apps.Bug.Config as Bug
 import Apps.Email.Config as Email
 import Apps.Hebamp.Config as Hebamp

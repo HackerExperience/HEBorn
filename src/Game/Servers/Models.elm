@@ -2,7 +2,6 @@ module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
-import Core.Error as Error
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Models as Filesystem

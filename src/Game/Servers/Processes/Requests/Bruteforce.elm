@@ -11,7 +11,6 @@ import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
-import Game.Servers.Processes.Models exposing (..)
 
 
 -- not a bool because we'll threat errors

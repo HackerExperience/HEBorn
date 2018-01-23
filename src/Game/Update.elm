@@ -5,7 +5,6 @@ import Dict exposing (Dict)
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Core.Error as Error
-import Driver.Websocket.Channels exposing (Channel(ServerChannel))
 import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account

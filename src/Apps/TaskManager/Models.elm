@@ -1,7 +1,6 @@
 module Apps.TaskManager.Models exposing (..)
 
 import Apps.TaskManager.Menu.Models as Menu
-import Game.Servers.Models as Servers
 import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
 

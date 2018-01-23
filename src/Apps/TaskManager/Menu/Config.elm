@@ -1,6 +1,5 @@
 module Apps.TaskManager.Menu.Config exposing (..)
 
-import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Menu.Messages exposing (..)
 

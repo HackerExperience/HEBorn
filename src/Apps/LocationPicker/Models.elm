@@ -2,7 +2,6 @@ module Apps.LocationPicker.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates, mapInit)
 import Utils.Ports.Geolocation exposing (geoLocReq)
-import Utils.React as React
 
 
 type alias Model =

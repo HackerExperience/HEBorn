@@ -15,7 +15,6 @@ import OS.SessionManager.WindowManager.Update as WM
 import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.WindowManager.Messages as WM
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Account.Models as Account
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers
 import Apps.Messages as Apps

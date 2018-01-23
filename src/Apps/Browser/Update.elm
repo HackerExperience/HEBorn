@@ -2,7 +2,6 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.React as React exposing (React)
-import ContextMenu exposing (ContextMenu)
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Shared as Finances
 import Game.Servers.Models as Servers
@@ -12,7 +11,6 @@ import Game.Web.Types as Web
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
-import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank

@@ -1,6 +1,5 @@
 module Game.Servers.Filesystem.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 

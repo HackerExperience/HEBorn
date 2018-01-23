@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
-import Apps.Browser.Config as BrowserConfig
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Config exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)

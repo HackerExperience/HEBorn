@@ -1,12 +1,9 @@
 module Apps.FloatingHeads.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Game.Servers.Models as Servers
-import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
-import Apps.FloatingHeads.Messages exposing (..)
 
 
 type alias LaunchResponse msg =

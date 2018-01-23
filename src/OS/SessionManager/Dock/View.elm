@@ -14,8 +14,6 @@ import OS.SessionManager.Dock.Resources as Res
 import OS.SessionManager.WindowManager.Models as WM
 import Apps.Models as Apps
 import Apps.Apps as Apps
-import Game.Models as Game
-import Game.Account.Models as Account
 
 
 -- this module still needs a refactor to make its code more maintainable

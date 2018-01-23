@@ -9,8 +9,6 @@ import Game.Storyline.Emails.Contents.Update as Contents
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
-import Utils.Html.Events exposing (onClickMe, onKeyDown)
-import Apps.Reference exposing (Reference)
 
 
 type alias UpdateResponse msg =

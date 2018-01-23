@@ -3,11 +3,8 @@ module Apps.ServersGears.View exposing (view)
 import Dict
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (disabled)
 import Html.Lazy exposing (lazy, lazy2)
 import Html.CssHelpers
-import Utils.Html.Events exposing (onClickMe)
-import Game.Models as GameModels
 import Game.Inventory.Models as Inventory
 import Game.Inventory.Shared as Inventory
 import Game.Servers.Models as Servers

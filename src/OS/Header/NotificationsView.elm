@@ -6,7 +6,6 @@ import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
 import Game.Meta.Types.Notifications as Notifications
-import Game.Servers.Filesystem.Shared as Filesystem
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)

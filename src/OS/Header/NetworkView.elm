@@ -6,7 +6,6 @@ import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (boolAttr)
 import Utils.List as List
 import Game.Meta.Types.Network as Network
-import Game.Servers.Models as Servers
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)

@@ -1,7 +1,6 @@
 module Apps.Email.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Storyline.Emails.Models as Emails exposing (Person)
 import Apps.Email.Config exposing (..)
 import Apps.Email.Models exposing (..)
 import Apps.Email.Messages as Email exposing (Msg(..))

@@ -2,7 +2,6 @@ module Apps.Browser.Menu.Actions exposing (actionHandler)
 
 import Utils.React as React exposing (React)
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Messages exposing (Msg)
 import Apps.Browser.Menu.Config exposing (..)
 import Apps.Browser.Menu.Messages exposing (MenuAction(..))
 

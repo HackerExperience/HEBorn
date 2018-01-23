@@ -2,7 +2,6 @@ module Setup.Pages.Mainframe.Update exposing (update)
 
 import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
-import Game.Account.Models as Account
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)

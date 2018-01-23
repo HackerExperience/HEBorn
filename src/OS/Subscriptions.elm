@@ -2,7 +2,6 @@ module OS.Subscriptions exposing (subscriptions)
 
 import OS.Config exposing (..)
 import OS.Models exposing (..)
-import OS.Messages exposing (..)
 import OS.SessionManager.Models as SessionManager
 import OS.SessionManager.Subscriptions as SessionManager
 

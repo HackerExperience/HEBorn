@@ -4,7 +4,6 @@ import Json.Decode as Decode exposing (Value)
 import Utils.React as React exposing (React)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
-import Game.Models as Game
 import Setup.Pages.PickLocation.Config exposing (..)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)

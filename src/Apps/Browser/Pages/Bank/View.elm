@@ -4,12 +4,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
-import Utils.Html.Events exposing (onKeyDown)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Account.Finances.Models exposing (AccountNumber)
 import Game.Account.Finances.Shared exposing (toMoney)
 import Game.Meta.Types.Network as Network
 

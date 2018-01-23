@@ -8,8 +8,6 @@ import Game.Meta.Types.Components as Components
 import Game.Meta.Types.Components.Type exposing (Type(..))
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Network.Connections as Connections
-import Game.Servers.Models as Servers
-import Game.Servers.Hardware.Models as Hardware
 
 
 type alias Model =

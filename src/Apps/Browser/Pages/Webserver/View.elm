@@ -5,7 +5,6 @@ import Html.CssHelpers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
 import Apps.Apps as Apps
-import Apps.Browser.Config as BrowserConfig
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Webserver.Config exposing (Config)
 import Apps.Browser.Pages.Webserver.Messages exposing (Msg(..))
