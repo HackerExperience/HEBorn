@@ -62,6 +62,7 @@ type alias Config msg =
     , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onDeleteFile : StorageId -> Filesystem.Id -> msg
     , onUpdateLog : Logs.ID -> String -> msg
     , onEncryptLog : Logs.ID -> msg
     , onHideLog : Logs.ID -> msg
@@ -120,11 +121,14 @@ explorerConfig : Config msg -> Explorer.Config msg
 explorerConfig config =
     { toMsg = ExplorerMsg >> config.toMsg
     , batchMsg = config.batchMsg
-    , activeServer = Tuple.second config.activeServer
+    , activeServer =
+        config.activeServer
+            |> Tuple.second
     , onNewTextFile = config.onNewTextFile
     , onNewDir = config.onNewDir
     , onMoveFile = config.onMoveFile
     , onRenameFile = config.onRenameFile
+    , onDeleteFile = config.onDeleteFile
     }
 
 

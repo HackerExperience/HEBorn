@@ -315,6 +315,8 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         \cid stg -> Filesystem.HandleMove >>> filesystem cid stg
     , onRenameFile =
         \cid stg -> Filesystem.HandleRename >>> filesystem cid stg
+    , onDeleteFile =
+        \cid stg -> Filesystem.HandleDelete >> filesystem cid stg
     , onUpdateLog =
         \cid -> Logs.HandleUpdateContent >>> logs cid
     , onEncryptLog =

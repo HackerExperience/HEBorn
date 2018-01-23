@@ -15,6 +15,7 @@ type alias Config msg =
     , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
     , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
     , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
+    , onDeleteFile : StorageId -> Filesystem.Id -> msg
     }
 
 
@@ -23,4 +24,9 @@ menuConfig config =
     { toMsg = MenuMsg >> config.toMsg
     , activeServer = config.activeServer
     , batchMsg = config.batchMsg
+    , onNewTextFile = config.onNewTextFile
+    , onNewDir = config.onNewDir
+    , onMoveFile = config.onMoveFile
+    , onRenameFile = config.onRenameFile
+    , onDeleteFile = config.onDeleteFile
     }
