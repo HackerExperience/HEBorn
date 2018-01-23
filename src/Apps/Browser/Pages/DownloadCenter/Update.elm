@@ -1,8 +1,6 @@
 module Apps.Browser.Pages.DownloadCenter.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Pages.DownloadCenter.Config exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
@@ -10,22 +8,21 @@ import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
 update :
     Config msg
-    -> Game.Data
     -> Msg
     -> Model
     -> UpdateResponse msg
-update config data msg model =
+update config msg model =
     case msg of
         Cracked target passwrd ->
             if (model.toolkit.target == target) then
                 onUpdatePasswordField passwrd model
             else
-                Update.fromModel model
+                ( model, React.none )
 
         LoginFailed ->
             onLoginFailed model
@@ -39,16 +36,12 @@ update config data msg model =
 
 onTogglePanel : Bool -> Model -> UpdateResponse msg
 onTogglePanel value model =
-    model
-        |> setShowingPanel value
-        |> Update.fromModel
+    ( setShowingPanel value model, React.none )
 
 
 onLoginFailed : Model -> UpdateResponse msg
 onLoginFailed model =
-    model
-        |> setLoginFailed True
-        |> Update.fromModel
+    ( setLoginFailed True model, React.none )
 
 
 onUpdatePasswordField : String -> Model -> UpdateResponse msg
@@ -57,4 +50,4 @@ onUpdatePasswordField newPassword model =
         |> HackingToolkit.setPassword newPassword
         |> flip setToolkit model
         |> setLoginFailed False
-        |> Update.fromModel
+        |> flip (,) React.none

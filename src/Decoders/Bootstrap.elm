@@ -8,7 +8,6 @@ import Game.Servers.Shared as Servers
 import Game.Models as Game
 import Decoders.Servers
 import Decoders.Storyline
-import Decoders.Game
 
 
 -- this is the outdated bootstrap
@@ -54,9 +53,9 @@ toModel game got =
             game
                 |> Game.getWeb
 
-        config =
+        flags =
             game
-                |> Game.getConfig
+                |> Game.getFlags
     in
         Game.Model
             account
@@ -64,7 +63,7 @@ toModel game got =
             meta
             got.story
             web
-            config
+            flags
 
 
 joinIndexes : ServerIndex -> GenericServers

@@ -1,42 +1,32 @@
 module OS.Update exposing (update)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import OS.Header.Messages as Header
 import OS.Header.Update as Header
+import OS.Config exposing (..)
 import OS.Messages exposing (..)
 import OS.Models exposing (..)
-import OS.Menu.Messages as Menu
-import OS.Menu.Update as Menu
-import OS.Menu.Actions as Menu
 import OS.SessionManager.Messages as SessionManager
 import OS.SessionManager.Update as SessionManager
 import OS.Toasts.Messages as Toasts
 import OS.Toasts.Update as Toasts
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         SessionManagerMsg msg ->
-            onSessionManagerMsg data msg model
+            onSessionManagerMsg config msg model
 
         HeaderMsg msg ->
-            onHeaderMsg data msg model
+            onHeaderMsg config msg model
 
         ToastsMsg msg ->
-            onToastsMsg data msg model
-
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
+            onToastsMsg config msg model
 
 
 
@@ -44,62 +34,56 @@ update data msg model =
 
 
 onSessionManagerMsg :
-    Game.Data
+    Config msg
     -> SessionManager.Msg
     -> Model
-    -> UpdateResponse
-onSessionManagerMsg data msg model =
-    Update.child
-        { get = .session
-        , set = (\session model -> { model | session = session })
-        , toMsg = SessionManagerMsg
-        , update = (SessionManager.update data)
-        }
-        msg
-        model
+    -> UpdateResponse msg
+onSessionManagerMsg config msg model =
+    let
+        config_ =
+            smConfig config
+
+        ( sm, react ) =
+            SessionManager.update config_ msg <| getSessionManager model
+
+        model_ =
+            setSessionManager sm model
+    in
+        ( model_, react )
 
 
 onHeaderMsg :
-    Game.Data
+    Config msg
     -> Header.Msg
     -> Model
-    -> UpdateResponse
-onHeaderMsg data msg model =
-    Update.child
-        { get = .header
-        , set = (\header model -> { model | header = header })
-        , toMsg = HeaderMsg
-        , update = (Header.update data)
-        }
-        msg
-        model
-
-
-onToastsMsg : Game.Data -> Toasts.Msg -> Model -> UpdateResponse
-onToastsMsg data msg model =
-    Update.child
-        { get = .toasts
-        , set = (\toasts model -> { model | toasts = toasts })
-        , toMsg = ToastsMsg
-        , update = (Toasts.update data)
-        }
-        msg
-        model
-
-
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+    -> UpdateResponse msg
+onHeaderMsg config msg model =
     let
-        ( menu_, menu_cmd, dispatch_ ) =
-            Menu.update data msg model.menu
+        config_ =
+            smConfig config
 
-        ( modelHeader, _, _ ) =
-            onHeaderMsg data Header.CheckMenus model
-
-        cmd_ =
-            Cmd.map MenuMsg menu_cmd
+        ( header, react ) =
+            Header.update
+                (headerConfig config)
+                msg
+                (getHeader model)
 
         model_ =
-            { modelHeader | menu = menu_ }
+            setHeader header model
     in
-        ( model_, cmd_, dispatch_ )
+        ( model_, react )
+
+
+onToastsMsg : Config msg -> Toasts.Msg -> Model -> UpdateResponse msg
+onToastsMsg config msg model =
+    let
+        config_ =
+            toastsConfig config
+
+        ( toasts, react ) =
+            Toasts.update config_ msg model.toasts
+
+        model_ =
+            { model | toasts = toasts }
+    in
+        ( model_, react )

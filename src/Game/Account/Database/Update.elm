@@ -1,20 +1,18 @@
 module Game.Account.Database.Update exposing (update)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Events.Account.PasswordAcquired as PasswordAcquired
+import Utils.React as React exposing (React)
+import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
+import Game.Account.Database.Config exposing (..)
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
-import Game.Models as Game
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         HandlePasswordAcquired data ->
             handlePasswordAcquired data model
@@ -29,7 +27,10 @@ update game msg model =
 {-| Saves password for that server, inserts a new server entry
 if none is found.
 -}
-handlePasswordAcquired : PasswordAcquired.Data -> Model -> UpdateResponse
+handlePasswordAcquired :
+    ServerPasswordAcquired.Data
+    -> Model
+    -> UpdateResponse msg
 handlePasswordAcquired data model =
     let
         servers =
@@ -42,26 +43,26 @@ handlePasswordAcquired data model =
                 |> flip (insertServer data.nip) servers
                 |> flip setHackedServers model
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 onHandleDatabaseAccountRemoved :
     HackedBankAccountID
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onHandleDatabaseAccountRemoved id model =
     let
         model_ =
             { model | bankAccounts = removeBankAccount id model.bankAccounts }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
 onHandleDatabaseAccountUpdated :
     HackedBankAccountID
     -> HackedBankAccount
     -> Model
-    -> UpdateResponse
+    -> UpdateResponse msg
 onHandleDatabaseAccountUpdated id account model =
     let
         model_ =
@@ -69,4 +70,4 @@ onHandleDatabaseAccountUpdated id account model =
                 | bankAccounts = insertBankAccount id account model.bankAccounts
             }
     in
-        Update.fromModel model_
+        ( model_, React.none )

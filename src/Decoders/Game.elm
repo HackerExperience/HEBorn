@@ -7,7 +7,6 @@ import Json.Decode as Decode
         , map
         , andThen
         , oneOf
-        , succeed
         , string
         , field
         , list
@@ -32,7 +31,6 @@ import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
 import Decoders.Account
 import Decoders.Inventory
-import Decoders.Storyline
 import Decoders.Storyline
 import Decoders.Servers
 import Decoders.Network
@@ -77,8 +75,8 @@ bootstrap game =
         |> hardcoded game.meta
         |> required "storyline" Decoders.Storyline.story
         |> hardcoded game.web
-        |> hardcoded game.config
-        |> hardcoded game.backfeed
+        |> hardcoded game.flags
+        |> hardcoded game.backflix
         |> map (,)
         |> andThen (\done -> map done <| servers)
         |> map (uncurry insertServers)

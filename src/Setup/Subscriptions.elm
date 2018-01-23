@@ -2,16 +2,15 @@ module Setup.Subscriptions exposing (subscriptions)
 
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
-import Setup.Models exposing (..)
-import Setup.Pages.Configs as Configs
+import Setup.Config exposing (..)
 import Setup.Pages.PickLocation.Subscriptions as PickLocation
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions : Config msg -> Model -> Sub msg
+subscriptions config model =
     case model.page of
         Just (PickLocationModel model) ->
-            PickLocation.subscriptions Configs.pickLocation model
+            PickLocation.subscriptions (pickLocationConfig config) model
 
         _ ->
             Sub.none

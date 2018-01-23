@@ -6,7 +6,7 @@ module Core.Models
         , SetupModel
         , PlayModel
         , initialModel
-        , getConfig
+        , getFlags
         , connect
         , login
         , logout
@@ -14,22 +14,21 @@ module Core.Models
         , setupToPlay
         )
 
+import Landing.Models as Landing
+import Driver.Websocket.Launch as Ws
 import Driver.Websocket.Models as Ws
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Dummy as Game
-import OS.Models as OS
-import Utils.Update as Update
-import Landing.Models as Landing
 import Setup.Models as Setup
-import Core.Config as Config exposing (Config)
+import OS.Models as OS
+import Core.Flags as Flags exposing (Flags)
 import Core.Messages exposing (..)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 type alias Model =
     { state : State
-    , config : Config
+    , flags : Flags
     , seed : Int
     , windowLoaded : Bool
     }
@@ -44,20 +43,20 @@ type State
 
 type alias HomeModel =
     { landing : Landing.Model
-    , websocket : Maybe Ws.Model
+    , websocket : Maybe (Ws.Model Msg)
     , connecting : Maybe Connecting
     }
 
 
 type alias SetupModel =
-    { websocket : Ws.Model
+    { websocket : Ws.Model Msg
     , game : Game.Model
     , setup : Setup.Model
     }
 
 
 type alias PlayModel =
-    { websocket : Ws.Model
+    { websocket : Ws.Model Msg
     , game : Game.Model
     , os : OS.Model
     }
@@ -70,17 +69,17 @@ type alias Connecting =
     }
 
 
-initialModel : Int -> Config -> Model
-initialModel seed config =
+initialModel : Int -> Flags -> Model
+initialModel seed flags =
     { state = Home initialHome
-    , config = config
+    , flags = flags
     , seed = seed
     , windowLoaded = False
     }
 
 
 connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model
-connect id username token ({ state, config } as model) =
+connect id username token ({ state, flags } as model) =
     case state of
         Home home ->
             let
@@ -88,7 +87,7 @@ connect id username token ({ state, config } as model) =
                     Just <| Connecting id username token
 
                 websocket =
-                    Just <| Ws.initialModel config.apiWsUrl token "web1"
+                    Just <| Ws.launch WebsocketMsg flags.apiWsUrl token "web1"
 
                 home_ =
                     { home | websocket = websocket, connecting = connecting }
@@ -105,8 +104,8 @@ connect id username token ({ state, config } as model) =
             model
 
 
-login : Model -> ( Model, Cmd Msg, Dispatch )
-login ({ state, config } as model) =
+login : Model -> ( Model, Cmd Msg )
+login ({ state, flags } as model) =
     case state of
         Home ({ connecting, websocket } as home) ->
             case connecting of
@@ -115,26 +114,29 @@ login ({ state, config } as model) =
                     let
                         websocket_ =
                             Maybe.withDefault
-                                (Ws.initialModel config.apiWsUrl token "web1")
+                                (Ws.launch WebsocketMsg
+                                    flags.apiWsUrl
+                                    token
+                                    "web1"
+                                )
                                 websocket
 
                         game =
-                            initialGame connecting config
+                            initialGame connecting flags
 
-                        ( state_, cmd, dispatch ) =
+                        ( state_, cmd ) =
                             initialSetup websocket_ game
-                                |> Update.mapModel Setup
 
                         model_ =
-                            { model | state = state_ }
+                            { model | state = Setup state_ }
                     in
-                        ( model_, cmd, dispatch )
+                        ( model_, cmd )
 
                 Nothing ->
-                    ( model, Cmd.none, Dispatch.none )
+                    ( model, Cmd.none )
 
         _ ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, Cmd.none )
 
 
 logout : Model -> Model
@@ -147,26 +149,26 @@ crash code message model =
     { model | state = Panic code message }
 
 
-getConfig : Model -> Config
-getConfig =
-    .config
+getFlags : Model -> Flags
+getFlags =
+    .flags
 
 
-setupToPlay : State -> ( State, Cmd Msg, Dispatch )
+setupToPlay : State -> ( State, Cmd Msg )
 setupToPlay state =
     case state of
         Setup { websocket, game } ->
             let
-                ( play, cmd, dispatch ) =
+                ( play, cmd ) =
                     initialPlay websocket game
 
                 state_ =
                     Play play
             in
-                ( state_, cmd, dispatch )
+                ( state_, cmd )
 
         _ ->
-            ( state, Cmd.none, Dispatch.none )
+            ( state, Cmd.none )
 
 
 
@@ -181,25 +183,17 @@ initialHome =
     }
 
 
-initialSetup : Ws.Model -> Game.Model -> ( SetupModel, Cmd Msg, Dispatch )
+initialSetup : Ws.Model Msg -> Game.Model -> ( SetupModel, Cmd Msg )
 initialSetup ws game =
-    let
-        ( setup, cmd, msg ) =
-            Setup.initialModel game
-
-        cmd_ =
-            Cmd.map SetupMsg cmd
-
-        setup_ =
-            { websocket = ws
-            , game = game
-            , setup = setup
-            }
-    in
-        ( setup_, cmd_, msg )
+    ( { websocket = ws
+      , game = game
+      , setup = Setup.initialModel
+      }
+    , Cmd.none
+    )
 
 
-initialPlay : Ws.Model -> Game.Model -> ( PlayModel, Cmd Msg, Dispatch )
+initialPlay : Ws.Model Msg -> Game.Model -> ( PlayModel, Cmd Msg )
 initialPlay ws game =
     let
         play_ =
@@ -208,9 +202,9 @@ initialPlay ws game =
             , os = OS.initialModel
             }
     in
-        ( play_, Cmd.none, Dispatch.none )
+        ( play_, Cmd.none )
 
 
-initialGame : Connecting -> Config -> Game.Model
-initialGame { id, username, token } config =
-    Game.dummy id username token config
+initialGame : Connecting -> Flags -> Game.Model
+initialGame { id, username, token } flags =
+    Game.dummy id username token flags

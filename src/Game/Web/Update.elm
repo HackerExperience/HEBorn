@@ -1,11 +1,9 @@
 module Game.Web.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Websocket as Ws
-import Core.Dispatch.Servers as Servers
+import Utils.React as React exposing (React)
 import Core.Error as Error
 import Driver.Websocket.Channels exposing (Channel(ServerChannel))
-import Game.Models as Game
+import Game.Web.Config exposing (..)
 import Game.Web.Messages exposing (..)
 import Game.Web.Types exposing (..)
 import Game.Web.Requests as Requests
@@ -18,75 +16,74 @@ import Game.Meta.Types.Network as Network
 import Game.Meta.Types.Requester exposing (Requester)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Login nip ip password data ->
-            onLogin game nip ip password data model
+            onLogin config nip ip password data model
 
         Request data ->
-            updateRequest game (Requests.receive data) model
+            updateRequest config (Requests.receive data) model
 
         FetchUrl url networkId cid requester ->
-            let
-                cmd =
-                    DNS.request url networkId cid requester game
-            in
-                ( model, cmd, Dispatch.none )
+            onFetchUrl config url networkId cid requester model
 
         JoinedServer cid ->
-            onJoinedServer game cid model
+            onJoinedServer config cid model
 
         HandleJoinServerFailed cid ->
-            handleJoinFailed game cid model
+            handleJoinFailed config cid model
 
 
 
 -- internals
 
 
+onFetchUrl :
+    Config msg
+    -> Url
+    -> Network.ID
+    -> Servers.CId
+    -> Requester
+    -> Model
+    -> UpdateResponse msg
+onFetchUrl config url networkId cid requester model =
+    ( model
+    , DNS.request url networkId cid requester config
+        |> Cmd.map config.toMsg
+        |> React.cmd
+    )
+
+
 updateRequest :
-    Game.Model
+    Config msg
     -> Maybe Requests.Response
     -> Model
-    -> UpdateResponse
-updateRequest game response model =
+    -> UpdateResponse msg
+updateRequest config response model =
     case response of
         Just (Requests.DNS requester response) ->
-            onDNS game requester response model
+            ( model, React.none )
 
         Nothing ->
-            ( model, Cmd.none, Dispatch.none )
-
-
-{-| Reports back the site information to the page.
--}
-onDNS : Game.Model -> Requester -> Response -> Model -> UpdateResponse
-onDNS game requester response model =
-    let
-        dispatch =
-            response
-                |> Servers.FetchedUrl requester
-                |> Dispatch.servers
-    in
-        ( model, Cmd.none, dispatch )
+            ( model, React.none )
 
 
 {-| Stores page reference and tries to login on server.
 -}
 onLogin :
-    Game.Model
+    Config msg
     -> Network.NIP
     -> Network.IP
     -> String
     -> Requester
     -> Model
-    -> UpdateResponse
-onLogin game nip remoteIp password requester model =
+    -> UpdateResponse msg
+onLogin config nip remoteIp password requester model =
     let
         gatewayIp =
             Network.getIp nip
@@ -103,23 +100,19 @@ onLogin game nip remoteIp password requester model =
                 , ( "password", Encode.string password )
                 ]
 
-        dispatch =
-            Dispatch.websocket <|
-                Ws.Join (ServerChannel remoteCid) (Just payload)
-
         model_ =
             startLoading remoteNip requester model
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, React.msg <| config.onLogin remoteCid (Just payload) )
 
 
 {-| Sets endpoint
 -}
-onJoinedServer : Game.Model -> Servers.CId -> Model -> UpdateResponse
-onJoinedServer game cid model =
+onJoinedServer : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+onJoinedServer config cid model =
     let
         servers =
-            Game.getServers game
+            config.servers
 
         nip =
             case (Servers.get cid servers) of
@@ -137,25 +130,24 @@ onJoinedServer game cid model =
         serverCid =
             Maybe.map (.sessionId >> Servers.fromKey) maybeRequester
 
-        dispatch =
+        react =
             case serverCid of
                 Just serverCid ->
-                    Dispatch.server serverCid <|
-                        Servers.SetEndpoint (Just cid)
+                    React.msg <| config.onJoinedServer serverCid cid
 
                 Nothing ->
-                    Dispatch.none
+                    React.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, react )
 
 
 {-| Reports failure back to the loading page.
 -}
-handleJoinFailed : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleJoinFailed game cid model =
+handleJoinFailed : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+handleJoinFailed config cid model =
     let
         nip =
-            case Servers.get cid (Game.getServers game) of
+            case Servers.get cid config.servers of
                 Just server ->
                     Servers.getActiveNIP server
 
@@ -167,13 +159,12 @@ handleJoinFailed game cid model =
         ( maybeRequester, model_ ) =
             finishLoading nip model
 
-        dispatch =
+        react =
             case maybeRequester of
                 Just requester ->
-                    Servers.FailLogin requester
-                        |> Dispatch.servers
+                    React.msg <| config.onJoinFailed requester
 
                 Nothing ->
-                    Dispatch.none
+                    React.none
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, react )

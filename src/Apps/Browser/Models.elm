@@ -3,7 +3,7 @@ module Apps.Browser.Models exposing (..)
 import Dict exposing (Dict)
 import Utils.List as List
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Types as Web
 import Apps.Reference exposing (..)
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
@@ -303,7 +303,7 @@ goTab nTab model =
                     model.rightTabs
 
             newLeft =
-                model.leftTabs ++ [ model.nowTab ] ++ wL
+                model.leftTabs ++ (model.nowTab :: wL)
         in
             { model
                 | leftTabs = newLeft
@@ -321,7 +321,7 @@ goTab nTab model =
                     model.leftTabs
 
             newRight =
-                wR ++ [ model.nowTab ] ++ model.rightTabs
+                wR ++ (model.nowTab :: model.rightTabs)
         in
             { model
                 | leftTabs = newLeft

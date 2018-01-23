@@ -1,7 +1,5 @@
 module Css.Common exposing (..)
 
-import Html
-import Html.CssHelpers
 import Css exposing (..)
 import Css.Utils exposing (pseudoContent)
 

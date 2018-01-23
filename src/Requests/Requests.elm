@@ -1,6 +1,14 @@
-module Requests.Requests exposing (request, report, decodeGenericError)
+module Requests.Requests
+    exposing
+        ( request_
+        , report_
+        , request
+        , report
+        , decodeGenericError
+        )
 
 import Http
+import Utils.Json.Decode as Decode
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Json.Encode as Encode
@@ -9,6 +17,63 @@ import Driver.Websocket.Channels as WebsocketDriver
 import Driver.Websocket.Websocket as WebsocketDriver
 import Requests.Topics as Topics exposing (Topic(..))
 import Requests.Types exposing (..)
+
+
+-- REVIEW: remove underlines after deprecating legacy functions
+
+
+request_ : Topic -> Encode.Value -> FlagsSource a -> Cmd ResponseType
+request_ topic payload flagSource =
+    case topic of
+        WebsocketTopic channel path ->
+            WebsocketDriver.send
+                (okWs identity)
+                (errorWs identity)
+                flagSource.flags.apiWsUrl
+                (WebsocketDriver.getAddress channel)
+                path
+                payload
+
+        HttpTopic path ->
+            HttpDriver.send (genericHttp identity)
+                flagSource.flags.apiHttpUrl
+                path
+                (Encode.encode 0 payload)
+
+
+report_ : String -> Code -> FlagsSource a -> Result String b -> Result String b
+report_ info code flagSrc result =
+    Decode.report ("Request (" ++ toString code ++ ") " ++ info)
+        flagSrc.flags
+        result
+
+
+
+-- REVIEW: legacy functions
+
+
+request :
+    Topic
+    -> (ResponseType -> msg)
+    -> Encode.Value
+    -> FlagsSource a
+    -> Cmd msg
+request topic msg data source =
+    case topic of
+        WebsocketTopic channel path ->
+            WebsocketDriver.send
+                (okWs msg)
+                (errorWs msg)
+                source.flags.apiWsUrl
+                (WebsocketDriver.getAddress channel)
+                path
+                data
+
+        HttpTopic path ->
+            HttpDriver.send (genericHttp msg)
+                source.flags.apiHttpUrl
+                path
+                (Encode.encode 0 data)
 
 
 report : Result String a -> Maybe a
@@ -25,30 +90,6 @@ report result =
                 Nothing
 
 
-request :
-    Topic
-    -> (ResponseType -> msg)
-    -> Encode.Value
-    -> ConfigSource a
-    -> Cmd msg
-request topic msg data source =
-    case topic of
-        WebsocketTopic channel path ->
-            WebsocketDriver.send
-                (okWs msg)
-                (errorWs msg)
-                source.config.apiWsUrl
-                (WebsocketDriver.getAddress channel)
-                path
-                data
-
-        HttpTopic path ->
-            HttpDriver.send (genericHttp msg)
-                source.config.apiHttpUrl
-                path
-                (Encode.encode 0 data)
-
-
 decodeGenericError :
     Decode.Value
     -> (String -> Decode.Decoder a)
@@ -61,7 +102,7 @@ decodeGenericError value decodeMessage =
 
 
 
--- internals
+-- internals----
 
 
 genericHttp : (ResponseType -> msg) -> Result Http.Error String -> msg

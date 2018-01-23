@@ -1,12 +1,11 @@
-module Game.Account.Messages exposing (Msg(..), RequestMsg(..))
+module Game.Account.Messages exposing (Msg(..))
 
-import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Context exposing (..)
 import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
-import Game.Notifications.Messages as Notifications
+import Game.Account.Notifications.Messages as Notifications
 
 
 type Msg
@@ -14,7 +13,6 @@ type Msg
     | DatabaseMsg Database.Msg
     | NotificationsMsg Notifications.Msg
     | FinancesMsg Finances.Msg
-    | Request RequestMsg
     | HandleLogout
     | HandleSetGateway Servers.CId
     | HandleSetEndpoint (Maybe Servers.CId)
@@ -24,7 +22,3 @@ type Msg
     | HandleTutorialCompleted Bool
     | HandleConnected
     | HandleDisconnected
-
-
-type RequestMsg
-    = LogoutRequest ResponseType

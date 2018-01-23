@@ -1,108 +1,109 @@
 module Apps.FloatingHeads.Update exposing (update)
 
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Storyline as Storyline
-import Core.Dispatch.OS as OS
-import Game.Data as Game
 import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
 import Game.Storyline.Emails.Contents.Messages as Contents
 import Game.Storyline.Emails.Contents.Update as Contents
+import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Reference exposing (Reference)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd FloatingHeads.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> FloatingHeads.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         ContentMsg msg ->
-            onContentMsg data msg model
+            onContentMsg config msg model
 
         Reply content ->
-            onReply data content model
+            onReply config content model
 
         HandleSelectContact contact ->
-            handleSelectContact data contact model
+            handleSelectContact config contact model
 
         ToggleMode ->
-            onToggleMode data model
+            onToggleMode config model
 
         Close ->
-            onClose data model
+            onClose config model
 
         LaunchApp context params ->
-            onLaunchApp data context params model
+            onLaunchApp config context params model
 
 
-onContentMsg : Game.Data -> Contents.Msg -> Model -> UpdateResponse
-onContentMsg data msg model =
+onContentMsg : Config msg -> Contents.Msg -> Model -> UpdateResponse msg
+onContentMsg config msg model =
     let
-        ( cmd, dispatch ) =
-            Contents.update data msg
+        config_ =
+            contentConfig config
 
-        cmd_ =
-            Cmd.map ContentMsg cmd
+        react =
+            msg
+                |> Contents.update config_
+                |> React.map (ContentMsg >> config.toMsg)
     in
-        ( model, cmd_, dispatch )
+        ( model, react )
 
 
-onReply : Game.Data -> Content -> Model -> UpdateResponse
-onReply data content model =
-    let
-        dispatch =
-            content
-                |> Storyline.ReplyEmail
-                |> Dispatch.emails
-    in
-        ( model, Cmd.none, dispatch )
+onReply : Config msg -> Content -> Model -> UpdateResponse msg
+onReply { onReplyEmail } content model =
+    content
+        |> onReplyEmail
+        |> React.msg
+        |> (,) model
 
 
-handleSelectContact : Game.Data -> ID -> Model -> UpdateResponse
-handleSelectContact data contact model =
+handleSelectContact : Config msg -> ID -> Model -> UpdateResponse msg
+handleSelectContact config contact model =
     let
         model_ =
             { model | activeContact = contact }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onToggleMode : Game.Data -> Model -> UpdateResponse
-onToggleMode data model =
+onToggleMode : Config msg -> Model -> UpdateResponse msg
+onToggleMode config model =
     let
-        model_ =
+        mode_ =
             case model.mode of
                 Compact ->
-                    { model | mode = Expanded }
+                    Expanded
 
                 Expanded ->
-                    { model | mode = Compact }
+                    Compact
+
+        model_ =
+            { model | mode = mode_ }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onClose : Game.Data -> Model -> UpdateResponse
-onClose data model =
-    let
-        dispatch =
-            Dispatch.os <| OS.CloseApp model.me
-    in
-        ( model, Cmd.none, dispatch )
+onClose : Config msg -> Model -> UpdateResponse msg
+onClose { onCloseApp } model =
+    onCloseApp
+        |> React.msg
+        |> (,) model
 
 
-onLaunchApp : Game.Data -> Context -> Params -> Model -> UpdateResponse
-onLaunchApp data context params model =
+onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg
+onLaunchApp config context params model =
     case params of
         OpenAtContact contact ->
-            Update.fromModel <| setActiveContact contact model
+            let
+                model_ =
+                    setActiveContact contact model
+            in
+                ( model_, React.none )

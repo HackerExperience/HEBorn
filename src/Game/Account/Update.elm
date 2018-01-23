@@ -1,176 +1,173 @@
 module Game.Account.Update exposing (update)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Core as Core
-import Core.Dispatch.Servers as Servers
+import Utils.React as React exposing (React)
 import Core.Error as Error exposing (Error)
-import Core.Dispatch.Websocket as Ws
-import Driver.Websocket.Channels exposing (Channel(AccountChannel))
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Source as Notifications
-import Game.Notifications.Update as Notifications
+import Game.Account.Notifications.Models as Notifications
+import Game.Account.Notifications.Messages as Notifications
+import Game.Account.Notifications.Update as Notifications
 import Game.Meta.Types.Context exposing (..)
-import Game.Notifications.Source as Notifications
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Finances.Update as Finances
 import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
+import Game.Account.Bounces.Messages as Bounces
+import Game.Account.Requests.Logout exposing (logoutRequest)
+import Game.Account.Config exposing (..)
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
-import Game.Account.Requests exposing (..)
-import Game.Account.Requests.Logout as Logout
-import Game.Account.Bounces.Messages as Bounces
-import Game.Models as Game
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         BouncesMsg msg ->
-            onBounce game msg model
+            onBounces config msg model
 
         FinancesMsg msg ->
-            onFinances game msg model
+            onFinances config msg model
 
         DatabaseMsg msg ->
-            onDatabase game msg model
+            onDatabase config msg model
 
         NotificationsMsg msg ->
-            onNotifications game msg model
-
-        Request data ->
-            data
-                |> receive
-                |> Maybe.map (flip (updateRequest game) model)
-                |> Maybe.withDefault (Update.fromModel model)
+            onNotifications config msg model
 
         HandleLogout ->
-            handleLogout game model
+            handleLogout config model
 
         HandleSetGateway cid ->
-            handleSetGateway game cid model
+            handleSetGateway config cid model
 
         HandleSetEndpoint mCid ->
-            handleSetEndpoint game mCid model
+            handleSetEndpoint config mCid model
 
         HandleSetContext context ->
-            handleSetContext game context model
+            handleSetContext config context model
 
         HandleNewGateway cid ->
             handleNewGateway cid model
 
         HandleLogoutAndCrash error ->
-            handleLogoutAndCrash game error model
+            handleLogoutAndCrash config error model
 
         HandleTutorialCompleted bool ->
-            handleTutorialCompleted game bool model
+            handleTutorialCompleted config bool model
 
         HandleConnected ->
-            handleConnected model
+            handleConnected config model
 
         HandleDisconnected ->
-            handleDisconnected model
+            handleDisconnected config model
 
 
 
 -- internals
 
 
-handleSetGateway : Game.Model -> Servers.CId -> Model -> UpdateResponse
-handleSetGateway game cid model =
-    Update.fromModel { model | activeGateway = Just cid }
+handleSetGateway : Config msg -> Servers.CId -> Model -> UpdateResponse msg
+handleSetGateway config cid model =
+    ( { model | activeGateway = Just cid }
+    , React.none
+    )
 
 
 handleSetEndpoint :
-    Game.Model
+    Config msg
     -> Maybe Servers.CId
     -> Model
-    -> UpdateResponse
-handleSetEndpoint game cid model =
+    -> UpdateResponse msg
+handleSetEndpoint config cid model =
+    -- this looks like wrong
     case getGateway model of
         Just gateway ->
             let
-                setEndpoint gatewayId =
-                    Dispatch.server gatewayId <|
-                        Servers.SetEndpoint cid
+                react =
+                    case getGateway model of
+                        Just gatewayId ->
+                            React.msg <| config.onSetEndpoint gatewayId cid
 
-                dispatch =
-                    model
-                        |> getGateway
-                        |> Maybe.map setEndpoint
-                        |> Maybe.withDefault Dispatch.none
+                        Nothing ->
+                            React.none
 
                 model_ =
                     if cid == Nothing then
-                        ensureValidContext game { model | context = Gateway }
+                        config.fallToGateway (fallToGateway model)
                     else
-                        ensureValidContext game model
+                        config.fallToGateway (fallToGateway model)
             in
-                ( model_, Cmd.none, dispatch )
+                ( model_, react )
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-handleSetContext : Game.Model -> Context -> Model -> UpdateResponse
-handleSetContext game context model =
+handleSetContext : Config msg -> Context -> Model -> UpdateResponse msg
+handleSetContext config context model =
     let
         model1 =
             { model | context = context }
 
         model_ =
-            ensureValidContext game model1
+            config.fallToGateway (fallToGateway model1)
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
-onDatabase : Game.Model -> Database.Msg -> Model -> UpdateResponse
-onDatabase game msg model =
-    Update.child
-        { get = .database
-        , set = (\database model -> { model | database = database })
-        , toMsg = DatabaseMsg
-        , update = (Database.update game)
-        }
-        msg
-        model
+onDatabase : Config msg -> Database.Msg -> Model -> UpdateResponse msg
+onDatabase config msg model =
+    let
+        config_ =
+            databaseConfig config
+
+        ( database, react ) =
+            Database.update config_ msg <| getDatabase model
+
+        model_ =
+            setDatabase database model
+    in
+        ( model_, react )
 
 
-onFinances : Game.Model -> Finances.Msg -> Model -> UpdateResponse
-onFinances game msg model =
-    Update.child
-        { get = .finances
-        , set = (\finances model -> { model | finances = finances })
-        , toMsg = FinancesMsg
-        , update = (Finances.update game)
-        }
-        msg
-        model
+onFinances : Config msg -> Finances.Msg -> Model -> UpdateResponse msg
+onFinances config msg model =
+    let
+        config_ =
+            financesConfig model.id config
+
+        ( finances, react ) =
+            Finances.update config_ msg <| getFinances model
+
+        model_ =
+            setFinances finances model
+    in
+        ( model_, react )
 
 
-onNotifications : Game.Model -> Notifications.Msg -> Model -> UpdateResponse
-onNotifications game msg model =
-    Update.child
-        { get = .notifications
-        , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = NotificationsMsg
-        , update = (Notifications.update game Notifications.Account)
-        }
-        msg
-        model
+onNotifications : Config msg -> Notifications.Msg -> Model -> UpdateResponse msg
+onNotifications config msg model =
+    let
+        config_ =
+            notificationsConfig config
+
+        ( notifications, react ) =
+            Notifications.update config_ msg <| getNotifications model
+
+        model_ =
+            setNotifications notifications model
+    in
+        ( model_, react )
 
 
-handleLogout : Game.Model -> Model -> UpdateResponse
-handleLogout game model =
+handleLogout : Config msg -> Model -> UpdateResponse msg
+handleLogout config model =
     let
         model_ =
             { model | logout = ToLanding }
@@ -178,23 +175,24 @@ handleLogout game model =
         token =
             getToken model
 
-        cmd =
-            Logout.request token model.id game
+        react =
+            config
+                |> logoutRequest token model.id
+                |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react )
 
 
-handleTutorialCompleted : Game.Model -> Bool -> Model -> UpdateResponse
-handleTutorialCompleted game bool model =
-    let
-        model_ =
-            { model | inTutorial = bool }
-    in
-        Update.fromModel model_
+handleTutorialCompleted : Config msg -> Bool -> Model -> UpdateResponse msg
+handleTutorialCompleted config bool model =
+    ( { model | inTutorial = bool }
+    , React.none
+    )
 
 
-handleLogoutAndCrash : Game.Model -> Error -> Model -> UpdateResponse
-handleLogoutAndCrash game error model =
+handleLogoutAndCrash : Config msg -> Error -> Model -> UpdateResponse msg
+handleLogoutAndCrash config error model =
     let
         model_ =
             { model | logout = ToCrash error }
@@ -202,81 +200,52 @@ handleLogoutAndCrash game error model =
         token =
             getToken model
 
-        cmd =
-            Logout.request token model.id game
+        react =
+            config
+                |> logoutRequest token model.id
+                |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react )
 
 
-onBounce : Game.Model -> Bounces.Msg -> Model -> UpdateResponse
-onBounce game msg model =
+onBounces : Config msg -> Bounces.Msg -> Model -> UpdateResponse msg
+onBounces config msg model =
     let
-        ( bounces, cmd, dispatch ) =
-            Bounces.update game msg model.bounces
+        config_ =
+            bouncesConfig config
 
-        cmd_ =
-            Cmd.map BouncesMsg cmd
+        ( bounces, react ) =
+            Bounces.update config_ msg <| getBounces model
 
         model_ =
-            { model | bounces = bounces }
+            setBounces bounces model
     in
-        ( model_, cmd_, dispatch )
+        ( model_, react )
 
 
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game response model =
-    case response of
-        _ ->
-            Update.fromModel model
-
-
-ensureValidContext : Game.Model -> Model -> Model
-ensureValidContext game model =
-    let
-        servers =
-            Game.getServers game
-
-        endpoint =
-            model
-                |> getGateway
-                |> Maybe.andThen (flip Servers.get servers)
-                |> Maybe.andThen Servers.getEndpointCId
-    in
-        if getContext model == Endpoint && endpoint == Nothing then
-            { model | context = Gateway }
-        else
-            model
-
-
-handleNewGateway : Servers.CId -> Model -> UpdateResponse
+handleNewGateway : Servers.CId -> Model -> UpdateResponse msg
 handleNewGateway cid model =
-    model
-        |> insertGateway cid
-        |> Update.fromModel
+    ( insertGateway cid model, React.none )
 
 
-handleConnected : Model -> UpdateResponse
-handleConnected model =
+handleConnected : Config msg -> Model -> UpdateResponse msg
+handleConnected config model =
+    ( model, React.msg <| config.onConnected (model.id) )
+
+
+handleDisconnected : Config msg -> Model -> UpdateResponse msg
+handleDisconnected config model =
     let
-        dispatch =
-            Dispatch.websocket <|
-                Ws.Join (AccountChannel model.id) Nothing
-    in
-        ( model, Cmd.none, dispatch )
-
-
-handleDisconnected : Model -> UpdateResponse
-handleDisconnected model =
-    let
-        dispatch =
+        react =
             case model.logout of
                 ToLanding ->
-                    Dispatch.core <| Core.Shutdown
+                    React.msg <| config.onDisconnected
 
                 ToCrash error ->
-                    Dispatch.core <| Core.Crash error
+                    React.msg <| config.onError error
 
                 _ ->
-                    Dispatch.none
+                    React.none
     in
-        ( model, Cmd.none, dispatch )
+        ( model, react )

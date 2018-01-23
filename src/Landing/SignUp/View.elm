@@ -5,8 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Html.CssHelpers
 import Landing.Resources as Res
-import Landing.SignUp.Messages exposing (Msg(..))
-import Landing.SignUp.Models exposing (Model)
+import Landing.SignUp.Messages exposing (..)
+import Landing.SignUp.Models exposing (..)
 
 
 landClass : List class -> Attribute msg
@@ -14,8 +14,8 @@ landClass =
     (.class) <| Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Model -> Html Msg
-view model =
+view : (Msg -> msg) -> Model -> Html msg
+view toMsg model =
     div []
         [ Html.form
             [ id "signup-form"
@@ -60,6 +60,7 @@ view model =
             , button [ class ("signup-button " ++ signUpButtonClass model), onClick SubmitForm ] [ text "Sign up" ]
             ]
         ]
+        |> Html.map toMsg
 
 
 viewErrorsEmail : Model -> String

@@ -1,21 +1,28 @@
 module Apps.TaskManager.Menu.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import ContextMenu exposing (ContextMenu)
-import Game.Data as Game
+import Apps.TaskManager.Menu.Config exposing (..)
 import Apps.TaskManager.Menu.Models exposing (Model)
 import Apps.TaskManager.Menu.Messages exposing (Msg(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
-update : Game.Data -> Msg -> Model -> ( Model, Cmd Msg, Dispatch )
-update data msg model =
+type alias UpdateResponse msg =
+    ( Model, React msg )
+
+
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update { toMsg } msg model =
     case msg of
         MenuMsg msg ->
             let
                 ( menu_, cmd ) =
                     ContextMenu.update msg model.menu
+
+                react =
+                    React.cmd <| Cmd.map (MenuMsg >> toMsg) cmd
             in
-                ( { model | menu = menu_ }, Cmd.map MenuMsg cmd, Dispatch.none )
+                ( { model | menu = menu_ }, react )
 
         MenuClick action ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )

@@ -1,44 +1,47 @@
-module Game.Servers.Requests.Resync
-    exposing
-        ( Response(..)
-        , request
-        , receive
-        )
+module Game.Servers.Requests.Resync exposing (Data, resyncRequest)
 
 import Time exposing (Time)
 import Json.Decode as Decode exposing (Value, decodeValue)
-import Requests.Requests as Requests
+import Requests.Requests as Requests exposing (report_)
 import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..), emptyPayload)
+import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Decoders.Servers
 import Game.Servers.Models exposing (..)
-import Game.Servers.Messages
-    exposing
-        ( Msg(Request)
-        , RequestMsg(ResyncRequest)
-        )
 import Game.Servers.Shared exposing (..)
 
 
-type Response
-    = Okay ( CId, Server )
+type alias Data =
+    Result () ( CId, Server )
 
 
-request : Maybe GatewayCache -> CId -> ConfigSource a -> Cmd Msg
-request gatewayCache id =
-    -- this request is mainly used to fetch invaded computers
-    Requests.request (Topics.serverResync id)
-        (ResyncRequest gatewayCache id >> Request)
-        emptyPayload
+resyncRequest : CId -> Time -> Maybe GatewayCache -> FlagsSource a -> Cmd Data
+resyncRequest id time gatewayCache flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.serverResync id)
+            emptyPayload
+        |> Cmd.map (uncurry <| receiver flagsSrc id time gatewayCache)
 
 
-receive : Time -> Maybe GatewayCache -> CId -> Code -> Value -> Maybe Response
-receive now gatewayCache id code json =
+
+-- internals
+
+
+receiver :
+    FlagsSource a
+    -> CId
+    -> Time
+    -> Maybe GatewayCache
+    -> Code
+    -> Value
+    -> Data
+receiver flagsSrc cid now gatewayCache code value =
     case code of
         OkCode ->
-            decodeValue (Decoders.Servers.server now gatewayCache) json
-                |> Result.map ((,) id >> Okay)
-                |> Requests.report
+            value
+                |> decodeValue (Decoders.Servers.server now gatewayCache)
+                |> report_ "Servers.Resync" code flagsSrc
+                |> Result.map ((,) cid)
+                |> Result.mapError (always ())
 
         _ ->
-            Nothing
+            Err ()

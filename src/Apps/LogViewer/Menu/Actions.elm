@@ -5,101 +5,97 @@ module Apps.LogViewer.Menu.Actions
         , startDecrypting
         , startHiding
         , startDeleting
+        , enterEditing
         )
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Game.Data as Game
-import Utils.Update as Update
+import Dict
+import Utils.React as React exposing (React)
 import Game.Servers.Logs.Models as Logs
+import Apps.LogViewer.Menu.Config exposing (..)
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages exposing (MenuAction(..))
 
 
+type alias UpdateResponse msg =
+    ( Model, React msg )
+
+
 actionHandler :
-    Game.Data
+    Config msg
     -> MenuAction
     -> Model
-    -> ( Model, Cmd LogViewer.Msg, Dispatch )
-actionHandler data action model =
+    -> UpdateResponse msg
+actionHandler config action model =
     case action of
         NormalEntryEdit logId ->
-            enterEditing data logId model
-                |> Update.fromModel
+            ( enterEditing config logId model, React.none )
 
         EdittingEntryApply logId ->
-            model
-                |> enterEditing data logId
-                |> Update.fromModel
+            ( enterEditing config logId model, React.none )
 
         EdittingEntryCancel logId ->
-            model
-                |> leaveEditing logId
-                |> Update.fromModel
+            ( leaveEditing logId model, React.none )
 
         EncryptEntry logId ->
-            let
-                dispatch =
-                    startCrypting logId data model
-            in
-                ( model, Cmd.none, dispatch )
+            startCrypting config logId model
 
         DecryptEntry logId ->
-            let
-                dispatch =
-                    startDecrypting logId model
-            in
-                ( model, Cmd.none, dispatch )
+            startDecrypting config logId model
 
         HideEntry logId ->
-            let
-                dispatch =
-                    startHiding logId data model
-            in
-                ( model, Cmd.none, dispatch )
+            startHiding config logId model
 
         DeleteEntry logId ->
-            let
-                dispatch =
-                    startDeleting logId data model
-            in
-                ( model, Cmd.none, dispatch )
+            startDeleting config logId model
 
 
-startCrypting : Logs.ID -> Game.Data -> Model -> Dispatch
-startCrypting id data model =
+startCrypting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startCrypting { onEncryptLog } id model =
+    id
+        |> onEncryptLog
+        |> React.msg
+        |> (,) model
+
+
+startDecrypting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startDecrypting config id model =
+    ( model, React.none )
+
+
+startHiding : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startHiding { onHideLog } id model =
+    id
+        |> onHideLog
+        |> React.msg
+        |> (,) model
+
+
+startDeleting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
+startDeleting { onDeleteLog } id model =
+    id
+        |> onDeleteLog
+        |> React.msg
+        |> (,) model
+
+
+enterEditing : Config msg -> Logs.ID -> Model -> Model
+enterEditing config id model =
     let
-        dispatch =
-            id
-                |> Servers.EncryptLog
-                |> Dispatch.logs (Game.getActiveCId data)
+        logs =
+            config.logs
+
+        model_ =
+            case Dict.get id logs.logs of
+                Just log ->
+                    case Logs.getContent log of
+                        Logs.NormalContent data ->
+                            Just <| updateEditing id data.raw model
+
+                        Logs.Encrypted ->
+                            Nothing
+
+                _ ->
+                    Nothing
     in
-        dispatch
-
-
-startDecrypting : Logs.ID -> Model -> Dispatch
-startDecrypting id model =
-    Dispatch.none
-
-
-startHiding : Logs.ID -> Game.Data -> Model -> Dispatch
-startHiding id data model =
-    let
-        dispatch =
-            id
-                |> Servers.HideLog
-                |> Dispatch.logs (Game.getActiveCId data)
-    in
-        dispatch
-
-
-startDeleting : Logs.ID -> Game.Data -> Model -> Dispatch
-startDeleting id data model =
-    let
-        dispatch =
-            id
-                |> Servers.DeleteLog
-                |> Dispatch.logs (Game.getActiveCId data)
-    in
-        dispatch
+        Maybe.withDefault model model_

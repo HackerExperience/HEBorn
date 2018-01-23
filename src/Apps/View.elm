@@ -8,6 +8,7 @@ module Apps.View
 
 import Html exposing (Html)
 import Apps.Apps exposing (..)
+import Apps.Config exposing (..)
 import Apps.Models exposing (..)
 import Apps.Messages exposing (..)
 import Apps.LogViewer.View as LogViewer
@@ -27,68 +28,67 @@ import Apps.Email.View as Email
 import Apps.Bug.View as Bug
 import Apps.Calculator.View as Calculator
 import Apps.Calculator.Messages as CalculatorMessages
-import Apps.LogFlix.View as LogFlix
+import Apps.BackFlix.View as BackFlix
 import Apps.FloatingHeads.View as FloatingHeads
 import Apps.FloatingHeads.Messages as FloatingHeadsMessages
-import Game.Data as Game
 
 
-view : Game.Data -> AppModel -> Html Msg
-view data model =
+view : Config msg -> AppModel -> Html msg
+view config model =
     case model of
         LogViewerModel model ->
-            Html.map LogViewerMsg (LogViewer.view data model)
+            LogViewer.view (logViewerConfig config) model
 
         TaskManagerModel model ->
-            Html.map TaskManagerMsg (TaskManager.view data model)
+            TaskManager.view (taskManConfig config) model
 
         BrowserModel model ->
-            Html.map BrowserMsg (Browser.view data model)
+            Browser.view (browserConfig config) model
 
         ExplorerModel model ->
-            Html.map ExplorerMsg (Explorer.view data model)
+            Explorer.view (explorerConfig config) model
 
         DatabaseModel model ->
-            Html.map DatabaseMsg (Database.view data model)
+            Database.view (dbAdminConfig config) model
 
         ConnManagerModel model ->
-            Html.map ConnManagerMsg (ConnManager.view data model)
+            ConnManager.view (connManagerConfig config) model
 
         BounceManagerModel model ->
-            Html.map BounceManagerMsg (BounceManager.view data model)
+            BounceManager.view (bounceManConfig config) model
 
         FinanceModel model ->
-            Html.map FinanceMsg (Finance.view data model)
+            Finance.view (financeConfig config) model
 
         MusicModel model ->
-            Html.map MusicMsg (Hebamp.view data model)
+            Hebamp.view (hebampConfig config) model
 
         CtrlPanelModel model ->
-            Html.map CtrlPanelMsg (CtrlPanel.view data model)
+            CtrlPanel.view (ctrlPainelConfig config) model
 
         ServersGearsModel model ->
-            Html.map ServersGearsMsg (ServersGears.view data model)
+            ServersGears.view (serversGearsConfig config) model
 
         LocationPickerModel model ->
-            Html.map LocationPickerMsg (LocationPicker.view data model)
+            LocationPicker.view (locationPickerConfig config) model
 
         LanViewerModel model ->
-            Html.map LanViewerMsg (LanViewer.view data model)
+            LanViewer.view (lanViewerConfig config) model
 
         EmailModel model ->
-            Html.map EmailMsg (Email.view data model)
+            Email.view (emailConfig config) model
 
         BugModel model ->
-            Html.map BugMsg (Bug.view data model)
+            Bug.view (bugConfig config) model
 
         CalculatorModel model ->
-            Html.map CalculatorMsg (Calculator.view data model)
+            Calculator.view (calculatorConfig config) model
 
-        LogFlixModel model ->
-            Html.map LogFlixMsg (LogFlix.view data model)
+        BackFlixModel model ->
+            BackFlix.view (backFlixConfig config) model
 
         FloatingHeadsModel model ->
-            Html.map FloatingHeadsMsg (FloatingHeads.view data model)
+            FloatingHeads.view (floatingHeadsConfig config) model
 
 
 isDecorated : App -> Bool

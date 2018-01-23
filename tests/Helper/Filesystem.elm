@@ -1,6 +1,7 @@
 module Helper.Filesystem exposing (..)
 
 import Game.Servers.Filesystem.Models exposing (..)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 {-| Like "mkdir -p", add folders recursively for given path.

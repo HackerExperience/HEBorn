@@ -1,58 +1,34 @@
 module Apps.LocationPicker.Update exposing (update)
 
+import Utils.React as React exposing (React)
 import Json.Decode exposing (Value)
 import Utils.Ports.Map as Map
 import Utils.Ports.Geolocation as Gloc
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
+import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Messages as LocationPicker exposing (Msg(..))
-import Apps.LocationPicker.Menu.Messages as Menu
-import Apps.LocationPicker.Menu.Update as Menu
-import Apps.LocationPicker.Menu.Actions as Menu
 
 
-type alias UpdateResponse =
-    ( Model, Cmd LocationPicker.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> LocationPicker.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         MapClick value ->
             onMapClick value model
 
         GeoResp value ->
-            onGeoResp value model
+            onGeoResp config value model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, coreMsg )
-
-
-onMapClick : Value -> Model -> UpdateResponse
+onMapClick : Value -> Model -> UpdateResponse msg
 onMapClick value model =
     let
         model_ =
@@ -61,19 +37,19 @@ onMapClick value model =
                 |> Result.toMaybe
                 |> flip setPos model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
-onGeoResp : Value -> Model -> UpdateResponse
-onGeoResp value model =
+onGeoResp : Config msg -> Value -> Model -> UpdateResponse msg
+onGeoResp config value model =
     if Gloc.checkInstance value model.self then
-        geoResp value model
+        geoResp config value model
     else
-        ( model, Cmd.none, Dispatch.none )
+        ( model, React.none )
 
 
-geoResp : Value -> Model -> UpdateResponse
-geoResp value model =
+geoResp : Config msg -> Value -> Model -> UpdateResponse msg
+geoResp config value model =
     let
         newPos =
             value
@@ -83,15 +59,14 @@ geoResp value model =
         model_ =
             setPos newPos model
 
-        cmd =
+        react =
             case newPos of
                 Just { lat, lng } ->
-                    Cmd.batch
-                        [ Map.mapCenter
-                            ( model.mapEId, lat, lng, 18 )
-                        ]
+                    [ Map.mapCenter ( model.mapEId, lat, lng, 18 ) ]
+                        |> List.map React.cmd
+                        |> React.batch config.batchMsg
 
                 Nothing ->
-                    Cmd.none
+                    React.none
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, react )

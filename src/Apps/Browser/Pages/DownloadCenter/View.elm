@@ -2,9 +2,9 @@ module Apps.Browser.Pages.DownloadCenter.View exposing (view)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
+import Apps.Browser.Config as BrowserConfig
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.DownloadCenter.Config exposing (..)
 import Apps.Browser.Pages.DownloadCenter.Messages exposing (..)
@@ -12,7 +12,6 @@ import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 import Apps.Browser.Widgets.HackingPanel.View as HackingPanel exposing (hackingPanel)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
-import Game.Meta.Types.Network exposing (NIP)
 import Apps.Apps as Apps
 
 
@@ -54,24 +53,29 @@ hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
     }
 
 
-view : Config msg -> Game.Data -> Model -> Html msg
-view config data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         -- this is cheating:
         cid =
             Servers.EndpointCId model.toolkit.target
 
         endpointMember =
-            List.member cid (Game.getEndpoints data)
+            case config.endpoints of
+                Just endpoints ->
+                    List.member cid endpoints
+
+                Nothing ->
+                    False
     in
         if (model.showingPanel && endpointMember) then
             viewPos config model.toolkit.target
         else
-            viewPre config data (not endpointMember) model
+            viewPre config (not endpointMember) model
 
 
-viewPre : Config msg -> Game.Data -> Bool -> Model -> Html msg
-viewPre config data showPassword model =
+viewPre : Config msg -> Bool -> Model -> Html msg
+viewPre config showPassword model =
     div [ class [ AutoHeight ] ]
         [ div [ class [ DummyTitle ] ]
             [ text <| "Welcome to " ++ model.title ++ "!" ]

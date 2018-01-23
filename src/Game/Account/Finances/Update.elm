@@ -1,30 +1,26 @@
 module Game.Account.Finances.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Utils.Update as Update
-import Game.Models as Game
-import Game.Data as Game
-import Game.Account.Models as Account
-import Game.Account.Finances.Messages exposing (..)
-import Game.Account.Finances.Models exposing (..)
+import Utils.React as React exposing (React)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Web.Models as Web
 import Game.Meta.Types.Requester exposing (Requester)
+import Game.Account.Finances.Config exposing (..)
+import Game.Account.Finances.Models exposing (..)
+import Game.Account.Finances.Messages exposing (..)
 import Game.Account.Finances.Requests.Login as Login
 import Game.Account.Finances.Requests.Transfer as Transfer
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Request data ->
-            onRequest game data model
+            onRequest config data model
 
         HandleBankAccountClosed accountId ->
             handleBankAccountClosed accountId model
@@ -32,123 +28,106 @@ update game msg model =
         HandleBankAccountUpdated accountId account ->
             handleBankAccountUpdated accountId account model
 
-        HandleBankAccountLogin request requester cid ->
-            handleBankAccountLogin game request requester cid model
+        HandleBankAccountLogin cid request requester ->
+            handleBankAccountLogin config request requester cid model
 
-        HandleBankAccountTransfer request requester cid ->
-            handleBankAccountTransfer game request requester cid model
+        HandleBankAccountTransfer cid request requester ->
+            handleBankAccountTransfer config request requester cid model
 
 
-handleBankAccountClosed : AccountId -> Model -> UpdateResponse
+handleBankAccountClosed : AccountId -> Model -> UpdateResponse msg
 handleBankAccountClosed accountId model =
-    Update.fromModel <| removeBankAccount accountId model
+    ( removeBankAccount accountId model, React.none )
 
 
-handleBankAccountUpdated : AccountId -> BankAccount -> Model -> UpdateResponse
+handleBankAccountUpdated : AccountId -> BankAccount -> Model -> UpdateResponse msg
 handleBankAccountUpdated accountId bankAccount model =
-    Update.fromModel <| insertBankAccount accountId bankAccount model
+    ( insertBankAccount accountId bankAccount model, React.none )
 
 
 handleBankAccountLogin :
-    Game.Model
+    Config msg
     -> BankLoginRequest
     -> Requester
     -> CId
     -> Model
-    -> UpdateResponse
-handleBankAccountLogin game request requester cid model =
+    -> UpdateResponse msg
+handleBankAccountLogin config request requester cid model =
     let
-        accountId =
-            game
-                |> Game.getAccount
-                |> Account.getId
-
         request_ =
-            Login.request request requester accountId cid game
+            config
+                |> Login.request request requester config.accountId cid
+                |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, request_, Dispatch.none )
+        ( model, request_ )
 
 
 handleBankAccountTransfer :
-    Game.Model
+    Config msg
     -> BankTransferRequest
     -> Requester
     -> CId
     -> Model
-    -> UpdateResponse
-handleBankAccountTransfer game request requester cid model =
+    -> UpdateResponse msg
+handleBankAccountTransfer config request requester cid model =
     let
-        accountId =
-            game
-                |> Game.getAccount
-                |> Account.getId
-
         request_ =
-            Transfer.request request requester accountId cid game
+            Transfer.request request requester config.accountId cid config
+                |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, request_, Dispatch.none )
+        ( model, request_ )
 
 
-onRequest : Game.Model -> RequestMsg -> Model -> UpdateResponse
-onRequest game data model =
+onRequest : Config msg -> RequestMsg -> Model -> UpdateResponse msg
+onRequest config data model =
     case data of
         BankLogin requester cid response ->
-            onBankLogin game requester cid (Login.receive response) model
+            onBankLogin config requester cid (Login.receive response) model
 
         BankTransfer requester cid response ->
-            onBankTransfer game requester cid (Transfer.receive response) model
+            onBankTransfer config requester cid (Transfer.receive response) model
 
 
 onBankLogin :
-    Game.Model
+    Config msg
     -> Requester
     -> CId
     -> LoginResponse
     -> Model
-    -> UpdateResponse
-onBankLogin game requester cid response model =
+    -> UpdateResponse msg
+onBankLogin config requester cid response model =
     case response of
         Valid data ->
-            let
-                dispatch =
-                    Servers.BankAccountLoginSuccessful requester data
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBALoginSuccess data requester
+            )
 
         DecodeFailed ->
-            Update.fromModel model
+            ( model, React.none )
 
         Invalid ->
-            let
-                dispatch =
-                    Servers.BankAccountLoginError requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBALoginFailed requester
+            )
 
 
 onBankTransfer :
-    Game.Model
+    Config msg
     -> Requester
     -> CId
     -> TransferResponse
     -> Model
-    -> UpdateResponse
-onBankTransfer game requester cid response model =
+    -> UpdateResponse msg
+onBankTransfer config requester cid response model =
     case response of
         Successful ->
-            let
-                dispatch =
-                    Servers.BankAccountTransferSuccessful requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBATransferSuccess requester
+            )
 
         Error ->
-            let
-                dispatch =
-                    Servers.BankAccountTransferError requester
-                        |> Dispatch.server cid
-            in
-                ( model, Cmd.none, dispatch )
+            ( model
+            , React.msg <| config.onBATransferFailed requester
+            )

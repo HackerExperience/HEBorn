@@ -6,7 +6,7 @@ import Game.Account.Database.Models as Database exposing (..)
 import Game.Account.Dock.Models as Dock
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Finances.Models as Finances
-import Game.Notifications.Models as Notifications
+import Game.Account.Notifications.Models as Notifications
 import Game.Meta.Types.Context exposing (..)
 
 
@@ -85,7 +85,7 @@ getId =
     .id
 
 
-getUsername : Model -> ID
+getUsername : Model -> String
 getUsername =
     .username
 
@@ -100,6 +100,11 @@ getGateway =
     .activeGateway
 
 
+getGateways : Model -> List Servers.CId
+getGateways =
+    .gateways
+
+
 getContext : Model -> Context
 getContext =
     .context
@@ -110,14 +115,29 @@ getFinances =
     .finances
 
 
+setFinances : Finances.Model -> Model -> Model
+setFinances finances model =
+    { model | finances = finances }
+
+
 getDatabase : Model -> Database.Model
 getDatabase =
     .database
 
 
+setDatabase : Database.Model -> Model -> Model
+setDatabase database model =
+    { model | database = database }
+
+
 getBounces : Model -> Bounces.Model
 getBounces =
     .bounces
+
+
+setBounces : Bounces.Model -> Model -> Model
+setBounces bounces model =
+    { model | bounces = bounces }
 
 
 getMainframe : Model -> Maybe Servers.CId
@@ -146,3 +166,31 @@ insertGateway id ({ gateways } as model) =
 getDock : Model -> Dock.Model
 getDock =
     .dock
+
+
+setInTutorial : Bool -> Model -> Model
+setInTutorial inTutorial model =
+    { model | inTutorial = inTutorial }
+
+
+getInTutorial : Model -> Bool
+getInTutorial =
+    .inTutorial
+
+
+getNotifications : Model -> Notifications.Model
+getNotifications =
+    .notifications
+
+
+setNotifications : Notifications.Model -> Model -> Model
+setNotifications notifications model =
+    { model | notifications = notifications }
+
+
+fallToGateway : Model -> Bool -> Model
+fallToGateway model needFallback =
+    if needFallback then
+        { model | context = Gateway }
+    else
+        model

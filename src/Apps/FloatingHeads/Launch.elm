@@ -1,35 +1,32 @@
 module Apps.FloatingHeads.Launch exposing (..)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Game.Data as Game
-import Game.Models
+import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
+import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages exposing (..)
 
 
-type alias LaunchResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias LaunchResponse msg =
+    ( Model, React msg )
 
 
-launch : Game.Data -> Maybe Params -> Reference -> LaunchResponse
-launch data maybeParams me =
+launch : Config msg -> Maybe Params -> Reference -> LaunchResponse msg
+launch config maybeParams me =
     case maybeParams of
         Just (OpenAtContact contact) ->
-            launchOpenAtContact data contact me
+            launchOpenAtContact config contact me
 
         Nothing ->
-            Update.fromModel <| initialModel Nothing me
+            ( initialModel Nothing me, React.none )
 
 
-launchOpenAtContact : Game.Data -> String -> Reference -> LaunchResponse
-launchOpenAtContact data contact me =
+launchOpenAtContact : Config msg -> String -> Reference -> LaunchResponse msg
+launchOpenAtContact config contact me =
     let
         model =
             initialModel (Just contact) me
     in
-        ( model, Cmd.none, Dispatch.none )
+        ( model, React.none )

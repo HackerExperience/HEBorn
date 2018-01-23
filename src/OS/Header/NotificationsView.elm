@@ -5,11 +5,15 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
-import Game.Notifications.Models as Notifications exposing (Content(..))
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Meta.Types.Notifications as Notifications
+import Game.Servers.Filesystem.Shared as Filesystem
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
+
+
+type alias Renderer a =
+    a -> ( String, String )
 
 
 { id, class, classList } =
@@ -17,16 +21,23 @@ import OS.Resources exposing (..)
 
 
 view :
-    OpenMenu
+    Renderer a
+    -> OpenMenu
     -> OpenMenu
     -> Class
     -> String
     -> Msg
-    -> Notifications.Model
+    -> Notifications.Notifications a
     -> Html Msg
-view current activator uniqueClass title readAll itens =
+view render current activator uniqueClass title readAllMsg itens =
     if (current == activator) then
-        visibleNotifications uniqueClass activator title readAll itens
+        visibleNotifications
+            render
+            uniqueClass
+            activator
+            title
+            readAllMsg
+            itens
     else
         emptyNotifications uniqueClass activator
 
@@ -47,17 +58,18 @@ emptyNotifications uniqueClass activator =
 {-| Gen a div with an ul with an header, all notifications and a footer
 -}
 visibleNotifications :
-    Class
+    Renderer a
+    -> Class
     -> OpenMenu
     -> String
     -> Msg
-    -> Notifications.Model
+    -> Notifications.Notifications a
     -> Html Msg
-visibleNotifications uniqueClass activator title readAll itens =
+visibleNotifications render uniqueClass activator title readAllMsg itens =
     footer
         |> List.singleton
-        |> (++) (Dict.foldl notificationReduce [] itens)
-        |> (::) (header title readAll)
+        |> (++) (Dict.foldl (notificationReduce render) [] itens)
+        |> (::) (header title readAllMsg)
         |> ul []
         |> List.singleton
         |> div
@@ -74,11 +86,11 @@ indicator =
 
 
 header : String -> Msg -> Html Msg
-header title readAll =
+header title readAllMsg =
     li []
         [ div [] [ text (title ++ " notifications") ]
         , spacer
-        , div [ onClick readAll ] [ text "Mark All as Read" ]
+        , div [ onClick readAllMsg ] [ text "Mark All as Read" ]
         ]
 
 
@@ -88,43 +100,18 @@ footer =
 
 
 notificationReduce :
-    Notifications.ID
-    -> Notifications.Notification
+    Renderer a
+    -> Notifications.Id
+    -> Notifications.Notification a
     -> List (Html Msg)
     -> List (Html Msg)
-notificationReduce id { content } acu =
-    renderContent content
+notificationReduce renderer id { content } acu =
+    renderer content
         |> notification id
         |> flip (::) acu
 
 
-renderContent : Content -> ( String, String )
-renderContent content =
-    case content of
-        Simple title body ->
-            ( title, body )
-
-        NewEmail from ->
-            ( "New email from: " ++ from
-            , "Check on Thunderpigeon"
-            )
-
-        DownloadStarted origin storage fileEntry ->
-            ( "New download started"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " download started!"
-              )
-            )
-
-        DownloadConcluded origin storage fileEntry ->
-            ( "New download concluded"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " download concluded!"
-              )
-            )
-
-
-notification : Notifications.ID -> ( String, String ) -> Html Msg
+notification : Notifications.Id -> ( String, String ) -> Html Msg
 notification id ( title, body ) =
     li []
         [ text title

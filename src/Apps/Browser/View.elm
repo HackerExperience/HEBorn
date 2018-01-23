@@ -5,9 +5,11 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import Css exposing (pct, width, asPairs)
-import Game.Data as Game
-import UI.Widgets.HorizontalTabs exposing (hzTabs)
-import UI.Widgets.Modal exposing (modalPickStorage)
+import Apps.Browser.Config exposing (..)
+import Apps.Browser.Messages exposing (..)
+import Apps.Browser.Models exposing (..)
+import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
+import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.NotFound.View as NotFound
 import Apps.Browser.Pages.Home.View as Home
 import Apps.Browser.Pages.Webserver.View as Webserver
@@ -22,11 +24,8 @@ import Apps.Browser.Pages.FBI.View as FBI
 import Apps.Browser.Pages.News.View as News
 import Apps.Browser.Pages.Bithub.View as Bithub
 import Apps.Browser.Pages.MissionCenter.View as MissionCenter
-import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
-import Apps.Browser.Pages.Configs exposing (..)
-import Apps.Browser.Resources exposing (Classes(..), prefix)
-import Apps.Browser.Messages exposing (..)
-import Apps.Browser.Models exposing (..)
+import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import UI.Widgets.Modal exposing (modalPickStorage)
 
 
 { id, class, classList } =
@@ -38,8 +37,8 @@ styles =
     Css.asPairs >> style
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         tab =
             getNowTab model
@@ -48,9 +47,12 @@ view data model =
             [ class [ Window, Content, Client ]
             ]
             [ viewTabs model
+                |> Html.map config.toMsg
             , viewToolbar tab
-            , viewPg data tab
+                |> Html.map config.toMsg
+            , viewPg config tab
             , menuView model
+                |> Html.map config.toMsg
             ]
 
 
@@ -146,43 +148,43 @@ viewTabs b =
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 
-viewPg : Game.Data -> Tab -> Html Msg
-viewPg data { page, modal } =
+viewPg : Config msg -> Tab -> Html msg
+viewPg config { page, modal } =
     div
         [ class [ PageContent ] ]
-        [ viewPage data page
-        , case modal of
-            Just (ForDownload source file) ->
-                let
-                    storages =
-                        data
-                            |> Game.getActiveServer
-                            |> .storages
+        [ viewPage config page
+        , Html.map config.toMsg <|
+            case modal of
+                Just (ForDownload source file) ->
+                    let
+                        storages =
+                            config.activeServer
+                                |> .storages
 
-                    onPick chosen =
-                        chosen
-                            |> Maybe.map (ReqDownload source file)
-                            |> Maybe.withDefault
-                                (ActiveTabMsg <| EnterModal Nothing)
-                in
-                    modalPickStorage storages onPick
+                        onPick chosen =
+                            chosen
+                                |> Maybe.map (ReqDownload source file)
+                                |> Maybe.withDefault
+                                    (ActiveTabMsg <| EnterModal Nothing)
+                    in
+                        modalPickStorage storages onPick
 
-            Nothing ->
-                text ""
+                Nothing ->
+                    text ""
         ]
 
 
-viewPage : Game.Data -> Page -> Html Msg
-viewPage data page =
+viewPage : Config msg -> Page -> Html msg
+viewPage config page =
     case page of
         NotFoundModel _ ->
             NotFound.view
 
         HomeModel ->
-            Home.view homeConfig
+            Home.view (homeConfig config)
 
         WebserverModel page ->
-            Webserver.view webserverConfig data page
+            Webserver.view (webserverConfig config) page
 
         ProfileModel ->
             Profile.view
@@ -191,13 +193,13 @@ viewPage data page =
             Whois.view
 
         DownloadCenterModel page ->
-            DownloadCenter.view downloadCenterConfig data page
+            DownloadCenter.view (downloadCenterConfig config) page
 
         ISPModel ->
             ISP.view
 
         BankModel page ->
-            Bank.view bankConfig page
+            Bank.view (bankConfig config) page
 
         StoreModel ->
             Store.view

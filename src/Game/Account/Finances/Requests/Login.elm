@@ -7,14 +7,11 @@ module Game.Account.Finances.Requests.Login
 import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
 import Core.Error as Error
-import Core.Dispatch.Core as Core
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Decoders.Bank exposing (accountData)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Game.Servers.Shared exposing (CId)
-import Requests.Types exposing (ConfigSource, Code(..), ResponseType)
-import Decoders.Processes
+import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances exposing (BankLoginRequest)
@@ -33,7 +30,7 @@ request :
     -> Requester
     -> Account.ID
     -> CId
-    -> ConfigSource a
+    -> FlagsSource a
     -> Cmd Msg
 request { bank, accountNum, password } requester accountId cid data =
     let

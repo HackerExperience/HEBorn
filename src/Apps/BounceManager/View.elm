@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Account.Database.Models as Database exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
-import Game.Data as Game
+import Game.Account.Bounces.Shared as Bounces
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Meta.Types.Network as Network
@@ -13,14 +13,42 @@ import UI.Layouts.FlexColumns exposing (flexCols)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import Apps.BounceManager.Config exposing (..)
 import Apps.BounceManager.Messages exposing (Msg(..))
 import Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Resources exposing (Classes(..), prefix)
-import Apps.BounceManager.Menu.View exposing (..)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
+
+
+view : Config msg -> Model -> Html msg
+view config ({ selected } as model) =
+    let
+        contentStc =
+            config.bounces
+
+        hckdServers =
+            config.database
+                |> Database.getHackedServers
+
+        viewData =
+            case selected of
+                TabManage ->
+                    (viewTabManage contentStc)
+
+                TabCreate ->
+                    (viewTabCreate hckdServers)
+
+        viewTabs =
+            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
+    in
+        Html.map config.toMsg <|
+            verticalSticked
+                (Just [ viewTabs ])
+                [ viewData ]
+                Nothing
 
 
 tabs : List MainTab
@@ -86,36 +114,3 @@ viewTabCreate servers =
             [ div [] available
             , div [] [ text "SOON" ]
             ]
-
-
-view : Game.Data -> Model -> Html Msg
-view data ({ selected } as model) =
-    let
-        contentStc =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getBounces
-
-        hckdServers =
-            data
-                |> Game.getGame
-                |> Game.getAccount
-                |> Account.getDatabase
-                |> Database.getHackedServers
-
-        viewData =
-            case selected of
-                TabManage ->
-                    (viewTabManage contentStc)
-
-                TabCreate ->
-                    (viewTabCreate hckdServers)
-
-        viewTabs =
-            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
-    in
-        verticalSticked
-            (Just [ viewTabs ])
-            [ viewData, menuView model ]
-            Nothing

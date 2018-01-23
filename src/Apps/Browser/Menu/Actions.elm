@@ -1,32 +1,32 @@
 module Apps.Browser.Menu.Actions exposing (actionHandler)
 
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (Msg)
+import Apps.Browser.Menu.Config exposing (..)
 import Apps.Browser.Menu.Messages exposing (MenuAction(..))
-import Core.Dispatch as Dispatch exposing (Dispatch)
 
 
 actionHandler :
-    Game.Data
+    Config msg
     -> MenuAction
     -> Model
-    -> ( Model, Cmd Msg, Dispatch )
-actionHandler data action model =
+    -> ( Model, React msg )
+actionHandler config action model =
     case action of
         NewTab ->
             let
                 model_ =
                     addTab model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
 
         DeleteTab n ->
             let
                 model_ =
                     deleteTab n model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
 
         GoPrevious ->
             let
@@ -36,7 +36,7 @@ actionHandler data action model =
                 model_ =
                     setNowTab tab_ model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
 
         GoNext ->
             let
@@ -46,7 +46,7 @@ actionHandler data action model =
                 model_ =
                     setNowTab tab_ model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )
 
         GoHome ->
             let
@@ -59,4 +59,4 @@ actionHandler data action model =
                 model_ =
                     setNowTab tab_ model
             in
-                ( model_, Cmd.none, Dispatch.none )
+                ( model_, React.none )

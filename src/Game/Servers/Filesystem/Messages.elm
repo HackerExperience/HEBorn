@@ -1,7 +1,7 @@
 module Game.Servers.Filesystem.Messages exposing (..)
 
-import Game.Servers.Filesystem.Models exposing (..)
 import Requests.Types exposing (ResponseType)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
 type Msg
@@ -11,12 +11,3 @@ type Msg
     | HandleNewDir Path Name
     | HandleMove Id Path
     | HandleAdded Id File
-    | Request RequestMsg
-
-
-type RequestMsg
-    = DeleteRequest ResponseType
-    | RenameRequest ResponseType
-    | MoveRequest ResponseType
-    | CreateRequest ResponseType
-    | IndexRequest ResponseType

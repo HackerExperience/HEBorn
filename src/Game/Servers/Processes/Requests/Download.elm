@@ -1,9 +1,12 @@
 module Game.Servers.Processes.Requests.Download
     exposing
-        ( Response(..)
-        , request
-        , requestPublic
-        , receive
+        ( Data
+        , Errors(..)
+        , FileId
+        , StorageId
+        , privateDownloadRequest
+        , publicDownloadRequest
+        , errorToString
         )
 
 import Json.Decode as Decode
@@ -11,82 +14,95 @@ import Json.Decode as Decode
         ( Decoder
         , Value
         , decodeValue
-        , map
         , succeed
         , fail
-        , string
         )
 import Json.Encode as Encode
-import Utils.Json.Decode exposing (commonError)
-import Requests.Requests as Requests
-import Requests.Topics as Topics
-import Requests.Types exposing (ConfigSource, Code(..))
-import Game.Servers.Processes.Messages exposing (..)
-import Game.Servers.Filesystem.Models as Filesystem
-import Game.Servers.Processes.Models exposing (ID, Process)
+import Utils.Json.Decode exposing (commonError, message)
 import Game.Meta.Types.Network exposing (NIP)
+import Requests.Requests as Requests exposing (report_)
+import Requests.Topics as Topics
+import Requests.Types exposing (Code(..), FlagsSource)
 import Game.Servers.Shared exposing (CId)
+import Game.Servers.Processes.Models exposing (..)
 
 
-type Response
-    = Okay
-    | SelfLoop
+type alias Data =
+    Result Errors ()
+
+
+type Errors
+    = SelfLoop
     | FileNotFound
     | StorageFull
     | StorageNotFound
     | BadRequest
+    | Unknown
 
 
-request :
-    ID
-    -> NIP
-    -> Filesystem.Id
-    -> String
+type alias FileId =
+    String
+
+
+type alias StorageId =
+    String
+
+
+privateDownloadRequest :
+    NIP
+    -> FileId
+    -> StorageId
     -> CId
-    -> ConfigSource a
-    -> Cmd Msg
-request optmistic target fileId storageId cid =
-    Requests.request (Topics.fsDownload cid)
-        (DownloadRequest optmistic >> Request)
-    <|
-        encoder target fileId storageId
+    -> FlagsSource a
+    -> Cmd Data
+privateDownloadRequest target fileId storageId cid flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.fsDownload cid)
+            (encoder target fileId storageId)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
-requestPublic :
-    ID
-    -> NIP
-    -> Filesystem.Id
-    -> String
+publicDownloadRequest :
+    NIP
+    -> FileId
+    -> StorageId
     -> CId
-    -> ConfigSource a
-    -> Cmd Msg
-requestPublic optmistic target fileId storageId cid =
-    Requests.request (Topics.pftpDownload cid)
-        (DownloadRequest optmistic >> Request)
-    <|
-        encoder target fileId storageId
+    -> FlagsSource a
+    -> Cmd Data
+publicDownloadRequest target fileId storageId cid flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.pftpDownload cid)
+            (encoder target fileId storageId)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
-    case code of
-        OkCode ->
-            Just Okay
+errorToString : Errors -> String
+errorToString error =
+    case error of
+        SelfLoop ->
+            "Self download: use copy instead!"
 
-        ErrorCode ->
-            Requests.decodeGenericError
-                json
-                decodeErrorMessage
+        FileNotFound ->
+            "The file you're trying to download no longer exists"
 
-        _ ->
-            Nothing
+        StorageFull ->
+            "Not enougth space!"
+
+        StorageNotFound ->
+            "The storage you're trying to access no longer exists"
+
+        BadRequest ->
+            "Shit happened!"
+
+        Unknown ->
+            "Shit happened!1!!1!"
 
 
 
--- INTERNALS
+-- internals
 
 
-encoder : NIP -> Filesystem.Id -> String -> Value
+encoder : NIP -> FileId -> String -> Value
 encoder ( netId, ip ) fileId storageId =
     Encode.object
         [ ( "network_id", Encode.string netId )
@@ -96,23 +112,39 @@ encoder ( netId, ip ) fileId storageId =
         ]
 
 
-decodeErrorMessage : String -> Decoder Response
-decodeErrorMessage str =
-    case str of
-        "download_self" ->
-            succeed SelfLoop
+receiver : FlagsSource a -> Code -> Value -> Data
+receiver flagsSrc code value =
+    case code of
+        OkCode ->
+            Ok ()
 
-        "bad_request" ->
-            succeed BadRequest
+        _ ->
+            value
+                |> decodeValue errorMessage
+                |> report_ "Processes.Download" code flagsSrc
+                |> Result.mapError (always Unknown)
+                |> Result.andThen Err
 
-        "file_not_found" ->
-            succeed FileNotFound
 
-        "storage_full" ->
-            succeed StorageFull
+errorMessage : Decoder Errors
+errorMessage =
+    message <|
+        \str ->
+            case str of
+                "download_self" ->
+                    succeed SelfLoop
 
-        "storage_not_found" ->
-            succeed StorageNotFound
+                "bad_request" ->
+                    succeed BadRequest
 
-        value ->
-            fail <| commonError "download error message" value
+                "file_not_found" ->
+                    succeed FileNotFound
+
+                "storage_full" ->
+                    succeed StorageFull
+
+                "storage_not_found" ->
+                    succeed StorageNotFound
+
+                value ->
+                    fail <| commonError "download error message" value

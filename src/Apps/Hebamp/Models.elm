@@ -1,11 +1,10 @@
 module Apps.Hebamp.Models exposing (..)
 
-import Apps.Hebamp.Menu.Models as Menu
+import Apps.Hebamp.Shared exposing (..)
 
 
 type alias Model =
-    { menu : Menu.Model
-    , playerId : String
+    { playerId : String
     , now : Maybe AudioData
     , prev : List AudioData
     , next : List AudioData
@@ -44,26 +43,20 @@ icon =
     "hebamp"
 
 
-initialModel : String -> Model
-initialModel id =
-    { menu = Menu.initialMenu
-    , playerId = "audio-" ++ id
-    , now =
-        Just
-            { mediaUrl = "//upload.wikimedia.org/wikipedia/en/2/2a/Nyan_cat.ogg"
-            , mediaType = "audio/ogg"
-            , label = "Nyan Cat"
-            , duration = 7.4
-            }
-    , prev = []
-    , next = []
-    , currentTime = 0
-    }
+initialModel : String -> List AudioData -> Model
+initialModel id playlist =
+    let
+        ( now, next ) =
+            case playlist of
+                head :: tail ->
+                    ( Just head, tail )
 
-
-type alias AudioData =
-    { mediaUrl : String
-    , mediaType : String
-    , label : String
-    , duration : Float
-    }
+                [] ->
+                    ( Nothing, [] )
+    in
+        { playerId = "audio-" ++ id
+        , now = now
+        , prev = []
+        , next = next
+        , currentTime = 0
+        }

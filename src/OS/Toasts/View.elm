@@ -3,10 +3,10 @@ module OS.Toasts.View exposing (view)
 import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
-import Game.Data as Game
-import Game.Notifications.Models exposing (Content(..))
-import Game.Servers.Filesystem.Models as Filesystem
 import OS.Resources as Res
+import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Servers.Notifications.Shared as ServersNotifications
 import OS.Toasts.Messages exposing (..)
 import OS.Toasts.Models exposing (..)
 
@@ -15,8 +15,8 @@ import OS.Toasts.Models exposing (..)
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view _ model =
+view : Model -> Html Msg
+view model =
     model
         |> Dict.foldl
             (\k v acu ->
@@ -39,39 +39,17 @@ toast id { notification, state } =
                 Nothing
 
         attrs =
-            [ classAttr ]
-                |> List.filterMap identity
+            List.filterMap identity [ classAttr ]
+
+        ( title, message ) =
+            case notification of
+                Server _ content ->
+                    ServersNotifications.renderToast content
+
+                Account content ->
+                    AccountNotifications.renderToast content
     in
         div attrs <|
-            case notification of
-                Simple title msg ->
-                    [ h6 [] [ text title ]
-                    , p [] [ text msg ]
-                    ]
-
-                NewEmail from ->
-                    [ h6 [] [ text <| "New email from: " ++ from ]
-                    , p [] [ text "Click to open Thunderpigeon" ]
-                    ]
-
-                DownloadStarted origin storageId file ->
-                    [ h6
-                        []
-                        [ text <| "Download started" ]
-                    , p []
-                        [ text <|
-                            (Filesystem.getName <| Filesystem.toFile file)
-                                ++ " download has started!"
-                        ]
-                    ]
-
-                DownloadConcluded origin storageId file ->
-                    [ h6
-                        []
-                        [ text <| "Download concluded" ]
-                    , p []
-                        [ text <|
-                            (Filesystem.getName <| Filesystem.toFile file)
-                                ++ " download has concluded!"
-                        ]
-                    ]
+            [ h6 [] [ text title ]
+            , p [] [ text message ]
+            ]

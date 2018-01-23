@@ -5,15 +5,13 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
-import Css
-import Css.Utils exposing (styles)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
 import Game.Storyline.Emails.Contents as Emails
 import Game.Storyline.Emails.Contents.View as Emails
+import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Messages exposing (Msg(..))
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
@@ -23,33 +21,33 @@ import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         person =
-            data
-                |> Game.getGame
-                |> Game.getStory
-                |> Storyline.getEmails
+            config.emails
                 |> Emails.getPerson model.activeContact
+
+        view_ =
+            case model.mode of
+                Compact ->
+                    viewCompact person model
+
+                Expanded ->
+                    viewExpanded config person model
     in
-        case model.mode of
-            Compact ->
-                viewCompact person model
-
-            Expanded ->
-                viewExpanded data person model
+        Html.map config.toMsg <| view_
 
 
-viewExpanded : Game.Data -> Maybe Person -> Model -> Html Msg
-viewExpanded data person model =
+viewExpanded : Config msg -> Maybe Person -> Model -> Html Msg
+viewExpanded config person model =
     div
         []
         [ windowHeader model
         , div
             [ class [ Super ] ]
             [ renderHeader person
-            , renderChat data person
+            , renderChat config person
             ]
         ]
 
@@ -115,28 +113,32 @@ renderHeader person =
             ]
 
 
-renderChat : Game.Data -> Maybe Person -> Html Msg
-renderChat data active =
+renderChat : Config msg -> Maybe Person -> Html Msg
+renderChat config active =
     active
         |> Maybe.map Emails.getAvailableReplies
         |> Maybe.withDefault []
-        |> List.map (reply data)
+        |> List.map (reply config)
         |> div []
         |> List.singleton
-        |> (::) (ul [] (chatMessages data active))
+        |> (::) (ul [] (chatMessages config active))
         |> div [ class [ Chat ] ]
 
 
-reply : Game.Data -> Emails.Content -> Html Msg
-reply data msg =
-    msg
-        |> Emails.view data
-        |> List.map (Html.map ContentMsg)
-        |> span [ onClick <| Reply msg ]
+reply : Config msg -> Emails.Content -> Html Msg
+reply config msg =
+    let
+        config_ =
+            contentConfig config
+    in
+        msg
+            |> Emails.view config_
+            |> List.map (Html.map ContentMsg)
+            |> span [ onClick <| Reply msg ]
 
 
-chatMessages : Game.Data -> Maybe Person -> List (Html Msg)
-chatMessages data active =
+chatMessages : Config msg -> Maybe Person -> List (Html Msg)
+chatMessages config active =
     active
         |> Maybe.map (Emails.getMessages >> Dict.values)
         |> Maybe.withDefault []
@@ -144,23 +146,27 @@ chatMessages data active =
             (\v ->
                 case v of
                     Emails.Sent msg ->
-                        baloon data To msg
+                        baloon config To msg
 
                     Emails.Received msg ->
-                        baloon data From msg
+                        baloon config From msg
             )
 
 
-baloon : Game.Data -> Classes -> Emails.Content -> Html Msg
-baloon data direction msg =
+baloon : Config msg -> Classes -> Emails.Content -> Html Msg
+baloon config direction msg =
     li
         [ class [ direction ] ]
-        [ content data msg ]
+        [ content config msg ]
 
 
-content : Game.Data -> Emails.Content -> Html Msg
-content data msg =
-    msg
-        |> Emails.view data
-        |> List.map (Html.map ContentMsg)
-        |> span []
+content : Config msg -> Emails.Content -> Html Msg
+content config msg =
+    let
+        config_ =
+            contentConfig config
+    in
+        msg
+            |> Emails.view config_
+            |> List.map (Html.map ContentMsg)
+            |> span []

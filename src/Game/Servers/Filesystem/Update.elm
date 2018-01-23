@@ -1,124 +1,124 @@
 module Game.Servers.Filesystem.Update exposing (update)
 
-import Utils.Update as Update
-import Game.Models as Game
+import Utils.React as React exposing (React)
+import Game.Servers.Filesystem.Requests.Delete exposing (deleteRequest)
+import Game.Servers.Filesystem.Requests.Move exposing (moveRequest)
+import Game.Servers.Filesystem.Requests.Rename exposing (renameRequest)
+import Game.Servers.Filesystem.Requests.Create exposing (createRequest)
+import Game.Servers.Filesystem.Config exposing (..)
 import Game.Servers.Filesystem.Messages exposing (..)
 import Game.Servers.Filesystem.Models exposing (..)
-import Game.Servers.Filesystem.Requests exposing (..)
-import Game.Servers.Filesystem.Requests.Delete as Delete
-import Game.Servers.Filesystem.Requests.Move as Move
-import Game.Servers.Filesystem.Requests.Rename as Rename
-import Game.Servers.Filesystem.Requests.Create as Create
-import Game.Servers.Shared exposing (CId)
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import Game.Servers.Filesystem.Shared exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Model
-    -> CId
+    Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
-update game cid msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleDelete fileId ->
-            handleDelete game cid fileId model
+            handleDelete config fileId model
 
         HandleMove fileId newLocation ->
-            handleMove game cid fileId newLocation model
+            handleMove config fileId newLocation model
 
         HandleRename fileId newBaseName ->
-            handleRename game cid fileId newBaseName model
+            handleRename config fileId newBaseName model
 
         HandleNewTextFile path name ->
-            handleNewTextFile game cid path name model
+            handleNewTextFile config path name model
 
         HandleNewDir path name ->
-            handleNewDir game cid path name model
+            handleNewDir config path name model
 
         HandleAdded id file ->
             onHandleAdded id file model
-
-        Request request ->
-            onRequest game cid (receive request) model
 
 
 
 -- internals
 
 
-handleDelete : Game.Model -> CId -> Id -> Model -> UpdateResponse
-handleDelete game cid id model =
+handleDelete : Config msg -> Id -> Model -> UpdateResponse msg
+handleDelete config id model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( deleteFile id model
-                    , Delete.request id cid game
+                    , config
+                        |> deleteRequest id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleMove :
-    Game.Model
-    -> CId
+    Config msg
     -> Id
     -> Path
     -> Model
-    -> UpdateResponse
-handleMove game cid id newPath model =
+    -> UpdateResponse msg
+handleMove config id newPath model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( moveFile id newPath model
-                    , Move.request newPath id cid game
+                    , config
+                        |> moveRequest newPath id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleRename :
-    Game.Model
-    -> CId
+    Config msg
     -> Id
     -> Name
     -> Model
-    -> UpdateResponse
-handleRename game cid id name model =
+    -> UpdateResponse msg
+handleRename config id name model =
     let
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->
                     ( renameFile id name model
-                    , Rename.request name id cid game
+                    , config
+                        |> renameRequest name id config.cid
+                        |> Cmd.map (always <| config.batchMsg [])
+                        |> React.cmd
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
     in
-        ( model_, cmd, Dispatch.none )
+        ( model_, cmd )
 
 
 handleNewTextFile :
-    Game.Model
-    -> CId
+    Config msg
     -> Path
     -> Name
     -> Model
-    -> UpdateResponse
-handleNewTextFile game cid path name model =
+    -> UpdateResponse msg
+handleNewTextFile config path name model =
     let
         fullpath =
             appendPath name path
@@ -131,62 +131,37 @@ handleNewTextFile game cid path name model =
     in
         if model /= model_ then
             ( model_
-            , Create.request "txt" name fullpath cid game
-            , Dispatch.none
+            , config
+                |> createRequest "txt" name fullpath config.cid
+                |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
             )
         else
-            Update.fromModel model
+            ( model, React.none )
 
 
 handleNewDir :
-    Game.Model
-    -> CId
+    Config msg
     -> Path
     -> Name
     -> Model
-    -> UpdateResponse
-handleNewDir game cid path name model =
+    -> UpdateResponse msg
+handleNewDir config path name model =
     let
         model_ =
             insertFolder path name model
     in
         if model /= model_ then
             ( model_
-            , Create.request "/" name path cid game
-            , Dispatch.none
+            , config
+                |> createRequest "/" name path config.cid
+                |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
             )
         else
-            Update.fromModel model
+            ( model, React.none )
 
 
-onHandleAdded : Id -> File -> Model -> UpdateResponse
+onHandleAdded : Id -> File -> Model -> UpdateResponse msg
 onHandleAdded id file model =
-    ( insertFile id file model
-    , Cmd.none
-    , Dispatch.none
-    )
-
-
-onRequest :
-    Game.Model
-    -> CId
-    -> Maybe Response
-    -> Model
-    -> UpdateResponse
-onRequest cid game response model =
-    case response of
-        Just response ->
-            updateRequest cid game response model
-
-        Nothing ->
-            Update.fromModel model
-
-
-updateRequest :
-    Game.Model
-    -> CId
-    -> Response
-    -> Model
-    -> UpdateResponse
-updateRequest game cid data model =
-    Update.fromModel model
+    ( insertFile id file model, React.none )

@@ -1,92 +1,85 @@
 module Apps.Browser.Update exposing (update)
 
 import Dict
-import Native.Panic
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Core.Dispatch.Account as Account
-import Core.Dispatch.OS as OS
-import Core.Error as Error
-import Game.Data as Game
-import Game.Models
+import Utils.React as React exposing (React)
+import ContextMenu exposing (ContextMenu)
 import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Shared as Finances
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
-import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Types as Web
-import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network
 import Apps.Reference exposing (..)
 import Apps.Apps as Apps
-import Game.Meta.Types.Context exposing (Context(Endpoint))
 import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
 import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
-import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Update as Menu
+import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Menu.Actions as Menu
-import Apps.Browser.Pages.Configs exposing (..)
 import Apps.Browser.Messages exposing (..)
+import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-type alias TabUpdateResponse =
-    ( Tab, Cmd Msg, Dispatch )
+type alias TabUpdateResponse msg =
+    ( Tab, React msg )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         -- menu
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            Menu.actionHandler (menuConfig config) action model
 
         MenuMsg msg ->
-            onMenuMsg data msg model
+            onMenuMsg config msg model
 
         LaunchApp context params ->
-            onLaunchApp data context params model
+            onLaunchApp config context params model
 
         ChangeTab tabId ->
-            Update.fromModel <| goTab tabId model
+            ( goTab tabId model, React.none )
 
         NewTabIn url ->
-            onNewTabIn data url model
+            onNewTabIn config url model
 
         PublicDownload nip entry ->
-            update data
+            update config
                 (ActiveTabMsg <| EnterModal <| Just <| ForDownload nip entry)
                 model
 
         ReqDownload source file storage ->
-            onReqDownload data source file storage model
+            onReqDownload config source file storage model
 
         HandlePasswordAcquired event ->
-            onEveryTabMsg data (Cracked event.nip event.password) model
+            onEveryTabMsg config (Cracked event.nip event.password) model
 
         ActiveTabMsg msg ->
-            updateSomeTabMsg data model.nowTab msg model
+            updateSomeTabMsg config model.nowTab msg model
 
         SomeTabMsg tabId msg ->
-            updateSomeTabMsg data tabId msg model
+            updateSomeTabMsg config tabId msg model
 
         EveryTabMsg msg ->
-            onEveryTabMsg data msg model
+            onEveryTabMsg config msg model
 
         BankLogin request ->
-            onBankLogin data request model.me model
+            onBankLogin config request model.me model
 
         BankTransfer request ->
-            onBankTransfer data request model.me model
+            onBankTransfer config request model.me model
 
         BankLogout ->
-            onBankLogout data model
+            onBankLogout config model
 
 
 
@@ -94,23 +87,23 @@ update data msg model =
 
 
 onMenuMsg :
-    Game.Data
+    Config msg
     -> Menu.Msg
     -> Model
-    -> UpdateResponse
-onMenuMsg data msg model =
-    Update.child
-        { get = .menu
-        , set = (\menu model -> { model | menu = menu })
-        , toMsg = MenuMsg
-        , update = (Menu.update data)
-        }
-        msg
-        model
+    -> UpdateResponse msg
+onMenuMsg config msg model =
+    let
+        ( menu, react ) =
+            Menu.update (menuConfig config) msg model.menu
+
+        model_ =
+            { model | menu = menu }
+    in
+        ( model_, react )
 
 
-onLaunchApp : Game.Data -> Context -> Params -> Model -> UpdateResponse
-onLaunchApp data context (OpenAtUrl url) model =
+onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg
+onLaunchApp config context (OpenAtUrl url) model =
     let
         filter id tab =
             tab.addressBar == url
@@ -123,14 +116,14 @@ onLaunchApp data context (OpenAtUrl url) model =
     in
         case maybeId of
             Just id ->
-                Update.fromModel <| goTab id model
+                ( goTab id model, React.none )
 
             Nothing ->
-                onNewTabIn data url model
+                onNewTabIn config url model
 
 
-onNewTabIn : Game.Data -> URL -> Model -> UpdateResponse
-onNewTabIn data url model =
+onNewTabIn : Config msg -> URL -> Model -> UpdateResponse msg
+onNewTabIn config url model =
     let
         createTabModel =
             addTab model
@@ -146,103 +139,67 @@ onNewTabIn data url model =
         tab =
             getTab tabId goTabModel.tabs
 
-        ( tab_, cmd, dispatch ) =
-            onGoAddress data url model.me tabId tab
+        ( tab_, react ) =
+            onGoAddress config url model.me tabId tab
 
         model_ =
             setNowTab tab_ goTabModel
     in
-        ( model_, cmd, dispatch )
+        ( model_, react )
 
 
 onReqDownload :
-    Game.Data
+    Config msg
     -> Network.NIP
     -> Filesystem.FileEntry
     -> StorageId
     -> Model
-    -> UpdateResponse
-onReqDownload data source file storage model =
-    let
-        ( me, _ ) =
-            data
-                |> Game.getGame
-                |> Game.Models.unsafeGetGateway
-
-        startMsg =
-            Servers.NewPublicDownloadProcess source storage file
-
-        dispatch =
-            Dispatch.processes me startMsg
-
-        model_ =
-            model
-                |> getNowTab
-                |> leaveModal
-                |> flip setNowTab model
-    in
-        ( model_, Cmd.none, dispatch )
+    -> UpdateResponse msg
+onReqDownload { onNewPublicDownload } source file storage model =
+    file
+        |> onNewPublicDownload source storage
+        |> React.msg
+        |> (,) model
 
 
 onBankLogin :
-    Game.Data
+    Config msg
     -> Finances.BankLoginRequest
     -> Reference
     -> Model
-    -> UpdateResponse
-onBankLogin data request { sessionId, windowId, context } model =
-    let
-        cid =
-            data
-                |> Game.getActiveCId
-
-        requester =
-            { sessionId = sessionId
-            , windowId = windowId
-            , context = context
-            , tabId = model.nowTab
-            }
-
-        loginMsg =
-            Account.BankAccountLogin request requester cid
-
-        dispatch =
-            Dispatch.finances loginMsg
-    in
-        ( model, Cmd.none, dispatch )
+    -> UpdateResponse msg
+onBankLogin { onBankAccountLogin } request { sessionId, windowId, context } model =
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = model.nowTab
+    }
+        |> onBankAccountLogin request
+        |> React.msg
+        |> (,) model
 
 
 onBankTransfer :
-    Game.Data
+    Config msg
     -> Finances.BankTransferRequest
     -> Reference
     -> Model
-    -> UpdateResponse
-onBankTransfer data request { sessionId, windowId, context } model =
-    let
-        cid =
-            data
-                |> Game.getActiveCId
-
-        requester =
-            { sessionId = sessionId
-            , windowId = windowId
-            , context = context
-            , tabId = model.nowTab
-            }
-
-        transferMsg =
-            Account.BankAccountTransfer request requester cid
-
-        dispatch =
-            Dispatch.finances transferMsg
-    in
-        ( model, Cmd.none, dispatch )
+    -> UpdateResponse msg
+onBankTransfer { onBankAccountTransfer } request { sessionId, windowId, context } model =
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = model.nowTab
+    }
+        |> onBankAccountTransfer request
+        |> React.msg
+        |> (,) model
 
 
-onBankLogout : Game.Data -> Model -> UpdateResponse
-onBankLogout data model =
-    Update.fromModel model
+onBankLogout : Config msg -> Model -> UpdateResponse msg
+onBankLogout config model =
+    -- TODO: Bank Logout Request
+    ( model, React.none )
 
 
 
@@ -250,139 +207,134 @@ onBankLogout data model =
 
 
 updateSomeTabMsg :
-    Game.Data
+    Config msg
     -> Int
     -> TabMsg
     -> Model
-    -> UpdateResponse
-updateSomeTabMsg data tabId msg model =
+    -> UpdateResponse msg
+updateSomeTabMsg config tabId msg model =
     let
         tab =
             getTab tabId model.tabs
 
         setThisTab tab_ =
             { model | tabs = (setTab tabId tab_ model.tabs) }
+
+        ( model_, react ) =
+            processTabMsg config tabId msg tab model
     in
-        model
-            |> processTabMsg data tabId msg tab
-            |> Update.mapModel setThisTab
+        Tuple.mapFirst setThisTab ( model_, react )
 
 
-onEveryTabMsg : Game.Data -> TabMsg -> Model -> UpdateResponse
-onEveryTabMsg data msg model =
+onEveryTabMsg : Config msg -> TabMsg -> Model -> UpdateResponse msg
+onEveryTabMsg config msg model =
     model.tabs
-        |> Dict.foldl (reduceTabMsg data msg model)
-            ( Dict.empty, Cmd.none, Dispatch.none )
-        |> Update.mapModel (\tabs_ -> { model | tabs = tabs_ })
+        |> Dict.foldl (reduceTabMsg config msg model)
+            ( Dict.empty, React.none )
+        |> Tuple.mapFirst (\tabs_ -> { model | tabs = tabs_ })
 
 
 reduceTabMsg :
-    Game.Data
+    Config msg
     -> TabMsg
     -> Model
     -> Int
     -> Tab
-    -> ( Tabs, Cmd Msg, Dispatch )
-    -> ( Tabs, Cmd Msg, Dispatch )
-reduceTabMsg data msg model tabId tab ( tabs, cmd0, dispatch0 ) =
+    -> ( Tabs, React msg )
+    -> ( Tabs, React msg )
+reduceTabMsg config msg model tabId tab ( tabs, react0 ) =
     let
-        ( tab_, cmd1, dispatch1 ) =
-            processTabMsg data tabId msg tab model
+        ( tab_, react1 ) =
+            processTabMsg config tabId msg tab model
 
         tabs_ =
             Dict.insert tabId tab tabs
 
-        cmd =
-            Cmd.batch
-                [ cmd0
-                , cmd1
-                ]
-
-        dispatch =
-            Dispatch.batch [ dispatch0, dispatch1 ]
+        react =
+            React.batch
+                config.batchMsg
+                [ react0, react1 ]
     in
-        ( tabs_, cmd, dispatch )
+        ( tabs_, react )
 
 
 processTabMsg :
-    Game.Data
+    Config msg
     -> Int
     -> TabMsg
     -> Tab
     -> Model
-    -> TabUpdateResponse
-processTabMsg data tabId msg tab model =
+    -> TabUpdateResponse msg
+processTabMsg config tabId msg tab model =
     case msg of
         GoPrevious ->
-            Update.fromModel <| gotoPreviousPage tab
+            ( gotoPreviousPage tab, React.none )
 
         GoNext ->
-            Update.fromModel <| gotoNextPage tab
+            ( gotoNextPage tab, React.none )
 
         UpdateAddress url ->
-            Update.fromModel { tab | addressBar = url }
+            ( { tab | addressBar = url }, React.none )
 
         EnterModal modal ->
-            Update.fromModel { tab | modal = modal }
+            ( { tab | modal = modal }, React.none )
 
         HandleFetched response ->
             onHandleFetched response tab
 
         GoAddress url ->
-            onGoAddress data url model.me tabId tab
+            onGoAddress config url model.me tabId tab
 
         AnyMap nip ->
             -- TODO: implementation pending
-            Update.fromModel tab
+            ( tab, React.none )
 
         NewApp params ->
             ( tab
-            , Cmd.none
-            , Dispatch.os <| OS.NewApp Nothing Nothing params
+            , React.msg <| config.onNewApp Nothing Nothing params
             )
 
         SelectEndpoint ->
             ( tab
-            , Cmd.none
-            , Dispatch.account <| Account.SetContext Endpoint
+            , React.msg <| config.onSetContext Endpoint
             )
 
         HandleBankLogin accountData ->
-            handleBankLogin data tabId tab accountData model
+            handleBankLogin config tabId tab accountData model
 
         HandleBankLoginError ->
-            handleBankError data tabId tab model
+            handleBankError config tabId tab model
 
         HandleBankTransfer ->
-            handleBankTransfer data tabId tab model
+            handleBankTransfer config tabId tab model
 
         HandleBankTransferError ->
-            handleBankTransferError data tabId tab model
+            handleBankTransferError config tabId tab model
 
         Login nip password ->
-            onLogin data nip password model.me tabId tab
+            onLogin config nip password model.me tabId tab
 
         Logout ->
             -- TODO #285
-            Update.fromModel tab
+            ( tab, React.none )
 
         LoginFailed ->
             -- TODO: forward error
-            Update.fromModel tab
+            ( tab, React.none )
 
         Crack nip ->
-            onCrack data nip tab
+            onCrack config nip tab
 
         Cracked _ _ ->
             -- TODO: forward success
-            Update.fromModel tab
+            ( tab, React.none )
 
         -- site msgs
         _ ->
-            onPageMsg data msg tab
+            onPageMsg config msg tab
 
 
-onHandleFetched : Web.Response -> Tab -> TabUpdateResponse
+onHandleFetched : Web.Response -> Tab -> TabUpdateResponse msg
 onHandleFetched response tab =
     let
         ( url, pageModel ) =
@@ -402,38 +354,24 @@ onHandleFetched response tab =
                 && (getURL tab == url)
     in
         if (isLoadingThisRequest) then
-            tab
-                |> gotoPage url pageModel
-                |> Update.fromModel
+            ( gotoPage url pageModel tab, React.none )
         else
-            Update.fromModel tab
+            ( tab, React.none )
 
 
 onGoAddress :
-    Game.Data
+    Config msg
     -> String
     -> Reference
     -> Int
     -> Tab
-    -> TabUpdateResponse
-onGoAddress data url { sessionId, windowId, context } tabId tab =
+    -> TabUpdateResponse msg
+onGoAddress config url { sessionId, windowId, context } tabId tab =
     let
-        cid =
-            Game.getActiveCId data
-
-        servers =
-            data
-                |> Game.getGame
-                |> Game.Models.getServers
-
         networkId =
-            servers
-                |> Servers.get cid
-                |> Maybe.map
-                    (Servers.getActiveNIP
-                        >> Network.getId
-                    )
-                |> Maybe.withDefault "::"
+            config.activeServer
+                |> Servers.getActiveNIP
+                |> Network.getId
 
         requester =
             { sessionId = sessionId
@@ -442,162 +380,139 @@ onGoAddress data url { sessionId, windowId, context } tabId tab =
             , tabId = tabId
             }
 
-        dispatch =
-            Dispatch.server cid <|
-                Servers.FetchUrl url
-                    networkId
-                    requester
+        react =
+            React.msg <| config.onFetchUrl networkId url requester
 
         tab_ =
             gotoPage url (LoadingModel url) tab
     in
-        ( tab_, Cmd.none, dispatch )
+        ( tab_, react )
 
 
 onLogin :
-    Game.Data
+    Config msg
     -> Network.NIP
     -> String
     -> Reference
     -> Int
     -> Tab
-    -> TabUpdateResponse
-onLogin data remoteNip password { sessionId, windowId, context } tabId tab =
+    -> TabUpdateResponse msg
+onLogin config remoteNip password { sessionId, windowId, context } tabId tab =
+    { sessionId = sessionId
+    , windowId = windowId
+    , context = context
+    , tabId = tabId
+    }
+        |> config.onWebLogin
+            (Servers.getActiveNIP config.activeGateway)
+            (Network.getIp remoteNip)
+            password
+        |> React.msg
+        |> (,) tab
+
+
+onCrack : Config msg -> Network.NIP -> Tab -> TabUpdateResponse msg
+onCrack { onNewBruteforceProcess } nip tab =
+    nip
+        |> Network.getIp
+        |> onNewBruteforceProcess
+        |> React.msg
+        |> (,) tab
+
+
+onPageMsg : Config msg -> TabMsg -> Tab -> TabUpdateResponse msg
+onPageMsg config msg tab =
     let
-        servers =
-            data
-                |> Game.getGame
-                |> Game.Models.getServers
-
-        requester =
-            { sessionId = sessionId
-            , windowId = windowId
-            , context = context
-            , tabId = tabId
-            }
-
-        gatewayNip =
-            Servers.get (Game.getActiveCId data) servers
-                |> Maybe.map (Servers.getActiveNIP)
-
-        remoteIp =
-            Network.getIp remoteNip
-
-        dispatch =
-            case gatewayNip of
-                Just gatewayNip ->
-                    Dispatch.servers <|
-                        Servers.Login gatewayNip remoteIp password requester
-
-                Nothing ->
-                    -- You don't have a Gateway?
-                    "A gateway is required for everything!"
-                        |> Error.astralProj
-                        |> uncurry Native.Panic.crash
-    in
-        ( tab, Cmd.none, dispatch )
-
-
-onCrack : Game.Data -> Network.NIP -> Tab -> TabUpdateResponse
-onCrack data nip tab =
-    let
-        serverId =
-            Game.getActiveCId data
-
-        targetIp =
-            Network.getIp nip
-
-        dispatch =
-            Dispatch.processes serverId <|
-                Servers.NewBruteforceProcess targetIp
-    in
-        ( tab, Cmd.none, dispatch )
-
-
-onPageMsg : Game.Data -> TabMsg -> Tab -> TabUpdateResponse
-onPageMsg data msg tab =
-    let
-        ( page_, cmd, dispatch ) =
-            updatePage data msg tab.page
+        ( page_, react ) =
+            updatePage config msg tab.page
 
         tab_ =
             { tab | page = page_ }
     in
-        ( tab_, cmd, dispatch )
+        ( tab_, react )
 
 
 updatePage :
-    Game.Data
+    Config msg
     -> TabMsg
     -> Page
-    -> ( Page, Cmd Msg, Dispatch )
-updatePage data msg tab =
+    -> ( Page, React msg )
+updatePage config msg tab =
     case ( tab, msg ) of
         ( WebserverModel page, WebserverMsg msg ) ->
-            Update.mapModel WebserverModel <|
-                Webserver.update webserverConfig data msg page
+            let
+                ( tab_, react ) =
+                    Webserver.update (webserverConfig config) msg page
+            in
+                ( WebserverModel tab_, react )
 
         ( BankModel page, BankMsg msg ) ->
-            Update.mapModel BankModel <|
-                Bank.update bankConfig data msg page
+            let
+                ( tab_, react ) =
+                    Bank.update (bankConfig config) msg page
+            in
+                ( BankModel tab_, react )
 
         ( DownloadCenterModel page, DownloadCenterMsg msg ) ->
-            Update.mapModel DownloadCenterModel <|
-                DownloadCenter.update downloadCenterConfig data msg page
+            let
+                ( tab_, react ) =
+                    DownloadCenter.update (downloadCenterConfig config) msg page
+            in
+                ( DownloadCenterModel tab_, react )
 
         _ ->
-            Update.fromModel tab
+            ( tab, React.none )
 
 
 handleBankLogin :
-    Game.Data
+    Config msg
     -> Int
     -> Tab
     -> Finances.BankAccountData
     -> Model
-    -> TabUpdateResponse
-handleBankLogin data tabId tab accountData model =
+    -> TabUpdateResponse msg
+handleBankLogin config tabId tab accountData model =
     let
         page =
             (getTab tabId model.tabs).page
 
-        ( pageModel, _, _ ) =
-            updatePage data (BankMsg <| Bank.HandleLogin accountData) page
+        ( pageModel, _ ) =
+            updatePage config (BankMsg <| Bank.HandleLogin accountData) page
     in
-        Update.fromModel { tab | page = pageModel }
+        ( { tab | page = pageModel }, React.none )
 
 
-handleBankError : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
-handleBankError data tabId tab model =
+handleBankError : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
+handleBankError config tabId tab model =
     let
         page =
             (getTab tabId model.tabs).page
 
-        ( pageModel, _, _ ) =
-            updatePage data (BankMsg Bank.HandleLoginError) page
+        ( pageModel, _ ) =
+            updatePage config (BankMsg Bank.HandleLoginError) page
     in
-        Update.fromModel { tab | page = pageModel }
+        ( { tab | page = pageModel }, React.none )
 
 
-handleBankTransfer : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
-handleBankTransfer data tabId tab model =
+handleBankTransfer : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
+handleBankTransfer config tabId tab model =
     let
         page =
             (getTab tabId model.tabs).page
 
-        ( pageModel, _, _ ) =
-            updatePage data (BankMsg Bank.HandleTransfer) page
+        ( pageModel, _ ) =
+            updatePage config (BankMsg Bank.HandleTransfer) page
     in
-        Update.fromModel { tab | page = pageModel }
+        ( { tab | page = pageModel }, React.none )
 
 
-handleBankTransferError : Game.Data -> Int -> Tab -> Model -> TabUpdateResponse
-handleBankTransferError data tabId tab model =
+handleBankTransferError : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
+handleBankTransferError config tabId tab model =
     let
         page =
             (getTab tabId model.tabs).page
 
-        ( pageModel, _, _ ) =
-            updatePage data (BankMsg Bank.HandleTransferError) page
+        ( pageModel, _ ) =
+            updatePage config (BankMsg Bank.HandleTransferError) page
     in
-        Update.fromModel { tab | page = pageModel }
+        ( { tab | page = pageModel }, React.none )

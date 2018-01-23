@@ -1,11 +1,11 @@
 module OS.Console.View exposing (view)
 
 import Dict exposing (Dict)
-import Game.Data as Game
-import Game.LogStream.Models as LogStream
+import Game.BackFlix.Models as BackFlix
 import Html exposing (Html, div, span, text)
 import Html.CssHelpers
 import UI.ToString exposing (timestampToFullData)
+import OS.Console.Config exposing (..)
 import OS.Resources exposing (..)
 
 
@@ -13,23 +13,23 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace "os"
 
 
-view : Game.Data -> Html msg
-view data =
+view : Config -> Html msg
+view config =
     let
         view_ =
-            viewLogs (Game.getLogStream data) ++ [ text "elliot@localhost_>" ]
+            viewLogs config.backFlix ++ [ text "elliot@localhost_>" ]
     in
         div [ class [ LogConsole ] ]
             view_
 
 
-viewLogs : LogStream.LogStream -> List (Html msg)
+viewLogs : BackFlix.BackFlix -> List (Html msg)
 viewLogs logs =
     logs
         |> Dict.foldl (\k v acc -> viewLog k v :: acc) []
 
 
-viewLog : LogStream.Id -> LogStream.Log -> Html msg
+viewLog : BackFlix.Id -> BackFlix.Log -> Html msg
 viewLog id log =
     let
         data =
@@ -53,32 +53,32 @@ viewLog id log =
             ]
 
 
-setClass : LogStream.Log -> List (Html.Attribute msg)
+setClass : BackFlix.Log -> List (Html.Attribute msg)
 setClass log =
     case log.type_ of
-        LogStream.Request ->
+        BackFlix.Request ->
             [ class [ BFRequest ] ]
 
-        LogStream.Receive ->
+        BackFlix.Receive ->
             [ class [ BFReceive ] ]
 
-        LogStream.Join ->
+        BackFlix.Join ->
             [ class [ BFJoin ] ]
 
-        LogStream.JoinAccount ->
+        BackFlix.JoinAccount ->
             [ class [ BFJoinAccount ] ]
 
-        LogStream.JoinServer ->
+        BackFlix.JoinServer ->
             [ class [ BFJoinServer ] ]
 
-        LogStream.Other ->
+        BackFlix.Other ->
             [ class [ BFOther ] ]
 
-        LogStream.None ->
+        BackFlix.None ->
             [ class [ BFNone ] ]
 
-        LogStream.Event ->
+        BackFlix.Event ->
             [ class [ BFEvent ] ]
 
-        LogStream.Error ->
+        BackFlix.Error ->
             [ class [ BFError ] ]

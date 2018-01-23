@@ -1,10 +1,7 @@
 module Setup.Models exposing (..)
 
-import Game.Models as Game
 import Json.Encode as Encode exposing (Value)
-import Core.Dispatch as Dispatch exposing (Dispatch)
 import Setup.Types exposing (..)
-import Setup.Messages exposing (Msg)
 import Setup.Settings as Settings exposing (Settings)
 import Setup.Pages.PickLocation.Models as PickLocation
 import Setup.Pages.Mainframe.Models as Mainframe
@@ -109,20 +106,16 @@ initializePages =
         List.map mapper
 
 
-initialModel : Game.Model -> ( Model, Cmd Msg, Dispatch )
-initialModel game =
-    let
-        model =
-            { page = Nothing
-            , pages = []
-            , badPages = []
-            , remaining = []
-            , done = []
-            , isLoading = True
-            , topicsDone = initialTopicsDone
-            }
-    in
-        ( model, Cmd.none, Dispatch.none )
+initialModel : Model
+initialModel =
+    { page = Nothing
+    , pages = []
+    , badPages = []
+    , remaining = []
+    , done = []
+    , isLoading = True
+    , topicsDone = initialTopicsDone
+    }
 
 
 initialTopicsDone : TopicsDone

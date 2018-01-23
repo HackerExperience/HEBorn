@@ -1,337 +1,322 @@
 module Game.Servers.Update exposing (..)
 
-import Utils.Update as Update
+import Utils.React as React exposing (React)
 import Json.Decode as Decode exposing (Value)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Account as Account
-import Game.Models as Game
-import Game.Account.Bounces.Models as Bounces
+import Decoders.Servers
+import Game.Meta.Types.Network as Network
+import Game.Account.Bounces.Shared as Bounces
+import Game.Meta.Models as Meta
+import Game.Servers.Notifications.Messages as Notifications
+import Game.Servers.Notifications.Update as Notifications
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Filesystem.Update as Filesystem
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Logs.Update as Logs
-import Game.Servers.Messages exposing (..)
-import Game.Servers.Models exposing (..)
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Processes.Update as Processes
 import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Hardware.Update as Hardware
-import Game.Servers.Requests exposing (..)
-import Game.Servers.Shared exposing (..)
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
-import Game.Meta.Models as Meta
-import Decoders.Servers
-import Game.Notifications.Messages as Notifications
-import Game.Notifications.Update as Notifications
-import Game.Notifications.Source as Notifications
-import Game.Servers.Requests.Resync as Resync
-import Game.Meta.Types.Network as Network
+import Game.Servers.Requests.Resync exposing (resyncRequest)
+import Game.Servers.Config exposing (..)
+import Game.Servers.Messages exposing (..)
+import Game.Servers.Models exposing (..)
+import Game.Servers.Shared exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-type alias ServerUpdateResponse =
-    ( Server, Cmd ServerMsg, Dispatch )
+type alias ServerUpdateResponse msg =
+    ( Server, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         ServerMsg cid msg ->
-            onServerMsg game cid msg model
+            onServerMsg config cid msg model
 
-        Resync cid ->
-            onResync game cid model
+        Synced cid server ->
+            ( insert cid server model, React.none )
 
-        Request data ->
-            onRequest game data model
+        HandleResync cid ->
+            onResync config cid model
 
         HandleJoinedServer cid value ->
-            handleJoinedServer game cid value model
+            handleJoinedServer config cid value model
 
 
-onServerMsg : Game.Model -> CId -> ServerMsg -> Model -> UpdateResponse
-onServerMsg game cid msg model =
+onServerMsg :
+    Config msg
+    -> CId
+    -> ServerMsg
+    -> Model
+    -> UpdateResponse msg
+onServerMsg config cid msg model =
     case get cid model of
         Just server ->
             server
-                |> updateServer game model cid msg
-                |> Update.mapModel (flip (insert cid) model)
-                |> Update.mapCmd (ServerMsg cid)
+                |> updateServer config cid model msg
+                |> Tuple.mapFirst (flip (insert cid) model)
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-onRequest : Game.Model -> RequestMsg -> Model -> UpdateResponse
-onRequest game data model =
+onResync : Config msg -> CId -> Model -> UpdateResponse msg
+onResync config cid model =
     let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
+        handler result =
+            case result of
+                Ok ( cid, servers ) ->
+                    config.toMsg <| Synced cid servers
 
-        response =
-            receive lastTick data
-    in
-        case response of
-            Just response ->
-                updateRequest game response model
+                Err () ->
+                    config.batchMsg []
 
-            Nothing ->
-                Update.fromModel model
-
-
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game data model =
-    case data of
-        ResyncServer (Resync.Okay ( cid, server )) ->
-            Update.fromModel <| insert cid server model
-
-
-onResync : Game.Model -> CId -> Model -> UpdateResponse
-onResync game cid model =
-    let
         cmd =
-            Resync.request (getGatewayCache cid model) cid game
+            config
+                |> resyncRequest cid
+                    config.lastTick
+                    (getGatewayCache cid model)
+                |> Cmd.map handler
+                |> React.cmd
     in
-        ( model, cmd, Dispatch.none )
+        ( model, cmd )
 
 
 updateServer :
-    Game.Model
-    -> Model
+    Config msg
     -> CId
+    -> Model
     -> ServerMsg
     -> Server
-    -> ServerUpdateResponse
-updateServer game model cid msg server =
+    -> ServerUpdateResponse msg
+updateServer config cid model msg server =
     case msg of
         HandleSetBounce maybeBounceId ->
-            handleSetBounce game
-                cid
-                maybeBounceId
-                server
+            handleSetBounce config cid maybeBounceId server
 
         HandleSetEndpoint remote ->
-            handleSetEndpoint game remote server
+            handleSetEndpoint config remote server
 
         HandleSetActiveNIP nip ->
-            handleSetActiveNIP game nip server
+            handleSetActiveNIP config nip server
 
         FilesystemMsg storageId msg ->
-            onFilesystemMsg game cid storageId msg server
+            onFilesystemMsg config cid storageId msg server
 
         LogsMsg msg ->
-            onLogsMsg game cid msg server
+            onLogsMsg config cid msg server
 
         ProcessesMsg msg ->
-            onProcessesMsg game cid msg server
+            onProcessesMsg config cid msg server
 
         HardwareMsg msg ->
-            onHardwareMsg game cid msg server
+            onHardwareMsg config cid msg server
 
         TunnelsMsg msg ->
-            onTunnelsMsg game msg server
-
-        ServerRequest data ->
-            updateServerRequest game (serverReceive data) server
+            onTunnelsMsg config cid msg server
 
         NotificationsMsg msg ->
-            onNotificationsMsg game cid msg server
+            onNotificationsMsg config cid msg server
 
 
 handleSetBounce :
-    Game.Model
+    Config msg
     -> CId
     -> Maybe Bounces.ID
     -> Server
-    -> ServerUpdateResponse
-handleSetBounce game cid maybeBounceId server =
-    setBounce maybeBounceId server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetBounce config cid maybeBounceId server =
+    ( setBounce maybeBounceId server, React.none )
 
 
 handleSetEndpoint :
-    Game.Model
+    Config msg
     -> Maybe CId
     -> Server
-    -> ServerUpdateResponse
-handleSetEndpoint game cid server =
-    setEndpointCId cid server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetEndpoint config cid server =
+    ( setEndpointCId cid server, React.none )
 
 
 handleSetActiveNIP :
-    Game.Model
+    Config msg
     -> Network.NIP
     -> Server
-    -> ServerUpdateResponse
-handleSetActiveNIP game nip server =
-    setActiveNIP nip server
-        |> Update.fromModel
+    -> ServerUpdateResponse msg
+handleSetActiveNIP config nip server =
+    ( setActiveNIP nip server, React.none )
 
 
 onFilesystemMsg :
-    Game.Model
+    Config msg
     -> CId
     -> StorageId
     -> Filesystem.Msg
     -> Server
-    -> ServerUpdateResponse
-onFilesystemMsg game cid id msg server =
+    -> ServerUpdateResponse msg
+onFilesystemMsg config cid id msg server =
     case getStorage id server of
         Just storage ->
             let
-                ( filesystem, cmd, dispatch ) =
-                    storage
-                        |> getFilesystem
-                        |> Filesystem.update game cid msg
+                config_ =
+                    filesystemConfig cid id config
+
+                ( filesystem, cmd ) =
+                    Filesystem.update config_ msg <| getFilesystem storage
 
                 storage_ =
                     setFilesystem filesystem storage
 
                 server_ =
                     setStorage id storage_ server
-
-                cmd_ =
-                    Cmd.map (FilesystemMsg id) cmd
             in
-                ( server_, cmd_, dispatch )
+                ( server_, cmd )
 
         Nothing ->
-            Update.fromModel server
+            ( server, React.none )
 
 
 onLogsMsg :
-    Game.Model
+    Config msg
     -> CId
     -> Logs.Msg
     -> Server
-    -> ServerUpdateResponse
-onLogsMsg game cid =
-    Update.child
-        { get = .logs
-        , set = (\logs model -> { model | logs = logs })
-        , toMsg = LogsMsg
-        , update = (Logs.update game cid)
-        }
+    -> ServerUpdateResponse msg
+onLogsMsg config cid msg server =
+    let
+        config_ =
+            logsConfig cid config
+
+        ( logs, cmd ) =
+            Logs.update config_ msg <| getLogs server
+
+        server_ =
+            setLogs logs server
+    in
+        ( server_, cmd )
 
 
 onProcessesMsg :
-    Game.Model
+    Config msg
     -> CId
     -> Processes.Msg
     -> Server
-    -> ServerUpdateResponse
-onProcessesMsg game cid =
-    Update.child
-        { get = .processes
-        , set = (\processes model -> { model | processes = processes })
-        , toMsg = ProcessesMsg
-        , update = (Processes.update game cid)
-        }
+    -> ServerUpdateResponse msg
+onProcessesMsg config cid msg server =
+    let
+        nip =
+            getActiveNIP server
+
+        config_ =
+            processesConfig cid nip config
+
+        ( processes, cmd ) =
+            Processes.update config_ msg <| getProcesses server
+
+        server_ =
+            setProcesses processes server
+    in
+        ( server_, cmd )
 
 
 onHardwareMsg :
-    Game.Model
+    Config msg
     -> CId
     -> Hardware.Msg
     -> Server
-    -> ServerUpdateResponse
-onHardwareMsg game cid =
-    Update.child
-        { get = .hardware
-        , set = (\hardware model -> { model | hardware = hardware })
-        , toMsg = HardwareMsg
-        , update = (Hardware.update game cid)
-        }
+    -> ServerUpdateResponse msg
+onHardwareMsg config cid msg server =
+    let
+        nip =
+            getActiveNIP server
+
+        config_ =
+            hardwareConfig cid nip config
+
+        ( hardware, cmd ) =
+            Hardware.update config_ msg <| getHardware server
+
+        server_ =
+            setHardware hardware server
+    in
+        ( server_, cmd )
 
 
-onTunnelsMsg : Game.Model -> Tunnels.Msg -> Server -> ServerUpdateResponse
-onTunnelsMsg game =
-    Update.child
-        { get = .tunnels
-        , set = (\tunnels model -> { model | tunnels = tunnels })
-        , toMsg = TunnelsMsg
-        , update = (Tunnels.update game)
-        }
+onTunnelsMsg :
+    Config msg
+    -> CId
+    -> Tunnels.Msg
+    -> Server
+    -> ServerUpdateResponse msg
+onTunnelsMsg config cid msg server =
+    let
+        config_ =
+            tunnelsConfig cid config
+
+        ( tunnels, cmd ) =
+            Tunnels.update config_ msg <| getTunnels server
+
+        server_ =
+            setTunnels tunnels server
+    in
+        ( server_, cmd )
 
 
 onNotificationsMsg :
-    Game.Model
+    Config msg
     -> CId
     -> Notifications.Msg
     -> Server
-    -> ServerUpdateResponse
-onNotificationsMsg game cid =
-    Update.child
-        { get = .notifications
-        , set = (\notifications model -> { model | notifications = notifications })
-        , toMsg = NotificationsMsg
-        , update = (Notifications.update game (Notifications.Server cid))
-        }
+    -> ServerUpdateResponse msg
+onNotificationsMsg config cid msg server =
+    let
+        config_ =
+            notificationsConfig cid config
 
+        ( notifications, cmd ) =
+            Notifications.update config_ msg <| getNotifications server
 
-updateServerRequest :
-    Game.Model
-    -> Maybe ServerResponse
-    -> Server
-    -> ServerUpdateResponse
-updateServerRequest game response server =
-    case response of
-        Just _ ->
-            Update.fromModel server
-
-        Nothing ->
-            Update.fromModel server
+        model_ =
+            setNotifications notifications server
+    in
+        ( model_, cmd )
 
 
 handleJoinedServer :
-    Game.Model
+    Config msg
     -> CId
     -> Value
     -> Model
-    -> UpdateResponse
-handleJoinedServer game cid value model =
+    -> UpdateResponse msg
+handleJoinedServer config cid value model =
     let
-        lastTick =
-            game
-                |> Game.getMeta
-                |> Meta.getLastTick
-
         decodeBootstrap =
-            Decoders.Servers.server lastTick <| getGatewayCache cid model
+            Decoders.Servers.server config.lastTick <|
+                getGatewayCache cid model
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
                 let
-                    dispatch =
-                        if isGateway server then
-                            cid
-                                |> Account.NewGateway
-                                |> Dispatch.account
-                        else
-                            Dispatch.none
-
                     model_ =
                         insert cid server model
 
-                    dispatch_ =
-                        Dispatch.batch
-                            [ dispatch
-
-                            --, Dispatch.web <| Web.JoinedServer cid
-                            ]
+                    cmd =
+                        if isGateway server then
+                            React.msg <| config.onNewGateway cid
+                        else
+                            React.none
                 in
-                    ( model_, Cmd.none, dispatch_ )
+                    ( model_, cmd )
 
             Err reason ->
                 let
                     log =
                         Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
                 in
-                    Update.fromModel model
+                    ( model, React.none )

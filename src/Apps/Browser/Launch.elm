@@ -1,47 +1,36 @@
 module Apps.Browser.Launch exposing (..)
 
-import Utils.Update as Update
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Game.Data as Game
-import Game.Models
+import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
+import Game.Storyline.Emails.Contents as Emails
 import Apps.Reference exposing (..)
+import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (..)
 
 
-type alias LaunchResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias LaunchResponse msg =
+    ( Model, React msg )
 
 
-launch : Game.Data -> Maybe Params -> Reference -> LaunchResponse
-launch data maybeParams me =
+launch : Config msg -> Maybe Params -> Reference -> LaunchResponse msg
+launch config maybeParams me =
     case maybeParams of
         Just (OpenAtUrl url) ->
-            launchOpenAtUrl data url me
+            launchOpenAtUrl config url me
 
         Nothing ->
-            Update.fromModel <| initialModel me
+            ( initialModel me, React.none )
 
 
-launchOpenAtUrl : Game.Data -> URL -> Reference -> LaunchResponse
-launchOpenAtUrl data url me =
+launchOpenAtUrl : Config msg -> URL -> Reference -> LaunchResponse msg
+launchOpenAtUrl config url me =
     let
-        cid =
-            Game.getActiveCId data
-
         nid =
-            data
-                |> Game.getGame
-                |> Game.Models.getServers
-                |> Servers.get cid
-                |> Maybe.map
-                    (Servers.getActiveNIP
-                        >> Network.getId
-                    )
-                |> Maybe.withDefault "::"
+            config.activeServer
+                |> Servers.getActiveNIP
+                |> Network.getId
 
         model =
             initialModel me
@@ -53,8 +42,8 @@ launchOpenAtUrl data url me =
             , tabId = model.lastTab
             }
 
-        dispatch =
-            Dispatch.server cid <| Servers.FetchUrl url nid reference
+        react =
+            React.msg <| config.onFetchUrl url nid reference
 
         model_ =
             model
@@ -62,4 +51,4 @@ launchOpenAtUrl data url me =
                 |> gotoPage url (LoadingModel url)
                 |> flip setNowTab model
     in
-        ( model_, Cmd.none, dispatch )
+        ( model_, react )

@@ -8,7 +8,6 @@ import OS.SessionManager.WindowManager.Models as WM
 import OS.SessionManager.Types exposing (..)
 import Apps.Messages as Apps
 import Apps.Apps as Apps
-import Apps.Models as Apps
 
 
 type Msg

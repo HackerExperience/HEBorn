@@ -1,24 +1,24 @@
 module Apps.DBAdmin.Menu.Actions exposing (actionHandler)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
+import Utils.React as React exposing (React)
+import Apps.DBAdmin.Menu.Config exposing (..)
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Messages as DBAdmin exposing (Msg(..))
 import Apps.DBAdmin.Menu.Messages exposing (MenuAction(..))
 
 
 actionHandler :
-    Game.Data
+    Config msg
     -> MenuAction
     -> Model
-    -> ( Model, Cmd DBAdmin.Msg, Dispatch )
-actionHandler data action model =
+    -> ( Model, React msg )
+actionHandler config action model =
     case action of
         NormalEntryEdit logId ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
         EdittingEntryApply logId ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
 
         EdittingEntryCancel logId ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )

@@ -1,17 +1,17 @@
 module OS.Header.ConnectionBarView exposing (view)
 
+import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (boolAttr)
-import Game.Data exposing (Data)
-import Game.Models as Game
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network
 import Game.Account.Models as Account
 import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Models as Servers exposing (Servers)
 import Game.Servers.Shared as Servers
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -22,42 +22,37 @@ import UI.Widgets.CustomSelect exposing (customSelect)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Data -> Model -> Html Msg
-view ({ game } as data) { openMenu } =
+view : Config msg -> Model -> Html Msg
+view config { openMenu } =
     let
-        account =
-            Game.getAccount game
-
         activeGatewayCId =
-            data
-                |> Game.Data.getActiveCId
+            config.activeGateway
+                |> Tuple.first
                 |> Just
 
         gateways =
-            account
-                |> (.gateways)
+            config.gateways
                 |> List.map Just
 
         activeBounce =
-            data
-                |> Game.Data.getActiveServer
-                |> Servers.getBounce
+            config.activeBounce
 
         activeEndpointCId =
-            game
-                |> Game.getEndpoint
-                |> Maybe.map Tuple.first
+            config.activeEndpointCid
 
         endpoints =
-            data
-                |> Game.Data.getEndpoints
-                |> List.map Just
+            case config.endpoints of
+                Just endpoints ->
+                    List.map Just endpoints
+
+                Nothing ->
+                    []
 
         gatewayBounces =
             case activeEndpointCId of
                 Nothing ->
-                    game
-                        |> Game.getBounces
+                    bounces
+                        |> Dict.keys
                         |> List.map Just
                         |> (::) Nothing
 
@@ -65,17 +60,14 @@ view ({ game } as data) { openMenu } =
                     [ activeBounce ]
 
         onGateway =
-            account
-                |> Account.getContext
+            config.activeContext
                 |> (==) Gateway
 
         servers =
-            data
-                |> Game.Data.getGame
-                |> Game.getServers
+            config.servers
 
         bounces =
-            Account.getBounces account
+            config.bounces
     in
         div [ class [ Connection ] ]
             [ contextToggler onGateway (ContextTo Gateway) activeEndpointCId

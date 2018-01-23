@@ -3,41 +3,39 @@ module Apps.LocationPicker.View exposing (view)
 import Html exposing (..)
 import Html.CssHelpers
 import Native.Untouchable
-import Game.Data as Game
+import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Messages exposing (Msg(..))
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
-import Apps.LocationPicker.Menu.View exposing (..)
 
 
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
-    div
-        [ menuForDummy
-        , class [ Super ]
-        ]
-        [ div [ class [ Map ] ]
-            [ Native.Untouchable.node "hemap" model.mapEId ]
-        , div [ class [ Interactive ] ] <|
-            case model.coordinates of
-                Just coord ->
-                    [ text "COORDENADAS"
-                    , br [] []
-                    , text " LAT: "
-                    , text <| toString coord.lat
-                    , br [] []
-                    , text " LNG: "
-                    , text <| toString coord.lng
-                    , br [] []
-                    , br [] []
-                    , text "CLIQUE NO MAPA PARA MUDAR SUA LOCALIZAÇÃO!"
-                    ]
+view : Config msg -> Model -> Html msg
+view config model =
+    Html.map config.toMsg <|
+        div
+            [ class [ Super ]
+            ]
+            [ div [ class [ Map ] ]
+                [ Native.Untouchable.node "hemap" model.mapEId ]
+            , div [ class [ Interactive ] ] <|
+                case model.coordinates of
+                    Just coord ->
+                        [ text "COORDENADAS"
+                        , br [] []
+                        , text " LAT: "
+                        , text <| toString coord.lat
+                        , br [] []
+                        , text " LNG: "
+                        , text <| toString coord.lng
+                        , br [] []
+                        , br [] []
+                        , text "CLIQUE NO MAPA PARA MUDAR SUA LOCALIZAÇÃO!"
+                        ]
 
-                Nothing ->
-                    [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
-        , menuView model
-        ]
+                    Nothing ->
+                        [ text "CLIQUE ONDE VOCÊ ESTÁ!" ]
+            ]

@@ -15,14 +15,15 @@ import OS.SessionManager.WindowManager.MenuHandler.View
         , menuViewCreator
         )
 import Game.Servers.Processes.Models as Processes
+import Apps.TaskManager.Menu.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManagerMsg
 import Apps.TaskManager.Menu.Messages exposing (Msg(..), MenuAction(..))
 import Apps.TaskManager.Menu.Models exposing (Menu(..))
 
 
-menuView : Model -> Html TaskManagerMsg.Msg
-menuView model =
+menuView : Config msg -> Model -> Html TaskManagerMsg.Msg
+menuView config model =
     menuViewCreator
         TaskManagerMsg.MenuMsg
         model
@@ -31,8 +32,8 @@ menuView model =
         menu
 
 
-menuFor : Menu -> Html.Attribute TaskManagerMsg.Msg
-menuFor context =
+menuFor : Config msg -> Menu -> Html.Attribute TaskManagerMsg.Msg
+menuFor { toMsg } context =
     menuForCreator TaskManagerMsg.MenuMsg MenuMsg context
 
 
@@ -60,21 +61,21 @@ menu model context =
             []
 
 
-menuForRunning : Processes.ID -> Html.Attribute TaskManagerMsg.Msg
-menuForRunning pID =
-    (menuFor (MenuRunningProcess pID))
+menuForRunning : Config msg -> Processes.ID -> Html.Attribute TaskManagerMsg.Msg
+menuForRunning config pID =
+    menuFor config (MenuRunningProcess pID)
 
 
-menuForPaused : Processes.ID -> Html.Attribute TaskManagerMsg.Msg
-menuForPaused pID =
-    (menuFor (MenuPausedProcess pID))
+menuForPaused : Config msg -> Processes.ID -> Html.Attribute TaskManagerMsg.Msg
+menuForPaused config pID =
+    menuFor config (MenuPausedProcess pID)
 
 
-menuForComplete : Processes.ID -> Html.Attribute TaskManagerMsg.Msg
-menuForComplete pID =
-    (menuFor (MenuCompleteProcess pID))
+menuForComplete : Config msg -> Processes.ID -> Html.Attribute TaskManagerMsg.Msg
+menuForComplete config pID =
+    menuFor config (MenuCompleteProcess pID)
 
 
-menuForPartial : Processes.ID -> Html.Attribute TaskManagerMsg.Msg
-menuForPartial pID =
-    (menuFor (MenuPartialProcess pID))
+menuForPartial : Config msg -> Processes.ID -> Html.Attribute TaskManagerMsg.Msg
+menuForPartial config pID =
+    menuFor config (MenuPartialProcess pID)

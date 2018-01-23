@@ -32,3 +32,13 @@ getMissions =
 getEmails : Model -> Emails.Model
 getEmails =
     .emails
+
+
+setMissions : Missions.Model -> Model -> Model
+setMissions missions model =
+    { model | missions = missions }
+
+
+setEmails : Emails.Model -> Model -> Model
+setEmails emails model =
+    { model | emails = emails }

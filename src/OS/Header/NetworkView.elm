@@ -1,18 +1,13 @@
 module OS.Header.NetworkView exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (attribute)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
-import Utils.Html exposing (spacer)
 import Utils.Html.Attributes exposing (boolAttr)
 import Utils.List as List
-import Game.Data exposing (Data)
-import Game.Models as Game
-import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network
-import Game.Account.Models as Account
 import Game.Servers.Models as Servers
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
@@ -22,21 +17,17 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Data -> Bool -> Html Msg
-view data isOpen =
+view : Config msg -> Bool -> Html Msg
+view config isOpen =
     let
         onClickNetwork nip =
             onClick <| SelectNIP nip
 
-        activeServer =
-            Game.Data.getActiveServer data
-
         activeNIP =
-            Servers.getActiveNIP activeServer
+            config.activeNIP
 
         availableNetworks =
-            activeServer
-                |> .nips
+            config.nips
                 |> List.unique
                 |> List.filter
                     ((/=) activeNIP)

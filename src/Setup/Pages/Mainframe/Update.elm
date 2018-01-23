@@ -1,58 +1,51 @@
 module Setup.Pages.Mainframe.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Models as Game
-import Utils.Update as Update
 import Utils.Maybe as Maybe
+import Utils.React as React exposing (React)
+import Game.Account.Models as Account
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
 import Setup.Requests.Check as Check
-import Game.Account.Models as Account
 
 
 type alias UpdateResponse msg =
-    ( Model, Cmd msg, Dispatch )
+    ( Model, React msg )
 
 
-update : Config msg -> Game.Model -> Msg -> Model -> UpdateResponse msg
-update config game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Mainframe str ->
             onMainframe str model
 
         Validate ->
-            onValidate config game model
+            onValidate config model
 
         Checked True ->
-            Update.fromModel <| setOkay model
+            ( setOkay model, React.none )
 
         Checked False ->
-            Update.fromModel model
+            ( model, React.none )
 
 
 onMainframe : String -> Model -> UpdateResponse msg
 onMainframe str model =
-    Update.fromModel <| setMainframeName str model
+    ( setMainframeName str model, React.none )
 
 
-onValidate : Config msg -> Game.Model -> Model -> UpdateResponse msg
-onValidate { toMsg } game model =
+onValidate : Config msg -> Model -> UpdateResponse msg
+onValidate ({ toMsg, mainframe } as config) model =
     let
-        mainframe =
-            game
-                |> Game.getAccount
-                |> Account.getMainframe
-
-        hostname =
-            getHostname model
-
         cmd =
-            case Maybe.uncurry mainframe hostname of
-                Just ( cid, name ) ->
-                    Check.serverName (Checked >> toMsg) name cid game
+            case Maybe.uncurry (getHostname model) mainframe of
+                Just ( name, mainframe ) ->
+                    Check.serverName (Checked >> toMsg)
+                        name
+                        mainframe
+                        config
 
                 Nothing ->
                     Cmd.none
     in
-        ( model, cmd, Dispatch.none )
+        ( model, React.cmd cmd )

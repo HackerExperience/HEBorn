@@ -1,12 +1,13 @@
 module Apps.Browser.Messages exposing (..)
 
 import Game.Account.Finances.Models as Finances
+import Game.Account.Finances.Shared as Finances
 import Game.Web.Types exposing (Response)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
-import Game.Servers.Filesystem.Models as Filesystem
-import Events.Account.PasswordAcquired as PasswordAcquired
+import Game.Servers.Filesystem.Shared as Filesystem
+import Events.Account.Handlers.ServerPasswordAcquired as PasswordAcquired
 import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter

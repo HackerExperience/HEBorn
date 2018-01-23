@@ -15,7 +15,7 @@ import Apps.LanViewer.Style as LanViewer
 import Apps.Email.Style as Email
 import Apps.Bug.Style as Bug
 import Apps.Calculator.Style as Calculator
-import Apps.LogFlix.Style as LogFlix
+import Apps.BackFlix.Style as BackFlix
 import Apps.ServersGears.Style as ServersGears
 import Apps.FloatingHeads.Style as FloatingHeads
 
@@ -37,6 +37,6 @@ cssList =
     , Bug.css
     , Calculator.css
     , ServersGears.css
-    , LogFlix.css
+    , BackFlix.css
     , FloatingHeads.css
     ]

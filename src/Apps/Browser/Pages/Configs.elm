@@ -1,6 +1,7 @@
 module Apps.Browser.Pages.Configs exposing (..)
 
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
+import Apps.Browser.Config as Browser
 import Apps.Browser.Pages.Bank.Config as Bank
 import Apps.Browser.Pages.DownloadCenter.Config as DownloadCenter
 import Apps.Browser.Pages.Home.Config as Home
@@ -17,8 +18,8 @@ bankConfig =
     }
 
 
-downloadCenterConfig : DownloadCenter.Config Msg
-downloadCenterConfig =
+downloadCenterConfig : Browser.Config msg -> DownloadCenter.Config Msg
+downloadCenterConfig { endpoints } =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg
     , onLogin = \a b -> ActiveTabMsg <| Login a b
     , onLogout = ActiveTabMsg Logout
@@ -27,6 +28,7 @@ downloadCenterConfig =
     , onPublicDownload = PublicDownload
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
     , onNewApp = NewApp >> ActiveTabMsg
+    , endpoints = endpoints
     }
 
 
@@ -37,8 +39,8 @@ homeConfig =
     }
 
 
-webserverConfig : Webserver.Config Msg
-webserverConfig =
+webserverConfig : Browser.Config msg -> Webserver.Config Msg
+webserverConfig { endpoints } =
     { toMsg = WebserverMsg >> ActiveTabMsg
     , onLogin = \a b -> ActiveTabMsg <| Login a b
     , onLogout = ActiveTabMsg Logout
@@ -47,4 +49,5 @@ webserverConfig =
     , onPublicDownload = PublicDownload
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
     , onNewApp = NewApp >> ActiveTabMsg
+    , endpoints = endpoints
     }

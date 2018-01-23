@@ -2,11 +2,11 @@ module Landing.View exposing (view)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Core.Models as Core
-import Landing.Messages exposing (..)
-import Landing.Models exposing (..)
 import Landing.Login.View as Login
 import Landing.SignUp.View as SignUp
+import Landing.Config exposing (..)
+import Landing.Messages exposing (..)
+import Landing.Models exposing (..)
 import Landing.Resources exposing (..)
 
 
@@ -14,11 +14,11 @@ import Landing.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Core.Model -> Model -> Html Msg
-view core model =
+view : Config msg -> Model -> Html msg
+view config model =
     div [ id viewId ]
         [ viewIntro
-        , viewDisplayManager core model
+        , viewDisplayManager config model
         ]
 
 
@@ -26,7 +26,7 @@ view core model =
 -- internals
 
 
-viewIntro : Html Msg
+viewIntro : Html msg
 viewIntro =
     div [ id introId ]
         [ text "Shh! Don't tell anyone, but this is the new HE1 website."
@@ -50,31 +50,30 @@ viewIntro =
         ]
 
 
-viewDisplayManager : Core.Model -> Model -> Html Msg
-viewDisplayManager core model =
+viewDisplayManager : Config msg -> Model -> Html msg
+viewDisplayManager config model =
     div
         [ id displayManagerId
         , class
-            (if core.windowLoaded then
+            (if config.windowLoaded then
                 [ Loaded ]
              else
                 []
             )
         ]
-        [ viewLogin model
-        , viewSignUp core model
+        [ viewLogin config model
+        , viewSignUp config model
         ]
 
 
-viewLogin : Model -> Html Msg
-viewLogin model =
-    Html.map LoginMsg
-        (Login.view model.login)
+viewLogin : Config msg -> Model -> Html msg
+viewLogin config model =
+    Login.view (.toMsg (loginConfig config)) model.login
 
 
-viewSignUp : Core.Model -> Model -> Html Msg
-viewSignUp core model =
-    if core.config.version == "dev" then
-        Html.map SignUpMsg (SignUp.view model.signUp)
+viewSignUp : Config msg -> Model -> Html msg
+viewSignUp config model =
+    if config.flags.version == "dev" then
+        SignUp.view (.toMsg (signupConfig config)) model.signUp
     else
         div [] []

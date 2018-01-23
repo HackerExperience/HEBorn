@@ -1,8 +1,7 @@
 module Game.Storyline.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Game.Models as Game
+import Utils.React as React exposing (React)
+import Game.Storyline.Config exposing (..)
 import Game.Storyline.Models exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Missions.Messages as Missions
@@ -11,51 +10,69 @@ import Game.Storyline.Emails.Messages as Emails
 import Game.Storyline.Emails.Update as Emails
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         HandleToggle ->
             handleToggle model
 
+        HandleSetMode enable ->
+            handleSet enable model
+
         MissionsMsg msg ->
-            onMission game msg model
+            onMission config msg model
 
         EmailsMsg msg ->
-            onEmail game msg model
+            onEmail config msg model
 
 
-handleToggle : Model -> UpdateResponse
+handleToggle : Model -> UpdateResponse msg
 handleToggle model =
     let
         model_ =
             { model | enabled = (not model.enabled) }
     in
-        Update.fromModel model_
+        ( model_, React.none )
 
 
-onMission : Game.Model -> Missions.Msg -> Model -> UpdateResponse
-onMission game msg model =
-    Update.child
-        { get = .missions
-        , set = (\missions model -> { model | missions = missions })
-        , toMsg = MissionsMsg
-        , update = (Missions.update game)
-        }
-        msg
-        model
+handleSet : Bool -> Model -> UpdateResponse msg
+handleSet enable model =
+    let
+        model_ =
+            { model | enabled = enable }
+    in
+        ( model_, React.none )
 
 
-onEmail : Game.Model -> Emails.Msg -> Model -> UpdateResponse
-onEmail game msg model =
-    Update.child
-        { get = .emails
-        , set = (\emails model -> { model | emails = emails })
-        , toMsg = EmailsMsg
-        , update = (Emails.update game)
-        }
-        msg
-        model
+onMission : Config msg -> Missions.Msg -> Model -> UpdateResponse msg
+onMission config msg model =
+    let
+        config_ =
+            missionsConfig config
+
+        ( missions, react ) =
+            Missions.update config_ msg <| getMissions model
+
+        model_ =
+            setMissions missions model
+    in
+        ( model_, react )
+
+
+onEmail : Config msg -> Emails.Msg -> Model -> UpdateResponse msg
+onEmail config msg model =
+    let
+        config_ =
+            emailsConfig config
+
+        ( emails, react ) =
+            Emails.update config_ msg <| getEmails model
+
+        model_ =
+            setEmails emails model
+    in
+        ( model_, react )

@@ -21,7 +21,7 @@ type App
     | EmailApp
     | BugApp
     | CalculatorApp
-    | LogFlixApp
+    | BackFlixApp
     | FloatingHeadsApp
 
 

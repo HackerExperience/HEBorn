@@ -1,147 +1,79 @@
 module Game.Servers.Hardware.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Account as Account
-import Utils.Update as Update
-import Events.Server.Hardware.MotherboardUpdated as MotherboardUpdated
-import Game.Models as Game
+import Utils.React as React exposing (React)
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Components.Motherboard.Diff as Motherboard
-import Game.Servers.Hardware.Requests.UpdateMotherboard as UpdateMotherboard
-import Game.Servers.Shared as Servers exposing (CId)
-import Game.Servers.Hardware.Requests exposing (..)
-import Game.Servers.Hardware.Messages exposing (..)
+import Game.Servers.Hardware.Requests.UpdateMotherboard as UpdateMotherboard exposing (updateMotherboardRequest)
+import Game.Servers.Hardware.Config exposing (..)
 import Game.Servers.Hardware.Models exposing (..)
+import Game.Servers.Hardware.Messages exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> CId -> Msg -> Model -> UpdateResponse
-update game cid msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
-        HandleMotherboardUpdated data ->
-            handleMotherboardUpdated data model
+        HandleMotherboardUpdate motherboard ->
+            handleMotherboardUpdate config motherboard model
 
-        HandleMotherboardUpdate data ->
-            handleMotherboardUpdate game cid data model
+        HandleMotherboardUpdated model_ ->
+            handleMotherboardUpdated config model_ model
 
-        Request response ->
-            onRequest game cid (receive response) model
+        SetMotherboard motherboard ->
+            ( setMotherboard (Just motherboard) model, React.none )
+
+
+handleMotherboardUpdate :
+    Config msg
+    -> Motherboard
+    -> Model
+    -> UpdateResponse msg
+handleMotherboardUpdate config motherboard model =
+    let
+        handler result =
+            case result of
+                Ok motherboard ->
+                    config.toMsg <| SetMotherboard motherboard
+
+                Err error ->
+                    config.batchMsg []
+
+        cmd =
+            config
+                |> updateMotherboardRequest motherboard config.cid
+                |> Cmd.map handler
+                |> React.cmd
+    in
+        ( model, cmd )
 
 
 handleMotherboardUpdated :
-    MotherboardUpdated.Data
+    Config msg
     -> Model
-    -> UpdateResponse
-handleMotherboardUpdated model_ model =
+    -> Model
+    -> UpdateResponse msg
+handleMotherboardUpdated config model_ model =
     let
-        oldMotherboard =
-            model
-                |> getMotherboard
-                |> Maybe.withDefault Motherboard.empty
-
-        newMotherboard =
+        motherboard =
             model_
                 |> getMotherboard
                 |> Maybe.withDefault Motherboard.empty
 
-        dispatch =
-            oldMotherboard
-                |> Motherboard.diff newMotherboard
-                |> dispatchDiff
-    in
-        ( model_, Cmd.none, dispatch )
-
-
-
---handleMotherboardDetached :
---    MotherboardDetached.Data
---    -> Model
---    -> UpdateResponse
---handleMotherboardDetached data model =
---    case getMotherboard model of
---        Just oldMotherboard ->
---            let
---                newMotherboard =
---                    Motherboard.empty
---                model_ =
---                    setMotherboard (Just newMotherboard) model
---                dispatch =
---                    oldMotherboard
---                        |> Motherboard.diff newMotherboard
---                        |> dispatchDiff
---            in
---                ( model_, Cmd.none, dispatch )
---        Nothing ->
---            Update.fromModel model
-
-
-handleMotherboardUpdate :
-    Game.Model
-    -> CId
-    -> Motherboard
-    -> Model
-    -> UpdateResponse
-handleMotherboardUpdate game cid motherboard model =
-    let
-        cmd =
-            UpdateMotherboard.request motherboard cid game
-                |> Debug.log "CMD"
-    in
-        ( model, cmd, Dispatch.none )
-
-
-onRequest : Game.Model -> CId -> Maybe Response -> Model -> UpdateResponse
-onRequest game cid request model =
-    case request of
-        Just (UpdateMotherboard response) ->
-            onUpdateMotherboard response model
-
-        Nothing ->
-            Update.fromModel model
-
-
-onUpdateMotherboard : UpdateMotherboard.Response -> Model -> UpdateResponse
-onUpdateMotherboard response model =
-    case response of
-        UpdateMotherboard.Okay motherboard ->
+        ( used, freed ) =
             model
-                |> setMotherboard (Just motherboard)
-                |> Update.fromModel
+                |> getMotherboard
+                |> Maybe.withDefault Motherboard.empty
+                |> Motherboard.diff motherboard
+                |> Tuple.mapFirst
+                    (List.map config.onInventoryUsed >> config.batchMsg)
+                |> Tuple.mapSecond
+                    (List.map config.onInventoryFreed >> config.batchMsg)
 
-        _ ->
-            Update.fromModel model
-
-
-
--- helpers
-
-
-dispatchDiff : Motherboard.Diff -> Dispatch
-dispatchDiff =
-    let
-        dispatchUsed =
-            List.map
-                (Account.UsedInventoryEntry
-                    >> Account.Inventory
-                    >> Dispatch.account
-                )
-                >> Dispatch.batch
-
-        dispatchFreed =
-            List.map
-                (Account.FreedInventoryEntry
-                    >> Account.Inventory
-                    >> Dispatch.account
-                )
-                >> Dispatch.batch
-
-        dispatch ( used, freed ) =
-            Dispatch.batch
-                [ dispatchUsed used
-                , dispatchFreed freed
-                ]
+        cmd =
+            React.msg <| config.batchMsg [ used, freed ]
     in
-        dispatch
+        ( model_, cmd )

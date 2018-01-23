@@ -7,7 +7,7 @@ import Game.Servers.Shared as Servers
 type Channel
     = AccountChannel Account.ID
     | ServerChannel Servers.CId
-    | LogFlixChannel
+    | BackFlixChannel
 
 
 getAddress : Channel -> String
@@ -24,5 +24,5 @@ getAddress channel =
                 Servers.EndpointCId ( id, ip ) ->
                     "server:" ++ id ++ "@" ++ ip
 
-        LogFlixChannel ->
+        BackFlixChannel ->
             "logflix"

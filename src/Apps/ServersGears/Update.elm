@@ -1,32 +1,27 @@
 module Apps.ServersGears.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as ServersDispatch
-import Utils.Update as Update
-import Game.Data as Game
+import Utils.React as React exposing (React)
 import Game.Models as GameModels
 import Game.Servers.Models as Servers
 import Game.Servers.Hardware.Models as Hardware
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
-import Apps.ServersGears.Menu.Messages as Menu
-import Apps.ServersGears.Menu.Update as Menu
-import Apps.ServersGears.Menu.Actions as Menu
+import Apps.ServersGears.Config exposing (..)
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Data -> Msg -> Model -> UpdateResponse
-update data msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case getMotherboard model of
         Just motherboard ->
-            updateGateway data motherboard msg model
+            updateGateway config motherboard msg model
 
         Nothing ->
-            updateEndpoint data msg model
+            updateEndpoint config msg model
 
 
 
@@ -34,34 +29,26 @@ update data msg model =
 
 
 updateGateway :
-    Game.Data
+    Config msg
     -> Motherboard
     -> Msg
     -> Model
-    -> UpdateResponse
-updateGateway data motherboard msg model =
+    -> UpdateResponse msg
+updateGateway config motherboard msg model =
     case msg of
         Save ->
-            onSave data motherboard model
+            onSave config motherboard model
 
         msg ->
-            updateGeneric data msg model
+            updateGeneric config msg model
 
 
-onSave : Game.Data -> Motherboard -> Model -> UpdateResponse
-onSave game motherboard model =
-    let
-        cid =
-            Game.getActiveCId game
-
-        dispatch =
-            Dispatch.hardware cid <|
-                ServersDispatch.MotherboardUpdate motherboard
-
-        model_ =
-            { model | anyChange = False }
-    in
-        ( model_, Cmd.none, dispatch )
+onSave : Config msg -> Motherboard -> Model -> UpdateResponse msg
+onSave { onMotherboardUpdate } motherboard model =
+    motherboard
+        |> onMotherboardUpdate
+        |> React.msg
+        |> (,) model
 
 
 
@@ -69,70 +56,51 @@ onSave game motherboard model =
 
 
 updateEndpoint :
-    Game.Data
+    Config msg
     -> Msg
     -> Model
-    -> UpdateResponse
-updateEndpoint data msg model =
-    updateGeneric data msg model
+    -> UpdateResponse msg
+updateEndpoint config msg model =
+    updateGeneric config msg model
 
 
 
 -- generic update
 
 
-updateGeneric : Game.Data -> Msg -> Model -> UpdateResponse
-updateGeneric data msg model =
+updateGeneric : Config msg -> Msg -> Model -> UpdateResponse msg
+updateGeneric config msg model =
     case msg of
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         Select selection ->
-            onSelectMsg data selection model
+            onSelectMsg config selection model
 
         Unlink ->
-            onUnlinkMsg data model
+            onUnlinkMsg config model
 
         _ ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, coreMsg )
-
-
-onSelectMsg : Game.Data -> Maybe Selection -> Model -> UpdateResponse
-onSelectMsg data selection_ model =
+onSelectMsg : Config msg -> Maybe Selection -> Model -> UpdateResponse msg
+onSelectMsg config selection_ model =
     let
         inv =
-            data
-                |> Game.getGame
-                |> GameModels.getInventory
+            config.inventory
     in
         case ( model.motherboard, model.selection, selection_ ) of
             ( Just mobo, Just (SelectingSlot slotA), Just (SelectingSlot slotB) ) ->
-                model
-                    |> swapSlots slotA slotB inv mobo
-                    |> Update.fromModel
+                let
+                    model_ =
+                        swapSlots slotA slotB inv mobo model
+                in
+                    ( model_, React.none )
 
             ( Just mobo, Just (SelectingEntry entry), Just (SelectingSlot slot) ) ->
-                model
-                    |> linkSlot slot entry inv mobo
-                    |> Update.fromModel
+                let
+                    model_ =
+                        linkSlot slot entry inv mobo model
+                in
+                    ( model_, React.none )
 
             ( Just mobo, Just (SelectingSlot slot), Just (SelectingEntry entry) ) ->
                 let
@@ -141,45 +109,51 @@ onSelectMsg data selection_ model =
                             highlightComponent entry inv selection_ model_
                         else
                             model_
+
+                    model_ =
+                        linkSlot slot entry inv mobo model
+                            |> fixSelection
                 in
-                    model
-                        |> linkSlot slot entry inv mobo
-                        |> fixSelection
-                        |> Update.fromModel
+                    ( model_, React.none )
 
             ( Just mobo, _, Just (SelectingSlot slotId) ) ->
-                model
-                    |> highlightSlot slotId mobo selection_
-                    |> Update.fromModel
+                let
+                    model_ =
+                        highlightSlot slotId mobo selection_ model
+                in
+                    ( model_, React.none )
 
             ( _, _, Just (SelectingEntry entry) ) ->
-                model
-                    |> highlightComponent entry inv selection_
-                    |> Update.fromModel
+                let
+                    model_ =
+                        highlightComponent entry inv selection_ model
+                in
+                    ( model_, React.none )
 
             _ ->
-                model
-                    |> setSelection
-                        selection_
-                        Nothing
-                    |> Update.fromModel
+                let
+                    model_ =
+                        setSelection selection_ Nothing model
+                in
+                    ( model_, React.none )
 
 
-onUnlinkMsg : Game.Data -> Model -> UpdateResponse
-onUnlinkMsg data model =
+onUnlinkMsg : Config msg -> Model -> UpdateResponse msg
+onUnlinkMsg config model =
     case model.selection of
         Just (SelectingSlot slot) ->
             let
                 inv =
-                    data
-                        |> Game.getGame
-                        |> GameModels.getInventory
+                    config.inventory
+
+                model_ =
+                    unlinkSlot slot inv model
             in
-                model
-                    |> unlinkSlot slot inv
-                    |> Update.fromModel
+                ( model_, React.none )
 
         _ ->
-            model
-                |> removeSelection
-                |> Update.fromModel
+            let
+                model_ =
+                    removeSelection model
+            in
+                ( model_, React.none )

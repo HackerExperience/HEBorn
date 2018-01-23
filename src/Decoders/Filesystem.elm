@@ -17,8 +17,9 @@ import Json.Decode
         , string
         )
 import Json.Decode.Pipeline exposing (decode, required, custom)
-import Game.Servers.Filesystem.Models as Filesystem
 import Utils.Json.Decode exposing (commonError)
+import Game.Servers.Filesystem.Models as Filesystem
+import Game.Servers.Filesystem.Shared as Filesystem
 
 
 {-| A parser that merges the response with the model, parses:

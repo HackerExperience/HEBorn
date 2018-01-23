@@ -1,9 +1,13 @@
 module Core.View exposing (view)
 
 import Html exposing (..)
+import Core.Error as Error
+import Core.Config exposing (..)
 import Core.Messages exposing (..)
 import Core.Models exposing (..)
-import Game.Data as Game
+import Game.Models as Game
+import Game.Account.Models as Account
+import Game.Meta.Models as Meta
 import OS.View as OS
 import Landing.View as Landing
 import Setup.View as Setup
@@ -11,22 +15,50 @@ import Core.Panic as Panic
 
 
 view : Model -> Html Msg
-view ({ state } as model) =
-    case state of
+view model =
+    case model.state of
         Home home ->
-            Html.map LandingMsg (Landing.view model home.landing)
+            Landing.view (landingConfig model.windowLoaded model.flags)
+                home.landing
 
         Setup setup ->
-            Html.map SetupMsg (Setup.view setup.game setup.setup)
+            onSetup setup model
 
         Play play ->
-            case Game.fromGateway play.game of
-                Just inBieber ->
-                    Html.map OSMsg (OS.view inBieber play.os)
-
-                Nothing ->
-                    Panic.view "WTF_ASTRAL_PROJECTION"
-                        "Player has no active gateway!"
+            onPlay play
 
         Panic code message ->
             Panic.view code message
+
+
+onSetup : SetupModel -> Model -> Html Msg
+onSetup { game, setup } model =
+    Setup.view (setupConfig game.account.id game.account.mainframe game.flags)
+        setup
+
+
+onPlay : PlayModel -> Html Msg
+onPlay { game, os } =
+    -- CONFREFACT: Get rid of `data`
+    let
+        volatile_ =
+            ( Game.getGateway game
+            , Game.getActiveServer game
+            )
+
+        ctx =
+            Account.getContext <| Game.getAccount game
+    in
+        case volatile_ of
+            ( Just gtw, Just srv ) ->
+                OS.view (osConfig game srv ctx gtw) os
+
+            ( Nothing, _ ) ->
+                "Player doesn't have a Gateway [View.play]"
+                    |> Error.astralProj
+                    |> uncurry Panic.view
+
+            ( _, Nothing ) ->
+                "Player doesn't have an active server [View.play]"
+                    |> Error.astralProj
+                    |> uncurry Panic.view

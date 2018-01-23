@@ -1,9 +1,8 @@
 module Game.Web.Messages exposing (Msg(..), RequestMsg(..))
 
 import Requests.Types exposing (ResponseType)
-import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Shared as Servers
-import Game.Web.Models exposing (..)
+import Game.Meta.Types.Requester exposing (Requester)
 import Game.Meta.Types.Network as Network
 
 

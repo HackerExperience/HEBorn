@@ -3,9 +3,11 @@ module OS.Header.TaskbarView exposing (view)
 import Dict
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
 import Game.Servers.Models as Servers
-import Game.Notifications.Models as Notifications
+import Game.Servers.Notifications.Shared as ServersNotifications
+import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Meta.Types.Notifications as Notifications
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.NotificationsView as Notifications
@@ -17,17 +19,17 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data { openMenu } =
+view : Config msg -> Model -> Html Msg
+view config { openMenu } =
     let
         ( chatView, chatBubble ) =
             chat openMenu
 
         ( serverView, serverBubble ) =
-            servers data openMenu
+            servers config openMenu
 
         ( accountView, accountBubble ) =
-            account data openMenu
+            account config openMenu
     in
         div [ class [ Taskbar ] ]
             [ chatView
@@ -50,7 +52,8 @@ chat openMenu =
             Dict.empty
 
         view =
-            Notifications.view openMenu
+            Notifications.view (always ( "", "" ))
+                openMenu
                 ChatOpen
                 ChatIco
                 "Chat"
@@ -65,23 +68,19 @@ chat openMenu =
         ( view, bubble_ )
 
 
-servers : Game.Data -> OpenMenu -> ( Html Msg, Html Msg )
-servers data openMenu =
+servers : Config msg -> OpenMenu -> ( Html Msg, Html Msg )
+servers config openMenu =
     let
         notifications =
-            data
-                |> Game.getActiveServer
-                |> Servers.getNotifications
-
-        cid =
-            Game.getActiveCId data
+            config.serversNotifications
 
         view =
-            Notifications.view openMenu
+            Notifications.view ServersNotifications.render
+                openMenu
                 ServersOpen
                 ServersIco
                 "This server"
-                (ServerReadAll cid)
+                ServerReadAll
                 notifications
 
         bubble_ =
@@ -92,20 +91,14 @@ servers data openMenu =
         ( view, bubble_ )
 
 
-account : Game.Data -> OpenMenu -> ( Html Msg, Html Msg )
-account data openMenu =
+account : Config msg -> OpenMenu -> ( Html Msg, Html Msg )
+account config openMenu =
     let
-        game =
-            data
-                |> Game.getGame
-
         view =
-            Account.view openMenu game
+            Account.view config openMenu
 
         bubble_ =
-            data
-                |> Game.getActiveServer
-                |> Servers.getNotifications
+            config.serversNotifications
                 |> Notifications.countUnreaded
                 |> bubble
     in

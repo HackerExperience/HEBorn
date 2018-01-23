@@ -12,8 +12,8 @@ import Utils.Html.Attributes exposing (appAttr, boolAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Apps.Models as Apps
 import Apps.View as Apps
-import Game.Data as Game
 import Game.Meta.Types.Context exposing (..)
+import OS.SessionManager.WindowManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res
@@ -23,17 +23,23 @@ import OS.SessionManager.WindowManager.Resources as Res
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data ({ windows, visible } as model) =
+view : Config msg -> Model -> Html msg
+view config ({ windows, visible } as model) =
     let
+        config_ id window =
+            appsConfig
+                (unsafeContextServer config (windowContext window))
+                id
+                Active
+                config
+
         mapper id =
             case Dict.get id windows of
                 Just window ->
                     window
                         |> getAppModelFromWindow
-                        |> Apps.view (windowData data Nothing id window model)
-                        |> Html.map (AppMsg Active id)
-                        |> windowWrapper id window
+                        |> Apps.view (config_ id window)
+                        |> windowWrapper config id window
                         |> (,) id
                         |> Just
 
@@ -45,12 +51,12 @@ view data ({ windows, visible } as model) =
             (List.filterMap mapper visible)
 
 
-styles : List Css.Style -> Attribute Msg
+styles : List Css.Style -> Attribute msg
 styles =
     Css.asPairs >> style
 
 
-windowClasses : Window -> Attribute Msg
+windowClasses : Window -> Attribute msg
 windowClasses window =
     if (window.maximized) then
         class
@@ -61,8 +67,8 @@ windowClasses window =
         class [ Res.Window ]
 
 
-windowWrapper : ID -> Window -> Html Msg -> Html Msg
-windowWrapper id window view =
+windowWrapper : Config msg -> ID -> Window -> Html msg -> Html msg
+windowWrapper config id window view =
     let
         windowStaticAttrs =
             [ windowClasses window
@@ -70,7 +76,7 @@ windowWrapper id window view =
             , boolAttr Res.decoratedAttrTag <| isDecorated window
             , appAttr window.app
             , activeContextAttr <| windowContext window
-            , onMouseDown (UpdateFocusTo (Just id))
+            , onMouseDown ((UpdateFocusTo (Just id)) |> config.toMsg)
             ]
 
         windowKeyDownListener =
@@ -79,8 +85,7 @@ windowWrapper id window view =
         windowAttrs =
             case windowKeyDownListener of
                 Just msg ->
-                    msg
-                        >> AppMsg Active id
+                    (msg >> AppMsg Active id >> config.toMsg)
                         |> onKeyDown
                         |> flip (::) windowStaticAttrs
 
@@ -89,7 +94,7 @@ windowWrapper id window view =
     in
         div
             windowAttrs
-            [ header id window
+            [ header config id window
             , div
                 [ class [ Res.WindowBody ] ]
                 [ view ]
@@ -110,45 +115,48 @@ isResizable window =
         |> Apps.isResizable
 
 
-header : ID -> Window -> Html Msg
-header id window =
+header : Config msg -> ID -> Window -> Html msg
+header config id window =
     let
         windowBody =
             if (isDecorated window) then
-                [ headerTitle (title window) (Apps.icon window.app)
-                , headerContext id <| realContext window
-                , headerButtons id window
+                [ headerTitle config (title window) (Apps.icon window.app)
+                , headerContext config id <| realContext window
+                , headerButtons config id window
                 ]
             else
                 []
     in
         div
-            [ Draggable.mouseTrigger id DragMsg
+            [ Draggable.mouseTrigger id (DragMsg >> config.toMsg)
             , class [ Res.HeaderSuper ]
             ]
             [ div
                 [ class [ Res.WindowHeader ]
-                , onMouseDown (UpdateFocusTo (Just id))
+                , (UpdateFocusTo (Just id))
+                    |> config.toMsg
+                    |> onMouseDown
                 ]
                 windowBody
             ]
 
 
-headerContext : ID -> Maybe Context -> Html Msg
-headerContext id context =
+headerContext : Config msg -> ID -> Maybe Context -> Html msg
+headerContext config id context =
     div [] <|
         case context of
             Just context ->
                 [ span
                     [ class [ Res.HeaderContextSw ]
                     , onClickMe <|
-                        SetContext id <|
-                            case context of
-                                Gateway ->
-                                    Endpoint
+                        config.toMsg <|
+                            SetContext id <|
+                                case context of
+                                    Gateway ->
+                                        Endpoint
 
-                                Endpoint ->
-                                    Gateway
+                                    Endpoint ->
+                                        Gateway
                     ]
                     [ text <| contextToString context ]
                 ]
@@ -157,8 +165,8 @@ headerContext id context =
                 []
 
 
-headerTitle : String -> String -> Html Msg
-headerTitle title icon =
+headerTitle : Config msg -> String -> String -> Html msg
+headerTitle config title icon =
     div
         [ class [ Res.HeaderTitle ]
         , attribute Res.appIconAttrTag icon
@@ -166,14 +174,14 @@ headerTitle title icon =
         [ text title ]
 
 
-headerButtons : ID -> Window -> Html Msg
-headerButtons id window =
+headerButtons : Config msg -> ID -> Window -> Html msg
+headerButtons config id window =
     let
         maximize =
             if (isResizable window) then
                 span
                     [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
-                    , onClickMe (ToggleMaximize id)
+                    , onClickMe <| config.toMsg (ToggleMaximize id)
                     ]
                     []
             else
@@ -182,19 +190,19 @@ headerButtons id window =
         div [ class [ Res.HeaderButtons ] ]
             [ span
                 [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
-                , onClickMe (Minimize id)
+                , onClickMe <| config.toMsg (Minimize id)
                 ]
                 []
             , maximize
             , span
                 [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
-                , onClickMe (Close id)
+                , onClickMe <| config.toMsg (Close id)
                 ]
                 []
             ]
 
 
-windowStyle : Window -> Html.Attribute Msg
+windowStyle : Window -> Html.Attribute msg
 windowStyle window =
     let
         position =

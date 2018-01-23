@@ -1,9 +1,9 @@
 module Apps.LogViewer.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Servers as Servers
-import Utils.Update as Update
-import Game.Data as Game
+import Dict
+import Utils.React as React exposing (React)
+import Game.Servers.Logs.Models as Logs
+import Apps.LogViewer.Config exposing (..)
 import Apps.LogViewer.Models exposing (..)
 import Apps.LogViewer.Messages as LogViewer exposing (Msg(..))
 import Apps.LogViewer.Menu.Messages as Menu
@@ -14,58 +14,57 @@ import Apps.LogViewer.Menu.Actions as Menu
         , startDecrypting
         , startHiding
         , startDeleting
+        , enterEditing
         )
 
 
+type alias UpdateResponse msg =
+    ( Model, React msg )
+
+
 update :
-    Game.Data
-    -> LogViewer.Msg
+    Config msg
+    -> Msg
     -> Model
-    -> ( Model, Cmd LogViewer.Msg, Dispatch )
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            let
+                config_ =
+                    menuConfig config
+            in
+                Menu.actionHandler config_ action model
 
         MenuMsg msg ->
             let
-                ( menu_, cmd, dispatch ) =
-                    Menu.update data msg model.menu
+                config_ =
+                    menuConfig config
 
-                cmd_ =
-                    Cmd.map MenuMsg cmd
+                ( menu_, react ) =
+                    Menu.update config_ msg model.menu
 
                 model_ =
                     { model | menu = menu_ }
             in
-                ( model_, cmd_, dispatch )
+                ( model_, react )
 
         -- -- Real acts
         ToogleExpand id ->
-            model
-                |> toggleExpand id
-                |> Update.fromModel
+            ( toggleExpand id model, React.none )
 
         UpdateTextFilter filter ->
-            model
-                |> updateTextFilter data filter
-                |> Update.fromModel
+            ( updateTextFilter config filter model, React.none )
 
         EnterEditing id ->
-            model
-                |> enterEditing data id
-                |> Update.fromModel
+            ( enterEditing (menuConfig config) id model, React.none )
 
         UpdateEditing id input ->
-            model
-                |> updateEditing id input
-                |> Update.fromModel
+            ( updateEditing id input model, React.none )
 
         LeaveEditing id ->
-            model
-                |> leaveEditing id
-                |> Update.fromModel
+            ( leaveEditing id model, React.none )
 
         ApplyEditing id ->
             let
@@ -75,48 +74,51 @@ update data msg model =
                 model_ =
                     leaveEditing id model
 
-                cid =
-                    Game.getActiveCId data
-
-                dispatch =
+                react =
                     case edited of
                         Just edited ->
                             edited
-                                |> Servers.UpdateLog id
-                                |> Dispatch.logs cid
+                                |> config.onUpdateLog id
+                                |> React.msg
 
                         Nothing ->
-                            Dispatch.none
+                            React.none
             in
-                ( model_, Cmd.none, dispatch )
+                ( model_, react )
 
         StartCrypting id ->
-            let
-                dispatch =
-                    startCrypting id data model
-            in
-                ( model, Cmd.none, dispatch )
+            startCrypting (menuConfig config) id model
 
         StartDecrypting id ->
-            let
-                dispatch =
-                    startDecrypting id model
-            in
-                ( model, Cmd.none, dispatch )
+            startDecrypting (menuConfig config) id model
 
         StartHiding id ->
-            let
-                dispatch =
-                    startHiding id data model
-            in
-                ( model, Cmd.none, dispatch )
+            startHiding (menuConfig config) id model
 
         StartDeleting id ->
-            let
-                dispatch =
-                    startDeleting id data model
-            in
-                ( model, Cmd.none, dispatch )
+            startDeleting (menuConfig config) id model
 
         DummyNoOp ->
-            ( model, Cmd.none, Dispatch.none )
+            ( model, React.none )
+
+
+updateTextFilter : Config msg -> String -> Model -> Model
+updateTextFilter config filter model =
+    let
+        filterer id log =
+            case Logs.getContent log of
+                Logs.NormalContent data ->
+                    String.contains filter data.raw
+
+                Logs.Encrypted ->
+                    False
+
+        filterCache =
+            config.logs
+                |> Logs.filter filterer
+                |> Dict.keys
+    in
+        { model
+            | filterText = filter
+            , filterCache = filterCache
+        }

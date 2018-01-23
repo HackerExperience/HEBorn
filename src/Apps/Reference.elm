@@ -7,10 +7,6 @@ type alias WindowID =
     String
 
 
-type alias ServerID =
-    String
-
-
 type alias SessionID =
     String
 

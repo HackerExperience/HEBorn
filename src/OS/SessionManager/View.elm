@@ -2,15 +2,18 @@ module OS.SessionManager.View exposing (..)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Data as Game
 import Dict
+import Core.Error as Error
 import OS.Resources as OsRes
+import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
 import OS.SessionManager.Messages exposing (..)
-import OS.SessionManager.Helpers exposing (..)
+import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.View as WM
 import OS.SessionManager.WindowManager.Resources as WmRes
 import OS.SessionManager.Dock.View as Dock
+import Game.Meta.Types.Context exposing (Context(..))
+import Game.Servers.Models as Servers
 
 
 osClass : List class -> Attribute msg
@@ -23,37 +26,64 @@ wmClass =
     .class <| Html.CssHelpers.withNamespace WmRes.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view game model =
-    div
-        [ osClass [ OsRes.Session ] ]
-        [ viewWM game model
-        , viewDock game model
-        ]
+view : Config msg -> Model -> Html msg
+view config model =
+    let
+        id =
+            getSessionID config
+    in
+        div
+            [ osClass [ OsRes.Session ] ]
+            [ viewWM config id model
+            , viewDock config id model
+            ]
 
 
 
 -- internals
 
 
-viewDock : Game.Data -> Model -> Html Msg
-viewDock game model =
-    model
-        |> Dock.view game
-        |> Html.map DockMsg
+viewDock : Config msg -> ID -> Model -> Html msg
+viewDock config id model =
+    Dock.view (dockConfig id config) model
 
 
-viewWM : Game.Data -> Model -> Html Msg
-viewWM data model =
+viewWM : Config msg -> ID -> Model -> Html msg
+viewWM config id model =
     let
-        id =
-            toSessionID data
+        config_ =
+            wmConfig id config
     in
         case Dict.get id model.sessions of
             Just wm ->
                 wm
-                    |> WM.view data
-                    |> Html.map (WindowManagerMsg id)
+                    |> WM.view config_
 
             Nothing ->
                 div [ wmClass [ WmRes.Canvas ] ] []
+
+
+getSessionID : Config msg -> ID
+getSessionID config =
+    case config.activeContext of
+        Gateway ->
+            config.activeServer
+                |> Tuple.first
+                |> Servers.toSessionId
+
+        Endpoint ->
+            let
+                endpointSessionId =
+                    config.activeServer
+                        |> Tuple.second
+                        |> Servers.getEndpointCId
+                        |> Maybe.map Servers.toSessionId
+            in
+                case endpointSessionId of
+                    Just endpointSessionId ->
+                        endpointSessionId
+
+                    Nothing ->
+                        "U = {x}, ∄ x ⊂ U"
+                            |> Error.neeiae
+                            |> uncurry Native.Panic.crash

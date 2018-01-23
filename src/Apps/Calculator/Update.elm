@@ -1,74 +1,61 @@
 module Apps.Calculator.Update exposing (update)
 
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
+import Utils.React as React exposing (React)
+import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (..)
-import Game.Data as Game
-import Apps.Calculator.Messages as Calculator exposing (Msg(..))
+import Apps.Calculator.Messages exposing (..)
 import Char
 
 
+type alias UpdateResponse msg =
+    ( Model, React msg )
+
+
 update :
-    Game.Data
-    -> Calculator.Msg
+    Config msg
+    -> Msg
     -> Model
-    -> ( Model, Cmd Calculator.Msg, Dispatch )
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         Input n ->
             onInput n model
-                |> Update.fromModel
 
         Sum ->
             onSum model
-                |> Update.fromModel
 
         Subtract ->
             onSubtract model
-                |> Update.fromModel
 
         Divide ->
             onDivide model
-                |> Update.fromModel
 
         Multiply ->
             onMultiply model
-                |> Update.fromModel
 
         Percent ->
             onPercent model
-                |> Update.fromModel
 
         Sqrt ->
             onSqrt model
-                |> Update.fromModel
 
         Comma ->
             onComma model
-                |> Update.fromModel
 
         CleanAll ->
             onCleanAll model
-                |> Update.fromModel
 
         Backspace ->
             onBackspace model
-                |> Update.fromModel
 
         Equal ->
             onEqual model
-                |> Update.fromModel
 
         KeyMsg code ->
             onKeyMsg code model
-                |> Update.fromModel
-
-        MenuMsg _ ->
-            model
-                |> Update.fromModel
 
 
-onInput : String -> Model -> Model
+onInput : String -> Model -> UpdateResponse msg
 onInput n model =
     let
         createTyping x y =
@@ -81,48 +68,72 @@ onInput n model =
     in
         case model.display of
             None ->
-                { model | display = Typing n }
+                let
+                    model_ =
+                        { model | display = Typing n }
+                in
+                    ( model_, React.none )
 
             Typing x ->
-                { model | display = createTyping x n }
+                let
+                    model_ =
+                        { model | display = createTyping x n }
+                in
+                    ( model_, React.none )
 
             Add x y ->
                 case y of
                     Typing a ->
-                        { model | display = Add x <| createTyping a n }
+                        let
+                            model_ =
+                                { model | display = Add x <| createTyping a n }
+                        in
+                            ( model_, React.none )
 
                     _ ->
-                        model
+                        ( model, React.none )
 
             Sub x y ->
                 case y of
                     Typing a ->
-                        { model | display = Sub x <| createTyping a n }
+                        let
+                            model_ =
+                                { model | display = Sub x <| createTyping a n }
+                        in
+                            ( model_, React.none )
 
                     _ ->
-                        model
+                        ( model, React.none )
 
             Div x y ->
                 case y of
                     Typing a ->
-                        { model | display = Div x <| createTyping a n }
+                        let
+                            model_ =
+                                { model | display = Div x <| createTyping a n }
+                        in
+                            ( model_, React.none )
 
                     _ ->
-                        model
+                        ( model, React.none )
 
             Mul x y ->
                 case y of
                     Typing a ->
-                        { model | display = Mul x <| createTyping a n }
+                        let
+                            model_ =
+                                { model | display = Mul x <| createTyping a n }
+                        in
+                            ( model_, React.none )
 
                     _ ->
-                        model
+                        ( model, React.none )
 
             _ ->
-                model
+                ( model, React.none )
 
 
-onKeyMsg : Int -> Model -> Model
+onKeyMsg : Int -> Model -> UpdateResponse msg
 onKeyMsg code model =
     let
         getStringfromChar x =
@@ -186,102 +197,142 @@ onKeyMsg code model =
         else if isComma then
             onComma model
         else
-            model
+            ( model, React.none )
 
 
-onSum : Model -> Model
+onSum : Model -> UpdateResponse msg
 onSum model =
     case model.display of
         Typing x ->
-            { model | display = Add x (Typing "0") }
+            let
+                model_ =
+                    { model | display = Add x (Typing "0") }
+            in
+                ( model_, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
-onSubtract : Model -> Model
+onSubtract : Model -> UpdateResponse msg
 onSubtract model =
     case model.display of
         Typing x ->
-            { model | display = Sub x (Typing "0") }
+            let
+                model_ =
+                    { model | display = Sub x (Typing "0") }
+            in
+                ( model_, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
-onDivide : Model -> Model
+onDivide : Model -> UpdateResponse msg
 onDivide model =
     case model.display of
         Typing x ->
-            { model | display = Div x (Typing "0") }
+            let
+                model_ =
+                    { model | display = Div x (Typing "0") }
+            in
+                ( model_, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
-onMultiply : Model -> Model
+onMultiply : Model -> UpdateResponse msg
 onMultiply model =
     case model.display of
         Typing x ->
-            { model | display = Mul x (Typing "0") }
+            let
+                model_ =
+                    { model | display = Mul x (Typing "0") }
+            in
+                ( model_, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
-onPercent : Model -> Model
+onPercent : Model -> UpdateResponse msg
 onPercent model =
     applyPercent model
 
 
-onSqrt : Model -> Model
+onSqrt : Model -> UpdateResponse msg
 onSqrt model =
     applySqrt model
 
 
-onComma : Model -> Model
+onComma : Model -> UpdateResponse msg
 onComma model =
     inputComma model
 
 
-onCleanAll : Model -> Model
+onCleanAll : Model -> UpdateResponse msg
 onCleanAll model =
-    { model | display = Typing "0" }
+    ( { model | display = Typing "0" }, React.none )
 
 
-onBackspace : Model -> Model
+onBackspace : Model -> UpdateResponse msg
 onBackspace model =
     inputBackspace model
 
 
-onEqual : Model -> Model
+onEqual : Model -> UpdateResponse msg
 onEqual model =
     applyEquals model
 
 
-inputComma : Model -> Model
+inputComma : Model -> UpdateResponse msg
 inputComma model =
     case model.display of
         Typing a ->
-            { model | display = Typing a }
+            let
+                model_ =
+                    { model | display = Typing a }
+            in
+                ( model_, React.none )
 
         Add n (Typing a) ->
-            { model | display = Add n (Typing <| canInputComma a) }
+            let
+                model_ =
+                    { model | display = Add n (Typing <| canInputComma a) }
+            in
+                ( model_, React.none )
 
         Sub n (Typing a) ->
-            { model | display = Sub n (Typing <| canInputComma a) }
+            let
+                model_ =
+                    { model | display = Sub n (Typing <| canInputComma a) }
+            in
+                ( model_, React.none )
 
         Div n (Typing a) ->
-            { model | display = Div n (Typing <| canInputComma a) }
+            let
+                model_ =
+                    { model | display = Div n (Typing <| canInputComma a) }
+            in
+                ( model_, React.none )
 
         Mul n (Typing a) ->
-            { model | display = Mul n (Typing <| canInputComma a) }
+            let
+                model_ =
+                    { model | display = Mul n (Typing <| canInputComma a) }
+            in
+                ( model_, React.none )
 
         Pow n (Typing a) ->
-            { model | display = Pow n (Typing <| canInputComma a) }
+            let
+                model_ =
+                    { model | display = Pow n (Typing <| canInputComma a) }
+            in
+                ( model_, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
 canInputComma : String -> String
@@ -299,7 +350,7 @@ canInputComma str =
             canInputCommaHelper str
 
 
-inputBackspace : Model -> Model
+inputBackspace : Model -> UpdateResponse msg
 inputBackspace model =
     let
         drop x =
@@ -312,25 +363,49 @@ inputBackspace model =
     in
         case model.display of
             Typing a ->
-                { model | display = drop a }
+                let
+                    model_ =
+                        { model | display = drop a }
+                in
+                    ( model_, React.none )
 
             Add a (Typing b) ->
-                { model | display = Add a (drop b) }
+                let
+                    model_ =
+                        { model | display = Add a (drop b) }
+                in
+                    ( model_, React.none )
 
             Sub a (Typing b) ->
-                { model | display = Sub a (drop b) }
+                let
+                    model_ =
+                        { model | display = Sub a (drop b) }
+                in
+                    ( model_, React.none )
 
             Div a (Typing b) ->
-                { model | display = Div a (drop b) }
+                let
+                    model_ =
+                        { model | display = Div a (drop b) }
+                in
+                    ( model_, React.none )
 
             Mul a (Typing b) ->
-                { model | display = Mul a (drop b) }
+                let
+                    model_ =
+                        { model | display = Mul a (drop b) }
+                in
+                    ( model_, React.none )
 
             Pow a (Typing b) ->
-                { model | display = Pow a (drop b) }
+                let
+                    model_ =
+                        { model | display = Pow a (drop b) }
+                in
+                    ( model_, React.none )
 
             _ ->
-                model
+                ( model, React.none )
 
 
 resultString : String -> String -> (Float -> Float -> Float) -> String
@@ -348,24 +423,32 @@ resultString x y z =
             msg
 
 
-applyEquals : Model -> Model
+applyEquals : Model -> UpdateResponse msg
 applyEquals model =
     case model.display of
         Add a b ->
             case b of
                 Typing m ->
-                    { model | display = Typing (resultString a m (+)) }
+                    let
+                        model_ =
+                            { model | display = Typing (resultString a m (+)) }
+                    in
+                        ( model_, React.none )
 
                 _ ->
-                    model
+                    ( model, React.none )
 
         Sub a b ->
             case b of
                 Typing m ->
-                    { model | display = Typing (resultString a m (-)) }
+                    let
+                        model_ =
+                            { model | display = Typing (resultString a m (-)) }
+                    in
+                        ( model_, React.none )
 
                 _ ->
-                    model
+                    ( model, React.none )
 
         Div a b ->
             case b of
@@ -381,45 +464,56 @@ applyEquals model =
 
                                 Err msg ->
                                     True
+
+                        model_ =
+                            if (by_zero m) then
+                                { model | display = DivideBy0 }
+                            else
+                                { model | display = Typing (resultString a m (/)) }
                     in
-                        if (by_zero m) then
-                            { model | display = DivideBy0 }
-                        else
-                            { model | display = Typing (resultString a m (/)) }
+                        ( model_, React.none )
 
                 _ ->
-                    model
+                    ( model, React.none )
 
         Mul a b ->
             case b of
                 Typing m ->
-                    { model | display = Typing (resultString a m (*)) }
+                    let
+                        model_ =
+                            { model | display = Typing (resultString a m (*)) }
+                    in
+                        ( model_, React.none )
 
                 _ ->
-                    model
+                    ( model, React.none )
 
         Pow a b ->
             case b of
                 Typing m ->
-                    { model | display = Typing (resultString a m (^)) }
+                    let
+                        model_ =
+                            { model | display = Typing (resultString a m (^)) }
+                    in
+                        ( model_, React.none )
 
                 _ ->
-                    model
+                    ( model, React.none )
 
         IsNotANumber ->
-            model
+            ( model, React.none )
 
         DivideBy0 ->
-            model
+            ( model, React.none )
 
         InvalidOperation ->
-            model
+            ( model, React.none )
 
         _ ->
-            model
+            ( model, React.none )
 
 
-applyPercent : Model -> Model
+applyPercent : Model -> UpdateResponse msg
 applyPercent model =
     let
         b_side x y =
@@ -427,28 +521,48 @@ applyPercent model =
     in
         case model.display of
             Typing x ->
-                model
+                ( model, React.none )
 
             Add x (Typing y) ->
-                { model | display = Add x (b_side x y) }
+                let
+                    model_ =
+                        { model | display = Add x (b_side x y) }
+                in
+                    ( model_, React.none )
 
             Sub x (Typing y) ->
-                { model | display = Sub x (b_side x y) }
+                let
+                    model_ =
+                        { model | display = Sub x (b_side x y) }
+                in
+                    ( model_, React.none )
 
             Div x (Typing y) ->
-                { model | display = Div x (b_side x y) }
+                let
+                    model_ =
+                        { model | display = Div x (b_side x y) }
+                in
+                    ( model_, React.none )
 
             Mul x (Typing y) ->
-                { model | display = Mul x (b_side x y) }
+                let
+                    model_ =
+                        { model | display = Mul x (b_side x y) }
+                in
+                    ( model_, React.none )
 
             Pow x (Typing y) ->
-                { model | display = Pow x (b_side x y) }
+                let
+                    model_ =
+                        { model | display = Pow x (b_side x y) }
+                in
+                    ( model_, React.none )
 
             _ ->
-                model
+                ( model, React.none )
 
 
-applySqrt : Model -> Model
+applySqrt : Model -> UpdateResponse msg
 applySqrt model =
     let
         doSqrt str =
@@ -464,22 +578,46 @@ applySqrt model =
     in
         case model.display of
             Typing x ->
-                { model | display = value x }
+                let
+                    model_ =
+                        { model | display = value x }
+                in
+                    ( model_, React.none )
 
             Add x (Typing y) ->
-                { model | display = value y }
+                let
+                    model_ =
+                        { model | display = value y }
+                in
+                    ( model_, React.none )
 
             Sub x (Typing y) ->
-                { model | display = value y }
+                let
+                    model_ =
+                        { model | display = value y }
+                in
+                    ( model_, React.none )
 
             Div x (Typing y) ->
-                { model | display = value y }
+                let
+                    model_ =
+                        { model | display = value y }
+                in
+                    ( model_, React.none )
 
             Mul x (Typing y) ->
-                { model | display = value y }
+                let
+                    model_ =
+                        { model | display = value y }
+                in
+                    ( model_, React.none )
 
             Pow x (Typing y) ->
-                { model | display = value y }
+                let
+                    model_ =
+                        { model | display = value y }
+                in
+                    ( model_, React.none )
 
             _ ->
-                model
+                ( model, React.none )

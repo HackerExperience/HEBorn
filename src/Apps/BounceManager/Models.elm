@@ -1,7 +1,5 @@
 module Apps.BounceManager.Models exposing (..)
 
-import Apps.BounceManager.Menu.Models as Menu
-
 
 type MainTab
     = TabManage
@@ -9,8 +7,7 @@ type MainTab
 
 
 type alias Model =
-    { menu : Menu.Model
-    , selected : MainTab
+    { selected : MainTab
     }
 
 
@@ -31,8 +28,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , selected = TabManage
+    { selected = TabManage
     }
 
 

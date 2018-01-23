@@ -1,64 +1,64 @@
 module Game.Storyline.Emails.Update exposing (update)
 
 import Dict
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Utils.Update as Update
-import Game.Models as Game
+import Utils.React as React exposing (React)
+import Game.Storyline.Emails.Config exposing (..)
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents exposing (Content)
 import Game.Storyline.Emails.Requests exposing (Response, receive)
 import Game.Storyline.Emails.Requests.Reply as Reply
-import Events.Account.Story.NewEmail as StoryNewEmail
-import Events.Account.Story.ReplyUnlocked as StoryReplyUnlocked
+import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
+import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Game.Model -> Msg -> Model -> UpdateResponse
-update game msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         Changed newModel ->
             onChanged newModel model
 
         HandleReply content ->
-            handleReply game content model
+            handleReply config content model
 
         HandleNewEmail data ->
-            handleNewEmail game data model
+            handleNewEmail config data model
 
         HandleReplyUnlocked data ->
-            handleReplyUnlocked game data model
+            handleReplyUnlocked config data model
 
         Request data ->
-            onRequest game (receive data) model
+            onRequest config (receive data) model
 
 
-onChanged : Model -> Model -> UpdateResponse
+onChanged : Model -> Model -> UpdateResponse msg
 onChanged newModel oldModel =
-    Update.fromModel newModel
+    ( newModel, React.none )
 
 
-handleReply : Game.Model -> Content -> Model -> UpdateResponse
-handleReply game content model =
+handleReply : Config msg -> Content -> Model -> UpdateResponse msg
+handleReply config content model =
     let
         accountId =
-            Game.getAccount game
-                |> .id
+            config.accountId
 
         contentId =
             Contents.toId content
 
         cmd =
-            Reply.request accountId contentId game
+            Reply.request accountId contentId config
+                |> Cmd.map config.toMsg
+                |> React.cmd
     in
-        ( model, cmd, Dispatch.none )
+        ( model, cmd )
 
 
-handleNewEmail : Game.Model -> StoryNewEmail.Data -> Model -> UpdateResponse
-handleNewEmail game data model =
+handleNewEmail : Config msg -> StoryEmailSent.Data -> Model -> UpdateResponse msg
+handleNewEmail config data model =
     let
         { personId, messageNode, replies, createNotification } =
             data
@@ -94,15 +94,15 @@ handleNewEmail game data model =
         model_ =
             setPerson personId person_ model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
 handleReplyUnlocked :
-    Game.Model
-    -> StoryReplyUnlocked.Data
+    Config msg
+    -> StoryEmailReplyUnlocked.Data
     -> Model
-    -> UpdateResponse
-handleReplyUnlocked game { personId, replies } model =
+    -> UpdateResponse msg
+handleReplyUnlocked config { personId, replies } model =
     let
         person_ =
             case getPerson personId model of
@@ -129,23 +129,23 @@ handleReplyUnlocked game { personId, replies } model =
         model_ =
             setPerson personId person_ model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
 
 -- requests
 
 
-onRequest : Game.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest game response model =
+onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
+onRequest config response model =
     case response of
         Just response ->
-            updateRequest game response model
+            updateRequest config response model
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-updateRequest : Game.Model -> Response -> Model -> UpdateResponse
-updateRequest game response model =
-    Update.fromModel model
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config response model =
+    ( model, React.none )

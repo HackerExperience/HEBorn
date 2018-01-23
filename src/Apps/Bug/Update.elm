@@ -1,84 +1,54 @@
 module Apps.Bug.Update exposing (update)
 
-import Core.Error as Error
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Account as Account
-import Core.Dispatch.Notifications as Notifications
-import Game.Data as Game
-import Game.Notifications.Models as Notifications
 import Native.Panic
+import Utils.React as React exposing (React)
+import Core.Error as Error
+import Game.Account.Notifications.Shared as AccountNotifications
+import Apps.Bug.Config exposing (..)
 import Apps.Bug.Models exposing (Model)
 import Apps.Bug.Messages as Hackerbug exposing (Msg(..))
-import Apps.Bug.Menu.Messages as Menu
-import Apps.Bug.Menu.Update as Menu
-import Apps.Bug.Menu.Actions as Menu
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Hackerbug.Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
 update :
-    Game.Data
+    Config msg
     -> Hackerbug.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
-
-        MenuMsg msg ->
-            onMenuMsg data msg model
-
         DummyToast ->
-            onDummyToast model
+            onDummyToast config model
 
         PoliteCrash ->
-            onPoliteCrash model
+            onPoliteCrash config model
 
         UnpoliteCrash ->
             onUnpoliteCrash model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
-    let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
-
-        cmd_ =
-            Cmd.map MenuMsg cmd
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, cmd_, coreMsg )
+onDummyToast : Config msg -> Model -> UpdateResponse msg
+onDummyToast { onAccountToast } model =
+    AccountNotifications.Generic "Hi" "Hello"
+        |> onAccountToast
+        |> React.msg
+        |> (,) model
 
 
-onDummyToast : Model -> UpdateResponse
-onDummyToast model =
-    ( model
-    , Cmd.none
-    , Notifications.Simple "Hi" "Hello"
-        |> Notifications.Toast Nothing
-        |> Dispatch.notifications
-    )
-
-
-onPoliteCrash : Model -> UpdateResponse
-onPoliteCrash model =
-    ( model
-    , Cmd.none
-    , "This is a polite crash."
+onPoliteCrash : Config msg -> Model -> UpdateResponse msg
+onPoliteCrash { onPoliteCrash } model =
+    "This is a polite crash."
         |> Error.fakeTest
-        |> Account.LogoutAndCrash
-        |> Dispatch.account
-    )
+        |> onPoliteCrash
+        |> React.msg
+        |> (,) model
 
 
-onUnpoliteCrash : Model -> UpdateResponse
+onUnpoliteCrash : Model -> UpdateResponse msg
 onUnpoliteCrash model =
     "This is an unpolite crash."
         |> Error.fakeTest

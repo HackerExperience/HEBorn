@@ -1,19 +1,18 @@
 module Core.Update exposing (update)
 
-import Core.Messages exposing (..)
-import Core.Models exposing (..)
-import Core.Subscribers as Subscribers
-import Core.Dispatch as Dispatch exposing (Dispatch)
+import Utils.React as React exposing (React)
+import Events.Handler as Events
+import Landing.Messages as Landing
+import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Models as Ws
 import Driver.Websocket.Update as Ws
-import Landing.Messages as Landing
-import Landing.Update as Landing
-import Game.Data as Game
 import Game.Messages as Game
 import Game.Models as Game
+import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
 import Game.Update as Game
+import Game.Account.Models as Account
 import Setup.Messages as Setup
 import Setup.Update as Setup
 import OS.Messages as OS
@@ -22,11 +21,40 @@ import OS.SessionManager.WindowManager.Messages as WM
 import OS.SessionManager.Messages as SM
 import Apps.Messages as Apps
 import Apps.TaskManager.Messages as TaskManager
+import Core.Error as Error
+import Core.Config exposing (..)
+import Core.Flags as Flags exposing (Flags)
+import Core.Messages exposing (..)
+import Core.Models exposing (..)
+
+
+-- TODO: Use onSth pattern
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (onDebug model received msg) of
+        BatchMsg msgs ->
+            case msgs of
+                [ msg ] ->
+                    update msg model
+
+                msg :: msgs ->
+                    -- this will actually blow the stack when dispatching many
+                    -- things, but we shouldn't dispatch more than 3 messages,
+                    -- so whatever
+                    let
+                        ( model0, cmd0 ) =
+                            update msg model
+
+                        ( model_, cmd1 ) =
+                            update (BatchMsg msgs) model0
+                    in
+                        ( model_, Cmd.batch [ cmd0, cmd1 ] )
+
+                [] ->
+                    ( model, Cmd.none )
+
         HandleBoot id username token ->
             let
                 model_ =
@@ -50,13 +78,19 @@ update msg model =
 
         HandlePlay ->
             let
-                ( state, cmd, dispatch ) =
+                ( state, cmd ) =
                     setupToPlay model.state
-
-                model_ =
-                    { model | state = state }
             in
-                dispatcher model_ cmd dispatch
+                ( { model | state = state }, cmd )
+
+        HandleEvent channel value ->
+            case Events.handler eventsConfig channel value of
+                Ok msg ->
+                    ( model, React.toCmd <| React.msg msg )
+
+                Err error ->
+                    always ( model, Cmd.none ) <|
+                        Debug.log (Events.report error) ""
 
         LoadingEnd z ->
             let
@@ -94,18 +128,14 @@ updateHome msg model stateModel =
     case msg of
         HandleConnected ->
             let
-                ( modelLogin, cmdLogin, dispatch ) =
+                ( modelLogin, cmdLogin ) =
                     login model
 
-                -- not tail recursive, but should only do a single recursion
-                ( modelLogin_, cmdLogin_ ) =
-                    dispatcher modelLogin cmdLogin dispatch
-
                 ( model_, cmdNext ) =
-                    updateState msg modelLogin_
+                    updateState msg modelLogin
 
                 cmd =
-                    Cmd.batch [ cmdLogin_, cmdNext ]
+                    Cmd.batch [ cmdLogin, cmdNext ]
             in
                 ( model_, cmd )
 
@@ -113,8 +143,10 @@ updateHome msg model stateModel =
             case stateModel.websocket of
                 Just websocket ->
                     let
-                        ( websocket_, cmd, dispatch ) =
-                            updateWebsocket msg websocket
+                        ( websocket_, cmd ) =
+                            websocket
+                                |> Ws.update (websocketConfig model.flags) msg
+                                |> Tuple.mapSecond React.toCmd
 
                         stateModel_ =
                             { stateModel | websocket = Just websocket_ }
@@ -122,7 +154,7 @@ updateHome msg model stateModel =
                         model_ =
                             { model | state = Home stateModel_ }
                     in
-                        dispatcher model_ cmd dispatch
+                        ( model_, cmd )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -138,7 +170,7 @@ updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
 updateSetup msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updateSetupWS msg stateModel
+            updateSetupWS model.flags msg stateModel
                 |> finishSetupUpdate model
 
         SetupMsg msg ->
@@ -153,59 +185,66 @@ updateSetup msg model stateModel =
             ( model, Cmd.none )
 
 
-updateSetupWS : Ws.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
-updateSetupWS msg stateModel =
+updateSetupWS :
+    Flags
+    -> Ws.Msg
+    -> SetupModel
+    -> ( SetupModel, Cmd Msg )
+updateSetupWS flags msg stateModel =
     let
-        ( websocket, cmd, dispatch ) =
-            updateWebsocket msg stateModel.websocket
+        ( websocket, cmd ) =
+            stateModel.websocket
+                |> Ws.update (websocketConfig flags) msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd )
 
 
-updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
 updateSetupSetup msg stateModel =
     let
-        ( setup, cmd, dispatch ) =
-            Setup.update stateModel.game msg stateModel.setup
+        config =
+            setupConfig
+                stateModel.game.account.id
+                stateModel.game.account.mainframe
+                stateModel.game.flags
+
+        ( setup, react ) =
+            Setup.update config msg stateModel.setup
 
         stateModel_ =
             { stateModel | setup = setup }
-
-        cmd_ =
-            Cmd.map SetupMsg cmd
     in
-        ( stateModel_, cmd_, dispatch )
+        ( stateModel_, React.toCmd react )
 
 
-updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg, Dispatch )
+updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
 updateSetupGame msg stateModel =
     let
-        ( game, cmd, dispatch ) =
-            updateGame msg stateModel.game
+        ( game, cmd ) =
+            stateModel.game
+                |> Game.update gameConfig msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd )
 
 
-finishSetupUpdate : Model -> ( SetupModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
-finishSetupUpdate model ( stateModel, cmd, dispatch ) =
-    let
-        model_ =
-            { model | state = Setup stateModel }
-    in
-        dispatcher model_ cmd dispatch
+finishSetupUpdate : Model -> ( SetupModel, Cmd Msg ) -> ( Model, Cmd Msg )
+finishSetupUpdate model ( stateModel, cmd ) =
+    ( { model | state = Setup stateModel }, cmd )
 
 
 updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
 updatePlay msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updatePlayWS msg stateModel
+            updatePlayWS model.flags msg stateModel
                 |> finishPlayUpdate model
 
         OSMsg msg ->
@@ -220,75 +259,71 @@ updatePlay msg model stateModel =
             ( model, Cmd.none )
 
 
-updatePlayWS : Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
-updatePlayWS msg stateModel =
+updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
+updatePlayWS flags msg stateModel =
     let
-        ( websocket, cmd, dispatch ) =
-            updateWebsocket msg stateModel.websocket
+        ( websocket, cmd ) =
+            stateModel.websocket
+                |> Ws.update (websocketConfig flags) msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | websocket = websocket }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd )
 
 
-updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
-updatePlayOS msg stateModel =
-    case Game.fromGateway stateModel.game of
-        Just data ->
-            let
-                ( os, cmd, dispatch ) =
-                    OS.update data msg stateModel.os
+updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
+updatePlayOS msg ({ game, os } as state) =
+    let
+        volatile_ =
+            ( Game.getGateway game
+            , Game.getActiveServer game
+            )
 
-                stateModel_ =
-                    { stateModel | os = os }
+        ctx =
+            Account.getContext <| Game.getAccount game
+    in
+        case volatile_ of
+            ( Just gtw, Just srv ) ->
+                let
+                    lastTick =
+                        game
+                            |> Game.getMeta
+                            |> Meta.getLastTick
 
-                cmd_ =
-                    Cmd.map OSMsg cmd
-            in
-                ( stateModel_, cmd_, dispatch )
+                    config =
+                        osConfig game srv ctx gtw
 
-        Nothing ->
-            ( stateModel, Cmd.none, Dispatch.none )
+                    ( os_, react ) =
+                        OS.update config msg os
+
+                    state_ =
+                        { state | os = os_ }
+                in
+                    ( state_, React.toCmd react )
+
+            _ ->
+                ( state, Cmd.none )
 
 
-updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg, Dispatch )
+updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
 updatePlayGame msg stateModel =
     let
-        ( game, cmd, dispatch ) =
-            updateGame msg stateModel.game
+        ( game, cmd ) =
+            stateModel.game
+                |> Game.update gameConfig msg
+                |> Tuple.mapSecond React.toCmd
 
         stateModel_ =
             { stateModel | game = game }
     in
-        ( stateModel_, cmd, dispatch )
+        ( stateModel_, cmd )
 
 
-finishPlayUpdate : Model -> ( PlayModel, Cmd Msg, Dispatch ) -> ( Model, Cmd Msg )
-finishPlayUpdate model ( stateModel, cmd, dispatch ) =
-    let
-        model_ =
-            { model | state = Play stateModel }
-    in
-        dispatcher model_ cmd dispatch
-
-
-stateAndThen :
-    (a -> ( a, Cmd b, Dispatch ))
-    -> ( a, Cmd b, Dispatch )
-    -> ( a, Cmd b, Dispatch )
-stateAndThen apply ( stateModel, cmd0, dispatch0 ) =
-    let
-        ( stateModel_, cmd1, dispatch1 ) =
-            apply stateModel
-
-        cmd =
-            Cmd.batch [ cmd0, cmd1 ]
-
-        dispatch =
-            Dispatch.batch [ dispatch0, dispatch1 ]
-    in
-        ( stateModel_, cmd, dispatch )
+finishPlayUpdate : Model -> ( PlayModel, Cmd Msg ) -> ( Model, Cmd Msg )
+finishPlayUpdate model ( stateModel, cmd ) =
+    ( { model | state = Play stateModel }, cmd )
 
 
 updateLanding :
@@ -298,11 +333,10 @@ updateLanding :
     -> ( Model, Cmd Msg )
 updateLanding msg model ({ landing } as stateModel) =
     let
-        ( landing_, cmd, dispatch ) =
-            Landing.update model msg landing
-
-        cmd_ =
-            Cmd.map LandingMsg cmd
+        ( landing_, react ) =
+            Landing.update (landingConfig model.windowLoaded model.flags)
+                msg
+                landing
 
         stateModel_ =
             { stateModel | landing = landing_ }
@@ -310,45 +344,16 @@ updateLanding msg model ({ landing } as stateModel) =
         model_ =
             { model | state = Home stateModel_ }
     in
-        dispatcher model_ cmd_ dispatch
-
-
-updateGame : Game.Msg -> Game.Model -> ( Game.Model, Cmd Msg, Dispatch )
-updateGame msg model =
-    let
-        ( model_, cmd, dispatch ) =
-            Game.update msg model
-
-        cmd_ =
-            Cmd.map GameMsg cmd
-    in
-        ( model_, cmd_, dispatch )
-
-
-updateWebsocket : Ws.Msg -> Ws.Model -> ( Ws.Model, Cmd Msg, Dispatch )
-updateWebsocket msg model =
-    let
-        ( model_, cmd, dispatch ) =
-            Ws.update msg model
-
-        cmd_ =
-            Cmd.map WebsocketMsg cmd
-    in
-        ( model_, cmd_, dispatch )
+        ( model_, (React.toCmd react) )
 
 
 
--- dispatcher code
+-- code
 
 
 isDev : Model -> Bool
-isDev model =
-    let
-        { version } =
-            getConfig model
-    in
-        -- make this function return False to test the game on production mode
-        version == "dev"
+isDev =
+    getFlags >> Flags.isDev
 
 
 onDebug : Model -> (a -> a) -> a -> a
@@ -377,26 +382,3 @@ received msg =
 
         _ ->
             Debug.log "▶ Message" msg
-
-
-sent : a -> a
-sent =
-    -- uncomment this line to see sent messages
-    --Debug.log "◀ Message"
-    identity
-
-
-dispatcher : Model -> Cmd Msg -> Dispatch -> ( Model, Cmd Msg )
-dispatcher model cmd dispatch =
-    dispatch
-        |> Subscribers.dispatch
-        |> List.foldl (sent >> reducer) ( model, cmd )
-
-
-reducer : Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-reducer msg ( model, cmd ) =
-    let
-        ( model_, cmd_ ) =
-            update msg model
-    in
-        ( model_, Cmd.batch [ cmd, cmd_ ] )

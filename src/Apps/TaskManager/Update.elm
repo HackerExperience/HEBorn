@@ -1,12 +1,10 @@
 module Apps.TaskManager.Update exposing (update)
 
 import Time exposing (Time)
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Game.Data as Game
-import Game.Servers.Shared as Servers
-import Game.Servers.Models as Servers
+import Utils.React as React exposing (React)
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Messages as Processes
+import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
 import Apps.TaskManager.Menu.Messages as Menu
@@ -14,63 +12,67 @@ import Apps.TaskManager.Menu.Update as Menu
 import Apps.TaskManager.Menu.Actions as Menu
 
 
-type alias UpdateResponse =
-    ( Model, Cmd TaskManager.Msg, Dispatch )
+type alias UpdateResponse cmd =
+    ( Model, React cmd )
 
 
 update :
-    Game.Data
+    Config msg
     -> TaskManager.Msg
     -> Model
-    -> UpdateResponse
-update data msg model =
+    -> UpdateResponse msg
+update config msg model =
     case msg of
         -- -- Context
         MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler data action model
+            let
+                config_ =
+                    menuConfig config
+
+                ( model_, react ) =
+                    Menu.actionHandler config_ action model
+            in
+                ( model_, react )
 
         MenuMsg msg ->
-            onMenuMsg data msg model
+            onMenuMsg config msg model
 
         --- Every update
         Tick now ->
-            onTick data now model
+            onTick config now model
 
 
-onMenuMsg : Game.Data -> Menu.Msg -> Model -> UpdateResponse
-onMenuMsg data msg model =
+onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
+onMenuMsg config msg model =
     let
-        ( menu_, cmd, coreMsg ) =
-            Menu.update data msg model.menu
+        config_ =
+            menuConfig config
 
-        cmd_ =
-            Cmd.map MenuMsg cmd
+        ( menu_, react ) =
+            Menu.update config_ msg model.menu
 
         model_ =
             { model | menu = menu_ }
     in
-        ( model_, cmd_, coreMsg )
+        ( model_, react )
 
 
-onTick : Game.Data -> Time -> Model -> UpdateResponse
-onTick data now model =
+onTick : Config msg -> Time -> Model -> UpdateResponse msg
+onTick config now model =
     let
-        activeServer =
-            Game.getActiveServer data
-
         model_ =
             updateTasks
-                activeServer
+                config
                 model
     in
-        ( model_, Cmd.none, Dispatch.none )
+        ( model_, React.none )
 
 
-updateTasks : Servers.Server -> Model -> Model
-updateTasks server old =
+updateTasks : Config msg -> Model -> Model
+updateTasks config old =
     let
         tasks =
-            Servers.getProcesses server
+            config.processes
 
         reduce process sum =
             process

@@ -1,22 +1,21 @@
 module OS.View exposing (view)
 
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (attribute)
+import Html as Html exposing (Html, div, text)
+import Html.Attributes as Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
-import Game.Data as Game
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Storyline.Models as Storyline
-import Core.Config as Config
+import Core.Flags as Flags
+import OS.Config exposing (..)
 import OS.Models exposing (Model)
 import OS.Messages exposing (Msg(..))
 import OS.Resources as Res
 import OS.DynamicStyle as DynamicStyle
 import OS.Header.View as Header
 import OS.Header.Models as Header
-import OS.Menu.View exposing (menuView, menuEmpty)
 import OS.SessionManager.View as SessionManager
 import OS.Toasts.View as Toasts
 import OS.Console.View as Console
@@ -26,36 +25,27 @@ import OS.Console.View as Console
     Html.CssHelpers.withNamespace Res.prefix
 
 
-view : Game.Data -> Model -> Html Msg
-view data model =
+view : Config msg -> Model -> Html msg
+view config model =
     let
         osContent =
-            viewOS data model
-
-        game =
-            data
-                |> Game.getGame
+            viewOS config model
 
         dynStyle =
-            DynamicStyle.view game
+            DynamicStyle.view config
 
         version =
-            game
-                |> Game.getConfig
-                |> Config.getVersion
+            config.flags
+                |> Flags.getVersion
 
         context =
-            game
-                |> Game.getAccount
-                |> Account.getContext
+            config.activeContext
 
         story =
-            game
-                |> Game.getStory
-                |> Storyline.isActive
+            config.story
 
         gameMode =
-            case story of
+            case Storyline.isActive story of
                 True ->
                     Res.campaignMode
 
@@ -64,7 +54,6 @@ view data model =
     in
         div
             [ id Res.Dashboard
-            , menuEmpty
             , attribute Res.gameVersionAttrTag version
             , attribute Res.gameModeAttrTag gameMode
             , activeContextAttr context
@@ -72,67 +61,60 @@ view data model =
             (dynStyle :: osContent)
 
 
-viewDynStyle : Game.Model -> List (Html Msg)
-viewDynStyle game =
-    let
-        story =
-            game
-                |> Game.getStory
-    in
-        if Storyline.isActive story then
-            [ lazy DynamicStyle.view game ]
-        else
-            []
-
-
-viewOS : Game.Data -> Model -> List (Html Msg)
-viewOS data model =
+viewOS : Config msg -> Model -> List (Html msg)
+viewOS config model =
     let
         version =
-            data
-                |> Game.getGame
-                |> Game.getConfig
-                |> Config.getVersion
+            config.flags
+                |> Flags.getVersion
     in
-        [ viewHeader
-            data
-            model.header
-        , console data model
-        , viewMain data model
-        , toasts data model
+        [ viewHeader config model.header
+        , console config
+        , viewMain config model
+        , toasts config model
         , lazy displayVersion
             version
-        , menuView model
         ]
 
 
-viewHeader : Game.Data -> Header.Model -> Html Msg
-viewHeader game header =
-    Header.view game header
-        |> Html.map HeaderMsg
+viewHeader : Config msg -> Header.Model -> Html msg
+viewHeader config header =
+    let
+        config_ =
+            headerConfig config
+    in
+        Header.view config_ header
+            |> Html.map (HeaderMsg >> config.toMsg)
 
 
-viewMain : Game.Data -> Model -> Html Msg
-viewMain game model =
-    model.session
-        |> SessionManager.view game
-        |> Html.map SessionManagerMsg
+viewMain : Config msg -> Model -> Html msg
+viewMain config model =
+    let
+        config_ =
+            smConfig config
+    in
+        model.session
+            |> SessionManager.view config_
 
 
-displayVersion : String -> Html Msg
+displayVersion : String -> Html msg
 displayVersion version =
     div
         [ class [ Res.Version ] ]
         [ text version ]
 
 
-toasts : Game.Data -> Model -> Html Msg
-toasts data model =
+toasts : Config msg -> Model -> Html msg
+toasts config model =
     model.toasts
-        |> Toasts.view data
-        |> Html.map ToastsMsg
+        |> Toasts.view
+        |> Html.map (ToastsMsg >> config.toMsg)
 
 
-console : Game.Data -> Model -> Html Msg
-console data model =
-    Console.view data
+console : Config msg -> Html msg
+console config =
+    let
+        config_ =
+            consoleConfig config
+    in
+        Console.view config_

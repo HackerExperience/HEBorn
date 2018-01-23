@@ -1,98 +1,84 @@
 module Landing.Login.Update exposing (..)
 
-import Utils.Update as Update
-import Landing.Login.Messages exposing (Msg(..))
-import Landing.Login.Models exposing (Model)
+import Utils.React as React exposing (React)
 import Landing.Login.Requests exposing (..)
 import Landing.Login.Requests.Login as Login
-import Core.Models as Core
-import Core.Dispatch as Dispatch exposing (Dispatch)
-import Core.Dispatch.Core as Core
+import Landing.Login.Config exposing (..)
+import Landing.Login.Messages exposing (..)
+import Landing.Login.Models exposing (..)
 
 
-type alias UpdateResponse =
-    ( Model, Cmd Msg, Dispatch )
+type alias UpdateResponse msg =
+    ( Model, React msg )
 
 
-update : Core.Model -> Msg -> Model -> UpdateResponse
-update core msg model =
+update : Config msg -> Msg -> Model -> UpdateResponse msg
+update config msg model =
     case msg of
         SubmitLogin ->
-            onSubmitLogin core model
+            onSubmitLogin config model
 
         SetUsername username ->
-            onSetUsername core username model
+            onSetUsername config username model
 
         SetPassword password ->
-            onSetPassword core password model
+            onSetPassword config password model
 
         Request data ->
-            onRequest core (receive data) model
+            onRequest config (receive data) model
 
 
-onSubmitLogin : Core.Model -> Model -> UpdateResponse
-onSubmitLogin core model =
-    let
-        cmd =
-            Login.request model.username model.password core
-    in
-        ( model, cmd, Dispatch.none )
+onSubmitLogin : Config msg -> Model -> UpdateResponse msg
+onSubmitLogin config model =
+    ( model
+    , config
+        |> Login.request model.username model.password
+        |> Cmd.map config.toMsg
+        |> React.cmd
+    )
 
 
-onSetUsername : Core.Model -> String -> Model -> UpdateResponse
-onSetUsername core username model =
-    let
-        model_ =
-            { model | username = username }
-    in
-        Update.fromModel model_
+onSetUsername : Config msg -> String -> Model -> UpdateResponse msg
+onSetUsername config username model =
+    ( { model | username = username }
+    , React.none
+    )
 
 
-onSetPassword : Core.Model -> String -> Model -> UpdateResponse
-onSetPassword core password model =
-    let
-        model_ =
-            { model | password = password }
-    in
-        Update.fromModel model_
+onSetPassword : Config msg -> String -> Model -> UpdateResponse msg
+onSetPassword config password model =
+    ( { model | password = password }
+    , React.none
+    )
 
 
-onRequest : Core.Model -> Maybe Response -> Model -> UpdateResponse
-onRequest core response model =
+onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
+onRequest config response model =
     case response of
         Just response ->
-            updateRequest core response model
+            updateRequest config response model
 
         Nothing ->
-            Update.fromModel model
+            ( model, React.none )
 
 
-updateRequest : Core.Model -> Response -> Model -> UpdateResponse
-updateRequest core response model =
+updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
+updateRequest config response model =
     case response of
         LoginResponse (Login.Okay token id) ->
-            onLoginOkay core token id model
+            onLoginOkay config token id model
 
         LoginResponse Login.Error ->
-            onLoginError core model
+            onLoginError config model
 
 
-onLoginOkay : Core.Model -> String -> String -> Model -> UpdateResponse
-onLoginOkay core token id model =
-    let
-        model_ =
-            { model | loginFailed = False }
-
-        dispatch =
-            Dispatch.core <| Core.Boot id model.username token
-    in
-        ( model_, Cmd.none, dispatch )
+onLoginOkay : Config msg -> String -> String -> Model -> UpdateResponse msg
+onLoginOkay config token id model =
+    ( { model | loginFailed = False }
+    , React.msg <| config.onLogin id model.username token
+    )
 
 
-onLoginError : Core.Model -> Model -> UpdateResponse
-onLoginError core model =
-    let
-        model_ =
-            { model | loginFailed = True }
-    in
-        Update.fromModel model_
+onLoginError : Config msg -> Model -> UpdateResponse msg
+onLoginError config model =
+    ( { model | loginFailed = True }, React.none )
