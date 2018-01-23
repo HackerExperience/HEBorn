@@ -159,15 +159,8 @@ onWindowManagerMsg config id msg model =
 
 
 onDockMsg : Config msg -> ID -> Dock.Msg -> Model -> UpdateResponse msg
-onDockMsg config id msg model_ =
-    let
-        config_ =
-            dockConfig id config
-
-        ( model, react ) =
-            Dock.update config_ msg model_
-    in
-        ( model, react )
+onDockMsg config id =
+    Dock.update (dockConfig id config)
 
 
 {-| Sends messages to every opened app on every session

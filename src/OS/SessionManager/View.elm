@@ -45,12 +45,7 @@ view config model =
 
 viewDock : Config msg -> ID -> Model -> Html msg
 viewDock config id model =
-    let
-        config_ =
-            dockConfig id config
-    in
-        Dock.view config_ model
-            |> Html.map (DockMsg >> config.toMsg)
+    Dock.view (dockConfig id config) model
 
 
 viewWM : Config msg -> ID -> Model -> Html msg
