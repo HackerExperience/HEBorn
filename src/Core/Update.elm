@@ -207,15 +207,10 @@ updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
 updateSetupSetup msg stateModel =
     let
         config =
-            case stateModel.game.account.mainframe of
-                Just cid ->
-                    setupConfig
-                        stateModel.game.account.id
-                        cid
-                        stateModel.game.flags
-
-                Nothing ->
-                    Debug.crash "Impossible: Going to setup before account bootstrap"
+            setupConfig
+                stateModel.game.account.id
+                stateModel.game.account.mainframe
+                stateModel.game.flags
 
         ( setup, react ) =
             Setup.update config msg stateModel.setup

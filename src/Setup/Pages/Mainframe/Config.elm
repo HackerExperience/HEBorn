@@ -11,5 +11,5 @@ type alias Config msg =
     , onPrevious : msg
     , toMsg : Msg -> msg
     , flags : Core.Flags
-    , mainframe : CId
+    , mainframe : Maybe CId
     }

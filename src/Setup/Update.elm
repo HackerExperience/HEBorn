@@ -218,7 +218,7 @@ handleJoinedServer config cid model =
             else
                 React.msg config.onPlay
     in
-        if config.mainframe == cid then
+        if config.mainframe == (Just cid) then
             ( doneLoading model, react )
         else
             ( model, React.none )
@@ -261,8 +261,14 @@ setRequest config model =
         request ( type_, settings ) =
             case type_ of
                 Settings.ServerTopic ->
-                    Cmd.map config.toMsg <|
-                        SetServer.request settings cid config
+                    case config.mainframe of
+                        Just cid ->
+                            config
+                                |> SetServer.request settings cid
+                                |> Cmd.map config.toMsg
+
+                        Nothing ->
+                            Cmd.none
 
                 Settings.AccountTopic ->
                     Cmd.none

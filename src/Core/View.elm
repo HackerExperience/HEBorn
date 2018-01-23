@@ -33,21 +33,8 @@ view model =
 
 onSetup : SetupModel -> Model -> Html Msg
 onSetup { game, setup } model =
-    case game.account.mainframe of
-        Just inBieber ->
-            let
-                config =
-                    setupConfig
-                        game.account.id
-                        inBieber
-                        game.flags
-            in
-                Setup.view config setup
-
-        Nothing ->
-            "Player doesn't have a Mainframe [View.setup]"
-                |> Error.astralProj
-                |> uncurry Panic.view
+    Setup.view (setupConfig game.account.id game.account.mainframe game.flags)
+        setup
 
 
 onPlay : PlayModel -> Html Msg

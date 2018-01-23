@@ -65,27 +65,20 @@ home model =
 
 setup : SetupModel -> Sub Msg
 setup ({ game, setup } as model) =
-    case game.account.mainframe of
-        Just mainframe ->
-            let
-                config =
-                    setupConfig
-                        game.account.id
-                        mainframe
-                        game.flags
+    let
+        config =
+            setupConfig
+                game.account.id
+                game.account.mainframe
+                game.flags
 
-                setupSub =
-                    Setup.subscriptions config setup
-            in
-                Sub.batch
-                    [ websocket model.websocket
-                    , setupSub
-                    ]
-
-        Nothing ->
-            "Player is in setup without a mainframe. [Subscriptions.setup]"
-                |> Error.astralProj
-                |> uncurry Native.Panic.crash
+        setupSub =
+            Setup.subscriptions config setup
+    in
+        Sub.batch
+            [ websocket model.websocket
+            , setupSub
+            ]
 
 
 play : PlayModel -> Sub Msg

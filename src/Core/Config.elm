@@ -87,11 +87,7 @@ websocketConfig flags =
                 , setup <| Setup.HandleJoinedAccount value
                 ]
     , onJoinedServer =
-        \cid value ->
-            BatchMsg
-                [ servers <| Servers.HandleJoinedServer cid value
-                , setup <| Setup.HandleJoinedServer cid
-                ]
+        \cid value -> servers <| Servers.HandleJoinedServer cid value
     , onJoinFailedServer =
         Web.HandleJoinServerFailed >> web
     , onLeaved =
@@ -195,6 +191,10 @@ gameConfig =
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
 
+    -- servers
+    , onNewGateway =
+        Setup.HandleJoinedServer >> setup
+
     --- account
     , onConnected =
         \accountId ->
@@ -235,7 +235,7 @@ gameConfig =
     }
 
 
-setupConfig : String -> CId -> Flags -> Setup.Config Msg
+setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
     { toMsg = SetupMsg
     , accountId = accountId
