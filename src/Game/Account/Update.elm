@@ -71,7 +71,7 @@ update config msg model =
 
 handleSetGateway : Config msg -> Servers.CId -> Model -> UpdateResponse msg
 handleSetGateway config cid model =
-    ( { model | activeGateway = Just cid }
+    ( { model | activeGateway = Just cid, context = Gateway }
     , React.none
     )
 
@@ -82,38 +82,31 @@ handleSetEndpoint :
     -> Model
     -> UpdateResponse msg
 handleSetEndpoint config cid model =
-    -- this looks like wrong
     case getGateway model of
-        Just gateway ->
+        Just gatewayId ->
             let
                 react =
-                    case getGateway model of
-                        Just gatewayId ->
-                            React.msg <| config.onSetEndpoint gatewayId cid
-
-                        Nothing ->
-                            React.none
+                    React.msg <| config.onSetEndpoint gatewayId cid
 
                 model_ =
-                    if cid == Nothing then
-                        config.fallToGateway (fallToGateway model)
-                    else
-                        config.fallToGateway (fallToGateway model)
+                    { model | context = Gateway }
             in
                 ( model_, react )
 
         Nothing ->
-            ( model, React.none )
+            "Trying to set endpoint without gateway."
+                |> Error.astralProj
+                |> HandleLogoutAndCrash
+                |> config.toMsg
+                |> React.msg
+                |> (,) model
 
 
 handleSetContext : Config msg -> Context -> Model -> UpdateResponse msg
 handleSetContext config context model =
     let
-        model1 =
-            { model | context = context }
-
         model_ =
-            config.fallToGateway (fallToGateway model1)
+            { model | context = context }
     in
         ( model_, React.none )
 

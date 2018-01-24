@@ -233,26 +233,6 @@ fromKey key =
             GatewayCId key
 
 
-activateEndpoint : Maybe CId -> GatewayData -> GatewayData
-activateEndpoint endpoint ({ endpoints } as data) =
-    case endpoint of
-        Just endpoint_ ->
-            let
-                endpoints_ =
-                    if List.member endpoint_ endpoints then
-                        endpoints
-                    else
-                        endpoint_ :: endpoints
-            in
-                { data
-                    | endpoint = endpoint
-                    , endpoints = endpoints_
-                }
-
-        Nothing ->
-            { data | endpoint = Nothing }
-
-
 
 -- server getters/setters
 
@@ -364,7 +344,51 @@ setEndpointCId cid ({ ownership } as server) =
             case ownership of
                 GatewayOwnership data ->
                     GatewayOwnership <|
-                        activateEndpoint cid data
+                        { data | endpoint = cid }
+
+                ownership ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
+
+
+addEndpointCId : CId -> Server -> Server
+addEndpointCId cid ({ ownership } as server) =
+    let
+        ownership_ =
+            case ownership of
+                GatewayOwnership ({ endpoints } as data) ->
+                    if List.member cid endpoints then
+                        ownership
+                    else
+                        GatewayOwnership <|
+                            { data
+                                | endpoints =
+                                    cid :: endpoints
+                            }
+
+                ownership ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
+
+
+removeEndpointCId : CId -> Server -> Server
+removeEndpointCId cid ({ ownership } as server) =
+    let
+        ownership_ =
+            case ownership of
+                GatewayOwnership data ->
+                    GatewayOwnership <|
+                        { data
+                            | endpoints =
+                                List.filter ((/=) cid) data.endpoints
+                            , endpoint =
+                                if data.endpoint == Just cid then
+                                    Nothing
+                                else
+                                    data.endpoint
+                        }
 
                 ownership ->
                     ownership

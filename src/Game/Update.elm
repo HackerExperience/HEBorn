@@ -103,11 +103,8 @@ onAccount config msg model =
         lastTick =
             Meta.getLastTick (getMeta model)
 
-        fallbackGW =
-            fallToGateway model
-
         config_ =
-            accountConfig fallbackGW lastTick (getFlags model) config
+            accountConfig lastTick (getFlags model) config
 
         ( account, react ) =
             Account.update config_ msg <| getAccount model
@@ -196,8 +193,15 @@ onServers config msg model =
         lastTick =
             Meta.getLastTick (getMeta model)
 
+        activeCId =
+            model
+                |> getActiveServer
+                |> Maybe.map Tuple.first
+
         config_ =
-            serversConfig lastTick
+            serversConfig activeCId
+                (getGateway model)
+                lastTick
                 (getFlags model)
                 config
 

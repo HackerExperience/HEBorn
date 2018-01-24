@@ -64,6 +64,7 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -107,6 +108,7 @@ wmConfig sessionId config =
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
+    , onWebLogout = config.onWebLogout
     }
 
 

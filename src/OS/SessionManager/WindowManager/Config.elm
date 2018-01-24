@@ -64,6 +64,7 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -104,6 +105,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = Close wId |> config.toMsg
+    , onWebLogout = config.onWebLogout
     }
 
 

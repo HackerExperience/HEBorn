@@ -72,6 +72,7 @@ type alias BrowserHistory =
 
 type ModalAction
     = ForDownload NIP Filesystem.FileEntry
+    | ImpossibleToLogin
 
 
 name : String

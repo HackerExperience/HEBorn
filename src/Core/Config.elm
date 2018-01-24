@@ -179,7 +179,7 @@ gameConfig =
                 |> browser ( sessionId, windowId ) context
     , onJoinFailed =
         \{ sessionId, windowId, context, tabId } ->
-            Browser.LoginFailed
+            Browser.HandleLoginFailed
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
 
@@ -206,7 +206,7 @@ gameConfig =
     -- account.finances
     , onBALoginSuccess =
         \data { sessionId, windowId, context, tabId } ->
-            Browser.LoginFailed
+            Browser.HandleBankLogin data
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
     , onBALoginFailed =
@@ -342,6 +342,8 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
                 |> MissionsActions.GoApp app
                 |> Missions.HandleActionDone
                 |> missions
+    , onWebLogout =
+        \cid -> Servers.HandleLogout |> server cid
     }
 
 

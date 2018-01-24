@@ -2,6 +2,7 @@ module UI.Widgets.Modal
     exposing
         ( modal
         , modalPickStorage
+        , modalOk
         , modalOkCancel
         , modalNode
         , overlayNode
@@ -37,6 +38,11 @@ modalPickStorage storages pickResponse =
             "Select where you want to save oswaldo:"
             btns
             cancel
+
+
+modalOk : Maybe String -> String -> msg -> Html msg
+modalOk title content ok =
+    modal title content [ ( ok, "Ok" ) ] Nothing
 
 
 modalOkCancel : Maybe String -> String -> msg -> msg -> Html msg

@@ -5,7 +5,6 @@ import Html.Attributes as Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
-import Game.Storyline.Models as Storyline
 import Core.Flags as Flags
 import OS.Config exposing (..)
 import OS.Models exposing (Model)

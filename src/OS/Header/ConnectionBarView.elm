@@ -35,12 +35,9 @@ view config { openMenu } =
             config.activeEndpointCid
 
         endpoints =
-            case config.endpoints of
-                Just endpoints ->
-                    List.map Just endpoints
-
-                Nothing ->
-                    []
+            config.endpoints
+                |> List.map Just
+                |> (::) Nothing
 
         gatewayBounces =
             case activeEndpointCId of

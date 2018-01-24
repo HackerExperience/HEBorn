@@ -44,12 +44,11 @@ type TabMsg
     | Cracked NIP String
     | AnyMap NIP
     | Login NIP String
-    | Logout
     | HandleBankLogin Finances.BankAccountData
     | HandleBankLoginError
     | HandleBankTransfer
     | HandleBankTransferError
-    | LoginFailed
+    | HandleLoginFailed
     | SelectEndpoint
     | NewApp Apps.App
     | HandleFetched Response

@@ -76,6 +76,7 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onCloseApp : msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -182,9 +183,10 @@ browserConfig config =
     , activeServer = Tuple.second config.activeServer
     , activeGateway = Tuple.second config.activeGateway
     , endpoints =
-        config.activeServer
+        config.activeGateway
             |> Tuple.second
             |> Servers.getEndpoints
+            |> Maybe.withDefault []
     , onNewApp = config.onNewApp
     , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
@@ -200,6 +202,7 @@ browserConfig config =
         config.activeServer
             |> Tuple.first
             |> config.onFetchUrl
+    , onWebLogout = config.onWebLogout
     }
 
 

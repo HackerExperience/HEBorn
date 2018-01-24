@@ -23,5 +23,6 @@ initialModel =
     , Apps.LanViewerApp
     , Apps.EmailApp
     , Apps.BugApp
+    , Apps.BackFlixApp
     , Apps.CalculatorApp
     ]

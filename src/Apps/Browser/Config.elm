@@ -6,7 +6,7 @@ import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Servers.Models as Servers
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Download as Download
 import Apps.Apps as Apps
@@ -21,7 +21,7 @@ import Apps.Browser.Pages.Webserver.Config as Webserver
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , endpoints : Maybe (List CId)
+    , endpoints : List CId
     , activeServer : Servers.Server
     , activeGateway : Servers.Server
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
@@ -33,6 +33,7 @@ type alias Config msg =
     , onNewBruteforceProcess : Network.IP -> msg
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : Network.ID -> Network.IP -> Requester -> msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -56,7 +57,7 @@ downloadCenterConfig : Config msg -> DownloadCenter.Config msg
 downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Logout |> ActiveTabMsg |> config.toMsg
+    , onLogout = Servers.EndpointCId >> config.onWebLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
@@ -78,7 +79,7 @@ webserverConfig : Config msg -> Webserver.Config msg
 webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Logout |> ActiveTabMsg |> config.toMsg
+    , onLogout = Servers.EndpointCId >> config.onWebLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg

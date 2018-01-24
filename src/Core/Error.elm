@@ -29,7 +29,7 @@ requestCode name code =
 
 astralProj : String -> Error
 astralProj =
-    -- FOR MISSING ACTIVE SERVER OR GATEWAY
+    -- For missing ACTIVE server or gateway
     (,) "WTF_ASTRAL_PROJECTION"
 
 
