@@ -229,4 +229,4 @@ view database model app =
             |> applyFilter app
             |> renderEntryList app
             |> (::) header
-            |> verticalList
+            |> verticalList []

@@ -79,6 +79,7 @@ type alias Config msg =
     , onReplyEmail : String -> Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
     , onWebLogout : CId -> msg
+    , accountId : String
     }
 
 
@@ -86,6 +87,7 @@ smConfig : Config msg -> SessionManager.Config msg
 smConfig config =
     { toMsg = SessionManagerMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , flags = config.flags
     , lastTick = config.lastTick
     , story = config.story
     , isCampaign = config.isCampaign
@@ -127,6 +129,7 @@ smConfig config =
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
     , onWebLogout = config.onWebLogout
+    , accountId = config.accountId
     }
 
 

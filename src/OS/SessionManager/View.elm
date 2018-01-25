@@ -3,7 +3,6 @@ module OS.SessionManager.View exposing (..)
 import Html exposing (..)
 import Html.CssHelpers
 import Dict
-import Core.Error as Error
 import OS.Resources as OsRes
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
@@ -11,7 +10,6 @@ import OS.SessionManager.Types exposing (..)
 import OS.SessionManager.WindowManager.View as WM
 import OS.SessionManager.WindowManager.Resources as WmRes
 import OS.SessionManager.Dock.View as Dock
-import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers
 
 

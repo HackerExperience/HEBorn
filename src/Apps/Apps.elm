@@ -2,6 +2,7 @@ module Apps.Apps exposing (App(..), AppParams(..), paramsToApp)
 
 import Apps.Browser.Models as Browser
 import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.BounceManager.Models as BounceManager
 import Apps.Hebamp.Shared as Hebamp
 
 
@@ -30,6 +31,7 @@ type AppParams
     = BrowserParams Browser.Params
     | FloatingHeadsParams FloatingHeads.Params
     | MusicParams Hebamp.Params
+    | BounceManagerParams BounceManager.Params
 
 
 paramsToApp : AppParams -> App
@@ -43,3 +45,6 @@ paramsToApp params =
 
         MusicParams _ ->
             MusicApp
+
+        BounceManagerParams _ ->
+            BounceManagerApp

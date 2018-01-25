@@ -6,11 +6,12 @@ import Json.Decode as Decode
         , dict
         , list
         , string
+        , field
         )
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, required, custom)
 import Game.Account.Bounces.Models exposing (..)
+import Game.Account.Bounces.Shared exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
-import Apps.Apps as Apps
 
 
 bounces : Decoder Model
@@ -22,11 +23,23 @@ bounce : Decoder Bounce
 bounce =
     decode Bounce
         |> required "name" string
-        |> required "path" (list nip)
+        |> required "links" (list nip)
 
 
 nip : Decoder NIP
 nip =
     decode (,)
-        |> required "netid" string
+        |> required "network_id" string
         |> required "ip" string
+
+
+bounceId : Decoder ID
+bounceId =
+    field "bounce_id" string
+
+
+bounceWithId : Decoder ( ID, Bounce )
+bounceWithId =
+    decode (,)
+        |> custom bounceId
+        |> custom bounce

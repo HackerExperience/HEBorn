@@ -10,6 +10,9 @@ import Events.Account.Handlers.BankAccountClosed as BankAccountClosed
 import Events.Account.Handlers.DbAccountUpdated as DbAccountUpdated
 import Events.Account.Handlers.DbAccountRemoved as DbAccountRemoved
 import Events.Account.Handlers.TutorialFinished as TutorialFinished
+import Events.Account.Handlers.BounceCreated as BounceCreated
+import Events.Account.Handlers.BounceUpdated as BounceUpdated
+import Events.Account.Handlers.BounceRemoved as BounceRemoved
 
 
 type alias Config msg =
@@ -23,4 +26,7 @@ type alias Config msg =
     , onDbAccountUpdated : DbAccountUpdated.Data -> msg
     , onDbAccountRemoved : DbAccountRemoved.Data -> msg
     , onTutorialFinished : TutorialFinished.Data -> msg
+    , onBounceCreated : BounceCreated.Data -> msg
+    , onBounceUpdated : BounceUpdated.Data -> msg
+    , onBounceRemoved : BounceRemoved.Data -> msg
     }

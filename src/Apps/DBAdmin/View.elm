@@ -96,7 +96,7 @@ renderBitcoinAccounts database model =
     database
         |> Database.getBitcoinWallets
         |> Dict.foldl renderBitcoinAccount []
-        |> verticalList
+        |> verticalList []
 
 
 renderBankAccount :
@@ -130,4 +130,4 @@ renderBankAccounts database model =
     database
         |> Database.getBankAccounts
         |> Dict.foldl renderBankAccount []
-        |> verticalList
+        |> verticalList []

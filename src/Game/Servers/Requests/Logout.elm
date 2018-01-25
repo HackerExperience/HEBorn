@@ -4,7 +4,6 @@ import Json.Decode as Decode exposing (Value)
 import Requests.Requests as Requests exposing (report_)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
-import Game.Servers.Models exposing (Server)
 import Game.Servers.Shared exposing (CId)
 
 
