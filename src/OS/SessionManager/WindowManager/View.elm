@@ -117,28 +117,25 @@ isResizable window =
 
 header : Config msg -> ID -> Window -> Html msg
 header config id window =
-    let
-        windowBody =
-            if (isDecorated window) then
-                [ headerTitle config (title window) (Apps.icon window.app)
-                , headerContext config id <| realContext window
-                , headerButtons config id window
-                ]
-            else
-                []
-    in
+    if isDecorated window then
         div
             [ Draggable.mouseTrigger id (DragMsg >> config.toMsg)
             , class [ Res.HeaderSuper ]
             ]
             [ div
                 [ class [ Res.WindowHeader ]
-                , (UpdateFocusTo (Just id))
+                , Just id
+                    |> UpdateFocusTo
                     |> config.toMsg
                     |> onMouseDown
                 ]
-                windowBody
+                [ headerTitle config (title window) (Apps.icon window.app)
+                , headerContext config id <| realContext window
+                , headerButtons config id window
+                ]
             ]
+    else
+        text ""
 
 
 headerContext : Config msg -> ID -> Maybe Context -> Html msg

@@ -1,6 +1,7 @@
 module Apps.Config exposing (..)
 
 import Time exposing (Time)
+import Html exposing (Attribute)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -50,6 +51,7 @@ type alias Config msg =
     , activeGateway : ( CId, Servers.Server )
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
+    , draggable : Attribute msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
@@ -150,6 +152,7 @@ floatingHeadsConfig config =
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = config.onCloseApp
     , onOpenApp = config.onOpenApp
+    , draggable = config.draggable
     }
 
 
@@ -262,6 +265,7 @@ hebampConfig config =
     { toMsg = MusicMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , onCloseApp = config.onCloseApp
+    , draggable = config.draggable
     }
 
 

@@ -62,12 +62,7 @@ windowHeader : Config msg -> Model -> Html msg
 windowHeader config model =
     div
         [ class [ PseudoHeader ] ]
-        [ span [ class [ HeaderBtnDrag ] ] []
-        , text " "
-        , closeBtn config
-        , text " "
-        , span [ class [ HeaderBtnDrag ] ] []
-        ]
+        [ closeBtn config ]
 
 
 closeBtn : Config msg -> Html msg
@@ -80,7 +75,7 @@ closeBtn { toMsg } =
 
 
 renderHeader : Config msg -> Maybe Person -> Html msg
-renderHeader { toMsg } person =
+renderHeader { draggable, toMsg } person =
     let
         fallbackLink =
             "images/avatar.jpg"
@@ -98,7 +93,7 @@ renderHeader { toMsg } person =
                 Nothing ->
                     src fallbackLink
     in
-        div [ class [ AvatarContainer ] ]
+        div [ class [ AvatarContainer ], draggable ]
             [ img
                 [ class [ Avatar ]
                 , imgSource

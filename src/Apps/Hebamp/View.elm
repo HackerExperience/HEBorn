@@ -19,42 +19,47 @@ import Apps.Hebamp.Resources exposing (Classes(..), prefix)
 
 
 view : Config msg -> Model -> Html msg
-view config model =
-    Html.map config.toMsg <|
-        div
-            [ class [ Container ] ]
-            [ div [ class [ Header ] ]
-                [ text ":"
-                , span [ class [ IconClose ], onClickMe (Close) ] []
-                ]
-            , div [ class [ Player ] ]
-                [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
-                , div [ class [ Vis, Title ] ] [ songTitle model.now ]
-                , div [ class [ Inf ] ] []
-                , div [ class [ Inf, KHz ] ] []
-                , div [ class [ MonoStereo ] ] [ text "mono" ]
-                , div [ class [ Bar, Volume ] ] []
-                , div [ class [ Bar, Balanced ] ] []
-                , div [ class [ Btn, Ext, Left ] ] [ text "EQ" ]
-                , div [ class [ Btn, Ext ] ] [ text "PL" ]
-                , div [ class [ Slidebar ] ]
-                    [ span
-                        [ class [ Pointer ]
-                        , sliderStyle model.now model.currentTime
-                        ]
-                        []
-                    ]
-                , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconStepBackward ] ] [] ]
-                , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPlay ], onClick Play ] [] ]
-                , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconPause ], onClick Pause ] [] ]
-                , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStop ], onClick Pause ] [] ]
-                , div [ class [ Btn, PlayerB ] ] [ span [ class [ Icon, IconStepForward ] ] [] ]
-                , div [ class [ Btn, PlayerB, First ] ] [ span [ class [ Icon, IconEject ], onClick Pause ] [] ]
-                , div [ class [ Btn, Ext, Left ] ] [ text "SHUFFLE" ]
-                , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
-                ]
-            , nativeAudio model.playerId model.now
+view ({ toMsg } as config) model =
+    div
+        [ class [ Container ] ]
+        [ div [ class [ Header ], config.draggable ]
+            [ text ":"
+            , span [ class [ IconClose ], onClickMe <| toMsg <| Close ] []
             ]
+        , div [ class [ Player ] ]
+            [ div [ class [ Vis ] ] [ text <| viewableTime model.currentTime ]
+            , div [ class [ Vis, Title ] ] [ songTitle model.now ]
+            , div [ class [ Inf ] ] []
+            , div [ class [ Inf, KHz ] ] []
+            , div [ class [ MonoStereo ] ] [ text "mono" ]
+            , div [ class [ Bar, Volume ] ] []
+            , div [ class [ Bar, Balanced ] ] []
+            , div [ class [ Btn, Ext, Left ] ] [ text "EQ" ]
+            , div [ class [ Btn, Ext ] ] [ text "PL" ]
+            , div [ class [ Slidebar ] ]
+                [ span
+                    [ class [ Pointer ]
+                    , sliderStyle model.now model.currentTime
+                    ]
+                    []
+                ]
+            , div [ class [ Btn, PlayerB, First ] ]
+                [ span [ class [ Icon, IconStepBackward ] ] [] ]
+            , div [ class [ Btn, PlayerB ] ]
+                [ span [ class [ Icon, IconPlay ], onClick <| toMsg <| Play ] [] ]
+            , div [ class [ Btn, PlayerB ] ]
+                [ span [ class [ Icon, IconPause ], onClick <| toMsg <| Pause ] [] ]
+            , div [ class [ Btn, PlayerB ] ]
+                [ span [ class [ Icon, IconStop ], onClick <| toMsg <| Pause ] [] ]
+            , div [ class [ Btn, PlayerB ] ]
+                [ span [ class [ Icon, IconStepForward ] ] [] ]
+            , div [ class [ Btn, PlayerB, First ] ]
+                [ span [ class [ Icon, IconEject ], onClick <| toMsg <| Pause ] [] ]
+            , div [ class [ Btn, Ext, Left ] ] [ text "SHUFFLE" ]
+            , div [ class [ Btn, Ext, Left ] ] [ text "RAND " ]
+            ]
+        , nativeAudio config model.playerId model.now
+        ]
 
 
 targetCurrentTime : Json.Decoder Float
@@ -102,7 +107,7 @@ viewableTime src =
         min ++ ":" ++ sec
 
 
-songTitle : Maybe AudioData -> Html Msg
+songTitle : Maybe AudioData -> Html msg
 songTitle audioData =
     audioData
         |> Maybe.map .label
@@ -110,7 +115,7 @@ songTitle audioData =
         |> text
 
 
-sliderStyle : Maybe AudioData -> Float -> Attribute Msg
+sliderStyle : Maybe AudioData -> Float -> Attribute msg
 sliderStyle audioData currentTime =
     let
         styles =
@@ -127,8 +132,8 @@ sliderStyle audioData currentTime =
         styles |> Css.asPairs |> style
 
 
-nativeAudio : String -> Maybe AudioData -> Html Msg
-nativeAudio playerId audioData =
+nativeAudio : Config msg -> String -> Maybe AudioData -> Html msg
+nativeAudio { toMsg } playerId audioData =
     let
         staticAttr =
             [ id playerId
@@ -140,7 +145,7 @@ nativeAudio playerId audioData =
                 Just audioData ->
                     [ src audioData.mediaUrl
                     , type_ audioData.mediaType
-                    , onTimeUpdate <| TimeUpdate playerId
+                    , onTimeUpdate <| toMsg << TimeUpdate playerId
                     ]
 
                 Nothing ->
