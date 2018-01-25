@@ -149,6 +149,7 @@ floatingHeadsConfig config =
     , username = Account.getUsername config.account
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = config.onCloseApp
+    , onOpenApp = config.onOpenApp
     }
 
 

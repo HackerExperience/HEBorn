@@ -1,9 +1,12 @@
 module Apps.FloatingHeads.Config exposing (..)
 
+import Apps.Apps as Apps
+import Game.Meta.Types.Context exposing (Context)
 import Game.Storyline.Emails.Models as Emails
 import Game.Storyline.Emails.Contents as Emails
 import Game.Storyline.Emails.Contents.Config as Content
 import Apps.FloatingHeads.Messages exposing (..)
+import Apps.Browser.Models as Browser
 
 
 type alias Config msg =
@@ -13,11 +16,15 @@ type alias Config msg =
     , username : String
     , onReplyEmail : Emails.Content -> msg
     , onCloseApp : msg
+    , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     }
 
 
 contentConfig : Config msg -> Content.Config msg
 contentConfig config =
     { username = config.username
-    , batchMsg = config.batchMsg
+    , onOpenBrowser =
+        Browser.OpenAtUrl
+            >> Apps.BrowserParams
+            >> config.onOpenApp Nothing
     }
