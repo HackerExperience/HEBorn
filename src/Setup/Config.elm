@@ -15,7 +15,7 @@ type alias Config msg =
     , flags : Core.Flags
     , onError : Core.Error -> msg
     , onPlay : msg
-    , onGatewaySetName : String -> msg
+    , onServerSetName : CId -> String -> msg
 
     -- TODO: remove, we're already receiving it using events
     , mainframe : Maybe CId
@@ -50,6 +50,6 @@ mainframeConfig config =
     , toMsg = MainframeMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , flags = config.flags
-    , onGatewaySetName = config.onGatewaySetName
+    , onServerSetName = config.onServerSetName
     , mainframe = config.mainframe
     }

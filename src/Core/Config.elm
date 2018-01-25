@@ -115,6 +115,8 @@ eventsConfig =
                     ]
         , onStoryEmailReplyUnlocked =
             Emails.HandleReplyUnlocked >> emails
+        , onStoryEmailReplySent =
+            Emails.HandleReplySent >> emails
         , onBankAccountUpdated =
             uncurry Finances.HandleBankAccountUpdated >> finances
         , onBankAccountClosed =
@@ -233,13 +235,8 @@ setupConfig accountId mainframe flags =
     , batchMsg = BatchMsg
     , accountId = accountId
     , mainframe = mainframe
-    , onGatewaySetName =
-        case mainframe of
-            Just cid ->
-                Servers.HandleSetName >> server cid
-
-            Nothing ->
-                \_ -> BatchMsg []
+    , onServerSetName =
+        \cid -> Servers.HandleSetName >> server cid
     , flags = flags
     , onError = HandleCrash
     , onPlay = HandlePlay
@@ -343,7 +340,7 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onNewBruteforceProcess =
         \cid -> Processes.HandleStartBruteforce >> processes cid
     , onReplyEmail =
-        Emails.HandleReply >> emails
+        Emails.HandleReply >>> emails
     , onActionDone =
         \app context ->
             context

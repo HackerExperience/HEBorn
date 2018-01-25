@@ -76,7 +76,7 @@ type alias Config msg =
     , onNewBruteforceProcess : CId -> Network.IP -> msg
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
-    , onReplyEmail : Emails.Content -> msg
+    , onReplyEmail : String -> Emails.Content -> msg
     , onCloseApp : msg
     , onWebLogout : CId -> msg
     }

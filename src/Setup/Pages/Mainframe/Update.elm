@@ -2,6 +2,7 @@ module Setup.Pages.Mainframe.Update exposing (update)
 
 import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
+import Game.Servers.Shared exposing (CId)
 import Setup.Pages.Mainframe.Models exposing (..)
 import Setup.Pages.Mainframe.Messages exposing (..)
 import Setup.Pages.Mainframe.Config exposing (..)
@@ -21,10 +22,10 @@ update config msg model =
         Validate ->
             onValidate config model
 
-        Checked True ->
-            onChecked config model
+        Checked mainframe True ->
+            onChecked config mainframe model
 
-        Checked False ->
+        Checked _ False ->
             ( model, React.none )
 
 
@@ -39,7 +40,8 @@ onValidate ({ toMsg, mainframe } as config) model =
         cmd =
             case Maybe.uncurry (getHostname model) mainframe of
                 Just ( name, mainframe ) ->
-                    Check.serverName (Checked >> toMsg)
+                    Check.serverName
+                        (Checked mainframe >> toMsg)
                         name
                         mainframe
                         config
@@ -50,12 +52,12 @@ onValidate ({ toMsg, mainframe } as config) model =
         ( model, React.cmd cmd )
 
 
-onChecked : Config msg -> Model -> UpdateResponse msg
-onChecked { onGatewaySetName, onNext, batchMsg } model =
+onChecked : Config msg -> CId -> Model -> UpdateResponse msg
+onChecked { onServerSetName, onNext, batchMsg } mainframe model =
     [ model
         |> .hostname
         |> Maybe.withDefault ""
-        |> onGatewaySetName
+        |> onServerSetName mainframe
     , model
         |> settings
         |> onNext

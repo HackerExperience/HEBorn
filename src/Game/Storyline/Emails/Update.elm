@@ -1,12 +1,13 @@
 module Game.Storyline.Emails.Update exposing (update)
 
 import Dict
+import Time exposing (Time)
 import Utils.React as React exposing (React)
 import Game.Storyline.Emails.Config exposing (..)
 import Game.Storyline.Emails.Models exposing (..)
 import Game.Storyline.Emails.Messages exposing (..)
 import Game.Storyline.Emails.Contents as Contents exposing (Content)
-import Game.Storyline.Emails.Requests exposing (Response, receive)
+import Game.Storyline.Emails.Requests exposing (Response(..), receive)
 import Game.Storyline.Emails.Requests.Reply as Reply
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
@@ -22,14 +23,17 @@ update config msg model =
         Changed newModel ->
             onChanged newModel model
 
-        HandleReply content ->
-            handleReply config content model
+        HandleReply personId content ->
+            handleReply config personId content model
 
         HandleNewEmail data ->
             handleNewEmail config data model
 
         HandleReplyUnlocked data ->
             handleReplyUnlocked config data model
+
+        HandleReplySent { timestamp, content, contactId } ->
+            handleReplySent config timestamp contactId content model
 
         Request data ->
             onRequest config (receive data) model
@@ -40,8 +44,8 @@ onChanged newModel oldModel =
     ( newModel, React.none )
 
 
-handleReply : Config msg -> Content -> Model -> UpdateResponse msg
-handleReply config content model =
+handleReply : Config msg -> String -> Content -> Model -> UpdateResponse msg
+handleReply config personId content model =
     let
         accountId =
             config.accountId
@@ -50,7 +54,10 @@ handleReply config content model =
             Contents.toId content
 
         cmd =
-            Reply.request accountId contentId config
+            Reply.request ( personId, content )
+                accountId
+                contentId
+                config
                 |> Cmd.map config.toMsg
                 |> React.cmd
     in
@@ -132,20 +139,48 @@ handleReplyUnlocked config { personId, replies } model =
         ( model_, React.none )
 
 
+handleReplySent :
+    Config msg
+    -> Time
+    -> String
+    -> Content
+    -> Model
+    -> UpdateResponse msg
+handleReplySent _ when personId content model =
+    let
+        person_ =
+            case getPerson personId model of
+                Nothing ->
+                    { about =
+                        personMetadata personId
+                    , messages =
+                        ( when, Sent content )
+                            |> List.singleton
+                            |> Dict.fromList
+                    , replies =
+                        []
+                    }
+
+                Just person ->
+                    { person
+                        | messages =
+                            person
+                                |> getMessages
+                                |> Dict.insert
+                                    when
+                                    (Sent content)
+                    }
+
+        model_ =
+            setPerson personId person_ model
+    in
+        ( model_, React.none )
+
+
 
 -- requests
 
 
 onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
 onRequest config response model =
-    case response of
-        Just response ->
-            updateRequest config response model
-
-        Nothing ->
-            ( model, React.none )
-
-
-updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
-updateRequest config response model =
     ( model, React.none )

@@ -16,7 +16,7 @@ type alias Config msg =
     , draggable : Attribute msg
     , emails : Emails.Model
     , username : String
-    , onReplyEmail : Emails.Content -> msg
+    , onReplyEmail : String -> Emails.Content -> msg
     , onCloseApp : msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     }

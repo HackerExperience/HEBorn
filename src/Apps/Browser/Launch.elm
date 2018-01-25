@@ -41,7 +41,7 @@ launchOpenAtUrl config url me =
             }
 
         react =
-            React.msg <| config.onFetchUrl url nid reference
+            React.msg <| config.onFetchUrl nid url reference
 
         model_ =
             model

@@ -12,6 +12,6 @@ type alias Config msg =
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , flags : Core.Flags
-    , onGatewaySetName : String -> msg
+    , onServerSetName : CId -> String -> msg
     , mainframe : Maybe CId
     }
