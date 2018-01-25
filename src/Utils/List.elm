@@ -13,6 +13,7 @@ module Utils.List
         , unique
         , uniqueBy
         , dropRight
+        , insertAt
         )
 
 import Set exposing (Set)
@@ -193,3 +194,22 @@ countUp func value ( acc, index ) =
 countDown : (Int -> a -> b -> b) -> a -> ( b, Int ) -> ( b, Int )
 countDown func value ( acc, index ) =
     ( func index value acc, index - 1 )
+
+
+
+--Slow only use for tiny Lists
+
+
+insertAt : Int -> a -> List a -> List a
+insertAt where_ value list =
+    let
+        leftSide =
+            dropRight where_ list
+
+        rightSide =
+            List.drop ((List.length list) - where_) list
+
+        middle =
+            List.singleton value
+    in
+        leftSide ++ middle ++ rightSide

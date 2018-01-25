@@ -2,7 +2,27 @@ module Apps.BounceManager.Resources exposing (..)
 
 
 type Classes
-    = BounceEntry
+    = Super
+    | Manage
+    | Builder
+    | Building
+    | Name
+    | Build
+    | Button
+    | BoxifyMe
+    | Servers
+    | ServerList
+    | Buttons
+    | BounceEntry
+    | BounceNode
+    | HackedServer
+    | BounceMap
+    | MiddleButton
+    | Slot
+    | Filter
+    | MoveMenu
+    | Selected
+    | Empty
 
 
 prefix : String

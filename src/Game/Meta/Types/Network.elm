@@ -55,3 +55,8 @@ isFromInternet ( id, _ ) =
 filterInternet : List NIP -> List NIP
 filterInternet list =
     List.filter isFromInternet list
+
+
+render : NIP -> String
+render nip =
+    Tuple.second nip
