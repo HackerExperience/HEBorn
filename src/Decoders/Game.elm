@@ -1,6 +1,7 @@
 module Decoders.Game exposing (..)
 
 import Dict exposing (Dict)
+import Set exposing (Set)
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -54,7 +55,7 @@ type alias Player =
     { serverId : String
     , nips : List NIP
     , activeNIP : NIP
-    , endpoints : List Servers.CId
+    , endpoints : Set NIP
     }
 
 
@@ -120,7 +121,7 @@ joinPlayer =
     decode Player
         |> required "server_id" string
         |> andThen playerNetwork
-        |> required "endpoints" (list Decoders.Servers.remoteCId)
+        |> required "endpoints" endpoints
 
 
 playerNetwork : (List NIP -> NIP -> a) -> Decoder a
@@ -171,3 +172,9 @@ insertServers model serversToJoin =
                 |> flip setServers model
     in
         ( model_, serversToJoin )
+
+
+endpoints : Decoder (Set NIP)
+endpoints =
+    list Decoders.Network.nip
+        |> map Set.fromList

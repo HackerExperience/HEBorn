@@ -1,6 +1,7 @@
 module Game.Servers.Update exposing (..)
 
 import Dict
+import Set
 import Utils.React as React exposing (React)
 import Json.Decode as Decode exposing (Value)
 import Decoders.Servers
@@ -352,14 +353,11 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
     let
         ( servers_, gateways_ ) =
             case cid of
-                EndpointCId _ ->
+                EndpointCId addr ->
                     ( Dict.map (\_ -> removeEndpointCId cid) model.servers
                     , Dict.map
                         (\_ cache ->
-                            { cache
-                                | endpoints =
-                                    List.filter ((/=) cid) cache.endpoints
-                            }
+                            { cache | endpoints = Set.remove addr cache.endpoints }
                         )
                         model.gateways
                     )

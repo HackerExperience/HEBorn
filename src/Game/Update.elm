@@ -2,6 +2,7 @@ module Game.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Dict exposing (Dict)
+import Set
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Core.Error as Error
@@ -293,8 +294,12 @@ bootstrapJoin config remoteServers playerServer =
 
         msg2 =
             playerServer.endpoints
+                |> Set.toList
                 |> List.filterMap
-                    (Servers.toSessionId >> flip Dict.get remoteServers)
+                    (Servers.EndpointCId
+                        >> Servers.toSessionId
+                        >> flip Dict.get remoteServers
+                    )
                 |> List.filterMap (joinRemote config playerServer)
                 |> config.batchMsg
     in
