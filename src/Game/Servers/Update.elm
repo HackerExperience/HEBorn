@@ -110,6 +110,9 @@ updateServer config cid model msg server =
         HandleSetActiveNIP nip ->
             handleSetActiveNIP config nip server
 
+        HandleSetName name ->
+            handleSetName name server
+
         FilesystemMsg storageId msg ->
             onFilesystemMsg config cid storageId msg server
 
@@ -138,7 +141,7 @@ handleSetBounce :
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse msg
-handleSetBounce config cid maybeBounceId server =
+handleSetBounce _ cid maybeBounceId server =
     ( setBounce maybeBounceId server, React.none )
 
 
@@ -147,7 +150,7 @@ handleSetEndpoint :
     -> Maybe CId
     -> Server
     -> ServerUpdateResponse msg
-handleSetEndpoint config cid server =
+handleSetEndpoint _ cid server =
     ( setEndpointCId cid server, React.none )
 
 
@@ -156,8 +159,16 @@ handleSetActiveNIP :
     -> Network.NIP
     -> Server
     -> ServerUpdateResponse msg
-handleSetActiveNIP config nip server =
+handleSetActiveNIP _ nip server =
     ( setActiveNIP nip server, React.none )
+
+
+handleSetName :
+    String
+    -> Server
+    -> ServerUpdateResponse msg
+handleSetName name server =
+    ( setName name server, React.none )
 
 
 onFilesystemMsg :

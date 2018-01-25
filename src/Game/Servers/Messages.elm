@@ -33,6 +33,7 @@ type ServerMsg
     | HandleSetBounce (Maybe Bounces.ID)
     | HandleSetEndpoint (Maybe CId)
     | HandleSetActiveNIP Network.NIP
+    | HandleSetName String
     | FilesystemMsg StorageId Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

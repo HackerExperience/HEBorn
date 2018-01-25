@@ -230,8 +230,16 @@ gameConfig =
 setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
     { toMsg = SetupMsg
+    , batchMsg = BatchMsg
     , accountId = accountId
     , mainframe = mainframe
+    , onGatewaySetName =
+        case mainframe of
+            Just cid ->
+                Servers.HandleSetName >> server cid
+
+            Nothing ->
+                \_ -> BatchMsg []
     , flags = flags
     , onError = HandleCrash
     , onPlay = HandlePlay
