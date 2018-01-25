@@ -9,6 +9,7 @@ module Game.Account.Bounces.Models
         , insert
         , remove
         , getName
+        , setName
         , getPath
         )
 
@@ -46,7 +47,7 @@ get id model =
 
 emptyBounce : Bounce
 emptyBounce =
-    { name = "None"
+    { name = "Untitled Bounce"
     , path = []
     }
 
@@ -73,3 +74,8 @@ getPath id model =
     model
         |> get id
         |> Maybe.map .path
+
+
+setName : String -> Bounce -> Bounce
+setName name bounce =
+    { bounce | name = name }

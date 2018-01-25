@@ -6,6 +6,7 @@ import Time exposing (Time)
 import Native.Panic
 import Draggable
 import Core.Error as Error
+import Core.Flags exposing (Flags)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -32,6 +33,7 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , lastTick : Time
+    , flags : Flags
     , story : Story.Model
     , isCampaign : Bool
     , account : Account.Model
@@ -69,6 +71,7 @@ type alias Config msg =
     , onReplyEmail : String -> Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
     , onWebLogout : CId -> msg
+    , accountId : String
     }
 
 
@@ -77,6 +80,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     { toMsg = AppMsg targetContext wId >> config.toMsg
     , batchMsg = config.batchMsg
     , lastTick = config.lastTick
+    , flags = config.flags
     , account = config.account
     , activeServer = appServer
     , activeGateway = config.activeGateway
@@ -113,6 +117,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = Close wId |> config.toMsg
     , onWebLogout = config.onWebLogout
+    , accountId = config.accountId
     }
 
 

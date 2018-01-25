@@ -28,3 +28,23 @@ onClickMe handler =
         }
     <|
         Json.succeed handler
+
+
+onClickWithPrevDef : msg -> Attribute msg
+onClickWithPrevDef handler =
+    onWithOptions "click"
+        { stopPropagation = False
+        , preventDefault = True
+        }
+    <|
+        Json.succeed handler
+
+
+onClickWithStopProp : msg -> Attribute msg
+onClickWithStopProp handler =
+    onWithOptions "click"
+        { stopPropagation = True
+        , preventDefault = False
+        }
+    <|
+        Json.succeed handler

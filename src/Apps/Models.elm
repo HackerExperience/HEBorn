@@ -303,5 +303,8 @@ windowInitSize app =
         BackFlixApp ->
             BackFlix.windowInitSize
 
+        BounceManagerApp ->
+            BounceManager.windowInitSize
+
         _ ->
             ( 600, 400 )

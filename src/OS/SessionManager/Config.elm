@@ -4,6 +4,7 @@ import ContextMenu
 import Html exposing (Attribute)
 import Time exposing (Time)
 import Utils.Core exposing (..)
+import Core.Flags exposing (Flags)
 import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Finances.Models as Finances
@@ -31,6 +32,7 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , lastTick : Time
+    , flags : Flags
     , story : Story.Model
     , isCampaign : Bool
     , servers : Servers.Model
@@ -68,6 +70,7 @@ type alias Config msg =
     , onReplyEmail : String -> Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
     , onWebLogout : CId -> msg
+    , accountId : String
     }
 
 
@@ -75,6 +78,7 @@ wmConfig : Servers.SessionId -> Config msg -> WindowManager.Config msg
 wmConfig sessionId config =
     { toMsg = WindowManagerMsg sessionId >> config.toMsg
     , lastTick = config.lastTick
+    , flags = config.flags
     , story = config.story
     , isCampaign = config.isCampaign
     , account = config.account
@@ -113,6 +117,7 @@ wmConfig sessionId config =
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
     , onWebLogout = config.onWebLogout
+    , accountId = config.accountId
     }
 
 

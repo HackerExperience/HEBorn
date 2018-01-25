@@ -52,3 +52,23 @@ terminalPhosphor : Color
 terminalPhosphor =
     -- OR AMBER "ffff33"
     hex "33ff66"
+
+
+bgHighlight : Color
+bgHighlight =
+    hex "0ff"
+
+
+bgHover : Color
+bgHover =
+    hex "00f"
+
+
+bounceNode : Color
+bounceNode =
+    hex "bfff00"
+
+
+boxifyMe : Color
+boxifyMe =
+    hex "444"

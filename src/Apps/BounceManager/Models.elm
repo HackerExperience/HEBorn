@@ -1,13 +1,45 @@
 module Apps.BounceManager.Models exposing (..)
 
+import Game.Account.Bounces.Models as Bounces
+import Game.Account.Bounces.Shared as Bounces
+import Game.Meta.Types.Network as Network
+import Apps.Reference exposing (Reference)
+
 
 type MainTab
     = TabManage
-    | TabCreate
+    | TabBuild ( Maybe Bounces.ID, Bounces.Bounce )
+
+
+type Selection
+    = SelectingSlot Int
+    | SelectingEntry Network.NIP
+    | SelectingServer Network.NIP
+
+
+type ModalAction
+    = ForReset ( Maybe Bounces.ID, Bounces.Bounce )
+    | ForEditWithoutSave Bounces.ID
+    | ForSave ( Maybe Bounces.ID, Bounces.Bounce )
+    | ForError String
+    | ForSaveSucessful
+
+
+type Params
+    = WithBounce Bounces.ID
 
 
 type alias Model =
     { selected : MainTab
+    , selection : Maybe Selection
+    , anyChange : Bool
+    , selectedBounce : Maybe ( Maybe Bounces.ID, Bounces.Bounce )
+    , renaming : Bool
+    , path : List Network.NIP
+    , bounceNameBuffer : Maybe String
+    , modal : Maybe ModalAction
+    , expanded : List Bounces.ID
+    , me : Reference
     }
 
 
@@ -26,9 +58,18 @@ icon =
     "bouncemngr"
 
 
-initialModel : Model
-initialModel =
+initialModel : Reference -> Model
+initialModel me =
     { selected = TabManage
+    , selection = Nothing
+    , anyChange = False
+    , selectedBounce = Nothing
+    , renaming = False
+    , path = []
+    , bounceNameBuffer = Nothing
+    , modal = Nothing
+    , expanded = []
+    , me = me
     }
 
 
@@ -38,5 +79,46 @@ tabToString tab =
         TabManage ->
             "Manage"
 
-        TabCreate ->
-            "Create"
+        TabBuild _ ->
+            "Build"
+
+
+setAnyChanges : Bool -> Model -> Model
+setAnyChanges anyChange model =
+    { model | anyChange = anyChange }
+
+
+windowInitSize : ( Float, Float )
+windowInitSize =
+    ( 800, 600 )
+
+
+getCurrentBouncePath : MainTab -> List Network.NIP
+getCurrentBouncePath tab =
+    case tab of
+        TabBuild ( id, bounce ) ->
+            bounce.path
+
+        _ ->
+            []
+
+
+reset : MainTab -> Model -> Model
+reset selected model =
+    let
+        path_ =
+            getCurrentBouncePath selected
+    in
+        { model
+            | selected = selected
+            , selection = Nothing
+            , bounceNameBuffer = Nothing
+            , path = path_
+            , anyChange = False
+            , renaming = False
+        }
+
+
+emptyBounceBuildTab : MainTab
+emptyBounceBuildTab =
+    TabBuild ( Nothing, Bounces.emptyBounce )

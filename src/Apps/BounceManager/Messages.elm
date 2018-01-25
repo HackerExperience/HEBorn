@@ -1,7 +1,31 @@
 module Apps.BounceManager.Messages exposing (Msg(..))
 
-import Apps.BounceManager.Models exposing (MainTab)
+import Game.Account.Bounces.Models as Bounces
+import Game.Account.Bounces.Shared as Bounces
+import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Network exposing (NIP)
+import Apps.BounceManager.Models exposing (..)
 
 
 type Msg
     = GoTab MainTab
+    | UpdateEditing String
+    | ToggleNameEdit
+    | ApplyNameChangings
+    | SelectSlot Int
+    | SelectEntry NIP
+    | SelectServer NIP
+    | AddNode NIP Int
+    | RemoveNode NIP
+    | MoveNode NIP Int
+    | ClearSelection
+    | SetModal (Maybe ModalAction)
+    | Save ( Maybe Bounces.ID, Bounces.Bounce )
+    | Edit Bounces.ID
+    | Reset ( Maybe Bounces.ID, Bounces.Bounce )
+    | Delete (Maybe Bounces.ID)
+    | ToggleExpand String
+    | LaunchApp Context Params
+    | CreateRequest (Maybe Bounces.Error)
+    | UpdateRequest (Maybe Bounces.Error)
+    | RemoveRequest (Maybe Bounces.Error)

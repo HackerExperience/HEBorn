@@ -23,7 +23,9 @@ import Setup.Messages as Setup
 import Game.Config as Game
 import Game.Messages as Game
 import Game.Models as Game
+import Game.Account.Models as Account
 import Game.Account.Messages as Account
+import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Messages as AccountNotifications
@@ -50,6 +52,7 @@ import OS.SessionManager.Types as SessionManager
 import OS.Toasts.Messages as Toast
 import Apps.Messages as Apps
 import Apps.Browser.Messages as Browser
+import Apps.BounceManager.Messages as BounceManager
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -129,6 +132,18 @@ eventsConfig =
             Database.HandleDatabaseAccountRemoved >> database
         , onTutorialFinished =
             .completed >> Account.HandleTutorialCompleted >> account
+        , onBounceCreated =
+            \( id, bounce ) ->
+                Bounces.HandleCreated id bounce
+                    |> bounces
+        , onBounceUpdated =
+            \( id, bounce ) ->
+                Bounces.HandleUpdated id bounce
+                    |> bounces
+        , onBounceRemoved =
+            \id ->
+                Bounces.HandleRemoved id
+                    |> bounces
         }
     , forBackFlix =
         { onNewLog =
@@ -354,6 +369,10 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
                 |> missions
     , onWebLogout =
         \cid -> Servers.HandleLogout |> server cid
+    , accountId =
+        game
+            |> Game.getAccount
+            |> Account.getId
     }
 
 
@@ -416,6 +435,11 @@ accountNotif =
 database : Database.Msg -> Msg
 database =
     Account.DatabaseMsg >> account
+
+
+bounces : Bounces.Msg -> Msg
+bounces =
+    Account.BouncesMsg >> account
 
 
 servers : Servers.Msg -> Msg
@@ -505,6 +529,15 @@ browser :
     -> Msg
 browser windowRef context =
     Apps.BrowserMsg >> app windowRef context
+
+
+bounceMan :
+    SessionManager.WindowRef
+    -> Context
+    -> BounceManager.Msg
+    -> Msg
+bounceMan windowRef context =
+    Apps.BounceManagerMsg >> app windowRef context
 
 
 app :
