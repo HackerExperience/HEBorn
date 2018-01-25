@@ -1,13 +1,23 @@
 module Apps.BounceManager.Models exposing (..)
 
+import Game.Account.Bounces.Models as Bounces
+
 
 type MainTab
     = TabManage
-    | TabCreate
+    | TabBuild
+
+
+type Selection
+    = SelectingSlot
+    | SelectingEntry
 
 
 type alias Model =
     { selected : MainTab
+    , selection : Maybe Selection
+    , anyChange : Bool
+    , activeBounce : Maybe Bounces.Bounce
     }
 
 
@@ -29,6 +39,9 @@ icon =
 initialModel : Model
 initialModel =
     { selected = TabManage
+    , selection = Nothing
+    , anyChange = False
+    , activeBounce = Nothing
     }
 
 
@@ -38,5 +51,15 @@ tabToString tab =
         TabManage ->
             "Manage"
 
-        TabCreate ->
-            "Create"
+        TabBuild ->
+            "Build"
+
+
+setAnyChanges : Bool -> Model -> Model
+setAnyChanges anyChange model =
+    { model | anyChange = anyChange }
+
+
+getActiveBounce : Model -> Maybe Bounces.Bounce
+getActiveBounce =
+    .activeBounce

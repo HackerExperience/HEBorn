@@ -15,4 +15,10 @@ css =
             , fontSize (px 12)
             , internalPadding
             ]
+        , class BounceNode
+            [ borderBottom3 (px 1) solid Colors.black
+            , fontSize (px 12)
+            , internalPadding
+            , borderRadius (px 8)
+            ]
         ]

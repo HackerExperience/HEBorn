@@ -2,6 +2,7 @@ module Apps.BounceManager.View exposing (view)
 
 import Dict
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Game.Account.Database.Models as Database exposing (HackedServers)
 import Game.Account.Bounces.Models as Bounces exposing (Bounce)
@@ -12,7 +13,7 @@ import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import Apps.BounceManager.Config exposing (..)
-import Apps.BounceManager.Messages exposing (Msg(..))
+import Apps.BounceManager.Messages exposing (..)
 import Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Resources exposing (Classes(..), prefix)
 
@@ -36,23 +37,19 @@ view config ({ selected } as model) =
                 TabManage ->
                     (viewTabManage contentStc)
 
-                TabCreate ->
-                    (viewTabCreate hckdServers)
+                TabBuild ->
+                    (viewTabBuild config hckdServers model)
 
         viewTabs =
-            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
+            hzTabs (compareTabs selected) viewTabLabel (GoTab >> config.toMsg) tabs
     in
-        Html.map config.toMsg <|
-            verticalSticked
-                (Just [ viewTabs ])
-                [ viewData ]
-                Nothing
+        verticalSticked (Just [ viewTabs ]) [ viewData ] Nothing
 
 
 tabs : List MainTab
 tabs =
     [ TabManage
-    , TabCreate
+    , TabBuild
     ]
 
 
@@ -61,7 +58,7 @@ compareTabs =
     (==)
 
 
-viewTabLabel : Bool -> MainTab -> ( List (Attribute Msg), List (Html Msg) )
+viewTabLabel : Bool -> MainTab -> ( List (Attribute msg), List (Html msg) )
 viewTabLabel _ tab =
     tab
         |> tabToString
@@ -70,7 +67,7 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewBouncePath : List Network.NIP -> Html Msg
+viewBouncePath : List Network.NIP -> Html msg
 viewBouncePath ips =
     ips
         |> List.map (Tuple.second >> text)
@@ -78,7 +75,7 @@ viewBouncePath ips =
         |> span []
 
 
-viewBounce : ( Bounces.ID, Bounce ) -> Html Msg
+viewBounce : ( Bounces.ID, Bounce ) -> Html msg
 viewBounce ( id, val ) =
     div [ class [ BounceEntry ] ]
         [ text "ID: "
@@ -92,7 +89,7 @@ viewBounce ( id, val ) =
         ]
 
 
-viewTabManage : Bounces.Model -> Html Msg
+viewTabManage : Bounces.Model -> Html msg
 viewTabManage src =
     src
         |> Dict.toList
@@ -100,15 +97,72 @@ viewTabManage src =
         |> verticalList
 
 
-viewTabCreate : HackedServers -> Html Msg
-viewTabCreate servers =
+viewTabBuild : Config msg -> Database.HackedServers -> Model -> Html msg
+viewTabBuild config servers model =
+    [ div [] [ text model.activeBounce.name ]
+    , flexCols
+        [ div [] [ renderAvailableServers servers model ]
+        , div [] [ renderBounceBuilder config model ]
+        ]
+    ]
+
+
+renderAvailableServers : Database.HackedServers -> Model -> Html msg
+renderAvailableServers hackedServers model =
+    hackedServers
+        |> Dict.toList
+        |> List.map (uncurry <| renderAvailableServer model)
+        |> verticalList
+
+
+renderAvailableServer :
+    Model
+    -> Network.NIP
+    -> Database.HackedServer
+    -> List (Html msg)
+    -> List (Html msg)
+renderAvailableServer model nip server acu =
     let
-        available =
-            servers
-                |> Dict.keys
-                |> List.map (Network.toString >> text)
-    in
-        flexCols
-            [ div [] available
-            , div [] [ text "SOON" ]
+        servers =
+            [ renderMaybeString "Label" server.label
+            , br [] []
+            , renderConsistentField "IP" (Tuple.second nip)
             ]
+    in
+        (div [ class [ HackedServer ] ] servers) :: acu
+
+
+renderMaybeString : String -> Maybe String -> Html msg
+renderMaybeString field maybeString =
+    case maybeString of
+        Just string ->
+            text <| field ++ ": " ++ string
+
+        Nothing ->
+            text ""
+
+
+renderConsistentField : String -> String -> Html msg
+renderConsistentField field value =
+    text <| field ++ ": " ++ value
+
+
+renderBounceBuilder : Config msg -> Model -> Html msg
+renderBounceBuilder config model =
+    model.getActiveBounce.path
+        |> List.foldl (renderBounceNode config model) []
+        |> div []
+
+
+renderBounceNode : Config msg -> Model -> Network.NIP -> Html msg
+renderBounceNode config model nip =
+    div [ class [ BounceNode ] ] [ text <| Network.toString nip ]
+
+
+renderMoveMenu : Config msg -> Model -> Html msg
+renderMoveMenu config model =
+    div [ class [ MoveMenu ] ]
+        [ button [ value "/\\" ] []
+        , button [ value "\\/" ] []
+        , button [ value "X" ] []
+        ]

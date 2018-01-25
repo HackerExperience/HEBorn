@@ -82,7 +82,7 @@ type alias HackedServer =
 
 initialModel : Model
 initialModel =
-    Model Dict.empty Dict.empty Dict.empty
+    Model (serversDummy) Dict.empty Dict.empty
 
 
 getHackedServers : Model -> HackedServers
@@ -163,3 +163,53 @@ getBankAccounts =
 getBitcoinWallets : Model -> HackedBitcoinWallets
 getBitcoinWallets =
     .btcWallets
+
+
+serversDummy : HackedServers
+serversDummy =
+    Dict.empty
+        |> Dict.insert ( "::", "1.2.3.4" )
+            { password = "euvendopaçoca"
+            , label = Just "Clebinho"
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = Player
+            , remoteConn = Just "ABC"
+            }
+        |> Dict.insert ( "::", "4.6.5.2" )
+            { password = "1234222423AFSEFGEEEEGGASRWE"
+            , label = Just "Robertinho"
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = Player
+            , remoteConn = Just "CDE"
+            }
+        |> Dict.insert ( "::", "6.12.5.56" )
+            { password = "1SDG222423AFSEE"
+            , label = Just "Oswaldinho"
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = Player
+            , remoteConn = Just "EFG"
+            }
+        |> Dict.insert ( "::", "112.232.165.55" )
+            { password = "166EFGEEEEGGASRWE"
+            , label = Just "Mariazinha"
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = Player
+            , remoteConn = Just "HIJ"
+            }
+        |> Dict.insert ( "::", "321.54.81.899" )
+            { password = "1155224E"
+            , label = Just "Sharona"
+            , notes = Nothing
+            , virusInstalled = []
+            , activeVirus = Nothing
+            , type_ = Player
+            , remoteConn = Just "KLM"
+            }
