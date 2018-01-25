@@ -12,7 +12,7 @@ import Game.Meta.Types.Network exposing (NIP)
 
 
 type alias Config msg =
-    { onLogout : msg
+    { onLogout : NIP -> msg
     , onSelectEndpoint : msg
     , onAnyMap : NIP -> msg
     , onNewApp : Apps.App -> msg
@@ -23,10 +23,10 @@ type alias Config msg =
     }
 
 
-logout : Config msg -> Html msg
-logout { onLogout } =
+logout : Config msg -> NIP -> Html msg
+logout { onLogout } nip =
     li
-        [ onClick <| onLogout ]
+        [ onClick <| onLogout nip ]
         [ text "Logout" ]
 
 
@@ -55,7 +55,7 @@ hackingPanel : Config msg -> NIP -> Html msg
 hackingPanel config nip =
     let
         options0 =
-            [ logout config
+            [ logout config nip
             , goBack config
             ]
 

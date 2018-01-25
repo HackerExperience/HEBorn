@@ -4,15 +4,15 @@ import Time exposing (Time)
 import Core.Flags as Core
 import Core.Error as Error exposing (Error)
 import Game.Account.Models exposing (..)
+import Game.Account.Messages exposing (..)
 import Game.Account.Bounces.Config as Bounces
-import Game.Meta.Types.Requester exposing (Requester)
-import Game.Servers.Shared exposing (CId)
+import Game.Account.Database.Config as Database
 import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Finances.Config as Finances
-import Game.Account.Database.Config as Database
 import Game.Account.Notifications.Config as Notifications
 import Game.Account.Notifications.Shared as Notifications
-import Game.Account.Messages exposing (..)
+import Game.Meta.Types.Requester exposing (Requester)
+import Game.Servers.Shared exposing (CId)
 
 
 type alias Config msg =
@@ -20,11 +20,12 @@ type alias Config msg =
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , lastTick : Time
+
+    -- events
     , onConnected : String -> msg
     , onDisconnected : msg
     , onError : Error -> msg
     , onSetEndpoint : CId -> Maybe CId -> msg
-    , fallToGateway : (Bool -> Model) -> Model
 
     -- account.finances
     , onBALoginSuccess : BankAccountData -> Requester -> msg

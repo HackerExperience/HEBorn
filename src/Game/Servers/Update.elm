@@ -1,5 +1,7 @@
 module Game.Servers.Update exposing (..)
 
+import Dict
+import Set
 import Utils.React as React exposing (React)
 import Json.Decode as Decode exposing (Value)
 import Decoders.Servers
@@ -18,6 +20,7 @@ import Game.Servers.Hardware.Update as Hardware
 import Game.Servers.Tunnels.Messages as Tunnels
 import Game.Servers.Tunnels.Update as Tunnels
 import Game.Servers.Requests.Resync exposing (resyncRequest)
+import Game.Servers.Requests.Logout exposing (logoutRequest)
 import Game.Servers.Config exposing (..)
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Models exposing (..)
@@ -46,6 +49,9 @@ update config msg model =
 
         HandleJoinedServer cid value ->
             handleJoinedServer config cid value model
+
+        HandleDisconnect cid ->
+            handleDisconnect config cid model
 
 
 onServerMsg :
@@ -105,6 +111,9 @@ updateServer config cid model msg server =
         HandleSetActiveNIP nip ->
             handleSetActiveNIP config nip server
 
+        HandleSetName name ->
+            handleSetName name server
+
         FilesystemMsg storageId msg ->
             onFilesystemMsg config cid storageId msg server
 
@@ -123,6 +132,9 @@ updateServer config cid model msg server =
         NotificationsMsg msg ->
             onNotificationsMsg config cid msg server
 
+        HandleLogout ->
+            handleLogout config cid server
+
 
 handleSetBounce :
     Config msg
@@ -130,7 +142,7 @@ handleSetBounce :
     -> Maybe Bounces.ID
     -> Server
     -> ServerUpdateResponse msg
-handleSetBounce config cid maybeBounceId server =
+handleSetBounce _ cid maybeBounceId server =
     ( setBounce maybeBounceId server, React.none )
 
 
@@ -139,7 +151,7 @@ handleSetEndpoint :
     -> Maybe CId
     -> Server
     -> ServerUpdateResponse msg
-handleSetEndpoint config cid server =
+handleSetEndpoint _ cid server =
     ( setEndpointCId cid server, React.none )
 
 
@@ -148,8 +160,16 @@ handleSetActiveNIP :
     -> Network.NIP
     -> Server
     -> ServerUpdateResponse msg
-handleSetActiveNIP config nip server =
+handleSetActiveNIP _ nip server =
     ( setActiveNIP nip server, React.none )
+
+
+handleSetName :
+    String
+    -> Server
+    -> ServerUpdateResponse msg
+handleSetName name server =
+    ( setName name server, React.none )
 
 
 onFilesystemMsg :
@@ -296,20 +316,23 @@ handleJoinedServer :
 handleJoinedServer config cid value model =
     let
         decodeBootstrap =
-            Decoders.Servers.server config.lastTick <|
-                getGatewayCache cid model
+            model
+                |> getGatewayCache cid
+                |> Decoders.Servers.server config.lastTick
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
                 let
-                    model_ =
-                        insert cid server model
-
                     cmd =
                         if isGateway server then
                             React.msg <| config.onNewGateway cid
                         else
                             React.none
+
+                    model_ =
+                        model
+                            |> insert cid server
+                            |> incEndpoint config cid server
                 in
                     ( model_, cmd )
 
@@ -319,3 +342,76 @@ handleJoinedServer config cid value model =
                         Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
                 in
                     ( model, React.none )
+
+
+handleDisconnect :
+    Config msg
+    -> CId
+    -> Model
+    -> UpdateResponse msg
+handleDisconnect { activeCId, onSetGatewayContext } cid model =
+    let
+        ( servers_, gateways_ ) =
+            case cid of
+                EndpointCId addr ->
+                    ( Dict.map (\_ -> removeEndpointCId cid) model.servers
+                    , Dict.map
+                        (\_ cache ->
+                            { cache | endpoints = Set.remove addr cache.endpoints }
+                        )
+                        model.gateways
+                    )
+
+                _ ->
+                    ( model.servers, model.gateways )
+
+        model_ =
+            { model
+                | servers = servers_
+                , gateways = gateways_
+            }
+                |> remove cid
+
+        react =
+            if (activeCId == Just cid) then
+                React.msg onSetGatewayContext
+            else
+                React.none
+    in
+        ( model_, react )
+
+
+handleLogout :
+    Config msg
+    -> CId
+    -> Server
+    -> ServerUpdateResponse msg
+handleLogout config cid server =
+    config
+        |> logoutRequest cid
+        -- this request doesn't have reponse
+        |> Cmd.map (\_ -> config.batchMsg [])
+        |> React.cmd
+        |> React.addMsg config.batchMsg
+            (HandleDisconnect cid |> config.toMsg)
+        |> (,) server
+
+
+
+--internals
+
+
+incEndpoint : Config msg -> CId -> Server -> Model -> Model
+incEndpoint { activeGateway } endpoint server model =
+    if isGateway server then
+        model
+    else
+        case activeGateway of
+            Just ( gtwCId, gtw ) ->
+                gtw
+                    |> addEndpointCId endpoint
+                    |> flip (insert gtwCId)
+                        model
+
+            _ ->
+                model

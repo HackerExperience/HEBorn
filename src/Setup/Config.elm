@@ -10,10 +10,12 @@ import Setup.Pages.Mainframe.Config as Mainframe
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , accountId : String
     , flags : Core.Flags
     , onError : Core.Error -> msg
     , onPlay : msg
+    , onGatewaySetName : String -> msg
 
     -- TODO: remove, we're already receiving it using events
     , mainframe : Maybe CId
@@ -42,10 +44,12 @@ pickLocationConfig { toMsg } =
 
 
 mainframeConfig : Config msg -> Mainframe.Config msg
-mainframeConfig { toMsg, flags, mainframe } =
-    { onNext = NextPage >> toMsg
-    , onPrevious = PreviousPage |> toMsg
-    , toMsg = MainframeMsg >> toMsg
-    , flags = flags
-    , mainframe = mainframe
+mainframeConfig config =
+    { onNext = NextPage >> config.toMsg
+    , onPrevious = PreviousPage |> config.toMsg
+    , toMsg = MainframeMsg >> config.toMsg
+    , batchMsg = config.batchMsg
+    , flags = config.flags
+    , onGatewaySetName = config.onGatewaySetName
+    , mainframe = config.mainframe
     }

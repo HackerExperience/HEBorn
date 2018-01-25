@@ -382,25 +382,6 @@ filterEndpointRelatedSessions servers targetCid cid wm =
 
 getSessionID : Config msg -> ID
 getSessionID config =
-    case config.activeContext of
-        Gateway ->
-            config.activeServer
-                |> Tuple.first
-                |> Servers.toSessionId
-
-        Endpoint ->
-            let
-                endpointSessionId =
-                    config.activeServer
-                        |> Tuple.second
-                        |> Servers.getEndpointCId
-                        |> Maybe.map Servers.toSessionId
-            in
-                case endpointSessionId of
-                    Just endpointSessionId ->
-                        endpointSessionId
-
-                    Nothing ->
-                        "U = {x}, ∄ x ⊂ U"
-                            |> Error.neeiae
-                            |> uncurry Native.Panic.crash
+    config.activeServer
+        |> Tuple.first
+        |> Servers.toSessionId

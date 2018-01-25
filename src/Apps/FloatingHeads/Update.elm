@@ -4,8 +4,6 @@ import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Storyline.Emails.Models as Emails exposing (ID)
 import Game.Storyline.Emails.Contents exposing (Content)
-import Game.Storyline.Emails.Contents.Messages as Contents
-import Game.Storyline.Emails.Contents.Update as Contents
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
@@ -22,9 +20,6 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        ContentMsg msg ->
-            onContentMsg config msg model
-
         Reply content ->
             onReply config content model
 
@@ -39,20 +34,6 @@ update config msg model =
 
         LaunchApp context params ->
             onLaunchApp config context params model
-
-
-onContentMsg : Config msg -> Contents.Msg -> Model -> UpdateResponse msg
-onContentMsg config msg model =
-    let
-        config_ =
-            contentConfig config
-
-        react =
-            msg
-                |> Contents.update config_
-                |> React.map (ContentMsg >> config.toMsg)
-    in
-        ( model, react )
 
 
 onReply : Config msg -> Content -> Model -> UpdateResponse msg

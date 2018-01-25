@@ -58,6 +58,11 @@ serverResync cid =
     WebsocketTopic (ServerChannel cid) "bootstrap"
 
 
+serverLogout : Servers.CId -> Topic
+serverLogout cid =
+    WebsocketTopic (ServerChannel cid) "logout"
+
+
 serverConfigCheck : Servers.CId -> Topic
 serverConfigCheck cid =
     WebsocketTopic (ServerChannel cid) "config.check"

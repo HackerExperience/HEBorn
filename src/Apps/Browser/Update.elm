@@ -278,7 +278,7 @@ processTabMsg config tabId msg tab model =
             ( { tab | modal = modal }, React.none )
 
         HandleFetched response ->
-            onHandleFetched response tab
+            handleFetched response tab
 
         GoAddress url ->
             onGoAddress config url model.me tabId tab
@@ -312,13 +312,8 @@ processTabMsg config tabId msg tab model =
         Login nip password ->
             onLogin config nip password model.me tabId tab
 
-        Logout ->
-            -- TODO #285
-            ( tab, React.none )
-
-        LoginFailed ->
-            -- TODO: forward error
-            ( tab, React.none )
+        HandleLoginFailed ->
+            handleLoginFailed tab
 
         Crack nip ->
             onCrack config nip tab
@@ -332,8 +327,8 @@ processTabMsg config tabId msg tab model =
             onPageMsg config msg tab
 
 
-onHandleFetched : Web.Response -> Tab -> TabUpdateResponse msg
-onHandleFetched response tab =
+handleFetched : Web.Response -> Tab -> TabUpdateResponse msg
+handleFetched response tab =
     let
         ( url, pageModel ) =
             case response of
@@ -355,6 +350,26 @@ onHandleFetched response tab =
             ( gotoPage url pageModel tab, React.none )
         else
             ( tab, React.none )
+
+
+handleLoginFailed : Tab -> TabUpdateResponse msg
+handleLoginFailed tab =
+    { tab
+        | page =
+            case tab.page of
+                WebserverModel model ->
+                    { model | loginFailed = True }
+                        |> WebserverModel
+
+                DownloadCenterModel model ->
+                    { model | loginFailed = True }
+                        |> DownloadCenterModel
+
+                _ ->
+                    tab.page
+        , modal = Just ImpossibleToLogin
+    }
+        |> flip (,) React.none
 
 
 onGoAddress :

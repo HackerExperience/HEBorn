@@ -51,9 +51,15 @@ onValidate ({ toMsg, mainframe } as config) model =
 
 
 onChecked : Config msg -> Model -> UpdateResponse msg
-onChecked { onNext } model =
-    model
+onChecked { onGatewaySetName, onNext, batchMsg } model =
+    [ model
+        |> .hostname
+        |> Maybe.withDefault ""
+        |> onGatewaySetName
+    , model
         |> settings
         |> onNext
+    ]
+        |> batchMsg
         |> React.msg
         |> (,) (setOkay model)

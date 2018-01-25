@@ -14,6 +14,7 @@ import Game.Servers.Tunnels.Config as Tunnels
 import Game.Servers.Hardware.Config as Hardware
 import Game.Servers.Messages exposing (..)
 import Game.Servers.Shared exposing (..)
+import Game.Servers.Models exposing (Server)
 
 
 type alias Config msg =
@@ -21,6 +22,9 @@ type alias Config msg =
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , lastTick : Time
+    , activeCId : Maybe CId
+    , activeGateway : Maybe ( CId, Server )
+    , onSetGatewayContext : msg
     , onInventoryFreed : Inventory.Entry -> msg
     , onInventoryUsed : Inventory.Entry -> msg
     , onNewGateway : CId -> msg

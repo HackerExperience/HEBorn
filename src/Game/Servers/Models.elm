@@ -1,6 +1,7 @@
 module Game.Servers.Models exposing (..)
 
 import Dict exposing (Dict)
+import Set exposing (Set)
 import Utils.Maybe as Maybe
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network exposing (NIP)
@@ -27,7 +28,7 @@ type alias Gateways =
 type alias GatewayCache =
     { activeNIP : NIP
     , nips : List NIP
-    , endpoints : List CId
+    , endpoints : Set EndpointAddress
     }
 
 
@@ -78,7 +79,7 @@ type Ownership
 
 
 type alias GatewayData =
-    { endpoints : List CId
+    { endpoints : Set EndpointAddress
     , endpoint : Maybe CId
     }
 
@@ -104,7 +105,7 @@ initialModel =
 -- gateway mapping information
 
 
-insertGateway : Id -> NIP -> List NIP -> List CId -> Model -> Model
+insertGateway : Id -> NIP -> List NIP -> Set EndpointAddress -> Model -> Model
 insertGateway id activeNIP nips endpoints model =
     let
         cache =
@@ -233,26 +234,6 @@ fromKey key =
             GatewayCId key
 
 
-activateEndpoint : Maybe CId -> GatewayData -> GatewayData
-activateEndpoint endpoint ({ endpoints } as data) =
-    case endpoint of
-        Just endpoint_ ->
-            let
-                endpoints_ =
-                    if List.member endpoint_ endpoints then
-                        endpoints
-                    else
-                        endpoint_ :: endpoints
-            in
-                { data
-                    | endpoint = endpoint
-                    , endpoints = endpoints_
-                }
-
-        Nothing ->
-            { data | endpoint = Nothing }
-
-
 
 -- server getters/setters
 
@@ -364,9 +345,50 @@ setEndpointCId cid ({ ownership } as server) =
             case ownership of
                 GatewayOwnership data ->
                     GatewayOwnership <|
-                        activateEndpoint cid data
+                        { data | endpoint = cid }
 
                 ownership ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
+
+
+addEndpointCId : CId -> Server -> Server
+addEndpointCId cid ({ ownership } as server) =
+    let
+        ownership_ =
+            case ( ownership, cid ) of
+                ( GatewayOwnership data, EndpointCId addr ) ->
+                    GatewayOwnership <|
+                        { data
+                            | endpoints =
+                                Set.insert addr data.endpoints
+                        }
+
+                _ ->
+                    ownership
+    in
+        { server | ownership = ownership_ }
+
+
+removeEndpointCId : CId -> Server -> Server
+removeEndpointCId cid ({ ownership } as server) =
+    let
+        ownership_ =
+            case ( ownership, cid ) of
+                ( GatewayOwnership data, EndpointCId addr ) ->
+                    GatewayOwnership <|
+                        { data
+                            | endpoints =
+                                Set.remove addr data.endpoints
+                            , endpoint =
+                                if data.endpoint == Just cid then
+                                    Nothing
+                                else
+                                    data.endpoint
+                        }
+
+                _ ->
                     ownership
     in
         { server | ownership = ownership_ }
@@ -381,7 +403,10 @@ getEndpoints : Server -> Maybe (List CId)
 getEndpoints server =
     case server.ownership of
         GatewayOwnership data ->
-            Just data.endpoints
+            data.endpoints
+                |> Set.toList
+                |> List.map EndpointCId
+                |> Just
 
         _ ->
             Nothing

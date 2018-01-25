@@ -2,6 +2,7 @@ module OS.SessionManager.WindowManager.Config exposing (..)
 
 import Time exposing (Time)
 import Native.Panic
+import Draggable
 import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
@@ -64,12 +65,14 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
+    , onWebLogout : CId -> msg
     }
 
 
 appsConfig : ( CId, Server ) -> WM.ID -> WM.TargetContext -> Config msg -> Apps.Config msg
 appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     { toMsg = AppMsg targetContext wId >> config.toMsg
+    , batchMsg = config.batchMsg
     , lastTick = config.lastTick
     , account = config.account
     , activeServer = appServer
@@ -77,7 +80,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , inventory = config.inventory
     , story = config.story
     , backFlix = config.backFlix
-    , batchMsg = config.batchMsg
+    , draggable = Draggable.mouseTrigger wId (DragMsg >> config.toMsg)
     , onNewApp = config.onNewApp
     , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
@@ -104,6 +107,7 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = Close wId |> config.toMsg
+    , onWebLogout = config.onWebLogout
     }
 
 

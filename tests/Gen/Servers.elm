@@ -1,6 +1,7 @@
 module Gen.Servers exposing (..)
 
 import Dict exposing (Dict)
+import Set
 import Gen.Filesystem
 import Gen.Logs
 import Gen.Processes
@@ -112,7 +113,7 @@ genOwnserhip =
 
 genGatewayOwnership : Generator GatewayData
 genGatewayOwnership =
-    constant <| GatewayData [] Nothing
+    constant <| GatewayData Set.empty Nothing
 
 
 genEndpointOwnership : Generator EndpointData

@@ -21,6 +21,7 @@ type Msg
     | Synced CId Server
     | HandleResync CId
     | HandleJoinedServer CId Value
+    | HandleDisconnect CId
 
 
 
@@ -28,9 +29,11 @@ type Msg
 
 
 type ServerMsg
-    = HandleSetBounce (Maybe Bounces.ID)
+    = HandleLogout
+    | HandleSetBounce (Maybe Bounces.ID)
     | HandleSetEndpoint (Maybe CId)
     | HandleSetActiveNIP Network.NIP
+    | HandleSetName String
     | FilesystemMsg StorageId Filesystem.Msg
     | LogsMsg Logs.Msg
     | ProcessesMsg Processes.Msg

@@ -49,7 +49,7 @@ server : Time -> Maybe GatewayCache -> Decoder Server
 server now gatewayCache =
     decode Server
         |> optional "name" string ""
-        |> required "server_type" serverType
+        |> optional "server_type" serverType Desktop
         |> andThen decodeNIPs
         |> optionalMaybe "coordinates" float
         |> required "main_storage" string

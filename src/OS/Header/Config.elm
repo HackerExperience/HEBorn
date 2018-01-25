@@ -14,7 +14,7 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , bounces : Bounces.Model
     , gateways : List CId
-    , endpoints : Maybe (List CId)
+    , endpoints : List CId
     , servers : Servers.Model
     , nips : List NIP
     , activeEndpointCid : Maybe CId

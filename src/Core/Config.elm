@@ -179,7 +179,7 @@ gameConfig =
                 |> browser ( sessionId, windowId ) context
     , onJoinFailed =
         \{ sessionId, windowId, context, tabId } ->
-            Browser.LoginFailed
+            Browser.HandleLoginFailed
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
 
@@ -206,7 +206,7 @@ gameConfig =
     -- account.finances
     , onBALoginSuccess =
         \data { sessionId, windowId, context, tabId } ->
-            Browser.LoginFailed
+            Browser.HandleBankLogin data
                 |> Browser.SomeTabMsg tabId
                 |> browser ( sessionId, windowId ) context
     , onBALoginFailed =
@@ -230,8 +230,16 @@ gameConfig =
 setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
 setupConfig accountId mainframe flags =
     { toMsg = SetupMsg
+    , batchMsg = BatchMsg
     , accountId = accountId
     , mainframe = mainframe
+    , onGatewaySetName =
+        case mainframe of
+            Just cid ->
+                Servers.HandleSetName >> server cid
+
+            Nothing ->
+                \_ -> BatchMsg []
     , flags = flags
     , onError = HandleCrash
     , onPlay = HandlePlay
@@ -342,6 +350,8 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
                 |> MissionsActions.GoApp app
                 |> Missions.HandleActionDone
                 |> missions
+    , onWebLogout =
+        \cid -> Servers.HandleLogout |> server cid
     }
 
 

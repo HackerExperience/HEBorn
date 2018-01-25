@@ -4,6 +4,7 @@ import Time exposing (Time)
 import Json.Decode exposing (Value)
 import Core.Flags as Core
 import Core.Error as Error exposing (Error)
+import Game.Meta.Types.Context as Context
 import Game.Meta.Types.Requester exposing (Requester)
 import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -54,8 +55,14 @@ type alias Config msg =
     }
 
 
-serversConfig : Time -> Core.Flags -> Config msg -> Servers.Config msg
-serversConfig lastTick flags config =
+serversConfig :
+    Maybe CId
+    -> Maybe ( CId, Servers.Server )
+    -> Time
+    -> Core.Flags
+    -> Config msg
+    -> Servers.Config msg
+serversConfig activeCId activeGtw lastTick flags config =
     { flags = flags
     , toMsg = ServersMsg >> config.toMsg
     , batchMsg = config.batchMsg
@@ -71,21 +78,26 @@ serversConfig lastTick flags config =
                 , config.toMsg <| AccountMsg <| Account.HandleNewGateway cid
                 ]
     , onToast = config.onServerToast
+    , onSetGatewayContext =
+        Context.Endpoint
+            |> Account.HandleSetContext
+            |> AccountMsg
+            |> config.toMsg
+    , activeCId = activeCId
+    , activeGateway = activeGtw
     }
 
 
 accountConfig :
-    ((Bool -> Account.Model) -> Account.Model)
-    -> Time
+    Time
     -> Core.Flags
     -> Config msg
     -> Account.Config msg
-accountConfig fallToGateway lastTick flags config =
+accountConfig lastTick flags config =
     { flags = flags
     , toMsg = AccountMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , lastTick = lastTick
-    , fallToGateway = fallToGateway
     , onConnected = config.onConnected
     , onDisconnected = config.onDisconnected
     , onError = config.onError

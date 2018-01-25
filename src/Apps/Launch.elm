@@ -18,7 +18,6 @@ import Apps.BounceManager.Models as BounceManager
 import Apps.Finance.Models as Finance
 import Apps.Hebamp.Launch as Hebamp
 import Apps.Hebamp.Messages as Hebamp
-import Apps.Hebamp.Models as Hebamp
 import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.ServersGears.Models as ServersGears
 import Apps.LocationPicker.Models as LocationPicker

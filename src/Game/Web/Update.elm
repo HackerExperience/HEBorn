@@ -63,10 +63,13 @@ updateRequest :
     -> Maybe Requests.Response
     -> Model
     -> UpdateResponse msg
-updateRequest config response model =
+updateRequest { onDNS } response model =
     case response of
         Just (Requests.DNS requester response) ->
-            ( model, React.none )
+            requester
+                |> onDNS response
+                |> React.msg
+                |> (,) model
 
         Nothing ->
             ( model, React.none )
@@ -101,8 +104,13 @@ onLogin config nip remoteIp password requester model =
 
         model_ =
             startLoading remoteNip requester model
+
+        react =
+            (Just payload)
+                |> config.onLogin remoteCid
+                |> React.msg
     in
-        ( model_, React.msg <| config.onLogin remoteCid (Just payload) )
+        ( model_, react )
 
 
 {-| Sets endpoint
@@ -146,13 +154,13 @@ handleJoinFailed : Config msg -> Servers.CId -> Model -> UpdateResponse msg
 handleJoinFailed config cid model =
     let
         nip =
-            case Servers.get cid config.servers of
-                Just server ->
-                    Servers.getActiveNIP server
+            case cid of
+                Servers.EndpointCId nip ->
+                    nip
 
-                Nothing ->
-                    "How did you do that?"
-                        |> Error.notInServers
+                Servers.GatewayCId _ ->
+                    "Failed to join a gateway"
+                        |> Error.porra
                         |> uncurry Native.Panic.crash
 
         ( maybeRequester, model_ ) =

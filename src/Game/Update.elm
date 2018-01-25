@@ -2,6 +2,7 @@ module Game.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Dict exposing (Dict)
+import Set
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Core.Error as Error
@@ -103,11 +104,8 @@ onAccount config msg model =
         lastTick =
             Meta.getLastTick (getMeta model)
 
-        fallbackGW =
-            fallToGateway model
-
         config_ =
-            accountConfig fallbackGW lastTick (getFlags model) config
+            accountConfig lastTick (getFlags model) config
 
         ( account, react ) =
             Account.update config_ msg <| getAccount model
@@ -196,8 +194,15 @@ onServers config msg model =
         lastTick =
             Meta.getLastTick (getMeta model)
 
+        activeCId =
+            model
+                |> getActiveServer
+                |> Maybe.map Tuple.first
+
         config_ =
-            serversConfig lastTick
+            serversConfig activeCId
+                (getGateway model)
+                lastTick
                 (getFlags model)
                 config
 
@@ -289,8 +294,12 @@ bootstrapJoin config remoteServers playerServer =
 
         msg2 =
             playerServer.endpoints
+                |> Set.toList
                 |> List.filterMap
-                    (Servers.toSessionId >> flip Dict.get remoteServers)
+                    (Servers.EndpointCId
+                        >> Servers.toSessionId
+                        >> flip Dict.get remoteServers
+                    )
                 |> List.filterMap (joinRemote config playerServer)
                 |> config.batchMsg
     in

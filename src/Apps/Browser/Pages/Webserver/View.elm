@@ -56,17 +56,11 @@ hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
 view : Config msg -> Model -> Html msg
 view config model =
     let
-        -- this is cheating:
         cid =
             Servers.EndpointCId model.toolkit.target
 
         endpointMember =
-            case config.endpoints of
-                Just endpoints ->
-                    List.member cid endpoints
-
-                Nothing ->
-                    False
+            List.member cid config.endpoints
     in
         if (model.showingPanel && endpointMember) then
             hackingPanel (hackingPanelConfig config) model.toolkit.target

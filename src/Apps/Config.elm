@@ -1,6 +1,7 @@
 module Apps.Config exposing (..)
 
 import Time exposing (Time)
+import Html exposing (Attribute)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -50,6 +51,7 @@ type alias Config msg =
     , activeGateway : ( CId, Servers.Server )
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
+    , draggable : Attribute msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
@@ -76,6 +78,7 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onCloseApp : msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -148,6 +151,8 @@ floatingHeadsConfig config =
     , username = Account.getUsername config.account
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = config.onCloseApp
+    , onOpenApp = config.onOpenApp
+    , draggable = config.draggable
     }
 
 
@@ -182,9 +187,10 @@ browserConfig config =
     , activeServer = Tuple.second config.activeServer
     , activeGateway = Tuple.second config.activeGateway
     , endpoints =
-        config.activeServer
+        config.activeGateway
             |> Tuple.second
             |> Servers.getEndpoints
+            |> Maybe.withDefault []
     , onNewApp = config.onNewApp
     , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
@@ -200,6 +206,7 @@ browserConfig config =
         config.activeServer
             |> Tuple.first
             |> config.onFetchUrl
+    , onWebLogout = config.onWebLogout
     }
 
 
@@ -258,6 +265,7 @@ hebampConfig config =
     { toMsg = MusicMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , onCloseApp = config.onCloseApp
+    , draggable = config.draggable
     }
 
 

@@ -186,11 +186,3 @@ getNotifications =
 setNotifications : Notifications.Model -> Model -> Model
 setNotifications notifications model =
     { model | notifications = notifications }
-
-
-fallToGateway : Model -> Bool -> Model
-fallToGateway model needFallback =
-    if needFallback then
-        { model | context = Gateway }
-    else
-        model

@@ -4,7 +4,7 @@ import Css exposing (..)
 import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import Css.Elements exposing (typeSelector, ul, li, div, h6)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (..)
+import Css.Utils as Css exposing (..)
 import Css.Icons as Icons
 import UI.Style exposing (clickableBox)
 import UI.Colors as Colors
@@ -34,6 +34,7 @@ css =
                     ]
                 ]
             ]
+        , conditional
         ]
 
 
@@ -387,5 +388,17 @@ toasts =
                 , marginBottom (px -94)
                 ]
             , child h6 [ margin2 (px 4) (px 0) ]
+            ]
+        ]
+
+
+conditional : Snippet
+conditional =
+    id Dashboard
+        [ withAttribute (Css.NOT <| Css.EQ gameVersionAttrTag devVersion)
+            [ child (class LogConsole)
+                [ display none
+                , opacity (int 0)
+                ]
             ]
         ]

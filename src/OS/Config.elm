@@ -74,6 +74,7 @@ type alias Config msg =
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : Emails.Content -> msg
     , onActionDone : Apps.App -> Context -> msg
+    , onWebLogout : CId -> msg
     }
 
 
@@ -120,6 +121,7 @@ smConfig config =
     , onFetchUrl = config.onFetchUrl
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
+    , onWebLogout = config.onWebLogout
     }
 
 
@@ -147,9 +149,10 @@ headerConfig config =
     , gateways =
         Account.getGateways config.account
     , endpoints =
-        config.activeServer
+        config.activeGateway
             |> Tuple.second
             |> Servers.getEndpoints
+            |> Maybe.withDefault []
     , servers =
         config.servers
     , nips =
@@ -157,7 +160,7 @@ headerConfig config =
             |> Tuple.second
             |> Servers.getNIPs
     , activeEndpointCid =
-        config.activeServer
+        config.activeGateway
             |> Tuple.second
             |> Servers.getEndpointCId
     , activeGateway =
