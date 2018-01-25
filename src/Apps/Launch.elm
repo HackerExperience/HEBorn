@@ -14,7 +14,8 @@ import Apps.Browser.Messages as Browser
 import Apps.Explorer.Models as Explorer
 import Apps.DBAdmin.Models as Database
 import Apps.ConnManager.Models as ConnManager
-import Apps.BounceManager.Models as BounceManager
+import Apps.BounceManager.Messages as BounceManager
+import Apps.BounceManager.Launch as BounceManager
 import Apps.Finance.Models as Finance
 import Apps.Hebamp.Launch as Hebamp
 import Apps.Hebamp.Messages as Hebamp
@@ -85,9 +86,25 @@ launch config ({ windowId } as reference) maybeParams app =
                 |> flip (,) React.none
 
         BounceManagerApp ->
-            BounceManager.initialModel
-                |> BounceManagerModel
-                |> flip (,) React.none
+            let
+                config_ =
+                    bounceManConfig config
+
+                params =
+                    case maybeParams of
+                        Just (BounceManagerParams params) ->
+                            Just params
+
+                        _ ->
+                            Nothing
+
+                ( model, react ) =
+                    BounceManager.launch config_ params reference
+
+                model_ =
+                    BounceManagerModel model
+            in
+                ( model_, react )
 
         FinanceApp ->
             Finance.initialModel
@@ -205,3 +222,6 @@ launchEvent context params =
 
         MusicParams params ->
             MusicMsg <| Hebamp.LaunchApp context params
+
+        BounceManagerParams params ->
+            BounceManagerMsg <| BounceManager.LaunchApp context params

@@ -34,7 +34,7 @@ view : Config msg -> Model -> Html msg
 view config model =
     let
         filterHeaderLayout =
-            verticalList
+            verticalList []
                 [ filterHeader
                     [ ( class [ BtnUser ], noOp config, False )
                     , ( class [ BtnEdit ], noOp config, False )
@@ -50,7 +50,7 @@ view config model =
             config.logs
                 |> applyFilter model
                 |> renderEntries config model
-                |> verticalList
+                |> verticalList []
     in
         verticalSticked
             (Just [ filterHeaderLayout ])

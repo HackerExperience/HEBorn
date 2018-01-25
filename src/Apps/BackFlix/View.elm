@@ -26,7 +26,7 @@ view config model =
             config.backFlix
 
         filterHeaderLayout =
-            verticalList
+            verticalList []
                 [ hzTabs (compareTabs model.selected) viewTabLabel GoTab tabs
                 , filterHeader
                     []
@@ -99,7 +99,7 @@ renderEntries : Dict BackFlix.Id BackFlix.Log -> Bool -> Html Msg
 renderEntries logs useString =
     logs
         |> Dict.foldl (\k v acc -> renderEntry useString k v :: acc) []
-        |> verticalList
+        |> verticalList []
 
 
 renderEntry : Bool -> BackFlix.Id -> BackFlix.Log -> Html Msg

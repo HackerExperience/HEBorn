@@ -7,6 +7,7 @@ import Game.Account.Models exposing (..)
 import Game.Account.Messages exposing (..)
 import Game.Account.Bounces.Config as Bounces
 import Game.Account.Database.Config as Database
+import Game.Account.Database.Models as Database
 import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Finances.Config as Finances
 import Game.Account.Notifications.Config as Notifications
@@ -57,10 +58,13 @@ databaseConfig config =
     }
 
 
-bouncesConfig : Config msg -> Bounces.Config msg
-bouncesConfig config =
+bouncesConfig : Database.Model -> ID -> Config msg -> Bounces.Config msg
+bouncesConfig database accountId config =
     { flags = config.flags
+    , batchMsg = config.batchMsg
     , toMsg = BouncesMsg >> config.toMsg
+    , database = database
+    , accountId = accountId
     }
 
 

@@ -2,7 +2,6 @@ module OS.SessionManager.Update exposing (update)
 
 import Dict exposing (Dict)
 import Utils.Maybe as Maybe
-import Core.Error as Error
 import Utils.React as React exposing (React)
 import OS.SessionManager.Config exposing (..)
 import OS.SessionManager.Models exposing (..)
