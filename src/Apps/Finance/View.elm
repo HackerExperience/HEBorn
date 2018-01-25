@@ -103,7 +103,7 @@ renderBitcoinAccounts finances model =
     finances
         |> Finances.getBitcoinWallets
         |> Dict.foldl renderBitcoinAccount []
-        |> verticalList
+        |> verticalList []
 
 
 renderBankAccount :
@@ -137,4 +137,4 @@ renderBankAccounts finances model =
     finances
         |> Finances.getBankAccounts
         |> Dict.foldl renderBankAccount []
-        |> verticalList
+        |> verticalList []

@@ -3,6 +3,7 @@ module Apps.Config exposing (..)
 import ContextMenu
 import Html exposing (Attribute)
 import Time exposing (Time)
+import Core.Flags exposing (Flags)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -45,6 +46,7 @@ import Apps.LocationPicker.Config as LocationPicker
 type alias Config msg =
     { toMsg : Msg -> msg
     , lastTick : Time
+    , flags : Flags
     , story : Storyline.Model
     , account : Account.Model
     , inventory : Inventory.Model
@@ -82,6 +84,7 @@ type alias Config msg =
     , onReplyEmail : String -> Emails.Content -> msg
     , onCloseApp : msg
     , onWebLogout : CId -> msg
+    , accountId : String
     }
 
 
@@ -253,9 +256,11 @@ connManagerConfig config =
 bounceManConfig : Config msg -> BounceManager.Config msg
 bounceManConfig config =
     { toMsg = BounceManagerMsg >> config.toMsg
+    , flags = config.flags
     , bounces = Account.getBounces config.account
     , database = Account.getDatabase config.account
     , batchMsg = config.batchMsg
+    , accountId = config.accountId
     }
 
 

@@ -203,7 +203,7 @@ onBounces : Config msg -> Bounces.Msg -> Model -> UpdateResponse msg
 onBounces config msg model =
     let
         config_ =
-            bouncesConfig config
+            bouncesConfig model.database model.id config
 
         ( bounces, react ) =
             Bounces.update config_ msg <| getBounces model

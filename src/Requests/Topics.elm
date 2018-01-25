@@ -192,3 +192,18 @@ bankLogin id =
 bankTransfer : Account.ID -> Topic
 bankTransfer id =
     WebsocketTopic (AccountChannel id) "bank.transfer"
+
+
+bounceCreate : Account.ID -> Topic
+bounceCreate id =
+    WebsocketTopic (AccountChannel id) "bounce.create"
+
+
+bounceUpdate : Account.ID -> Topic
+bounceUpdate id =
+    WebsocketTopic (AccountChannel id) "bounce.update"
+
+
+bounceRemove : Account.ID -> Topic
+bounceRemove id =
+    WebsocketTopic (AccountChannel id) "bounce.remove"
