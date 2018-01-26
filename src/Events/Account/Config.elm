@@ -4,6 +4,7 @@ import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
 import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
+import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
 import Events.Account.Handlers.BankAccountUpdated as BankAccountUpdated
 import Events.Account.Handlers.BankAccountClosed as BankAccountClosed
 import Events.Account.Handlers.DbAccountUpdated as DbAccountUpdated
@@ -16,6 +17,7 @@ type alias Config msg =
     , onStoryStepProceeded : StoryStepProceeded.Data -> msg
     , onStoryEmailSent : StoryEmailSent.Data -> msg
     , onStoryEmailReplyUnlocked : StoryEmailReplyUnlocked.Data -> msg
+    , onStoryEmailReplySent : StoryEmailReplySent.Data -> msg
     , onBankAccountUpdated : BankAccountUpdated.Data -> msg
     , onBankAccountClosed : BankAccountClosed.Data -> msg
     , onDbAccountUpdated : DbAccountUpdated.Data -> msg

@@ -16,8 +16,8 @@ type alias Config msg =
 emailsConfig : Config msg -> Emails.Config msg
 emailsConfig config =
     { toMsg = EmailsMsg >> config.toMsg
-    , accountId = config.accountId
     , flags = config.flags
+    , accountId = config.accountId
     }
 
 

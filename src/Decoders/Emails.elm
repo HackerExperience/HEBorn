@@ -118,7 +118,7 @@ contentFromId id =
 
         "give_more_info" ->
             succeed GiveMoreInfo
-                |> required "step" string
+                |> optional "step" string "%"
                 |> field "meta"
 
         "more_info" ->

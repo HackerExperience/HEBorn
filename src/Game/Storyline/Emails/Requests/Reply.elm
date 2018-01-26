@@ -21,6 +21,7 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Storyline.Emails.Messages exposing (..)
+import Game.Storyline.Emails.Contents exposing (Content)
 
 
 type Response
@@ -30,14 +31,15 @@ type Response
 
 
 request :
-    String
+    ( String, Content )
+    -> String
     -> String
     -> FlagsSource a
     -> Cmd Msg
-request accountId replyId =
+request src accountId replyId =
     Requests.request
         (Topics.emailReply accountId)
-        (ReplyRequest >> Request)
+        (ReplyRequest src >> Request)
         (encoder replyId)
 
 

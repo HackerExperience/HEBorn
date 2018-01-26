@@ -5,6 +5,7 @@ import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
 import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
+import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
 import Events.Account.Handlers.BankAccountUpdated as BankAccountUpdated
 import Events.Account.Handlers.BankAccountClosed as BankAccountClosed
 import Events.Account.Handlers.DbAccountUpdated as DbAccountUpdated
@@ -24,6 +25,9 @@ events config name value =
 
         "story_email_sent" ->
             StoryEmailSent.handler config.onStoryEmailSent value
+
+        "story_reply_sent" ->
+            StoryEmailReplySent.handler config.onStoryEmailReplySent value
 
         "story_email_reply_unlocked" ->
             StoryEmailReplyUnlocked.handler config.onStoryEmailReplyUnlocked value

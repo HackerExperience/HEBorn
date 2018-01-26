@@ -128,7 +128,6 @@ chat =
                 ]
             , div
                 [ flex (int 0)
-                , minHeight (px 42)
                 , textAlign center
                 , child span
                     [ border3 (px 2) solid (hex "ccc")

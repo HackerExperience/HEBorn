@@ -39,7 +39,7 @@ update config msg model =
 onReply : Config msg -> Content -> Model -> UpdateResponse msg
 onReply { onReplyEmail } content model =
     content
-        |> onReplyEmail
+        |> onReplyEmail model.activeContact
         |> React.msg
         |> (,) model
 

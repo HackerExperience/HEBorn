@@ -23,6 +23,12 @@ fromStep mission id =
 tutorialStep : ID -> List Action
 tutorialStep id =
     case id of
+        "tutorial@download_cracker_public_ftp" ->
+            [ GoApp BrowserApp Gateway
+
+            --, GoAddress
+            ]
+
         "001" ->
             [ GoApp ExplorerApp Gateway
             , RunFile "003"
