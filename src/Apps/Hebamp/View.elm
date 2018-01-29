@@ -19,10 +19,10 @@ import Apps.Hebamp.Resources exposing (Classes(..), prefix)
 
 
 view : Config msg -> Model -> Html msg
-view ({ toMsg } as config) model =
+view ({ toMsg, draggable, windowMenu } as config) model =
     div
         [ class [ Container ] ]
-        [ div [ class [ Header ], config.draggable ]
+        [ div [ class [ Header ], draggable, windowMenu ]
             [ text ":"
             , span [ class [ IconClose ], onClickMe <| toMsg <| Close ] []
             ]

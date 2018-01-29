@@ -7,9 +7,6 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
-import Apps.Explorer.Menu.Messages as Menu
-import Apps.Explorer.Menu.Update as Menu
-import Apps.Explorer.Menu.Actions exposing (actionHandler)
 
 
 type alias UpdateResponse msg =
@@ -17,65 +14,43 @@ type alias UpdateResponse msg =
 
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
-update config msg model =
+update ({ activeServer } as config) msg model =
     let
-        server =
-            config.activeServer
-
         maybeFs =
             model
-                |> getStorage server
-                |> flip Servers.getStorage server
+                |> getStorage activeServer
+                |> flip Servers.getStorage activeServer
                 |> Maybe.map Servers.getFilesystem
     in
         case maybeFs of
             Just fs ->
-                case msg of
-                    -- Menu
-                    MenuMsg (Menu.MenuClick action) ->
-                        let
-                            config_ =
-                                menuConfig config
-                        in
-                            actionHandler config action model
-
-                    MenuMsg msg ->
-                        onMenuMsg config msg model
-
-                    -- General Acts
-                    GoPath newPath ->
-                        onGoPath config newPath fs model
-
-                    GoStorage newStorageId ->
-                        onGoStorage newStorageId model
-
-                    UpdateEditing newState ->
-                        onUpdateEditing newState model
-
-                    EnterRename id ->
-                        onEnterRename config id fs model
-
-                    ApplyEdit ->
-                        onApplyEdit config fs model
-
-                    _ ->
-                        -- TODO: implement folder operation requests
-                        ( model, React.none )
+                realUpdate config fs msg model
 
             Nothing ->
                 ( model, React.none )
 
 
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
-onMenuMsg config msg model =
-    let
-        ( menu_, react ) =
-            Menu.update (menuConfig config) msg model.menu
+realUpdate : Config msg -> Filesystem.Model -> Msg -> Model -> UpdateResponse msg
+realUpdate config fs msg model =
+    case msg of
+        GoPath newPath ->
+            onGoPath config newPath fs model
 
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, react )
+        GoStorage newStorageId ->
+            onGoStorage newStorageId model
+
+        UpdateEditing newState ->
+            onUpdateEditing newState model
+
+        EnterRename id ->
+            onEnterRename config id fs model
+
+        ApplyEdit ->
+            onApplyEdit config fs model
+
+        _ ->
+            -- TODO: implement folder operation requests
+            ( model, React.none )
 
 
 onGoPath :

@@ -4,7 +4,6 @@ import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
-import Apps.Explorer.Menu.Models as Menu
 
 
 type EditingStatus
@@ -17,8 +16,7 @@ type EditingStatus
 
 
 type alias Model =
-    { menu : Menu.Model
-    , storageId : Maybe Servers.StorageId
+    { storageId : Maybe Servers.StorageId
     , path : Filesystem.Path
     , editing : EditingStatus
     }
@@ -54,8 +52,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , storageId = Nothing
+    { storageId = Nothing
     , path = [ "" ]
     , editing = NotEditing
     }

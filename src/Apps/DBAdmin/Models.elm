@@ -1,7 +1,6 @@
 module Apps.DBAdmin.Models exposing (..)
 
 import Dict exposing (Dict)
-import Apps.DBAdmin.Menu.Models as Menu
 
 
 type MainTab
@@ -29,8 +28,7 @@ type alias Tab =
 
 
 type alias Model =
-    { menu : Menu.Model
-    , selected : MainTab
+    { selected : MainTab
     , servers : Tab
     , serversEditing : Dict String EditingServers
     , bankAccs : Tab
@@ -81,8 +79,7 @@ getTab app =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , selected = TabServers
+    { selected = TabServers
     , servers = initialTab
     , serversEditing = Dict.empty
     , bankAccs = initialTab

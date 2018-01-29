@@ -2,12 +2,10 @@ module Apps.DBAdmin.Messages exposing (Msg(..))
 
 import Game.Servers.Logs.Models exposing (ID)
 import Apps.DBAdmin.Models exposing (MainTab(..))
-import Apps.DBAdmin.Menu.Messages as Menu
 
 
 type Msg
-    = MenuMsg Menu.Msg
-    | GoTab MainTab
+    = GoTab MainTab
     | ToogleExpand MainTab ID
     | UpdateTextFilter MainTab String
     | EnterEditing MainTab ID

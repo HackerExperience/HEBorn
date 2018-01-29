@@ -5,6 +5,7 @@ module Core.Models
         , HomeModel
         , SetupModel
         , PlayModel
+        , init
         , initialModel
         , getFlags
         , connect
@@ -14,16 +15,17 @@ module Core.Models
         , setupToPlay
         )
 
-import Landing.Models as Landing
+import ContextMenu exposing (ContextMenu)
+import Core.Flags as Flags exposing (Flags)
+import Core.Messages exposing (..)
 import Driver.Websocket.Launch as Ws
 import Driver.Websocket.Models as Ws
+import Landing.Models as Landing
+import Setup.Models as Setup
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Dummy as Game
-import Setup.Models as Setup
 import OS.Models as OS
-import Core.Flags as Flags exposing (Flags)
-import Core.Messages exposing (..)
 
 
 type alias Model =
@@ -31,6 +33,7 @@ type alias Model =
     , flags : Flags
     , seed : Int
     , windowLoaded : Bool
+    , contextMenu : ContextMenuShit
     }
 
 
@@ -69,13 +72,35 @@ type alias Connecting =
     }
 
 
+type alias ContextMenuShit =
+    ContextMenu (List (List ( ContextMenu.Item, Msg )))
+
+
+init : Int -> Flags -> ( Model, Cmd Msg )
+init seed flags =
+    let
+        ( menuModel, menuCmd ) =
+            ContextMenu.init
+
+        model =
+            { state = Home initialHome
+            , flags = flags
+            , seed = seed
+            , windowLoaded = False
+            , contextMenu = menuModel
+            }
+
+        cmd =
+            Cmd.map MenuMsg menuCmd
+    in
+        ( model, cmd )
+
+
 initialModel : Int -> Flags -> Model
 initialModel seed flags =
-    { state = Home initialHome
-    , flags = flags
-    , seed = seed
-    , windowLoaded = False
-    }
+    flags
+        |> init seed
+        |> Tuple.first
 
 
 connect : Account.ID -> Account.Username -> Account.Token -> Model -> Model

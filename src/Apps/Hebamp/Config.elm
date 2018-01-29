@@ -8,5 +8,6 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , draggable : Attribute msg
+    , windowMenu : Attribute msg
     , onCloseApp : msg
     }

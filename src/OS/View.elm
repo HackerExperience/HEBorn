@@ -1,5 +1,6 @@
 module OS.View exposing (view)
 
+import ContextMenu
 import Html as Html exposing (Html, div, text)
 import Html.Attributes as Attributes exposing (attribute)
 import Html.Lazy exposing (lazy)
@@ -25,21 +26,9 @@ import OS.Console.View as Console
 view : Config msg -> Model -> Html msg
 view config model =
     let
-        osContent =
-            viewOS config model
-
-        dynStyle =
-            DynamicStyle.view config
-
         version =
             config.flags
                 |> Flags.getVersion
-
-        context =
-            config.activeContext
-
-        story =
-            config.story
 
         gameMode =
             case config.isCampaign of
@@ -49,49 +38,39 @@ view config model =
                 False ->
                     Res.multiplayerMode
     in
-        div
-            [ id Res.Dashboard
-            , attribute Res.gameVersionAttrTag version
-            , attribute Res.gameModeAttrTag gameMode
-            , activeContextAttr context
-            ]
-            (dynStyle :: osContent)
+        model
+            |> viewOS config
+            |> (::) (DynamicStyle.view config)
+            |> (::) config.menuView
+            |> div
+                [ id Res.Dashboard
+                , attribute Res.gameVersionAttrTag version
+                , attribute Res.gameModeAttrTag gameMode
+                , activeContextAttr config.activeContext
+                , config.menuAttr
+                    [ [ ( ContextMenu.item "Logout", config.onLogout ) ] ]
+                ]
 
 
 viewOS : Config msg -> Model -> List (Html msg)
 viewOS config model =
-    let
-        version =
-            config.flags
-                |> Flags.getVersion
-    in
-        [ viewHeader config model.header
-        , console config
-        , viewMain config model
-        , toasts config model
-        , lazy displayVersion
-            version
-        ]
+    [ viewHeader config model.header
+    , console config
+    , viewMain config model
+    , toasts config model
+    , lazy (Flags.getVersion >> displayVersion) config.flags
+    ]
 
 
 viewHeader : Config msg -> Header.Model -> Html msg
 viewHeader config header =
-    let
-        config_ =
-            headerConfig config
-    in
-        Header.view config_ header
-            |> Html.map (HeaderMsg >> config.toMsg)
+    Header.view (headerConfig config) header
 
 
 viewMain : Config msg -> Model -> Html msg
 viewMain config model =
-    let
-        config_ =
-            smConfig config
-    in
-        model.session
-            |> SessionManager.view config_
+    model.session
+        |> SessionManager.view (smConfig config)
 
 
 displayVersion : String -> Html msg
@@ -110,8 +89,4 @@ toasts config model =
 
 console : Config msg -> Html msg
 console config =
-    let
-        config_ =
-            consoleConfig config
-    in
-        Console.view config_
+    Console.view (consoleConfig config)

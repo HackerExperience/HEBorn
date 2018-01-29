@@ -6,17 +6,18 @@ import Html.Attributes as Attributes exposing (style, attribute, tabindex)
 import Html.Events exposing (onMouseDown)
 import Html.CssHelpers
 import Html.Keyed
+import ContextMenu
 import Css exposing (left, top, asPairs, px, height, width, int, zIndex)
 import Draggable
 import Utils.Html.Attributes exposing (appAttr, boolAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
-import Apps.Models as Apps
-import Apps.View as Apps
 import Game.Meta.Types.Context exposing (..)
 import OS.SessionManager.WindowManager.Config exposing (..)
 import OS.SessionManager.WindowManager.Messages exposing (..)
 import OS.SessionManager.WindowManager.Models exposing (..)
 import OS.SessionManager.WindowManager.Resources as Res
+import Apps.Models as Apps
+import Apps.View as Apps
 
 
 { id, class, classList } =
@@ -96,7 +97,7 @@ windowWrapper config id window view =
             windowAttrs
             [ header config id window
             , div
-                [ class [ Res.WindowBody ] ]
+                [ class [ Res.WindowBody ], config.menuAttr [] ]
                 [ view ]
             ]
 
@@ -121,6 +122,7 @@ header config id window =
         div
             [ Draggable.mouseTrigger id (DragMsg >> config.toMsg)
             , class [ Res.HeaderSuper ]
+            , headerMenu config id window
             ]
             [ div
                 [ class [ Res.WindowHeader ]
@@ -140,9 +142,9 @@ header config id window =
 
 headerContext : Config msg -> ID -> Maybe Context -> Html msg
 headerContext config id context =
-    div [] <|
-        case context of
-            Just context ->
+    case context of
+        Just context ->
+            div []
                 [ span
                     [ class [ Res.HeaderContextSw ]
                     , onClickMe <|
@@ -158,8 +160,8 @@ headerContext config id context =
                     [ text <| contextToString context ]
                 ]
 
-            Nothing ->
-                []
+        Nothing ->
+            text ""
 
 
 headerTitle : Config msg -> String -> String -> Html msg
@@ -197,6 +199,23 @@ headerButtons config id window =
                 ]
                 []
             ]
+
+
+headerMenu : Config msg -> ID -> Window -> Attribute msg
+headerMenu { menuAttr, toMsg } id window =
+    let
+        generic =
+            [ ( ContextMenu.item "Minimize", toMsg <| Minimize id )
+            , ( ContextMenu.item "Close", toMsg <| Close id )
+            ]
+
+        moreResize =
+            if (isResizable window) then
+                ( ContextMenu.item "Maximize", toMsg <| ToggleMaximize id ) :: generic
+            else
+                generic
+    in
+        menuAttr [ moreResize ]
 
 
 windowStyle : Window -> Html.Attribute msg

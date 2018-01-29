@@ -1,5 +1,7 @@
 module OS.SessionManager.WindowManager.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Attribute)
 import Time exposing (Time)
 import Native.Panic
 import Draggable
@@ -28,6 +30,7 @@ import Apps.Config as Apps
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , lastTick : Time
     , story : Story.Model
     , isCampaign : Bool
@@ -38,7 +41,7 @@ type alias Config msg =
     , activeGateway : ( Servers.CId, Servers.Server )
     , activeContext : Context
     , inventory : Inventory.Model
-    , batchMsg : List msg -> msg
+    , menuAttr : ContextMenuAttribute msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
@@ -81,6 +84,8 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     , story = config.story
     , backFlix = config.backFlix
     , draggable = Draggable.mouseTrigger wId (DragMsg >> config.toMsg)
+    , menuAttr = config.menuAttr
+    , windowMenu = windowMenu config wId
     , onNewApp = config.onNewApp
     , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
@@ -111,6 +116,18 @@ appsConfig (( appCId, _ ) as appServer) wId targetContext config =
     }
 
 
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg
+
+
 unsafeContextServer : Config msg -> Context -> ( CId, Server )
 unsafeContextServer { servers, activeGateway } context =
     case (Servers.getContextServer context servers activeGateway) of
@@ -121,3 +138,12 @@ unsafeContextServer { servers, activeGateway } context =
             -- TODO<Issue#421>: Implement onDeuMerda
             Error.neeiae "Missing onDeuMerda"
                 |> Native.Panic.crash
+
+
+windowMenu : Config msg -> WM.ID -> Attribute msg
+windowMenu config id =
+    [ ( ContextMenu.item "Minimize", config.toMsg <| Minimize id )
+    , ( ContextMenu.item "Close", config.toMsg <| Close id )
+    ]
+        |> List.singleton
+        |> config.menuAttr

@@ -16,17 +16,14 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Bool -> Html Msg
-view config isOpen =
+view : Config msg -> Bool -> Html msg
+view { toMsg, activeNIP, nips } isOpen =
     let
         onClickNetwork nip =
-            onClick <| SelectNIP nip
-
-        activeNIP =
-            config.activeNIP
+            onClick <| toMsg <| SelectNIP nip
 
         availableNetworks =
-            config.nips
+            nips
                 |> List.unique
                 |> List.filter
                     ((/=) activeNIP)
@@ -45,7 +42,7 @@ view config isOpen =
                 div [ class [ Network ] ]
                     [ div
                         [ class [ ActiveNetwork ]
-                        , onClick <| ToggleMenus NetworkOpen
+                        , onClick <| toMsg <| ToggleMenus NetworkOpen
                         ]
                         [ div [] [ text (Network.getId activeNIP) ]
                         , div [] [ text "⌄" ]

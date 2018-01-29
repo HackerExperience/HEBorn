@@ -1,7 +1,8 @@
 module Apps.Config exposing (..)
 
-import Time exposing (Time)
+import ContextMenu
 import Html exposing (Attribute)
+import Time exposing (Time)
 import Game.Account.Models as Account
 import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -52,6 +53,8 @@ type alias Config msg =
     , backFlix : BackFlix.BackFlix
     , batchMsg : List msg -> msg
     , draggable : Attribute msg
+    , menuAttr : ContextMenuAttribute msg
+    , windowMenu : Attribute msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
@@ -126,6 +129,7 @@ explorerConfig config =
     , activeServer =
         config.activeServer
             |> Tuple.second
+    , menuAttr = config.menuAttr
     , onNewTextFile = config.onNewTextFile
     , onNewDir = config.onNewDir
     , onMoveFile = config.onMoveFile
@@ -191,6 +195,7 @@ browserConfig config =
             |> Tuple.second
             |> Servers.getEndpoints
             |> Maybe.withDefault []
+    , menuAttr = config.menuAttr
     , onNewApp = config.onNewApp
     , onOpenApp = config.onOpenApp
     , onNewPublicDownload = config.onNewPublicDownload
@@ -266,6 +271,7 @@ hebampConfig config =
     , batchMsg = config.batchMsg
     , onCloseApp = config.onCloseApp
     , draggable = config.draggable
+    , windowMenu = config.windowMenu
     }
 
 
@@ -275,3 +281,15 @@ backFlixConfig config =
     , backFlix = config.backFlix
     , batchMsg = config.batchMsg
     }
+
+
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

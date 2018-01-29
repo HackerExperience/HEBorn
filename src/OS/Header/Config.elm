@@ -1,5 +1,7 @@
 module OS.Header.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Attribute)
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Bounces.Models as Bounces
 import Game.Meta.Types.Context exposing (..)
@@ -24,6 +26,7 @@ type alias Config msg =
     , serversNotifications : Notifications.Model
     , activeNIP : NIP
     , nips : List NIP
+    , menuAttr : ContextMenuAttribute msg
     , onLogout : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
@@ -33,3 +36,15 @@ type alias Config msg =
     , onReadAllServerNotifications : msg
     , onSetActiveNIP : NIP -> msg
     }
+
+
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

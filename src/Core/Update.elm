@@ -1,5 +1,6 @@
 module Core.Update exposing (update)
 
+import ContextMenu
 import Utils.React as React exposing (React)
 import Events.Handler as Events
 import Landing.Messages as Landing
@@ -96,6 +97,19 @@ update msg model =
                     { model | windowLoaded = True }
             in
                 ( model_, Cmd.none )
+
+        MenuMsg msg ->
+            let
+                ( menuModel, menuCmd ) =
+                    ContextMenu.update msg model.contextMenu
+
+                model_ =
+                    { model | contextMenu = menuModel }
+
+                cmd =
+                    Cmd.map MenuMsg menuCmd
+            in
+                ( model_, cmd )
 
         _ ->
             updateState msg model
@@ -246,7 +260,8 @@ updatePlay msg model stateModel =
                 |> finishPlayUpdate model
 
         OSMsg msg ->
-            updatePlayOS msg stateModel
+            model
+                |> updatePlayOS msg stateModel
                 |> finishPlayUpdate model
 
         GameMsg msg ->
@@ -271,8 +286,8 @@ updatePlayWS flags msg stateModel =
         ( stateModel_, cmd )
 
 
-updatePlayOS : OS.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
-updatePlayOS msg ({ game, os } as state) =
+updatePlayOS : OS.Msg -> PlayModel -> Model -> ( PlayModel, Cmd Msg )
+updatePlayOS msg ({ game, os } as state) { contextMenu } =
     let
         volatile_ =
             ( Game.getGateway game
@@ -291,7 +306,7 @@ updatePlayOS msg ({ game, os } as state) =
                             |> Meta.getLastTick
 
                     config =
-                        osConfig game srv ctx gtw
+                        osConfig game contextMenu srv ctx gtw
 
                     ( os_, react ) =
                         OS.update config msg os

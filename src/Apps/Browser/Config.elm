@@ -1,5 +1,7 @@
 module Apps.Browser.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Attribute)
 import Utils.Core exposing (..)
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Game.Meta.Types.Context exposing (Context(..))
@@ -11,7 +13,6 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Requests.Download as Download
 import Apps.Apps as Apps
 import Apps.Browser.Messages exposing (..)
-import Apps.Browser.Menu.Config as Menu
 import Apps.Browser.Pages.Bank.Config as Bank
 import Apps.Browser.Pages.DownloadCenter.Config as DownloadCenter
 import Apps.Browser.Pages.Home.Config as Home
@@ -24,6 +25,7 @@ type alias Config msg =
     , endpoints : List CId
     , activeServer : Servers.Server
     , activeGateway : Servers.Server
+    , menuAttr : ContextMenuAttribute msg
     , onNewApp : Maybe Context -> Maybe Apps.AppParams -> Apps.App -> msg
     , onOpenApp : Maybe Context -> Apps.AppParams -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
@@ -34,13 +36,6 @@ type alias Config msg =
     , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : Network.ID -> Network.IP -> Requester -> msg
     , onWebLogout : CId -> msg
-    }
-
-
-menuConfig : Config msg -> Menu.Config msg
-menuConfig config =
-    { toMsg = MenuMsg >> config.toMsg
-    , batchMsg = config.batchMsg
     }
 
 
@@ -87,3 +82,15 @@ webserverConfig config =
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
     , endpoints = config.endpoints
     }
+
+
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

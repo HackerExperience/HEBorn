@@ -11,21 +11,15 @@ import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
-import Apps.TaskManager.Menu.View exposing (..)
 
 
 view : Config msg -> Model -> Html msg
 view config model =
-    let
-        config_ =
-            menuConfig config
-    in
-        Html.map config.toMsg <|
-            div [ class [ MainLayout ] ]
-                [ viewTasksTable config
-                , viewTotalResources model
-                , menuView config_ model
-                ]
+    Html.map config.toMsg <|
+        div [ class [ MainLayout ] ]
+            [ viewTasksTable config
+            , viewTotalResources model
+            ]
 
 
 
@@ -120,26 +114,29 @@ viewState now lastRecalc proc =
             text "Completed (failure)"
 
 
-processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute Msg
-processMenu config ( id, process ) =
-    let
-        menu =
-            case Processes.getAccess process of
-                Processes.Full _ ->
-                    case Processes.getState process of
-                        Processes.Running ->
-                            menuForRunning
 
-                        Processes.Paused ->
-                            menuForPaused
+{- MENUREF:
+   processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute Msg
+   processMenu config ( id, process ) =
+       let
+           menu =
+               case Processes.getAccess process of
+                   Processes.Full _ ->
+                       case Processes.getState process of
+                           Processes.Running ->
+                               menuForRunning
 
-                        _ ->
-                            menuForComplete
+                           Processes.Paused ->
+                               menuForPaused
 
-                Processes.Partial _ ->
-                    menuForPartial
-    in
-        menu (menuConfig config) id
+                           _ ->
+                               menuForComplete
+
+                   Processes.Partial _ ->
+                       menuForPartial
+       in
+           menu (menuConfig config) id
+-}
 
 
 viewTaskRow :
@@ -158,7 +155,8 @@ viewTaskRow config (( _, process ) as entry) =
                 |> Maybe.map (viewTaskRowUsage)
                 |> maybe
     in
-        div [ class [ EntryDivision ], (processMenu config entry) ]
+        div [ class [ EntryDivision ] ]
+            --MENUREF: (processMenu config entry)
             [ div []
                 [ text <| Processes.getName process
                 , br [] []

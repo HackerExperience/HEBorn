@@ -8,6 +8,8 @@ module Core.Config
         , osConfig
         )
 
+import Color
+import ContextMenu exposing (ContextMenu)
 import Driver.Websocket.Config as Ws
 import Driver.Websocket.Channels exposing (Channel(..))
 import Driver.Websocket.Messages as Ws
@@ -245,11 +247,12 @@ setupConfig accountId mainframe flags =
 
 osConfig :
     Game.Model
+    -> ContextMenuShit
     -> ( CId, Server )
     -> Context
     -> ( CId, Server )
     -> OS.Config Msg
-osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
+osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     { toMsg = OSMsg
     , batchMsg = BatchMsg
     , flags = Game.getFlags game
@@ -262,6 +265,8 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , activeServer = srv
     , activeContext = ctx
     , activeGateway = gtw
+    , menuView = ContextMenu.view menuConfig MenuMsg identity menu
+    , menuAttr = ContextMenu.open MenuMsg
     , isCampaign =
         gtw
             |> Tuple.second
@@ -352,8 +357,30 @@ osConfig game (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     }
 
 
+menuConfig : ContextMenu.Config
+menuConfig =
+    let
+        defaultConfig =
+            ContextMenu.defaultConfig
+    in
+        { defaultConfig
+            | direction = ContextMenu.RightBottom
+            , overflowX = ContextMenu.Mirror
+            , overflowY = ContextMenu.Mirror
+            , containerColor = Color.rgb 255 255 255
+            , hoverColor = Color.rgb 238 238 238
+            , invertText = False
+            , cursor = ContextMenu.Arrow
+            , rounded = False
+        }
+
+
 
 -- helpers
+
+
+type alias ContextMenuShit =
+    ContextMenu (List (List ( ContextMenu.Item, Msg )))
 
 
 ws : Ws.Msg -> Msg

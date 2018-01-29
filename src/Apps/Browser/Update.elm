@@ -15,9 +15,6 @@ import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
 import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
-import Apps.Browser.Menu.Update as Menu
-import Apps.Browser.Menu.Messages as Menu
-import Apps.Browser.Menu.Actions as Menu
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
@@ -34,21 +31,20 @@ type alias TabUpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        -- menu
-        MenuMsg (Menu.MenuClick action) ->
-            Menu.actionHandler (menuConfig config) action model
-
-        MenuMsg msg ->
-            onMenuMsg config msg model
-
         LaunchApp context params ->
             onLaunchApp config context params model
 
         ChangeTab tabId ->
             ( goTab tabId model, React.none )
 
+        NewTab ->
+            ( addTab model, React.none )
+
         NewTabIn url ->
             onNewTabIn config url model
+
+        DeleteTab tabId ->
+            ( deleteTab tabId model, React.none )
 
         PublicDownload nip entry ->
             update config
@@ -82,22 +78,6 @@ update config msg model =
 
 
 -- browser internals
-
-
-onMenuMsg :
-    Config msg
-    -> Menu.Msg
-    -> Model
-    -> UpdateResponse msg
-onMenuMsg config msg model =
-    let
-        ( menu, react ) =
-            Menu.update (menuConfig config) msg model.menu
-
-        model_ =
-            { model | menu = menu }
-    in
-        ( model_, react )
 
 
 onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg

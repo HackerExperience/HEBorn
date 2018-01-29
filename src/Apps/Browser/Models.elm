@@ -10,7 +10,6 @@ import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
 import Apps.Browser.Pages.Bank.Models as PageBank
-import Apps.Browser.Menu.Models as Menu
 
 
 type alias Model =
@@ -20,7 +19,6 @@ type alias Model =
     , leftTabs : List Int
     , rightTabs : List Int
     , lastTab : Int
-    , menu : Menu.Model
     }
 
 
@@ -144,7 +142,6 @@ initialModel me =
     , lastTab = 0
     , leftTabs = []
     , rightTabs = []
-    , menu = Menu.initialMenu
     }
 
 
