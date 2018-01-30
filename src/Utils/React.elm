@@ -8,6 +8,7 @@ module Utils.React
         , addCmd
         , batch
         , map
+        , update
         , toCmd
         , split
         )
@@ -88,6 +89,11 @@ map f react =
 
         None ->
             None
+
+
+update : model -> ( model, React msg )
+update model =
+    ( model, none )
 
 
 toCmd : React msg -> Cmd msg

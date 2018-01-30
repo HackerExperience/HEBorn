@@ -1,7 +1,7 @@
 module Apps.BounceManager.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Apps.Reference exposing (..)
+import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Apps.BounceManager.Config exposing (..)
 import Apps.BounceManager.Models exposing (..)
 
@@ -10,8 +10,8 @@ type alias LaunchResponse msg =
     ( Model, React msg )
 
 
-launch : Config msg -> Maybe Params -> Reference -> LaunchResponse msg
-launch config maybeParams me =
+launch : Config msg -> Maybe Params -> LaunchResponse msg
+launch config maybeParams =
     case maybeParams of
         _ ->
-            ( initialModel me, React.none )
+            ( initialModel config.reference, React.none )

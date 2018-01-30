@@ -3,8 +3,7 @@ module Utils.Html.Attributes exposing (..)
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
 import Game.Meta.Types.Context exposing (Context(..))
-import Apps.Apps as Apps
-import Apps.Models as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 -- ONLY PUT HERE ATTRIBUTES THAT REQUIRES MAPPING OR PIPES
@@ -52,10 +51,9 @@ idAttr =
     attribute idAttrTag
 
 
-appAttr : Apps.App -> Attribute msg
+appAttr : String -> Attribute msg
 appAttr =
-    Apps.name
-        >> attribute appAttrTag
+    attribute appAttrTag
 
 
 activeContextAttr : Context -> Attribute msg

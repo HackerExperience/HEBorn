@@ -74,7 +74,7 @@ update config msg model =
         ToggleExpand bounceId ->
             onToggleExpand config bounceId model
 
-        LaunchApp _ _ ->
+        LaunchApp _ ->
             --TODO: Implement open BounceManager with preset Bounce
             ( model, React.none )
 

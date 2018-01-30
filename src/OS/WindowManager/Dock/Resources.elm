@@ -1,4 +1,4 @@
-module OS.SessionManager.Dock.Resources exposing (..)
+module OS.WindowManager.Dock.Resources exposing (..)
 
 
 type Classes

@@ -3,7 +3,7 @@ module Apps.BounceManager.Models exposing (..)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network exposing (NIP)
-import Apps.Reference exposing (Reference)
+import Game.Meta.Types.Apps.Desktop exposing (Reference)
 
 
 type MainTab

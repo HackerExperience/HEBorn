@@ -1,4 +1,4 @@
-module OS.SessionManager.WindowManager.Style exposing (..)
+module OS.WindowManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
@@ -7,7 +7,7 @@ import Css.Icons as Icon
 import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (pseudoContent, withAttribute)
 import UI.Colors as Colors
-import OS.SessionManager.WindowManager.Resources exposing (..)
+import OS.WindowManager.Resources exposing (..)
 
 
 wmBorderRadius : Px

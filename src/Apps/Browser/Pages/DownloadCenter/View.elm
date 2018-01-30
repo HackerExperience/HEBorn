@@ -11,7 +11,7 @@ import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 import Apps.Browser.Widgets.HackingPanel.View as HackingPanel exposing (hackingPanel)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
-import Apps.Apps as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 { id, class, classList } =
@@ -42,10 +42,10 @@ hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
     , onNewApp = onNewApp
     , onSetShowingPanel = SetShowingPanel >> toMsg
     , apps =
-        [ Apps.TaskManagerApp
-        , Apps.ConnManagerApp
-        , Apps.LogViewerApp
-        , Apps.ExplorerApp
+        [ DesktopApp.TaskManager
+        , DesktopApp.ConnManager
+        , DesktopApp.LogViewer
+        , DesktopApp.Explorer
         ]
     , allowAnyMap = True
     , allowSelectEndpoint = True

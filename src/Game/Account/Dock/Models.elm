@@ -1,28 +1,28 @@
 module Game.Account.Dock.Models exposing (Model, initialModel)
 
-import Apps.Apps as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 type alias Model =
-    List Apps.App
+    List DesktopApp
 
 
 initialModel : Model
 initialModel =
-    [ Apps.BrowserApp
-    , Apps.ExplorerApp
-    , Apps.LogViewerApp
-    , Apps.TaskManagerApp
-    , Apps.DatabaseApp
-    , Apps.ConnManagerApp
-    , Apps.BounceManagerApp
-    , Apps.FinanceApp
-    , Apps.MusicApp
-    , Apps.CtrlPanelApp
-    , Apps.ServersGearsApp
-    , Apps.LanViewerApp
-    , Apps.EmailApp
-    , Apps.BugApp
-    , Apps.BackFlixApp
-    , Apps.CalculatorApp
+    [ DesktopApp.Browser
+    , DesktopApp.Explorer
+    , DesktopApp.LogViewer
+    , DesktopApp.TaskManager
+    , DesktopApp.DBAdmin
+    , DesktopApp.ConnManager
+    , DesktopApp.BounceManager
+    , DesktopApp.Finance
+    , DesktopApp.Hebamp
+    , DesktopApp.CtrlPanel
+    , DesktopApp.ServersGears
+    , DesktopApp.LanViewer
+    , DesktopApp.Email
+    , DesktopApp.Bug
+    , DesktopApp.BackFlix
+    , DesktopApp.Calculator
     ]

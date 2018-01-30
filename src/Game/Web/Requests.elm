@@ -3,7 +3,7 @@ module Game.Web.Requests exposing (Response(..), receive)
 import Game.Web.Messages exposing (..)
 import Game.Web.Types as DNS
 import Game.Web.Requests.DNS as DNS
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 
 
 type Response

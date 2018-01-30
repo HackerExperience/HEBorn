@@ -4,15 +4,15 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (withAttribute, nest)
 import Utils.Html.Attributes exposing (activeContextValue, appAttrTag)
+import Apps.Shared as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context)
 import OS.Resources as OS
-import OS.SessionManager.Dock.Resources as Dock
-import OS.SessionManager.WindowManager.Resources as WM
-import Apps.Models as Apps
-import Apps.Apps exposing (App)
+import OS.WindowManager.Dock.Resources as Dock
+import OS.WindowManager.Resources as WM
 
 
-highlightDockIcon : App -> Stylesheet
+highlightDockIcon : DesktopApp -> Stylesheet
 highlightDockIcon app =
     (stylesheet << namespace Dock.prefix)
         [ class Dock.ItemIco
@@ -35,7 +35,7 @@ highlightHeaderContextToggler context =
         ]
 
 
-highlightWindow : App -> Context -> Stylesheet
+highlightWindow : DesktopApp -> Context -> Stylesheet
 highlightWindow app context =
     (stylesheet << namespace WM.prefix)
         [ class WM.Window

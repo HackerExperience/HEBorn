@@ -3,7 +3,7 @@ module Apps.Browser.Launch exposing (..)
 import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
-import Apps.Reference exposing (..)
+import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
 
@@ -12,18 +12,18 @@ type alias LaunchResponse msg =
     ( Model, React msg )
 
 
-launch : Config msg -> Maybe Params -> Reference -> LaunchResponse msg
-launch config maybeParams me =
+launch : Config msg -> Maybe Params -> LaunchResponse msg
+launch config maybeParams =
     case maybeParams of
         Just (OpenAtUrl url) ->
-            launchOpenAtUrl config url me
+            launchOpenAtUrl config url
 
         Nothing ->
-            ( initialModel me, React.none )
+            ( initialModel config.reference, React.none )
 
 
-launchOpenAtUrl : Config msg -> URL -> Reference -> LaunchResponse msg
-launchOpenAtUrl config url me =
+launchOpenAtUrl : Config msg -> URL -> LaunchResponse msg
+launchOpenAtUrl config url =
     let
         nid =
             config.activeServer
@@ -31,17 +31,13 @@ launchOpenAtUrl config url me =
                 |> Network.getId
 
         model =
-            initialModel me
+            initialModel config.reference
 
-        reference =
-            { sessionId = me.sessionId
-            , windowId = me.windowId
-            , context = me.context
-            , tabId = model.lastTab
-            }
+        requester =
+            Requester config.reference model.lastTab
 
         react =
-            React.msg <| config.onFetchUrl nid url reference
+            React.msg <| config.onFetchUrl nid url requester
 
         model_ =
             model

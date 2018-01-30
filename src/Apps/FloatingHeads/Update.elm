@@ -32,8 +32,8 @@ update config msg model =
         Close ->
             onClose config model
 
-        LaunchApp context params ->
-            onLaunchApp config context params model
+        LaunchApp params ->
+            onLaunchApp config params model
 
 
 onReply : Config msg -> Content -> Model -> UpdateResponse msg
@@ -77,8 +77,8 @@ onClose { onCloseApp } model =
         |> (,) model
 
 
-onLaunchApp : Config msg -> Context -> Params -> Model -> UpdateResponse msg
-onLaunchApp config context params model =
+onLaunchApp : Config msg -> Params -> Model -> UpdateResponse msg
+onLaunchApp config params model =
     case params of
         OpenAtContact contact ->
             let

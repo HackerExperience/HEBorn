@@ -10,10 +10,11 @@ import Game.Account.Finances.Models as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.BackFlix.Models as BackFlix
 import Game.Inventory.Models as Inventory
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Shared as Filesystem
@@ -25,9 +26,8 @@ import Game.Storyline.Emails.Contents as Emails
 import OS.Messages exposing (..)
 import OS.Console.Config as Console
 import OS.Header.Config as Header
-import OS.SessionManager.Config as SessionManager
+import OS.WindowManager.Config as WindowManager
 import OS.Toasts.Config as Toasts
-import Apps.Apps as Apps
 
 
 type alias Config msg =
@@ -74,18 +74,18 @@ type alias Config msg =
     , onResumeProcess : CId -> Processes.ID -> msg
     , onRemoveProcess : CId -> Processes.ID -> msg
     , onNewBruteforceProcess : CId -> Network.IP -> msg
-    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onWebLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
     , onReplyEmail : String -> Emails.Content -> msg
-    , onActionDone : Apps.App -> Context -> msg
+    , onActionDone : DesktopApp -> Context -> msg
     , onWebLogout : CId -> msg
     , accountId : String
     }
 
 
-smConfig : Config msg -> SessionManager.Config msg
-smConfig config =
-    { toMsg = SessionManagerMsg >> config.toMsg
+windowManagerConfig : Config msg -> WindowManager.Config msg
+windowManagerConfig config =
+    { toMsg = WindowManagerMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , flags = config.flags
     , lastTick = config.lastTick
@@ -102,6 +102,7 @@ smConfig config =
         config.activeServer
             |> Tuple.second
             |> Servers.getEndpointCId
+    , accountId = config.accountId
     , menuAttr = config.menuAttr
     , onSetBounce = config.onSetBounce
     , onNewPublicDownload = config.onNewPublicDownload
@@ -129,7 +130,6 @@ smConfig config =
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
     , onWebLogout = config.onWebLogout
-    , accountId = config.accountId
     }
 
 

@@ -2,7 +2,7 @@ module Apps.Browser.Pages.Home.View exposing (view)
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Apps.Apps as Apps
+import Apps.Params as AppParams exposing (AppParams)
 import Apps.Browser.Pages.Home.Config exposing (..)
 import Apps.Hebamp.Shared as Hebamp
 
@@ -44,8 +44,8 @@ view { onNewTabIn, onGoAddress, onOpenApp } =
                   }
                     |> List.singleton
                     |> Hebamp.OpenPlaylist
-                    |> Apps.MusicParams
-                    |> onOpenApp Nothing
+                    |> AppParams.Hebamp
+                    |> onOpenApp
                     |> onClick
                 ]
                 [ text "Blblbl" ]
