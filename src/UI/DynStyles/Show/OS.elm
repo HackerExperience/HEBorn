@@ -4,12 +4,12 @@ import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Utils as Css exposing (withAttribute)
 import Utils.Html.Attributes exposing (appAttrTag)
-import OS.SessionManager.Dock.Resources as Dock
-import Apps.Models as Apps
-import Apps.Apps exposing (App)
+import Apps.Shared as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import OS.WindowManager.Dock.Resources as Dock
 
 
-showDockIcon : App -> Stylesheet
+showDockIcon : DesktopApp -> Stylesheet
 showDockIcon app =
     (stylesheet << namespace Dock.prefix)
         [ class Dock.Item

@@ -8,8 +8,9 @@ module Game.Web.Models
         )
 
 import Dict exposing (Dict)
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Meta.Types.Network as Network
+import Game.Servers.Shared as Servers exposing (CId)
 
 
 type alias Model =
@@ -18,7 +19,7 @@ type alias Model =
 
 
 type alias LoadingPages =
-    Dict Network.NIP Requester
+    Dict Network.NIP ( CId, Requester )
 
 
 initialModel : Model
@@ -26,16 +27,16 @@ initialModel =
     { loadingPages = Dict.empty }
 
 
-startLoading : Network.NIP -> Requester -> Model -> Model
-startLoading id requester model =
+startLoading : Network.NIP -> CId -> Requester -> Model -> Model
+startLoading id cid requester model =
     let
         loadingPages =
-            Dict.insert id requester model.loadingPages
+            Dict.insert id ( cid, requester ) model.loadingPages
     in
         { model | loadingPages = loadingPages }
 
 
-finishLoading : Network.NIP -> Model -> ( Maybe Requester, Model )
+finishLoading : Network.NIP -> Model -> ( Maybe ( CId, Requester ), Model )
 finishLoading nip model =
     let
         request =

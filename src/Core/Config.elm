@@ -32,6 +32,7 @@ import Game.Account.Notifications.Messages as AccountNotifications
 import Game.BackFlix.Messages as BackFlix
 import Game.Meta.Models as Meta
 import Game.Meta.Types.Context exposing (Context)
+import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Messages as Filesystem
@@ -47,10 +48,9 @@ import Game.Storyline.Missions.Messages as Missions
 import Game.Web.Messages as Web
 import OS.Config as OS
 import OS.Messages as OS
-import OS.SessionManager.Messages as SessionManager
-import OS.SessionManager.Types as SessionManager
+import OS.WindowManager.Shared as WindowManager
+import OS.WindowManager.Messages as WindowManager
 import OS.Toasts.Messages as Toast
-import Apps.Messages as Apps
 import Apps.Browser.Messages as Browser
 import Apps.BounceManager.Messages as BounceManager
 
@@ -102,11 +102,7 @@ eventsConfig =
             \data ->
                 BatchMsg
                     [ database <| Database.HandlePasswordAcquired data
-                    , data
-                        |> Browser.HandlePasswordAcquired
-                        |> Apps.BrowserMsg
-                        |> List.singleton
-                        |> apps
+                    , browsers <| Browser.HandlePasswordAcquired data
                     ]
         , onStoryStepProceeded =
             Missions.HandleStepProceeded >> missions
@@ -133,17 +129,11 @@ eventsConfig =
         , onTutorialFinished =
             .completed >> Account.HandleTutorialCompleted >> account
         , onBounceCreated =
-            \( id, bounce ) ->
-                Bounces.HandleCreated id bounce
-                    |> bounces
+            uncurry Bounces.HandleCreated >> bounces
         , onBounceUpdated =
-            \( id, bounce ) ->
-                Bounces.HandleUpdated id bounce
-                    |> bounces
+            uncurry Bounces.HandleUpdated >> bounces
         , onBounceRemoved =
-            \id ->
-                Bounces.HandleRemoved id
-                    |> bounces
+            Bounces.HandleRemoved >> bounces
         }
     , forBackFlix =
         { onNewLog =
@@ -192,15 +182,9 @@ gameConfig =
 
     -- web
     , onDNS =
-        \response { sessionId, windowId, context, tabId } ->
-            Browser.HandleFetched response
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        Browser.HandleFetched >> browserTab
     , onJoinFailed =
-        \{ sessionId, windowId, context, tabId } ->
-            Browser.HandleLoginFailed
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        browserTab Browser.HandleLoginFailed
 
     -- servers
     , onNewGateway =
@@ -224,25 +208,13 @@ gameConfig =
 
     -- account.finances
     , onBALoginSuccess =
-        \data { sessionId, windowId, context, tabId } ->
-            Browser.HandleBankLogin data
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        Browser.HandleBankLogin >> browserTab
     , onBALoginFailed =
-        \{ sessionId, windowId, context, tabId } ->
-            Browser.HandleBankLoginError
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        browserTab Browser.HandleBankLoginError
     , onBATransferSuccess =
-        \{ sessionId, windowId, context, tabId } ->
-            Browser.HandleBankTransfer
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        browserTab Browser.HandleBankTransfer
     , onBATransferFailed =
-        \{ sessionId, windowId, context, tabId } ->
-            Browser.HandleBankTransferError
-                |> Browser.SomeTabMsg tabId
-                |> browser ( sessionId, windowId ) context
+        browserTab Browser.HandleBankTransferError
     }
 
 
@@ -353,7 +325,7 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onRemoveProcess =
         \cid -> Processes.HandleRemove >> processes cid
     , onWebLogin =
-        Web.Login >>>>> web
+        Web.Login >>>>>> web
     , onFetchUrl =
         \cid nId nIp r ->
             web <| Web.FetchUrl nIp nId cid r
@@ -362,9 +334,9 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onReplyEmail =
         Emails.HandleReply >>> emails
     , onActionDone =
-        \app context ->
+        \desktopApp context ->
             context
-                |> MissionsActions.GoApp app
+                |> MissionsActions.GoApp desktopApp
                 |> Missions.HandleActionDone
                 |> missions
     , onWebLogout =
@@ -502,11 +474,6 @@ finances =
     Account.FinancesMsg >> account
 
 
-sessionManager : SessionManager.Msg -> Msg
-sessionManager =
-    OS.SessionManagerMsg >> os
-
-
 os : OS.Msg -> Msg
 os =
     OSMsg
@@ -514,36 +481,42 @@ os =
 
 toast : Toast.Msg -> Msg
 toast =
-    OS.ToastsMsg >> os
+    OS.ToastsMsg
+        >> os
 
 
-apps : List Apps.Msg -> Msg
+windowManager : WindowManager.Msg -> Msg
+windowManager =
+    OS.WindowManagerMsg >> os
+
+
+app : WindowManager.AppId -> WindowManager.AppMsg -> Msg
+app appId =
+    WindowManager.AppMsg appId >> windowManager
+
+
+apps : WindowManager.AppMsg -> Msg
 apps =
-    SessionManager.EveryAppMsg >> sessionManager
+    WindowManager.AppsMsg >> windowManager
 
 
-browser :
-    SessionManager.WindowRef
-    -> Context
-    -> Browser.Msg
-    -> Msg
-browser windowRef context =
-    Apps.BrowserMsg >> app windowRef context
+browser : WindowManager.AppId -> Browser.Msg -> Msg
+browser appId =
+    WindowManager.BrowserMsg >> app appId
 
 
-bounceMan :
-    SessionManager.WindowRef
-    -> Context
-    -> BounceManager.Msg
-    -> Msg
-bounceMan windowRef context =
-    Apps.BounceManagerMsg >> app windowRef context
+browserTab : Browser.TabMsg -> Requester -> Msg
+browserTab msg { reference, browserTab } =
+    msg
+        |> Browser.SomeTabMsg browserTab
+        |> browser reference
 
 
-app :
-    SessionManager.WindowRef
-    -> Context
-    -> Apps.Msg
-    -> Msg
-app windowRef context =
-    SessionManager.AppMsg windowRef context >> sessionManager
+browsers : Browser.Msg -> Msg
+browsers =
+    WindowManager.BrowserMsg >> apps
+
+
+bounceManager : WindowManager.AppId -> BounceManager.Msg -> Msg
+bounceManager appId =
+    WindowManager.BounceManagerMsg >> app appId

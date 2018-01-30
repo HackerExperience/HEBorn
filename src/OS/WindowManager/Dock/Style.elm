@@ -1,4 +1,4 @@
-module OS.SessionManager.Dock.Style exposing (..)
+module OS.WindowManager.Dock.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
@@ -9,7 +9,7 @@ import Css.Gradients as Gradients
 import Css.Icons as Icon
 import Utils.Html.Attributes exposing (appAttrTag)
 import OS.Resources as OS
-import OS.SessionManager.Dock.Resources exposing (..)
+import OS.WindowManager.Dock.Resources exposing (..)
 
 
 addIco : String -> Style -> Style

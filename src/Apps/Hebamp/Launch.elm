@@ -1,7 +1,7 @@
 module Apps.Hebamp.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Apps.Reference exposing (..)
+import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Shared exposing (..)
@@ -11,20 +11,20 @@ type alias LaunchResponse msg =
     ( Model, React msg )
 
 
-launch : Config msg -> Maybe Params -> Reference -> LaunchResponse msg
-launch config maybeParams me =
+launch : Config msg -> Maybe Params -> LaunchResponse msg
+launch config maybeParams =
     case maybeParams of
         Just (OpenPlaylist playlist) ->
-            launchOpenPlaylist config playlist me
+            launchOpenPlaylist config playlist
 
         Nothing ->
-            ( initialModel me.windowId [], React.none )
+            ( initialModel config.reference [], React.none )
 
 
-launchOpenPlaylist : Config msg -> List AudioData -> Reference -> LaunchResponse msg
-launchOpenPlaylist _ playlist { windowId } =
+launchOpenPlaylist : Config msg -> List AudioData -> LaunchResponse msg
+launchOpenPlaylist config playlist =
     let
         model =
-            initialModel windowId playlist
+            initialModel config.reference playlist
     in
         ( model, React.none )

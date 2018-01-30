@@ -10,4 +10,4 @@ type Msg
     | ToggleMode
     | Reply Content
     | Close
-    | LaunchApp Context Params
+    | LaunchApp Params

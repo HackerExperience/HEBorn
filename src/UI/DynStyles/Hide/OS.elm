@@ -2,7 +2,7 @@ module UI.DynStyles.Hide.OS exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import OS.SessionManager.Dock.Resources as Dock
+import OS.WindowManager.Dock.Resources as Dock
 
 
 hideAllDock : Stylesheet

@@ -20,7 +20,7 @@ import Game.Account.Finances.Messages
         , LoginResponse(..)
         )
 import Game.Meta.Types.Network as Network
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 
 
 request :

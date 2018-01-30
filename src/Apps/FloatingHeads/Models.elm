@@ -1,7 +1,7 @@
 module Apps.FloatingHeads.Models exposing (..)
 
+import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Game.Storyline.Emails.Models as Emails exposing (ID)
-import Apps.Reference exposing (Reference)
 
 
 type alias Model =

@@ -1,7 +1,7 @@
 module Game.Storyline.Missions.Actions exposing (Action(..))
 
 import Game.Meta.Types.Context exposing (Context)
-import Apps.Apps exposing (App)
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 type alias ID =
@@ -10,4 +10,4 @@ type alias ID =
 
 type Action
     = RunFile ID
-    | GoApp App Context
+    | GoApp DesktopApp Context

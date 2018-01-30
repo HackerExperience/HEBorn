@@ -10,4 +10,4 @@ type Msg
     | Pause
     | SetCurrentTime Float
     | Close
-    | LaunchApp Context Params
+    | LaunchApp Params

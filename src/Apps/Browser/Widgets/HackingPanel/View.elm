@@ -6,8 +6,8 @@ module Apps.Browser.Widgets.HackingPanel.View
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Apps.Apps as Apps
-import Apps.Models as Apps
+import Apps.Shared as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Network exposing (NIP)
 
 
@@ -15,9 +15,9 @@ type alias Config msg =
     { onLogout : NIP -> msg
     , onSelectEndpoint : msg
     , onAnyMap : NIP -> msg
-    , onNewApp : Apps.App -> msg
+    , onNewApp : DesktopApp -> msg
     , onSetShowingPanel : Bool -> msg
-    , apps : List Apps.App
+    , apps : List DesktopApp
     , allowAnyMap : Bool
     , allowSelectEndpoint : Bool
     }
@@ -77,7 +77,7 @@ hackingPanel config nip =
         div [] [ ul [] options3 ]
 
 
-openApp : Config msg -> Apps.App -> Html msg
+openApp : Config msg -> DesktopApp -> Html msg
 openApp { onNewApp } app =
     li
         [ onClick <| onNewApp app ]

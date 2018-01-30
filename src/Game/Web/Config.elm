@@ -2,7 +2,7 @@ module Game.Web.Config exposing (..)
 
 import Json.Decode exposing (Value)
 import Core.Flags as Core
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
 import Game.Web.Types exposing (..)
