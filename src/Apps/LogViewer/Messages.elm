@@ -10,7 +10,3 @@ type Msg
     | UpdateEditing ID String
     | ApplyEditing ID
     | LeaveEditing ID
-    | StartEncryption ID
-    | StartDecryption ID
-    | StartHiding ID
-    | StartDeleting ID
