@@ -45,18 +45,6 @@ update config msg model =
         ApplyEditing id ->
             onApplyEditing config id model
 
-        StartEncryption id ->
-            onStartEncryption config id model
-
-        StartDecryption id ->
-            onStartDecryption config id model
-
-        StartHiding id ->
-            onStartHiding config id model
-
-        StartDeleting id ->
-            onStartDeleting config id model
-
 
 updateTextFilter : Config msg -> String -> Model -> Model
 updateTextFilter config filter model =
@@ -96,36 +84,6 @@ onApplyEditing { onUpdateLog } id model =
                     React.none
     in
         ( model_, react )
-
-
-onStartEncryption : Config msg -> Logs.ID -> Model -> UpdateResponse msg
-onStartEncryption { onEncryptLog } id model =
-    id
-        |> onEncryptLog
-        |> React.msg
-        |> (,) model
-
-
-onStartDecryption : Config msg -> Logs.ID -> Model -> UpdateResponse msg
-onStartDecryption config id model =
-    -- NOT IMPLEMENTED YET
-    ( model, React.none )
-
-
-onStartHiding : Config msg -> Logs.ID -> Model -> UpdateResponse msg
-onStartHiding { onHideLog } id model =
-    id
-        |> onHideLog
-        |> React.msg
-        |> (,) model
-
-
-onStartDeleting : Config msg -> Logs.ID -> Model -> UpdateResponse msg
-onStartDeleting { onDeleteLog } id model =
-    id
-        |> onDeleteLog
-        |> React.msg
-        |> (,) model
 
 
 onEnterEditing : Config msg -> Logs.ID -> Model -> UpdateResponse msg

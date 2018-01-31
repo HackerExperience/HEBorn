@@ -1,6 +1,7 @@
 module Apps.LogViewer.View exposing (view)
 
 import Dict exposing (Dict)
+import ContextMenu
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -96,8 +97,7 @@ renderEntry config model id log =
     in
         toogableEntry
             (not editingState)
-            []
-            ----MENUREF: [ menu id log model ]
+            [ menu config id log model ]
             (config.toMsg <| ToogleExpand id)
             expandedState
             data
@@ -163,26 +163,26 @@ renderTopActions _ log =
     div [] <| renderFlags [ BtnUser, BtnEdit, BtnCrypt ]
 
 
-btnsEditing : Logs.ID -> List ( Attribute Msg, Msg )
-btnsEditing logID =
-    [ ( class [ BtnApply, BottomButton ], ApplyEditing logID )
-    , ( class [ BtnCancel, BottomButton ], LeaveEditing logID )
+btnsEditing : Config msg -> Logs.ID -> List ( Attribute msg, msg )
+btnsEditing { toMsg } logID =
+    [ ( class [ BtnApply, BottomButton ], toMsg <| ApplyEditing logID )
+    , ( class [ BtnCancel, BottomButton ], toMsg <| LeaveEditing logID )
     ]
 
 
-btnsNormal : Logs.ID -> List ( Attribute Msg, Msg )
-btnsNormal logID =
-    [ ( class [ BtnCrypt, BottomButton ], StartEncryption logID )
-    , ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnEdit, BottomButton ], EnterEditing logID )
-    , ( class [ BtnDelete, BottomButton ], StartDeleting logID )
+btnsNormal : Config msg -> Logs.ID -> List ( Attribute msg, msg )
+btnsNormal { toMsg, onEncryptLog, onHideLog, onDeleteLog } logID =
+    [ ( class [ BtnCrypt, BottomButton ], onEncryptLog logID )
+    , ( class [ BtnHide, BottomButton ], onHideLog logID )
+    , ( class [ BtnEdit, BottomButton ], toMsg <| EnterEditing logID )
+    , ( class [ BtnDelete, BottomButton ], onDeleteLog logID )
     ]
 
 
-btnsCryptographed : Logs.ID -> List ( Attribute Msg, Msg )
-btnsCryptographed logID =
-    [ ( class [ BtnHide, BottomButton ], StartHiding logID )
-    , ( class [ BtnDecrypt, BottomButton ], StartDecryption logID )
+btnsCryptographed : Config msg -> Logs.ID -> List ( Attribute msg, msg )
+btnsCryptographed { batchMsg, onHideLog } logID =
+    [ ( class [ BtnHide, BottomButton ], onHideLog logID )
+    , ( class [ BtnDecrypt, BottomButton ], batchMsg [] )
     ]
 
 
@@ -192,24 +192,22 @@ renderBottomActions :
     -> Logs.Log
     -> Model
     -> Html msg
-renderBottomActions { toMsg } id log model =
+renderBottomActions ({ toMsg } as config) id log model =
     let
         btns =
             if (isEntryEditing id model) then
-                btnsEditing id
+                btnsEditing config id
             else if (isEntryExpanded id model) then
                 case log.content of
                     Logs.NormalContent _ ->
-                        btnsNormal id
+                        btnsNormal config id
 
                     Logs.Encrypted ->
-                        btnsCryptographed id
+                        btnsCryptographed config id
             else
                 []
     in
-        btns
-            |> horizontalBtnPanel
-            |> Html.map toMsg
+        horizontalBtnPanel btns
 
 
 renderData : Config msg -> Logs.ID -> Logs.Log -> Model -> Html msg
@@ -239,19 +237,46 @@ renderBottom config id log model =
         div [ class [ EBottom ] ] [ actions ]
 
 
+menu : Config msg -> Logs.ID -> Logs.Log -> Model -> Attribute msg
+menu config id log model =
+    if (isEntryEditing id model) then
+        menuEditingEntry config id
+    else
+        case log.content of
+            Logs.NormalContent _ ->
+                menuNormalEntry config id
 
-{- MENUREF:
-   menu : Logs.ID -> Logs.Log -> Model -> Attribute msg
-   menu id log model =
-       if (isEntryEditing id model) then
-           menuEditingEntry id
-       else
-           case log.content of
-               Logs.NormalContent _ ->
-                   menuNormalEntry id
-               Logs.Encrypted ->
-                   menuEncryptedEntry id
--}
+            Logs.Encrypted ->
+                menuEncryptedEntry config id
+
+
+menuEditingEntry : Config msg -> Logs.ID -> Attribute msg
+menuEditingEntry { toMsg, menuAttr } id =
+    menuAttr
+        [ [ ( ContextMenu.item "Apply", toMsg (ApplyEditing id) )
+          , ( ContextMenu.item "Cancel", toMsg (LeaveEditing id) )
+          ]
+        ]
+
+
+menuNormalEntry : Config msg -> Logs.ID -> Attribute msg
+menuNormalEntry { toMsg, onEncryptLog, onHideLog, onDeleteLog, menuAttr } id =
+    menuAttr
+        [ [ ( ContextMenu.item "Edit", toMsg (EnterEditing id) )
+          , ( ContextMenu.item "Encrypt", onEncryptLog id )
+          , ( ContextMenu.item "Hide", onHideLog id )
+          , ( ContextMenu.item "Delete", onDeleteLog id )
+          ]
+        ]
+
+
+menuEncryptedEntry : Config msg -> Logs.ID -> Attribute msg
+menuEncryptedEntry { onHideLog, onDeleteLog, menuAttr } id =
+    menuAttr
+        [ [ ( ContextMenu.item "Hide", onHideLog id )
+          , ( ContextMenu.item "Delete", onDeleteLog id )
+          ]
+        ]
 
 
 getLogsfromDateHelper :

@@ -33,7 +33,7 @@ type alias Model =
     , flags : Flags
     , seed : Int
     , windowLoaded : Bool
-    , contextMenu : ContextMenuShit
+    , contextMenu : ContextMenuMagic
     }
 
 
@@ -72,7 +72,7 @@ type alias Connecting =
     }
 
 
-type alias ContextMenuShit =
+type alias ContextMenuMagic =
     ContextMenu (List (List ( ContextMenu.Item, Msg )))
 
 

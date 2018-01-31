@@ -26,10 +26,10 @@ type Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
     | LoadingEnd Int
-    | MenuMsg ContextMenuShit
+    | MenuMsg ContextMenuMagic
 
 
-type alias ContextMenuShit =
+type alias ContextMenuMagic =
     ContextMenu.Msg (List (List ( ContextMenu.Item, Msg )))
 
 

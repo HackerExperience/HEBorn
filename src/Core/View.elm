@@ -38,7 +38,6 @@ onSetup { game, setup } model =
 
 onPlay : PlayModel -> Model -> Html Msg
 onPlay { game, os } { contextMenu } =
-    -- CONFREFACT: Get rid of `data`
     let
         volatile_ =
             ( Game.getGateway game

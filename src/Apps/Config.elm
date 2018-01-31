@@ -99,6 +99,7 @@ taskManConfig config =
         config.activeServer
             |> Tuple.second
             |> Servers.getProcesses
+    , menuAttr = config.menuAttr
     , lastTick = config.lastTick
     , batchMsg = config.batchMsg
     , onPauseProcess = config.onPauseProcess
@@ -110,11 +111,12 @@ taskManConfig config =
 logViewerConfig : Config msg -> LogViewer.Config msg
 logViewerConfig config =
     { toMsg = LogViewerMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , logs =
         config.activeServer
             |> Tuple.second
             |> Servers.getLogs
-    , batchMsg = config.batchMsg
+    , menuAttr = config.menuAttr
     , onUpdateLog = config.onUpdateLog
     , onEncryptLog = config.onEncryptLog
     , onHideLog = config.onHideLog

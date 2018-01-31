@@ -247,7 +247,7 @@ setupConfig accountId mainframe flags =
 
 osConfig :
     Game.Model
-    -> ContextMenuShit
+    -> ContextMenuMagic
     -> ( CId, Server )
     -> Context
     -> ( CId, Server )
@@ -379,7 +379,7 @@ menuConfig =
 -- helpers
 
 
-type alias ContextMenuShit =
+type alias ContextMenuMagic =
     ContextMenu (List (List ( ContextMenu.Item, Msg )))
 
 
