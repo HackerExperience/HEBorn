@@ -53,7 +53,7 @@ dock config model =
         content =
             icons config dock wm
     in
-        div [ class [ Res.Container ] ]
+        div [ class [ Res.Container ], config.menuAttr [] ]
             [ div [ class [ Res.Main ] ] [ content ] ]
 
 

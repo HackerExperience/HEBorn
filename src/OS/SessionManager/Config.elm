@@ -1,5 +1,7 @@
 module OS.SessionManager.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Attribute)
 import Time exposing (Time)
 import Utils.Core exposing (..)
 import Game.Account.Models as Account
@@ -39,6 +41,7 @@ type alias Config msg =
     , inventory : Inventory.Model
     , backFlix : BackFlix.BackFlix
     , endpointCId : Maybe Servers.CId
+    , menuAttr : ContextMenuAttribute msg
     , onSetBounce : Maybe Bounces.ID -> msg
     , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
     , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
@@ -82,6 +85,7 @@ wmConfig sessionId config =
     , backFlix = config.backFlix
     , inventory = config.inventory
     , batchMsg = config.batchMsg
+    , menuAttr = config.menuAttr
     , onNewApp = HandleNewApp >>>> config.toMsg
     , onOpenApp = HandleOpenApp >>> config.toMsg
     , onNewPublicDownload = config.onNewPublicDownload
@@ -115,9 +119,22 @@ wmConfig sessionId config =
 dockConfig : Servers.SessionId -> Config msg -> Dock.Config msg
 dockConfig sessionId config =
     { toMsg = DockMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , accountDock = Account.getDock config.account
     , sessionId = sessionId
     , endpointCId = Servers.getEndpointCId <| Tuple.second config.activeServer
+    , menuAttr = config.menuAttr
     , wmConfig = wmConfig sessionId config
-    , batchMsg = config.batchMsg
     }
+
+
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

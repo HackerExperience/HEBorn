@@ -12,20 +12,20 @@ import Apps.Apps as Apps
 import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
 import Apps.Browser.Pages.Bank.Messages as Bank
-import Apps.Browser.Menu.Messages as Menu
 import Apps.Browser.Models exposing (..)
 
 
 type Msg
-    = MenuMsg Menu.Msg
-      -- Inside tab actions
-    | ActiveTabMsg TabMsg
+    = -- Inside tab actions
+      ActiveTabMsg TabMsg
     | SomeTabMsg Int TabMsg
     | EveryTabMsg TabMsg
       -- Browser actions
     | LaunchApp Context Params
     | ChangeTab Int
+    | NewTab
     | NewTabIn String
+    | DeleteTab Int
     | ReqDownload Network.NIP Filesystem.FileEntry StorageId
     | PublicDownload NIP Filesystem.FileEntry
     | HandlePasswordAcquired PasswordAcquired.Data

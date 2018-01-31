@@ -17,7 +17,7 @@ import OS.Resources exposing (..)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config { openMenu } =
     let
         ( chatView, chatBubble ) =
@@ -29,14 +29,15 @@ view config { openMenu } =
         ( accountView, accountBubble ) =
             account config openMenu
     in
-        div [ class [ Taskbar ] ]
-            [ chatView
-            , chatBubble
-            , serverView
-            , serverBubble
-            , accountView
-            , accountBubble
-            ]
+        Html.map config.toMsg <|
+            div [ class [ Taskbar ] ]
+                [ chatView
+                , chatBubble
+                , serverView
+                , serverBubble
+                , accountView
+                , accountBubble
+                ]
 
 
 

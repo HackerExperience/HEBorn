@@ -1,5 +1,6 @@
 module Core.Subscriptions exposing (subscriptions)
 
+import ContextMenu
 import Utils.Ports.OnLoad exposing (windowLoaded)
 import Core.Error as Error
 import Core.Messages exposing (..)
@@ -29,14 +30,18 @@ subscriptions ({ state } as model) =
                     setup setupModel
 
                 Play playModel ->
-                    play playModel
+                    play model playModel
 
                 Panic _ _ ->
                     Sub.none
+
+        menuSub =
+            (ContextMenu.subscriptions model.contextMenu)
     in
         Sub.batch
             [ stateSub
             , windowLoaded LoadingEnd
+            , Sub.map MenuMsg menuSub
             ]
 
 
@@ -81,8 +86,8 @@ setup ({ game, setup } as model) =
             ]
 
 
-play : PlayModel -> Sub Msg
-play model =
+play : Model -> PlayModel -> Sub Msg
+play core model =
     let
         websocketSub =
             websocket model.websocket
@@ -91,7 +96,7 @@ play model =
             game model.game
 
         osSub =
-            os model.game model.os
+            os core model.game model.os
     in
         Sub.batch
             [ websocketSub
@@ -100,8 +105,8 @@ play model =
             ]
 
 
-os : Game.Model -> OS.Model -> Sub Msg
-os game os =
+os : Model -> Game.Model -> OS.Model -> Sub Msg
+os { contextMenu } game os =
     let
         volatile_ =
             ( Game.getGateway game
@@ -120,7 +125,7 @@ os game os =
                             |> Meta.getLastTick
 
                     config =
-                        osConfig game srv ctx gtw
+                        osConfig game contextMenu srv ctx gtw
                 in
                     OS.subscriptions config os
 

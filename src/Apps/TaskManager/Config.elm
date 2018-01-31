@@ -1,27 +1,31 @@
 module Apps.TaskManager.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Attribute)
 import Time exposing (Time)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Messages exposing (..)
-import Apps.TaskManager.Menu.Config as Menu
 
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , processes : Processes.Model
     , lastTick : Time
-    , batchMsg : List msg -> msg
+    , menuAttr : ContextMenuAttribute msg
     , onPauseProcess : Processes.ID -> msg
     , onResumeProcess : Processes.ID -> msg
     , onRemoveProcess : Processes.ID -> msg
     }
 
 
-menuConfig : Config msg -> Menu.Config msg
-menuConfig config =
-    { toMsg = MenuMsg >> config.toMsg
-    , batchMsg = config.batchMsg
-    , onPauseProcess = config.onPauseProcess
-    , onResumeProcess = config.onResumeProcess
-    , onRemoveProcess = config.onRemoveProcess
-    }
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

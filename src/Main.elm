@@ -1,11 +1,11 @@
 module Main exposing (init, main)
 
 import Html
-import Core.Subscriptions exposing (..)
-import Core.Messages exposing (..)
-import Core.Models exposing (..)
-import Core.Update exposing (..)
-import Core.View exposing (..)
+import Core.Subscriptions exposing (subscriptions)
+import Core.Messages exposing (Msg)
+import Core.Models as Core exposing (Model)
+import Core.Update exposing (update)
+import Core.View exposing (view)
 import Core.Flags as Core
 
 
@@ -22,26 +22,11 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init { seed, apiHttpUrl, apiWsUrl, version } =
-    let
-        flags =
-            Core.initFlags apiHttpUrl apiWsUrl version
-
-        model =
-            initialModel seed flags
-    in
-        ( model, Cmd.none )
+    Core.init seed <| Core.initFlags apiHttpUrl apiWsUrl version
 
 
 main : Program Flags Model Msg
 main =
-    {- Toggle comment below to switch on/off TimeTravel debugger. It's a great
-       option to debug changes on models (and quickly go back in time to apply
-       new changes), but it makes the UI quite sluggish, specially when dragging
-       windows, since it has to track all messages. In short, we recommend using
-       TimeTravel only when debugging specific models.
-
-    -}
-    -- TimeTravel.programWithFlags
     Html.programWithFlags
         { init = init
         , view = view

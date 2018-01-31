@@ -6,9 +6,6 @@ import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Models exposing (Model)
 import Apps.TaskManager.Messages as TaskManager exposing (Msg(..))
-import Apps.TaskManager.Menu.Messages as Menu
-import Apps.TaskManager.Menu.Update as Menu
-import Apps.TaskManager.Menu.Actions as Menu
 
 
 type alias UpdateResponse cmd =
@@ -22,38 +19,8 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            let
-                config_ =
-                    menuConfig config
-
-                ( model_, react ) =
-                    Menu.actionHandler config_ action model
-            in
-                ( model_, react )
-
-        MenuMsg msg ->
-            onMenuMsg config msg model
-
-        --- Every update
         Tick now ->
             onTick config now model
-
-
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
-onMenuMsg config msg model =
-    let
-        config_ =
-            menuConfig config
-
-        ( menu_, react ) =
-            Menu.update config_ msg model.menu
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, react )
 
 
 onTick : Config msg -> Time -> Model -> UpdateResponse msg
@@ -97,7 +64,6 @@ updateTasks config old =
             (increaseHistory up old.historyUp)
     in
         Model
-            old.menu
             historyCPU
             historyMem
             historyDown

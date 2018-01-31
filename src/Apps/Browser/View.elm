@@ -4,11 +4,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.CssHelpers
+import ContextMenu
 import Css exposing (pct, width, asPairs)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Models exposing (..)
-import Apps.Browser.Menu.View exposing (menuView, menuNav, menuTab)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.NotFound.View as NotFound
 import Apps.Browser.Pages.Home.View as Home
@@ -46,13 +46,9 @@ view config model =
         div
             [ class [ Window, Content, Client ]
             ]
-            [ viewTabs model
-                |> Html.map config.toMsg
-            , viewToolbar tab
-                |> Html.map config.toMsg
+            [ viewTabs config model
+            , viewToolbar config tab
             , viewPg config tab
-            , menuView model
-                |> Html.map config.toMsg
             ]
 
 
@@ -70,8 +66,8 @@ renderToolbarBtn active label callback =
         [ text label ]
 
 
-viewToolbar : Tab -> Html Msg
-viewToolbar browser =
+viewToolbar : Config msg -> Tab -> Html msg
+viewToolbar { menuAttr, toMsg } browser =
     let
         btnClass lengthFn =
             if (lengthFn browser) > 0 then
@@ -82,20 +78,20 @@ viewToolbar browser =
         genBtn lengthFn action label =
             div
                 [ class <| btnClass lengthFn
-                , onClick action
+                , onClick <| toMsg action
                 ]
                 [ text label ]
 
         prevBtn =
             genBtn
                 ((.previousPages) >> List.length)
-                (ActiveTabMsg <| GoPrevious)
+                (ActiveTabMsg GoPrevious)
                 "<"
 
         nextBtn =
             genBtn
                 ((.nextPages) >> List.length)
-                (ActiveTabMsg <| GoNext)
+                (ActiveTabMsg GoNext)
                 ">"
 
         goBtn =
@@ -103,10 +99,27 @@ viewToolbar browser =
                 ((.addressBar) >> String.length)
                 (ActiveTabMsg <| GoAddress browser.addressBar)
                 "%"
+
+        menuNav =
+            menuAttr
+                [ [ ( ContextMenu.item "Previous", toMsg <| ActiveTabMsg GoPrevious )
+                  , ( ContextMenu.item "Next", toMsg <| ActiveTabMsg GoNext )
+                  , browser.addressBar
+                        |> GoAddress
+                        |> ActiveTabMsg
+                        |> toMsg
+                        |> (,) (ContextMenu.item "Go")
+                  , "about:home"
+                        |> GoAddress
+                        |> ActiveTabMsg
+                        |> toMsg
+                        |> (,) (ContextMenu.item "Home")
+                  ]
+                ]
     in
         div
-            [ menuNav
-            , class [ Toolbar ]
+            [ class [ Toolbar ]
+            , menuNav
             ]
             [ prevBtn
             , nextBtn
@@ -117,11 +130,15 @@ viewToolbar browser =
                     [ browser.addressBar
                         |> GoAddress
                         |> ActiveTabMsg
+                        |> toMsg
                         |> onSubmit
                     ]
                     [ input
                         [ value browser.addressBar
-                        , onInput (ActiveTabMsg << UpdateAddress)
+                        , UpdateAddress
+                            >> ActiveTabMsg
+                            >> toMsg
+                            |> onInput
                         ]
                         []
                     ]
@@ -129,22 +146,31 @@ viewToolbar browser =
             ]
 
 
-viewTabLabel : Tabs -> Bool -> Int -> ( List (Attribute Msg), List (Html Msg) )
-viewTabLabel src _ tab =
+viewTabLabel : Config msg -> Tabs -> Bool -> Int -> ( List (Attribute msg), List (Html msg) )
+viewTabLabel config src _ tab =
     getTab tab src
         |> getPage
         |> getTitle
         |> text
         |> List.singleton
-        |> (,) [ menuTab tab ]
+        |> (,) [ menuTab config tab ]
 
 
-viewTabs : Model -> Html Msg
-viewTabs b =
+menuTab : Config msg -> Int -> Attribute msg
+menuTab { menuAttr, toMsg } tab =
+    [ [ ( ContextMenu.item "New Tab", toMsg NewTab )
+      , ( ContextMenu.item "Close", toMsg <| DeleteTab tab )
+      ]
+    ]
+        |> menuAttr
+
+
+viewTabs : Config msg -> Model -> Html msg
+viewTabs config b =
     hzTabs
         ((==) b.nowTab)
-        (viewTabLabel b.tabs)
-        ChangeTab
+        (viewTabLabel config b.tabs)
+        (config.toMsg << ChangeTab)
         (b.leftTabs ++ (b.nowTab :: b.rightTabs))
 
 

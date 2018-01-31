@@ -6,9 +6,6 @@ import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Tabs exposing (..)
 import Apps.DBAdmin.Messages as DBAdmin exposing (Msg(..))
-import Apps.DBAdmin.Menu.Messages as Menu
-import Apps.DBAdmin.Menu.Update as Menu
-import Apps.DBAdmin.Menu.Actions as Menu
 import Apps.DBAdmin.Tabs.Servers.Helpers as Servers
 
 
@@ -23,18 +20,6 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        -- -- Context
-        MenuMsg (Menu.MenuClick action) ->
-            let
-                config_ =
-                    menuConfig config
-            in
-                Menu.actionHandler config_ action model
-
-        MenuMsg msg ->
-            onMenuMsg config msg model
-
-        -- -- Real acts
         ToogleExpand tab itemId ->
             onToogleExpand tab itemId model
 
@@ -58,21 +43,6 @@ update config msg model =
 
         _ ->
             ( model, React.none )
-
-
-onMenuMsg : Config msg -> Menu.Msg -> Model -> UpdateResponse msg
-onMenuMsg config msg model =
-    let
-        config_ =
-            menuConfig config
-
-        ( menu_, react ) =
-            Menu.update config_ msg model.menu
-
-        model_ =
-            { model | menu = menu_ }
-    in
-        ( model_, react )
 
 
 onToogleExpand : MainTab -> ID -> Model -> UpdateResponse msg

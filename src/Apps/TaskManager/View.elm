@@ -1,5 +1,6 @@
 module Apps.TaskManager.View exposing (view)
 
+import ContextMenu
 import Time exposing (Time)
 import Html exposing (..)
 import Html.CssHelpers
@@ -11,21 +12,14 @@ import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
-import Apps.TaskManager.Menu.View exposing (..)
 
 
 view : Config msg -> Model -> Html msg
 view config model =
-    let
-        config_ =
-            menuConfig config
-    in
-        Html.map config.toMsg <|
-            div [ class [ MainLayout ] ]
-                [ viewTasksTable config
-                , viewTotalResources model
-                , menuView config_ model
-                ]
+    div [ class [ MainLayout ] ]
+        [ viewTasksTable config
+        , viewTotalResources model
+        ]
 
 
 
@@ -36,12 +30,7 @@ view config model =
     Html.CssHelpers.withNamespace prefix
 
 
-maybe : Maybe (Html Msg) -> Html Msg
-maybe =
-    Maybe.withDefault <| text ""
-
-
-viewTaskRowUsage : Processes.ResourcesUsage -> Html Msg
+viewTaskRowUsage : Processes.ResourcesUsage -> Html msg
 viewTaskRowUsage usage =
     let
         un =
@@ -55,7 +44,7 @@ viewTaskRowUsage usage =
             ]
 
 
-etaBar : Time -> Float -> Html Msg
+etaBar : Time -> Float -> Html msg
 etaBar secondsLeft progress =
     let
         formattedTime =
@@ -75,7 +64,7 @@ syncProgress now lastSync remaining lastProgress =
             + lastProgress
 
 
-viewState : Time -> Time -> Processes.Process -> Html Msg
+viewState : Time -> Time -> Processes.Process -> Html msg
 viewState now lastRecalc proc =
     case Processes.getState proc of
         Processes.Starting ->
@@ -101,10 +90,9 @@ viewState now lastRecalc proc =
                         timeLeft
                         lastProgress
             in
-                maybe <|
-                    Maybe.map2 etaBar
-                        timeLeft
-                        progress
+                progress
+                    |> Maybe.map2 etaBar timeLeft
+                    |> Maybe.withDefault (text "")
 
         Processes.Paused ->
             text "Paused"
@@ -120,7 +108,7 @@ viewState now lastRecalc proc =
             text "Completed (failure)"
 
 
-processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute Msg
+processMenu : Config msg -> ( Processes.ID, Processes.Process ) -> Attribute msg
 processMenu config ( id, process ) =
     let
         menu =
@@ -139,13 +127,44 @@ processMenu config ( id, process ) =
                 Processes.Partial _ ->
                     menuForPartial
     in
-        menu (menuConfig config) id
+        menu config id
+
+
+menuForRunning : Config msg -> Processes.ID -> Attribute msg
+menuForRunning { menuAttr, onPauseProcess, onRemoveProcess } pID =
+    menuAttr
+        [ [ ( ContextMenu.item "Pause", onPauseProcess pID )
+          , ( ContextMenu.item "Remove", onRemoveProcess pID )
+          ]
+        ]
+
+
+menuForPaused : Config msg -> Processes.ID -> Attribute msg
+menuForPaused { menuAttr, onResumeProcess, onRemoveProcess } pID =
+    menuAttr
+        [ [ ( ContextMenu.item "Resume", onResumeProcess pID )
+          , ( ContextMenu.item "Remove", onRemoveProcess pID )
+          ]
+        ]
+
+
+menuForComplete : Config msg -> Processes.ID -> Attribute msg
+menuForComplete { menuAttr, onRemoveProcess } pID =
+    menuAttr
+        [ [ ( ContextMenu.item "Remove", onRemoveProcess pID )
+          ]
+        ]
+
+
+menuForPartial : Config msg -> Processes.ID -> Attribute msg
+menuForPartial { menuAttr } _ =
+    menuAttr []
 
 
 viewTaskRow :
     Config msg
     -> ( Processes.ID, Processes.Process )
-    -> Html Msg
+    -> Html msg
 viewTaskRow config (( _, process ) as entry) =
     let
         lastRecalc =
@@ -156,9 +175,12 @@ viewTaskRow config (( _, process ) as entry) =
             process
                 |> Processes.getUsage
                 |> Maybe.map (viewTaskRowUsage)
-                |> maybe
+                |> Maybe.withDefault (text "")
     in
-        div [ class [ EntryDivision ], (processMenu config entry) ]
+        div
+            [ class [ EntryDivision ]
+            , processMenu config entry
+            ]
             [ div []
                 [ text <| Processes.getName process
                 , br [] []
@@ -173,7 +195,7 @@ viewTaskRow config (( _, process ) as entry) =
             ]
 
 
-viewTasksTable : Config msg -> Html Msg
+viewTasksTable : Config msg -> Html msg
 viewTasksTable config =
     let
         first =
@@ -193,7 +215,7 @@ viewTasksTable config =
             |> div [ class [ TaskTable ] ]
 
 
-viewGraphUsage : String -> String -> List Float -> Html Msg
+viewGraphUsage : String -> String -> List Float -> Html msg
 viewGraphUsage title color history =
     let
         sz =
@@ -212,7 +234,7 @@ viewGraphUsage title color history =
         lineGraph points color 50 True ( 3, 1 )
 
 
-viewTotalResources : Model -> Html Msg
+viewTotalResources : Model -> Html msg
 viewTotalResources { historyCPU, historyMem, historyDown, historyUp } =
     div [ class [ BottomGraphsRow ] ]
         [ viewGraphUsage "CPU" "green" historyCPU

@@ -1,7 +1,8 @@
 module OS.Config exposing (..)
 
+import ContextMenu
+import Html exposing (Html, Attribute)
 import Time exposing (Time)
-import Apps.Apps as Apps
 import Core.Flags exposing (Flags)
 import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
@@ -26,6 +27,7 @@ import OS.Console.Config as Console
 import OS.Header.Config as Header
 import OS.SessionManager.Config as SessionManager
 import OS.Toasts.Config as Toasts
+import Apps.Apps as Apps
 
 
 type alias Config msg =
@@ -42,6 +44,8 @@ type alias Config msg =
     , activeGateway : ( CId, Server )
     , isCampaign : Bool
     , lastTick : Time
+    , menuView : Html msg
+    , menuAttr : ContextMenuAttribute msg
     , onLogout : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
@@ -96,6 +100,7 @@ smConfig config =
         config.activeServer
             |> Tuple.second
             |> Servers.getEndpointCId
+    , menuAttr = config.menuAttr
     , onSetBounce = config.onSetBounce
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
@@ -128,22 +133,6 @@ smConfig config =
 headerConfig : Config msg -> Header.Config msg
 headerConfig config =
     { toMsg = HeaderMsg >> config.toMsg
-    , onLogout =
-        config.onLogout
-    , onSetGateway =
-        config.onSetGateway
-    , onSetEndpoint =
-        config.onSetEndpoint
-    , onSetContext =
-        config.onSetContext
-    , onSetBounce =
-        config.onSetBounce
-    , onReadAllAccountNotifications =
-        config.onReadAllAccountNotifications
-    , onReadAllServerNotifications =
-        config.onReadAllServerNotifications
-    , onSetActiveNIP =
-        config.onSetActiveNIP
     , bounces =
         Account.getBounces config.account
     , gateways =
@@ -179,6 +168,23 @@ headerConfig config =
         config.activeServer
             |> Tuple.second
             |> Servers.getActiveNIP
+    , menuAttr = config.menuAttr
+    , onLogout =
+        config.onLogout
+    , onSetGateway =
+        config.onSetGateway
+    , onSetEndpoint =
+        config.onSetEndpoint
+    , onSetContext =
+        config.onSetContext
+    , onSetBounce =
+        config.onSetBounce
+    , onReadAllAccountNotifications =
+        config.onReadAllAccountNotifications
+    , onReadAllServerNotifications =
+        config.onReadAllServerNotifications
+    , onSetActiveNIP =
+        config.onSetActiveNIP
     }
 
 
@@ -190,3 +196,15 @@ consoleConfig config =
 toastsConfig : Config msg -> Toasts.Config msg
 toastsConfig config =
     { toMsg = ToastsMsg >> config.toMsg }
+
+
+
+-- helpers
+
+
+type alias ContextMenuItens msg =
+    List (List ( ContextMenu.Item, msg ))
+
+
+type alias ContextMenuAttribute msg =
+    ContextMenuItens msg -> Attribute msg

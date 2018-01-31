@@ -1,6 +1,5 @@
 module Apps.TaskManager.Models exposing (..)
 
-import Apps.TaskManager.Menu.Models as Menu
 import Game.Shared exposing (ID)
 import Game.Servers.Processes.Models as Processes
 
@@ -10,8 +9,7 @@ type alias Entries =
 
 
 type alias Model =
-    { menu : Menu.Model
-    , historyCPU : List Float
+    { historyCPU : List Float
     , historyMem : List Float
     , historyDown : List Float
     , historyUp : List Float
@@ -35,8 +33,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , historyCPU = []
+    { historyCPU = []
     , historyMem = []
     , historyDown = []
     , historyUp = []

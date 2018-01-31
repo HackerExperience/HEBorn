@@ -24,7 +24,7 @@ view model =
             onSetup setup model
 
         Play play ->
-            onPlay play
+            onPlay play model
 
         Panic code message ->
             Panic.view code message
@@ -36,9 +36,8 @@ onSetup { game, setup } model =
         setup
 
 
-onPlay : PlayModel -> Html Msg
-onPlay { game, os } =
-    -- CONFREFACT: Get rid of `data`
+onPlay : PlayModel -> Model -> Html Msg
+onPlay { game, os } { contextMenu } =
     let
         volatile_ =
             ( Game.getGateway game
@@ -50,7 +49,7 @@ onPlay { game, os } =
     in
         case volatile_ of
             ( Just gtw, Just srv ) ->
-                OS.view (osConfig game srv ctx gtw) os
+                OS.view (osConfig game contextMenu srv ctx gtw) os
 
             ( Nothing, _ ) ->
                 "Player doesn't have a Gateway [View.play]"

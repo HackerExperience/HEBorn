@@ -15,9 +15,9 @@ import OS.Header.NetworkView as NetworkTongue
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> Model -> Html Msg
+view : Config msg -> Model -> Html msg
 view config model =
-    div [ class [ Header ] ]
+    div [ class [ Header ], config.menuAttr [] ]
         [ logo
         , ConnBar.view config model
         , Taskbar.view config model
@@ -29,7 +29,7 @@ view config model =
 -- internals
 
 
-logo : Html Msg
+logo : Html msg
 logo =
     div
         [ class [ Logo ] ]

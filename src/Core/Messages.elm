@@ -1,5 +1,6 @@
 module Core.Messages exposing (Msg(..), unroll)
 
+import ContextMenu
 import Json.Decode exposing (Value)
 import Game.Messages as Game
 import Game.Account.Models as Account
@@ -25,6 +26,11 @@ type Msg
     | OSMsg OS.Msg
     | WebsocketMsg Ws.Msg
     | LoadingEnd Int
+    | MenuMsg ContextMenuMagic
+
+
+type alias ContextMenuMagic =
+    ContextMenu.Msg (List (List ( ContextMenu.Item, Msg )))
 
 
 unroll : Msg -> List Msg

@@ -15,7 +15,6 @@ import Game.Account.Database.Models as Database
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
-import Apps.DBAdmin.Menu.View exposing (menuView, menuNormalEntry, menuEditingEntry, menuFilter)
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
 import Apps.DBAdmin.Tabs.Servers.Helpers exposing (..)
 
@@ -180,14 +179,6 @@ renderBottom app entry =
             data
 
 
-menuInclude : Model -> ( NIP, Database.HackedServer ) -> List (Attribute Msg)
-menuInclude app (( nip, _ ) as entry) =
-    if (isEntryEditing app entry) then
-        [ menuEditingEntry <| Network.toString nip ]
-    else
-        [ menuNormalEntry <| Network.toString nip ]
-
-
 renderEntry : Model -> ( NIP, Database.HackedServer ) -> Html Msg
 renderEntry app (( nip, _ ) as entry) =
     let
@@ -211,7 +202,7 @@ renderEntry app (( nip, _ ) as entry) =
     in
         toogableEntry
             (not editingState)
-            (menuInclude app entry)
+            []
             (ToogleExpand TabServers <| Network.toString nip)
             expandedState
             data
@@ -226,17 +217,16 @@ renderEntryList app entries =
 
 view : Database.Model -> Model -> Model -> Html Msg
 view database model app =
-    verticalList
-        ([ menuView model
-         , filterHeader
-            []
-            []
-            app.servers.filterText
-            "Search..."
-            (UpdateTextFilter TabServers)
-         ]
-            ++ (database.servers
-                    |> applyFilter app
-                    |> renderEntryList app
-               )
-        )
+    let
+        header =
+            filterHeader []
+                []
+                app.servers.filterText
+                "Search..."
+                (UpdateTextFilter TabServers)
+    in
+        database.servers
+            |> applyFilter app
+            |> renderEntryList app
+            |> (::) header
+            |> verticalList

@@ -2,7 +2,6 @@ module Apps.LogViewer.Models exposing (..)
 
 import Dict exposing (Dict)
 import Game.Servers.Logs.Models as Logs
-import Apps.LogViewer.Menu.Models as Menu
 
 
 type Sorting
@@ -10,8 +9,7 @@ type Sorting
 
 
 type alias Model =
-    { menu : Menu.Model
-    , filterText : String
+    { filterText : String
     , filterFlags : List Never
     , filterCache : List Logs.ID
     , sorting : Sorting
@@ -51,8 +49,7 @@ icon =
 
 initialModel : Model
 initialModel =
-    { menu = Menu.initialMenu
-    , filterText = ""
+    { filterText = ""
     , filterFlags = []
     , filterCache = []
     , sorting = DefaultSort
