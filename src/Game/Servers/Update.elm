@@ -143,7 +143,7 @@ handleSetBounce :
     -> Server
     -> ServerUpdateResponse msg
 handleSetBounce _ cid maybeBounceId server =
-    ( setBounce maybeBounceId server, React.none )
+    ( setActiveBounce server maybeBounceId, React.none )
 
 
 handleSetEndpoint :

@@ -143,7 +143,6 @@ customSelect =
                 ]
             ]
         , nest [ withClass SGateway, before ] [ Icons.gateway ]
-        , nest [ withClass SBounce, before ] [ Icons.bounce ]
         , nest [ withClass SEndpoint, before ] [ Icons.endpoint ]
         ]
 
@@ -249,6 +248,8 @@ connection =
     class Connection
         [ children
             [ customSelect
+            , sbounce
+            , bounceMenu
             , popup
             , contextSwitch
             ]
@@ -401,4 +402,148 @@ conditional =
                 , opacity (int 0)
                 ]
             ]
+        ]
+
+
+sbounce : Snippet
+sbounce =
+    class SBounce
+        [ clickableBox
+        , before [ Icons.fontFamily, Icons.bounce ]
+        , minWidth (px 120)
+        , maxWidth (px 120)
+        , textAlign center
+        , overflow hidden
+        , whiteSpace noWrap
+        , textOverflow ellipsis
+        ]
+
+
+bounceMenu : Snippet
+bounceMenu =
+    class BounceMenu
+        [ display none
+        , position absolute
+        , marginTop (px 35)
+        , border3 (px 1) solid Colors.black
+        , backgroundColor Colors.bgWindow
+        , flexDirection row
+        , width (px 500)
+        , height (px 200)
+        , zIndex (int 5)
+        , children
+            [ bounceMenuLeft
+            , bounceMenuRight
+            ]
+        , withClass Selected
+            [ displayFlex
+            ]
+        ]
+
+
+bounceMenuLeft : Snippet
+bounceMenuLeft =
+    class BounceMenuLeft
+        [ width (pct 25)
+        , displayFlex
+        , flexDirection column
+        , alignItems center
+        , borderRight3 (px 1) solid Colors.black
+        , children
+            [ bounceList
+            ]
+        , withClass Hidden [ display none ]
+        ]
+
+
+bounceMenuRight : Snippet
+bounceMenuRight =
+    class BounceMenuRight
+        [ displayFlex
+        , flexDirection column
+        , width (pct 75)
+        , children
+            [ bounceMembers
+            , bounceOptions
+            ]
+        , withClass ReadOnly
+            [ minWidth (pct 100)
+            , maxWidth (pct 100)
+            , minHeight (pct 100)
+            , maxHeight (pct 100)
+            ]
+        ]
+
+
+bounceList : Snippet
+bounceList =
+    class BounceList
+        [ displayFlex
+        , flexDirection column
+        , minHeight (pct 87.5)
+        , maxHeight (pct 87.5)
+        , overflowX hidden
+        , width (pct 100)
+        , children
+            [ bounceListEntry
+            ]
+        ]
+
+
+bounceListEntry : Snippet
+bounceListEntry =
+    class BounceListEntry
+        [ borderBottom3 (px 1) solid Colors.black
+        , width (pct 100)
+        , minHeight (px 32)
+        , maxHeight (px 32)
+        , textAlign center
+        , hover [ backgroundColor Colors.bgHover ]
+        ]
+
+
+bounceMember : Snippet
+bounceMember =
+    class BounceMember
+        []
+
+
+bounceMembers : Snippet
+bounceMembers =
+    class BounceMembers
+        [ displayFlex
+        , flexDirection row
+        , minWidth (pct 89.5)
+        , maxWidth (pct 89.5)
+        , minHeight (px 143)
+        , maxHeight (px 143)
+        , margin (px 16)
+        , overflowX auto
+        , children
+            [ bounceMember
+            ]
+        , withClass ReadOnly
+            [ minWidth (pct 100)
+            , maxWidth (pct 100)
+            , minHeight (pct 100)
+            , maxHeight (pct 100)
+            , margin (px 0)
+            ]
+        , withClass Empty
+            [ alignItems center
+            , justifyContent center
+            ]
+        ]
+
+
+bounceOptions : Snippet
+bounceOptions =
+    class BounceOptions
+        [ displayFlex
+        , justifyContent spaceBetween
+        , flex (int 0)
+        , width (pct 95)
+        , height (pct 12.5)
+        , padding2 (px 0) (px 8)
+        , withClass Hidden [ display none ]
         ]

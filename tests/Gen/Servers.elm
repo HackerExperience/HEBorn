@@ -118,7 +118,7 @@ genGatewayOwnership =
 
 genEndpointOwnership : Generator EndpointData
 genEndpointOwnership =
-    constant <| EndpointData Nothing Nothing
+    constant <| EndpointData Nothing
 
 
 genServer : Generator Server
@@ -151,6 +151,7 @@ genGenericServer genOwnserhip genHardware =
             , storages =
                 Dict.fromList [ ( "storage", Storage "Storage" fs ) ]
             , logs = logs
+            , bounce = Nothing
             , processes = proc
             , tunnels = Tunnels.initialModel
             , ownership =

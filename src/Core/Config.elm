@@ -48,6 +48,7 @@ import OS.Config as OS
 import OS.Messages as OS
 import OS.WindowManager.Shared as WindowManager
 import OS.WindowManager.Messages as WindowManager
+import OS.Header.Messages as Header
 import OS.Toasts.Messages as Toast
 import Apps.Browser.Messages as Browser
 import Apps.BounceManager.Messages as BounceManager
@@ -237,7 +238,7 @@ osConfig :
     -> Context
     -> ( CId, Server )
     -> OS.Config Msg
-osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
+osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
     { toMsg = OSMsg
     , batchMsg = BatchMsg
     , flags = Game.getFlags game
@@ -270,8 +271,14 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
         Account.HandleSetContext
             >> account
     , onSetBounce =
-        Servers.HandleSetBounce
-            >> server sCId
+        case Servers.getEndpointCId gSrv of
+            Just cid ->
+                Servers.HandleSetBounce
+                    >> server cid
+
+            Nothing ->
+                Servers.HandleSetBounce
+                    >> server gCId
     , onReadAllAccountNotifications =
         AccountNotifications.HandleReadAll
             |> accountNotif
@@ -339,6 +346,8 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
                 |> storyline
     , onWebLogout =
         \cid -> Servers.HandleLogout |> server cid
+    , onDropHeaderMenu =
+        OSMsg <| OS.HeaderMsg Header.DropMenu
     , accountId =
         game
             |> Game.getAccount
