@@ -14,6 +14,7 @@ import OS.Header.Messages exposing (Msg)
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , bounces : Bounces.Model
     , gateways : List CId
     , endpoints : List CId

@@ -55,6 +55,7 @@ server now gatewayCache =
         |> required "main_storage" string
         |> required "storages" storages
         |> logs
+        |> hardcoded Nothing
         |> processes now
         |> tunnels
         |> custom (ownership gatewayCache)
@@ -127,7 +128,6 @@ hardware =
 endpointOwnership : Decoder EndpointData
 endpointOwnership =
     decode EndpointData
-        |> hardcoded Nothing
         |> optionalMaybe "analyzed" analyzedEndpoint
 
 

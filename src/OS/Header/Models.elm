@@ -15,6 +15,7 @@ type OpenMenu
 type alias Model =
     { openMenu : OpenMenu
     , mouseSomewhereInside : Bool
+    , selectedBounce : Maybe String
     }
 
 
@@ -22,6 +23,7 @@ initialModel : Model
 initialModel =
     { openMenu = NothingOpen
     , mouseSomewhereInside = False
+    , selectedBounce = Nothing
     }
 
 

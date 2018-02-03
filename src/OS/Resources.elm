@@ -25,6 +25,16 @@ type Class
     | Empty
     | Toasts
     | Fading
+    | Hidden
+    | ReadOnly
+    | BounceMenu
+    | BounceMenuLeft
+    | BounceMenuRight
+    | BounceList
+    | BounceListEntry
+    | BounceMember
+    | BounceMembers
+    | BounceOptions
     | LogConsole
     | LogConsoleBox
     | LogConsoleHeader
