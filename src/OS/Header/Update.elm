@@ -3,7 +3,6 @@ module OS.Header.Update exposing (update)
 import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Servers.Shared as Servers
 import OS.Header.Messages exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Config exposing (..)
@@ -28,17 +27,14 @@ update config msg model =
         MouseLeavesDropdown ->
             onMouseLeavesDropdown model
 
-        SelectGateway cid ->
-            onSelectGateway config cid model
-
-        SelectBounce id ->
-            onSelectBounce config id model
-
-        SelectEndpoint cid ->
-            onSelectEndpoint config cid model
+        DropMenu ->
+            onDropMenu config model
 
         SelectNIP nip ->
             onSelectNIP config nip model
+
+        SelectBounce bounceId ->
+            onSelectBounce config bounceId model
 
         ContextTo context ->
             onContextTo config context model
@@ -96,28 +92,9 @@ onMouseLeavesDropdown model =
         ( model_, React.none )
 
 
-onSelectGateway : Config msg -> Servers.CId -> Model -> UpdateResponse msg
-onSelectGateway { onSetGateway, servers } cid model =
-    cid
-        |> onSetGateway
-        |> React.msg
-        |> (,) (dropMenu model)
-
-
-onSelectBounce : Config msg -> Maybe String -> Model -> UpdateResponse msg
-onSelectBounce { onSetBounce } id model =
-    id
-        |> onSetBounce
-        |> React.msg
-        |> (,) (dropMenu model)
-
-
-onSelectEndpoint : Config msg -> Maybe Servers.CId -> Model -> UpdateResponse msg
-onSelectEndpoint { onSetEndpoint } cid model =
-    cid
-        |> onSetEndpoint
-        |> React.msg
-        |> (,) (dropMenu model)
+onDropMenu : Config msg -> Model -> UpdateResponse msg
+onDropMenu { activeBounce } ({ openMenu } as model) =
+    ( dropMenu model, React.none )
 
 
 onContextTo : Config msg -> Context -> Model -> UpdateResponse msg
@@ -160,3 +137,18 @@ onSelectNIP { onSetActiveNIP } nip model =
         |> onSetActiveNIP
         |> React.msg
         |> (,) model
+
+
+onSelectBounce : Config msg -> Maybe String -> Model -> UpdateResponse msg
+onSelectBounce config bounceId model =
+    let
+        model_ =
+            case model.openMenu of
+                BounceOpen _ ->
+                    { model | openMenu = BounceOpen bounceId }
+
+                _ ->
+                    model
+    in
+        model_
+            |> flip (,) React.none

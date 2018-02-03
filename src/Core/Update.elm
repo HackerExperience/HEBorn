@@ -84,9 +84,12 @@ update msg model =
             let
                 ( menuModel, menuCmd ) =
                     ContextMenu.update msg model.contextMenu
+
+                cmd =
+                    Cmd.map MenuMsg menuCmd
             in
                 ( { model | contextMenu = menuModel }
-                , Cmd.map MenuMsg menuCmd
+                , cmd
                 )
 
         _ ->

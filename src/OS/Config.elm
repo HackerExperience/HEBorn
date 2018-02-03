@@ -79,6 +79,7 @@ type alias Config msg =
     , onReplyEmail : String -> Story.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
     , onWebLogout : CId -> msg
+    , onDropHeaderMenu : msg
     , accountId : String
     }
 
@@ -136,6 +137,7 @@ windowManagerConfig config =
 headerConfig : Config msg -> Header.Config msg
 headerConfig config =
     { toMsg = HeaderMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , bounces =
         Account.getBounces config.account
     , gateways =
@@ -160,7 +162,7 @@ headerConfig config =
     , activeBounce =
         config.activeServer
             |> Tuple.second
-            |> Servers.getBounce
+            |> flip Servers.getActiveBounce config.servers
     , activeContext =
         config.activeContext
     , serversNotifications =

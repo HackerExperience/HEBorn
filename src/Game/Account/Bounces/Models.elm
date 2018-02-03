@@ -39,10 +39,7 @@ initialModel =
 
 get : ID -> Model -> Maybe Bounce
 get id model =
-    if id == "" then
-        Just emptyBounce
-    else
-        Dict.get id model
+    Dict.get id model
 
 
 emptyBounce : Bounce
