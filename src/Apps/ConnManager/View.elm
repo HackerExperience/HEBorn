@@ -23,7 +23,7 @@ view : Config msg -> Model -> Html msg
 view config model =
     let
         filterHeaderLayout =
-            verticalList
+            verticalList []
                 [ filterHeader
                     [ ( class [ IcoUp ], FilterUp, False )
                     , ( class [ IcoDown ], FilterDown, False )
@@ -43,7 +43,7 @@ view config model =
                 |> .tunnels
                 |> Dict.toList
                 |> List.map (tunnelView nip)
-                |> verticalList
+                |> verticalList []
     in
         Html.map config.toMsg <|
             verticalSticked

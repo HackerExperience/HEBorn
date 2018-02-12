@@ -11,6 +11,9 @@ import Events.Account.Handlers.BankAccountClosed as BankAccountClosed
 import Events.Account.Handlers.DbAccountUpdated as DbAccountUpdated
 import Events.Account.Handlers.DbAccountRemoved as DbAccountRemoved
 import Events.Account.Handlers.TutorialFinished as TutorialFinished
+import Events.Account.Handlers.BounceCreated as BounceCreated
+import Events.Account.Handlers.BounceUpdated as BounceUpdated
+import Events.Account.Handlers.BounceRemoved as BounceRemoved
 import Events.Account.Config exposing (..)
 
 
@@ -46,6 +49,15 @@ events config name value =
 
         "tutorial_finished" ->
             TutorialFinished.handler config.onTutorialFinished value
+
+        "bounce_created" ->
+            BounceCreated.handler config.onBounceCreated value
+
+        "bounce_updated" ->
+            BounceUpdated.handler config.onBounceUpdated value
+
+        "bounce_removed" ->
+            BounceRemoved.handler config.onBounceRemoved value
 
         _ ->
             Err ""

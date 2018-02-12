@@ -27,7 +27,6 @@ import Json.Decode.Pipeline
 import Game.Account.Models as Account
 import Game.Inventory.Models as Inventory
 import Game.Servers.Models as Servers
-import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Models exposing (..)
 import Decoders.Account
