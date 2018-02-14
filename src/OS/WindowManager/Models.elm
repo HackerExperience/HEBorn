@@ -52,6 +52,7 @@ type alias App =
     { windowId : WindowId
     , serverCId : CId
     , model : AppModel
+    , context : Context
     }
 
 
@@ -88,7 +89,6 @@ type alias Window =
     { position : Position
     , size : Size
     , maximized : IsMaximized
-    , decorated : IsDecorated
     , instance : Instance
     , originSessionId : SessionId
     }
@@ -588,13 +588,15 @@ setContext context window =
             { window | instance = Double context appId maybeAppId }
 
 
+setInstance : Instance -> Window -> Window
+setInstance instance window =
+    { window | instance = instance }
+
+
 hasMultipleContext : Window -> Bool
 hasMultipleContext window =
     case getInstance window of
         Single _ _ ->
-            False
-
-        Double _ _ Nothing ->
             False
 
         Double _ _ _ ->
@@ -604,11 +606,6 @@ hasMultipleContext window =
 isMaximized : Window -> Bool
 isMaximized =
     .maximized
-
-
-hasDecoration : Window -> Bool
-hasDecoration =
-    .decorated
 
 
 isSession : SessionId -> Window -> Bool

@@ -1,4 +1,4 @@
-module OS.WindowManager.Launch exposing (launch)
+module OS.WindowManager.Launch exposing (launch, launchSecondary)
 
 import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
@@ -37,165 +37,234 @@ import OS.WindowManager.Shared exposing (..)
 launch :
     Config msg
     -> DesktopApp
-    -> Maybe Context
     -> Maybe AppParams
+    -> Maybe Context
     -> Model
     -> ( Model, React msg )
-launch config desktopApp maybeContext maybeParams model =
+launch config desktopApp maybeParams maybeContext model =
     let
-        ( model1, windowId ) =
-            newWindowId model
-
-        contexts =
+        appContext =
             Apps.context desktopApp
 
         context =
-            getAppActiveContext config maybeContext contexts
+            getAppActiveContext config maybeContext appContext
 
-        launchGateway =
-            case context of
-                Gateway ->
-                    launchApp config Gateway windowId desktopApp maybeParams
+        getParams context_ =
+            if context == context_ then
+                maybeParams
+            else
+                Nothing
 
-                Endpoint ->
-                    launchApp config Gateway windowId desktopApp Nothing
+        ( model1, windowId ) =
+            newWindowId model
 
-        launchEndpoint =
-            case context of
-                Gateway ->
-                    launchApp config Endpoint windowId desktopApp Nothing
+        ( model2, instance ) =
+            createInstance config desktopApp context model1
 
-                Endpoint ->
-                    launchApp config Endpoint windowId desktopApp maybeParams
+        handleApp ( appId, ( app, react ) ) ( model, react_ ) =
+            ( insertApp appId app model
+            , React.batch config.batchMsg [ react_, react ]
+            )
 
-        ( model2, mainAppId, react1 ) =
-            case contexts of
-                Apps.DynamicContext ->
-                    launchGateway model1
-
-                Apps.StaticContext Gateway ->
-                    launchGateway model1
-
-                Apps.StaticContext Endpoint ->
-                    launchEndpoint model1
-
-        ( model3, maybeOtherAppId, react2 ) =
-            case contexts of
-                Apps.DynamicContext ->
-                    let
-                        ( m, i, r ) =
-                            launchEndpoint model2
-                    in
-                        ( m, Just i, r )
-
-                Apps.StaticContext _ ->
-                    ( model2, Nothing, React.none )
-
-        instance =
-            case contexts of
-                Apps.DynamicContext ->
-                    Double context mainAppId maybeOtherAppId
-
-                Apps.StaticContext _ ->
-                    Single context mainAppId
-
-        hasDecoration =
-            case Maybe.map getModel <| getApp mainAppId model3 of
-                Just appModel ->
-                    isDecorated appModel
-
-                Nothing ->
-                    True
-
-        sessionId =
-            getSessionId config
-
-        maybePosition =
-            model
-                |> getSession sessionId
-                |> getFocusing
-                |> Maybe.andThen (flip getWindow model)
-                |> Maybe.map getPosition
-
-        position =
-            case maybePosition of
-                Just { x, y } ->
-                    Position (x + 32) (y + 32)
-
-                Nothing ->
-                    Position 32 (44 + 32)
-
-        window =
-            { position = position
-            , size = (uncurry Size <| Apps.windowInitSize desktopApp)
-            , maximized = False
-            , decorated = hasDecoration
-            , instance = instance
-            , originSessionId = sessionId
-            }
+        ( model_, react ) =
+            instance
+                |> launchInstance config desktopApp getParams windowId
+                |> List.foldl handleApp ( model, React.none )
     in
-        ( insert windowId window model3
-        , React.batch config.batchMsg [ react1, react2 ]
-        )
+        ( newWindow config windowId desktopApp instance model_, react )
+
+
+launchSecondary :
+    Config msg
+    -> WindowId
+    -> DesktopApp
+    -> Model
+    -> ( Model, React msg )
+launchSecondary config windowId desktopApp model =
+    let
+        ( model1, endpointAppId ) =
+            newAppId model
+
+        maybeWindow =
+            getWindow windowId model
+
+        maybeInstance =
+            case Maybe.map getInstance maybeWindow of
+                Just (Double _ appId Nothing) ->
+                    Just <| Double Endpoint appId (Just endpointAppId)
+
+                maybeInstance ->
+                    maybeInstance
+
+        maybeWindow_ =
+            maybeWindow
+                |> Maybe.uncurry maybeInstance
+                |> Maybe.map (uncurry setInstance)
+
+        maybeAppReact =
+            launchEndpoint config
+                windowId
+                endpointAppId
+                desktopApp
+                Nothing
+    in
+        case Maybe.uncurry maybeWindow_ maybeAppReact of
+            Just ( window, ( app, react ) ) ->
+                ( model
+                    |> insertApp endpointAppId app
+                    |> insertWindow windowId window
+                , react
+                )
+
+            Nothing ->
+                React.update model
 
 
 
 -- internals
 
 
-launchApp :
+launchInstance :
     Config msg
-    -> Context
-    -> WindowId
     -> DesktopApp
-    -> Maybe AppParams
-    -> Model
-    -> ( Model, AppId, React msg )
-launchApp config context windowId desktopApp maybeParams model =
+    -> (Context -> Maybe AppParams)
+    -> WindowId
+    -> Instance
+    -> List ( AppId, ( App, React msg ) )
+launchInstance config desktopApp getParams windowId instance =
     let
-        activeServer =
-            case context of
-                Gateway ->
-                    config.activeGateway
+        gateway appId =
+            Gateway
+                |> getParams
+                |> launchGateway config
+                    windowId
+                    appId
+                    desktopApp
+                |> (,) appId
 
-                Endpoint ->
-                    case config.endpointCId of
-                        Just id ->
-                            config.servers
-                                |> Servers.get id
-                                |> Maybe.map ((,) id)
-                                |> Maybe.withDefault config.activeServer
+        endpoint appId =
+            Endpoint
+                |> getParams
+                |> launchEndpoint config
+                    windowId
+                    appId
+                    desktopApp
+                |> Maybe.map ((,) appId)
 
-                        Nothing ->
-                            -- this may
-                            config.activeServer
+        maybeCons x xs =
+            case x of
+                Just x ->
+                    x :: xs
 
-        ( model_, appId ) =
-            newAppId model
-
-        ( appModel, react ) =
-            delegateLaunch config
-                activeServer
-                windowId
-                appId
-                desktopApp
-                maybeParams
-
-        app =
-            App windowId (Tuple.first activeServer) appModel
+                Nothing ->
+                    xs
     in
-        ( insertApp appId app model_, appId, react )
+        case instance of
+            Double context appId1 (Just appId2) ->
+                maybeCons (endpoint appId1) [ gateway appId1 ]
+
+            Double context appId Nothing ->
+                [ gateway appId ]
+
+            Single Gateway appId ->
+                [ gateway appId ]
+
+            Single Endpoint appId ->
+                maybeCons (endpoint appId) []
 
 
-delegateLaunch :
+launchGateway :
     Config msg
-    -> ( CId, Server )
     -> WindowId
     -> AppId
     -> DesktopApp
     -> Maybe AppParams
+    -> ( App, React msg )
+launchGateway config windowId appId desktopApp maybeParams =
+    launchForServer config
+        windowId
+        appId
+        desktopApp
+        maybeParams
+        config.activeGateway
+
+
+launchEndpoint :
+    Config msg
+    -> WindowId
+    -> AppId
+    -> DesktopApp
+    -> Maybe AppParams
+    -> Maybe ( App, React msg )
+launchEndpoint config windowId appId desktopApp maybeParams =
+    case config.endpointCId of
+        Just cid ->
+            launchForCId config
+                windowId
+                appId
+                desktopApp
+                maybeParams
+                cid
+
+        Nothing ->
+            Nothing
+
+
+launchForCId :
+    Config msg
+    -> WindowId
+    -> AppId
+    -> DesktopApp
+    -> Maybe AppParams
+    -> CId
+    -> Maybe ( App, React msg )
+launchForCId config windowId appId desktopApp maybeParams cid =
+    case Servers.get cid config.servers of
+        Just server ->
+            ( cid, server )
+                |> launchForServer config
+                    windowId
+                    appId
+                    desktopApp
+                    maybeParams
+                |> Just
+
+        Nothing ->
+            Nothing
+
+
+launchForServer :
+    Config msg
+    -> WindowId
+    -> AppId
+    -> DesktopApp
+    -> Maybe AppParams
+    -> ( CId, Server )
+    -> ( App, React msg )
+launchForServer config windowId appId desktopApp maybeParams activeServer =
+    let
+        ( appModel, react ) =
+            delegateLaunch config
+                windowId
+                appId
+                desktopApp
+                maybeParams
+                activeServer
+    in
+        ( createApp config windowId appModel activeServer
+        , react
+        )
+
+
+delegateLaunch :
+    Config msg
+    -> WindowId
+    -> AppId
+    -> DesktopApp
+    -> Maybe AppParams
+    -> ( CId, Server )
     -> ( AppModel, React msg )
-delegateLaunch config ( cid, svr ) winId appId dApp params =
+delegateLaunch config winId appId dApp params ( cid, svr ) =
     case dApp of
         DesktopApp.BackFlix ->
             ( BackFlixModel BackFlix.initialModel
@@ -312,22 +381,100 @@ launchLocationPicker config windowId appId =
 
 
 
--- helpers
+------ helpers
+
+
+newWindow :
+    Config msg
+    -> WindowId
+    -> DesktopApp
+    -> Instance
+    -> Model
+    -> Model
+newWindow config windowId desktopApp instance model =
+    let
+        sessionId =
+            getSessionId config
+
+        maybePosition =
+            model
+                |> getSession sessionId
+                |> getFocusing
+                |> Maybe.andThen (flip getWindow model)
+                |> Maybe.map getPosition
+
+        position =
+            case maybePosition of
+                Just { x, y } ->
+                    Position (x + 32) (y + 32)
+
+                Nothing ->
+                    Position 32 (44 + 32)
+
+        window =
+            { position = position
+            , size = (uncurry Size <| Apps.windowInitSize desktopApp)
+            , maximized = False
+            , instance = instance
+            , originSessionId = sessionId
+            }
+    in
+        insert windowId window model
+
+
+createInstance :
+    Config msg
+    -> DesktopApp
+    -> Context
+    -> Model
+    -> ( Model, Instance )
+createInstance config desktopApp context model =
+    let
+        ( model1, appId1 ) =
+            newAppId model
+
+        ( model2, appId2 ) =
+            newAppId model1
+    in
+        case Apps.context desktopApp of
+            Apps.DynamicContext ->
+                case config.endpointCId of
+                    Just _ ->
+                        ( model2, Double context appId1 (Just appId2) )
+
+                    Nothing ->
+                        ( model1, Double context appId1 Nothing )
+
+            Apps.StaticContext context ->
+                ( model1, Single context appId1 )
+
+
+createApp : Config msg -> WindowId -> AppModel -> ( CId, Server ) -> App
+createApp config windowId appModel ( cid, server ) =
+    let
+        context =
+            if Servers.isGateway server then
+                Gateway
+            else
+                Endpoint
+    in
+        App windowId cid appModel context
 
 
 getAppActiveContext : Config msg -> Maybe Context -> AppContext -> Context
 getAppActiveContext config maybeContext appContext =
-    case maybeContext of
-        Just context ->
-            context
+    -- enforce app context rules but allow manipulating them when possible
+    case appContext of
+        Apps.DynamicContext ->
+            case maybeContext of
+                Just context ->
+                    context
 
-        Nothing ->
-            case appContext of
-                Apps.DynamicContext ->
+                Nothing ->
                     if config.activeServer == config.activeGateway then
                         Gateway
                     else
                         Endpoint
 
-                Apps.StaticContext context ->
-                    context
+        Apps.StaticContext context ->
+            context

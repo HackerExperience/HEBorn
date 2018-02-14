@@ -33,6 +33,7 @@ import Apps.LogViewer.View as LogViewer
 import Apps.ServersGears.View as ServersGears
 import Apps.TaskManager.View as TaskManager
 import Game.Meta.Types.Context as Context exposing (Context(..))
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId(..))
 import OS.Resources as OsRes
@@ -167,15 +168,24 @@ windowWrapper config model app window html =
         title =
             getTitle appModel
 
+        desktopApp =
+            toDesktopApp appModel
+
         icon =
-            Apps.icon <| toDesktopApp appModel
+            Apps.icon desktopApp
 
         content =
             div [ class [ Res.WindowBody ], config.menuAttr [] ] [ html ]
     in
         if hasDecorations then
             div attrs
-                [ header config title icon resizable (getWindowId app) window
+                [ header config
+                    title
+                    icon
+                    resizable
+                    desktopApp
+                    (getWindowId app)
+                    window
                 , content
                 ]
         else
@@ -188,10 +198,11 @@ header :
     -> String
     -> String
     -> Bool
+    -> DesktopApp
     -> WindowId
     -> Window
     -> Html msg
-header config title icon resizable windowId window =
+header config title icon resizable desktopApp windowId window =
     div
         [ Draggable.mouseTrigger windowId (DragMsg >> config.toMsg)
         , class [ Res.HeaderSuper ]
@@ -202,7 +213,7 @@ header config title icon resizable windowId window =
             , onMouseDown (config.toMsg <| UpdateFocus (Just windowId))
             ]
             [ headerTitle title icon
-            , headerContext config windowId window
+            , headerContext config desktopApp windowId window
             , headerButtons config resizable windowId
             ]
         ]
@@ -217,20 +228,36 @@ headerTitle title icon =
         [ text title ]
 
 
-headerContext : Config msg -> WindowId -> Window -> Html msg
-headerContext config windowId window =
-    let
-        content =
-            if hasMultipleContext window then
-                span
-                    [ class [ Res.HeaderContextSw ]
-                    , onClickMe <| config.toMsg (ToggleContext windowId)
-                    ]
-                    [ text <| Context.toString (getContext window) ]
-            else
-                text ""
-    in
-        div [] [ content ]
+headerContext : Config msg -> DesktopApp -> WindowId -> Window -> Html msg
+headerContext config desktopApp windowId window =
+    case config.endpointCId of
+        Just _ ->
+            case getInstance window of
+                Single _ _ ->
+                    text ""
+
+                Double _ _ Nothing ->
+                    div []
+                        [ span
+                            [ class [ Res.HeaderContextSw ]
+                            , onClickMe <|
+                                config.toMsg (LaunchEndpoint windowId desktopApp)
+                            ]
+                            [ text <| Context.toString (getContext window) ]
+                        ]
+
+                Double _ _ _ ->
+                    div []
+                        [ span
+                            [ class [ Res.HeaderContextSw ]
+                            , onClickMe <|
+                                config.toMsg (ToggleContext windowId)
+                            ]
+                            [ text <| Context.toString (getContext window) ]
+                        ]
+
+        Nothing ->
+            text ""
 
 
 headerButtons : Config msg -> Bool -> WindowId -> Html msg

@@ -58,3 +58,13 @@ getWindowGateway config model window =
         maybeAppId
             |> Maybe.andThen (flip getApp model)
             |> Maybe.andThen (getAppActiveServer config)
+
+
+isEndpointAvailable : Config msg -> Bool
+isEndpointAvailable config =
+    case config.endpointCId of
+        Just _ ->
+            True
+
+        Nothing ->
+            False

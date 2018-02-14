@@ -45,10 +45,13 @@ update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
         NewApp desktopApp maybeContext maybeParams ->
-            launch config desktopApp maybeContext maybeParams model
+            launch config desktopApp maybeParams maybeContext model
 
         OpenApp cid params ->
             onOpenApp config cid params model
+
+        LaunchEndpoint windowId desktopApp ->
+            launchSecondary config windowId desktopApp model
 
         -- window handling
         Close wId ->
@@ -137,7 +140,7 @@ onOpenApp config cid params model =
                 updateAppParams config appId params model
 
             Nothing ->
-                launch config desktopApp maybeContext (Just params) model
+                launch config desktopApp (Just params) maybeContext model
 
 
 withSession :
@@ -202,7 +205,7 @@ onClickIcon config desktopApp model =
             openOrRestoreApp desktopApp sessionId model
     in
         if shouldLaunch then
-            launch config desktopApp (Just context) Nothing model_
+            launch config desktopApp Nothing (Just context) model_
         else
             React.update model_
 
