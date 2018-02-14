@@ -50,8 +50,8 @@ update config msg model =
         OpenApp cid params ->
             onOpenApp config cid params model
 
-        LaunchEndpoint windowId desktopApp ->
-            launchSecondary config windowId desktopApp model
+        LazyLaunchEndpoint windowId desktopApp ->
+            lazyLaunchEndpoint config windowId desktopApp model
 
         -- window handling
         Close wId ->

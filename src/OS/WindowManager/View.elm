@@ -240,8 +240,9 @@ headerContext config desktopApp windowId window =
                     div []
                         [ span
                             [ class [ Res.HeaderContextSw ]
-                            , onClickMe <|
-                                config.toMsg (LaunchEndpoint windowId desktopApp)
+                            , LazyLaunchEndpoint windowId desktopApp
+                                |> config.toMsg
+                                |> onClickMe
                             ]
                             [ text <| Context.toString (getContext window) ]
                         ]
