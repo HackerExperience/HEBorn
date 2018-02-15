@@ -6,8 +6,8 @@ import Landing.Style as Landing
 import UI.Style as UI
 import Setup.Style as Setup
 import OS.Style as OS
-import OS.SessionManager.WindowManager.Style as WindowManager
-import OS.SessionManager.Dock.Style as Dock
+import OS.WindowManager.Style as WindowManager
+import OS.WindowManager.Dock.Style as Dock
 import Apps.Style as Apps
 
 

@@ -9,10 +9,10 @@ import Game.Web.Requests as Requests
 import Game.Web.Requests.DNS as DNS
 import Game.Web.Models exposing (..)
 import Json.Encode as Encode
-import Game.Servers.Shared as Servers
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Models as Servers
 import Game.Meta.Types.Network as Network
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 
 
 type alias UpdateResponse msg =
@@ -22,8 +22,8 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        Login nip ip password data ->
-            onLogin config nip ip password data model
+        Login cid nip ip password data ->
+            onLogin config cid nip ip password data model
 
         Request data ->
             updateRequest config (Requests.receive data) model
@@ -79,13 +79,14 @@ updateRequest { onDNS } response model =
 -}
 onLogin :
     Config msg
+    -> CId
     -> Network.NIP
     -> Network.IP
     -> String
     -> Requester
     -> Model
     -> UpdateResponse msg
-onLogin config nip remoteIp password requester model =
+onLogin config cid nip remoteIp password requester model =
     let
         gatewayIp =
             Network.getIp nip
@@ -103,7 +104,7 @@ onLogin config nip remoteIp password requester model =
                 ]
 
         model_ =
-            startLoading remoteNip requester model
+            startLoading remoteNip cid requester model
 
         react =
             (Just payload)
@@ -131,11 +132,11 @@ onJoinedServer config cid model =
                         |> Error.notInServers
                         |> uncurry Native.Panic.crash
 
-        ( maybeRequester, model_ ) =
+        ( maybeCIdReq, model_ ) =
             finishLoading nip model
 
         serverCid =
-            Maybe.map (.sessionId >> Servers.fromKey) maybeRequester
+            Maybe.map Tuple.first maybeCIdReq
 
         react =
             case serverCid of
@@ -163,8 +164,11 @@ handleJoinFailed config cid model =
                         |> Error.porra
                         |> uncurry Native.Panic.crash
 
-        ( maybeRequester, model_ ) =
+        ( maybeCIdReq, model_ ) =
             finishLoading nip model
+
+        maybeRequester =
+            Maybe.map Tuple.second maybeCIdReq
 
         react =
             case maybeRequester of

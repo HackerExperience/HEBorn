@@ -36,7 +36,7 @@ update config msg model =
         Close ->
             onClose config model
 
-        LaunchApp _ params ->
+        LaunchApp params ->
             onLaunchApp config params model
 
 

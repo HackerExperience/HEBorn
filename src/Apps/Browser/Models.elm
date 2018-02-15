@@ -2,10 +2,10 @@ module Apps.Browser.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
+import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Web.Types as Web
-import Apps.Reference exposing (..)
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter

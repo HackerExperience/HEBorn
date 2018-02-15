@@ -11,7 +11,7 @@ import Json.Decode as Decode
         )
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Account.Dock.Models exposing (..)
-import Apps.Apps as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 dock : Decoder Model
@@ -21,47 +21,47 @@ dock =
         |> list
 
 
-app : String -> Decoder Apps.App
+app : String -> Decoder DesktopApp
 app str =
     case str of
         "browser" ->
-            succeed Apps.BrowserApp
+            succeed DesktopApp.Browser
 
         "explorer" ->
-            succeed Apps.ExplorerApp
+            succeed DesktopApp.Explorer
 
         "logvw" ->
-            succeed Apps.LogViewerApp
+            succeed DesktopApp.LogViewer
 
         "taskmngr" ->
-            succeed Apps.TaskManagerApp
+            succeed DesktopApp.TaskManager
 
         "db" ->
-            succeed Apps.DatabaseApp
+            succeed DesktopApp.DBAdmin
 
         "connmngr" ->
-            succeed Apps.ConnManagerApp
+            succeed DesktopApp.ConnManager
 
         "bouncemngr" ->
-            succeed Apps.BounceManagerApp
+            succeed DesktopApp.BounceManager
 
         "finances" ->
-            succeed Apps.FinanceApp
+            succeed DesktopApp.Finance
 
         "hebamp" ->
-            succeed Apps.MusicApp
+            succeed DesktopApp.Music
 
         "ctrlpnl" ->
-            succeed Apps.CtrlPanelApp
+            succeed DesktopApp.CtrlPanel
 
         "srvsgrs" ->
-            succeed Apps.ServersGearsApp
+            succeed DesktopApp.ServersGears
 
         "lanvw" ->
-            succeed Apps.LanViewerApp
+            succeed DesktopApp.LanViewer
 
         "emails" ->
-            succeed Apps.EmailApp
+            succeed DesktopApp.Email
 
         error ->
             fail <| commonError "app_type" error

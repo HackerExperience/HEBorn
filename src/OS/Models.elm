@@ -1,12 +1,12 @@
 module OS.Models exposing (..)
 
-import OS.SessionManager.Models as SessionManager
+import OS.WindowManager.Models as WindowManager
 import OS.Header.Models as Header
 import OS.Toasts.Models as Toasts
 
 
 type alias Model =
-    { session : SessionManager.Model
+    { windowManager : WindowManager.Model
     , header : Header.Model
     , toasts : Toasts.Model
     }
@@ -14,20 +14,20 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { session = SessionManager.initialModel
+    { windowManager = WindowManager.initialModel
     , header = Header.initialModel
     , toasts = Toasts.initialModel
     }
 
 
-getSessionManager : Model -> SessionManager.Model
-getSessionManager =
-    .session
+getWindowManager : Model -> WindowManager.Model
+getWindowManager =
+    .windowManager
 
 
-setSessionManager : SessionManager.Model -> Model -> Model
-setSessionManager sm model =
-    { model | session = sm }
+setWindowManager : WindowManager.Model -> Model -> Model
+setWindowManager windowManager model =
+    { model | windowManager = windowManager }
 
 
 getHeader : Model -> Header.Model
@@ -38,3 +38,13 @@ getHeader =
 setHeader : Header.Model -> Model -> Model
 setHeader header model =
     { model | header = header }
+
+
+getToasts : Model -> Toasts.Model
+getToasts =
+    .toasts
+
+
+setToasts : Toasts.Model -> Model -> Model
+setToasts toasts model =
+    { model | toasts = toasts }

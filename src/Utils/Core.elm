@@ -22,3 +22,9 @@ infixl 9 >>>>
 (>>>>>) f g a b c d =
     g (f a b c d)
 infixl 9 >>>>>
+
+
+(>>>>>>) : (a -> b -> c -> d -> e -> f) -> (f -> g) -> (a -> b -> c -> d -> e -> g)
+(>>>>>>) f g a b c d e =
+    g (f a b c d e)
+infixl 9 >>>>>>

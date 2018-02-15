@@ -7,7 +7,7 @@ import Css.Icons as Icon
 import Css.Utils exposing (..)
 import Css.Common exposing (..)
 import UI.Colors as Color
-import OS.SessionManager.WindowManager.Resources as WM
+import OS.WindowManager.Resources as WM
 import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
 
 

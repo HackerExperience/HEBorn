@@ -34,7 +34,7 @@ import Requests.Types exposing (FlagsSource, Code(..))
 import Decoders.Network
 import Decoders.Filesystem
 import Game.Servers.Shared as Servers
-import Game.Meta.Types.Requester exposing (Requester)
+import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Web.Types exposing (..)
 import Game.Web.Messages exposing (..)

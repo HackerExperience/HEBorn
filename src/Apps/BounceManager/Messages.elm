@@ -25,7 +25,7 @@ type Msg
     | Reset ( Maybe Bounces.ID, Bounces.Bounce )
     | Delete (Maybe Bounces.ID)
     | ToggleExpand String
-    | LaunchApp Context Params
+    | LaunchApp Params
     | CreateRequest (Maybe Bounces.CreateError)
     | UpdateRequest (Maybe Bounces.UpdateError)
     | RemoveRequest (Maybe Bounces.RemoveError)

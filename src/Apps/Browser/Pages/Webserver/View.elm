@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
-import Apps.Apps as Apps
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Webserver.Config exposing (Config)
 import Apps.Browser.Pages.Webserver.Messages exposing (Msg(..))
@@ -43,10 +43,10 @@ hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
     , onNewApp = onNewApp
     , onSetShowingPanel = SetShowingPanel >> toMsg
     , apps =
-        [ Apps.TaskManagerApp
-        , Apps.ConnManagerApp
-        , Apps.LogViewerApp
-        , Apps.ExplorerApp
+        [ DesktopApp.TaskManager
+        , DesktopApp.ConnManager
+        , DesktopApp.LogViewer
+        , DesktopApp.Explorer
         ]
     , allowAnyMap = True
     , allowSelectEndpoint = True

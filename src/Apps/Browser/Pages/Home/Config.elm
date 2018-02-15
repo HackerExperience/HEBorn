@@ -1,11 +1,11 @@
 module Apps.Browser.Pages.Home.Config exposing (Config)
 
 import Game.Meta.Types.Context exposing (Context)
-import Apps.Apps as Apps
+import Apps.Params as AppParams exposing (AppParams)
 
 
 type alias Config msg =
     { onNewTabIn : String -> msg
     , onGoAddress : String -> msg
-    , onOpenApp : Maybe Context -> Apps.AppParams -> msg
+    , onOpenApp : AppParams -> msg
     }
