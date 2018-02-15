@@ -93,7 +93,7 @@ viewSession config model { visible, focusing } =
         mapFun windowId =
             model
                 |> getWindow windowId
-                |> Maybe.map (viewWindow config model)
+                |> Maybe.map (viewWindow config model windowId)
                 |> Maybe.withDefault (text "")
                 |> (,) windowId
     in
@@ -105,8 +105,8 @@ viewSession config model { visible, focusing } =
 -- window decoration and state handling
 
 
-viewWindow : Config msg -> Model -> Window -> Html msg
-viewWindow config model window =
+viewWindow : Config msg -> Model -> WindowId -> Window -> Html msg
+viewWindow config model windowId window =
     let
         appId =
             getActiveAppId window
@@ -126,10 +126,10 @@ viewWindow config model window =
             Just app ->
                 let
                     appView =
-                        viewApp config model appId app
+                        viewApp config model windowId appId app
                 in
                     if needsDecoration then
-                        windowWrapper config model app window appView
+                        windowWrapper config model app windowId window appView
                     else
                         appView
 
@@ -137,8 +137,15 @@ viewWindow config model window =
                 text ""
 
 
-windowWrapper : Config msg -> Model -> App -> Window -> Html msg -> Html msg
-windowWrapper config model app window html =
+windowWrapper :
+    Config msg
+    -> Model
+    -> App
+    -> WindowId
+    -> Window
+    -> Html msg
+    -> Html msg
+windowWrapper config model app windowId window html =
     let
         appModel =
             getModel app
@@ -150,7 +157,7 @@ windowWrapper config model app window html =
             isResizable <| getModel app
 
         onMouseDownMsg =
-            config.toMsg <| UpdateFocus (Just <| getWindowId app)
+            config.toMsg <| UpdateFocus (Just windowId)
 
         onKeyDownMsg =
             getKeyloggerMsg config (getActiveAppId window) appModel
@@ -184,7 +191,7 @@ windowWrapper config model app window html =
                     icon
                     resizable
                     desktopApp
-                    (getWindowId app)
+                    windowId
                     window
                 , content
                 ]
@@ -363,20 +370,21 @@ decoratedAttr =
 -- integrate with apps
 
 
-viewApp : Config msg -> Model -> AppId -> App -> Html msg
-viewApp config model appId app =
+viewApp : Config msg -> Model -> WindowId -> AppId -> App -> Html msg
+viewApp config model windowId appId app =
     let
         activeGateway =
             model
-                |> getWindow (getWindowId app)
-                |> Maybe.andThen (getWindowGateway config model)
+                |> getWindowOfApp appId
+                |> Maybe.andThen (flip getWindow model)
+                |> Maybe.andThen (getGatewayOfWindow config model)
 
         activeServer =
             getAppActiveServer config app
     in
         case Maybe.uncurry activeServer activeGateway of
             Just ( active, gateway ) ->
-                viewAppDelegate config active gateway appId app
+                viewAppDelegate config active gateway windowId appId app
 
             Nothing ->
                 -- this shouldn't happen really
@@ -387,10 +395,11 @@ viewAppDelegate :
     Config msg
     -> ( CId, Server )
     -> ( CId, Server )
+    -> WindowId
     -> AppId
     -> App
     -> Html msg
-viewAppDelegate config ( cid, server ) ( gCid, gServer ) appId app =
+viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
     case getModel app of
         BackFlixModel appModel ->
             BackFlix.view (backFlixConfig appId config) appModel
@@ -427,11 +436,11 @@ viewAppDelegate config ( cid, server ) ( gCid, gServer ) appId app =
 
         FloatingHeadsModel appModel ->
             FloatingHeads.view
-                (floatingHeadsConfig (getWindowId app) appId gCid config)
+                (floatingHeadsConfig windowId appId gCid config)
                 appModel
 
         HebampModel appModel ->
-            Hebamp.view (hebampConfig (getWindowId app) appId config) appModel
+            Hebamp.view (hebampConfig windowId appId config) appModel
 
         LanViewerModel appModel ->
             LanViewer.view lanViewerConfig appModel

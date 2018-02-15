@@ -25,7 +25,7 @@ import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Servers.Shared exposing (CId)
+import Game.Servers.Shared as Servers exposing (CId)
 import OS.WindowManager.Shared exposing (..)
 
 
@@ -34,7 +34,8 @@ type alias Model =
     , windows : Windows
     , sessions : Sessions
     , dragging : Maybe WindowId
-    , lastPosition : Position
+    , windowOfApps : WindowOfApps
+    , sessionOfWindows : SessionOfWindows
     , seed : Random.Seed
     , drag : Draggable.State WindowId
     }
@@ -49,10 +50,9 @@ type alias Apps =
 
 
 type alias App =
-    { windowId : WindowId
-    , serverCId : CId
+    { context : Context
+    , cid : CId
     , model : AppModel
-    , context : Context
     }
 
 
@@ -90,7 +90,6 @@ type alias Window =
     , size : Size
     , maximized : IsMaximized
     , instance : Instance
-    , originSessionId : SessionId
     }
 
 
@@ -131,6 +130,7 @@ type alias Session =
     { hidden : Index
     , visible : Index
     , focusing : Maybe WindowId
+    , cid : CId
     }
 
 
@@ -139,7 +139,19 @@ type alias Index =
 
 
 
--- initializers
+-- references
+
+
+type alias WindowOfApps =
+    Dict AppId WindowId
+
+
+type alias SessionOfWindows =
+    Dict WindowId CId
+
+
+
+-- affecting model
 
 
 initialModel : Model
@@ -147,23 +159,40 @@ initialModel =
     { apps = Dict.empty
     , windows = Dict.empty
     , sessions = Dict.empty
+    , windowOfApps = Dict.empty
+    , sessionOfWindows = Dict.empty
     , dragging = Nothing
-    , lastPosition = Position 0 44
     , seed = Random.initialSeed 844121764423
     , drag = Draggable.init
     }
 
 
-initialSession : Session
-initialSession =
-    { hidden = []
-    , visible = []
-    , focusing = Nothing
-    }
+insert : CId -> WindowId -> Size -> Instance -> Model -> Model
+insert cid windowId size instance model =
+    let
+        position =
+            getNewWindowPosition cid model
+
+        window =
+            Window
+                position
+                size
+                False
+                instance
+    in
+        model
+            |> insertWindow windowId window
+            |> linkWindowSession windowId cid
 
 
+getNewAppId : Model -> ( AppId, Model )
+getNewAppId =
+    getUuid
 
--- integrations
+
+insertApp : AppId -> App -> Model -> Model
+insertApp appId app model =
+    { model | apps = Dict.insert appId app model.apps }
 
 
 getApp : AppId -> Model -> Maybe App
@@ -171,19 +200,102 @@ getApp appId =
     .apps >> Dict.get appId
 
 
+getNewWindowId : Model -> ( WindowId, Model )
+getNewWindowId =
+    getUuid
+
+
+insertWindow : WindowId -> Window -> Model -> Model
+insertWindow windowId window model =
+    { model | windows = Dict.insert windowId window model.windows }
+
+
 getWindow : WindowId -> Model -> Maybe Window
 getWindow windowId =
     .windows >> Dict.get windowId
 
 
-getSession : SessionId -> Model -> Session
-getSession sessionId model =
-    case Dict.get sessionId model.sessions of
+insertSession : CId -> Session -> Model -> Model
+insertSession cid session model =
+    { model | sessions = Dict.insert (cidToSessionId cid) session model.sessions }
+
+
+getSession : CId -> Model -> Session
+getSession cid model =
+    case Dict.get (cidToSessionId cid) model.sessions of
         Just session ->
             session
 
         Nothing ->
-            initialSession
+            Session [] [] Nothing cid
+
+
+close : WindowId -> Model -> Model
+close =
+    let
+        removeApp appId model =
+            { model
+                | apps = Dict.remove appId model.apps
+                , windowOfApps = Dict.remove appId model.windowOfApps
+            }
+
+        removeWindow windowId model =
+            { model
+                | windows = Dict.remove windowId model.windows
+                , sessionOfWindows = Dict.remove windowId model.sessionOfWindows
+            }
+
+        killApps window model =
+            window
+                |> listAppIds
+                |> List.foldl removeApp model
+
+        cleanSessions windowId model =
+            let
+                sessions =
+                    Dict.map (always <| removeFromSession windowId)
+                        model.sessions
+            in
+                { model | sessions = sessions }
+    in
+        \windowId model ->
+            case getWindow windowId model of
+                Just window ->
+                    model
+                        |> killApps window
+                        |> cleanSessions windowId
+                        |> removeWindow windowId
+
+                Nothing ->
+                    model
+
+
+linkAppWindow : AppId -> WindowId -> Model -> Model
+linkAppWindow appId windowId model =
+    let
+        windowOfApps =
+            Dict.insert appId windowId model.windowOfApps
+    in
+        { model | windowOfApps = windowOfApps }
+
+
+getWindowOfApp : AppId -> Model -> Maybe WindowId
+getWindowOfApp appId =
+    .windowOfApps >> Dict.get appId
+
+
+linkWindowSession : WindowId -> CId -> Model -> Model
+linkWindowSession windowId cid model =
+    let
+        sessionOfWindows =
+            Dict.insert windowId cid model.sessionOfWindows
+    in
+        { model | sessionOfWindows = sessionOfWindows }
+
+
+getSessionOfWindow : WindowId -> Model -> Maybe CId
+getSessionOfWindow windowId =
+    .sessionOfWindows >> Dict.get windowId
 
 
 getDragging : Model -> Maybe WindowId
@@ -191,102 +303,39 @@ getDragging =
     .dragging
 
 
-newAppId : Model -> ( Model, AppId )
-newAppId =
-    getUuid
-
-
-newWindowId : Model -> ( Model, WindowId )
-newWindowId =
-    getUuid
-
-
-insert : WindowId -> Window -> Model -> Model
-insert windowId window model =
+pin : WindowId -> Model -> Model
+pin windowId model =
     let
-        sessionId =
-            window.originSessionId
-
-        session =
-            model
-                |> getSession window.originSessionId
-                |> updateFocus (Just windowId)
-    in
-        model
-            |> insertWindow windowId window
-            |> insertSession sessionId session
-
-
-insertWindow : WindowId -> Window -> Model -> Model
-insertWindow windowId window model =
-    -- this is a dumb function use it to update existing windows
-    { model | windows = Dict.insert windowId window model.windows }
-
-
-insertApp : AppId -> App -> Model -> Model
-insertApp appId app model =
-    -- this is a dumb function use it to update existing apps
-    { model | apps = Dict.insert appId app model.apps }
-
-
-insertSession : SessionId -> Session -> Model -> Model
-insertSession sessionId session model =
-    -- this is a dumb function use it to update existing sessions
-    { model | sessions = Dict.insert sessionId session model.sessions }
-
-
-removeApp : AppId -> Model -> Model
-removeApp appId model =
-    { model | apps = Dict.remove appId model.apps }
-
-
-close : WindowId -> Model -> Model
-close windowId model =
-    let
-        killAppsFast { instance } =
-            case instance of
-                Single _ appId ->
-                    removeApp appId model
-
-                Double _ appId1 (Just appId2) ->
-                    model
-                        |> removeApp appId1
-                        |> removeApp appId2
-
-                Double _ appId _ ->
-                    removeApp appId model
-
-        killAppsSlow () =
-            -- this code may not need to exist
-            let
-                apps =
-                    Dict.filter (\_ app -> app.windowId /= windowId) model.apps
-            in
-                { model | apps = apps }
-
-        model_ =
-            case getWindow windowId model of
-                Just window ->
-                    killAppsFast window
-
-                Nothing ->
-                    killAppsSlow ()
-
         sessions =
-            -- this is slow, it's a bottleneck of pinned windows
-            Dict.map (\_ session -> unpin windowId session) model_.sessions
-
-        windows =
-            Dict.remove windowId model.windows
+            Dict.map (always <| restore windowId) model.sessions
     in
-        { model_ | sessions = sessions, windows = windows }
+        { model | sessions = sessions }
 
 
-minimizeAll : DesktopApp -> SessionId -> Model -> Model
-minimizeAll desktopApp sessionId model =
+unpin : WindowId -> Model -> Model
+unpin windowId model =
+    case getSessionOfWindow windowId model of
+        Just cid ->
+            let
+                session =
+                    getSession cid model
+
+                sessions =
+                    model.sessions
+                        |> Dict.map (always <| removeFromSession windowId)
+                        |> Dict.insert (cidToSessionId cid) session
+            in
+                { model | sessions = sessions }
+
+        Nothing ->
+            close windowId model
+
+
+minimizeAll : DesktopApp -> CId -> Model -> Model
+minimizeAll desktopApp cid model =
     let
         session =
-            getSession sessionId model
+            getSession cid model
 
         toMinimize =
             List.filter (filterByWindowApp desktopApp model)
@@ -295,14 +344,14 @@ minimizeAll desktopApp sessionId model =
         session_ =
             List.foldl minimize session toMinimize
     in
-        insertSession sessionId session_ model
+        insertSession cid session_ model
 
 
-closeAll : DesktopApp -> SessionId -> Model -> Model
-closeAll desktopApp sessionId model =
+closeAll : DesktopApp -> CId -> Model -> Model
+closeAll desktopApp cid model =
     let
         session =
-            getSession sessionId model
+            getSession cid model
 
         filterer =
             filterByWindowApp desktopApp model
@@ -321,52 +370,42 @@ closeAll desktopApp sessionId model =
             |> flip foldlClose toCloseHidden
 
 
-listAppId : DesktopApp -> Model -> List AppId
-listAppId desktopApp model =
-    model.apps
-        |> Dict.filter (always (getModel >> toDesktopApp >> (==) desktopApp))
-        |> Dict.keys
+listAppsOfType : DesktopApp -> Model -> List AppId
+listAppsOfType desktopApp =
+    .apps
+        >> Dict.filter (always (getModel >> toDesktopApp >> (==) desktopApp))
+        >> Dict.keys
 
 
-getOpenedAppId : DesktopApp -> CId -> SessionId -> Model -> Maybe AppId
-getOpenedAppId desktopApp cid sessionId model =
+findExistingAppId : DesktopApp -> CId -> Model -> Maybe AppId
+findExistingAppId =
     let
-        session =
-            getSession sessionId model
+        getSessionWindows cid model =
+            case getSession cid model of
+                { visible, hidden } ->
+                    hidden ++ visible
 
-        getWindowAppIds window =
-            case getInstance window of
-                Single _ appId ->
-                    [ appId ]
-
-                Double _ appId (Just otherAppId) ->
-                    [ appId, otherAppId ]
-
-                Double _ appId _ ->
-                    [ appId ]
-
-        filterAppByCId appId =
-            case getApp appId model of
-                Just app ->
-                    cid == (getServerCId app)
-
-                Nothing ->
-                    False
+        filterAppByCId cid model appId =
+            model
+                |> getApp appId
+                |> Maybe.map (getAppCId >> (==) cid)
+                |> Maybe.withDefault False
     in
-        session.hidden
-            |> (++) session.visible
-            |> List.filter (filterByWindowApp desktopApp model)
-            |> List.filterMap (flip getWindow model)
-            |> List.concatMap getWindowAppIds
-            |> List.filter filterAppByCId
-            |> List.head
+        \desktopApp cid model ->
+            model
+                |> getSessionWindows cid
+                |> List.filter (filterByWindowApp desktopApp model)
+                |> List.filterMap (flip getWindow model)
+                |> List.concatMap listAppIds
+                |> List.filter (filterAppByCId cid model)
+                |> List.head
 
 
-openOrRestoreApp : DesktopApp -> SessionId -> Model -> ( Model, Bool )
-openOrRestoreApp desktopApp sessionId model =
+openOrRestoreApp : DesktopApp -> CId -> Model -> ( Model, Bool )
+openOrRestoreApp desktopApp cid model =
     let
         session =
-            getSession sessionId model
+            getSession cid model
 
         filterer =
             filterByWindowApp desktopApp model
@@ -387,14 +426,62 @@ openOrRestoreApp desktopApp sessionId model =
         if noVisible && anyHidden then
             hidden
                 |> List.foldl restore session
-                |> flip (insertSession sessionId) model
+                |> flip (insertSession cid) model
                 |> flip (,) False
         else
             ( model, True )
 
 
+linkEndpointApp : AppId -> WindowId -> Model -> Model
+linkEndpointApp appId windowId model =
+    case getWindow windowId model of
+        Just window ->
+            case getInstance window of
+                Double context appId_ Nothing ->
+                    window
+                        |> setInstance (Double context appId_ <| Just appId)
+                        |> flip (insertWindow windowId) model
 
--- app helpers
+                Double _ _ _ ->
+                    model
+
+                Single _ _ ->
+                    model
+
+        Nothing ->
+            model
+
+
+getNewWindowPosition : CId -> Model -> Position
+getNewWindowPosition cid model =
+    let
+        maybePosition =
+            model
+                |> getSession cid
+                |> getFocusing
+                |> Maybe.andThen (flip getWindow model)
+                |> Maybe.map getPosition
+    in
+        case maybePosition of
+            Just { x, y } ->
+                Position (x + 32) (y + 32)
+
+            Nothing ->
+                Position 32 (44 + 32)
+
+
+
+-- affecting apps
+
+
+getAppContext : App -> Context
+getAppContext =
+    .context
+
+
+getAppCId : App -> CId
+getAppCId =
+    .cid
 
 
 getModel : App -> AppModel
@@ -405,16 +492,6 @@ getModel =
 setModel : AppModel -> App -> App
 setModel appModel app =
     { app | model = appModel }
-
-
-getWindowId : App -> WindowId
-getWindowId =
-    .windowId
-
-
-getServerCId : App -> CId
-getServerCId =
-    .serverCId
 
 
 getTitle : AppModel -> String
@@ -533,235 +610,6 @@ toDesktopApp model =
             DesktopApp.FloatingHeads
 
 
-
--- window helpers
-
-
-getPosition : Window -> Position
-getPosition =
-    .position
-
-
-getSize : Window -> Size
-getSize =
-    .size
-
-
-getInstance : Window -> Instance
-getInstance =
-    .instance
-
-
-getContext : Window -> Context
-getContext window =
-    case getInstance window of
-        Single context _ ->
-            context
-
-        Double context _ _ ->
-            context
-
-
-getActiveAppId : Window -> AppId
-getActiveAppId window =
-    case getInstance window of
-        Single _ appId ->
-            appId
-
-        Double Gateway appId maybeAppId ->
-            appId
-
-        Double Endpoint _ (Just appId) ->
-            appId
-
-        Double Endpoint _ Nothing ->
-            Debug.crash "Impossible window state"
-
-
-setContext : Context -> Window -> Window
-setContext context window =
-    case getInstance window of
-        Single _ _ ->
-            window
-
-        Double _ appId maybeAppId ->
-            { window | instance = Double context appId maybeAppId }
-
-
-setInstance : Instance -> Window -> Window
-setInstance instance window =
-    { window | instance = instance }
-
-
-hasMultipleContext : Window -> Bool
-hasMultipleContext window =
-    case getInstance window of
-        Single _ _ ->
-            False
-
-        Double _ _ _ ->
-            True
-
-
-isMaximized : Window -> Bool
-isMaximized =
-    .maximized
-
-
-isSession : SessionId -> Window -> Bool
-isSession sessionId { originSessionId } =
-    sessionId == originSessionId
-
-
-toggleMaximize : Window -> Window
-toggleMaximize window =
-    { window | maximized = not window.maximized }
-
-
-toggleContext : Window -> Window
-toggleContext window =
-    case getInstance window of
-        Single _ _ ->
-            window
-
-        Double Gateway _ _ ->
-            setContext Endpoint window
-
-        Double Endpoint _ _ ->
-            setContext Gateway window
-
-
-move : Float -> Float -> Window -> Window
-move deltaX deltaY ({ position } as window) =
-    let
-        position_ =
-            Position (position.x + deltaX) (position.y + deltaY)
-    in
-        { window | position = position_ }
-
-
-
--- session helpers
-
-
-getFocusing : Session -> Maybe WindowId
-getFocusing =
-    .focusing
-
-
-pin : WindowId -> Session -> Session
-pin =
-    restore
-
-
-unpin : WindowId -> Session -> Session
-unpin windowId session =
-    let
-        filterer =
-            (/=) >> List.filter
-
-        visible =
-            filterer windowId session.visible
-
-        hidden =
-            filterer windowId session.hidden
-    in
-        { session
-            | visible = visible
-            , hidden = hidden
-            , focusing = List.head <| List.reverse visible
-        }
-
-
-minimize : WindowId -> Session -> Session
-minimize windowId session =
-    let
-        filterer =
-            (/=) >> List.filter
-
-        visible =
-            filterer windowId session.visible
-
-        hidden =
-            session.hidden
-                |> filterer windowId
-                |> (::) windowId
-    in
-        { session
-            | visible = visible
-            , hidden = hidden
-            , focusing = List.head <| List.reverse visible
-        }
-
-
-restore : WindowId -> Session -> Session
-restore windowId session =
-    let
-        filterer =
-            (/=) >> List.filter
-
-        visible =
-            session.visible
-                |> filterer windowId
-                |> List.reverse
-                |> (::) windowId
-                |> List.reverse
-
-        hidden =
-            filterer windowId session.hidden
-    in
-        { session
-            | visible = visible
-            , hidden = hidden
-            , focusing = Just windowId
-        }
-
-
-toggleVisibility : WindowId -> Session -> Session
-toggleVisibility windowId session =
-    if List.member windowId session.visible then
-        minimize windowId session
-    else
-        restore windowId session
-
-
-updateFocus : Maybe WindowId -> Session -> Session
-updateFocus maybeWindowId session =
-    case maybeWindowId of
-        Just windowId ->
-            restore windowId session
-
-        Nothing ->
-            { session | focusing = Nothing }
-
-
-
--- middleware
-
-
-startDragging : WindowId -> SessionId -> Model -> Model
-startDragging windowId sessionId model =
-    let
-        model_ =
-            { model | dragging = Just windowId }
-
-        session =
-            model_
-                |> getSession sessionId
-                |> updateFocus (Just windowId)
-    in
-        insertSession sessionId session model_
-
-
-stopDragging : Model -> Model
-stopDragging model =
-    { model | dragging = Nothing }
-
-
-
--- apps integrations
-
-
 isDecorated : AppModel -> Bool
 isDecorated app =
     case app of
@@ -789,16 +637,247 @@ isResizable app =
 
 
 
--- internals
+-- affecting windows
 
 
-getUuid : Model -> ( Model, String )
-getUuid model =
+getPosition : Window -> Position
+getPosition =
+    .position
+
+
+move : Float -> Float -> Window -> Window
+move deltaX deltaY ({ position } as window) =
     let
-        ( uuid, seed ) =
-            Random.step Uuid.uuidGenerator model.seed
+        position_ =
+            Position (position.x + deltaX) (position.y + deltaY)
     in
-        ( { model | seed = seed }, Uuid.toString uuid )
+        { window | position = position_ }
+
+
+getSize : Window -> Size
+getSize =
+    .size
+
+
+isMaximized : Window -> Bool
+isMaximized =
+    .maximized
+
+
+toggleMaximize : Window -> Window
+toggleMaximize window =
+    { window | maximized = not window.maximized }
+
+
+getContext : Window -> Context
+getContext window =
+    case getInstance window of
+        Single context _ ->
+            context
+
+        Double context _ _ ->
+            context
+
+
+setContext : Context -> Window -> Window
+setContext context window =
+    case context of
+        Gateway ->
+            case getInstance window of
+                Single _ _ ->
+                    window
+
+                Double _ appId maybeAppId ->
+                    { window | instance = Double context appId maybeAppId }
+
+        Endpoint ->
+            case getInstance window of
+                Single _ _ ->
+                    window
+
+                Double _ appId Nothing ->
+                    window
+
+                Double _ appId justAppId ->
+                    { window | instance = Double context appId justAppId }
+
+
+toggleContext : Window -> Window
+toggleContext window =
+    case getContext window of
+        Gateway ->
+            setContext Endpoint window
+
+        Endpoint ->
+            setContext Gateway window
+
+
+getInstance : Window -> Instance
+getInstance =
+    .instance
+
+
+setInstance : Instance -> Window -> Window
+setInstance instance window =
+    { window | instance = instance }
+
+
+listAppIds : Window -> List AppId
+listAppIds window =
+    case getInstance window of
+        Single _ appId ->
+            [ appId ]
+
+        Double _ appId1 (Just appId2) ->
+            [ appId1, appId2 ]
+
+        Double _ appId Nothing ->
+            [ appId ]
+
+
+getActiveAppId : Window -> AppId
+getActiveAppId window =
+    case getInstance window of
+        Single _ appId ->
+            appId
+
+        Double Gateway appId maybeAppId ->
+            appId
+
+        Double Endpoint _ (Just appId) ->
+            appId
+
+        Double Endpoint _ Nothing ->
+            Debug.crash "Impossible window state"
+
+
+hasMultipleContext : Window -> Bool
+hasMultipleContext window =
+    case getInstance window of
+        Single _ _ ->
+            False
+
+        Double _ _ Nothing ->
+            False
+
+        Double _ _ _ ->
+            True
+
+
+hasFlexibleContext : Window -> Bool
+hasFlexibleContext window =
+    case getInstance window of
+        Single _ _ ->
+            False
+
+        Double _ _ _ ->
+            True
+
+
+
+-- affecting sessions
+
+
+minimize : WindowId -> Session -> Session
+minimize windowId =
+    removeVisible windowId >> insertHidden windowId
+
+
+restore : WindowId -> Session -> Session
+restore windowId =
+    removeHidden windowId >> insertVisible windowId
+
+
+getFocusing : Session -> Maybe WindowId
+getFocusing =
+    .focusing
+
+
+focus : Maybe WindowId -> Session -> Session
+focus maybeWindowId session =
+    case maybeWindowId of
+        Just windowId ->
+            restore windowId session
+
+        Nothing ->
+            unfocus session
+
+
+unfocus : Session -> Session
+unfocus session =
+    { session | focusing = Nothing }
+
+
+insertVisible : WindowId -> Session -> Session
+insertVisible windowId session =
+    let
+        session_ =
+            removeVisible windowId session
+
+        visible =
+            session_.visible
+                |> List.reverse
+                |> (::) windowId
+                |> List.reverse
+    in
+        { session_ | visible = visible, focusing = Just windowId }
+
+
+removeVisible : WindowId -> Session -> Session
+removeVisible windowId session =
+    { session | visible = List.filter ((/=) windowId) session.visible }
+
+
+insertHidden : WindowId -> Session -> Session
+insertHidden windowId session =
+    let
+        session_ =
+            removeHidden windowId session
+
+        hidden =
+            session_.hidden
+                |> List.reverse
+                |> (::) windowId
+                |> List.reverse
+    in
+        { session_ | hidden = hidden }
+
+
+removeHidden : WindowId -> Session -> Session
+removeHidden windowId session =
+    { session | hidden = List.filter ((/=) windowId) session.hidden }
+
+
+removeFromSession : WindowId -> Session -> Session
+removeFromSession windowId =
+    removeVisible windowId >> removeHidden windowId
+
+
+
+-- dependencies
+
+
+startDragging : WindowId -> CId -> Model -> Model
+startDragging windowId cid model =
+    let
+        model_ =
+            { model | dragging = Just windowId }
+
+        session =
+            model_
+                |> getSession cid
+                |> focus (Just windowId)
+    in
+        insertSession cid session model_
+
+
+stopDragging : Model -> Model
+stopDragging model =
+    { model | dragging = Nothing }
+
+
+
+-- internals
 
 
 filterByWindowApp : DesktopApp -> Model -> WindowId -> Bool
@@ -817,3 +896,22 @@ filterByWindowApp desktopApp model windowId =
 
             Nothing ->
                 False
+
+
+cidToSessionId : CId -> SessionId
+cidToSessionId cid =
+    case cid of
+        Servers.GatewayCId id ->
+            "gateway_id::" ++ id
+
+        Servers.EndpointCId ( nid, ip ) ->
+            "endpoint_addr::" ++ nid ++ "::" ++ ip
+
+
+getUuid : Model -> ( String, Model )
+getUuid model =
+    let
+        ( uuid, seed ) =
+            Random.step Uuid.uuidGenerator model.seed
+    in
+        ( Uuid.toString uuid, { model | seed = seed } )
