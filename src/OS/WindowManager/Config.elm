@@ -114,7 +114,10 @@ dragConfig config =
 
 dockConfig : Config msg -> Dock.Config msg
 dockConfig config =
-    { onNewApp = \app -> config.toMsg <| NewApp app Nothing Nothing
+    { onNewApp =
+        \app ->
+            config.toMsg <|
+                NewApp app Nothing Nothing (Tuple.first config.activeServer)
     , onClickIcon = ClickIcon >> config.toMsg
     , onMinimizeAll = MinimizeAll >> config.toMsg
     , onCloseAll = CloseAll >> config.toMsg
@@ -159,8 +162,16 @@ browserConfig appId cid server config =
             |> Tuple.second
             |> Servers.getEndpoints
             |> Maybe.withDefault []
-    , onNewApp = NewApp >>>> config.toMsg
-    , onOpenApp = OpenApp >>> config.toMsg
+    , onNewApp =
+        \app context params ->
+            case config.endpointCId of
+                Just cid ->
+                    config.toMsg <| NewApp app context params cid
+
+                Nothing ->
+                    config.batchMsg []
+    , onOpenApp =
+        OpenApp >>> config.toMsg
     , onNewPublicDownload = config.onNewPublicDownload
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
