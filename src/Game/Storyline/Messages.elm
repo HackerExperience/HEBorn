@@ -1,9 +1,18 @@
 module Game.Storyline.Messages exposing (Msg(..))
 
-import Game.Storyline.Missions.Messages as Missions
-import Game.Storyline.Emails.Messages as Emails
+import Game.Storyline.Models exposing (..)
+import Game.Storyline.Shared exposing (..)
 
 
 type Msg
-    = MissionsMsg Missions.Msg
-    | EmailsMsg Emails.Msg
+    = HandleReply ContactID Reply
+    | HandleNewEmail StoryEmailSent.Data
+    | HandleReplyUnlocked StoryEmailReplyUnlocked.Data
+    | HandleReplySent StoryEmailReplySent.Data
+    | HandleActionDone Action
+    | HandleStepProceeded StoryStepProceeded.Data
+    | Request RequestMsg
+
+
+type RequestMsg
+    = ReplyRequest ( ContactID, Reply ) ResponseType

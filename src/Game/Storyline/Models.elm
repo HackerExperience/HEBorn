@@ -1,37 +1,39 @@
 module Game.Storyline.Models exposing (..)
 
-import Game.Storyline.Missions.Models as Missions
-import Game.Storyline.Emails.Models as Emails
+import Dict exposing (Dict)
+import Time exposing (Time)
+import Game.Storyline.Shared exposing (..)
+import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type alias Model =
-    { missions : Missions.Model
-    , emails : Emails.Model
+    Dict ContactID Contact
+
+
+type alias ContactID =
+    String
+
+
+type alias Contact =
+    { availableReplies : Reply
+    , pastEmails : Dict Time SendedEmail
+    , step : Maybe ( Step, List Action )
+    , objective : Maybe Objective
+    , quest : Maybe Quest
+    , about : About
     }
 
 
 initialModel : Model
 initialModel =
-    { missions = Missions.initialModel
-    , emails = Emails.initialModel
-    }
+    Dict.empty
 
 
-getMissions : Model -> Missions.Model
-getMissions =
-    .missions
+initalAbout : ContactID -> About
+initalAbout who =
+    case who of
+        "friend" ->
+            About "Friend" "friendpic.jpg"
 
-
-getEmails : Model -> Emails.Model
-getEmails =
-    .emails
-
-
-setMissions : Missions.Model -> Model -> Model
-setMissions missions model =
-    { model | missions = missions }
-
-
-setEmails : Emails.Model -> Model -> Model
-setEmails emails model =
-    { model | emails = emails }
+        _ ->
+            About "Unkown Contact" "unknown.jpg"
