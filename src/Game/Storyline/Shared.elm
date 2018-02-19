@@ -1,7 +1,11 @@
 module Game.Storyline.Shared exposing (..)
 
 
-type SendedEmail
+type alias PastEmails =
+    Dict Time PastEmail
+
+
+type PastEmail
     = FromContact Reply
     | FromPlayer Reply
 
@@ -45,6 +49,10 @@ type Objective
 type Step
     = Tutorial_SetupPC
     | Tutorial_DownloadCracker
+
+
+type Quest
+    = Tutorial
 
 
 type alias About =

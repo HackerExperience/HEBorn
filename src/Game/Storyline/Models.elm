@@ -16,7 +16,7 @@ type alias ContactID =
 
 type alias Contact =
     { availableReplies : Reply
-    , pastEmails : Dict Time SendedEmail
+    , pastEmails : PastEmails
     , step : Maybe ( Step, List Action )
     , objective : Maybe Objective
     , quest : Maybe Quest
