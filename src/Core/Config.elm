@@ -41,10 +41,8 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Notifications.Messages as ServerNotifications
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared as Servers exposing (CId)
-import Game.Storyline.Missions.Actions as MissionsActions
+import Game.Storyline.StepActions.Shared as StepActions
 import Game.Storyline.Messages as Storyline
-import Game.Storyline.Emails.Messages as Emails
-import Game.Storyline.Missions.Messages as Missions
 import Game.Web.Messages as Web
 import OS.Config as OS
 import OS.Messages as OS
@@ -105,19 +103,19 @@ eventsConfig =
                     , browsers <| Browser.HandlePasswordAcquired data
                     ]
         , onStoryStepProceeded =
-            Missions.HandleStepProceeded >> missions
+            Storyline.HandleStepProceeded >> storyline
         , onStoryEmailSent =
             \data ->
                 BatchMsg
-                    [ emails <| Emails.HandleNewEmail data
-                    , data.personId
+                    [ storyline <| Storyline.HandleNewEmail data
+                    , data.contactId
                         |> AccountNotifications.HandleNewEmail
                         |> accountNotif
                     ]
         , onStoryEmailReplyUnlocked =
-            Emails.HandleReplyUnlocked >> emails
+            Storyline.HandleReplyUnlocked >> storyline
         , onStoryEmailReplySent =
-            Emails.HandleReplySent >> emails
+            Storyline.HandleReplySent >> storyline
         , onBankAccountUpdated =
             uncurry Finances.HandleBankAccountUpdated >> finances
         , onBankAccountClosed =
@@ -332,13 +330,13 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, _ ) as gtw) =
     , onNewBruteforceProcess =
         \cid -> Processes.HandleStartBruteforce >> processes cid
     , onReplyEmail =
-        Emails.HandleReply >>> emails
+        Storyline.HandleReply >>> storyline
     , onActionDone =
         \desktopApp context ->
             context
-                |> MissionsActions.GoApp desktopApp
-                |> Missions.HandleActionDone
-                |> missions
+                |> StepActions.GoApp desktopApp
+                |> Storyline.HandleActionDone
+                |> storyline
     , onWebLogout =
         \cid -> Servers.HandleLogout |> server cid
     , accountId =
@@ -457,16 +455,6 @@ web =
 storyline : Storyline.Msg -> Msg
 storyline =
     Game.StoryMsg >> game
-
-
-missions : Missions.Msg -> Msg
-missions =
-    Storyline.MissionsMsg >> storyline
-
-
-emails : Emails.Msg -> Msg
-emails =
-    Storyline.EmailsMsg >> storyline
 
 
 finances : Finances.Msg -> Msg

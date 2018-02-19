@@ -124,14 +124,9 @@ viewWindow config model windowId window =
     in
         case maybeApp of
             Just app ->
-                let
-                    appView =
-                        viewApp config model windowId appId app
-                in
-                    if needsDecoration then
-                        windowWrapper config model app windowId window appView
-                    else
-                        appView
+                app
+                    |> viewApp config model windowId appId
+                    |> windowWrapper config model app windowId window
 
             Nothing ->
                 text ""

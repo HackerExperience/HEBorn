@@ -4,9 +4,9 @@ import Html exposing (Attribute)
 import Apps.Params as AppParams exposing (AppParams)
 import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Game.Meta.Types.Context exposing (Context)
-import Game.Storyline.Emails.Models as Emails
-import Game.Storyline.Emails.Contents as Emails
-import Game.Storyline.Emails.Contents.Config as Content
+import Game.Storyline.Models as Storyline
+import Game.Storyline.Shared exposing (ContactId, Reply)
+import Game.Storyline.Emails.Config as Emails
 import Apps.FloatingHeads.Messages exposing (..)
 import Apps.Browser.Models as Browser
 
@@ -16,15 +16,15 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , reference : Reference
     , draggable : Attribute msg
-    , emails : Emails.Model
+    , story : Storyline.Model
     , username : String
-    , onReplyEmail : String -> Emails.Content -> msg
+    , onReplyEmail : ContactId -> Reply -> msg
     , onCloseApp : msg
     , onOpenApp : AppParams -> msg
     }
 
 
-contentConfig : Config msg -> Content.Config msg
+contentConfig : Config msg -> Emails.Config msg
 contentConfig config =
     { username = config.username
     , onOpenBrowser =

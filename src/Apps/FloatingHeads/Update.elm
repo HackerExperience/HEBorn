@@ -2,8 +2,7 @@ module Apps.FloatingHeads.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Game.Meta.Types.Context exposing (Context)
-import Game.Storyline.Emails.Models as Emails exposing (ID)
-import Game.Storyline.Emails.Contents exposing (Content)
+import Game.Storyline.Shared exposing (ContactId, Reply)
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 import Apps.FloatingHeads.Messages as FloatingHeads exposing (Msg(..))
@@ -36,7 +35,7 @@ update config msg model =
             onLaunchApp config params model
 
 
-onReply : Config msg -> Content -> Model -> UpdateResponse msg
+onReply : Config msg -> Reply -> Model -> UpdateResponse msg
 onReply { onReplyEmail } content model =
     content
         |> onReplyEmail model.activeContact
@@ -44,7 +43,7 @@ onReply { onReplyEmail } content model =
         |> (,) model
 
 
-handleSelectContact : Config msg -> ID -> Model -> UpdateResponse msg
+handleSelectContact : Config msg -> ContactId -> Model -> UpdateResponse msg
 handleSelectContact config contact model =
     let
         model_ =

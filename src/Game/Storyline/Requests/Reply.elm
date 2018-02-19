@@ -1,4 +1,4 @@
-module Game.Storyline.Emails.Requests.Reply
+module Game.Storyline.Requests.Reply
     exposing
         ( Response(..)
         , request
@@ -20,8 +20,8 @@ import Utils.Json.Decode exposing (commonError)
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
-import Game.Storyline.Emails.Messages exposing (..)
-import Game.Storyline.Emails.Contents exposing (Content)
+import Game.Storyline.Messages exposing (..)
+import Game.Storyline.Shared exposing (ContactId, Reply(..))
 
 
 type Response
@@ -31,16 +31,16 @@ type Response
 
 
 request :
-    ( String, Content )
-    -> String
-    -> String
+    ( ContactId, Reply )
+    -> ContactId
+    -> Reply
     -> FlagsSource a
     -> Cmd Msg
-request src accountId replyId =
+request (( contactId, _ ) as src) accountId reply =
     Requests.request
         (Topics.emailReply accountId)
         (ReplyRequest src >> Request)
-        (encoder replyId)
+        (encoder contactId reply)
 
 
 receive : Code -> Value -> Maybe Response
@@ -62,10 +62,11 @@ receive code json =
 -- INTERNALS
 
 
-encoder : String -> Value
-encoder replyId =
+encoder : ContactId -> Reply -> Value
+encoder contactId reply =
     Encode.object
-        [ ( "reply_id", Encode.string replyId )
+        [ ( "reply_id", Encode.string <| getReplyId reply )
+        , ( "contact_id", Encode.string contactId )
         ]
 
 
@@ -80,3 +81,37 @@ decodeErrorMessage str =
 
         value ->
             fail <| commonError "email reply error message" value
+
+
+getReplyId : Reply -> String
+getReplyId reply =
+    case reply of
+        AboutThat ->
+            "about_that"
+
+        BackThanks ->
+            "back_thanks"
+
+        DownloadCracker1 _ ->
+            "download_cracker1"
+
+        Downloaded ->
+            "downloaded"
+
+        HellYeah ->
+            "hell_yeah"
+
+        NothingNow ->
+            "nothing_now"
+
+        WatchIADoing ->
+            "watchiadoing"
+
+        Welcome ->
+            "welcome"
+
+        YeahRight ->
+            "yeah_right"
+
+        NastyVirus1 ->
+            "nasty_virus1"
