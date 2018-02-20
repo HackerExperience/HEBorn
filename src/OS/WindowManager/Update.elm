@@ -58,7 +58,7 @@ update config msg model =
             React.update <| close wId model
 
         Minimize wId ->
-            withSession config model <| minimize wId >> React.update
+            React.update <| minimize (getSessionId config) wId model
 
         ToggleMaximize wId ->
             withWindow wId model <| toggleMaximize >> React.update
@@ -70,13 +70,10 @@ update config msg model =
             withWindow wId model <| setContext context >> React.update
 
         UpdateFocus maybeWId ->
-            withSession config model <| focus maybeWId >> React.update
+            React.update <| focus (getSessionId config) maybeWId model
 
-        Pin windowId ->
-            React.update <| pin windowId model
-
-        Unpin windowId ->
-            React.update <| unpin windowId model
+        TogglePin windowId ->
+            React.update <| togglePin windowId model
 
         -- drag messages
         StartDrag wId ->
@@ -138,22 +135,6 @@ onOpenApp config cid params model =
 
             Nothing ->
                 launch config desktopApp (Just params) maybeContext cid model
-
-
-withSession :
-    Config msg
-    -> Model
-    -> (Session -> ( Session, React msg ))
-    -> UpdateResponse msg
-withSession config model map =
-    let
-        sessionId =
-            getSessionId config
-    in
-        model
-            |> getSession sessionId
-            |> map
-            |> Tuple.mapFirst (flip (insertSession sessionId) model)
 
 
 withWindow :

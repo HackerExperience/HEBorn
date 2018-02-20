@@ -19,6 +19,11 @@ explorer =
     faIcon FA.archive
 
 
+windowPin : Icon
+windowPin =
+    faIcon FA.dotCircleO
+
+
 windowMinimize : Icon
 windowMinimize =
     faIcon FA.windowMinimize

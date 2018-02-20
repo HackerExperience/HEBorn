@@ -36,6 +36,7 @@ type alias Model =
     , dragging : Maybe WindowId
     , windowOfApps : WindowOfApps
     , sessionOfWindows : SessionOfWindows
+    , pinned : Pinned
     , seed : Random.Seed
     , drag : Draggable.State WindowId
     }
@@ -150,6 +151,12 @@ type alias SessionOfWindows =
     Dict WindowId CId
 
 
+type alias Pinned =
+    { hidden : Index
+    , visible : Index
+    }
+
+
 
 -- affecting model
 
@@ -162,6 +169,7 @@ initialModel =
     , windowOfApps = Dict.empty
     , sessionOfWindows = Dict.empty
     , dragging = Nothing
+    , pinned = Pinned [] []
     , seed = Random.initialSeed 844121764423
     , drag = Draggable.init
     }
@@ -186,7 +194,9 @@ insert cid windowId size instance model =
                 |> linkWindowSession windowId cid
 
         session =
-            focus (Just windowId) <| getSession cid model_
+            model_
+                |> getSession cid
+                |> focusWindow (Just windowId)
     in
         insertSession cid session model_
 
@@ -227,13 +237,48 @@ insertSession cid session model =
 
 
 getSession : CId -> Model -> Session
-getSession cid model =
+getSession cid ({ pinned } as model) =
     case Dict.get (cidToSessionId cid) model.sessions of
         Just session ->
             session
 
         Nothing ->
-            Session [] [] Nothing cid
+            Session pinned.hidden pinned.visible Nothing cid
+
+
+minimize : CId -> WindowId -> Model -> Model
+minimize cid windowId model =
+    let
+        model_ =
+            model
+                |> getSession cid
+                |> minimizeWindow windowId
+                |> flip (insertSession cid) model
+    in
+        if List.member windowId model.pinned.visible then
+            filterVisiblePinned windowId model_
+        else
+            model_
+
+
+focus : CId -> Maybe WindowId -> Model -> Model
+focus cid maybeWindowId model =
+    let
+        model_ =
+            model
+                |> getSession cid
+                |> focusWindow maybeWindowId
+                |> flip (insertSession cid) model
+    in
+        case maybeWindowId of
+            Just windowId ->
+                if List.member windowId model.pinned.hidden then
+                    insertVisiblePinned windowId model_
+                else
+                    model_
+
+            Nothing ->
+                model_
 
 
 close : WindowId -> Model -> Model
@@ -271,6 +316,8 @@ close =
                         |> killApps window
                         |> cleanSessions windowId
                         |> removeWindow windowId
+                        |> filterHiddenPinned windowId
+                        |> filterVisiblePinned windowId
 
                 Nothing ->
                     model
@@ -309,13 +356,34 @@ getDragging =
     .dragging
 
 
+togglePin : WindowId -> Model -> Model
+togglePin windowId ({ pinned } as model) =
+    let
+        member =
+            List.member windowId
+    in
+        if member pinned.visible || member pinned.hidden then
+            unpin windowId model
+        else
+            pin windowId model
+
+
 pin : WindowId -> Model -> Model
-pin windowId model =
+pin windowId ({ pinned } as model) =
     let
         sessions =
             Dict.map (always <| restore windowId) model.sessions
+
+        visible =
+            pinned.visible
+                |> List.reverse
+                |> (::) windowId
+                |> List.reverse
+
+        pinned_ =
+            { pinned | visible = visible }
     in
-        { model | sessions = sessions }
+        { model | sessions = sessions, pinned = pinned_ }
 
 
 unpin : WindowId -> Model -> Model
@@ -330,11 +398,53 @@ unpin windowId model =
                     model.sessions
                         |> Dict.map (always <| removeFromSession windowId)
                         |> Dict.insert (cidToSessionId cid) session
+
+                model_ =
+                    { model | sessions = sessions }
             in
-                { model | sessions = sessions }
+                filterVisiblePinned windowId model_
 
         Nothing ->
             close windowId model
+
+
+insertVisiblePinned : WindowId -> Model -> Model
+insertVisiblePinned windowId ({ pinned } as model) =
+    let
+        visible =
+            pinned.visible
+                |> List.reverse
+                |> (::) windowId
+                |> List.reverse
+
+        pinned_ =
+            { pinned | visible = visible }
+    in
+        { model | pinned = pinned_ }
+
+
+filterHiddenPinned : WindowId -> Model -> Model
+filterHiddenPinned windowId ({ pinned } as model) =
+    let
+        hidden =
+            List.filter ((/=) windowId) pinned.hidden
+
+        pinned_ =
+            { pinned | hidden = hidden }
+    in
+        { model | pinned = pinned_ }
+
+
+filterVisiblePinned : WindowId -> Model -> Model
+filterVisiblePinned windowId ({ pinned } as model) =
+    let
+        visible =
+            List.filter ((/=) windowId) pinned.visible
+
+        pinned_ =
+            { pinned | visible = visible }
+    in
+        { model | pinned = pinned_ }
 
 
 minimizeAll : DesktopApp -> CId -> Model -> Model
@@ -346,11 +456,8 @@ minimizeAll desktopApp cid model =
         toMinimize =
             List.filter (filterByWindowApp desktopApp model)
                 session.visible
-
-        session_ =
-            List.foldl minimize session toMinimize
     in
-        insertSession cid session_ model
+        List.foldl (minimize cid) model toMinimize
 
 
 closeAll : DesktopApp -> CId -> Model -> Model
@@ -784,8 +891,8 @@ hasFlexibleContext window =
 -- affecting sessions
 
 
-minimize : WindowId -> Session -> Session
-minimize windowId =
+minimizeWindow : WindowId -> Session -> Session
+minimizeWindow windowId =
     removeVisible windowId >> insertHidden windowId
 
 
@@ -799,8 +906,8 @@ getFocusing =
     .focusing
 
 
-focus : Maybe WindowId -> Session -> Session
-focus maybeWindowId session =
+focusWindow : Maybe WindowId -> Session -> Session
+focusWindow maybeWindowId session =
     case maybeWindowId of
         Just windowId ->
             restore windowId session
@@ -872,7 +979,7 @@ startDragging windowId cid model =
         session =
             model_
                 |> getSession cid
-                |> focus (Just windowId)
+                |> focusWindow (Just windowId)
     in
         insertSession cid session model_
 

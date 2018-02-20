@@ -124,6 +124,11 @@ css =
                                                     , textAlign center
                                                     ]
                                                 ]
+                                            , class HeaderBtnPin
+                                                [ before
+                                                    [ Icon.windowPin ]
+                                                , color (hex "c1c1c1")
+                                                ]
                                             , class HeaderBtnClose
                                                 [ before
                                                     [ Icon.windowClose ]

@@ -266,6 +266,13 @@ headerContext config desktopApp windowId window =
 headerButtons : Config msg -> Bool -> WindowId -> Html msg
 headerButtons config resizable windowId =
     let
+        pin =
+            span
+                [ class [ Res.HeaderButton, Res.HeaderBtnPin ]
+                , onClickMe <| config.toMsg (TogglePin windowId)
+                ]
+                []
+
         minimize =
             span
                 [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
@@ -291,7 +298,8 @@ headerButtons config resizable windowId =
                 []
     in
         div [ class [ Res.HeaderButtons ] ]
-            [ minimize
+            [ pin
+            , minimize
             , maximize
             , close
             ]

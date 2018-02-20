@@ -12,6 +12,7 @@ type Classes
     | HeaderButtons
     | HeaderButton
     | HeaderBtnClose
+    | HeaderBtnPin
     | HeaderBtnMaximize
     | HeaderBtnMinimize
     | HeaderContextSw
