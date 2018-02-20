@@ -53,25 +53,13 @@ update msg model =
                     ( model, Cmd.none )
 
         HandleBoot id username token ->
-            let
-                model_ =
-                    connect id username token model
-            in
-                ( model_, Cmd.none )
+            ( connect id username token model, Cmd.none )
 
         HandleShutdown ->
-            let
-                model_ =
-                    logout model
-            in
-                ( model_, Cmd.none )
+            ( logout model, Cmd.none )
 
         HandleCrash ( code, message ) ->
-            let
-                model_ =
-                    crash code message model
-            in
-                ( model_, Cmd.none )
+            ( crash code message model, Cmd.none )
 
         HandlePlay ->
             let
@@ -83,41 +71,45 @@ update msg model =
         HandleEvent channel value ->
             case Events.handler eventsConfig channel value of
                 Ok msg ->
-                    ( model, React.toCmd <| React.msg msg )
+                    update msg model
 
                 Err error ->
                     always ( model, Cmd.none ) <|
                         Debug.log (Events.report error) ""
 
         LoadingEnd z ->
-            let
-                model_ =
-                    { model | windowLoaded = True }
-            in
-                ( model_, Cmd.none )
+            ( { model | windowLoaded = True }, Cmd.none )
 
         MenuMsg msg ->
             let
                 ( menuModel, menuCmd ) =
                     ContextMenu.update msg model.contextMenu
-
-                model_ =
-                    { model | contextMenu = menuModel }
-
-                cmd =
-                    Cmd.map MenuMsg menuCmd
             in
-                ( model_, cmd )
+                ( { model | contextMenu = menuModel }
+                , Cmd.map MenuMsg menuCmd
+                )
 
         _ ->
-            updateState msg model
+            dispatch <| updateState msg model
 
 
 
 -- internals
 
 
-updateState : Msg -> Model -> ( Model, Cmd Msg )
+dispatch : ( Model, React Msg ) -> ( Model, Cmd Msg )
+dispatch ( model, react ) =
+    case React.split react of
+        ( Just msg, cmd ) ->
+            case update msg model of
+                ( model, cmd2 ) ->
+                    ( model, Cmd.batch [ cmd, cmd2 ] )
+
+        ( Nothing, cmd ) ->
+            ( model, cmd )
+
+
+updateState : Msg -> Model -> ( Model, React Msg )
 updateState msg ({ state } as model) =
     case state of
         Home stateModel ->
@@ -130,10 +122,10 @@ updateState msg ({ state } as model) =
             updatePlay msg model stateModel
 
         Panic _ _ ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
-updateHome : Msg -> Model -> HomeModel -> ( Model, Cmd Msg )
+updateHome : Msg -> Model -> HomeModel -> ( Model, React Msg )
 updateHome msg model stateModel =
     case msg of
         HandleConnected ->
@@ -141,79 +133,71 @@ updateHome msg model stateModel =
                 ( modelLogin, cmdLogin ) =
                     login model
 
-                ( model_, cmdNext ) =
+                ( model_, reactNext ) =
                     updateState msg modelLogin
-
-                cmd =
-                    Cmd.batch [ cmdLogin, cmdNext ]
             in
-                ( model_, cmd )
+                ( model_, React.addCmd cmdLogin reactNext )
 
         WebsocketMsg msg ->
             case stateModel.websocket of
                 Just websocket ->
                     let
-                        ( websocket_, cmd ) =
-                            websocket
-                                |> Ws.update (websocketConfig model.flags) msg
-                                |> Tuple.mapSecond React.toCmd
+                        ( websocket_, react ) =
+                            Ws.update (websocketConfig model.flags)
+                                msg
+                                websocket
 
                         stateModel_ =
                             { stateModel | websocket = Just websocket_ }
-
-                        model_ =
-                            { model | state = Home stateModel_ }
                     in
-                        ( model_, cmd )
+                        ( { model | state = Home stateModel_ }, react )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, React.none )
 
         LandingMsg msg ->
             updateLanding msg model stateModel
 
         _ ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
-updateSetup : Msg -> Model -> SetupModel -> ( Model, Cmd Msg )
+updateSetup : Msg -> Model -> SetupModel -> ( Model, React Msg )
 updateSetup msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updateSetupWS model.flags msg stateModel
+            stateModel
+                |> updateSetupWS model.flags msg
                 |> finishSetupUpdate model
 
         SetupMsg msg ->
-            updateSetupSetup msg stateModel
+            stateModel
+                |> updateSetupSetup msg
                 |> finishSetupUpdate model
 
         GameMsg msg ->
-            updateSetupGame msg stateModel
+            stateModel
+                |> updateSetupGame msg
                 |> finishSetupUpdate model
 
         _ ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
 updateSetupWS :
     Flags
     -> Ws.Msg
     -> SetupModel
-    -> ( SetupModel, Cmd Msg )
+    -> ( SetupModel, React Msg )
 updateSetupWS flags msg stateModel =
     let
-        ( websocket, cmd ) =
-            stateModel.websocket
-                |> Ws.update (websocketConfig flags) msg
-                |> Tuple.mapSecond React.toCmd
-
-        stateModel_ =
-            { stateModel | websocket = websocket }
+        ( websocket, react ) =
+            Ws.update (websocketConfig flags) msg stateModel.websocket
     in
-        ( stateModel_, cmd )
+        ( { stateModel | websocket = websocket }, react )
 
 
-updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
+updateSetupSetup : Setup.Msg -> SetupModel -> ( SetupModel, React Msg )
 updateSetupSetup msg stateModel =
     let
         config =
@@ -224,37 +208,30 @@ updateSetupSetup msg stateModel =
 
         ( setup, react ) =
             Setup.update config msg stateModel.setup
-
-        stateModel_ =
-            { stateModel | setup = setup }
     in
-        ( stateModel_, React.toCmd react )
+        ( { stateModel | setup = setup }, react )
 
 
-updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, Cmd Msg )
+updateSetupGame : Game.Msg -> SetupModel -> ( SetupModel, React Msg )
 updateSetupGame msg stateModel =
     let
-        ( game, cmd ) =
-            stateModel.game
-                |> Game.update gameConfig msg
-                |> Tuple.mapSecond React.toCmd
-
-        stateModel_ =
-            { stateModel | game = game }
+        ( game, react ) =
+            Game.update gameConfig msg stateModel.game
     in
-        ( stateModel_, cmd )
+        ( { stateModel | game = game }, react )
 
 
-finishSetupUpdate : Model -> ( SetupModel, Cmd Msg ) -> ( Model, Cmd Msg )
-finishSetupUpdate model ( stateModel, cmd ) =
-    ( { model | state = Setup stateModel }, cmd )
+finishSetupUpdate : Model -> ( SetupModel, a ) -> ( Model, a )
+finishSetupUpdate model ( stateModel, react ) =
+    ( { model | state = Setup stateModel }, react )
 
 
-updatePlay : Msg -> Model -> PlayModel -> ( Model, Cmd Msg )
+updatePlay : Msg -> Model -> PlayModel -> ( Model, React Msg )
 updatePlay msg model stateModel =
     case msg of
         WebsocketMsg msg ->
-            updatePlayWS model.flags msg stateModel
+            stateModel
+                |> updatePlayWS model.flags msg
                 |> finishPlayUpdate model
 
         OSMsg msg ->
@@ -263,28 +240,24 @@ updatePlay msg model stateModel =
                 |> finishPlayUpdate model
 
         GameMsg msg ->
-            updatePlayGame msg stateModel
+            stateModel
+                |> updatePlayGame msg
                 |> finishPlayUpdate model
 
         _ ->
-            ( model, Cmd.none )
+            ( model, React.none )
 
 
-updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
+updatePlayWS : Flags -> Ws.Msg -> PlayModel -> ( PlayModel, React Msg )
 updatePlayWS flags msg stateModel =
     let
-        ( websocket, cmd ) =
-            stateModel.websocket
-                |> Ws.update (websocketConfig flags) msg
-                |> Tuple.mapSecond React.toCmd
-
-        stateModel_ =
-            { stateModel | websocket = websocket }
+        ( websocket, react ) =
+            Ws.update (websocketConfig flags) msg stateModel.websocket
     in
-        ( stateModel_, cmd )
+        ( { stateModel | websocket = websocket }, react )
 
 
-updatePlayOS : OS.Msg -> PlayModel -> Model -> ( PlayModel, Cmd Msg )
+updatePlayOS : OS.Msg -> PlayModel -> Model -> ( PlayModel, React Msg )
 updatePlayOS msg ({ game, os } as state) { contextMenu } =
     let
         volatile_ =
@@ -308,40 +281,32 @@ updatePlayOS msg ({ game, os } as state) { contextMenu } =
 
                     ( os_, react ) =
                         OS.update config msg os
-
-                    state_ =
-                        { state | os = os_ }
                 in
-                    ( state_, React.toCmd react )
+                    ( { state | os = os_ }, react )
 
             _ ->
-                ( state, Cmd.none )
+                ( state, React.none )
 
 
-updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, Cmd Msg )
+updatePlayGame : Game.Msg -> PlayModel -> ( PlayModel, React Msg )
 updatePlayGame msg stateModel =
     let
-        ( game, cmd ) =
-            stateModel.game
-                |> Game.update gameConfig msg
-                |> Tuple.mapSecond React.toCmd
-
-        stateModel_ =
-            { stateModel | game = game }
+        ( game, react ) =
+            Game.update gameConfig msg stateModel.game
     in
-        ( stateModel_, cmd )
+        ( { stateModel | game = game }, react )
 
 
-finishPlayUpdate : Model -> ( PlayModel, Cmd Msg ) -> ( Model, Cmd Msg )
-finishPlayUpdate model ( stateModel, cmd ) =
-    ( { model | state = Play stateModel }, cmd )
+finishPlayUpdate : Model -> ( PlayModel, a ) -> ( Model, a )
+finishPlayUpdate model ( stateModel, react ) =
+    ( { model | state = Play stateModel }, react )
 
 
 updateLanding :
     Landing.Msg
     -> Model
     -> HomeModel
-    -> ( Model, Cmd Msg )
+    -> ( Model, React Msg )
 updateLanding msg model ({ landing } as stateModel) =
     let
         ( landing_, react ) =
@@ -351,11 +316,8 @@ updateLanding msg model ({ landing } as stateModel) =
 
         stateModel_ =
             { stateModel | landing = landing_ }
-
-        model_ =
-            { model | state = Home stateModel_ }
     in
-        ( model_, (React.toCmd react) )
+        ( { model | state = Home stateModel_ }, react )
 
 
 
@@ -379,6 +341,9 @@ received : Msg -> Msg
 received msg =
     case msg of
         -- ignored messages
+        BatchMsg _ ->
+            msg
+
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
             msg
 
