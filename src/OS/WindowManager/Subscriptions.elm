@@ -5,6 +5,7 @@ import Draggable
 import Utils.Maybe as Maybe
 import Apps.LocationPicker.Subscriptions as LocationPicker
 import Apps.TaskManager.Subscriptions as TaskManager
+import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId(..))
 import OS.WindowManager.Config exposing (..)
@@ -32,13 +33,24 @@ subscriptions config model =
 subsApp : Config msg -> Model -> AppId -> App -> Maybe (Sub msg)
 subsApp config model appId app =
     let
-        activeGateway =
-            model
-                |> getWindow (getWindowId app)
-                |> Maybe.andThen (getWindowGateway config model)
+        cid =
+            getAppCId app
 
         activeServer =
-            getAppActiveServer config app
+            config.servers
+                |> Servers.get cid
+                |> Maybe.map ((,) cid)
+
+        activeGateway =
+            case getAppContext app of
+                Gateway ->
+                    activeServer
+
+                Endpoint ->
+                    model
+                        |> getWindowOfApp appId
+                        |> Maybe.andThen (flip getWindow model)
+                        |> Maybe.andThen (getEndpointOfWindow config model)
     in
         case Maybe.uncurry activeServer activeGateway of
             Just ( active, gateway ) ->

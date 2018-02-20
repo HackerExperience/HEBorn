@@ -44,8 +44,8 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        NewApp desktopApp maybeContext maybeParams ->
-            launch config desktopApp maybeParams maybeContext model
+        NewApp desktopApp maybeContext maybeParams cid ->
+            launch config desktopApp maybeParams maybeContext cid model
 
         OpenApp cid params ->
             onOpenApp config cid params model
@@ -60,9 +60,6 @@ update config msg model =
         Minimize wId ->
             withSession config model <| minimize wId >> React.update
 
-        ToggleVisibility wId ->
-            withSession config model <| toggleVisibility wId >> React.update
-
         ToggleMaximize wId ->
             withWindow wId model <| toggleMaximize >> React.update
 
@@ -73,13 +70,13 @@ update config msg model =
             withWindow wId model <| setContext context >> React.update
 
         UpdateFocus maybeWId ->
-            withSession config model <| updateFocus maybeWId >> React.update
+            withSession config model <| focus maybeWId >> React.update
 
-        Pin wId ->
-            withSession config model <| pin wId >> React.update
+        Pin windowId ->
+            React.update <| pin windowId model
 
-        Unpin wId ->
-            withSession config model <| unpin wId >> React.update
+        Unpin windowId ->
+            React.update <| unpin windowId model
 
         -- drag messages
         StartDrag wId ->
@@ -119,7 +116,7 @@ onOpenApp config cid params model =
             AppsParams.toAppType params
 
         maybeAppId =
-            getOpenedAppId desktopApp cid (getSessionId config) model
+            findExistingAppId desktopApp cid model
 
         maybeContext =
             case config.endpointCId of
@@ -140,7 +137,7 @@ onOpenApp config cid params model =
                 updateAppParams config appId params model
 
             Nothing ->
-                launch config desktopApp (Just params) maybeContext model
+                launch config desktopApp (Just params) maybeContext cid model
 
 
 withSession :
@@ -199,13 +196,16 @@ onClickIcon config desktopApp model =
             getSessionId config
 
         context =
-            getActiveContext config
+            if config.activeGateway == config.activeServer then
+                Gateway
+            else
+                Endpoint
 
         ( model_, shouldLaunch ) =
             openOrRestoreApp desktopApp sessionId model
     in
         if shouldLaunch then
-            launch config desktopApp Nothing (Just context) model_
+            launch config desktopApp Nothing (Just context) sessionId model_
         else
             React.update model_
 
@@ -250,7 +250,7 @@ updateApp config appId appMsg model =
             getApp appId model
 
         maybeWindowId =
-            Maybe.map getWindowId maybeApp
+            getWindowOfApp appId model
 
         maybeWindow =
             Maybe.andThen (flip getWindow model) maybeWindowId
@@ -259,14 +259,14 @@ updateApp config appId appMsg model =
             Maybe.andThen (getAppActiveServer config) maybeApp
 
         maybeActiveGateway =
-            Maybe.andThen (getWindowGateway config model) maybeWindow
+            Maybe.andThen (getGatewayOfWindow config model) maybeWindow
 
         uncurried =
             case Maybe.uncurry maybeActiveServer maybeActiveGateway of
                 Just ( active, gateway ) ->
-                    case maybeApp of
-                        Just app ->
-                            Just ( app, active, gateway )
+                    case Maybe.uncurry maybeWindowId maybeApp of
+                        Just ( windowId, app ) ->
+                            Just ( windowId, app, active, gateway )
 
                         Nothing ->
                             Nothing
@@ -275,13 +275,14 @@ updateApp config appId appMsg model =
                     Nothing
     in
         case uncurried of
-            Just ( app, active, gateway ) ->
+            Just ( windowId, app, active, gateway ) ->
                 let
                     ( appModel, react ) =
                         updateAppDelegate config
                             active
                             gateway
                             appMsg
+                            windowId
                             appId
                             app
                 in
@@ -298,10 +299,11 @@ updateAppDelegate :
     -> ( CId, Server )
     -> ( CId, Server )
     -> AppMsg
+    -> WindowId
     -> AppId
     -> App
     -> ( AppModel, React msg )
-updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg appId app =
+updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId app =
     -- HACK : Elm's Tuple Pattern Matching is slow
     -- https://groups.google.com/forum/#!topic/elm-dev/QGmwWH6V8-c
     case appMsg of
@@ -417,7 +419,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg appId app =
                 FloatingHeadsModel appModel ->
                     appModel
                         |> FloatingHeads.update
-                            (floatingHeadsConfig (getWindowId app)
+                            (floatingHeadsConfig windowId
                                 appId
                                 cid
                                 config
@@ -433,7 +435,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg appId app =
                 HebampModel appModel ->
                     appModel
                         |> Hebamp.update
-                            (hebampConfig (getWindowId app) appId config)
+                            (hebampConfig windowId appId config)
                             msg
                         |> Tuple.mapFirst HebampModel
 
@@ -500,6 +502,6 @@ updateApps config appMsg model =
                 ( model, react :: list )
     in
         model
-            |> listAppId (msgToDesktopApp appMsg)
+            |> listAppsOfType (msgToDesktopApp appMsg)
             |> List.foldl reducer ( model, [] )
             |> Tuple.mapSecond (React.batch config.batchMsg)
