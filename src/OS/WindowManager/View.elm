@@ -49,14 +49,19 @@ import OS.WindowManager.Models exposing (..)
 view : Config msg -> Model -> Html msg
 view config model =
     let
+        isFreeplay =
+            config.activeServer
+                |> Tuple.second
+                |> Servers.isFreeplay
+
         session =
             getSession (getSessionId config) model
     in
         div [ osClass [ OsRes.Session ] ]
-            [ viewSession config model session
+            [ viewSession config model isFreeplay session
 
             -- sadly, using lazy here will cause problems with window titles
-            , Dock.view (dockConfig config) model session
+            , Dock.view (dockConfig config) model isFreeplay session
             ]
 
 
@@ -87,18 +92,39 @@ styles =
 -- session handling
 
 
-viewSession : Config msg -> Model -> Session -> Html msg
-viewSession config model { visible, focusing } =
+viewSession : Config msg -> Model -> Bool -> Session -> Html msg
+viewSession config model isFreeplay { visible, focusing } =
+    Html.Keyed.node Res.workspaceNode [ class [ Res.Super ] ] <|
+        List.filterMap (filterMapWindows config model isFreeplay) visible
+
+
+filterMapWindows :
+    Config msg
+    -> Model
+    -> Bool
+    -> WindowId
+    -> Maybe ( WindowId, Html msg )
+filterMapWindows config model isFreeplay windowId =
     let
-        mapFun windowId =
+        shouldDraw =
             model
-                |> getWindow windowId
-                |> Maybe.map (viewWindow config model windowId)
-                |> Maybe.withDefault (text "")
-                |> (,) windowId
+                |> getSessionOfWindow windowId
+                |> Maybe.andThen (flip Servers.get config.servers)
+                |> Maybe.map (Servers.isFreeplay >> (==) isFreeplay)
+                |> Maybe.withDefault False
     in
-        Html.Keyed.node Res.workspaceNode [ class [ Res.Super ] ] <|
-            List.map mapFun visible
+        if shouldDraw then
+            case getWindow windowId model of
+                Just window ->
+                    Just <|
+                        ( windowId
+                        , viewWindow config model windowId window
+                        )
+
+                Nothing ->
+                    Nothing
+        else
+            Nothing
 
 
 
@@ -266,6 +292,13 @@ headerContext config desktopApp windowId window =
 headerButtons : Config msg -> Bool -> WindowId -> Html msg
 headerButtons config resizable windowId =
     let
+        pin =
+            span
+                [ class [ Res.HeaderButton, Res.HeaderBtnPin ]
+                , onClickMe <| config.toMsg (TogglePin windowId)
+                ]
+                []
+
         minimize =
             span
                 [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
@@ -291,7 +324,8 @@ headerButtons config resizable windowId =
                 []
     in
         div [ class [ Res.HeaderButtons ] ]
-            [ minimize
+            [ pin
+            , minimize
             , maximize
             , close
             ]

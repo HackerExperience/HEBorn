@@ -35,8 +35,7 @@ type Msg
     | ToggleContext WindowId
     | SelectContext Context WindowId
     | UpdateFocus (Maybe WindowId)
-    | Pin WindowId
-    | Unpin WindowId
+    | TogglePin WindowId
       -- drag messages
     | StartDrag WindowId
     | Dragging Draggable.Delta
