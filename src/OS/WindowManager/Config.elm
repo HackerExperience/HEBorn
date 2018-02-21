@@ -126,6 +126,7 @@ dockConfig config =
     , onCloseWindow = Close >> config.toMsg
     , accountDock = Account.getDock config.account
     , endpointCId = config.endpointCId
+    , servers = config.servers
     }
 
 

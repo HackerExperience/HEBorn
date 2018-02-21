@@ -61,7 +61,7 @@ view config model =
             [ viewSession config model isFreeplay session
 
             -- sadly, using lazy here will cause problems with window titles
-            , Dock.view (dockConfig config) model session
+            , Dock.view (dockConfig config) model isFreeplay session
             ]
 
 

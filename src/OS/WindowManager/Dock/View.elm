@@ -10,6 +10,7 @@ import Utils.Maybe as Maybe
 import Apps.Shared as Apps
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import OS.Resources as OsRes
+import Game.Servers.Models as Servers
 import OS.WindowManager.Models exposing (..)
 import OS.WindowManager.Shared exposing (..)
 import OS.WindowManager.Dock.Config exposing (..)
@@ -36,15 +37,15 @@ type alias WindowGroup =
     Dict AppName (List ( WindowId, Window ))
 
 
-view : Config msg -> Model -> Session -> Html msg
-view config model session =
+view : Config msg -> Model -> Bool -> Session -> Html msg
+view config model isFreeplay session =
     let
         groups =
-            group model session
+            group config model isFreeplay session
 
         icons =
             config.accountDock
-                |> List.foldl (viewIcons config model groups) []
+                |> List.foldl (viewIcons config model isFreeplay groups) []
                 |> List.reverse
                 |> div [ class [ Res.Main ] ]
 
@@ -72,17 +73,18 @@ osClass =
 viewIcons :
     Config msg
     -> Model
+    -> Bool
     -> WindowGroups
     -> DesktopApp
     -> List (Html msg)
     -> List (Html msg)
-viewIcons config model groupedWindows app list =
+viewIcons config model isFreeplay groupedWindows app list =
     let
         icon =
             viewIcon config app
 
         isNotEmpty =
-            hasAppOpened app groupedWindows
+            hasWindowOpened app groupedWindows
 
         content =
             if isNotEmpty then
@@ -207,39 +209,54 @@ getWindowTitle model window =
         |> Maybe.map (getModel >> getTitle)
 
 
-group : Model -> Session -> WindowGroups
-group model { visible, hidden } =
+group : Config msg -> Model -> Bool -> Session -> WindowGroups
+group =
     let
-        reducer windowId dict =
-            let
-                maybeWindow =
-                    getWindow windowId model
+        shouldInsert config model isFreeplay windowId =
+            model
+                |> getSessionOfWindow windowId
+                |> Maybe.andThen (flip Servers.get config.servers)
+                |> Maybe.map (Servers.isFreeplay >> (==) isFreeplay)
+                |> Maybe.withDefault False
 
-                maybeAppName =
-                    maybeWindow
-                        |> Maybe.map getActiveAppId
-                        |> Maybe.andThen (flip getApp model)
-                        |> Maybe.map
-                            (getModel >> toDesktopApp >> Apps.name)
-            in
-                case Maybe.uncurry maybeWindow maybeAppName of
-                    Just ( window, appName ) ->
-                        dict
-                            |> Dict.get appName
-                            |> Maybe.withDefault []
-                            |> (::) ( windowId, window )
-                            |> flip (Dict.insert appName) dict
+        getWindowAppName model window =
+            window
+                |> getActiveAppId
+                |> (flip getApp model)
+                |> Maybe.map (getModel >> toDesktopApp >> Apps.name)
+
+        reducer config model isFreeplay windowId dict =
+            if shouldInsert config model isFreeplay windowId then
+                case getWindow windowId model of
+                    Just window ->
+                        case getWindowAppName model window of
+                            Just appName ->
+                                dict
+                                    |> Dict.get appName
+                                    |> Maybe.withDefault []
+                                    |> (::) ( windowId, window )
+                                    |> flip (Dict.insert appName) dict
+
+                            Nothing ->
+                                dict
 
                     Nothing ->
                         dict
+            else
+                dict
     in
-        ( List.foldl reducer Dict.empty visible
-        , List.foldl reducer Dict.empty hidden
-        )
+        \config model isFreeplay { visible, hidden } ->
+            let
+                reducer_ =
+                    reducer config model isFreeplay
+            in
+                ( List.foldl reducer_ Dict.empty visible
+                , List.foldl reducer_ Dict.empty hidden
+                )
 
 
-hasAppOpened : DesktopApp -> WindowGroups -> Bool
-hasAppOpened app ( hidden, visible ) =
+hasWindowOpened : DesktopApp -> WindowGroups -> Bool
+hasWindowOpened app ( hidden, visible ) =
     let
         name =
             Apps.name app
