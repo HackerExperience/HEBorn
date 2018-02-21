@@ -185,6 +185,7 @@ viewPg config { page, modal } =
                     let
                         storages =
                             config.activeServer
+                                |> Tuple.second
                                 |> .storages
 
                         onPick chosen =

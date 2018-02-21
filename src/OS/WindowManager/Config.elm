@@ -152,9 +152,10 @@ bounceManagerConfig appId config =
 
 browserConfig : AppId -> CId -> Server -> Config msg -> Browser.Config msg
 browserConfig appId cid server config =
-    { toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
+    { flags = config.flags
+    , toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
-    , activeServer = server
+    , activeServer = ( cid, server )
     , activeGateway = Tuple.second config.activeGateway
     , reference = appId
     , endpointCId = config.endpointCId

@@ -7,6 +7,7 @@ import Game.Account.Finances.Shared as Finances
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Requests.Browse as BrowseRequest exposing (browseRequest)
 import Game.Web.Types as Web
 import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Game.Meta.Types.Context exposing (Context(..))
@@ -251,8 +252,8 @@ processTabMsg config tabId msg tab model =
         EnterModal modal ->
             ( { tab | modal = modal }, React.none )
 
-        HandleFetched response ->
-            handleFetched response tab
+        HandleBrowse response ->
+            handleBrowse response tab
 
         GoAddress url ->
             onGoAddress config url model.me tabId tab
@@ -302,29 +303,45 @@ processTabMsg config tabId msg tab model =
             onPageMsg config msg tab
 
 
-handleFetched : Web.Response -> Tab -> TabUpdateResponse msg
-handleFetched response tab =
-    let
-        ( url, pageModel ) =
-            case response of
-                Web.PageLoaded site ->
-                    ( site.url, initialPage site )
+handleBrowse : BrowseRequest.Data -> Tab -> TabUpdateResponse msg
+handleBrowse data tab =
+    case data of
+        Ok site ->
 
-                Web.PageNotFound url ->
-                    ( url, NotFoundModel { url = url } )
+        Err error ->
+            let
+                (url, pageModel) =
+                    case error of
+                        BrowseRequest.PageNotFound url ->
+                            (url, NotFoundModel { url = url })
 
-                Web.ConnectionError url ->
-                    -- TODO: Change to some "failed" page
-                    ( url, BlankModel )
+                        BrowseRequest.ConnectionError url ->
+                            -- TODO: Change to some "failed" page
+                            (url, BlankModel)
+            in
+                ( gotoPage url pageModel tab , React.none)
+                    
+    --let
+    --    ( url, pageModel ) =
+    --        case response of
+    --            Web.PageLoaded site ->
+    --                ( site.url, initialPage site )
 
-        isLoadingThisRequest =
-            (isLoading <| getPage tab)
-                && (getURL tab == url)
-    in
-        if (isLoadingThisRequest) then
-            ( gotoPage url pageModel tab, React.none )
-        else
-            ( tab, React.none )
+    --            Web.PageNotFound url ->
+    --                ( url, NotFoundModel { url = url } )
+
+    --            Web.ConnectionError url ->
+    --                -- TODO: Change to some "failed" page
+    --                ( url, BlankModel )
+
+    --    isLoadingThisRequest =
+    --        (isLoading <| getPage tab)
+    --            && (getURL tab == url)
+    --in
+    --    if (isLoadingThisRequest) then
+    --        ( gotoPage url pageModel tab, React.none )
+    --    else
+    --        ( tab, React.none )
 
 
 handleLoginFailed : Tab -> TabUpdateResponse msg
@@ -358,17 +375,19 @@ onGoAddress config url reference tabId tab =
     let
         networkId =
             config.activeServer
+                |> Tuple.second
                 |> Servers.getActiveNIP
                 |> Network.getId
 
-        requester =
-            Requester reference tabId
-
-        react =
-            React.msg <| config.onFetchUrl networkId url requester
-
         tab_ =
             gotoPage url (LoadingModel url) tab
+
+        react =
+            config.activeServer
+                |> Tuple.first
+                |> browseRequest url networkId
+                |> Cmd.map HandleBrowse
+                |> React.cmd
     in
         ( tab_, react )
 

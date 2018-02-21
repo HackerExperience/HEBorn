@@ -27,6 +27,7 @@ launchOpenAtUrl config url =
     let
         nid =
             config.activeServer
+                |> Tuple.second
                 |> Servers.getActiveNIP
                 |> Network.getId
 

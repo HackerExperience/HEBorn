@@ -2,6 +2,7 @@ module Apps.Browser.Config exposing (..)
 
 import ContextMenu
 import Html exposing (Attribute)
+import Core.Flags as Core
 import Utils.Core exposing (..)
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Params as AppParams exposing (AppParams)
@@ -21,11 +22,12 @@ import Apps.Browser.Pages.Webserver.Config as Webserver
 
 
 type alias Config msg =
-    { toMsg : Msg -> msg
+    { flags : Core.Flags
+    , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , reference : Reference
     , endpoints : List CId
-    , activeServer : Servers.Server
+    , activeServer : ( CId, Servers.Server )
     , activeGateway : Servers.Server
     , menuAttr : ContextMenuAttribute msg
     , endpointCId : Maybe CId
