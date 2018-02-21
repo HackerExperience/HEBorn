@@ -22,7 +22,7 @@ import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Storyline.Models as Story
-import Game.Storyline.Emails.Contents as Emails
+import Game.Storyline.Shared as Story
 import OS.Messages exposing (..)
 import OS.Console.Config as Console
 import OS.Header.Config as Header
@@ -76,7 +76,7 @@ type alias Config msg =
     , onNewBruteforceProcess : CId -> Network.IP -> msg
     , onWebLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
-    , onReplyEmail : String -> Emails.Content -> msg
+    , onReplyEmail : String -> Story.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
     , onWebLogout : CId -> msg
     , accountId : String

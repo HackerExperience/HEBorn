@@ -1,5 +1,6 @@
 module Events.Account.Handlers.StoryEmailSent exposing (Data, handler, notify)
 
+import Time exposing (Time)
 import Json.Decode
     exposing
         ( Decoder
@@ -14,15 +15,14 @@ import Json.Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, custom, optional)
 import Events.Shared exposing (Handler)
-import Decoders.Emails exposing (contentFromId)
-import Game.Storyline.Emails.Models exposing (..)
-import Game.Storyline.Emails.Contents exposing (..)
+import Decoders.Storyline exposing (replyFromId)
+import Game.Storyline.Shared exposing (Reply, PastEmail(FromContact), ContactId)
 
 
 type alias Data =
-    { personId : String
-    , messageNode : ( Float, Message )
-    , replies : Replies
+    { contactId : ContactId
+    , messageNode : ( Time, PastEmail )
+    , replies : List Reply
     , createNotification : Bool
     }
 
@@ -32,13 +32,13 @@ handler toMsg =
     decodeValue newEmail >> Result.map toMsg
 
 
-notify : (String -> value) -> (Maybe Float -> value -> msg) -> Data -> msg
-notify toContent toMsg { personId, messageNode } =
+notify : (String -> value) -> (Maybe Time -> value -> msg) -> Data -> msg
+notify fromString toMsg { contactId, messageNode } =
     let
         ( time, _ ) =
             messageNode
     in
-        toMsg (Just time) <| toContent personId
+        toMsg (Just time) <| fromString contactId
 
 
 
@@ -54,23 +54,23 @@ newEmail =
         |> optional "notification" bool True
 
 
-messageNode : Decoder ( Float, Message )
+messageNode : Decoder ( Time, PastEmail )
 messageNode =
     decode (,)
         |> required "timestamp" float
-        |> custom message
+        |> custom pastEmail
 
 
-replies : Decoder (List Content)
+replies : Decoder (List Reply)
 replies =
     string
-        |> andThen contentFromId
+        |> andThen replyFromId
         |> list
 
 
-message : Decoder Message
-message =
+pastEmail : Decoder PastEmail
+pastEmail =
     field "email_id" string
         |> andThen
-            contentFromId
-        |> map Received
+            replyFromId
+        |> map FromContact

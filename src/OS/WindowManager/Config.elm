@@ -44,7 +44,7 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Models as Processes
 import Game.Storyline.Models as Storyline
-import Game.Storyline.Emails.Contents as Emails
+import Game.Storyline.Shared as Storyline
 import OS.WindowManager.Dock.Config as Dock
 import OS.WindowManager.Messages exposing (..)
 import OS.WindowManager.Shared exposing (..)
@@ -77,7 +77,7 @@ type alias Config msg =
     , onNewBruteforceProcess : CId -> Network.IP -> msg
     , onWebLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
     , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
-    , onReplyEmail : String -> Emails.Content -> msg
+    , onReplyEmail : String -> Storyline.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
     , onWebLogout : CId -> msg
     , lastTick : Time
@@ -230,7 +230,7 @@ dbAdminConfig appId config =
 emailConfig : AppId -> CId -> Config msg -> Email.Config msg
 emailConfig appId cid config =
     { toMsg = EmailMsg >> AppMsg appId >> config.toMsg
-    , emails = Storyline.getEmails config.story
+    , story = config.story
     , batchMsg = config.batchMsg
     , onOpenApp = OpenApp cid >> config.toMsg
     }
@@ -268,7 +268,7 @@ floatingHeadsConfig windowId appId cid config =
     { toMsg = FloatingHeadsMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , reference = appId
-    , emails = Storyline.getEmails config.story
+    , story = config.story
     , username = Account.getUsername config.account
     , onReplyEmail = config.onReplyEmail
     , onCloseApp = config.toMsg <| Close windowId

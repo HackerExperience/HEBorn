@@ -8,7 +8,7 @@ import Css exposing (Stylesheet)
 import Css.File
 import OS.Config exposing (..)
 import Game.Storyline.DynamicStyle as Storyline
-import Game.Storyline.Missions.DynamicStyle as Missions
+import Game.Storyline.StepActions.DynamicStyle as StepActions
 
 
 styleNode : String -> List Stylesheet -> Html msg
@@ -28,7 +28,7 @@ view : Config msg -> Html msg
 view { story, isCampaign } =
     let
         missions_ =
-            Missions.dynCss
+            StepActions.dynCss
                 >> styleNode "missions"
 
         story_ =
@@ -38,7 +38,7 @@ view { story, isCampaign } =
         ( storyStyles, missionsStyles ) =
             if isCampaign then
                 ( lazy story_ story
-                , lazy missions_ story.missions
+                , lazy missions_ story
                 )
             else
                 ( text "", text "" )

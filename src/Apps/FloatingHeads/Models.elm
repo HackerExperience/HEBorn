@@ -1,12 +1,12 @@
 module Apps.FloatingHeads.Models exposing (..)
 
 import Game.Meta.Types.Apps.Desktop exposing (Reference)
-import Game.Storyline.Emails.Models as Emails exposing (ID)
+import Game.Storyline.Shared exposing (ContactId)
 
 
 type alias Model =
     { me : Reference
-    , activeContact : ID
+    , activeContact : ContactId
     , mode : Mode
     }
 

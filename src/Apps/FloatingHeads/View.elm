@@ -6,9 +6,9 @@ import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
-import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
-import Game.Storyline.Emails.Contents as Emails
-import Game.Storyline.Emails.Contents.View as Emails
+import Game.Storyline.Models as Storyline exposing (Contact)
+import Game.Storyline.Shared as Storyline
+import Game.Storyline.Emails.View as Emails
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Messages exposing (Msg(..))
 import Apps.FloatingHeads.Models exposing (..)
@@ -23,8 +23,9 @@ view : Config msg -> Model -> Html msg
 view config model =
     let
         person =
-            config.emails
-                |> Emails.getPerson model.activeContact
+            Storyline.getContact
+                model.activeContact
+                config.story
     in
         case model.mode of
             Compact ->
@@ -34,7 +35,7 @@ view config model =
                 viewExpanded config person model
 
 
-viewExpanded : Config msg -> Maybe Person -> Model -> Html msg
+viewExpanded : Config msg -> Maybe Contact -> Model -> Html msg
 viewExpanded config person model =
     div
         []
@@ -47,7 +48,7 @@ viewExpanded config person model =
         ]
 
 
-viewCompact : Config msg -> Maybe Person -> Model -> Html msg
+viewCompact : Config msg -> Maybe Contact -> Model -> Html msg
 viewCompact config person model =
     div
         []
@@ -74,24 +75,16 @@ closeBtn { toMsg } =
         []
 
 
-renderHeader : Config msg -> Maybe Person -> Html msg
+renderHeader : Config msg -> Maybe Contact -> Html msg
 renderHeader { draggable, toMsg } person =
     let
-        fallbackLink =
-            "images/avatar.jpg"
-
         imgSource =
             case person of
                 Just person ->
-                    case person.about of
-                        Just about ->
-                            src about.picture
-
-                        Nothing ->
-                            src fallbackLink
+                    src person.about.picture
 
                 Nothing ->
-                    src fallbackLink
+                    src "images/avatar.jpg"
     in
         div [ class [ AvatarContainer ], draggable ]
             [ img
@@ -103,10 +96,10 @@ renderHeader { draggable, toMsg } person =
             ]
 
 
-renderChat : Config msg -> Maybe Person -> Html msg
+renderChat : Config msg -> Maybe Contact -> Html msg
 renderChat config active =
     active
-        |> Maybe.map Emails.getAvailableReplies
+        |> Maybe.map Storyline.getAvailableReplies
         |> Maybe.withDefault []
         |> List.map (reply config)
         |> div []
@@ -115,39 +108,39 @@ renderChat config active =
         |> div [ class [ Chat ] ]
 
 
-reply : Config msg -> Emails.Content -> Html msg
+reply : Config msg -> Storyline.Reply -> Html msg
 reply config msg =
     msg
         |> Emails.view (contentConfig config)
         |> span [ onClick <| config.toMsg <| Reply msg ]
 
 
-chatMessages : Config msg -> Maybe Person -> List (Html msg)
+chatMessages : Config msg -> Maybe Contact -> List (Html msg)
 chatMessages config active =
     active
-        |> Maybe.map (Emails.getMessages >> Dict.values)
+        |> Maybe.map (Storyline.getPastEmails >> Dict.values)
         |> Maybe.withDefault []
         |> List.map (messageSerialize >> uncurry (baloon config))
 
 
-messageSerialize : Emails.Message -> ( Classes, Emails.Content )
+messageSerialize : Storyline.PastEmail -> ( Classes, Storyline.Reply )
 messageSerialize msg =
     case msg of
-        Emails.Sent msg ->
+        Storyline.FromPlayer msg ->
             ( To, msg )
 
-        Emails.Received msg ->
+        Storyline.FromContact msg ->
             ( From, msg )
 
 
-baloon : Config msg -> Classes -> Emails.Content -> Html msg
+baloon : Config msg -> Classes -> Storyline.Reply -> Html msg
 baloon config direction msg =
     li
         [ class [ direction ] ]
         [ content config msg ]
 
 
-content : Config msg -> Emails.Content -> Html msg
+content : Config msg -> Storyline.Reply -> Html msg
 content config msg =
     msg
         |> Emails.view (contentConfig config)

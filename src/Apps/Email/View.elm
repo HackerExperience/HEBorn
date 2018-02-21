@@ -5,7 +5,8 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Game.Storyline.Emails.Models as Emails exposing (ID, Person)
+import Game.Storyline.Models exposing (Contact)
+import Game.Storyline.Shared exposing (ContactId)
 import Apps.Email.Config exposing (..)
 import Apps.Email.Messages exposing (Msg(..))
 import Apps.Email.Models exposing (..)
@@ -17,41 +18,24 @@ import Apps.Email.Resources exposing (Classes(..), prefix)
 
 
 view : Config msg -> Model -> Html msg
-view config model =
-    let
-        emails =
-            config.emails
-
-        contactList =
-            emails
-                |> Dict.foldr contact []
-                |> ul [ class [ Contacts ] ]
-    in
-        Html.map config.toMsg <|
-            div
-                []
-                [ contactList ]
+view ({ story } as config) model =
+    story
+        |> Dict.foldr (contact config) []
+        |> ul [ class [ Contacts ] ]
+        |> List.singleton
+        |> div []
 
 
 contact :
-    ID
-    -> Person
-    -> List (Html Msg)
-    -> List (Html Msg)
-contact k { about } acu =
+    Config msg
+    -> ContactId
+    -> Contact
+    -> List (Html msg)
+    -> List (Html msg)
+contact { toMsg } contactId { about } acu =
     let
-        name =
-            about
-                |> Maybe.map (.name)
-                |> Maybe.withDefault "[UNKNOWN]"
-
         source =
-            case about of
-                Just about_ ->
-                    src about_.picture
-
-                Nothing ->
-                    src "images/avatar.jpg"
+            src about.picture
 
         image =
             img imageAttrs []
@@ -60,7 +44,7 @@ contact k { about } acu =
             [ source, class [ Avatar ] ]
 
         attrs =
-            [ onClick <| SelectContact k ]
+            [ onClick <| toMsg <| SelectContact contactId ]
     in
-        li attrs [ image, text name ]
+        li attrs [ image, text about.nick ]
             |> flip (::) acu

@@ -1,9 +1,23 @@
-module Game.Storyline.Messages exposing (Msg(..))
+module Game.Storyline.Messages exposing (..)
 
-import Game.Storyline.Missions.Messages as Missions
-import Game.Storyline.Emails.Messages as Emails
+import Requests.Types exposing (ResponseType)
+import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
+import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
+import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
+import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
+import Game.Storyline.Shared exposing (ContactId, Reply)
+import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type Msg
-    = MissionsMsg Missions.Msg
-    | EmailsMsg Emails.Msg
+    = HandleReply ContactId Reply
+    | HandleNewEmail StoryEmailSent.Data
+    | HandleReplyUnlocked StoryEmailReplyUnlocked.Data
+    | HandleReplySent StoryEmailReplySent.Data
+    | HandleActionDone Action
+    | HandleStepProceeded StoryStepProceeded.Data
+    | Request RequestMsg
+
+
+type RequestMsg
+    = ReplyRequest ( ContactId, Reply ) ResponseType
