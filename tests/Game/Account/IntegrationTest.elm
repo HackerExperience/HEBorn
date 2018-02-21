@@ -17,8 +17,7 @@ import Game.Models as Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Storyline.Models as Story
-import Game.Storyline.Emails.Models as Emails
-import Game.Storyline.Emails.Contents as Emails
+import Game.Storyline.Shared as Story
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers
 import Game.Account.Database.Models exposing (..)
@@ -107,20 +106,15 @@ replyUnlocked =
                     """
                         { "contact_id": "kress"
                         , "replies":
-                            [ { "id": "helloworld"
-                              , "meta": { "something": "itriedsohardandgotsofar" }
-                            } ]
+                            [ "welcome" ]
                         }
                         """
             in
                 game
                     |> applyEvent name json channel
                     |> Game.getStory
-                    |> Story.getEmails
-                    |> Emails.getPerson ("kress")
-                    |> Maybe.map Emails.getAvailableReplies
+                    |> Story.getContact "kress"
+                    |> Maybe.map
+                        Story.getAvailableReplies
                     |> Expect.equal
-                        (Just
-                            [ Emails.HelloWorld "itriedsohardandgotsofar"
-                            ]
-                        )
+                        (Just [ Story.Welcome ])

@@ -20,7 +20,6 @@ type alias Data =
     , contactId : ContactId
     , step : Step
     , reply : Reply
-    , to : Reply
     , availableReplies : List Reply
     }
 
@@ -41,5 +40,5 @@ replySent =
         |> required "contact_id" string
         |> required "step" step
         |> required "reply_id" reply
-        |> required "reply_to" reply
+        --|> required "reply_to" reply
         |> required "replies" replies

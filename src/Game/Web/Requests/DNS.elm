@@ -108,6 +108,9 @@ decodeType typeStr =
         "npc_download_center" ->
             decodeDownloadCenter
 
+        "npc_story_char" ->
+            decodeDownloadCenter
+
         "npc_isp" ->
             succeed ISP
 
