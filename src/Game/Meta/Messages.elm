@@ -5,3 +5,4 @@ import Time exposing (Time)
 
 type Msg
     = Tick Time
+    | Focused (Maybe ( String, String ))

@@ -15,3 +15,26 @@ update config msg model =
     case msg of
         Tick time ->
             ( { model | lastTick = time }, React.none )
+
+        Focused what ->
+            onFocused what model
+
+
+onFocused : Maybe ( String, String ) -> Model -> UpdateResponse msg
+onFocused what model =
+    let
+        focus_ =
+            case Maybe.map Tuple.second what of
+                Just "INPUT" ->
+                    InsertMode
+
+                Just "TEXTAREA" ->
+                    InsertMode
+
+                _ ->
+                    NormalMode
+
+        model_ =
+            { model | keyFocus = focus_ }
+    in
+        ( model_, React.none )
