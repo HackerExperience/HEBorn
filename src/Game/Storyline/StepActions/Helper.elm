@@ -15,3 +15,6 @@ initialActions step =
         Tutorial_DownloadCracker ->
             [ GoApp DesktopApp.Browser Gateway
             ]
+
+        Tutorial_NastyVirus ->
+            []

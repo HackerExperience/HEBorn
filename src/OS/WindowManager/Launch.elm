@@ -1,6 +1,5 @@
 module OS.WindowManager.Launch exposing (launch, lazyLaunchEndpoint)
 
-import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
 import Apps.Params as Apps exposing (AppParams)
 import Apps.Shared as Apps exposing (AppContext)
@@ -9,7 +8,6 @@ import Apps.BounceManager.Launch as BounceManager
 import Apps.Browser.Launch as Browser
 import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
-import Apps.Calculator.Messages as Calculator
 import Apps.ConnManager.Models as ConnManager
 import Apps.CtrlPanel.Models as CtrlPanel
 import Apps.DBAdmin.Models as DBAdmin

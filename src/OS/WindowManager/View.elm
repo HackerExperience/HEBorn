@@ -1,6 +1,5 @@
 module OS.WindowManager.View exposing (view)
 
-import Dict
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (style, attribute, tabindex)
 import Html.Events exposing (onMouseDown)

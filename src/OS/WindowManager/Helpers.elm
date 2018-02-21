@@ -1,14 +1,11 @@
 module OS.WindowManager.Helpers exposing (..)
 
 import Utils.Maybe as Maybe
-import Apps.Shared as Apps exposing (AppContext)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId(..))
 import OS.WindowManager.Config exposing (..)
 import OS.WindowManager.Models exposing (..)
-import OS.WindowManager.Shared exposing (..)
 
 
 getActiveServer :

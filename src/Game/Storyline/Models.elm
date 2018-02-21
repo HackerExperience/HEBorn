@@ -1,7 +1,6 @@
 module Game.Storyline.Models exposing (..)
 
 import Dict exposing (Dict)
-import Time exposing (Time)
 import Utils.List as List
 import Game.Storyline.Shared exposing (..)
 import Game.Storyline.StepActions.Shared exposing (Action)
