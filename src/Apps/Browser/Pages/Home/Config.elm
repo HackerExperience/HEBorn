@@ -1,6 +1,5 @@
 module Apps.Browser.Pages.Home.Config exposing (Config)
 
-import Game.Meta.Types.Context exposing (Context)
 import Apps.Params as AppParams exposing (AppParams)
 
 

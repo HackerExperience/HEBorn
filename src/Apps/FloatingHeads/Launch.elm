@@ -1,7 +1,6 @@
 module Apps.FloatingHeads.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
 

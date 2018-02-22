@@ -340,6 +340,9 @@ onDebug model fun a =
 received : Msg -> Msg
 received msg =
     case msg of
+        BatchMsg [] ->
+            Debug.log "☹ Empty BatchMsg" msg
+
         -- ignored messages
         BatchMsg _ ->
             msg

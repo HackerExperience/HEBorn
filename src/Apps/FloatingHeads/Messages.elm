@@ -1,7 +1,6 @@
 module Apps.FloatingHeads.Messages exposing (Msg(..))
 
 import Apps.FloatingHeads.Models exposing (..)
-import Game.Meta.Types.Context exposing (Context)
 import Game.Storyline.Shared as Story
 
 

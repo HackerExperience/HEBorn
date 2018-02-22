@@ -170,5 +170,8 @@ stepFromId id =
         "tutorial@download_cracker" ->
             succeed Tutorial_DownloadCracker
 
+        "tutorial@nasty_virus" ->
+            succeed Tutorial_NastyVirus
+
         error ->
             fail <| commonError "storyline step id" error

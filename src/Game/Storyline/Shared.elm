@@ -44,6 +44,7 @@ type Objective
 type Step
     = Tutorial_SetupPC
     | Tutorial_DownloadCracker
+    | Tutorial_NastyVirus
 
 
 type Quest

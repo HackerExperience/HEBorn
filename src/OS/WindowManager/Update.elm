@@ -1,7 +1,6 @@
 module OS.WindowManager.Update exposing (update)
 
 import Draggable
-import Draggable.Events as Draggable
 import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
 import Apps.Params as AppsParams exposing (AppParams)

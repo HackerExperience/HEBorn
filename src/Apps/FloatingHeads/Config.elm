@@ -3,7 +3,6 @@ module Apps.FloatingHeads.Config exposing (..)
 import Html exposing (Attribute)
 import Apps.Params as AppParams exposing (AppParams)
 import Game.Meta.Types.Apps.Desktop exposing (Reference)
-import Game.Meta.Types.Context exposing (Context)
 import Game.Storyline.Models as Storyline
 import Game.Storyline.Shared exposing (ContactId, Reply)
 import Game.Storyline.Emails.Config as Emails

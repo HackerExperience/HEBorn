@@ -12,7 +12,6 @@ import Apps.BounceManager.Config as BounceManager
 import Apps.Browser.Config as Browser
 import Apps.Bug.Config as Bug
 import Apps.Calculator.Config as Calculator
-import Apps.Calculator.Messages as Calculator
 import Apps.ConnManager.Config as ConnManager
 import Apps.CtrlPanel.Config as CtrlPanel
 import Apps.DBAdmin.Config as DBAdmin

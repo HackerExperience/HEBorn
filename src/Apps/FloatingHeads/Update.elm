@@ -1,7 +1,6 @@
 module Apps.FloatingHeads.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Context exposing (Context)
 import Game.Storyline.Shared exposing (ContactId, Reply)
 import Apps.FloatingHeads.Config exposing (..)
 import Apps.FloatingHeads.Models exposing (..)
