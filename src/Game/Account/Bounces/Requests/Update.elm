@@ -53,7 +53,8 @@ encodeNIP hackedServers nip =
         password =
             nip
                 |> flip (Database.getHackedServer) hackedServers
-                |> Database.getPassword
+                |> Maybe.andThen (Database.getPassword >> Just)
+                |> Maybe.withDefault ""
 
         encode ( id, ip ) =
             Encode.object

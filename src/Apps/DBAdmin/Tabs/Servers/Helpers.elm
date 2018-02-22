@@ -87,7 +87,6 @@ enterSelectingVirus itemId database model =
                         let
                             edit_ =
                                 item.activeVirus
-                                    |> Maybe.map Tuple.first
                                     |> SelectingVirus
                         in
                             updateEditing (Network.toString nip) edit_ model

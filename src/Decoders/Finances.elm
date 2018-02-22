@@ -10,13 +10,15 @@ import Json.Decode as Decode
         , int
         , list
         )
-import Json.Decode.Pipeline exposing (decode, required, custom)
-import Game.Account.Finances.Models
-    exposing
-        ( BankAccounts
-        , BankAccount
-        , AccountId
-        )
+import Json.Decode.Pipeline exposing (decode, required, custom, hardcoded)
+import Game.Account.Finances.Models exposing (..)
+
+
+finances : Decoder Model
+finances =
+    decode Model
+        |> required "bank" bank
+        |> hardcoded Dict.empty
 
 
 bank : Decoder BankAccounts

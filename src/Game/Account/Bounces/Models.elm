@@ -11,6 +11,7 @@ module Game.Account.Bounces.Models
         , getName
         , setName
         , getPath
+        , getNameWithBounce
         )
 
 import Dict exposing (Dict)
@@ -64,6 +65,11 @@ getName id model =
     model
         |> get id
         |> Maybe.map .name
+
+
+getNameWithBounce : Bounce -> String
+getNameWithBounce =
+    .name
 
 
 getPath : ID -> Model -> Maybe Path

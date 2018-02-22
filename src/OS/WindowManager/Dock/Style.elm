@@ -173,6 +173,7 @@ itemIco =
         , addIco "bug" Icon.bug
         , addIco "calculator" Icon.calculator
         , addIco "logfl" Icon.logfl
+        , addIco "bug" Icon.bug
         , addGrad "explorer" Gradients.mangoPulp
         , addGrad "logvw" Gradients.stellar
         , addGrad "browser" Gradients.pinotNoir
@@ -190,6 +191,7 @@ itemIco =
         , addGrad "bug" Gradients.superman
         , addGrad "calculator" Gradients.mangoPulp
         , addGrad "logfl" Gradients.aquaMarine
+        , addGrad "bug" Gradients.loveAndLiberty
         ]
 
 
