@@ -179,8 +179,11 @@ windowWrapper config model app windowId window html =
         onMouseDownMsg =
             config.toMsg <| UpdateFocus (Just windowId)
 
-        onKeyDownMsg =
-            getKeyloggerMsg config (getActiveAppId window) appModel
+        onKeyDown_ attrs =
+            appModel
+                |> getKeyloggerMsg config (getActiveAppId window)
+                |> Maybe.map (onKeyDown >> flip (::) attrs)
+                |> Maybe.withDefault attrs
 
         attrs =
             [ windowClasses window
@@ -189,8 +192,8 @@ windowWrapper config model app windowId window html =
             , appAttr_ appModel
             , activeContextAttr <| getContext window
             , onMouseDown onMouseDownMsg
-            , onKeyDown onKeyDownMsg
             ]
+                |> onKeyDown_
 
         title =
             getTitle appModel
@@ -488,14 +491,18 @@ viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
                 appModel
 
 
-getKeyloggerMsg : Config msg -> AppId -> AppModel -> (Int -> msg)
+getKeyloggerMsg : Config msg -> AppId -> AppModel -> Maybe (Int -> msg)
 getKeyloggerMsg config appId app =
     case app of
         CalculatorModel _ ->
-            Calculator.KeyMsg >> CalculatorMsg >> AppMsg appId >> config.toMsg
+            Calculator.KeyMsg
+                >> CalculatorMsg
+                >> AppMsg appId
+                >> config.toMsg
+                |> Just
 
         _ ->
-            always <| config.batchMsg []
+            Nothing
 
 
 appAttr_ : AppModel -> Attribute msg
