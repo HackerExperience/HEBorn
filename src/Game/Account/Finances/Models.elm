@@ -93,6 +93,11 @@ initialModel =
     }
 
 
+getBankName : BankAccount -> String
+getBankName =
+    .name
+
+
 getBankAccounts : Model -> BankAccounts
 getBankAccounts =
     .bank
@@ -162,3 +167,11 @@ setBitcoinWallets bitcoin model =
 setFinances : BankAccounts -> BitcoinWallets -> Model -> Model
 setFinances bank bitcoin model =
     { model | bank = bank, bitcoin = bitcoin }
+
+
+accountToString : AccountId -> BankAccount -> String
+accountToString accountId account =
+    account
+        |> getBankName
+        |> flip (++) ": "
+        |> flip (++) (toString <| Tuple.second accountId)

@@ -13,6 +13,7 @@ import Events.Account.Handlers.TutorialFinished as TutorialFinished
 import Events.Account.Handlers.BounceCreated as BounceCreated
 import Events.Account.Handlers.BounceUpdated as BounceUpdated
 import Events.Account.Handlers.BounceRemoved as BounceRemoved
+import Events.Account.Handlers.VirusCollected as VirusCollected
 
 
 type alias Config msg =
@@ -29,4 +30,5 @@ type alias Config msg =
     , onBounceCreated : BounceCreated.Data -> msg
     , onBounceUpdated : BounceUpdated.Data -> msg
     , onBounceRemoved : BounceRemoved.Data -> msg
+    , onVirusCollected : VirusCollected.Data -> msg
     }

@@ -5,12 +5,18 @@ module UI.Widgets.Modal
         , modalOk
         , modalOkCancel
         , modalNode
+        , modalFrame
         , overlayNode
+        , select
+        , buttons
+        , okCancelButtons
+        , selectedAttrTag
         )
 
 import Dict exposing (Dict)
 import Html exposing (Html, Attribute, node, div, button, text, h3, span)
 import Html.Events exposing (onClick)
+import UI.Widgets.CustomSelect exposing (customSelect)
 import Game.Servers.Models exposing (Storages)
 
 
@@ -90,6 +96,77 @@ modal title content buttons fallback =
         root
 
 
+
+--ModalMac
+
+
+modalFrame :
+    Maybe String
+    -> List (Html msg)
+    -> List (Html msg)
+    -> Html msg
+modalFrame title body buttons =
+    let
+        main =
+            case title of
+                Just title ->
+                    h3 [] [ text title ] :: body
+
+                Nothing ->
+                    body
+
+        content_ =
+            node contentNode
+                []
+                [ node msgNode [] main
+                , node btnsNode [] buttons
+                ]
+                |> List.singleton
+                |> node containerNode []
+
+        root =
+            node modalNode [] [ overlay Nothing, content_ ]
+    in
+        root
+
+
+buttons :
+    List ( msg, String )
+    -> List (Html msg)
+buttons buttons =
+    let
+        reducer ( action, content ) buttons =
+            button
+                [ onClick action ]
+                [ text content ]
+                :: buttons
+    in
+        List.foldr reducer [] buttons
+
+
+select :
+    List String
+    -> Maybe String
+    -> (Maybe String -> msg)
+    -> Html msg
+select list selected selectMsg =
+    let
+        reducer member acu =
+            Html.option [ onClick <| selectMsg (Just member) ] [ text member ]
+                |> flip (::) acu
+
+        select_ =
+            List.foldr reducer [] list
+                |> Html.select []
+    in
+        select_
+
+
+okCancelButtons : msg -> msg -> List (Html msg)
+okCancelButtons okMsg cancelMsg =
+    buttons [ ( okMsg, "Ok" ), ( cancelMsg, "Cancel" ) ]
+
+
 overlay : Maybe msg -> Html msg
 overlay fallback =
     let
@@ -129,3 +206,8 @@ msgNode =
 overlayNode : String
 overlayNode =
     "overlay"
+
+
+selectedAttrTag : String
+selectedAttrTag =
+    "selected"
