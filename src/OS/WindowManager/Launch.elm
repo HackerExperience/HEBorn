@@ -22,6 +22,7 @@ import Apps.LocationPicker.Models as LocationPicker
 import Apps.LogViewer.Models as LogViewer
 import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
+import Apps.VirusPanel.Models as VirusPanel
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
@@ -406,6 +407,11 @@ launchDelegate config activeServer activeGateway windowId appId desktopApp maybe
 
         DesktopApp.TaskManager ->
             ( TaskManagerModel TaskManager.initialModel
+            , React.none
+            )
+
+        DesktopApp.VirusPanel ->
+            ( VirusPanelModel VirusPanel.initialModel
             , React.none
             )
 

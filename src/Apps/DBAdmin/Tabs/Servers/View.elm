@@ -13,6 +13,7 @@ import Utils.Html exposing (spacer)
 import Utils.Html.Events exposing (onChange)
 import Game.Account.Database.Models as Database
 import Game.Meta.Types.Network as Network exposing (NIP)
+import Apps.DBAdmin.Config exposing (..)
 import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
@@ -52,7 +53,7 @@ renderData : ( NIP, Database.HackedServer ) -> Html Msg
 renderData ( nip, item ) =
     div []
         [ text "ip: "
-        , text <| Tuple.second nip
+        , text <| Network.render nip
         , text " psw: "
         , text item.password
         , text " nick: "
@@ -76,15 +77,37 @@ renderMiniData ( nip, item ) =
         ]
 
 
-renderVirusOption : String -> ( String, String, Float ) -> Html Msg
-renderVirusOption activeId ( id, label, version ) =
-    option
-        [ value id, selected (activeId == id) ]
-        [ text (label ++ " (" ++ (toString version) ++ ")") ]
+renderVirusOption : Config msg -> String -> String -> Html Msg
+renderVirusOption { database } activeId id =
+    let
+        version =
+            id
+                |> flip Database.getVirus database
+                |> Maybe.andThen
+                    (\virus ->
+                        Database.getVirusVersion virus
+                            |> toString
+                            |> Just
+                    )
+                |> Maybe.withDefault "Unknown"
+
+        label =
+            id
+                |> flip Database.getVirus database
+                |> Maybe.andThen (Database.getVirusName >> Just)
+                |> Maybe.withDefault "Unknown"
+    in
+        option
+            [ value id, selected (activeId == id) ]
+            [ text (label ++ " (" ++ (toString version) ++ ")") ]
 
 
-renderEditing : ( NIP, Database.HackedServer ) -> EditingServers -> Html Msg
-renderEditing (( nip, item ) as entry) src =
+renderEditing :
+    Config msg
+    -> ( NIP, Database.HackedServer )
+    -> EditingServers
+    -> Html Msg
+renderEditing config (( nip, item ) as entry) src =
     case src of
         EditingTexts ( nick, notes ) ->
             div []
@@ -112,7 +135,7 @@ renderEditing (( nip, item ) as entry) src =
                     (UpdateServersSelectVirus (Network.toString nip))
                 ]
                 (List.map
-                    (renderVirusOption <| Maybe.withDefault "" activeId)
+                    (renderVirusOption config <| Maybe.withDefault "" activeId)
                     item.virusInstalled
                 )
 
@@ -152,11 +175,15 @@ renderBottomActions app (( nip, _ ) as entry) =
         horizontalBtnPanel btns
 
 
-renderAnyData : Model -> ( NIP, Database.HackedServer ) -> Html Msg
-renderAnyData app (( nip, _ ) as entry) =
+renderAnyData :
+    Config msg
+    -> Model
+    -> ( NIP, Database.HackedServer )
+    -> Html Msg
+renderAnyData config app (( nip, _ ) as entry) =
     case (Dict.get (Network.toString nip) app.serversEditing) of
         Just x ->
-            renderEditing entry x
+            renderEditing config entry x
 
         Nothing ->
             if (isEntryExpanded app entry) then
@@ -179,8 +206,12 @@ renderBottom app entry =
             data
 
 
-renderEntry : Model -> ( NIP, Database.HackedServer ) -> Html Msg
-renderEntry app (( nip, _ ) as entry) =
+renderEntry :
+    Config msg
+    -> Model
+    -> ( NIP, Database.HackedServer )
+    -> Html Msg
+renderEntry config app (( nip, _ ) as entry) =
     let
         expandedState =
             isEntryExpanded app entry
@@ -196,7 +227,7 @@ renderEntry app (( nip, _ ) as entry) =
 
         data =
             [ div [ class [ ETop ] ] etop
-            , renderAnyData app entry
+            , renderAnyData config app entry
             , renderBottom app entry
             ]
     in
@@ -208,25 +239,29 @@ renderEntry app (( nip, _ ) as entry) =
             data
 
 
-renderEntryList : Model -> Database.HackedServers -> List (Html Msg)
-renderEntryList app entries =
+renderEntryList :
+    Config msg
+    -> Model
+    -> Database.HackedServers
+    -> List (Html Msg)
+renderEntryList config app entries =
     entries
         |> Dict.toList
-        |> List.map (renderEntry app)
+        |> List.map (renderEntry config app)
 
 
-view : Database.Model -> Model -> Model -> Html Msg
-view database model app =
+view : Config msg -> Model -> Html Msg
+view ({ database } as config) model =
     let
         header =
             filterHeader []
                 []
-                app.servers.filterText
+                model.servers.filterText
                 "Search..."
                 (UpdateTextFilter TabServers)
     in
         database.servers
-            |> applyFilter app
-            |> renderEntryList app
+            |> applyFilter model
+            |> renderEntryList config model
             |> (::) header
             |> verticalList []

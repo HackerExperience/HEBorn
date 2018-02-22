@@ -20,6 +20,7 @@ type DesktopApp
     | LogViewer
     | ServersGears
     | TaskManager
+    | VirusPanel
 
 
 type alias Reference =

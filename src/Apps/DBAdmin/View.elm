@@ -28,7 +28,7 @@ view config ({ selected } as model) =
         viewData =
             case selected of
                 TabServers ->
-                    (Servers.view database model model)
+                    (Servers.view config model)
 
                 TabBankAccs ->
                     renderBankAccounts database model
@@ -76,7 +76,7 @@ renderBitcoinAccount :
 renderBitcoinAccount address account acc =
     let
         account_ =
-            [ text "Bitcoin Wallet: ", text account.address ]
+            [ text "Bitcoin Wallet: ", text address ]
 
         accountContent =
             [ text <| "BTC : " ++ (toString account.balance) ]
