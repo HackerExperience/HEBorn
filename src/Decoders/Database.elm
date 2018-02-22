@@ -16,22 +16,40 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, required, custom)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Meta.Types.Network exposing (NIP)
+import Game.Shared exposing (ID)
 import Game.Account.Database.Models exposing (..)
+import Game.Account.Finances.Models exposing (AccountNumber)
 
 
-activeVirus : Decoder RunningVirus
-activeVirus =
-    decode (,)
-        |> required "id" string
-        |> required "since" float
-
-
-virus : Decoder InstalledVirus
+virus : Decoder Virus
 virus =
-    decode (,,)
-        |> required "id" string
+    decode Virus
         |> required "filename" string
         |> required "version" float
+        |> required "type" (string |> andThen virusType)
+
+
+virusType : String -> Decoder VirusType
+virusType str =
+    case str of
+        "spyware" ->
+            succeed Spyware
+
+        "adware" ->
+            succeed Adware
+
+        "btc_miner" ->
+            succeed BTCMiner
+
+        error ->
+            fail <| commonError "virus_type" error
+
+
+virusWithIndex : Decoder ( ID, Virus )
+virusWithIndex =
+    decode (,)
+        |> required "id" string
+        |> custom virus
 
 
 serverType : String -> Decoder ServerType
@@ -66,8 +84,9 @@ hackedServer =
         |> required "password" string
         |> optionalMaybe "label" string
         |> optionalMaybe "notes" string
-        |> required "viruses" (list virus)
-        |> optionalMaybe "active" activeVirus
+        |> required "viruses" (list string)
+        |> optionalMaybe "active" string
+        |> optionalMaybe "running_time" float
         |> required "type" (string |> andThen serverType)
         |> optionalMaybe "remote" string
 
@@ -99,3 +118,13 @@ hackedBankAccount =
         |> required "name" string
         |> required "password" string
         |> required "balance" int
+
+
+virusCollected : Decoder ( AtmId, AccountNumber, Int, ID, NIP )
+virusCollected =
+    decode (,,,,)
+        |> required "atm_id" string
+        |> required "account_number" int
+        |> required "money" int
+        |> required "file_id" string
+        |> required "nip" nip

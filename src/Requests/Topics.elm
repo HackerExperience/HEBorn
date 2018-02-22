@@ -207,3 +207,12 @@ bounceUpdate id =
 bounceRemove : Account.ID -> Topic
 bounceRemove id =
     WebsocketTopic (AccountChannel id) "bounce.remove"
+
+
+
+-- Virus
+
+
+virusCollect : Account.ID -> Topic
+virusCollect id =
+    WebsocketTopic (AccountChannel id) "virus.collect"

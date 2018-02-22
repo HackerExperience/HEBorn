@@ -131,6 +131,9 @@ eventsConfig =
                 onDbAccountRemoved =
                     Database.HandleDatabaseAccountRemoved >> database
 
+                onVirusCollected =
+                    Database.HandleCollectedVirus >> database
+
                 onTutorialFinished =
                     .completed >> Account.HandleTutorialCompleted >> account
             in
@@ -147,6 +150,7 @@ eventsConfig =
                 , onBounceCreated = uncurry Bounces.HandleCreated >> bounces
                 , onBounceUpdated = uncurry Bounces.HandleUpdated >> bounces
                 , onBounceRemoved = Bounces.HandleRemoved >> bounces
+                , onVirusCollected = onVirusCollected
                 }
 
         forBackFlix =

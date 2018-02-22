@@ -25,6 +25,7 @@ import Apps.LocationPicker.Update as LocationPicker
 import Apps.LogViewer.Update as LogViewer
 import Apps.ServersGears.Update as ServersGears
 import Apps.TaskManager.Update as TaskManager
+import Apps.VirusPanel.Update as VirusPanel
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
@@ -483,6 +484,18 @@ updateAppDelegate config activeServer activeGateway appMsg windowId appId app =
                             (taskManagerConfig appId activeServer config)
                             msg
                         |> Tuple.mapFirst TaskManagerModel
+
+                model ->
+                    React.update model
+
+        VirusPanelMsg msg ->
+            case getModel app of
+                VirusPanelModel appModel ->
+                    appModel
+                        |> VirusPanel.update
+                            (virusPanelConfig appId activeGateway config)
+                            msg
+                        |> Tuple.mapFirst VirusPanelModel
 
                 model ->
                     React.update model

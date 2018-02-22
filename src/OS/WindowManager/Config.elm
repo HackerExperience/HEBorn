@@ -25,6 +25,7 @@ import Apps.LocationPicker.Config as LocationPicker
 import Apps.LogViewer.Config as LogViewer
 import Apps.ServersGears.Config as ServersGears
 import Apps.TaskManager.Config as TaskManager
+import Apps.VirusPanel.Config as VirusPanel
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Account.Messages as Account
@@ -96,7 +97,7 @@ dockConfig config =
         , onMinimizeWindow = Minimize >> config.toMsg
         , onRestoreWindow = Just >> UpdateFocus >> config.toMsg
         , onCloseWindow = Close >> config.toMsg
-        , accountDock = Account.getDock <| accountFrmoConfig config
+        , accountDock = Account.getDock <| accountFromConfig config
         , endpointCId = endpointCIdFromConfig config
         , servers = Game.getServers config.game
         }
@@ -119,7 +120,7 @@ bounceManagerConfig : AppId -> Config msg -> BounceManager.Config msg
 bounceManagerConfig appId config =
     let
         account =
-            accountFrmoConfig config
+            accountFromConfig config
     in
         { flags = config.flags
         , toMsg = BounceManagerMsg >> AppMsg appId >> config.toMsg
@@ -127,7 +128,7 @@ bounceManagerConfig appId config =
         , reference = appId
         , bounces = Account.getBounces account
         , database = Account.getDatabase account
-        , accountId = Account.getId <| accountFrmoConfig config
+        , accountId = Account.getId account
         }
 
 
@@ -206,7 +207,7 @@ dbAdminConfig : AppId -> Config msg -> DBAdmin.Config msg
 dbAdminConfig appId config =
     { toMsg = DBAdminMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
-    , database = Account.getDatabase <| accountFrmoConfig config
+    , database = Account.getDatabase <| accountFromConfig config
     }
 
 
@@ -236,7 +237,7 @@ explorerConfig appId ( cid, server ) config =
 financeConfig : AppId -> Config msg -> Finance.Config msg
 financeConfig appId config =
     { toMsg = FinanceMsg >> AppMsg appId >> config.toMsg
-    , finances = Account.getFinances <| accountFrmoConfig config
+    , finances = Account.getFinances <| accountFromConfig config
     , batchMsg = config.batchMsg
     }
 
@@ -252,7 +253,7 @@ floatingHeadsConfig windowId appId ( gCid, _ ) config =
     , batchMsg = config.batchMsg
     , reference = appId
     , story = Game.getStory config.game
-    , username = Account.getUsername <| accountFrmoConfig config
+    , username = Account.getUsername <| accountFromConfig config
     , onReply = Storyline.HandleReply >>> storyline config
     , onCloseApp = config.toMsg <| Close windowId
     , onOpenApp = flip OpenApp gCid >> config.toMsg
@@ -326,6 +327,31 @@ taskManagerConfig appId ( cid, server ) config =
     , onRemove = Processes.HandleRemove >> processes config cid
     , menuAttr = config.menuAttr
     }
+
+
+virusPanelConfig :
+    AppId
+    -> ( CId, Server )
+    -> Config msg
+    -> VirusPanel.Config msg
+virusPanelConfig appId activeGateway config =
+    let
+        ( cid, server ) =
+            activeGateway
+
+        account =
+            accountFromConfig config
+    in
+        { toMsg = VirusPanelMsg >> AppMsg appId >> config.toMsg
+        , batchMsg = config.batchMsg
+        , flags = config.flags
+        , database = Account.getDatabase account
+        , processes = Servers.getProcesses server
+        , finances = Account.getFinances account
+        , bounces = Account.getBounces account
+        , activeGateway = activeGateway
+        , accountId = Account.getId account
+        }
 
 
 
@@ -416,8 +442,8 @@ endpointCIdFromConfig { activeGateway } =
         |> Servers.getEndpointCId
 
 
-accountFrmoConfig : Config msg -> Account.Model
-accountFrmoConfig { game } =
+accountFromConfig : Config msg -> Account.Model
+accountFromConfig { game } =
     Game.getAccount game
 
 

@@ -23,6 +23,7 @@ import Apps.LocationPicker.Models as LocationPicker
 import Apps.LogViewer.Models as LogViewer
 import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
+import Apps.VirusPanel.Models as VirusPanel
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared as Servers exposing (CId)
@@ -77,6 +78,7 @@ type AppModel
     | LogViewerModel LogViewer.Model
     | ServersGearsModel ServersGears.Model
     | TaskManagerModel TaskManager.Model
+    | VirusPanelModel VirusPanel.Model
 
 
 
@@ -666,6 +668,9 @@ getTitle model =
         FloatingHeadsModel model ->
             FloatingHeads.title model
 
+        VirusPanelModel model ->
+            VirusPanel.title model
+
 
 toDesktopApp : AppModel -> DesktopApp
 toDesktopApp model =
@@ -723,6 +728,9 @@ toDesktopApp model =
 
         FloatingHeadsModel _ ->
             DesktopApp.FloatingHeads
+
+        VirusPanelModel _ ->
+            DesktopApp.VirusPanel
 
 
 isDecorated : AppModel -> Bool

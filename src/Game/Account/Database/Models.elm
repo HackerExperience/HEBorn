@@ -10,6 +10,7 @@ type alias Model =
     { servers : HackedServers
     , bankAccounts : HackedBankAccounts
     , btcWallets : HackedBitcoinWallets
+    , viruses : Viruses
     }
 
 
@@ -23,12 +24,25 @@ type alias AtmId =
     ID
 
 
-type alias InstalledVirus =
-    ( ID, String, Float )
+
+--Sigma Viruses xD
 
 
-type alias RunningVirus =
-    ( ID, Time )
+type alias Viruses =
+    Dict ID Virus
+
+
+type VirusType
+    = Spyware
+    | Adware
+    | BTCMiner
+
+
+type alias Virus =
+    { name : String
+    , version : Float
+    , type_ : VirusType
+    }
 
 
 type alias HackedBankAccount =
@@ -55,8 +69,7 @@ type alias HackedBitcoinAddress =
 
 
 type alias HackedBitcoinWallet =
-    { address : String
-    , password : String
+    { password : String
     , balance : Float
     }
 
@@ -73,16 +86,60 @@ type alias HackedServer =
     { password : String
     , label : Maybe String
     , notes : Maybe String
-    , virusInstalled : List InstalledVirus
-    , activeVirus : Maybe RunningVirus
+    , virusInstalled : List ID
+    , activeVirus : Maybe ID
+    , runningTime : Maybe Time
     , type_ : ServerType
     , remoteConn : Maybe String
     }
 
 
+emptyServer : HackedServer
+emptyServer =
+    { password = ""
+    , label = Nothing
+    , notes = Nothing
+    , virusInstalled = []
+    , activeVirus = Nothing
+    , runningTime = Nothing
+    , type_ = Player
+    , remoteConn = Nothing
+    }
+
+
 initialModel : Model
 initialModel =
-    Model Dict.empty Dict.empty Dict.empty
+    Model Dict.empty Dict.empty Dict.empty Dict.empty
+
+
+getVirusInstalled : HackedServer -> List ID
+getVirusInstalled =
+    .virusInstalled
+
+
+getActiveVirus : HackedServer -> Maybe ID
+getActiveVirus =
+    .activeVirus
+
+
+getVirusName : Virus -> String
+getVirusName =
+    .name
+
+
+getVirusVersion : Virus -> Float
+getVirusVersion =
+    .version
+
+
+getVirusTime : HackedServer -> Maybe Time
+getVirusTime =
+    .runningTime
+
+
+getVirus : ID -> Model -> Maybe Virus
+getVirus id model =
+    Dict.get id model.viruses
 
 
 getHackedServers : Model -> HackedServers
@@ -105,23 +162,14 @@ setPassword password server =
     { server | password = password }
 
 
-{-| Returns a new HackedServer if no one is found.
--}
-getHackedServer : NIP -> HackedServers -> HackedServer
-getHackedServer nip servers =
-    case Dict.get nip servers of
-        Just server ->
-            server
+getHackedServerLabel : HackedServer -> Maybe String
+getHackedServerLabel =
+    .label
 
-        Nothing ->
-            { password = ""
-            , label = Nothing
-            , notes = Nothing
-            , virusInstalled = []
-            , activeVirus = Nothing
-            , type_ = NPC
-            , remoteConn = Nothing
-            }
+
+getHackedServer : NIP -> HackedServers -> Maybe HackedServer
+getHackedServer nip servers =
+    Dict.get nip servers
 
 
 insertServer : NIP -> HackedServer -> HackedServers -> HackedServers
@@ -163,3 +211,8 @@ getBankAccounts =
 getBitcoinWallets : Model -> HackedBitcoinWallets
 getBitcoinWallets =
     .btcWallets
+
+
+getVirusType : Virus -> VirusType
+getVirusType =
+    .type_

@@ -25,4 +25,5 @@ initialModel =
     , DesktopApp.Bug
     , DesktopApp.BackFlix
     , DesktopApp.Calculator
+    , DesktopApp.VirusPanel
     ]

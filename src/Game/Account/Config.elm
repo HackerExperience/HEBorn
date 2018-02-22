@@ -55,6 +55,7 @@ databaseConfig : Config msg -> Database.Config msg
 databaseConfig config =
     { flags = config.flags
     , toMsg = DatabaseMsg >> config.toMsg
+    , lastTick = config.lastTick
     }
 
 
