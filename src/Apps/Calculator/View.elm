@@ -16,7 +16,90 @@ import Core.Error as Error
 
 view : Config msg -> Model -> Html msg
 view config model =
-    Html.map config.toMsg <| render config model
+    let
+        addBtn =
+            btn config [ NormalBtn ] Sum "+"
+
+        divideBtn =
+            btn config [ NormalBtn ] Divide "/"
+
+        subtractBtn =
+            btn config [ NormalBtn ] Subtract "-"
+
+        multiplyBtn =
+            btn config [ NormalBtn ] Multiply "*"
+
+        squarerootBtn =
+            btn config [ NormalBtn ] Sqrt "√"
+
+        applyBtn =
+            btn config [ ApplyBtn ] Equal "="
+
+        percentBtn =
+            btn config [ NormalBtn ] Percent "%"
+
+        commaBtn =
+            btn config [ NormalSubBtn ] Comma "."
+
+        clearallBtn =
+            btn config [ DoubleWidthBtn ] CleanAll "C"
+
+        bkspaceBtn =
+            btn config [ DoubleWidthBtn ] Backspace "BS"
+
+        numBtn x =
+            let
+                string =
+                    toString x
+            in
+                if x <= 3 && x /= 0 then
+                    btn config [ NormalSubBtn ] (Input string) string
+                else if x == 0 then
+                    btn config [ ZeroBtn ] (Input string) string
+                else
+                    btn config [ NormalBtn ] (Input string) string
+    in
+        div [ class [ MainContainer ] ]
+            [ div [ class [ DisplayContainer ] ]
+                [ text (renderTyping model.display) ]
+            , div [ class [ ButtonsContainer ] ]
+                [ clearallBtn
+                , bkspaceBtn
+                , percentBtn
+                , divideBtn
+                , multiplyBtn
+                , subtractBtn
+                , numBtn 7
+                , numBtn 8
+                , numBtn 9
+                , addBtn
+                , numBtn 4
+                , numBtn 5
+                , numBtn 6
+                , squarerootBtn
+                , div [ class [ ButtonsContainerSub ] ]
+                    [ numBtn 1
+                    , numBtn 2
+                    , numBtn 3
+                    , numBtn 0
+                    , commaBtn
+                    ]
+                , applyBtn
+                ]
+            ]
+
+
+btn : Config msg -> List Classes -> Msg -> String -> Html msg
+btn { toMsg } class_ action label =
+    let
+        attrib =
+            [ class class_
+            , onClick (toMsg action)
+            ]
+    in
+        button
+            attrib
+            [ text label ]
 
 
 renderTyping : Operator -> String
@@ -51,102 +134,3 @@ renderTyping op =
 
         _ ->
             "Error"
-
-
-render : Config msg -> Model -> Html Msg
-render config model =
-    let
-        genBtn class_ action label =
-            let
-                attrib =
-                    [ class class_
-                    , onClick (config.toMsg action)
-                    ]
-            in
-                button
-                    attrib
-                    [ text label ]
-
-        addBtn =
-            genBtn [ NormalBtn ] Sum "+"
-
-        divideBtn =
-            genBtn [ NormalBtn ] Divide "/"
-
-        subtractBtn =
-            genBtn [ NormalBtn ] Subtract "-"
-
-        multiplyBtn =
-            genBtn [ NormalBtn ] Multiply "*"
-
-        squarerootBtn =
-            genBtn [ NormalBtn ] Sqrt "√"
-
-        applyBtn =
-            genBtn [ ApplyBtn ] Equal "="
-
-        percentBtn =
-            genBtn [ NormalBtn ] Percent "%"
-
-        commaBtn =
-            genBtn [ NormalSubBtn ] Comma "."
-
-        clearallBtn =
-            genBtn [ DoubleWidthBtn ] CleanAll "C"
-
-        bkspaceBtn =
-            genBtn [ DoubleWidthBtn ] Backspace "BS"
-
-        numBtn string =
-            let
-                x =
-                    case (String.toInt string) of
-                        Ok y ->
-                            y
-
-                        Err msg ->
-                            "Should not exist a number button out of range 0-9"
-                                |> Error.impossible
-                                |> uncurry Native.Panic.crash
-            in
-                if x /= -1 then
-                    if x <= 3 && x /= 0 then
-                        genBtn [ NormalSubBtn ] (Input string) string
-                    else if x == 0 then
-                        genBtn [ ZeroBtn ] (Input string) string
-                    else
-                        genBtn [ NormalBtn ] (Input string) string
-                else
-                    -- "Die Monster you don't belong in this world"
-                    "Should not exist a number button out of range 0-9"
-                        |> Error.impossible
-                        |> uncurry Native.Panic.crash
-    in
-        div [ class [ MainContainer ] ]
-            [ div [ class [ DisplayContainer ] ]
-                [ text (renderTyping model.display) ]
-            , div [ class [ ButtonsContainer ] ]
-                [ clearallBtn
-                , bkspaceBtn
-                , percentBtn
-                , divideBtn
-                , multiplyBtn
-                , subtractBtn
-                , numBtn "7"
-                , numBtn "8"
-                , numBtn "9"
-                , addBtn
-                , numBtn "4"
-                , numBtn "5"
-                , numBtn "6"
-                , squarerootBtn
-                , div [ class [ ButtonsContainerSub ] ]
-                    [ numBtn "1"
-                    , numBtn "2"
-                    , numBtn "3"
-                    , numBtn "0"
-                    , commaBtn
-                    ]
-                , applyBtn
-                ]
-            ]

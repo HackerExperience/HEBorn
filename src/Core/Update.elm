@@ -341,8 +341,13 @@ received : Msg -> Msg
 received msg =
     case msg of
         -- ignored messages
-        BatchMsg _ ->
-            msg
+        BatchMsg msgs ->
+            if List.length msgs < 1 then
+                Debug.log "☹ Empty BatchMsg" msg
+            else
+                msgs
+                    |> List.map received
+                    |> BatchMsg
 
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
             msg
