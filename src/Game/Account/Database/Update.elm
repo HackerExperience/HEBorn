@@ -1,10 +1,14 @@
 module Game.Account.Database.Update exposing (update)
 
+import Dict as Dict
 import Utils.React as React exposing (React)
 import Events.Account.Handlers.ServerPasswordAcquired as ServerPasswordAcquired
+import Events.Account.Handlers.VirusCollected as VirusCollected
 import Game.Account.Database.Config exposing (..)
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
+import Game.Meta.Types.Network exposing (NIP)
+import Game.Shared exposing (ID)
 
 
 type alias UpdateResponse msg =
@@ -23,6 +27,9 @@ update config msg model =
         HandleDatabaseAccountUpdated id account ->
             onHandleDatabaseAccountUpdated id account model
 
+        HandleCollectedVirus data ->
+            onHandleCollectedVirus config data model
+
 
 {-| Saves password for that server, inserts a new server entry
 if none is found.
@@ -39,6 +46,7 @@ handlePasswordAcquired data model =
         model_ =
             servers
                 |> getHackedServer data.nip
+                |> Maybe.withDefault emptyServer
                 |> setPassword data.password
                 |> flip (insertServer data.nip) servers
                 |> flip setHackedServers model
@@ -71,3 +79,47 @@ onHandleDatabaseAccountUpdated id account model =
             }
     in
         ( model_, React.none )
+
+
+onHandleCollectedVirus :
+    Config msg
+    -> VirusCollected.Data
+    -> Model
+    -> UpdateResponse msg
+onHandleCollectedVirus config data model =
+    let
+        ( atmId, accNumber, money, virusId, serverNIP ) =
+            data
+
+        accountId =
+            ( atmId, accNumber )
+
+        hackedServers =
+            (getHackedServers model)
+
+        servers =
+            resetRunningVirusTime config serverNIP virusId hackedServers
+
+        --TODO: Dispatch a Notification to Player showing earning money
+    in
+        React.update { model | servers = servers }
+
+
+resetRunningVirusTime :
+    Config msg
+    -> NIP
+    -> ID
+    -> HackedServers
+    -> HackedServers
+resetRunningVirusTime config nip fileId hackedServers =
+    case Dict.get nip hackedServers of
+        Just server ->
+            if (Just fileId) == (getActiveVirus server) then
+                Dict.insert nip
+                    { server | runningTime = Just config.lastTick }
+                    hackedServers
+            else
+                hackedServers
+
+        Nothing ->
+            hackedServers

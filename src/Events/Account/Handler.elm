@@ -14,6 +14,7 @@ import Events.Account.Handlers.TutorialFinished as TutorialFinished
 import Events.Account.Handlers.BounceCreated as BounceCreated
 import Events.Account.Handlers.BounceUpdated as BounceUpdated
 import Events.Account.Handlers.BounceRemoved as BounceRemoved
+import Events.Account.Handlers.VirusCollected as VirusCollected
 import Events.Account.Config exposing (..)
 
 
@@ -58,6 +59,9 @@ events config name value =
 
         "bounce_removed" ->
             BounceRemoved.handler config.onBounceRemoved value
+
+        "virus_collected" ->
+            VirusCollected.handler config.onVirusCollected value
 
         _ ->
             Err ""

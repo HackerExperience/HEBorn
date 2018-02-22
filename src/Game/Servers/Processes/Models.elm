@@ -45,6 +45,7 @@ type
     | FileTransference
     | PassiveFirewall
     | Download DownloadContent
+    | VirusCollect
 
 
 type alias EncryptorContent =
@@ -442,6 +443,9 @@ getName { type_ } =
 
         Download _ ->
             "Download"
+
+        VirusCollect ->
+            "Virus Collect"
 
 
 getPercentUsage : Usage -> Float

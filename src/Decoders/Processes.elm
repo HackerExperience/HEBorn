@@ -72,6 +72,9 @@ type_ =
                 "file_download" ->
                     field "data" download
 
+                "virus_collect" ->
+                    succeed VirusCollect
+
                 value ->
                     fail ("Unknown process type `" ++ value ++ "'")
     in
