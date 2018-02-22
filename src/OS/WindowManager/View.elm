@@ -31,6 +31,7 @@ import Apps.LocationPicker.View as LocationPicker
 import Apps.LogViewer.View as LogViewer
 import Apps.ServersGears.View as ServersGears
 import Apps.TaskManager.View as TaskManager
+import Apps.VirusPanel.View as VirusPanel
 import Game.Meta.Types.Context as Context exposing (Context(..))
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Servers.Models as Servers exposing (Server)
@@ -491,6 +492,10 @@ viewAppDelegate config activeServer activeGateway windowId appId app =
 
         TaskManagerModel appModel ->
             TaskManager.view (taskManagerConfig appId activeServer config)
+                appModel
+
+        VirusPanelModel appModel ->
+            VirusPanel.view (virusPanelConfig appId activeGateway config)
                 appModel
 
 

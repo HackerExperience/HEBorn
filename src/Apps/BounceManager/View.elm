@@ -449,13 +449,16 @@ entry :
     -> Int
     -> Model
     -> List (Html msg)
-entry ({ toMsg } as config) hackedServers nip c model =
+entry ({ toMsg, database } as config) hackedServers nip c model =
     let
         server =
             Database.getHackedServer nip hackedServers
 
         label_ =
-            Maybe.withDefault (Network.render nip) server.label |> text
+            server
+                |> Maybe.andThen Database.getHackedServerLabel
+                |> Maybe.withDefault (Network.render nip)
+                |> text
 
         attr selectCondition highlightCondition =
             attrEntry config selectCondition highlightCondition nip
