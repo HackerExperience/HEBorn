@@ -2,6 +2,7 @@ module Apps.Browser.Config exposing (..)
 
 import ContextMenu
 import Html exposing (Attribute)
+import Core.Flags as Core
 import Utils.Core exposing (..)
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Params as AppParams exposing (AppParams)
@@ -23,9 +24,10 @@ import Apps.Browser.Pages.Webserver.Config as Webserver
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
+    , flags : Core.Flags
     , reference : Reference
     , endpoints : List CId
-    , activeServer : Servers.Server
+    , activeServer : ( CId, Servers.Server )
     , activeGateway : Servers.Server
     , menuAttr : ContextMenuAttribute msg
     , endpointCId : Maybe CId
@@ -36,9 +38,8 @@ type alias Config msg =
     , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
     , onSetContext : Context -> msg
     , onNewBruteforceProcess : Network.IP -> msg
-    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
-    , onFetchUrl : Network.ID -> Network.IP -> Requester -> msg
-    , onWebLogout : CId -> msg
+    , onLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onLogout : CId -> msg
     }
 
 
@@ -55,7 +56,7 @@ downloadCenterConfig : Config msg -> DownloadCenter.Config msg
 downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Servers.EndpointCId >> config.onWebLogout
+    , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
@@ -80,7 +81,7 @@ webserverConfig : Config msg -> Webserver.Config msg
 webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Servers.EndpointCId >> config.onWebLogout
+    , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg

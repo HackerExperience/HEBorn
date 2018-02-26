@@ -180,8 +180,6 @@ gameConfig =
         HandleCrash
 
     -- web
-    , onDNS =
-        Browser.HandleFetched >> browserTab
     , onJoinFailed =
         browserTab Browser.HandleLoginFailed
 
@@ -258,9 +256,8 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
             |> Tuple.second
             |> Servers.getType
             |> (==) Servers.DesktopCampaign
-    , onLogout =
-        Account.HandleLogout
-            |> account
+    , onSignOut =
+        Account.HandleSignOut |> account
     , onSetGateway =
         Account.HandleSetGateway
             >> account
@@ -302,7 +299,7 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
     , onServerToast =
         Toast.HandleServers >>> toast
     , onPoliteCrash =
-        Account.HandleLogoutAndCrash >> account
+        Account.HandleSignOutAndCrash >> account
     , onNewTextFile =
         \cid stg -> Filesystem.HandleNewTextFile >>> filesystem cid stg
     , onNewDir =
@@ -329,11 +326,8 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
         \cid -> Processes.HandleResume >> processes cid
     , onRemoveProcess =
         \cid -> Processes.HandleRemove >> processes cid
-    , onWebLogin =
+    , onLogin =
         Web.Login >>>>>> web
-    , onFetchUrl =
-        \cid nId nIp r ->
-            web <| Web.FetchUrl nIp nId cid r
     , onNewBruteforceProcess =
         \cid -> Processes.HandleStartBruteforce >> processes cid
     , onReplyEmail =
@@ -344,7 +338,7 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
                 |> StepActions.GoApp desktopApp
                 |> Storyline.HandleActionDone
                 |> storyline
-    , onWebLogout =
+    , onLogout =
         \cid -> Servers.HandleLogout |> server cid
     , accountId =
         game

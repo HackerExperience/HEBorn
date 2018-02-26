@@ -16,7 +16,7 @@ import Random.Pcg
         )
 import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
-import Game.Web.Types as Web
+import Game.Meta.Types.Network.Site as Site
 
 
 --------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ genPage =
             let
                 site =
                     { url = str
-                    , type_ = Web.Webserver { custom = "" }
+                    , type_ = Site.Webserver { custom = "" }
                     , meta =
                         { password = Nothing
                         , nip = ( "main", str )

@@ -4,9 +4,7 @@ import Utils.React as React exposing (React)
 import Core.Error as Error
 import Game.Web.Config exposing (..)
 import Game.Web.Messages exposing (..)
-import Game.Web.Types exposing (..)
-import Game.Web.Requests as Requests
-import Game.Web.Requests.DNS as DNS
+import Game.Meta.Types.Network.Site as Site
 import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import Game.Servers.Shared as Servers exposing (CId)
@@ -25,12 +23,6 @@ update config msg model =
         Login cid nip ip password data ->
             onLogin config cid nip ip password data model
 
-        Request data ->
-            updateRequest config (Requests.receive data) model
-
-        FetchUrl url networkId cid requester ->
-            onFetchUrl config url networkId cid requester model
-
         JoinedServer cid ->
             onJoinedServer config cid model
 
@@ -42,41 +34,6 @@ update config msg model =
 -- internals
 
 
-onFetchUrl :
-    Config msg
-    -> Url
-    -> Network.ID
-    -> Servers.CId
-    -> Requester
-    -> Model
-    -> UpdateResponse msg
-onFetchUrl config url networkId cid requester model =
-    ( model
-    , DNS.request url networkId cid requester config
-        |> Cmd.map config.toMsg
-        |> React.cmd
-    )
-
-
-updateRequest :
-    Config msg
-    -> Maybe Requests.Response
-    -> Model
-    -> UpdateResponse msg
-updateRequest { onDNS } response model =
-    case response of
-        Just (Requests.DNS requester response) ->
-            requester
-                |> onDNS response
-                |> React.msg
-                |> (,) model
-
-        Nothing ->
-            ( model, React.none )
-
-
-{-| Stores page reference and tries to login on server.
--}
 onLogin :
     Config msg
     -> CId

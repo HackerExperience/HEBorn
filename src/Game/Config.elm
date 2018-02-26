@@ -20,7 +20,6 @@ import Game.Servers.Messages as Servers
 import Game.Inventory.Config as Inventory
 import Game.Inventory.Messages as Inventory
 import Game.Web.Config as Web
-import Game.Web.Types as Web
 import Game.Storyline.Config as Story
 import Game.Meta.Config as Meta
 import Game.Messages exposing (..)
@@ -33,7 +32,6 @@ type alias Config msg =
     , onError : Error -> msg
 
     -- web
-    , onDNS : Web.Response -> Requester -> msg
     , onJoinFailed : Requester -> msg
 
     -- servers
@@ -123,7 +121,6 @@ webConfig flags servers config =
     , toMsg = WebMsg >> config.toMsg
     , batchMsg = config.batchMsg
     , servers = servers
-    , onDNS = config.onDNS
     , onLogin = config.onJoinServer
     , onJoinedServer =
         \cid1 cid2 ->

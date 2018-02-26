@@ -55,8 +55,8 @@ invisibleAccountGear =
 logoutBtn : Html Msg
 logoutBtn =
     button
-        [ onClick Logout ]
-        [ text "Logout" ]
+        [ onClick SignOut ]
+        [ text "Sign out" ]
         |> List.singleton
         |> li []
 

@@ -51,7 +51,7 @@ view config model =
                 , activeContextAttr config.activeContext
                 , onClick <| config.toMsg <| HeaderMsg <| Header.CheckMenus
                 , config.menuAttr
-                    [ [ ( ContextMenu.item "Logout", config.onLogout ) ] ]
+                    [ [ ( ContextMenu.item "Sign out", config.onSignOut ) ] ]
                 ]
 
 

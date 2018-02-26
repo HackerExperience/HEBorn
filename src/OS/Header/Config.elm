@@ -30,7 +30,7 @@ type alias Config msg =
     , activeNIP : NIP
     , nips : List NIP
     , menuAttr : ContextMenuAttribute msg
-    , onLogout : msg
+    , onSignOut : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
     , onSetContext : Context -> msg

@@ -13,12 +13,12 @@ type Msg
     | DatabaseMsg Database.Msg
     | NotificationsMsg Notifications.Msg
     | FinancesMsg Finances.Msg
-    | HandleLogout
+    | HandleSignOut
     | HandleSetGateway Servers.CId
     | HandleSetEndpoint (Maybe Servers.CId)
     | HandleSetContext Context
     | HandleNewGateway Servers.CId
-    | HandleLogoutAndCrash ( String, String )
+    | HandleSignOutAndCrash ( String, String )
     | HandleTutorialCompleted Bool
     | HandleConnected
     | HandleDisconnected

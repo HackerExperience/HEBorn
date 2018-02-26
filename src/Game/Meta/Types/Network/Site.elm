@@ -1,4 +1,4 @@
-module Game.Web.Types exposing (..)
+module Game.Meta.Types.Network.Site exposing (..)
 
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
@@ -52,16 +52,6 @@ type alias BankContent =
 type alias DownloadCenterContent =
     { title : String
     }
-
-
-
--- This response is located here to avoid a dependency cycle
-
-
-type Response
-    = PageLoaded Site
-    | PageNotFound Url
-    | ConnectionError Url
 
 
 getType : Site -> Type

@@ -46,7 +46,7 @@ type alias Config msg =
     , lastTick : Time
     , menuView : Html msg
     , menuAttr : ContextMenuAttribute msg
-    , onLogout : msg
+    , onSignOut : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
     , onSetContext : Context -> msg
@@ -74,11 +74,10 @@ type alias Config msg =
     , onResumeProcess : CId -> Processes.ID -> msg
     , onRemoveProcess : CId -> Processes.ID -> msg
     , onNewBruteforceProcess : CId -> Network.IP -> msg
-    , onWebLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
-    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
+    , onLogout : CId -> msg
     , onReplyEmail : String -> Story.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
-    , onWebLogout : CId -> msg
     , accountId : String
     }
 
@@ -125,11 +124,10 @@ windowManagerConfig config =
     , onRemoveProcess = config.onRemoveProcess
     , onSetContext = config.onSetContext
     , onNewBruteforceProcess = config.onNewBruteforceProcess
-    , onWebLogin = config.onWebLogin
-    , onFetchUrl = config.onFetchUrl
+    , onLogin = config.onLogin
     , onReplyEmail = config.onReplyEmail
     , onActionDone = config.onActionDone
-    , onWebLogout = config.onWebLogout
+    , onLogout = config.onLogout
     }
 
 
@@ -137,17 +135,14 @@ headerConfig : Config msg -> Header.Config msg
 headerConfig config =
     { toMsg = HeaderMsg >> config.toMsg
     , batchMsg = config.batchMsg
-    , bounces =
-        Account.getBounces config.account
-    , gateways =
-        Account.getGateways config.account
+    , bounces = Account.getBounces config.account
+    , gateways = Account.getGateways config.account
     , endpoints =
         config.activeGateway
             |> Tuple.second
             |> Servers.getEndpoints
             |> Maybe.withDefault []
-    , servers =
-        config.servers
+    , servers = config.servers
     , nips =
         config.activeServer
             |> Tuple.second
@@ -156,8 +151,7 @@ headerConfig config =
         config.activeGateway
             |> Tuple.second
             |> Servers.getEndpointCId
-    , activeGateway =
-        config.activeGateway
+    , activeGateway = config.activeGateway
     , activeBounce =
         config.activeServer
             |> Tuple.second
@@ -175,22 +169,14 @@ headerConfig config =
             |> Tuple.second
             |> Servers.getActiveNIP
     , menuAttr = config.menuAttr
-    , onLogout =
-        config.onLogout
-    , onSetGateway =
-        config.onSetGateway
-    , onSetEndpoint =
-        config.onSetEndpoint
-    , onSetContext =
-        config.onSetContext
-    , onSetBounce =
-        config.onSetBounce
-    , onReadAllAccountNotifications =
-        config.onReadAllAccountNotifications
-    , onReadAllServerNotifications =
-        config.onReadAllServerNotifications
-    , onSetActiveNIP =
-        config.onSetActiveNIP
+    , onSignOut = config.onSignOut
+    , onSetGateway = config.onSetGateway
+    , onSetEndpoint = config.onSetEndpoint
+    , onSetContext = config.onSetContext
+    , onSetBounce = config.onSetBounce
+    , onReadAllAccountNotifications = config.onReadAllAccountNotifications
+    , onReadAllServerNotifications = config.onReadAllServerNotifications
+    , onSetActiveNIP = config.onSetActiveNIP
     }
 
 

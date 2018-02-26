@@ -5,15 +5,15 @@ module Apps.Browser.Pages.NotFound.Models
         , getTitle
         )
 
-import Game.Web.Types exposing (Url)
+import Game.Meta.Types.Network.Site as Site
 
 
 type alias Model =
-    { url : Url
+    { url : Site.Url
     }
 
 
-initialModel : Url -> Model
+initialModel : Site.Url -> Model
 initialModel url =
     { url = url
     }

@@ -7,7 +7,7 @@ import OS.Header.Models exposing (OpenMenu)
 
 
 type Msg
-    = Logout
+    = SignOut
     | ToggleMenus OpenMenu
     | MouseEnterDropdown
     | MouseLeavesDropdown

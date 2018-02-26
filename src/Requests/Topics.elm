@@ -24,8 +24,8 @@ register =
 -- account
 
 
-logout : Account.ID -> Topic
-logout id =
+accountLogout : Account.ID -> Topic
+accountLogout id =
     WebsocketTopic (AccountChannel id) "account.logout"
 
 

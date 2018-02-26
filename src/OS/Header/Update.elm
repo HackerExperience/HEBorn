@@ -15,8 +15,8 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        Logout ->
-            onLogout config model
+        SignOut ->
+            onSignOut config model
 
         ToggleMenus next ->
             onToggleMenus next model
@@ -52,9 +52,9 @@ update config msg model =
             onAccountReadAll config model
 
 
-onLogout : Config msg -> Model -> UpdateResponse msg
-onLogout { onLogout } model =
-    onLogout
+onSignOut : Config msg -> Model -> UpdateResponse msg
+onSignOut { onSignOut } model =
+    onSignOut
         |> React.msg
         |> (,) model
 

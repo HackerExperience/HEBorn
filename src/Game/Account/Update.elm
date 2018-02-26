@@ -12,7 +12,7 @@ import Game.Account.Database.Messages as Database
 import Game.Account.Database.Update as Database
 import Game.Account.Bounces.Update as Bounces
 import Game.Account.Bounces.Messages as Bounces
-import Game.Account.Requests.Logout exposing (logoutRequest)
+import Game.Account.Requests.SignOut exposing (signOutRequest)
 import Game.Account.Config exposing (..)
 import Game.Account.Messages exposing (..)
 import Game.Account.Models exposing (..)
@@ -37,8 +37,8 @@ update config msg model =
         NotificationsMsg msg ->
             onNotifications config msg model
 
-        HandleLogout ->
-            handleLogout config model
+        HandleSignOut ->
+            handleSignOut config model
 
         HandleSetGateway cid ->
             handleSetGateway config cid model
@@ -52,8 +52,8 @@ update config msg model =
         HandleNewGateway cid ->
             handleNewGateway cid model
 
-        HandleLogoutAndCrash error ->
-            handleLogoutAndCrash config error model
+        HandleSignOutAndCrash error ->
+            handleSignOutAndCrash config error model
 
         HandleTutorialCompleted bool ->
             handleTutorialCompleted config bool model
@@ -96,7 +96,7 @@ handleSetEndpoint config cid model =
         Nothing ->
             "Trying to set endpoint without gateway."
                 |> Error.astralProj
-                |> HandleLogoutAndCrash
+                |> HandleSignOutAndCrash
                 |> config.toMsg
                 |> React.msg
                 |> (,) model
@@ -156,18 +156,18 @@ onNotifications config msg model =
         ( model_, react )
 
 
-handleLogout : Config msg -> Model -> UpdateResponse msg
-handleLogout config model =
+handleSignOut : Config msg -> Model -> UpdateResponse msg
+handleSignOut config model =
     let
         model_ =
-            { model | logout = ToLanding }
+            { model | signOut = ToLanding }
 
         token =
             getToken model
 
         react =
             config
-                |> logoutRequest token model.id
+                |> signOutRequest token model.id
                 |> Cmd.map (always <| config.batchMsg [])
                 |> React.cmd
     in
@@ -181,18 +181,18 @@ handleTutorialCompleted config bool model =
     )
 
 
-handleLogoutAndCrash : Config msg -> Error -> Model -> UpdateResponse msg
-handleLogoutAndCrash config error model =
+handleSignOutAndCrash : Config msg -> Error -> Model -> UpdateResponse msg
+handleSignOutAndCrash config error model =
     let
         model_ =
-            { model | logout = ToCrash error }
+            { model | signOut = ToCrash error }
 
         token =
             getToken model
 
         react =
             config
-                |> logoutRequest token model.id
+                |> signOutRequest token model.id
                 |> Cmd.map (always <| config.batchMsg [])
                 |> React.cmd
     in
@@ -228,7 +228,7 @@ handleDisconnected : Config msg -> Model -> UpdateResponse msg
 handleDisconnected config model =
     let
         react =
-            case model.logout of
+            case model.signOut of
                 ToLanding ->
                     React.msg <| config.onDisconnected
 

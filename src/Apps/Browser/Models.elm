@@ -5,7 +5,7 @@ import Utils.List as List
 import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Web.Types as Web
+import Game.Meta.Types.Network.Site as Site exposing (Site)
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
@@ -392,49 +392,49 @@ leaveModal tab =
     { tab | modal = Nothing }
 
 
-initialPage : Web.Site -> Page
+initialPage : Site -> Page
 initialPage ({ url, type_, meta } as site) =
     case type_ of
-        Web.NotFound ->
+        Site.NotFound ->
             NotFoundModel <| PageNotFound.initialModel url
 
-        Web.Home ->
+        Site.Home ->
             HomeModel
 
-        Web.Webserver content ->
+        Site.Webserver content ->
             WebserverModel <| PageWebserver.initialModel content meta
 
-        Web.Profile ->
+        Site.Profile ->
             ProfileModel
 
-        Web.Whois ->
+        Site.Whois ->
             WhoisModel
 
-        Web.DownloadCenter content ->
+        Site.DownloadCenter content ->
             DownloadCenterModel <| DownloadCenter.initialModel content meta
 
-        Web.ISP ->
+        Site.ISP ->
             ISPModel
 
-        Web.Bank content ->
+        Site.Bank content ->
             BankModel <| PageBank.initialModel url content
 
-        Web.Store ->
+        Site.Store ->
             StoreModel
 
-        Web.BTC ->
+        Site.BTC ->
             BTCModel
 
-        Web.FBI ->
+        Site.FBI ->
             FBIModel
 
-        Web.News ->
+        Site.News ->
             NewsModel
 
-        Web.Bithub ->
+        Site.Bithub ->
             BithubModel
 
-        Web.MissionCenter ->
+        Site.MissionCenter ->
             MissionCenterModel
 
 

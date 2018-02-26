@@ -74,11 +74,10 @@ type alias Config msg =
     , onRemoveProcess : CId -> Processes.ID -> msg
     , onSetContext : Context -> msg
     , onNewBruteforceProcess : CId -> Network.IP -> msg
-    , onWebLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
-    , onFetchUrl : CId -> Network.ID -> Network.IP -> Requester -> msg
+    , onLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
     , onReplyEmail : String -> Storyline.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
-    , onWebLogout : CId -> msg
+    , onLogout : CId -> msg
     , lastTick : Time
     , isCampaign : Bool
     , activeContext : Context
@@ -153,7 +152,8 @@ browserConfig : AppId -> CId -> Server -> Config msg -> Browser.Config msg
 browserConfig appId cid server config =
     { toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
-    , activeServer = server
+    , flags = config.flags
+    , activeServer = ( cid, server )
     , activeGateway = Tuple.second config.activeGateway
     , reference = appId
     , endpointCId = config.endpointCId
@@ -180,12 +180,8 @@ browserConfig appId cid server config =
         config.activeServer
             |> Tuple.first
             |> config.onNewBruteforceProcess
-    , onWebLogin = config.onWebLogin cid
-    , onFetchUrl =
-        config.activeServer
-            |> Tuple.first
-            |> config.onFetchUrl
-    , onWebLogout = config.onWebLogout
+    , onLogin = config.onLogin cid
+    , onLogout = config.onLogout
     , menuAttr = config.menuAttr
     }
 
