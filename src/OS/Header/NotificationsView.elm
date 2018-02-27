@@ -1,4 +1,4 @@
-module OS.Header.NotificationsView exposing (view)
+module OS.Header.NotificationsView exposing (view, notifications)
 
 import Dict
 import Html exposing (..)
@@ -32,11 +32,10 @@ view render current activator uniqueClass title readAllMsg itens =
     if (current == activator) then
         visibleNotifications
             render
-            uniqueClass
-            activator
             title
             readAllMsg
             itens
+            uniqueClass
     else
         emptyNotifications uniqueClass activator
 
@@ -48,7 +47,7 @@ view render current activator uniqueClass title readAllMsg itens =
 emptyNotifications : Class -> OpenMenu -> Html Msg
 emptyNotifications uniqueClass activator =
     indicator
-        [ class [ Notification, uniqueClass ]
+        [ class [ uniqueClass ]
         , onClick <| ToggleMenus activator
         , onMouseEnter MouseEnterDropdown
         , onMouseLeave MouseLeavesDropdown
@@ -56,30 +55,39 @@ emptyNotifications uniqueClass activator =
         []
 
 
-{-| Gen a div with an ul with an header, all notifications and a footer
--}
 visibleNotifications :
     Renderer a
+    -> String
+    -> Msg
+    -> Notifications.Notifications a
     -> Class
-    -> OpenMenu
+    -> Html Msg
+visibleNotifications render title readAllMsg itens uniqueClass =
+    notifications render title readAllMsg itens
+        |> List.singleton
+        |> indicator
+            [ class [ uniqueClass ]
+            , onMouseEnter MouseEnterDropdown
+            , onMouseLeave MouseLeavesDropdown
+            ]
+
+
+{-| Gen a div with an ul with an header, all notifications and a footer
+-}
+notifications :
+    Renderer a
     -> String
     -> Msg
     -> Notifications.Notifications a
     -> Html Msg
-visibleNotifications render uniqueClass activator title readAllMsg itens =
+notifications render title readAllMsg itens =
     footer
         |> List.singleton
         |> (++) (Dict.foldl (notificationReduce render) [] itens)
         |> (::) (header title readAllMsg)
         |> ul []
         |> List.singleton
-        |> div []
-        |> List.singleton
-        |> indicator
-            [ class [ Notification, uniqueClass ]
-            , onMouseEnter MouseEnterDropdown
-            , onMouseLeave MouseLeavesDropdown
-            ]
+        |> div [ class [ Notification ] ]
 
 
 indicator : List (Attribute a) -> List (Html a) -> Html a
