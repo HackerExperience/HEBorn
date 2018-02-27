@@ -26,13 +26,13 @@ visibleAccountGear config =
     [ logoutBtn ]
         |> ul []
         |> List.singleton
-        |> div
-            [ onMouseEnter MouseEnterDropdown
-            , onMouseLeave MouseLeavesDropdown
-            ]
+        |> div []
         |> List.singleton
         |> indicator
-            [ class [ Account ] ]
+            [ class [ Account ]
+            , onMouseEnter MouseEnterDropdown
+            , onMouseLeave MouseLeavesDropdown
+            ]
 
 
 invisibleAccountGear : Html Msg
@@ -40,6 +40,8 @@ invisibleAccountGear =
     indicator
         [ class [ Account ]
         , onClick <| ToggleMenus AccountOpen
+        , onMouseEnter MouseEnterDropdown
+        , onMouseLeave MouseLeavesDropdown
         ]
         []
 

@@ -50,6 +50,8 @@ emptyNotifications uniqueClass activator =
     indicator
         [ class [ Notification, uniqueClass ]
         , onClick <| ToggleMenus activator
+        , onMouseEnter MouseEnterDropdown
+        , onMouseLeave MouseLeavesDropdown
         ]
         []
 
@@ -71,12 +73,13 @@ visibleNotifications render uniqueClass activator title readAllMsg itens =
         |> (::) (header title readAllMsg)
         |> ul []
         |> List.singleton
-        |> div
-            [ onMouseEnter MouseEnterDropdown
+        |> div []
+        |> List.singleton
+        |> indicator
+            [ class [ Notification, uniqueClass ]
+            , onMouseEnter MouseEnterDropdown
             , onMouseLeave MouseLeavesDropdown
             ]
-        |> List.singleton
-        |> indicator [ class [ Notification, uniqueClass ] ]
 
 
 indicator : List (Attribute a) -> List (Html a) -> Html a

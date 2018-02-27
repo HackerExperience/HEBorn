@@ -4,8 +4,8 @@ import Dict
 import Html exposing (..)
 import Html.Attributes exposing (disabled)
 import Html.CssHelpers
+import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html.Events exposing (onClickMe, onClickWithStopProp)
-import Html.Events exposing (onClick)
 import Utils.Html.Attributes exposing (boolAttr)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
@@ -65,9 +65,7 @@ view ({ toMsg } as config) ({ openMenu } as model) =
                 |> (==) Gateway
     in
         div
-            [ class [ Connection ]
-            , onClickMe <| toMsg DropMenu
-            ]
+            [ class [ Connection ] ]
             [ contextToggler onGateway (toMsg <| ContextTo Gateway) activeEndpointCId
             , gatewaySelector config servers openMenu activeGatewayCId config.gateways
             , bounceSelector config activeBounce activeEndpointCId model
@@ -248,13 +246,20 @@ bounceSelector config activeBounce activeEndpointCId model =
                 |> Maybe.andThen (flip Bounces.getName config.bounces)
                 |> Maybe.withDefault "None"
 
-        msg =
-            ToggleMenus (BounceOpen activeBounce)
+        attrs =
+            [ class [ SBounce ]
+            , ToggleMenus (BounceOpen activeBounce)
                 |> config.toMsg
                 |> onClickMe
+            , MouseEnterDropdown
+                |> config.toMsg
+                |> onMouseEnter
+            , MouseLeavesDropdown
+                |> config.toMsg
+                |> onMouseLeave
+            ]
     in
-        div
-            (msg :: [ class [ SBounce ] ])
+        div attrs
             [ text name ]
 
 
@@ -277,8 +282,18 @@ bounceMenu config activeBounce activeEndpointCId model =
         readonlyMode =
             activeEndpointCId
                 |> (/=) Nothing
+
+        attrs =
+            [ class_
+            , MouseEnterDropdown
+                |> config.toMsg
+                |> onMouseEnter
+            , MouseLeavesDropdown
+                |> config.toMsg
+                |> onMouseLeave
+            ]
     in
-        div [ class_ ]
+        div attrs
             [ bouncePicker config readonlyMode
             , bounceView config readonlyMode activeBounce model
             ]

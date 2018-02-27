@@ -79,7 +79,6 @@ type alias Config msg =
     , onReplyEmail : String -> Story.Reply -> msg
     , onActionDone : DesktopApp -> Context -> msg
     , onWebLogout : CId -> msg
-    , onDropHeaderMenu : msg
     , accountId : String
     }
 
@@ -165,6 +164,8 @@ headerConfig config =
             |> flip Servers.getActiveBounce config.servers
     , activeContext =
         config.activeContext
+    , accountNotifications =
+        Account.getNotifications config.account
     , serversNotifications =
         config.activeServer
             |> Tuple.second

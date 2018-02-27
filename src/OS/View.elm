@@ -3,11 +3,13 @@ module OS.View exposing (view)
 import ContextMenu
 import Html as Html exposing (Html, div, text)
 import Html.Attributes as Attributes exposing (attribute)
+import Html.Events exposing (onClick)
 import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
 import Core.Flags as Flags
 import OS.Header.View as Header
+import OS.Header.Messages as Header
 import OS.Header.Models as Header
 import OS.WindowManager.View as WindowManager
 import OS.Toasts.View as Toasts
@@ -47,6 +49,7 @@ view config model =
                 , attribute Res.gameVersionAttrTag version
                 , attribute Res.gameModeAttrTag gameMode
                 , activeContextAttr config.activeContext
+                , onClick <| config.toMsg <| HeaderMsg <| Header.CheckMenus
                 , config.menuAttr
                     [ [ ( ContextMenu.item "Logout", config.onLogout ) ] ]
                 ]
