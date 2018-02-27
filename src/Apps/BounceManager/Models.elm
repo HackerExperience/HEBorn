@@ -94,7 +94,7 @@ setAnyChanges anyChange model =
     { model | anyChange = anyChange }
 
 
-windowInitSize : ( Float, Float )
+windowInitSize : ( Int, Int )
 windowInitSize =
     ( 800, 600 )
 

@@ -29,7 +29,7 @@ title model =
     "Calculator"
 
 
-windowInitSize : ( Float, Float )
+windowInitSize : ( Int, Int )
 windowInitSize =
     ( 195, 243 )
 

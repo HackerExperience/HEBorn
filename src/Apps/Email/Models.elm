@@ -25,6 +25,6 @@ initialModel =
     {}
 
 
-windowInitSize : ( Float, Float )
+windowInitSize : ( Int, Int )
 windowInitSize =
     ( 200, 550 )

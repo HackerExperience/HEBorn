@@ -38,7 +38,7 @@ icon =
     "logfl"
 
 
-windowInitSize : ( Float, Float )
+windowInitSize : ( Int, Int )
 windowInitSize =
     ( 600, 600 )
 

@@ -1,6 +1,7 @@
 module OS.WindowManager.Messages exposing (..)
 
 import Draggable
+import Window
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Servers.Shared exposing (CId)
@@ -28,6 +29,7 @@ type Msg
     = NewApp DesktopApp (Maybe Context) (Maybe AppParams) CId
     | OpenApp CId AppParams
     | LazyLaunchEndpoint WindowId DesktopApp
+    | SetAppSize Window.Size
       -- window handling
     | Close WindowId
     | Minimize WindowId
