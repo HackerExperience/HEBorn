@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Draggable
 import Random.Pcg as Random
 import Uuid
+import Window
 import Apps.BackFlix.Models as BackFlix
 import Apps.BounceManager.Models as BounceManager
 import Apps.Browser.Models as Browser
@@ -38,6 +39,7 @@ type alias Model =
     , pinned : Pinned
     , seed : Random.Seed
     , drag : Draggable.State WindowId
+    , appSize : Maybe Size
     }
 
 
@@ -100,8 +102,8 @@ type alias Position =
 
 
 type alias Size =
-    { width : Float
-    , height : Float
+    { width : Int
+    , height : Int
     }
 
 
@@ -171,6 +173,7 @@ initialModel =
     , pinned = Pinned [] []
     , seed = Random.initialSeed 844121764423
     , drag = Draggable.init
+    , appSize = Nothing
     }
 
 
@@ -766,6 +769,19 @@ move deltaX deltaY ({ position } as window) =
         { window | position = position_ }
 
 
+smartMove : Model -> Float -> Float -> Window -> Window
+smartMove { appSize } deltaX deltaY ({ size, position } as window) =
+    -- Consider app's size when moving
+    let
+        position0 =
+            wmFringe appSize size position
+
+        position_ =
+            Position (position0.x + deltaX) (position0.y + deltaY)
+    in
+        { window | position = position_ }
+
+
 getSize : Window -> Size
 getSize =
     .size
@@ -1027,3 +1043,24 @@ getUuid model =
             Random.step Uuid.uuidGenerator model.seed
     in
         ( Uuid.toString uuid, { model | seed = seed } )
+
+
+wmFringe : Maybe Size -> Size -> Position -> Position
+wmFringe appSize { width } ({ x, y } as originalPosition) =
+    case appSize of
+        Just appSize ->
+            let
+                x_ =
+                    ((toFloat appSize.width) - 8)
+                        |> min x
+                        |> max (toFloat (8 - width))
+
+                y_ =
+                    ((toFloat appSize.height) - 8)
+                        |> min y
+                        |> max 0
+            in
+                Position x_ y_
+
+        Nothing ->
+            originalPosition

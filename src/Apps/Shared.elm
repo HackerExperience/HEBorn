@@ -201,7 +201,7 @@ icon app =
             FloatingHeads.icon
 
 
-windowInitSize : DesktopApp -> ( Float, Float )
+windowInitSize : DesktopApp -> ( Int, Int )
 windowInitSize app =
     case app of
         DesktopApp.Email ->

@@ -1,6 +1,8 @@
 module Core.Update exposing (update)
 
 import ContextMenu
+import Task
+import Window
 import Utils.React as React exposing (React)
 import Events.Handler as Events
 import Landing.Messages as Landing
@@ -63,8 +65,16 @@ update msg model =
 
         HandlePlay ->
             let
-                ( state, cmd ) =
+                ( state, cmd0 ) =
                     setupToPlay model.state
+
+                cmd =
+                    WindowManager.SetAppSize
+                        >> OS.WindowManagerMsg
+                        >> OSMsg
+                        |> flip Task.perform Window.size
+                        |> flip (::) [ cmd0 ]
+                        |> Cmd.batch
             in
                 ( { model | state = state }, cmd )
 

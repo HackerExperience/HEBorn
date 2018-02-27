@@ -3,10 +3,13 @@ module OS.Header.AccountView exposing (view)
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import Utils.List as List
+import Game.Account.Notifications.Shared as Notifications
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Resources exposing (..)
+import OS.Header.NotificationsView exposing (notifications)
 
 
 { id, class, classList } =
@@ -23,23 +26,28 @@ view config openMenu =
 
 visibleAccountGear : Config msg -> Html Msg
 visibleAccountGear config =
-    [ logoutBtn ]
-        |> ul []
-        |> List.singleton
-        |> div
-            [ onMouseEnter MouseEnterDropdown
-            , onMouseLeave MouseLeavesDropdown
-            ]
+    [ notifications Notifications.render
+        "Account"
+        AccountReadAll
+        config.accountNotifications
+    , ul [] [ logoutBtn ]
+    ]
+        |> div []
         |> List.singleton
         |> indicator
-            [ class [ Account ] ]
+            [ class [ AccountIco ]
+            , onMouseEnter MouseEnterDropdown
+            , onMouseLeave MouseLeavesDropdown
+            ]
 
 
 invisibleAccountGear : Html Msg
 invisibleAccountGear =
     indicator
-        [ class [ Account ]
+        [ class [ AccountIco ]
         , onClick <| ToggleMenus AccountOpen
+        , onMouseEnter MouseEnterDropdown
+        , onMouseLeave MouseLeavesDropdown
         ]
         []
 

@@ -21,7 +21,7 @@ type Class
     | ChatIco
     | ServersIco
     | Notification
-    | Account
+    | AccountIco
     | Empty
     | Toasts
     | Fading

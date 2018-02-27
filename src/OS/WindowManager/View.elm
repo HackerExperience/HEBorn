@@ -187,7 +187,7 @@ windowWrapper config model app windowId window html =
 
         attrs =
             [ windowClasses window
-            , windowPositionAndSize hasDecorations window
+            , windowPositionAndSize model.appSize hasDecorations window
             , decoratedAttr hasDecorations
             , appAttr_ appModel
             , activeContextAttr <| getContext window
@@ -364,14 +364,17 @@ windowClasses window =
         class [ Res.Window ]
 
 
-windowPositionAndSize : Bool -> Window -> Html.Attribute msg
-windowPositionAndSize hasDecorations window =
+windowPositionAndSize : Maybe Size -> Bool -> Window -> Html.Attribute msg
+windowPositionAndSize appSize hasDecorations window =
     let
-        { x, y } =
+        originalPosition =
             getPosition window
 
-        { width, height } =
+        originalSize =
             getSize window
+
+        { x, y } =
+            wmFringe appSize originalSize originalPosition
 
         position =
             [ left <| px x
@@ -379,8 +382,8 @@ windowPositionAndSize hasDecorations window =
             ]
 
         size =
-            [ Css.width <| px width
-            , Css.height <| px height
+            [ Css.width <| px <| toFloat originalSize.width
+            , Css.height <| px <| toFloat originalSize.height
             ]
 
         attrs =

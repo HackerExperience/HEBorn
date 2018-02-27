@@ -2,6 +2,7 @@ module OS.WindowManager.Subscriptions exposing (subscriptions)
 
 import Dict exposing (Dict)
 import Draggable
+import Window
 import Utils.Maybe as Maybe
 import Apps.LocationPicker.Subscriptions as LocationPicker
 import Apps.TaskManager.Subscriptions as TaskManager
@@ -27,6 +28,7 @@ subscriptions config model =
         Sub.batch
             [ apps
             , Draggable.subscriptions (DragMsg >> config.toMsg) model.drag
+            , Window.resizes (SetAppSize >> config.toMsg)
             ]
 
 

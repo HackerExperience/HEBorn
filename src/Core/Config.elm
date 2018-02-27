@@ -346,8 +346,6 @@ osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
                 |> storyline
     , onWebLogout =
         \cid -> Servers.HandleLogout |> server cid
-    , onDropHeaderMenu =
-        OSMsg <| OS.HeaderMsg Header.DropMenu
     , accountId =
         game
             |> Game.getAccount

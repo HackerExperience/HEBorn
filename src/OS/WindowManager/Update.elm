@@ -1,6 +1,7 @@
 module OS.WindowManager.Update exposing (update)
 
 import Draggable
+import Window
 import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
 import Apps.Params as AppsParams exposing (AppParams)
@@ -51,6 +52,9 @@ update config msg model =
 
         LazyLaunchEndpoint windowId desktopApp ->
             lazyLaunchEndpoint config windowId desktopApp model
+
+        SetAppSize size_ ->
+            onSetAppSize size_ model
 
         -- window handling
         Close wId ->
@@ -105,6 +109,12 @@ update config msg model =
             updateApps config appMsg model
 
 
+onSetAppSize : Window.Size -> Model -> UpdateResponse msg
+onSetAppSize size_ model =
+    { model | appSize = Just size_ }
+        |> flip (,) React.none
+
+
 onOpenApp : Config msg -> CId -> AppParams -> Model -> UpdateResponse msg
 onOpenApp config cid params model =
     let
@@ -156,7 +166,7 @@ onDragging : Float -> Float -> Model -> UpdateResponse msg
 onDragging x y model =
     case getDragging model of
         Just windowId ->
-            withWindow windowId model (move x y >> React.update)
+            withWindow windowId model (smartMove model x y >> React.update)
 
         Nothing ->
             React.update model

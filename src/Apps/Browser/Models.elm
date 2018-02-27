@@ -105,7 +105,7 @@ icon =
     "browser"
 
 
-windowInitSize : ( Float, Float )
+windowInitSize : ( Int, Int )
 windowInitSize =
     ( 900, 550 )
 

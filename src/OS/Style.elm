@@ -266,9 +266,12 @@ taskbar =
         , children
             [ indicator
             , bubble
-            , notifications
             , account
+            , class ChatIco [ child div [ taskbarMenu ] ]
+            , class ServersIco [ child div [ taskbarMenu ] ]
             ]
+        , descendants
+            [ notifications ]
         , textAlign right
         ]
 
@@ -307,12 +310,6 @@ indicator =
         ]
 
 
-notifications : Snippet
-notifications =
-    class Notification
-        [ child div notificationMenu ]
-
-
 taskbarMenu : Style
 taskbarMenu =
     batch
@@ -325,32 +322,32 @@ taskbarMenu =
         ]
 
 
-notificationMenu : List Style
-notificationMenu =
-    [ taskbarMenu
-    , child ul
-        [ listStyle none
-        , padding (px 0)
-        , margin (px 0)
-        , child li
-            [ borderBottom3 (px 1) solid Colors.separator
-            , padding2 (px 0) (px 8)
-            , firstChild
-                [ flexContainerHorz
-                , backgroundColor Colors.bgSelected
-                ]
-            , lastChild
-                [ borderBottom (px 0)
-                , textAlign center
+notifications : Snippet
+notifications =
+    class Notification
+        [ child ul
+            [ listStyle none
+            , padding (px 0)
+            , margin (px 0)
+            , child li
+                [ borderBottom3 (px 1) solid Colors.separator
+                , padding2 (px 0) (px 8)
+                , firstChild
+                    [ flexContainerHorz
+                    , backgroundColor Colors.bgSelected
+                    ]
+                , lastChild
+                    [ borderBottom (px 0)
+                    , textAlign center
+                    ]
                 ]
             ]
         ]
-    ]
 
 
 account : Snippet
 account =
-    class Account
+    class AccountIco
         [ before [ Icons.accountMenu ]
         , child div
             [ taskbarMenu
@@ -359,8 +356,8 @@ account =
                 , padding (px 0)
                 , margin (px 0)
                 , child li
-                    [ borderBottom3 (px 1) solid Colors.separator
-                    , padding2 (px 0) (px 8)
+                    [ borderTop3 (px 1) solid Colors.separator
+                    , padding (px 8)
                     ]
                 ]
             ]

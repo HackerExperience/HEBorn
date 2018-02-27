@@ -97,7 +97,7 @@ account config openMenu =
             Account.view config openMenu
 
         bubble_ =
-            config.serversNotifications
+            config.accountNotifications
                 |> Notifications.countUnreaded
                 |> bubble
     in
@@ -106,7 +106,10 @@ account config openMenu =
 
 bubble : Int -> Html Msg
 bubble num =
-    flip (node bubbleNode) [ text <| toString num ] <|
+    flip
+        (node bubbleNode)
+        [ text <| toString num ]
+    <|
         if num <= 0 then
             [ class [ Empty ] ]
         else
