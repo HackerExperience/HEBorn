@@ -11,9 +11,8 @@ type Msg
     | ToggleMenus OpenMenu
     | MouseEnterDropdown
     | MouseLeavesDropdown
-    | SelectGateway Servers.CId
     | SelectBounce (Maybe String)
-    | SelectEndpoint (Maybe Servers.CId)
+    | DropMenu
     | SelectNIP NIP
     | CheckMenus
     | ContextTo Context

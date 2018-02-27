@@ -4,7 +4,7 @@ module OS.Header.Models exposing (..)
 type OpenMenu
     = NothingOpen
     | GatewayOpen
-    | BounceOpen
+    | BounceOpen (Maybe String)
     | EndpointOpen
     | ChatOpen
     | ServersOpen

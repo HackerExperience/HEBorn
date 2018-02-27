@@ -45,6 +45,7 @@ type alias Server =
     , mainStorage : StorageId
     , storages : Storages
     , logs : Logs.Model
+    , bounce : Maybe Bounces.ID
     , processes : Processes.Model
     , tunnels : Tunnels.Model
     , ownership : Ownership
@@ -85,8 +86,7 @@ type alias GatewayData =
 
 
 type alias EndpointData =
-    { bounce : Maybe Bounces.ID
-    , analyzed : Maybe AnalyzedEndpoint
+    { analyzed : Maybe AnalyzedEndpoint
     }
 
 
@@ -414,26 +414,35 @@ getEndpoints server =
 
 getBounce : Server -> Maybe Bounces.ID
 getBounce server =
-    case server.ownership of
-        EndpointOwnership data ->
-            data.bounce
+    server.bounce
 
-        _ ->
-            Nothing
+
+getActiveBounce : Server -> Model -> Maybe Bounces.ID
+getActiveBounce server model =
+    case (getEndpointCId server) of
+        Nothing ->
+            getBounce server
+
+        Just cid ->
+            model
+                |> get cid
+                |> Maybe.andThen (getBounce)
+
+
+setActiveBounce : Server -> Maybe Bounces.ID -> Server
+setActiveBounce server bounceId =
+    case (getEndpointCId server) of
+        Nothing ->
+            { server | bounce = bounceId }
+
+        Just cid ->
+            --can not change bounces being used in a connection
+            server
 
 
 setBounce : Maybe Bounces.ID -> Server -> Server
-setBounce bounce ({ ownership } as server) =
-    let
-        ownership_ =
-            case ownership of
-                EndpointOwnership data ->
-                    EndpointOwnership { data | bounce = bounce }
-
-                ownership ->
-                    ownership
-    in
-        { server | ownership = ownership_ }
+setBounce bounce server =
+    { server | bounce = bounce }
 
 
 isGateway : Server -> Bool
