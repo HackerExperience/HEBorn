@@ -17,7 +17,7 @@ type alias Config msg =
     , draggable : Attribute msg
     , story : Storyline.Model
     , username : String
-    , onReplyEmail : ContactId -> Reply -> msg
+    , onReply : ContactId -> Reply -> msg
     , onCloseApp : msg
     , onOpenApp : AppParams -> msg
     }

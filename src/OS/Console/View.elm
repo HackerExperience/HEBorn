@@ -17,13 +17,13 @@ view : Config -> Html msg
 view config =
     let
         view_ =
-            viewLogs config.backFlix ++ [ text "elliot@localhost_>" ]
+            viewLogs config.logs ++ [ text "elliot@localhost_>" ]
     in
         div [ class [ LogConsole ] ]
             view_
 
 
-viewLogs : BackFlix.BackFlix -> List (Html msg)
+viewLogs : BackFlix.Logs -> List (Html msg)
 viewLogs logs =
     logs
         |> Dict.foldl (\k v acc -> viewLog k v :: acc) []

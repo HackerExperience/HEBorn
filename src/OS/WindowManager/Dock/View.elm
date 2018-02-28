@@ -6,7 +6,6 @@ import Html.Attributes exposing (title, attribute)
 import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (..)
-import Utils.Maybe as Maybe
 import Apps.Shared as Apps
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import OS.Resources as OsRes

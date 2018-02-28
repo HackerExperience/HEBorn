@@ -4,4 +4,4 @@ import Game.BackFlix.Models as BackFlix
 
 
 type alias Config =
-    { backFlix : BackFlix.BackFlix }
+    { logs : BackFlix.Logs }

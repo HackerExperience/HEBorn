@@ -2,7 +2,6 @@ module Apps.Browser.Messages exposing (..)
 
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Shared as Finances
-import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem

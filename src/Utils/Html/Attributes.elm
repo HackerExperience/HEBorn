@@ -3,7 +3,6 @@ module Utils.Html.Attributes exposing (..)
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 
 
 -- ONLY PUT HERE ATTRIBUTES THAT REQUIRES MAPPING OR PIPES

@@ -41,9 +41,9 @@ updateGateway config motherboard msg model =
 
 
 onSave : Config msg -> Motherboard -> Model -> UpdateResponse msg
-onSave { onMotherboardUpdate } motherboard model =
+onSave { onUpdate } motherboard model =
     motherboard
-        |> onMotherboardUpdate
+        |> onUpdate
         |> React.msg
         |> (,) model
 

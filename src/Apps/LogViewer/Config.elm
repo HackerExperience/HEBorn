@@ -11,10 +11,10 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , logs : Logs.Model
     , menuAttr : ContextMenuAttribute msg
-    , onUpdateLog : Logs.ID -> String -> msg
-    , onEncryptLog : Logs.ID -> msg
-    , onHideLog : Logs.ID -> msg
-    , onDeleteLog : Logs.ID -> msg
+    , onUpdate : Logs.ID -> String -> msg
+    , onEncrypt : Logs.ID -> msg
+    , onHide : Logs.ID -> msg
+    , onDelete : Logs.ID -> msg
     }
 
 

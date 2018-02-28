@@ -22,24 +22,22 @@ import Apps.Browser.Pages.Webserver.Config as Webserver
 
 
 type alias Config msg =
-    { toMsg : Msg -> msg
+    { flags : Core.Flags
+    , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , flags : Core.Flags
     , reference : Reference
-    , endpoints : List CId
     , activeServer : ( CId, Servers.Server )
-    , activeGateway : Servers.Server
-    , menuAttr : ContextMenuAttribute msg
-    , endpointCId : Maybe CId
-    , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> msg
-    , onOpenApp : CId -> AppParams -> msg
-    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
-    , onBankAccountLogin : BankLoginRequest -> Requester -> msg
-    , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
+    , activeGateway : ( CId, Servers.Server )
+    , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> CId -> msg
+    , onOpenApp : AppParams -> CId -> msg
     , onSetContext : Context -> msg
-    , onNewBruteforceProcess : Network.IP -> msg
     , onLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onLogout : CId -> msg
+    , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewBruteforceProcess : Network.IP -> msg
+    , onBankAccountLogin : BankLoginRequest -> Requester -> msg
+    , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
+    , menuAttr : ContextMenuAttribute msg
     }
 
 
@@ -62,7 +60,7 @@ downloadCenterConfig config =
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = config.endpoints
+    , endpoints = endpoints config
     }
 
 
@@ -71,8 +69,9 @@ homeConfig config =
     { onNewTabIn = NewTabIn >> config.toMsg
     , onGoAddress = GoAddress >> ActiveTabMsg >> config.toMsg
     , onOpenApp =
-        config.endpointCId
-            |> Maybe.map config.onOpenApp
+        config
+            |> endpointCId
+            |> Maybe.map (flip config.onOpenApp)
             |> Maybe.withDefault (always <| config.batchMsg [])
     }
 
@@ -87,12 +86,27 @@ webserverConfig config =
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = config.endpoints
+    , endpoints = endpoints config
     }
 
 
 
 -- helpers
+
+
+endpointCId : Config msg -> Maybe CId
+endpointCId { activeGateway } =
+    activeGateway
+        |> Tuple.second
+        |> Servers.getEndpointCId
+
+
+endpoints : Config msg -> List CId
+endpoints { activeGateway } =
+    activeGateway
+        |> Tuple.second
+        |> Servers.getEndpoints
+        |> Maybe.withDefault []
 
 
 type alias ContextMenuItens msg =

@@ -7,7 +7,6 @@ import Apps.Calculator.Config exposing (..)
 import Apps.Calculator.Models exposing (..)
 import Apps.Calculator.Messages exposing (Msg(..))
 import Apps.Calculator.Resources exposing (..)
-import Core.Error as Error
 
 
 { id, class, classList } =
