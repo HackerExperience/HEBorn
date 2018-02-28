@@ -13,9 +13,9 @@ type alias Config msg =
     , processes : Processes.Model
     , lastTick : Time
     , menuAttr : ContextMenuAttribute msg
-    , onPauseProcess : Processes.ID -> msg
-    , onResumeProcess : Processes.ID -> msg
-    , onRemoveProcess : Processes.ID -> msg
+    , onPause : Processes.ID -> msg
+    , onResume : Processes.ID -> msg
+    , onRemove : Processes.ID -> msg
     }
 
 

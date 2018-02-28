@@ -30,7 +30,7 @@ type alias AuthData =
     { token : Token }
 
 
-type Logout
+type SignOut
     = StillLogged
     | ToLanding
     | ToCrash Error
@@ -50,7 +50,7 @@ type alias Model =
     , bounces : Bounces.Model
     , finances : Finances.Model
     , notifications : Notifications.Model
-    , logout : Logout
+    , signOut : SignOut
     , mainframe : Maybe Servers.CId
     }
 
@@ -75,7 +75,7 @@ initialModel id username token =
     , bounces = Bounces.initialModel
     , finances = Finances.initialModel
     , notifications = Notifications.initialModel
-    , logout = StillLogged
+    , signOut = StillLogged
     , mainframe = Nothing
     }
 

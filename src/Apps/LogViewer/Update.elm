@@ -68,7 +68,7 @@ updateTextFilter config filter model =
         }
 
 
-onApplyEditing { onUpdateLog } id model =
+onApplyEditing { onUpdate } id model =
     let
         model_ =
             leaveEditing id model
@@ -77,7 +77,7 @@ onApplyEditing { onUpdateLog } id model =
             case (getEdit id model) of
                 Just edited ->
                     edited
-                        |> onUpdateLog id
+                        |> onUpdate id
                         |> React.msg
 
                 Nothing ->

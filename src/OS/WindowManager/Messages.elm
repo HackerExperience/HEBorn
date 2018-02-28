@@ -27,7 +27,7 @@ import OS.WindowManager.Shared exposing (..)
 
 type Msg
     = NewApp DesktopApp (Maybe Context) (Maybe AppParams) CId
-    | OpenApp CId AppParams
+    | OpenApp AppParams CId
     | LazyLaunchEndpoint WindowId DesktopApp
     | SetAppSize Window.Size
       -- window handling

@@ -125,7 +125,7 @@ os { contextMenu } game os =
                             |> Meta.getLastTick
 
                     config =
-                        osConfig game contextMenu srv ctx gtw
+                        osConfig game contextMenu ctx srv gtw
                 in
                     OS.subscriptions config os
 

@@ -22,7 +22,7 @@ account model =
         |> hardcoded model.bounces
         |> hardcoded model.finances
         |> hardcoded model.notifications
-        |> hardcoded model.logout
+        |> hardcoded model.signOut
         |> mainframe model
 
 

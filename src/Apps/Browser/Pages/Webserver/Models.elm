@@ -1,6 +1,6 @@
 module Apps.Browser.Pages.Webserver.Models exposing (..)
 
-import Game.Web.Types as Web exposing (Url)
+import Game.Meta.Types.Network.Site as Site
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Widgets.PublicFiles.Model as PublicFiles
 
@@ -18,7 +18,7 @@ type alias Model =
 -- Default page for valid IP without a server
 
 
-initialModel : Web.WebserverContent -> Web.Meta -> Model
+initialModel : Site.WebserverContent -> Site.Meta -> Model
 initialModel { custom } meta =
     { toolkit =
         { password = meta.password

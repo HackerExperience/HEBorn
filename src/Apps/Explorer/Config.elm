@@ -13,11 +13,11 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , activeServer : Servers.Server
     , menuAttr : ContextMenuAttribute msg
-    , onNewTextFile : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
-    , onNewDir : StorageId -> Filesystem.Path -> Filesystem.Name -> msg
-    , onMoveFile : StorageId -> Filesystem.Id -> Filesystem.Path -> msg
-    , onRenameFile : StorageId -> Filesystem.Id -> Filesystem.Name -> msg
-    , onDeleteFile : StorageId -> Filesystem.Id -> msg
+    , onNewTextFile : Filesystem.Path -> Filesystem.Name -> StorageId -> msg
+    , onNewDir : Filesystem.Path -> Filesystem.Name -> StorageId -> msg
+    , onMoveFile : Filesystem.Id -> Filesystem.Path -> StorageId -> msg
+    , onRenameFile : Filesystem.Id -> Filesystem.Name -> StorageId -> msg
+    , onDeleteFile : Filesystem.Id -> StorageId -> msg
     }
 
 

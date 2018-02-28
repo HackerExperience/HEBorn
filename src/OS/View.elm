@@ -33,7 +33,7 @@ view config model =
                 |> Flags.getVersion
 
         gameMode =
-            case config.isCampaign of
+            case isCampaignFromConfig config of
                 True ->
                     Res.campaignMode
 
@@ -51,7 +51,7 @@ view config model =
                 , activeContextAttr config.activeContext
                 , onClick <| config.toMsg <| HeaderMsg <| Header.CheckMenus
                 , config.menuAttr
-                    [ [ ( ContextMenu.item "Logout", config.onLogout ) ] ]
+                    [ [ ( ContextMenu.item "Sign out", onSignOut config ) ] ]
                 ]
 
 

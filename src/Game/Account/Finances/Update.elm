@@ -26,11 +26,11 @@ update config msg model =
         HandleBankAccountUpdated accountId account ->
             handleBankAccountUpdated accountId account model
 
-        HandleBankAccountLogin cid request requester ->
-            handleBankAccountLogin config request requester cid model
+        HandleBankAccountLogin request requester ->
+            handleBankAccountLogin config request requester model
 
-        HandleBankAccountTransfer cid request requester ->
-            handleBankAccountTransfer config request requester cid model
+        HandleBankAccountTransfer request requester ->
+            handleBankAccountTransfer config request requester model
 
 
 handleBankAccountClosed : AccountId -> Model -> UpdateResponse msg
@@ -47,14 +47,13 @@ handleBankAccountLogin :
     Config msg
     -> BankLoginRequest
     -> Requester
-    -> CId
     -> Model
     -> UpdateResponse msg
-handleBankAccountLogin config request requester cid model =
+handleBankAccountLogin config request requester model =
     let
         request_ =
             config
-                |> Login.request request requester config.accountId cid
+                |> Login.request request requester config.accountId
                 |> Cmd.map config.toMsg
                 |> React.cmd
     in
@@ -65,13 +64,12 @@ handleBankAccountTransfer :
     Config msg
     -> BankTransferRequest
     -> Requester
-    -> CId
     -> Model
     -> UpdateResponse msg
-handleBankAccountTransfer config request requester cid model =
+handleBankAccountTransfer config request requester model =
     let
         request_ =
-            Transfer.request request requester config.accountId cid config
+            Transfer.request request requester config.accountId config
                 |> Cmd.map config.toMsg
                 |> React.cmd
     in
@@ -81,21 +79,20 @@ handleBankAccountTransfer config request requester cid model =
 onRequest : Config msg -> RequestMsg -> Model -> UpdateResponse msg
 onRequest config data model =
     case data of
-        BankLogin requester cid response ->
-            onBankLogin config requester cid (Login.receive response) model
+        BankLogin requester response ->
+            onBankLogin config requester (Login.receive response) model
 
-        BankTransfer requester cid response ->
-            onBankTransfer config requester cid (Transfer.receive response) model
+        BankTransfer requester response ->
+            onBankTransfer config requester (Transfer.receive response) model
 
 
 onBankLogin :
     Config msg
     -> Requester
-    -> CId
     -> LoginResponse
     -> Model
     -> UpdateResponse msg
-onBankLogin config requester cid response model =
+onBankLogin config requester response model =
     case response of
         Valid data ->
             ( model
@@ -114,11 +111,10 @@ onBankLogin config requester cid response model =
 onBankTransfer :
     Config msg
     -> Requester
-    -> CId
     -> TransferResponse
     -> Model
     -> UpdateResponse msg
-onBankTransfer config requester cid response model =
+onBankTransfer config requester response model =
     case response of
         Successful ->
             ( model

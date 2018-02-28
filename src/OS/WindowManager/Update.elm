@@ -47,8 +47,8 @@ update config msg model =
         NewApp desktopApp maybeContext maybeParams cid ->
             launch config desktopApp maybeParams maybeContext cid model
 
-        OpenApp cid params ->
-            onOpenApp config cid params model
+        OpenApp params cid ->
+            onOpenApp config params cid model
 
         LazyLaunchEndpoint windowId desktopApp ->
             lazyLaunchEndpoint config windowId desktopApp model
@@ -115,8 +115,8 @@ onSetAppSize size_ model =
         |> flip (,) React.none
 
 
-onOpenApp : Config msg -> CId -> AppParams -> Model -> UpdateResponse msg
-onOpenApp config cid params model =
+onOpenApp : Config msg -> AppParams -> CId -> Model -> UpdateResponse msg
+onOpenApp config params cid model =
     let
         desktopApp =
             AppsParams.toAppType params
@@ -125,7 +125,7 @@ onOpenApp config cid params model =
             findExistingAppId desktopApp cid model
 
         maybeContext =
-            case config.endpointCId of
+            case endpointCIdFromConfig config of
                 Just endpointCId ->
                     if endpointCId == cid then
                         Just Endpoint
@@ -293,7 +293,7 @@ updateAppDelegate :
     -> AppId
     -> App
     -> ( AppModel, React msg )
-updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId app =
+updateAppDelegate config activeServer activeGateway appMsg windowId appId app =
     -- HACK : Elm's Tuple Pattern Matching is slow
     -- https://groups.google.com/forum/#!topic/elm-dev/QGmwWH6V8-c
     case appMsg of
@@ -323,7 +323,12 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
             case getModel app of
                 BrowserModel appModel ->
                     appModel
-                        |> Browser.update (browserConfig appId cid server config)
+                        |> Browser.update
+                            (browserConfig appId
+                                activeServer
+                                activeGateway
+                                config
+                            )
                             msg
                         |> Tuple.mapFirst BrowserModel
 
@@ -376,7 +381,9 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
             case getModel app of
                 EmailModel appModel ->
                     appModel
-                        |> Email.update (emailConfig appId cid config) msg
+                        |> Email.update
+                            (emailConfig appId activeGateway config)
+                            msg
                         |> Tuple.mapFirst EmailModel
 
                 model ->
@@ -387,7 +394,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
                 ExplorerModel appModel ->
                     appModel
                         |> Explorer.update
-                            (explorerConfig appId cid server config)
+                            (explorerConfig appId activeServer config)
                             msg
                         |> Tuple.mapFirst ExplorerModel
 
@@ -411,7 +418,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
                         |> FloatingHeads.update
                             (floatingHeadsConfig windowId
                                 appId
-                                cid
+                                activeGateway
                                 config
                             )
                             msg
@@ -449,7 +456,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
                 LogViewerModel appModel ->
                     appModel
                         |> LogViewer.update
-                            (logViewerConfig appId cid server config)
+                            (logViewerConfig appId activeServer config)
                             msg
                         |> Tuple.mapFirst LogViewerModel
 
@@ -461,7 +468,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
                 ServersGearsModel appModel ->
                     appModel
                         |> ServersGears.update
-                            (serversGearsConfig appId cid server config)
+                            (serversGearsConfig appId activeServer config)
                             msg
                         |> Tuple.mapFirst ServersGearsModel
 
@@ -473,7 +480,7 @@ updateAppDelegate config ( cid, server ) ( gCid, gServer ) appMsg windowId appId
                 TaskManagerModel appModel ->
                     appModel
                         |> TaskManager.update
-                            (taskManagerConfig appId cid server config)
+                            (taskManagerConfig appId activeServer config)
                             msg
                         |> Tuple.mapFirst TaskManagerModel
 

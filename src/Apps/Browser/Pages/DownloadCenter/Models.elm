@@ -1,6 +1,6 @@
 module Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 
-import Game.Web.Types as Web
+import Game.Meta.Types.Network.Site as Site
 import Apps.Browser.Widgets.HackingToolkit.Model as HackingToolkit
 import Apps.Browser.Widgets.PublicFiles.Model as PublicFiles
 
@@ -14,7 +14,7 @@ type alias Model =
     }
 
 
-initialModel : Web.DownloadCenterContent -> Web.Meta -> Model
+initialModel : Site.DownloadCenterContent -> Site.Meta -> Model
 initialModel { title } meta =
     { toolkit =
         { password = meta.password

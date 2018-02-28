@@ -9,7 +9,6 @@ import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Servers.Processes.Models as Processes
 import Apps.TaskManager.Config exposing (..)
-import Apps.TaskManager.Messages exposing (Msg(..))
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 
@@ -131,27 +130,27 @@ processMenu config ( id, process ) =
 
 
 menuForRunning : Config msg -> Processes.ID -> Attribute msg
-menuForRunning { menuAttr, onPauseProcess, onRemoveProcess } pID =
+menuForRunning { menuAttr, onPause, onRemove } pID =
     menuAttr
-        [ [ ( ContextMenu.item "Pause", onPauseProcess pID )
-          , ( ContextMenu.item "Remove", onRemoveProcess pID )
+        [ [ ( ContextMenu.item "Pause", onPause pID )
+          , ( ContextMenu.item "Remove", onRemove pID )
           ]
         ]
 
 
 menuForPaused : Config msg -> Processes.ID -> Attribute msg
-menuForPaused { menuAttr, onResumeProcess, onRemoveProcess } pID =
+menuForPaused { menuAttr, onResume, onRemove } pID =
     menuAttr
-        [ [ ( ContextMenu.item "Resume", onResumeProcess pID )
-          , ( ContextMenu.item "Remove", onRemoveProcess pID )
+        [ [ ( ContextMenu.item "Resume", onResume pID )
+          , ( ContextMenu.item "Remove", onRemove pID )
           ]
         ]
 
 
 menuForComplete : Config msg -> Processes.ID -> Attribute msg
-menuForComplete { menuAttr, onRemoveProcess } pID =
+menuForComplete { menuAttr, onRemove } pID =
     menuAttr
-        [ [ ( ContextMenu.item "Remove", onRemoveProcess pID )
+        [ [ ( ContextMenu.item "Remove", onRemove pID )
           ]
         ]
 

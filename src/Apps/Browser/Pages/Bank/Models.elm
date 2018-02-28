@@ -6,7 +6,7 @@ module Apps.Browser.Pages.Bank.Models
         , State(..)
         )
 
-import Game.Web.Types as Web
+import Game.Meta.Types.Network.Site as Site
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Account.Finances.Models exposing (AccountNumber)
 import Game.Account.Finances.Shared exposing (BankAccountData)
@@ -37,7 +37,7 @@ type State
     | Transfer
 
 
-initialModel : Web.Url -> Web.BankContent -> Model
+initialModel : Site.Url -> Site.BankContent -> Model
 initialModel url content =
     { title = content.title
     , nip = content.nip

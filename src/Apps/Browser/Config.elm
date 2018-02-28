@@ -2,6 +2,7 @@ module Apps.Browser.Config exposing (..)
 
 import ContextMenu
 import Html exposing (Attribute)
+import Core.Flags as Core
 import Utils.Core exposing (..)
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Params as AppParams exposing (AppParams)
@@ -20,25 +21,29 @@ import Apps.Browser.Pages.Home.Config as Home
 import Apps.Browser.Pages.Webserver.Config as Webserver
 
 
+{-| Callbacks:
+
+  - `onBruteforceProcess` targets gateway cid
+  - `onNewPublicDownload` targets active cid
+
+-}
 type alias Config msg =
-    { toMsg : Msg -> msg
+    { flags : Core.Flags
+    , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
     , reference : Reference
-    , endpoints : List CId
-    , activeServer : Servers.Server
-    , activeGateway : Servers.Server
-    , menuAttr : ContextMenuAttribute msg
-    , endpointCId : Maybe CId
-    , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> msg
-    , onOpenApp : CId -> AppParams -> msg
+    , activeServer : ( CId, Servers.Server )
+    , activeGateway : ( CId, Servers.Server )
+    , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> CId -> msg
+    , onOpenApp : AppParams -> CId -> msg
+    , onSetContext : Context -> msg
+    , onLogin : NIP -> Network.IP -> String -> Requester -> msg
+    , onLogout : CId -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
+    , onNewBruteforceProcess : Network.IP -> msg
     , onBankAccountLogin : BankLoginRequest -> Requester -> msg
     , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
-    , onSetContext : Context -> msg
-    , onNewBruteforceProcess : Network.IP -> msg
-    , onWebLogin : NIP -> Network.IP -> String -> Requester -> msg
-    , onFetchUrl : Network.ID -> Network.IP -> Requester -> msg
-    , onWebLogout : CId -> msg
+    , menuAttr : ContextMenuAttribute msg
     }
 
 
@@ -55,13 +60,13 @@ downloadCenterConfig : Config msg -> DownloadCenter.Config msg
 downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Servers.EndpointCId >> config.onWebLogout
+    , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = config.endpoints
+    , endpoints = endpoints config
     }
 
 
@@ -70,8 +75,9 @@ homeConfig config =
     { onNewTabIn = NewTabIn >> config.toMsg
     , onGoAddress = GoAddress >> ActiveTabMsg >> config.toMsg
     , onOpenApp =
-        config.endpointCId
-            |> Maybe.map config.onOpenApp
+        config
+            |> endpointCId
+            |> Maybe.map (flip config.onOpenApp)
             |> Maybe.withDefault (always <| config.batchMsg [])
     }
 
@@ -80,18 +86,33 @@ webserverConfig : Config msg -> Webserver.Config msg
 webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg >> config.toMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
-    , onLogout = Servers.EndpointCId >> config.onWebLogout
+    , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = config.endpoints
+    , endpoints = endpoints config
     }
 
 
 
 -- helpers
+
+
+endpointCId : Config msg -> Maybe CId
+endpointCId { activeGateway } =
+    activeGateway
+        |> Tuple.second
+        |> Servers.getEndpointCId
+
+
+endpoints : Config msg -> List CId
+endpoints { activeGateway } =
+    activeGateway
+        |> Tuple.second
+        |> Servers.getEndpoints
+        |> Maybe.withDefault []
 
 
 type alias ContextMenuItens msg =

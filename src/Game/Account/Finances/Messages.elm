@@ -17,13 +17,13 @@ type Msg
     = Request RequestMsg
     | HandleBankAccountClosed AccountId
     | HandleBankAccountUpdated AccountId BankAccount
-    | HandleBankAccountLogin CId BankLoginRequest Requester
-    | HandleBankAccountTransfer CId BankTransferRequest Requester
+    | HandleBankAccountLogin BankLoginRequest Requester
+    | HandleBankAccountTransfer BankTransferRequest Requester
 
 
 type RequestMsg
-    = BankLogin Requester CId ResponseType
-    | BankTransfer Requester CId ResponseType
+    = BankLogin Requester ResponseType
+    | BankTransfer Requester ResponseType
 
 
 type LoginResponse

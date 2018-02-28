@@ -17,6 +17,6 @@ type Msg
     | Disconnected
     | Joined Channel Value
     | JoinFailed Channel Value
-    | Leaved Channel Value
+    | Left Channel Value
     | HandleJoin Channel (Maybe Value)
     | HandleLeave Channel

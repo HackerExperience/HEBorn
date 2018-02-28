@@ -2,11 +2,10 @@ module Apps.Browser.Messages exposing (..)
 
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Shared as Finances
-import Game.Web.Types exposing (Response)
-import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Requests.Browse as BrowseRequest
 import Events.Account.Handlers.ServerPasswordAcquired as PasswordAcquired
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Apps.Browser.Pages.Webserver.Messages as Webserver
@@ -51,7 +50,7 @@ type TabMsg
     | HandleLoginFailed
     | SelectEndpoint
     | NewApp DesktopApp
-    | HandleFetched Response
+    | HandleBrowse BrowseRequest.Data
       -- site msgs
     | WebserverMsg Webserver.Msg
     | BankMsg Bank.Msg

@@ -1,4 +1,4 @@
-module Game.Account.Requests.Logout exposing (logoutRequest)
+module Game.Account.Requests.SignOut exposing (signOutRequest)
 
 import Json.Encode as Encode exposing (Value)
 import Requests.Requests as Requests
@@ -11,10 +11,10 @@ type alias Data =
     Result () ()
 
 
-logoutRequest : String -> ID -> FlagsSource a -> Cmd Data
-logoutRequest token id flagsSrc =
+signOutRequest : String -> ID -> FlagsSource a -> Cmd Data
+signOutRequest token id flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.logout id) (encoder token)
+        |> Requests.request_ (Topics.accountLogout id) (encoder token)
         |> Cmd.map (uncurry receiver)
 
 

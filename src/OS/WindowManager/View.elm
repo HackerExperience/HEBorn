@@ -108,7 +108,7 @@ filterMapWindows config model isFreeplay windowId =
         shouldDraw =
             model
                 |> getSessionOfWindow windowId
-                |> Maybe.andThen (flip Servers.get config.servers)
+                |> Maybe.andThen (flip Servers.get <| serversFromConfig config)
                 |> Maybe.map (Servers.isFreeplay >> (==) isFreeplay)
                 |> Maybe.withDefault False
     in
@@ -260,7 +260,7 @@ headerTitle title icon =
 
 headerContext : Config msg -> DesktopApp -> WindowId -> Window -> Html msg
 headerContext config desktopApp windowId window =
-    case config.endpointCId of
+    case endpointCIdFromConfig config of
         Just _ ->
             case getInstance window of
                 Single _ _ ->
@@ -433,7 +433,7 @@ viewAppDelegate :
     -> AppId
     -> App
     -> Html msg
-viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
+viewAppDelegate config activeServer activeGateway windowId appId app =
     case getModel app of
         BackFlixModel appModel ->
             BackFlix.view (backFlixConfig appId config) appModel
@@ -442,7 +442,7 @@ viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
             BounceManager.view (bounceManagerConfig appId config) appModel
 
         BrowserModel appModel ->
-            Browser.view (browserConfig appId cid server config) appModel
+            Browser.view (browserConfig appId activeServer activeGateway config) appModel
 
         BugModel appModel ->
             Bug.view (bugConfig appId config) appModel
@@ -460,17 +460,17 @@ viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
             Database.view (dbAdminConfig appId config) appModel
 
         EmailModel appModel ->
-            Email.view (emailConfig appId gCid config) appModel
+            Email.view (emailConfig appId activeGateway config) appModel
 
         ExplorerModel appModel ->
-            Explorer.view (explorerConfig appId cid server config) appModel
+            Explorer.view (explorerConfig appId activeServer config) appModel
 
         FinanceModel appModel ->
             Finance.view (financeConfig appId config) appModel
 
         FloatingHeadsModel appModel ->
             FloatingHeads.view
-                (floatingHeadsConfig windowId appId gCid config)
+                (floatingHeadsConfig windowId appId activeGateway config)
                 appModel
 
         HebampModel appModel ->
@@ -483,14 +483,14 @@ viewAppDelegate config ( cid, server ) ( gCid, gServer ) windowId appId app =
             LocationPicker.view (locationPickerConfig appId config) appModel
 
         LogViewerModel appModel ->
-            LogViewer.view (logViewerConfig appId cid server config) appModel
+            LogViewer.view (logViewerConfig appId activeServer config) appModel
 
         ServersGearsModel appModel ->
-            ServersGears.view (serversGearsConfig appId cid server config)
+            ServersGears.view (serversGearsConfig appId activeServer config)
                 appModel
 
         TaskManagerModel appModel ->
-            TaskManager.view (taskManagerConfig appId cid server config)
+            TaskManager.view (taskManagerConfig appId activeServer config)
                 appModel
 
 

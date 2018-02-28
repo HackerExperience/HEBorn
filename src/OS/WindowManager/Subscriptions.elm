@@ -39,7 +39,8 @@ subsApp config model appId app =
             getAppCId app
 
         activeServer =
-            config.servers
+            config
+                |> serversFromConfig
                 |> Servers.get cid
                 |> Maybe.map ((,) cid)
 
@@ -70,7 +71,7 @@ subsAppDelegate :
     -> AppId
     -> App
     -> Maybe (Sub msg)
-subsAppDelegate config ( cid, server ) ( gCid, gServer ) appId app =
+subsAppDelegate config activeServer activeGateway appId app =
     case getModel app of
         LocationPickerModel appModel ->
             appModel
@@ -81,7 +82,7 @@ subsAppDelegate config ( cid, server ) ( gCid, gServer ) appId app =
         TaskManagerModel appModel ->
             appModel
                 |> TaskManager.subscriptions
-                    (taskManagerConfig appId cid server config)
+                    (taskManagerConfig appId activeServer config)
                 |> Just
 
         _ ->

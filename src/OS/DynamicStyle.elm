@@ -6,9 +6,10 @@ import Html.Lazy exposing (lazy)
 import Json.Encode as Json
 import Css exposing (Stylesheet)
 import Css.File
-import OS.Config exposing (..)
+import Game.Models as Game
 import Game.Storyline.DynamicStyle as Storyline
 import Game.Storyline.StepActions.DynamicStyle as StepActions
+import OS.Config exposing (..)
 
 
 styleNode : String -> List Stylesheet -> Html msg
@@ -25,8 +26,11 @@ styleNode id_ stylesheet =
 
 
 view : Config msg -> Html msg
-view { story, isCampaign } =
+view config =
     let
+        story =
+            Game.getStory config.game
+
         missions_ =
             StepActions.dynCss
                 >> styleNode "missions"
@@ -36,7 +40,7 @@ view { story, isCampaign } =
                 >> styleNode "storyline"
 
         ( storyStyles, missionsStyles ) =
-            if isCampaign then
+            if isCampaignFromConfig config then
                 ( lazy story_ story
                 , lazy missions_ story
                 )

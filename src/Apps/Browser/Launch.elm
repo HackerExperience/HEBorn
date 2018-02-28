@@ -2,10 +2,11 @@ module Apps.Browser.Launch exposing (..)
 
 import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
+import Game.Servers.Requests.Browse as BrowseRequest exposing (browseRequest)
 import Game.Meta.Types.Network as Network
-import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Messages exposing (..)
 
 
 type alias LaunchResponse msg =
@@ -25,24 +26,31 @@ launch config maybeParams =
 launchOpenAtUrl : Config msg -> URL -> LaunchResponse msg
 launchOpenAtUrl config url =
     let
-        nid =
+        ( cid, server ) =
             config.activeServer
+
+        networkId =
+            server
                 |> Servers.getActiveNIP
                 |> Network.getId
 
         model =
             initialModel config.reference
 
-        requester =
-            Requester config.reference model.lastTab
-
-        react =
-            React.msg <| config.onFetchUrl nid url requester
-
         model_ =
             model
                 |> getNowTab
                 |> gotoPage url (LoadingModel url)
                 |> flip setNowTab model
+
+        react =
+            config
+                |> browseRequest url networkId cid
+                |> Cmd.map
+                    (HandleBrowse
+                        >> SomeTabMsg model_.lastTab
+                        >> config.toMsg
+                    )
+                |> React.cmd
     in
         ( model_, react )

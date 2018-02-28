@@ -1,5 +1,6 @@
 module OS.WindowManager.Launch exposing (launch, lazyLaunchEndpoint)
 
+import Utils.Maybe as Maybe
 import Utils.React as React exposing (React)
 import Apps.Params as Apps exposing (AppParams)
 import Apps.Shared as Apps exposing (AppContext)
@@ -41,7 +42,7 @@ launch :
     -> Model
     -> ( Model, React msg )
 launch config desktopApp maybeParams maybeContext cid model =
-    case Servers.get cid config.servers of
+    case Servers.get cid <| serversFromConfig config of
         Just server ->
             case Apps.context desktopApp of
                 Apps.DynamicContext ->
@@ -80,19 +81,24 @@ lazyLaunchEndpoint :
     -> ( Model, React msg )
 lazyLaunchEndpoint config windowId desktopApp model =
     let
+        maybeWindow =
+            getWindow windowId model
+
         maybeActiveEndpoint =
-            model
-                |> getWindow windowId
-                |> Maybe.andThen (getEndpointOfWindow config model)
+            Maybe.andThen (getEndpointOfWindow config model) maybeWindow
+
+        maybeAcitveGateway =
+            Maybe.andThen (getGatewayOfWindow config model) maybeWindow
     in
-        case maybeActiveEndpoint of
-            Just activeEndpoint ->
+        case Maybe.uncurry maybeActiveEndpoint maybeAcitveGateway of
+            Just ( activeEndpoint, activeGateway ) ->
                 Tuple.second <|
                     launchAppHelper config
+                        activeEndpoint
+                        activeGateway
                         desktopApp
                         Nothing
                         windowId
-                        activeEndpoint
                         model
 
             Nothing ->
@@ -143,10 +149,11 @@ launchDoubleHelper config desktopApp maybeParams context activeGateway model =
 
         ( appId, ( model2, react1 ) ) =
             launchAppHelper config
+                activeGateway
+                activeGateway
                 desktopApp
                 gatewayParams
                 windowId
-                activeGateway
                 model1
 
         instance =
@@ -173,10 +180,11 @@ launchDoubleHelper config desktopApp maybeParams context activeGateway model =
                     ( model_, react2 ) =
                         Tuple.second <|
                             launchAppHelper config
+                                activeEndpoint
+                                activeGateway
                                 desktopApp
                                 endpointParams
                                 windowId
-                                activeEndpoint
                                 model3
 
                     react_ =
@@ -185,7 +193,7 @@ launchDoubleHelper config desktopApp maybeParams context activeGateway model =
                     ( model_, react_ )
 
             Nothing ->
-                ( model3, React.none )
+                ( model3, react1 )
 
 
 launchSingleHelper :
@@ -211,10 +219,11 @@ launchSingleHelper config desktopApp maybeParams context activeGateway model =
 
                 ( appId, ( model2, react ) ) =
                     launchAppHelper config
+                        activeServer
+                        activeGateway
                         desktopApp
                         maybeParams
                         windowId
-                        activeServer
                         model1
 
                 instance =
@@ -237,24 +246,26 @@ launchSingleHelper config desktopApp maybeParams context activeGateway model =
 
 launchAppHelper :
     Config msg
+    -> ( CId, Server )
+    -> ( CId, Server )
     -> DesktopApp
     -> Maybe AppParams
     -> WindowId
-    -> ( CId, Server )
     -> Model
     -> ( AppId, ( Model, React msg ) )
-launchAppHelper config desktopApp maybeParams windowId activeServer model =
+launchAppHelper config activeServer activeGateway desktopApp maybeParams windowId model =
     let
         ( appId, model1 ) =
             getNewAppId model
 
         ( appModel, react ) =
-            delegateLaunch config
+            launchDelegate config
+                activeServer
+                activeGateway
                 windowId
                 appId
                 desktopApp
                 maybeParams
-                activeServer
 
         ( cid, server ) =
             activeServer
@@ -288,15 +299,16 @@ launchAppHelper config desktopApp maybeParams windowId activeServer model =
 ---- delegates
 
 
-delegateLaunch :
+launchDelegate :
     Config msg
+    -> ( CId, Server )
+    -> ( CId, Server )
     -> WindowId
     -> AppId
     -> DesktopApp
     -> Maybe AppParams
-    -> ( CId, Server )
     -> ( AppModel, React msg )
-delegateLaunch config windowId appId desktopApp maybeParams ( cid, server ) =
+launchDelegate config activeServer activeGateway windowId appId desktopApp maybeParams =
     case desktopApp of
         DesktopApp.BackFlix ->
             ( BackFlixModel BackFlix.initialModel
@@ -313,7 +325,8 @@ delegateLaunch config windowId appId desktopApp maybeParams ( cid, server ) =
         DesktopApp.Browser ->
             maybeParams
                 |> Maybe.andThen Apps.castBrowser
-                |> Browser.launch (browserConfig appId cid server config)
+                |> Browser.launch
+                    (browserConfig appId activeServer activeGateway config)
                 |> Tuple.mapFirst BrowserModel
 
         DesktopApp.Bug ->
@@ -360,7 +373,7 @@ delegateLaunch config windowId appId desktopApp maybeParams ( cid, server ) =
             maybeParams
                 |> Maybe.andThen Apps.castFloatingHeads
                 |> FloatingHeads.launch
-                    (floatingHeadsConfig windowId appId cid config)
+                    (floatingHeadsConfig windowId appId activeServer config)
                 |> Tuple.mapFirst FloatingHeadsModel
 
         DesktopApp.Hebamp ->
@@ -385,7 +398,7 @@ delegateLaunch config windowId appId desktopApp maybeParams ( cid, server ) =
 
         DesktopApp.ServersGears ->
             config
-                |> serversGearsConfig appId cid server
+                |> serversGearsConfig appId activeServer
                 |> .mobo
                 |> ServersGears.initialModel
                 |> ServersGearsModel

@@ -49,7 +49,7 @@ onPlay { game, os } { contextMenu } =
     in
         case volatile_ of
             ( Just gtw, Just srv ) ->
-                OS.view (osConfig game contextMenu srv ctx gtw) os
+                OS.view (osConfig game contextMenu ctx srv gtw) os
 
             ( Nothing, _ ) ->
                 "Player doesn't have a Gateway [View.play]"
