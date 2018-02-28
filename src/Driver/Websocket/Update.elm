@@ -30,7 +30,7 @@ update config msg model =
         JoinFailed channel value ->
             onJoinFailed config channel value model
 
-        Leaved channel value ->
+        Left channel value ->
             handleLeave config channel (Just value) model
 
         HandleJoin channel payload ->
@@ -108,7 +108,7 @@ handleJoin config channel payload model =
                 |> Channel.init
                 |> Channel.onJoin (Joined channel >> config.toMsg)
                 |> Channel.onJoinError (JoinFailed channel >> config.toMsg)
-                |> Channel.onLeave (Leaved channel >> config.toMsg)
+                |> Channel.onLeave (Left channel >> config.toMsg)
                 |> Channel.on "event" eventHandler
                 |> Channel.on "event_marote" eventHandler
 
@@ -141,7 +141,7 @@ handleLeave config channel payload model =
             Dict.remove channelAddress model.channels
     in
         ( { model | channels = channels }
-        , React.msg <| config.onLeaved channel payload
+        , React.msg <| config.onLeft channel payload
         )
 
 

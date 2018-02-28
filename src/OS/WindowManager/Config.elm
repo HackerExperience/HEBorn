@@ -25,25 +25,27 @@ import Apps.LocationPicker.Config as LocationPicker
 import Apps.LogViewer.Config as LogViewer
 import Apps.ServersGears.Config as ServersGears
 import Apps.TaskManager.Config as TaskManager
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Models as Game
+import Game.Messages as Game
+import Game.Account.Messages as Account
 import Game.Account.Models as Account
-import Game.Account.Bounces.Shared as Bounces
-import Game.Account.Finances.Models as Finances
+import Game.Account.Bounces.Messages as Bounces
+import Game.Account.Database.Messages as Database
+import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
-import Game.BackFlix.Models as BackFlix
-import Game.Inventory.Models as Inventory
-import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
+import Game.Meta.Models as Meta
+import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
-import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId, StorageId)
+import Game.Servers.Filesystem.Messages as Filesystem
+import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Hardware.Models as Hardware
-import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Servers.Logs.Models as Logs
-import Game.Servers.Processes.Models as Processes
-import Game.Storyline.Models as Storyline
-import Game.Storyline.Shared as Storyline
+import Game.Servers.Logs.Messages as Logs
+import Game.Servers.Processes.Messages as Processes
+import Game.Storyline.Messages as Storyline
+import Game.Web.Messages as Web
 import OS.WindowManager.Dock.Config as Dock
 import OS.WindowManager.Messages exposing (..)
 import OS.WindowManager.Shared exposing (..)
@@ -53,43 +55,14 @@ type alias Config msg =
     { flags : Flags
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , onSetBounce : Maybe Bounces.ID -> msg
-    , onNewPublicDownload : NIP -> StorageId -> Filesystem.FileEntry -> msg
-    , onBankAccountLogin : Finances.BankLoginRequest -> Requester -> msg
-    , onBankAccountTransfer : Finances.BankTransferRequest -> Requester -> msg
-    , onAccountToast : AccountNotifications.Content -> msg
-    , onPoliteCrash : ( String, String ) -> msg
-    , onNewTextFile : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
-    , onNewDir : CId -> StorageId -> Filesystem.Path -> Filesystem.Name -> msg
-    , onMoveFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Path -> msg
-    , onRenameFile : CId -> StorageId -> Filesystem.Id -> Filesystem.Name -> msg
-    , onDeleteFile : CId -> StorageId -> Filesystem.Id -> msg
-    , onUpdateLog : CId -> Logs.ID -> String -> msg
-    , onEncryptLog : CId -> Logs.ID -> msg
-    , onHideLog : CId -> Logs.ID -> msg
-    , onDeleteLog : CId -> Logs.ID -> msg
-    , onMotherboardUpdate : CId -> Motherboard -> msg
-    , onPauseProcess : CId -> Processes.ID -> msg
-    , onResumeProcess : CId -> Processes.ID -> msg
-    , onRemoveProcess : CId -> Processes.ID -> msg
-    , onSetContext : Context -> msg
-    , onNewBruteforceProcess : CId -> Network.IP -> msg
-    , onLogin : CId -> NIP -> Network.IP -> String -> Requester -> msg
-    , onReplyEmail : String -> Storyline.Reply -> msg
-    , onActionDone : DesktopApp -> Context -> msg
-    , onLogout : CId -> msg
-    , lastTick : Time
-    , isCampaign : Bool
+    , gameMsg : Game.Msg -> msg
+    , game : Game.Model
     , activeContext : Context
-    , endpointCId : Maybe Servers.CId
-    , activeGateway : ( Servers.CId, Servers.Server )
     , activeServer : ( Servers.CId, Servers.Server )
-    , story : Storyline.Model
-    , servers : Servers.Model
-    , account : Account.Model
-    , inventory : Inventory.Model
-    , backFlix : BackFlix.BackFlix
-    , accountId : String
+    , activeGateway : ( Servers.CId, Servers.Server )
+    , onSetContext : Context -> msg
+    , onActionDone : DesktopApp -> Context -> msg
+    , onAccountToast : AccountNotifications.Content -> msg
     , menuAttr : List (List ( ContextMenu.Item, msg )) -> Attribute msg
     }
 
@@ -98,7 +71,7 @@ type alias Config msg =
 -- NOTE: some apps are collecting active gateway from the config, this is
 -- probably wrong, specially for pinned windows, apps shouldn't need active
 -- gateway unless they are doing something with gateway's CId/NIP, for those
--- cases, gateway should be collected from a param, not from the config
+-- cases, gateway s+hould be collected from a param, not from the config
 
 
 dragConfig : Config msg -> Draggable.Config WindowId msg
@@ -112,78 +85,93 @@ dragConfig config =
 
 dockConfig : Config msg -> Dock.Config msg
 dockConfig config =
-    { onNewApp =
-        \app ->
-            config.toMsg <|
-                NewApp app Nothing Nothing (Tuple.first config.activeServer)
-    , onClickIcon = ClickIcon >> config.toMsg
-    , onMinimizeAll = MinimizeAll >> config.toMsg
-    , onCloseAll = CloseAll >> config.toMsg
-    , onMinimizeWindow = Minimize >> config.toMsg
-    , onRestoreWindow = Just >> UpdateFocus >> config.toMsg
-    , onCloseWindow = Close >> config.toMsg
-    , accountDock = Account.getDock config.account
-    , endpointCId = config.endpointCId
-    , servers = config.servers
-    }
+    let
+        cid =
+            Tuple.first config.activeServer
+    in
+        { onNewApp = \app -> config.toMsg <| NewApp app Nothing Nothing cid
+        , onClickIcon = ClickIcon >> config.toMsg
+        , onMinimizeAll = MinimizeAll >> config.toMsg
+        , onCloseAll = CloseAll >> config.toMsg
+        , onMinimizeWindow = Minimize >> config.toMsg
+        , onRestoreWindow = Just >> UpdateFocus >> config.toMsg
+        , onCloseWindow = Close >> config.toMsg
+        , accountDock = Account.getDock <| accountFrmoConfig config
+        , endpointCId = endpointCIdFromConfig config
+        , servers = Game.getServers config.game
+        }
 
 
 backFlixConfig : AppId -> Config msg -> BackFlix.Config msg
 backFlixConfig appId config =
-    { toMsg = BackFlixMsg >> AppMsg appId >> config.toMsg
-    , backFlix = config.backFlix
-    , batchMsg = config.batchMsg
-    }
+    let
+        -- FIXME: not using a getter because backflix api is bad, fix it
+        logs =
+            .logs <| Game.getBackFlix config.game
+    in
+        { toMsg = BackFlixMsg >> AppMsg appId >> config.toMsg
+        , batchMsg = config.batchMsg
+        , logs = logs
+        }
 
 
 bounceManagerConfig : AppId -> Config msg -> BounceManager.Config msg
 bounceManagerConfig appId config =
-    { flags = config.flags
-    , toMsg = BounceManagerMsg >> AppMsg appId >> config.toMsg
-    , batchMsg = config.batchMsg
-    , reference = appId
-    , bounces = Account.getBounces config.account
-    , database = Account.getDatabase config.account
-    , accountId = config.accountId
-    }
+    let
+        account =
+            accountFrmoConfig config
+    in
+        { flags = config.flags
+        , toMsg = BounceManagerMsg >> AppMsg appId >> config.toMsg
+        , batchMsg = config.batchMsg
+        , reference = appId
+        , bounces = Account.getBounces account
+        , database = Account.getDatabase account
+        , accountId = Account.getId <| accountFrmoConfig config
+        }
 
 
-browserConfig : AppId -> CId -> Server -> Config msg -> Browser.Config msg
-browserConfig appId cid server config =
-    { toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
-    , batchMsg = config.batchMsg
-    , flags = config.flags
-    , activeServer = ( cid, server )
-    , activeGateway = Tuple.second config.activeGateway
-    , reference = appId
-    , endpointCId = config.endpointCId
-    , endpoints =
-        config.activeGateway
-            |> Tuple.second
-            |> Servers.getEndpoints
-            |> Maybe.withDefault []
-    , onNewApp =
-        \app context params ->
-            case config.endpointCId of
-                Just cid ->
-                    config.toMsg <| NewApp app context params cid
+browserConfig :
+    AppId
+    -> ( CId, Server )
+    -> ( CId, Server )
+    -> Config msg
+    -> Browser.Config msg
+browserConfig appId activeServer ( gCId, gServer ) config =
+    let
+        cid =
+            Tuple.first activeServer
 
-                Nothing ->
-                    config.batchMsg []
-    , onOpenApp =
-        OpenApp >>> config.toMsg
-    , onNewPublicDownload = config.onNewPublicDownload
-    , onBankAccountLogin = config.onBankAccountLogin
-    , onBankAccountTransfer = config.onBankAccountTransfer
-    , onSetContext = config.onSetContext
-    , onNewBruteforceProcess =
-        config.activeServer
-            |> Tuple.first
-            |> config.onNewBruteforceProcess
-    , onLogin = config.onLogin cid
-    , onLogout = config.onLogout
-    , menuAttr = config.menuAttr
-    }
+        -- FIXME: review if passing down these seeds is okay
+        onNewPublicDownload =
+            Processes.HandleStartPublicDownload >>>> processes config cid
+
+        onNewBruteforceProcess =
+            Processes.HandleStartBruteforce >> processes config cid
+
+        onBankAccountLogin =
+            Finances.HandleBankAccountLogin cid >>> finances config
+
+        onBankAccountTransfer =
+            Finances.HandleBankAccountTransfer cid >>> finances config
+    in
+        { flags = config.flags
+        , toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
+        , batchMsg = config.batchMsg
+        , reference = appId
+        , activeServer = activeServer
+        , activeGateway = config.activeGateway
+        , onNewApp = NewApp >>>>> config.toMsg
+        , onOpenApp = OpenApp >>> config.toMsg
+        , onSetContext = Account.HandleSetContext >> account config
+        , onLogin = Web.Login gCId >>>>> web config
+        , onLogout = flip (server config) Servers.HandleLogout
+        , onNewPublicDownload = onNewPublicDownload
+        , onNewBruteforceProcess = onNewBruteforceProcess
+        , onBankAccountLogin = onBankAccountLogin
+        , onBankAccountTransfer = onBankAccountTransfer
+        , menuAttr = config.menuAttr
+        }
 
 
 bugConfig : AppId -> Config msg -> Bug.Config msg
@@ -191,7 +179,7 @@ bugConfig appId config =
     { toMsg = BugMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , onAccountToast = config.onAccountToast
-    , onPoliteCrash = config.onPoliteCrash
+    , onPoliteCrash = Account.HandleSignOutAndCrash >> account config
     }
 
 
@@ -205,8 +193,8 @@ calculatorConfig appId config =
 connManagerConfig : AppId -> Config msg -> ConnManager.Config msg
 connManagerConfig appId config =
     { toMsg = ConnManagerMsg >> AppMsg appId >> config.toMsg
-    , activeServer = Tuple.second config.activeServer
     , batchMsg = config.batchMsg
+    , activeServer = Tuple.second config.activeServer
     }
 
 
@@ -218,30 +206,32 @@ ctrlPanelConfig =
 dbAdminConfig : AppId -> Config msg -> DBAdmin.Config msg
 dbAdminConfig appId config =
     { toMsg = DBAdminMsg >> AppMsg appId >> config.toMsg
-    , database = Account.getDatabase config.account
     , batchMsg = config.batchMsg
+    , database = Account.getDatabase <| accountFrmoConfig config
     }
 
 
-emailConfig : AppId -> CId -> Config msg -> Email.Config msg
-emailConfig appId cid config =
+emailConfig : AppId -> ( CId, Server ) -> Config msg -> Email.Config msg
+emailConfig appId ( cid, _ ) config =
     { toMsg = EmailMsg >> AppMsg appId >> config.toMsg
-    , story = config.story
     , batchMsg = config.batchMsg
-    , onOpenApp = OpenApp cid >> config.toMsg
+    , story = Game.getStory config.game
+
+    -- TODO: review if the CId usage is alright
+    , onOpenApp = flip OpenApp cid >> config.toMsg
     }
 
 
-explorerConfig : AppId -> CId -> Server -> Config msg -> Explorer.Config msg
-explorerConfig appId cid server config =
+explorerConfig : AppId -> ( CId, Server ) -> Config msg -> Explorer.Config msg
+explorerConfig appId ( cid, server ) config =
     { toMsg = ExplorerMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , activeServer = server
-    , onNewTextFile = config.onNewTextFile cid
-    , onNewDir = config.onNewDir cid
-    , onMoveFile = config.onMoveFile cid
-    , onRenameFile = config.onRenameFile cid
-    , onDeleteFile = config.onDeleteFile cid
+    , onNewTextFile = Filesystem.HandleNewTextFile >>> filesystem config cid
+    , onNewDir = Filesystem.HandleNewDir >>> filesystem config cid
+    , onMoveFile = Filesystem.HandleMove >>> filesystem config cid
+    , onRenameFile = Filesystem.HandleRename >>> filesystem config cid
+    , onDeleteFile = Filesystem.HandleDelete >> filesystem config cid
     , menuAttr = config.menuAttr
     }
 
@@ -249,7 +239,7 @@ explorerConfig appId cid server config =
 financeConfig : AppId -> Config msg -> Finance.Config msg
 financeConfig appId config =
     { toMsg = FinanceMsg >> AppMsg appId >> config.toMsg
-    , finances = Account.getFinances config.account
+    , finances = Account.getFinances <| accountFrmoConfig config
     , batchMsg = config.batchMsg
     }
 
@@ -257,19 +247,19 @@ financeConfig appId config =
 floatingHeadsConfig :
     WindowId
     -> AppId
-    -> CId
+    -> ( CId, Server )
     -> Config msg
     -> FloatingHeads.Config msg
-floatingHeadsConfig windowId appId cid config =
+floatingHeadsConfig windowId appId ( gCid, _ ) config =
     { toMsg = FloatingHeadsMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , reference = appId
-    , story = config.story
-    , username = Account.getUsername config.account
-    , onReplyEmail = config.onReplyEmail
+    , story = Game.getStory config.game
+    , username = Account.getUsername <| accountFrmoConfig config
+    , onReply = Storyline.HandleReply >>> storyline config
     , onCloseApp = config.toMsg <| Close windowId
-    , onOpenApp = OpenApp cid >> config.toMsg
-    , draggable = draggableHelper windowId config
+    , onOpenApp = flip OpenApp gCid >> config.toMsg
+    , draggable = draggable windowId config
     }
 
 
@@ -279,7 +269,7 @@ hebampConfig windowId appId config =
     , batchMsg = config.batchMsg
     , reference = appId
     , onCloseApp = config.toMsg <| Close windowId
-    , draggable = draggableHelper windowId config
+    , draggable = draggable windowId config
     , windowMenu = windowMenu config windowId
     }
 
@@ -296,55 +286,153 @@ locationPickerConfig appId config =
     }
 
 
-logViewerConfig : AppId -> CId -> Server -> Config msg -> LogViewer.Config msg
-logViewerConfig appId cid server config =
+logViewerConfig : AppId -> ( CId, Server ) -> Config msg -> LogViewer.Config msg
+logViewerConfig appId ( cid, server ) config =
     { toMsg = LogViewerMsg >> AppMsg appId >> config.toMsg
     , logs = Servers.getLogs server
     , batchMsg = config.batchMsg
-    , onUpdateLog = config.onUpdateLog cid
-    , onEncryptLog = config.onEncryptLog cid
-    , onHideLog = config.onHideLog cid
-    , onDeleteLog = config.onDeleteLog cid
+    , onUpdate = Logs.HandleUpdateContent >>> logs config cid
+    , onEncrypt = Logs.HandleEncrypt >> logs config cid
+    , onHide = Logs.HandleHide >> logs config cid
+    , onDelete = Logs.HandleDelete >> logs config cid
     , menuAttr = config.menuAttr
     }
 
 
 serversGearsConfig :
     AppId
-    -> CId
-    -> Server
+    -> ( CId, Server )
     -> Config msg
     -> ServersGears.Config msg
-serversGearsConfig appId cid server config =
+serversGearsConfig appId ( cid, server ) config =
     { toMsg = ServersGearsMsg >> AppMsg appId >> config.toMsg
-    , inventory = config.inventory
+    , inventory = Game.getInventory config.game
     , activeServer = server
     , mobo = Hardware.getMotherboard <| Servers.getHardware server
     , batchMsg = config.batchMsg
-    , onMotherboardUpdate = config.onMotherboardUpdate cid
+    , onUpdate = Hardware.HandleMotherboardUpdate >> hardware config cid
     }
 
 
 taskManagerConfig :
     AppId
-    -> CId
-    -> Server
+    -> ( CId, Server )
     -> Config msg
     -> TaskManager.Config msg
-taskManagerConfig appId cid server config =
+taskManagerConfig appId ( cid, server ) config =
     { toMsg = TaskManagerMsg >> AppMsg appId >> config.toMsg
     , processes = Servers.getProcesses server
-    , lastTick = config.lastTick
+    , lastTick = lastTickFromConfig config
     , batchMsg = config.batchMsg
-    , onPauseProcess = config.onPauseProcess cid
-    , onResumeProcess = config.onResumeProcess cid
-    , onRemoveProcess = config.onRemoveProcess cid
+    , onPause = Processes.HandlePause >> processes config cid
+    , onResume = Processes.HandleResume >> processes config cid
+    , onRemove = Processes.HandleRemove >> processes config cid
     , menuAttr = config.menuAttr
     }
 
 
-draggableHelper : WindowId -> Config msg -> Attribute msg
-draggableHelper windowId config =
+
+-- dispatch helpers
+
+
+account : Config msg -> Account.Msg -> msg
+account config =
+    Game.AccountMsg >> config.gameMsg
+
+
+bounces : Config msg -> Bounces.Msg -> msg
+bounces config =
+    Account.BouncesMsg >> account config
+
+
+database : Config msg -> Database.Msg -> msg
+database config =
+    Account.DatabaseMsg >> account config
+
+
+finances : Config msg -> Finances.Msg -> msg
+finances config =
+    Account.FinancesMsg >> account config
+
+
+servers : Config msg -> Servers.Msg -> msg
+servers config =
+    Game.ServersMsg >> config.gameMsg
+
+
+server : Config msg -> CId -> Servers.ServerMsg -> msg
+server config cid =
+    Servers.ServerMsg cid >> servers config
+
+
+filesystem : Config msg -> CId -> Filesystem.Msg -> Servers.StorageId -> msg
+filesystem config cid msg storageId =
+    server config cid <| Servers.FilesystemMsg storageId msg
+
+
+hardware : Config msg -> CId -> Hardware.Msg -> msg
+hardware config cid =
+    Servers.HardwareMsg >> server config cid
+
+
+logs : Config msg -> CId -> Logs.Msg -> msg
+logs config cid =
+    Servers.LogsMsg >> server config cid
+
+
+processes : Config msg -> CId -> Processes.Msg -> msg
+processes config cid =
+    Servers.ProcessesMsg >> server config cid
+
+
+web : Config msg -> Web.Msg -> msg
+web config =
+    Game.WebMsg >> config.gameMsg
+
+
+storyline : Config msg -> Storyline.Msg -> msg
+storyline config =
+    Game.StoryMsg >> config.gameMsg
+
+
+
+-- other helpers
+
+
+serversFromConfig : Config msg -> Servers.Model
+serversFromConfig { game } =
+    Game.getServers game
+
+
+isCampaignFromConfig : Config msg -> Bool
+isCampaignFromConfig { activeServer } =
+    activeServer
+        |> Tuple.second
+        |> Servers.getType
+        |> (==) Servers.DesktopCampaign
+
+
+endpointCIdFromConfig : Config msg -> Maybe CId
+endpointCIdFromConfig { activeGateway } =
+    activeGateway
+        |> Tuple.second
+        |> Servers.getEndpointCId
+
+
+accountFrmoConfig : Config msg -> Account.Model
+accountFrmoConfig { game } =
+    Game.getAccount game
+
+
+lastTickFromConfig : Config msg -> Time
+lastTickFromConfig { game } =
+    game
+        |> Game.getMeta
+        |> Meta.getLastTick
+
+
+draggable : WindowId -> Config msg -> Attribute msg
+draggable windowId config =
     Draggable.mouseTrigger windowId (DragMsg >> config.toMsg)
 
 

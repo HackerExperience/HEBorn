@@ -4,7 +4,6 @@ import Utils.React as React exposing (React)
 import Core.Error as Error
 import Game.Web.Config exposing (..)
 import Game.Web.Messages exposing (..)
-import Game.Meta.Types.Network.Site as Site
 import Game.Web.Models exposing (..)
 import Json.Encode as Encode
 import Game.Servers.Shared as Servers exposing (CId)

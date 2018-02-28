@@ -4,7 +4,6 @@ import Utils.React as React exposing (React)
 import Game.Servers.Models as Servers
 import Game.Servers.Requests.Browse as BrowseRequest exposing (browseRequest)
 import Game.Meta.Types.Network as Network
-import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (..)

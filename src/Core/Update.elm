@@ -287,7 +287,7 @@ updatePlayOS msg ({ game, os } as state) { contextMenu } =
                             |> Meta.getLastTick
 
                     config =
-                        osConfig game contextMenu srv ctx gtw
+                        osConfig game contextMenu ctx srv gtw
 
                     ( os_, react ) =
                         OS.update config msg os

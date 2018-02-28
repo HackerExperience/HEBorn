@@ -35,20 +35,16 @@ update config msg model =
 
 
 onReply : Config msg -> Reply -> Model -> UpdateResponse msg
-onReply { onReplyEmail } content model =
+onReply config content model =
     content
-        |> onReplyEmail model.activeContact
+        |> config.onReply model.activeContact
         |> React.msg
         |> (,) model
 
 
 handleSelectContact : Config msg -> ContactId -> Model -> UpdateResponse msg
 handleSelectContact config contact model =
-    let
-        model_ =
-            { model | activeContact = contact }
-    in
-        ( model_, React.none )
+    React.update { model | activeContact = contact }
 
 
 onToggleMode : Config msg -> Model -> UpdateResponse msg
@@ -61,16 +57,13 @@ onToggleMode config model =
 
                 Expanded ->
                     Compact
-
-        model_ =
-            { model | mode = mode_ }
     in
-        ( model_, React.none )
+        React.update { model | mode = mode_ }
 
 
 onClose : Config msg -> Model -> UpdateResponse msg
-onClose { onCloseApp } model =
-    onCloseApp
+onClose config model =
+    config.onCloseApp
         |> React.msg
         |> (,) model
 
@@ -79,8 +72,4 @@ onLaunchApp : Config msg -> Params -> Model -> UpdateResponse msg
 onLaunchApp config params model =
     case params of
         OpenAtContact contact ->
-            let
-                model_ =
-                    setActiveContact contact model
-            in
-                ( model_, React.none )
+            React.update <| setActiveContact contact model

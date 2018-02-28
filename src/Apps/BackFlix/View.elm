@@ -23,7 +23,7 @@ view : Config msg -> Model -> Html msg
 view config model =
     let
         backFlix =
-            config.backFlix
+            config.logs
 
         filterHeaderLayout =
             verticalList []
@@ -72,13 +72,13 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : BackFlix.BackFlix -> Html Msg
-viewTabAll model =
-    renderEntries model True
+viewTabAll : BackFlix.Logs -> Html Msg
+viewTabAll logs =
+    renderEntries logs True
 
 
-viewTabSimple : BackFlix.BackFlix -> Html Msg
-viewTabSimple model =
+viewTabSimple : BackFlix.Logs -> Html Msg
+viewTabSimple logs =
     let
         filter id log =
             case log.type_ of
@@ -88,7 +88,7 @@ viewTabSimple model =
                 _ ->
                     True
     in
-        renderEntries (Dict.filter filter model) False
+        renderEntries (Dict.filter filter logs) False
 
 
 

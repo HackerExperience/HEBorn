@@ -171,17 +171,17 @@ btnsEditing { toMsg } logID =
 
 
 btnsNormal : Config msg -> Logs.ID -> List ( Attribute msg, msg )
-btnsNormal { toMsg, onEncryptLog, onHideLog, onDeleteLog } logID =
-    [ ( class [ BtnCrypt, BottomButton ], onEncryptLog logID )
-    , ( class [ BtnHide, BottomButton ], onHideLog logID )
+btnsNormal { toMsg, onEncrypt, onHide, onDelete } logID =
+    [ ( class [ BtnCrypt, BottomButton ], onEncrypt logID )
+    , ( class [ BtnHide, BottomButton ], onHide logID )
     , ( class [ BtnEdit, BottomButton ], toMsg <| EnterEditing logID )
-    , ( class [ BtnDelete, BottomButton ], onDeleteLog logID )
+    , ( class [ BtnDelete, BottomButton ], onDelete logID )
     ]
 
 
 btnsCryptographed : Config msg -> Logs.ID -> List ( Attribute msg, msg )
-btnsCryptographed { batchMsg, onHideLog } logID =
-    [ ( class [ BtnHide, BottomButton ], onHideLog logID )
+btnsCryptographed { batchMsg, onHide } logID =
+    [ ( class [ BtnHide, BottomButton ], onHide logID )
     , ( class [ BtnDecrypt, BottomButton ], batchMsg [] )
     ]
 
@@ -260,21 +260,21 @@ menuEditingEntry { toMsg, menuAttr } id =
 
 
 menuNormalEntry : Config msg -> Logs.ID -> Attribute msg
-menuNormalEntry { toMsg, onEncryptLog, onHideLog, onDeleteLog, menuAttr } id =
+menuNormalEntry { toMsg, onEncrypt, onHide, onDelete, menuAttr } id =
     menuAttr
         [ [ ( ContextMenu.item "Edit", toMsg (EnterEditing id) )
-          , ( ContextMenu.item "Encrypt", onEncryptLog id )
-          , ( ContextMenu.item "Hide", onHideLog id )
-          , ( ContextMenu.item "Delete", onDeleteLog id )
+          , ( ContextMenu.item "Encrypt", onEncrypt id )
+          , ( ContextMenu.item "Hide", onHide id )
+          , ( ContextMenu.item "Delete", onDelete id )
           ]
         ]
 
 
 menuEncryptedEntry : Config msg -> Logs.ID -> Attribute msg
-menuEncryptedEntry { onHideLog, onDeleteLog, menuAttr } id =
+menuEncryptedEntry { onHide, onDelete, menuAttr } id =
     menuAttr
-        [ [ ( ContextMenu.item "Hide", onHideLog id )
-          , ( ContextMenu.item "Delete", onDeleteLog id )
+        [ [ ( ContextMenu.item "Hide", onHide id )
+          , ( ContextMenu.item "Delete", onDelete id )
           ]
         ]
 

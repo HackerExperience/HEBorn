@@ -23,14 +23,12 @@ import Setup.Messages as Setup
 import Game.Config as Game
 import Game.Messages as Game
 import Game.Models as Game
-import Game.Account.Models as Account
 import Game.Account.Messages as Account
 import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Messages as AccountNotifications
 import Game.BackFlix.Messages as BackFlix
-import Game.Meta.Models as Meta
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
 import Game.Servers.Messages as Servers
@@ -38,7 +36,6 @@ import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Messages as Filesystem
 import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Logs.Messages as Logs
-import Game.Servers.Notifications.Messages as ServerNotifications
 import Game.Servers.Processes.Messages as Processes
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Storyline.StepActions.Shared as StepActions
@@ -48,10 +45,8 @@ import OS.Config as OS
 import OS.Messages as OS
 import OS.WindowManager.Shared as WindowManager
 import OS.WindowManager.Messages as WindowManager
-import OS.Header.Messages as Header
 import OS.Toasts.Messages as Toast
 import Apps.Browser.Messages as Browser
-import Apps.BounceManager.Messages as BounceManager
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -65,154 +60,169 @@ landingConfig windowLoaded flags =
 
 websocketConfig : Flags -> Ws.Config Msg
 websocketConfig flags =
-    { flags =
-        flags
-    , toMsg =
-        WebsocketMsg
-    , onConnected =
-        BatchMsg
-            [ HandleConnected
-            , account Account.HandleConnected
-            ]
-    , onDisconnected =
-        account <| Account.HandleDisconnected
-    , onJoinedAccount =
-        \value ->
+    let
+        onConnected =
+            BatchMsg
+                [ HandleConnected
+                , account Account.HandleConnected
+                ]
+
+        onJoinedAccount value =
             BatchMsg
                 [ game <| Game.HandleJoinedAccount value
                 , setup <| Setup.HandleJoinedAccount value
                 ]
-    , onJoinedServer =
-        \cid value -> servers <| Servers.HandleJoinedServer cid value
-    , onJoinFailedServer =
-        Web.HandleJoinServerFailed >> web
-    , onLeaved =
-        \_ _ ->
+
+        onJoinedServer cid value =
+            servers <| Servers.HandleJoinedServer cid value
+
+        onLeft _ _ =
             BatchMsg []
-    , onEvent =
-        HandleEvent
-    }
+    in
+        { flags = flags
+        , toMsg = WebsocketMsg
+        , onConnected = onConnected
+        , onDisconnected = account <| Account.HandleDisconnected
+        , onJoinedAccount = onJoinedAccount
+        , onJoinedServer = onJoinedServer
+        , onJoinFailedServer = Web.HandleJoinServerFailed >> web
+        , onLeft = onLeft
+        , onEvent = HandleEvent
+        }
 
 
 eventsConfig : Events.Config Msg
 eventsConfig =
-    { forAccount =
-        { onServerPasswordAcquired =
-            \data ->
-                BatchMsg
-                    [ database <| Database.HandlePasswordAcquired data
-                    , browsers <| Browser.HandlePasswordAcquired data
-                    ]
-        , onStoryStepProceeded =
-            Storyline.HandleStepProceeded >> storyline
-        , onStoryEmailSent =
-            \data ->
-                BatchMsg
-                    [ storyline <| Storyline.HandleNewEmail data
-                    , data.contactId
-                        |> AccountNotifications.HandleNewEmail
-                        |> accountNotif
-                    ]
-        , onStoryEmailReplyUnlocked =
-            Storyline.HandleReplyUnlocked >> storyline
-        , onStoryEmailReplySent =
-            Storyline.HandleReplySent >> storyline
-        , onBankAccountUpdated =
-            uncurry Finances.HandleBankAccountUpdated >> finances
-        , onBankAccountClosed =
-            Finances.HandleBankAccountClosed >> finances
-        , onDbAccountUpdated =
-            uncurry Database.HandleDatabaseAccountUpdated >> database
-        , onDbAccountRemoved =
-            Database.HandleDatabaseAccountRemoved >> database
-        , onTutorialFinished =
-            .completed >> Account.HandleTutorialCompleted >> account
-        , onBounceCreated =
-            uncurry Bounces.HandleCreated >> bounces
-        , onBounceUpdated =
-            uncurry Bounces.HandleUpdated >> bounces
-        , onBounceRemoved =
-            Bounces.HandleRemoved >> bounces
+    let
+        forAccount =
+            let
+                onServerPasswordAcquired data =
+                    BatchMsg
+                        [ database <| Database.HandlePasswordAcquired data
+                        , browsers <| Browser.HandlePasswordAcquired data
+                        ]
+
+                onStoryStepProceeded =
+                    Storyline.HandleStepProceeded >> storyline
+
+                onStoryEmailSent data =
+                    BatchMsg
+                        [ storyline <| Storyline.HandleNewEmail data
+                        , data.contactId
+                            |> AccountNotifications.HandleNewEmail
+                            |> accountNotif
+                        ]
+
+                onStoryEmailReplyUnlocked =
+                    Storyline.HandleReplyUnlocked >> storyline
+
+                onStoryEmailReplySent =
+                    Storyline.HandleReplySent >> storyline
+
+                onBankAccountUpdated =
+                    uncurry Finances.HandleBankAccountUpdated >> finances
+
+                onBankAccountClosed =
+                    Finances.HandleBankAccountClosed >> finances
+
+                onDbAccountUpdated =
+                    uncurry Database.HandleDatabaseAccountUpdated >> database
+
+                onDbAccountRemoved =
+                    Database.HandleDatabaseAccountRemoved >> database
+
+                onTutorialFinished =
+                    .completed >> Account.HandleTutorialCompleted >> account
+            in
+                { onServerPasswordAcquired = onServerPasswordAcquired
+                , onStoryStepProceeded = onStoryStepProceeded
+                , onStoryEmailSent = onStoryEmailSent
+                , onStoryEmailReplyUnlocked = onStoryEmailReplyUnlocked
+                , onStoryEmailReplySent = onStoryEmailReplySent
+                , onBankAccountUpdated = onBankAccountUpdated
+                , onBankAccountClosed = onBankAccountClosed
+                , onDbAccountUpdated = onDbAccountUpdated
+                , onDbAccountRemoved = onDbAccountRemoved
+                , onTutorialFinished = onTutorialFinished
+                , onBounceCreated = uncurry Bounces.HandleCreated >> bounces
+                , onBounceUpdated = uncurry Bounces.HandleUpdated >> bounces
+                , onBounceRemoved = Bounces.HandleRemoved >> bounces
+                }
+
+        forBackFlix =
+            { onNewLog = BackFlix.HandleCreate >> backflix }
+
+        forServer =
+            let
+                onFileAdded cid ( id, data ) =
+                    filesystem cid id <| uncurry Filesystem.HandleAdded data
+
+                onFileDownloaded cid ( id, data ) =
+                    BatchMsg []
+
+                onProcessCreated cid data =
+                    processes cid <| Processes.HandleProcessStarted data
+
+                onProcessCompleted cid data =
+                    processes cid <| Processes.HandleProcessConclusion data
+
+                onProcessesRecalcado cid data =
+                    processes cid <| Processes.HandleProcessesChanged data
+
+                onBruteforceFailed cid data =
+                    processes cid <| Processes.HandleBruteforceFailed data
+
+                onLogCreated cid data =
+                    logs cid <| uncurry Logs.HandleCreated data
+
+                onMotherboardUpdated cid data =
+                    hardware cid <| Hardware.HandleMotherboardUpdated data
+            in
+                { onFileAdded = onFileAdded
+                , onFileDownloaded = onFileDownloaded
+                , onProcessCreated = onProcessCreated
+                , onProcessCompleted = onProcessCompleted
+                , onProcessesRecalcado = onProcessesRecalcado
+                , onBruteforceFailed = onBruteforceFailed
+                , onLogCreated = onLogCreated
+                , onMotherboardUpdated = onMotherboardUpdated
+                }
+    in
+        { forAccount = forAccount
+        , forBackFlix = forBackFlix
+        , forServer = forServer
         }
-    , forBackFlix =
-        { onNewLog =
-            BackFlix.HandleCreate >> backflix
-        }
-    , forServer =
-        { onFileAdded =
-            \cid ( id, data ) ->
-                filesystem cid id <| uncurry Filesystem.HandleAdded data
-        , onFileDownloaded =
-            -- not implemented yet
-            \cid ( id, data ) -> BatchMsg []
-        , onProcessCreated =
-            \cid data ->
-                processes cid <| Processes.HandleProcessStarted data
-        , onProcessCompleted =
-            \cid data ->
-                processes cid <| Processes.HandleProcessConclusion data
-        , onProcessesRecalcado =
-            \cid data ->
-                processes cid <| Processes.HandleProcessesChanged data
-        , onBruteforceFailed =
-            \cid data ->
-                processes cid <| Processes.HandleBruteforceFailed data
-        , onLogCreated =
-            \cid data ->
-                logs cid <| uncurry Logs.HandleCreated data
-        , onMotherboardUpdated =
-            \cid data ->
-                hardware cid <| Hardware.HandleMotherboardUpdated data
-        }
-    }
 
 
 gameConfig : Game.Config Msg
 gameConfig =
-    { toMsg = GameMsg
-    , batchMsg = BatchMsg
+    let
+        onJoinServer =
+            \cid payload ->
+                ws <| Ws.HandleJoin (ServerChannel cid) payload
 
-    -- game & web
-    , onJoinServer =
-        \cid payload ->
-            ws <| Ws.HandleJoin (ServerChannel cid) payload
-    , onError =
-        HandleCrash
-
-    -- web
-    , onJoinFailed =
-        browserTab Browser.HandleLoginFailed
-
-    -- servers
-    , onNewGateway =
-        Setup.HandleJoinedServer >> setup
-
-    --- account
-    , onConnected =
-        \accountId ->
-            BatchMsg
-                [ ws <| Ws.HandleJoin (AccountChannel accountId) Nothing
-                , ws <| Ws.HandleJoin BackFlixChannel Nothing
-                ]
-    , onDisconnected =
-        HandleShutdown
-
-    -- account.notifications
-    , onAccountToast =
-        Toast.HandleAccount >> toast
-    , onServerToast =
-        Toast.HandleServers >>> toast
-
-    -- account.finances
-    , onBALoginSuccess =
-        Browser.HandleBankLogin >> browserTab
-    , onBALoginFailed =
-        browserTab Browser.HandleBankLoginError
-    , onBATransferSuccess =
-        browserTab Browser.HandleBankTransfer
-    , onBATransferFailed =
-        browserTab Browser.HandleBankTransferError
-    }
+        onConnected =
+            \accountId ->
+                BatchMsg
+                    [ ws <| Ws.HandleJoin (AccountChannel accountId) Nothing
+                    , ws <| Ws.HandleJoin BackFlixChannel Nothing
+                    ]
+    in
+        { toMsg = GameMsg
+        , batchMsg = BatchMsg
+        , onJoinServer = onJoinServer
+        , onError = HandleCrash
+        , onJoinFailed = browserTab Browser.HandleLoginFailed
+        , onNewGateway = Setup.HandleJoinedServer >> setup
+        , onConnected = onConnected
+        , onDisconnected = HandleShutdown
+        , onAccountToast = Toast.HandleAccount >> toast
+        , onServerToast = Toast.HandleServers >>> toast
+        , onBALoginSuccess = Browser.HandleBankLogin >> browserTab
+        , onBALoginFailed = browserTab Browser.HandleBankLoginError
+        , onBATransferSuccess = browserTab Browser.HandleBankTransfer
+        , onBATransferFailed = browserTab Browser.HandleBankTransferError
+        }
 
 
 setupConfig : String -> Maybe CId -> Flags -> Setup.Config Msg
@@ -232,119 +242,31 @@ setupConfig accountId mainframe flags =
 osConfig :
     Game.Model
     -> ContextMenuMagic
-    -> ( CId, Server )
     -> Context
     -> ( CId, Server )
+    -> ( CId, Server )
     -> OS.Config Msg
-osConfig game menu (( sCId, _ ) as srv) ctx (( gCId, gSrv ) as gtw) =
-    { toMsg = OSMsg
-    , batchMsg = BatchMsg
-    , flags = Game.getFlags game
-    , account = Game.getAccount game
-    , servers = Game.getServers game
-    , story = Game.getStory game
-    , inventory = Game.getInventory game
-    , backFlix = .logs <| Game.getBackFlix game
-    , lastTick = Meta.getLastTick <| Game.getMeta <| game
-    , activeServer = srv
-    , activeContext = ctx
-    , activeGateway = gtw
-    , menuView = ContextMenu.view menuConfig MenuMsg identity menu
-    , menuAttr = ContextMenu.open MenuMsg
-    , isCampaign =
-        gtw
-            |> Tuple.second
-            |> Servers.getType
-            |> (==) Servers.DesktopCampaign
-    , onSignOut =
-        Account.HandleSignOut |> account
-    , onSetGateway =
-        Account.HandleSetGateway
-            >> account
-    , onSetEndpoint =
-        Account.HandleSetEndpoint
-            >> account
-    , onSetContext =
-        Account.HandleSetContext
-            >> account
-    , onSetBounce =
-        case Servers.getEndpointCId gSrv of
-            Just cid ->
-                Servers.HandleSetBounce
-                    >> server cid
-
-            Nothing ->
-                Servers.HandleSetBounce
-                    >> server gCId
-    , onReadAllAccountNotifications =
-        AccountNotifications.HandleReadAll
-            |> accountNotif
-    , onReadAllServerNotifications =
-        ServerNotifications.HandleReadAll
-            |> serverNotif sCId
-    , onSetActiveNIP =
-        Servers.HandleSetActiveNIP
-            >> server sCId
-    , onNewPublicDownload =
-        Processes.HandleStartPublicDownload
-            >>>> processes gCId
-    , onBankAccountLogin =
-        Finances.HandleBankAccountLogin sCId
-            >>> finances
-    , onBankAccountTransfer =
-        Finances.HandleBankAccountTransfer sCId
-            >>> finances
-    , onAccountToast =
-        Toast.HandleAccount >> toast
-    , onServerToast =
-        Toast.HandleServers >>> toast
-    , onPoliteCrash =
-        Account.HandleSignOutAndCrash >> account
-    , onNewTextFile =
-        \cid stg -> Filesystem.HandleNewTextFile >>> filesystem cid stg
-    , onNewDir =
-        \cid stg -> Filesystem.HandleNewDir >>> filesystem cid stg
-    , onMoveFile =
-        \cid stg -> Filesystem.HandleMove >>> filesystem cid stg
-    , onRenameFile =
-        \cid stg -> Filesystem.HandleRename >>> filesystem cid stg
-    , onDeleteFile =
-        \cid stg -> Filesystem.HandleDelete >> filesystem cid stg
-    , onUpdateLog =
-        \cid -> Logs.HandleUpdateContent >>> logs cid
-    , onEncryptLog =
-        \cid -> Logs.HandleEncrypt >> logs cid
-    , onHideLog =
-        \cid -> Logs.HandleHide >> logs cid
-    , onDeleteLog =
-        \cid -> Logs.HandleDelete >> logs cid
-    , onMotherboardUpdate =
-        \cid -> Hardware.HandleMotherboardUpdate >> hardware cid
-    , onPauseProcess =
-        \cid -> Processes.HandlePause >> processes cid
-    , onResumeProcess =
-        \cid -> Processes.HandleResume >> processes cid
-    , onRemoveProcess =
-        \cid -> Processes.HandleRemove >> processes cid
-    , onLogin =
-        Web.Login >>>>>> web
-    , onNewBruteforceProcess =
-        \cid -> Processes.HandleStartBruteforce >> processes cid
-    , onReplyEmail =
-        Storyline.HandleReply >>> storyline
-    , onActionDone =
-        \desktopApp context ->
-            context
-                |> StepActions.GoApp desktopApp
-                |> Storyline.HandleActionDone
-                |> storyline
-    , onLogout =
-        \cid -> Servers.HandleLogout |> server cid
-    , accountId =
-        game
-            |> Game.getAccount
-            |> Account.getId
-    }
+osConfig game menu ctx (( sCId, _ ) as srv) (( gCId, gSrv ) as gtw) =
+    let
+        onActionDone =
+            \desktopApp context ->
+                context
+                    |> StepActions.GoApp desktopApp
+                    |> Storyline.HandleActionDone
+                    |> storyline
+    in
+        { flags = Game.getFlags game
+        , toMsg = OSMsg
+        , batchMsg = BatchMsg
+        , gameMsg = GameMsg
+        , game = game
+        , activeContext = ctx
+        , activeServer = srv
+        , activeGateway = gtw
+        , onActionDone = onActionDone
+        , menuView = ContextMenu.view menuConfig MenuMsg identity menu
+        , menuAttr = ContextMenu.open MenuMsg
+        }
 
 
 menuConfig : ContextMenu.Config
@@ -423,11 +345,6 @@ server cid =
     Servers.ServerMsg cid >> servers
 
 
-serverNotif : CId -> ServerNotifications.Msg -> Msg
-serverNotif cid =
-    Servers.NotificationsMsg >> server cid
-
-
 filesystem : CId -> Servers.StorageId -> Filesystem.Msg -> Msg
 filesystem cid id =
     Servers.FilesystemMsg id >> server cid
@@ -470,8 +387,7 @@ os =
 
 toast : Toast.Msg -> Msg
 toast =
-    OS.ToastsMsg
-        >> os
+    OS.ToastsMsg >> os
 
 
 windowManager : WindowManager.Msg -> Msg
@@ -504,8 +420,3 @@ browserTab msg { reference, browserTab } =
 browsers : Browser.Msg -> Msg
 browsers =
     WindowManager.BrowserMsg >> apps
-
-
-bounceManager : WindowManager.AppId -> BounceManager.Msg -> Msg
-bounceManager appId =
-    WindowManager.BounceManagerMsg >> app appId

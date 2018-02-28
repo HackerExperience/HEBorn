@@ -1,6 +1,5 @@
 module Game.Web.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Meta.Types.Network as Network

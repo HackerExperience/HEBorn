@@ -392,7 +392,7 @@ onLogin config remoteNip password reference tabId tab =
     tabId
         |> Requester reference
         |> config.onLogin
-            (Servers.getActiveNIP config.activeGateway)
+            (Servers.getActiveNIP <| Tuple.second config.activeGateway)
             (Network.getIp remoteNip)
             password
         |> React.msg

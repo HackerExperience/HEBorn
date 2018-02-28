@@ -1,7 +1,6 @@
 module Apps.Hebamp.Launch exposing (..)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Apps.Hebamp.Config exposing (..)
 import Apps.Hebamp.Models exposing (..)
 import Apps.Hebamp.Shared exposing (..)

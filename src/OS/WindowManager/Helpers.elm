@@ -29,7 +29,7 @@ getEndpointOfGateway config server =
             Servers.getEndpointCId server
 
         server_ =
-            Maybe.andThen (flip Servers.get config.servers) cid
+            Maybe.andThen (flip Servers.get <| serversFromConfig config) cid
     in
         Maybe.uncurry cid server_
 
@@ -40,7 +40,7 @@ getAppActiveServer config app =
         cid =
             getAppCId app
     in
-        Maybe.map ((,) cid) <| Servers.get cid config.servers
+        Maybe.map ((,) cid) <| Servers.get cid <| serversFromConfig config
 
 
 getSessionId : Config msg -> CId
@@ -80,7 +80,7 @@ getCIdsOfWindow config window model =
             List.filterMap (flip getApp model >> Maybe.map getAppCId) appIds
 
         getAppendServer cid =
-            case Servers.get cid config.servers of
+            case Servers.get cid <| serversFromConfig config of
                 Just server ->
                     Just ( cid, server )
 

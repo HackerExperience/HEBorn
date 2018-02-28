@@ -126,22 +126,22 @@ onApplyEdit config fs model =
                     if Filesystem.isValidFilename fName then
                         React.none
                     else
-                        React.msg <| onNewTextFile storageId model.path fName
+                        React.msg <| onNewTextFile model.path fName storageId
 
                 CreatingPath fName ->
                     if Filesystem.isValidFilename fName then
                         React.none
                     else
-                        React.msg <| onNewDir storageId model.path fName
+                        React.msg <| onNewDir model.path fName storageId
 
                 Moving fID ->
-                    React.msg <| onMoveFile storageId fID model.path
+                    React.msg <| onMoveFile fID model.path storageId
 
                 Renaming fID fName ->
                     if Filesystem.isValidFilename fName then
                         React.none
                     else
-                        React.msg <| onRenameFile storageId fID fName
+                        React.msg <| onRenameFile fID fName storageId
 
                 _ ->
                     -- TODO: implement folder operation requests
