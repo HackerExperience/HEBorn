@@ -193,7 +193,7 @@ launchDoubleHelper config desktopApp maybeParams context activeGateway model =
                     ( model_, react_ )
 
             Nothing ->
-                ( model3, React.none )
+                ( model3, react1 )
 
 
 launchSingleHelper :
