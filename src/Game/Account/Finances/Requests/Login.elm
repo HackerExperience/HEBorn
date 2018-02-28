@@ -27,10 +27,9 @@ request :
     BankLoginRequest
     -> Requester
     -> Account.ID
-    -> CId
     -> FlagsSource a
     -> Cmd Msg
-request { bank, accountNum, password } requester accountId cid data =
+request { bank, accountNum, password } requester accountId data =
     let
         payload =
             Encode.object
@@ -41,7 +40,7 @@ request { bank, accountNum, password } requester accountId cid data =
                 ]
     in
         Requests.request (Topics.bankLogin accountId)
-            (BankLogin requester cid >> Request)
+            (BankLogin requester >> Request)
             payload
             data
 

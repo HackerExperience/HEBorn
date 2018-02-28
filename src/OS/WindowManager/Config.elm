@@ -142,18 +142,17 @@ browserConfig appId activeServer ( gCId, gServer ) config =
         cid =
             Tuple.first activeServer
 
-        -- FIXME: review if passing down these seeds is okay
         onNewPublicDownload =
             Processes.HandleStartPublicDownload >>>> processes config cid
 
         onNewBruteforceProcess =
-            Processes.HandleStartBruteforce >> processes config cid
+            Processes.HandleStartBruteforce >> processes config gCId
 
         onBankAccountLogin =
-            Finances.HandleBankAccountLogin cid >>> finances config
+            Finances.HandleBankAccountLogin >>> finances config
 
         onBankAccountTransfer =
-            Finances.HandleBankAccountTransfer cid >>> finances config
+            Finances.HandleBankAccountTransfer >>> finances config
     in
         { flags = config.flags
         , toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
@@ -216,8 +215,6 @@ emailConfig appId ( cid, _ ) config =
     { toMsg = EmailMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , story = Game.getStory config.game
-
-    -- TODO: review if the CId usage is alright
     , onOpenApp = flip OpenApp cid >> config.toMsg
     }
 

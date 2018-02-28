@@ -21,6 +21,12 @@ import Apps.Browser.Pages.Home.Config as Home
 import Apps.Browser.Pages.Webserver.Config as Webserver
 
 
+{-| Callbacks:
+
+  - `onBruteforceProcess` targets gateway cid
+  - `onNewPublicDownload` targets active cid
+
+-}
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg

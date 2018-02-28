@@ -25,10 +25,9 @@ request :
     BankTransferRequest
     -> Requester
     -> Account.ID
-    -> CId
     -> FlagsSource a
     -> Cmd Msg
-request { fromBank, fromAcc, toBank, toAcc, password, value } requester accountId cid data =
+request { fromBank, fromAcc, toBank, toAcc, password, value } requester accountId data =
     let
         payload =
             Encode.object
@@ -43,7 +42,7 @@ request { fromBank, fromAcc, toBank, toAcc, password, value } requester accountI
                 ]
     in
         Requests.request (Topics.bankTransfer accountId)
-            (BankTransfer requester cid >> Request)
+            (BankTransfer requester >> Request)
             payload
             data
 
