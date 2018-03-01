@@ -218,10 +218,8 @@ gameConfig =
         , onDisconnected = HandleShutdown
         , onAccountToast = Toast.HandleAccount >> toast
         , onServerToast = Toast.HandleServers >>> toast
-        , onBALoginSuccess = Browser.HandleBankLogin >> browserTab
-        , onBALoginFailed = browserTab Browser.HandleBankLoginError
-        , onBATransferSuccess = browserTab Browser.HandleBankTransfer
-        , onBATransferFailed = browserTab Browser.HandleBankTransferError
+        , onBankAccountLogin = Browser.HandleBankLogin >> browserTab
+        , onBankAccountTransfer = Browser.HandleBankTransfer >> browserTab
         }
 
 

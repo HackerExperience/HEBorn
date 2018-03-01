@@ -95,7 +95,7 @@ onBankLogin config requester response model =
     case response of
         Valid data ->
             ( model
-            , React.msg <| config.onBALoginSuccess data requester
+            , React.msg <| config.onBankAccountLogin (Ok data) requester
             )
 
         DecodeFailed ->
@@ -103,7 +103,7 @@ onBankLogin config requester response model =
 
         Invalid ->
             ( model
-            , React.msg <| config.onBALoginFailed requester
+            , React.msg <| config.onBankAccountLogin (Err ()) requester
             )
 
 
@@ -117,10 +117,10 @@ onBankTransfer config requester response model =
     case response of
         Successful ->
             ( model
-            , React.msg <| config.onBATransferSuccess requester
+            , React.msg <| config.onBankAccountTransfer (Ok ()) requester
             )
 
         Error ->
             ( model
-            , React.msg <| config.onBATransferFailed requester
+            , React.msg <| config.onBankAccountTransfer (Err ()) requester
             )

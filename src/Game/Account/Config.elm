@@ -29,10 +29,8 @@ type alias Config msg =
     , onSetEndpoint : CId -> Maybe CId -> msg
 
     -- account.finances
-    , onBALoginSuccess : BankAccountData -> Requester -> msg
-    , onBALoginFailed : Requester -> msg
-    , onBATransferSuccess : Requester -> msg
-    , onBATransferFailed : Requester -> msg
+    , onBankAccountLogin : Result () BankAccountData -> Requester -> msg
+    , onBankAccountTransfer : Result () () -> Requester -> msg
 
     -- account.notifications
     , onToast : Notifications.Content -> msg
@@ -44,10 +42,8 @@ financesConfig accountId config =
     { flags = config.flags
     , toMsg = FinancesMsg >> config.toMsg
     , accountId = accountId
-    , onBALoginSuccess = config.onBALoginSuccess
-    , onBALoginFailed = config.onBALoginFailed
-    , onBATransferSuccess = config.onBATransferSuccess
-    , onBATransferFailed = config.onBATransferFailed
+    , onBankAccountLogin = config.onBankAccountLogin
+    , onBankAccountTransfer = config.onBankAccountTransfer
     }
 
 

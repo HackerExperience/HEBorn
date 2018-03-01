@@ -272,17 +272,11 @@ processTabMsg config tabId msg tab model =
             , React.msg <| config.onSetContext Endpoint
             )
 
-        HandleBankLogin accountData ->
-            handleBankLogin config tabId tab accountData model
+        HandleBankLogin data ->
+            handleBankLogin config tabId tab data model
 
-        HandleBankLoginError ->
-            handleBankError config tabId tab model
-
-        HandleBankTransfer ->
-            handleBankTransfer config tabId tab model
-
-        HandleBankTransferError ->
-            handleBankTransferError config tabId tab model
+        HandleBankTransfer data ->
+            handleBankTransfer config tabId tab data model
 
         Login nip password ->
             onLogin config nip password model.me tabId tab
@@ -456,51 +450,45 @@ handleBankLogin :
     Config msg
     -> Int
     -> Tab
-    -> Finances.BankAccountData
+    -> Result () Finances.BankAccountData
     -> Model
     -> TabUpdateResponse msg
-handleBankLogin config tabId tab accountData model =
+handleBankLogin config tabId tab result model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            updatePage config (BankMsg <| Bank.HandleLogin accountData) page
+            case result of
+                Ok accountData ->
+                    updatePage config
+                        (BankMsg <| Bank.HandleLogin accountData)
+                        page
+
+                Err () ->
+                    updatePage config (BankMsg Bank.HandleLoginError) page
     in
         ( { tab | page = pageModel }, React.none )
 
 
-handleBankError : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
-handleBankError config tabId tab model =
+handleBankTransfer :
+    Config msg
+    -> Int
+    -> Tab
+    -> Result () ()
+    -> Model
+    -> TabUpdateResponse msg
+handleBankTransfer config tabId tab result model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            updatePage config (BankMsg Bank.HandleLoginError) page
-    in
-        ( { tab | page = pageModel }, React.none )
+            case result of
+                Ok () ->
+                    updatePage config (BankMsg Bank.HandleTransfer) page
 
-
-handleBankTransfer : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
-handleBankTransfer config tabId tab model =
-    let
-        page =
-            (getTab tabId model.tabs).page
-
-        ( pageModel, _ ) =
-            updatePage config (BankMsg Bank.HandleTransfer) page
-    in
-        ( { tab | page = pageModel }, React.none )
-
-
-handleBankTransferError : Config msg -> Int -> Tab -> Model -> TabUpdateResponse msg
-handleBankTransferError config tabId tab model =
-    let
-        page =
-            (getTab tabId model.tabs).page
-
-        ( pageModel, _ ) =
-            updatePage config (BankMsg Bank.HandleTransferError) page
+                Err () ->
+                    updatePage config (BankMsg Bank.HandleTransferError) page
     in
         ( { tab | page = pageModel }, React.none )
