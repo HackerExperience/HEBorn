@@ -43,10 +43,8 @@ type TabMsg
     | Cracked NIP String
     | AnyMap NIP
     | Login NIP String
-    | HandleBankLogin Finances.BankAccountData
-    | HandleBankLoginError
-    | HandleBankTransfer
-    | HandleBankTransferError
+    | HandleBankLogin (Result () Finances.BankAccountData)
+    | HandleBankTransfer (Result () ())
     | HandleLoginFailed
     | SelectEndpoint
     | NewApp DesktopApp

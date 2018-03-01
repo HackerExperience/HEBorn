@@ -11,10 +11,6 @@ type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
     , accountId : Account.ID
-
-    -- TODO: replace Success/Error with Result
-    , onBALoginSuccess : BankAccountData -> Requester -> msg
-    , onBALoginFailed : Requester -> msg
-    , onBATransferSuccess : Requester -> msg
-    , onBATransferFailed : Requester -> msg
+    , onBankAccountLogin : Result () BankAccountData -> Requester -> msg
+    , onBankAccountTransfer : Result () () -> Requester -> msg
     }
