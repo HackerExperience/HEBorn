@@ -58,49 +58,43 @@ windowManagerConfig config =
 
 
 headerConfig : Config msg -> Header.Config msg
-headerConfig config =
+headerConfig ({ game } as config) =
     let
+        servers_ =
+            Game.getServers game
+
+        server_ =
+            Tuple.second config.activeServer
+
         account_ =
-            Game.getAccount config.game
+            Game.getAccount game
 
-        ( cid, server_ ) =
-            config.activeServer
-
-        gateway =
-            Tuple.second config.activeGateway
+        ( cid, gateway ) =
+            config.activeGateway
 
         endpoints =
             gateway
                 |> Servers.getEndpoints
                 |> Maybe.withDefault []
 
-        accountNotifications =
-            config.game
-                |> Game.getAccount
-                |> Account.getNotifications
-
         onReadAllAccountNotifications =
             accountNotif config AccountNotifications.HandleReadAll
 
         onReadAllServerNotifications =
             serverNotif config cid ServersNotifications.HandleReadAll
-
-        onSetActiveNIP =
-            Servers.HandleSetActiveNIP >> server config cid
     in
         { toMsg = HeaderMsg >> config.toMsg
         , batchMsg = config.batchMsg
         , activeContext = config.activeContext
-        , activeGateway = config.activeGateway
-        , activeEndpointCid = Servers.getEndpointCId gateway
-        , activeNIP = Servers.getActiveNIP server_
+        , activeGatewayCId = cid
+        , activeEndpointCId = Servers.getEndpointCId gateway
         , activeBounce = Servers.getBounce server_
+        , activeNIP = Servers.getActiveNIP server_
         , gateways = Account.getGateways account_
         , endpoints = endpoints
-        , nips = Servers.getNIPs server_
         , bounces = Account.getBounces account_
-        , servers = Game.getServers config.game
-        , accountNotifications = accountNotifications
+        , nips = Servers.getNIPs server_
+        , accountNotifications = Account.getNotifications account_
         , serversNotifications = Servers.getNotifications server_
         , onSignOut = onSignOut config
         , onSetGateway = Account.HandleSetGateway >> account config
@@ -109,7 +103,8 @@ headerConfig config =
         , onSetBounce = onSetBounce config
         , onReadAllAccountNotifications = onReadAllAccountNotifications
         , onReadAllServerNotifications = onReadAllServerNotifications
-        , onSetActiveNIP = onSetActiveNIP
+        , onSetActiveNIP = Servers.HandleSetActiveNIP >> server config cid
+        , getLabel = flip Servers.getLabel servers_
         , menuAttr = config.menuAttr
         }
 

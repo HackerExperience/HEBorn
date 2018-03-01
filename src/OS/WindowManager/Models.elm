@@ -4,7 +4,6 @@ import Dict exposing (Dict)
 import Draggable
 import Random.Pcg as Random
 import Uuid
-import Window
 import Apps.BackFlix.Models as BackFlix
 import Apps.BounceManager.Models as BounceManager
 import Apps.Browser.Models as Browser

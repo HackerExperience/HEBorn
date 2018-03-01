@@ -518,3 +518,20 @@ getContextServer context servers ( gatewayCId, gateway ) =
 getType : Server -> ServerType
 getType =
     .type_
+
+
+getLabel : CId -> Model -> Maybe String
+getLabel cid model =
+    case get cid model of
+        Just server ->
+            if isGateway server then
+                Just <| getName server
+            else
+                Just <|
+                    getName server
+                        ++ " ("
+                        ++ (Network.getIp <| getActiveNIP server)
+                        ++ ")"
+
+        Nothing ->
+            Nothing
