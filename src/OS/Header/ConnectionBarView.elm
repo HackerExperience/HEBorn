@@ -11,7 +11,6 @@ import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network
-import Game.Servers.Models as Servers exposing (Servers)
 import Game.Servers.Shared as Servers
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
@@ -28,21 +27,17 @@ import UI.Widgets.CustomSelect exposing (customSelect)
 view : Config msg -> Model -> Html msg
 view ({ toMsg } as config) ({ openMenu } as model) =
     let
-        servers =
-            config.servers
-
         bounces =
             config.bounces
 
         activeGatewayCId =
-            config.activeGateway
-                |> Tuple.first
+            config.activeGatewayCId
 
         activeBounce =
             config.activeBounce
 
         activeEndpointCId =
-            config.activeEndpointCid
+            config.activeEndpointCId
 
         endpoints =
             config.endpoints
@@ -67,10 +62,10 @@ view ({ toMsg } as config) ({ openMenu } as model) =
         div
             [ class [ Connection ] ]
             [ contextToggler onGateway (toMsg <| ContextTo Gateway) activeEndpointCId
-            , gatewaySelector config servers openMenu activeGatewayCId config.gateways
+            , gatewaySelector config openMenu activeGatewayCId config.gateways
             , bounceSelector config activeBounce activeEndpointCId model
             , bounceMenu config activeBounce activeEndpointCId model
-            , endpointSelector config servers openMenu activeEndpointCId endpoints
+            , endpointSelector config openMenu activeEndpointCId endpoints
             , contextToggler (not onGateway) (toMsg <| ContextTo Endpoint) activeEndpointCId
             ]
 
@@ -141,21 +136,18 @@ selector { toMsg } classes wrapper kind render open active list =
 
 gatewaySelector :
     Config msg
-    -> Servers.Model
     -> OpenMenu
     -> Servers.CId
     -> List Servers.CId
     -> Html msg
-gatewaySelector { toMsg, batchMsg, onSetGateway } servers open cid list =
+gatewaySelector ({ toMsg } as config) open cid list =
     let
-        render_ _ cid =
-            servers
-                |> Servers.get cid
-                |> Maybe.map gatewayLabel
+        render_ _ =
+            config.getLabel >> Maybe.map text
 
         msg cid =
-            batchMsg
-                [ onSetGateway cid
+            config.batchMsg
+                [ config.onSetGateway cid
                 , toMsg DropMenu
                 ]
 
@@ -173,60 +165,28 @@ gatewaySelector { toMsg, batchMsg, onSetGateway } servers open cid list =
             list
 
 
-gatewayLabel : Servers.Server -> Html msg
-gatewayLabel server =
-    server
-        |> Servers.getName
-        |> text
-
-
 
 -- ENDPOINT
 
 
 endpointSelector :
     Config msg
-    -> Servers.Model
     -> OpenMenu
     -> Maybe Servers.CId
     -> List (Maybe Servers.CId)
     -> Html msg
-endpointSelector ({ toMsg, onSetEndpoint, batchMsg } as config) servers =
+endpointSelector ({ toMsg } as config) =
     let
-        view cid =
-            servers
-                |> Servers.get cid
-                |> Maybe.map (endpointLabel servers cid)
+        render =
+            config.getLabel >> Maybe.map text
 
         msg cid =
-            batchMsg
-                [ onSetEndpoint cid
+            config.batchMsg
+                [ config.onSetEndpoint cid
                 , toMsg DropMenu
                 ]
     in
-        selector config [ SEndpoint ] msg EndpointOpen view
-
-
-endpointLabel :
-    Servers.Model
-    -> Servers.CId
-    -> Servers.Server
-    -> Html msg
-endpointLabel servers cid server =
-    let
-        ip =
-            server
-                |> Servers.getActiveNIP
-                |> Network.getIp
-
-        name =
-            Servers.getName server
-    in
-        name
-            ++ " ("
-            ++ ip
-            ++ ")"
-            |> text
+        selector config [ SEndpoint ] msg EndpointOpen render
 
 
 

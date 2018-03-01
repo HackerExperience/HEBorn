@@ -8,7 +8,6 @@ import Game.Account.Notifications.Models as AccountNotifications
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
-import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Notifications.Models as ServerNotifications
 import OS.Header.Messages exposing (Msg)
 
@@ -16,20 +15,17 @@ import OS.Header.Messages exposing (Msg)
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , bounces : Bounces.Model
+    , activeContext : Context
+    , activeGatewayCId : CId
+    , activeEndpointCId : Maybe CId
+    , activeBounce : Maybe Bounces.ID
+    , activeNIP : NIP
     , gateways : List CId
     , endpoints : List CId
-    , servers : Servers.Model
+    , bounces : Bounces.Model
     , nips : List NIP
-    , activeEndpointCid : Maybe CId
-    , activeGateway : ( CId, Server )
-    , activeBounce : Maybe Bounces.ID
-    , activeContext : Context
     , accountNotifications : AccountNotifications.Model
     , serversNotifications : ServerNotifications.Model
-    , activeNIP : NIP
-    , nips : List NIP
-    , menuAttr : ContextMenuAttribute msg
     , onSignOut : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg
@@ -38,6 +34,8 @@ type alias Config msg =
     , onReadAllAccountNotifications : msg
     , onReadAllServerNotifications : msg
     , onSetActiveNIP : NIP -> msg
+    , getLabel : CId -> Maybe String
+    , menuAttr : ContextMenuAttribute msg
     }
 
 

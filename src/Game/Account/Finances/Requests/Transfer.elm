@@ -7,7 +7,6 @@ module Game.Account.Finances.Requests.Transfer
 import Json.Encode as Encode
 import Requests.Requests as Requests
 import Requests.Topics as Topics
-import Game.Servers.Shared exposing (CId)
 import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Game.Account.Models as Account
 import Game.Meta.Types.Network as Network

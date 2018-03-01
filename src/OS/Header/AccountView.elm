@@ -3,7 +3,6 @@ module OS.Header.AccountView exposing (view)
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
-import Utils.List as List
 import Game.Account.Notifications.Shared as Notifications
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
