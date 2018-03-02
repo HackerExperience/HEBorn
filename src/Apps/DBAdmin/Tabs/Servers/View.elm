@@ -51,30 +51,38 @@ renderFlags =
 
 renderData : ( NIP, Database.HackedServer ) -> Html Msg
 renderData ( nip, item ) =
-    div []
-        [ text "ip: "
-        , text <| Network.render nip
-        , text " psw: "
-        , text item.password
-        , text " nick: "
-        , text <| Maybe.withDefault "[Unlabeled]" item.label
-        , text " notes: "
-        , item.notes |> Maybe.withDefault "S/N" |> text
-        , span [ onClick <| EnterSelectingVirus (Network.toString nip) ]
-            [ text " !!!!VIRUS!!!!" ]
-        ]
+    let
+        alias =
+            Database.getHackedServerAlias item
+    in
+        div []
+            [ text "ip: "
+            , text <| Network.render nip
+            , text " psw: "
+            , text item.password
+            , text " nick: "
+            , text <| Maybe.withDefault "[Unlabeled]" alias
+            , text " notes: "
+            , item.notes |> Maybe.withDefault "S/N" |> text
+            , span [ onClick <| EnterSelectingVirus (Network.toString nip) ]
+                [ text " !!!!VIRUS!!!!" ]
+            ]
 
 
 renderMiniData : ( NIP, Database.HackedServer ) -> Html Msg
 renderMiniData ( nip, item ) =
-    div []
-        [ text "ip: "
-        , text <| Tuple.second nip
-        , text " psw: "
-        , text item.password
-        , text " nick: "
-        , text <| Maybe.withDefault "[Unlabeled]" item.label
-        ]
+    let
+        alias =
+            Database.getHackedServerAlias item
+    in
+        div []
+            [ text "ip: "
+            , text <| Tuple.second nip
+            , text " psw: "
+            , text item.password
+            , text " nick: "
+            , text <| Maybe.withDefault "[Unlabeled]" alias
+            ]
 
 
 renderVirusOption : Config msg -> String -> String -> Html Msg

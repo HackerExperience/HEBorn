@@ -89,10 +89,10 @@ viewTabManage ({ toMsg, bounces } as config) model =
         bounces
             |> Dict.toList
             |> List.map (viewBounce config model)
-            |> verticalList []
+            |> verticalList [ class [ BounceList ] ]
             |> List.singleton
             |> (++) [ modalHandler config model ]
-            |> div [ class [ Super ] ]
+            |> div [ class [ Super, Manage ] ]
 
 
 viewTabBuild :
@@ -310,7 +310,8 @@ renderAvailableServers :
     -> Model
     -> Html msg
 renderAvailableServers ({ database } as config) model =
-    (Database.getHackedServers database)
+    database
+        |> Database.getHackedServers
         |> Dict.filter (\k _ -> not <| List.member k model.path)
         |> Dict.foldl (renderAvailableServer config model) ( [], 0 )
         |> Tuple.first
@@ -332,9 +333,10 @@ renderAvailableServer :
 renderAvailableServer ({ toMsg } as config) model nip server ( acc, c ) =
     let
         label =
-            server.label
+            server
+                |> Database.getHackedServerAlias
                 |> Maybe.withDefault (Network.render nip)
-                |> (++) "Label: "
+                |> (++) "Alias: "
                 |> text
 
         ip =
@@ -456,7 +458,7 @@ entry ({ toMsg, database } as config) hackedServers nip c model =
 
         label_ =
             server
-                |> Maybe.andThen Database.getHackedServerLabel
+                |> Maybe.andThen Database.getHackedServerAlias
                 |> Maybe.withDefault (Network.render nip)
                 |> text
 

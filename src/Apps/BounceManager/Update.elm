@@ -94,12 +94,13 @@ update config msg model =
 onGoTab : MainTab -> Model -> UpdateResponse msg
 onGoTab tab model =
     case tab of
-        TabBuild bounceInfo ->
+        TabBuild ( maybeId, bounce ) ->
             let
                 model_ =
                     { model
                         | selected = tab
-                        , selectedBounce = Just bounceInfo
+                        , selectedBounce = Just ( maybeId, bounce )
+                        , path = bounce.path
                     }
             in
                 ( model_, React.none )
@@ -336,6 +337,7 @@ onEdit config bounceId model =
                     { model
                         | selected = TabBuild ( Just bounceId, bounce )
                         , selectedBounce = Just ( Just bounceId, bounce )
+                        , path = bounce.path
                     }
 
                 Nothing ->
