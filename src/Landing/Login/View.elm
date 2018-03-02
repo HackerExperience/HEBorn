@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Html.CssHelpers
-import Landing.Resources as Res
+import Landing.Resources as R
 import Landing.Login.Messages exposing (..)
 import Landing.Login.Models exposing (..)
 
 
 landClass : List class -> Attribute msg
 landClass =
-    (.class) <| Html.CssHelpers.withNamespace Res.prefix
+    (.class) <| Html.CssHelpers.withNamespace R.prefix
 
 
 view : (Msg -> msg) -> Model -> Html msg
@@ -20,9 +20,9 @@ view toMsg model =
         [ id "login-form"
         , action "javascript:void(0);"
         ]
-        [ div [ landClass [ Res.Title ] ] [ text "Login" ]
+        [ div [ landClass [ R.Title ] ] [ text "Login" ]
         , br [] []
-        , div [ landClass [ Res.Input ] ]
+        , div [ landClass [ R.Input ] ]
             [ label [ for "username-field" ] [ text "username: " ]
             , input
                 [ id "username-field"
@@ -33,7 +33,7 @@ view toMsg model =
                 []
             ]
         , div [ class "validation-error" ] [ text (viewErrorsUsername model) ]
-        , div [ landClass [ Res.Input ] ]
+        , div [ landClass [ R.Input ] ]
             [ label [ for "password-field" ] [ text "password: " ]
             , input
                 [ id "password-field"

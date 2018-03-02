@@ -11,7 +11,7 @@ import Apps.Browser.Pages.DownloadCenter.Models exposing (..)
 import Apps.Browser.Widgets.HackingToolkit.View as HackingToolkit exposing (hackingToolkit)
 import Apps.Browser.Widgets.HackingPanel.View as HackingPanel exposing (hackingPanel)
 import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFiles)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 
 
 { id, class, classList } =

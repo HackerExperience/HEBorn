@@ -23,7 +23,7 @@ import Apps.LogViewer.Models as LogViewer
 import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
 import Apps.VirusPanel.Models as VirusPanel
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId)

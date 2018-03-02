@@ -3,7 +3,7 @@ module Apps.Browser.Pages.Webserver.Config exposing (Config)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Apps.Browser.Pages.Webserver.Messages exposing (..)
 
 

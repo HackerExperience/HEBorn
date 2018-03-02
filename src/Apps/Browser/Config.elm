@@ -6,10 +6,10 @@ import Core.Flags as Core
 import Utils.Core exposing (..)
 import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Params as AppParams exposing (AppParams)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network exposing (NIP)
-import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Shared as Filesystem

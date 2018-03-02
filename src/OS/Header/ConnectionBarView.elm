@@ -17,7 +17,7 @@ import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Resources exposing (..)
 import UI.Layouts.VerticalList exposing (..)
-import UI.Widgets.CustomSelect exposing (customSelect)
+import UI.Elements.CustomSelect exposing (customSelect)
 
 
 { id, class, classList } =

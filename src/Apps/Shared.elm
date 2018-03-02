@@ -1,6 +1,6 @@
 module Apps.Shared exposing (..)
 
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Apps.LogViewer.Models as LogViewer
 import Apps.TaskManager.Models as TaskManager

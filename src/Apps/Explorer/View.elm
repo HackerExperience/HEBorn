@@ -13,7 +13,7 @@ import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Resources exposing (Classes(..), prefix, idAttrKey)
-import UI.Widgets.ProgressBar exposing (progressBar)
+import UI.Elements.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 
 

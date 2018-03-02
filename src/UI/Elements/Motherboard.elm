@@ -1,4 +1,4 @@
-module UI.Widgets.Motherboard exposing (guessMobo, defaultMobo)
+module UI.Elements.Motherboard exposing (guessMobo, defaultMobo)
 
 import Html exposing (Html)
 import Svg exposing (Svg, use)

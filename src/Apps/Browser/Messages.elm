@@ -7,7 +7,7 @@ import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Requests.Browse as BrowseRequest
 import Events.Account.Handlers.ServerPasswordAcquired as PasswordAcquired
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
 import Apps.Browser.Pages.Bank.Messages as Bank

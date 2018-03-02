@@ -1,11 +1,11 @@
-module UI.Widgets.Modal.Virus exposing (..)
+module UI.Elements.Modal.Virus exposing (..)
 
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Utils.Html.Attributes exposing (boolAttr)
-import UI.Widgets.Modal as Modal exposing (..)
+import UI.Elements.Modal as Modal exposing (..)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Database.Models as Database exposing (HackedServer)

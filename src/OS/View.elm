@@ -15,14 +15,14 @@ import OS.WindowManager.View as WindowManager
 import OS.Toasts.View as Toasts
 import OS.Console.View as Console
 import OS.DynamicStyle as DynamicStyle
-import OS.Resources as Res
+import OS.Resources as R
 import OS.Config exposing (..)
 import OS.Models exposing (..)
 import OS.Messages exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Res.prefix
+    Html.CssHelpers.withNamespace R.prefix
 
 
 view : Config msg -> Model -> Html msg
@@ -35,19 +35,19 @@ view config model =
         gameMode =
             case isCampaignFromConfig config of
                 True ->
-                    Res.campaignMode
+                    R.campaignMode
 
                 False ->
-                    Res.multiplayerMode
+                    R.multiplayerMode
     in
         model
             |> viewOS config
             |> (::) (DynamicStyle.view config)
             |> (::) config.menuView
             |> div
-                [ id Res.Dashboard
-                , attribute Res.gameVersionAttrTag version
-                , attribute Res.gameModeAttrTag gameMode
+                [ id R.Dashboard
+                , attribute R.gameVersionAttrTag version
+                , attribute R.gameModeAttrTag gameMode
                 , activeContextAttr config.activeContext
                 , onClick <| config.toMsg <| HeaderMsg <| Header.CheckMenus
                 , config.menuAttr
@@ -78,7 +78,7 @@ viewMain config model =
 displayVersion : String -> Html msg
 displayVersion version =
     div
-        [ class [ Res.Version ] ]
+        [ class [ R.Version ] ]
         [ text version ]
 
 

@@ -1,4 +1,4 @@
-module UI.Widgets.ProgressBar exposing (progressBar)
+module UI.Elements.ProgressBar exposing (progressBar)
 
 import Html exposing (Html, Attribute, text, node)
 import Html.Attributes as Html exposing (style)

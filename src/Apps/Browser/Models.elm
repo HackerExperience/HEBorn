@@ -2,7 +2,7 @@ module Apps.Browser.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
+import Game.Meta.Types.Desktop.Apps exposing (Reference)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Meta.Types.Network.Site as Site exposing (Site)

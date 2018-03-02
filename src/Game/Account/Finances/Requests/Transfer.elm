@@ -17,7 +17,7 @@ import Game.Account.Finances.Messages
         , RequestMsg(..)
         , TransferResponse(..)
         )
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 
 
 request :

@@ -7,7 +7,7 @@ module Game.Account.Finances.Messages
         )
 
 import Requests.Types exposing (ResponseType)
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Account.Finances.Models exposing (..)
 import Game.Account.Finances.Shared exposing (..)
 
