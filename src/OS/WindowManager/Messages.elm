@@ -22,6 +22,7 @@ import Apps.Bug.Messages as Bug
 import Apps.Calculator.Messages as Calculator
 import Apps.BackFlix.Messages as BackFlix
 import Apps.FloatingHeads.Messages as FloatingHeads
+import Apps.VirusPanel.Messages as VirusPanel
 import OS.WindowManager.Shared exposing (..)
 
 
@@ -69,6 +70,7 @@ type AppMsg
     | LogViewerMsg LogViewer.Msg
     | ServersGearsMsg ServersGears.Msg
     | TaskManagerMsg TaskManager.Msg
+    | VirusPanelMsg VirusPanel.Msg
 
 
 msgToDesktopApp : AppMsg -> DesktopApp
@@ -121,3 +123,6 @@ msgToDesktopApp desktopMsg =
 
         TaskManagerMsg _ ->
             DesktopApp.TaskManager
+
+        VirusPanelMsg _ ->
+            DesktopApp.VirusPanel

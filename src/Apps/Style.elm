@@ -18,6 +18,7 @@ import Apps.Calculator.Style as Calculator
 import Apps.BackFlix.Style as BackFlix
 import Apps.ServersGears.Style as ServersGears
 import Apps.FloatingHeads.Style as FloatingHeads
+import Apps.VirusPanel.Style as VirusPanel
 
 
 cssList : List Stylesheet
@@ -39,4 +40,5 @@ cssList =
     , ServersGears.css
     , BackFlix.css
     , FloatingHeads.css
+    , VirusPanel.css
     ]

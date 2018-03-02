@@ -20,6 +20,7 @@ import Apps.Bug.Models as Bug
 import Apps.Calculator.Models as Calculator
 import Apps.BackFlix.Models as BackFlix
 import Apps.FloatingHeads.Models as FloatingHeads
+import Apps.VirusPanel.Models as VirusPanel
 
 
 type AppContext
@@ -84,6 +85,9 @@ context app =
         DesktopApp.FloatingHeads ->
             StaticContext Gateway
 
+        DesktopApp.VirusPanel ->
+            StaticContext Gateway
+
 
 name : DesktopApp -> String
 name app =
@@ -141,6 +145,9 @@ name app =
 
         DesktopApp.FloatingHeads ->
             FloatingHeads.name
+
+        DesktopApp.VirusPanel ->
+            VirusPanel.name
 
 
 icon : DesktopApp -> String
@@ -200,6 +207,9 @@ icon app =
         DesktopApp.FloatingHeads ->
             FloatingHeads.icon
 
+        DesktopApp.VirusPanel ->
+            VirusPanel.icon
+
 
 windowInitSize : DesktopApp -> ( Int, Int )
 windowInitSize app =
@@ -215,6 +225,9 @@ windowInitSize app =
 
         DesktopApp.BackFlix ->
             BackFlix.windowInitSize
+
+        DesktopApp.VirusPanel ->
+            VirusPanel.windowInitSize
 
         _ ->
             ( 600, 400 )
