@@ -15,7 +15,7 @@ import Game.Servers.Shared as Servers
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 import UI.Layouts.VerticalList exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
 

@@ -6,11 +6,11 @@ import Html exposing (Html, div, span, text)
 import Html.CssHelpers
 import UI.ToString exposing (timestampToFullData)
 import OS.Console.Config exposing (..)
-import OS.Resources exposing (..)
+import OS.Console.Resources exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace "os"
+    Html.CssHelpers.withNamespace prefix
 
 
 view : Config -> Html msg

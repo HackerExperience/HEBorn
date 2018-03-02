@@ -6,6 +6,9 @@ import Landing.Style as Landing
 import UI.Style as UI
 import Setup.Style as Setup
 import OS.Style as OS
+import OS.Header.Style as Header
+import OS.Console.Style as Console
+import OS.Toasts.Style as Toasts
 import OS.WindowManager.Style as WindowManager
 import OS.WindowManager.Dock.Style as Dock
 import Apps.Style as Apps
@@ -22,6 +25,9 @@ fileStructure =
                 ([ Core.css
                  , Landing.css
                  , Setup.css
+                 , Header.css
+                 , Console.css
+                 , Toasts.css
                  , OS.css
                  , UI.css
                  , WindowManager.css
