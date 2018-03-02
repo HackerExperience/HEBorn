@@ -7,5 +7,5 @@ import Apps.BackFlix.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , logs : BackFlix.Logs
+    , logs : BackFlix.Model
     }

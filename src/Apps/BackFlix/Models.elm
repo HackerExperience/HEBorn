@@ -102,7 +102,7 @@ catchDataWhenFiltering filterCache log =
         Nothing
 
 
-applyFilter : Model -> BackFlix.Logs -> Dict BackFlix.Id BackFlix.Log
+applyFilter : Model -> BackFlix.Model -> Dict BackFlix.Id BackFlix.Log
 applyFilter model =
     let
         filterer id log =
