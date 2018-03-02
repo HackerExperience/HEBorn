@@ -81,7 +81,8 @@ viewTabLabel _ tab =
 
 viewTabList : Config msg -> Model -> Html msg
 viewTabList ({ database } as config) model =
-    Database.getHackedServers database
+    database
+        |> Database.getHackedServers
         |> Dict.toList
         |> List.map (viewServer config model)
         |> verticalList [ class [ ServerList ] ]
@@ -98,9 +99,9 @@ viewServer :
 viewServer ({ toMsg } as config) model ( nip, server ) =
     let
         name =
-            case server.label of
-                Just label ->
-                    label
+            case Database.getHackedServerAlias server of
+                Just alias ->
+                    alias
 
                 Nothing ->
                     Network.render nip

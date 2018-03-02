@@ -13,6 +13,7 @@ type Classes
     | Servers
     | ServerList
     | Buttons
+    | BounceList
     | BounceEntry
     | BounceNode
     | HackedServer

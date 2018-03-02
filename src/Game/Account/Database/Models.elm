@@ -78,7 +78,7 @@ type alias HackedServers =
 
 type alias HackedServer =
     { password : String
-    , label : Maybe String
+    , alias : Maybe String
     , notes : Maybe String
     , virusInstalled : List ID
     , activeVirus : Maybe ID
@@ -89,7 +89,7 @@ type alias HackedServer =
 emptyServer : HackedServer
 emptyServer =
     { password = ""
-    , label = Nothing
+    , alias = Nothing
     , notes = Nothing
     , virusInstalled = []
     , activeVirus = Nothing
@@ -152,9 +152,9 @@ setPassword password server =
     { server | password = password }
 
 
-getHackedServerLabel : HackedServer -> Maybe String
-getHackedServerLabel =
-    .label
+getHackedServerAlias : HackedServer -> Maybe String
+getHackedServerAlias =
+    .alias
 
 
 getHackedServer : NIP -> HackedServers -> Maybe HackedServer

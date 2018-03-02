@@ -59,8 +59,11 @@ enterEditing itemId database model =
                 |> Maybe.map
                     (\( nip, item ) ->
                         let
+                            alias =
+                                Database.getHackedServerAlias item
+
                             edit_ =
-                                EditingTexts ( start item.label, start item.notes )
+                                EditingTexts ( start alias, start item.notes )
                         in
                             updateEditing (Network.toString nip) edit_ model
                     )
@@ -72,7 +75,8 @@ enterSelectingVirus : String -> Database.Model -> Model -> Model
 enterSelectingVirus itemId database model =
     let
         items =
-            database.servers
+            database
+                |> Database.getHackedServers
 
         item =
             items
@@ -128,7 +132,7 @@ updateTextFilter newFilter database model =
         filterMapFunc nip item =
             [ Tuple.second nip
             , item.password
-            , Maybe.withDefault "" item.label
+            , Maybe.withDefault "" <| Database.getHackedServerAlias item
             , Maybe.withDefault "" item.notes
             ]
                 |> List.filter (String.contains newFilter)
@@ -136,7 +140,8 @@ updateTextFilter newFilter database model =
                 |> not
 
         newFilterCache =
-            database.servers
+            database
+                |> Database.getHackedServers
                 |> Dict.filter filterMapFunc
                 |> Dict.keys
                 |> List.map Network.toString

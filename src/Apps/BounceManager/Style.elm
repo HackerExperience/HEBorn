@@ -68,11 +68,16 @@ bounceManage =
                 ]
             ]
         , children
-            [ class BounceEntry
-                [ borderBottom3 (px 1) solid Colors.black
-                , fontSize (px 12)
-                , internalPadding
-                , width (pct 100)
+            [ class BounceList
+                [ overflowY auto
+                , overflowX hidden
+                , children
+                    [ class BounceEntry
+                        [ borderBottom3 (px 1) solid Colors.black
+                        , fontSize (px 12)
+                        , internalPadding
+                        ]
+                    ]
                 ]
             ]
         ]
