@@ -2,7 +2,7 @@ module Driver.Websocket.Update exposing (update)
 
 import Dict exposing (Dict)
 import Json.Decode exposing (Value, decodeValue, value, string, field)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Phoenix.Channel as Channel
 import Utils.React as React exposing (React)
 import Driver.Websocket.Config exposing (..)
@@ -159,9 +159,10 @@ decodeJoinFailed =
     decodeValue <| field "data" value
 
 
-decodeEvent : Value -> Result String ( String, Value )
+decodeEvent : Value -> Result String ( String, String, Value )
 decodeEvent =
-    decode (,)
+    decode (,,)
         |> required "event" string
+        |> optional "request_id" string ""
         |> required "data" value
         |> decodeValue

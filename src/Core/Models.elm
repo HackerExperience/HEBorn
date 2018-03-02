@@ -22,6 +22,7 @@ import Driver.Websocket.Launch as Ws
 import Driver.Websocket.Models as Ws
 import Landing.Models as Landing
 import Setup.Models as Setup
+import Game.Meta.Types.AwaitEvent as AwaitEvent exposing (AwaitEvent)
 import Game.Models as Game
 import Game.Account.Models as Account
 import Game.Dummy as Game
@@ -34,6 +35,7 @@ type alias Model =
     , seed : Int
     , windowLoaded : Bool
     , contextMenu : ContextMenuMagic
+    , awaitEvent : AwaitEvent Msg
     }
 
 
@@ -88,6 +90,7 @@ init seed flags =
             , seed = seed
             , windowLoaded = False
             , contextMenu = menuModel
+            , awaitEvent = AwaitEvent.empty
             }
 
         cmd =

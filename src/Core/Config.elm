@@ -256,6 +256,7 @@ osConfig game menu ctx (( sCId, _ ) as srv) (( gCId, gSrv ) as gtw) =
         { flags = Game.getFlags game
         , toMsg = OSMsg
         , batchMsg = BatchMsg
+        , awaitEvent = HandleAwait
         , gameMsg = GameMsg
         , game = game
         , activeContext = ctx

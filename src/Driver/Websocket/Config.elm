@@ -16,5 +16,5 @@ type alias Config msg =
     , onJoinedServer : CId -> Value -> msg
     , onJoinFailedServer : CId -> msg
     , onLeft : Channel -> Maybe Value -> msg
-    , onEvent : Channel -> Result String ( String, Value ) -> msg
+    , onEvent : Channel -> Result String ( String, String, Value ) -> msg
     }

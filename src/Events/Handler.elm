@@ -18,11 +18,11 @@ type alias Error =
 handler :
     Config msg
     -> Ws.Channel
-    -> Result String ( String, Value )
+    -> Result String ( String, String, Value )
     -> Result Error msg
 handler config channel result =
     case result of
-        Ok ( event, value ) ->
+        Ok ( event, requestId, value ) ->
             case router config channel event value of
                 Ok event ->
                     Ok event

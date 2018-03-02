@@ -32,7 +32,7 @@ applyEvent : String -> String -> Ws.Channel -> Game.Model -> Game.Model
 applyEvent name data channel model =
     let
         result =
-            ( name, toValue data )
+            ( name, "", toValue data )
                 |> Ok
                 |> Events.handler Core.eventsConfig channel
                 |> Result.map React.msg
