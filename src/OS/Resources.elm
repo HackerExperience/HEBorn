@@ -6,8 +6,6 @@ type Class
     | Dock
     | Version
     | AutoHide
-    | Toasts
-    | Fading
 
 
 type Id
