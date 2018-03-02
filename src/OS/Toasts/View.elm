@@ -3,7 +3,7 @@ module OS.Toasts.View exposing (view)
 import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
-import OS.Resources as Res
+import OS.Toasts.Resources exposing (..)
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
 import OS.Toasts.Messages exposing (..)
@@ -11,7 +11,7 @@ import OS.Toasts.Models exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Res.prefix
+    Html.CssHelpers.withNamespace prefix
 
 
 view : Model -> Html Msg
@@ -25,7 +25,7 @@ view model =
                     (toast k v) :: acu
             )
             []
-        |> div [ class [ Res.Toasts ] ]
+        |> div [ class [ Toasts ] ]
 
 
 toast : Int -> Toast -> Html Msg

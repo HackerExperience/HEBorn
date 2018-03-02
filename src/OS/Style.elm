@@ -56,10 +56,10 @@ dashboard =
 
 dock : Snippet
 dock =
+    -- This should be on WM.Style
     class Dock
         [ flexContainerHorz
         , justifyContent center
-        , position absolute
         , width (vw 100)
         , bottom zero
         , zIndex (int 1)
@@ -70,32 +70,6 @@ dock =
             [ marginBottom (px -60)
             , hover
                 [ marginBottom (px 0) ]
-            ]
-        ]
-
-
-toasts : Snippet
-toasts =
-    class Toasts
-        [ position absolute
-        , right (px 2)
-        , bottom (px 2)
-        , width (px 240)
-        , child div
-            [ color Colors.white
-            , padding (px 8)
-            , borderRadius (px 8)
-            , backgroundColor (rgba 0 0 0 0.9)
-            , marginTop (px 2)
-            , minHeight (px 92)
-            , maxHeight (px 92)
-            , overflow hidden
-            , transition 0.5 "all" Linear
-            , withClass Fading
-                [ opacity (int 0)
-                , marginBottom (px -94)
-                ]
-            , child h6 [ margin2 (px 4) (px 0) ]
             ]
         ]
 
