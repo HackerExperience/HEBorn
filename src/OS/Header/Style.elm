@@ -139,7 +139,6 @@ connection =
             [ customSelect
             , sbounce
             , bounceMenu
-            , popup
             , contextSwitch
             ]
         , flexContainerHorz
@@ -395,9 +394,3 @@ bounceOptions =
         , padding2 (px 0) (px 8)
         , withClass Hidden [ display none ]
         ]
-
-
-popup : Snippet
-popup =
-    typeSelector "popup"
-        [ zIndex (int 3) ]
