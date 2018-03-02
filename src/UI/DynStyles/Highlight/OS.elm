@@ -8,6 +8,7 @@ import Apps.Shared as Apps
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context)
 import OS.Resources as OS
+import OS.Header.Resources as Header
 import OS.WindowManager.Dock.Resources as Dock
 import OS.WindowManager.Resources as WM
 
@@ -27,9 +28,9 @@ highlightDockIcon app =
 
 highlightHeaderContextToggler : Context -> Stylesheet
 highlightHeaderContextToggler context =
-    (stylesheet << namespace OS.prefix)
-        [ class OS.Context
-            [ withAttribute (Css.NOT (Css.BOOL OS.headerContextActiveAttrTag))
+    (stylesheet << namespace Header.prefix)
+        [ class Header.Context
+            [ withAttribute (Css.NOT (Css.BOOL Header.headerContextActiveAttrTag))
                 [ backgroundColor (hex "F00") ]
             ]
         ]

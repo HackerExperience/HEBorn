@@ -9,7 +9,7 @@ import Game.Meta.Types.Network as Network
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 
 
 { id, class, classList } =

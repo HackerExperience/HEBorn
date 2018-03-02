@@ -7,7 +7,7 @@ import Game.Account.Notifications.Shared as Notifications
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 import OS.Header.NotificationsView exposing (notifications)
 
 

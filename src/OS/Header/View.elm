@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 import OS.Header.TaskbarView as Taskbar
 import OS.Header.ConnectionBarView as ConnBar
 import OS.Header.NetworkView as NetworkTongue

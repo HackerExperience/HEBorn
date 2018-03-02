@@ -3,38 +3,11 @@ module OS.Resources exposing (..)
 
 type Class
     = Session
-    | Header
     | Dock
     | Version
     | AutoHide
-    | Connection
-    | Taskbar
-    | Network
-    | AvailableNetworks
-    | ActiveNetwork
-    | SGateway
-    | SBounce
-    | SEndpoint
-    | Context
-    | Selected
-    | Logo
-    | ChatIco
-    | ServersIco
-    | Notification
-    | AccountIco
-    | Empty
     | Toasts
     | Fading
-    | Hidden
-    | ReadOnly
-    | BounceMenu
-    | BounceMenuLeft
-    | BounceMenuRight
-    | BounceList
-    | BounceListEntry
-    | BounceMember
-    | BounceMembers
-    | BounceOptions
     | LogConsole
     | LogConsoleBox
     | LogConsoleHeader
@@ -60,21 +33,6 @@ prefix =
     "os"
 
 
-indicatorNode : String
-indicatorNode =
-    "indic"
-
-
-bubbleNode : String
-bubbleNode =
-    "bubble"
-
-
-headerContextActiveAttrTag : String
-headerContextActiveAttrTag =
-    "active"
-
-
 gameVersionAttrTag : String
 gameVersionAttrTag =
     "game-version"
@@ -98,8 +56,3 @@ campaignMode =
 multiplayerMode : String
 multiplayerMode =
     "multiplayer"
-
-
-expandedMenuAttrTag : String
-expandedMenuAttrTag =
-    "expanded"

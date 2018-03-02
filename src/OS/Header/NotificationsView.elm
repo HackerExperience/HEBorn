@@ -8,7 +8,7 @@ import Utils.Html exposing (spacer)
 import Game.Meta.Types.Notifications as Notifications
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 
 
 type alias Renderer a =

@@ -10,7 +10,7 @@ import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.NotificationsView as Notifications
 import OS.Header.AccountView as Account
-import OS.Resources exposing (..)
+import OS.Header.Resources exposing (..)
 
 
 { id, class, classList } =
