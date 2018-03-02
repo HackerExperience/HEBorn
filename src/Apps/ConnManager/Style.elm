@@ -1,16 +1,16 @@
 module Apps.ConnManager.Style exposing (..)
 
 import Css exposing (..)
+import Css.Colors as Colors
 import Css.Namespace exposing (namespace)
-import Css.Icons as Icon
-import UI.Colors as Colors
 import Apps.ConnManager.Resources exposing (Classes(..), prefix)
+import UI.Icons as Icons
 
 
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 
@@ -20,11 +20,11 @@ css =
     (stylesheet << namespace prefix)
         [ class IcoUp
             [ ico
-            , before [ Icon.upload ]
+            , before [ Icons.upload ]
             ]
         , class IcoDown
             [ ico
-            , before [ Icon.download ]
+            , before [ Icons.download ]
             ]
         , class GroupedTunnel
             [ borderBottom3 (px 1) solid Colors.black

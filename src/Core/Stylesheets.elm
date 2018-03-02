@@ -11,6 +11,7 @@ import OS.Console.Style as Console
 import OS.Toasts.Style as Toasts
 import OS.WindowManager.Style as WindowManager
 import OS.WindowManager.Dock.Style as Dock
+import OS.WindowManager.Sidebar.Style as Sidebar
 import Apps.Style as Apps
 
 
@@ -32,6 +33,7 @@ fileStructure =
                  , UI.css
                  , WindowManager.css
                  , Dock.css
+                 , Sidebar.css
                  ]
                     ++ Apps.cssList
                 )

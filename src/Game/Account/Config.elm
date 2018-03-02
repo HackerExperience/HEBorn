@@ -13,7 +13,7 @@ import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Finances.Config as Finances
 import Game.Account.Notifications.Config as Notifications
 import Game.Account.Notifications.Shared as Notifications
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Servers.Shared exposing (CId)
 
 

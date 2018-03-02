@@ -2,7 +2,7 @@ module Apps.TaskManager.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding)
+import UI.Common exposing (flexContainerHorz, flexContainerVert, internalPadding)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)
 
 

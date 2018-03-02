@@ -23,10 +23,11 @@ import Apps.LogViewer.Models as LogViewer
 import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
 import Apps.VirusPanel.Models as VirusPanel
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared as Servers exposing (CId)
 import OS.WindowManager.Shared exposing (..)
+import OS.WindowManager.Sidebar.Models as Sidebar
 
 
 type alias Model =
@@ -40,6 +41,7 @@ type alias Model =
     , seed : Random.Seed
     , drag : Draggable.State WindowId
     , appSize : Maybe Size
+    , sidebar : Sidebar.Model
     }
 
 
@@ -175,6 +177,7 @@ initialModel =
     , seed = Random.initialSeed 844121764423
     , drag = Draggable.init
     , appSize = Nothing
+    , sidebar = Sidebar.initialModel
     }
 
 
@@ -986,6 +989,20 @@ removeHidden windowId session =
 removeFromSession : WindowId -> Session -> Session
 removeFromSession windowId =
     removeVisible windowId >> removeHidden windowId
+
+
+
+-- sidebar
+
+
+getSidebar : Model -> Sidebar.Model
+getSidebar =
+    .sidebar
+
+
+setSidebar : Sidebar.Model -> Model -> Model
+setSidebar sidebar model =
+    { model | sidebar = sidebar }
 
 
 

@@ -1,7 +1,7 @@
 module Apps.BounceManager.Config exposing (..)
 
 import Core.Flags exposing (Flags)
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
+import Game.Meta.Types.Desktop.Apps exposing (Reference)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Database.Models as Database
 import Apps.BounceManager.Messages exposing (..)

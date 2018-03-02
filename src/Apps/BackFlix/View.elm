@@ -6,8 +6,8 @@ import Html.CssHelpers
 import UI.ToString exposing (timestampToFullData)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
-import UI.Entries.FilterHeader exposing (filterHeader)
-import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import UI.Elements.FilterHeader exposing (filterHeader)
+import UI.Elements.HorizontalTabs exposing (hzTabs)
 import Game.BackFlix.Models as BackFlix
 import Apps.BackFlix.Config exposing (..)
 import Apps.BackFlix.Messages exposing (Msg(..))

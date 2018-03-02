@@ -16,7 +16,7 @@ import Apps.ServersGears.Config exposing (..)
 import Apps.ServersGears.Messages exposing (..)
 import Apps.ServersGears.Models exposing (..)
 import Apps.ServersGears.Resources exposing (Classes(..), prefix)
-import UI.Widgets.Motherboard exposing (..)
+import UI.Elements.Motherboard exposing (..)
 
 
 { id, class, classList } =

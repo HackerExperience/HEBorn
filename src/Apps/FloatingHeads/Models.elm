@@ -1,6 +1,6 @@
 module Apps.FloatingHeads.Models exposing (..)
 
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
+import Game.Meta.Types.Desktop.Apps exposing (Reference)
 import Game.Storyline.Shared exposing (ContactId)
 
 

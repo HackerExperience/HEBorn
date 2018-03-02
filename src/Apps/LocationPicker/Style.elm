@@ -2,7 +2,7 @@ module Apps.LocationPicker.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz)
+import UI.Common exposing (flexContainerHorz)
 import Apps.LocationPicker.Resources exposing (Classes(..), prefix)
 
 

@@ -11,9 +11,9 @@ import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Notifications.Messages as AccountNotifications
 import Game.Account.Notifications.Shared as AccountNotifications
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (..)
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Servers.Shared exposing (CId, StorageId)
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
