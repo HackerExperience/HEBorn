@@ -24,8 +24,8 @@ import Apps.Browser.Pages.FBI.View as FBI
 import Apps.Browser.Pages.News.View as News
 import Apps.Browser.Pages.Bithub.View as Bithub
 import Apps.Browser.Pages.MissionCenter.View as MissionCenter
-import UI.Widgets.HorizontalTabs exposing (hzTabs)
-import UI.Widgets.Modal exposing (modalPickStorage, modalOk)
+import UI.Elements.HorizontalTabs exposing (hzTabs)
+import UI.Elements.Modal exposing (modalPickStorage, modalOk)
 
 
 { id, class, classList } =

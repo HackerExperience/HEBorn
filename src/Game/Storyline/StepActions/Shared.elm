@@ -1,7 +1,7 @@
 module Game.Storyline.StepActions.Shared exposing (Action(..))
 
 import Game.Meta.Types.Context exposing (Context)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 
 
 type alias ID =

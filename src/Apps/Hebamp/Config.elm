@@ -1,7 +1,7 @@
 module Apps.Hebamp.Config exposing (..)
 
 import Html exposing (Attribute)
-import Game.Meta.Types.Apps.Desktop exposing (Reference)
+import Game.Meta.Types.Desktop.Apps exposing (Reference)
 import Apps.Hebamp.Messages exposing (..)
 
 

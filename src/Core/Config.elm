@@ -30,7 +30,7 @@ import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Messages as AccountNotifications
 import Game.BackFlix.Messages as BackFlix
 import Game.Meta.Types.Context exposing (Context)
-import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Messages as Filesystem

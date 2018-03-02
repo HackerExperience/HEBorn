@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Game.Servers.Shared as Servers
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Webserver.Config exposing (Config)
 import Apps.Browser.Pages.Webserver.Messages exposing (Msg(..))

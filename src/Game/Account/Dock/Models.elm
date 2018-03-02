@@ -1,6 +1,6 @@
 module Game.Account.Dock.Models exposing (Model, initialModel)
 
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 
 
 type alias Model =

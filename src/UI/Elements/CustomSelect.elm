@@ -1,4 +1,4 @@
-module UI.Widgets.CustomSelect exposing (customSelect)
+module UI.Elements.CustomSelect exposing (customSelect)
 
 import Html exposing (Html, Attribute, node, text, div)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)

@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
-import UI.Widgets.HorizontalTabs exposing (hzTabs)
+import UI.Elements.HorizontalTabs exposing (hzTabs)
 import Game.Account.Finances.Models as Finances
 import Game.Account.Finances.Shared exposing (toMoney)
 import Apps.Finance.Config exposing (..)

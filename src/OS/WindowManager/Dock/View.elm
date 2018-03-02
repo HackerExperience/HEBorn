@@ -7,13 +7,13 @@ import Html.Events exposing (onClick)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (..)
 import Apps.Shared as Apps
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
-import OS.Resources as OsRes
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
+import OS.Resources as OS
 import Game.Servers.Models as Servers
 import OS.WindowManager.Models exposing (..)
 import OS.WindowManager.Shared exposing (..)
 import OS.WindowManager.Dock.Config exposing (..)
-import OS.WindowManager.Dock.Resources as Res
+import OS.WindowManager.Dock.Resources as R
 
 
 -- we're taking liberties concerning leaking implementation
@@ -46,13 +46,13 @@ view config model isFreeplay session =
             config.accountDock
                 |> List.foldl (viewIcons config model isFreeplay groups) []
                 |> List.reverse
-                |> div [ class [ Res.Main ] ]
+                |> div [ class [ R.Main ] ]
 
         dock =
-            div [ class [ Res.Container ] ]
-                [ div [ class [ Res.Main ] ] [ icons ] ]
+            div [ class [ R.Container ] ]
+                [ div [ class [ R.Main ] ] [ icons ] ]
     in
-        div [ osClass [ OsRes.Dock ] ]
+        div [ osClass [ OS.Dock ] ]
             [ dock ]
 
 
@@ -61,12 +61,12 @@ view config model isFreeplay session =
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Res.prefix
+    Html.CssHelpers.withNamespace R.prefix
 
 
 osClass : List class -> Attribute msg
 osClass =
-    .class <| Html.CssHelpers.withNamespace OsRes.prefix
+    .class <| Html.CssHelpers.withNamespace OS.prefix
 
 
 viewIcons :
@@ -93,9 +93,9 @@ viewIcons config model isFreeplay groupedWindows app list =
 
         result =
             div
-                [ class [ Res.Item ]
+                [ class [ R.Item ]
                 , appAttr <| Apps.name app
-                , boolAttr Res.appHasInstanceAttrTag isNotEmpty
+                , boolAttr R.appHasInstanceAttrTag isNotEmpty
                 ]
                 content
     in
@@ -105,9 +105,9 @@ viewIcons config model isFreeplay groupedWindows app list =
 viewIcon : Config msg -> DesktopApp -> Html msg
 viewIcon config app =
     div
-        [ class [ Res.ItemIco ]
+        [ class [ R.ItemIco ]
         , onClick (config.onClickIcon app)
-        , attribute Res.appIconAttrTag (Apps.icon app)
+        , attribute R.appIconAttrTag (Apps.icon app)
         , title (Apps.name app)
         ]
         []
@@ -143,14 +143,14 @@ options config model app ( visible, hidden ) =
                 |> (::) (hr [] [])
                 |> (++) visible_
     in
-        div [ class [ Res.AppContext ] ]
+        div [ class [ R.AppContext ] ]
             [ ul [] menu_ ]
 
 
 subMenuAction : String -> msg -> Html msg
 subMenuAction label event =
     li
-        [ class [ Res.ClickableWindow ], onClick event ]
+        [ class [ R.ClickableWindow ], onClick event ]
         [ text label ]
 
 
@@ -180,7 +180,7 @@ windowList onClick model label list =
 listItem : (WindowId -> msg) -> Model -> Int -> ( String, Window ) -> Html msg
 listItem event model index ( windowId, window ) =
     li
-        [ class [ Res.ClickableWindow ]
+        [ class [ R.ClickableWindow ]
         , idAttr (toString index)
         , onClick (event windowId)
         ]

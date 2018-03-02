@@ -1,4 +1,4 @@
-module Game.Meta.Types.Apps.Desktop exposing (..)
+module Game.Meta.Types.Desktop.Apps exposing (..)
 
 
 type DesktopApp

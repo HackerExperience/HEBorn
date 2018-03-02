@@ -8,7 +8,7 @@ module Game.Web.Models
         )
 
 import Dict exposing (Dict)
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Meta.Types.Network as Network
 import Game.Servers.Shared as Servers exposing (CId)
 

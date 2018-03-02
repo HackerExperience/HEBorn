@@ -35,7 +35,7 @@ import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Meta.Models as Meta
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Messages as Servers
 import Game.Servers.Models as Servers exposing (Server)
@@ -47,9 +47,10 @@ import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
 import Game.Storyline.Messages as Storyline
 import Game.Web.Messages as Web
-import OS.WindowManager.Dock.Config as Dock
 import OS.WindowManager.Messages exposing (..)
 import OS.WindowManager.Shared exposing (..)
+import OS.WindowManager.Dock.Config as Dock
+import OS.WindowManager.Sidebar.Config as Sidebar
 
 
 type alias Config msg =
@@ -109,6 +110,13 @@ backFlixConfig appId config =
     { toMsg = BackFlixMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , logs = Game.getBackFlix config.game
+    }
+
+
+sidebarConfig : Config msg -> Sidebar.Config msg
+sidebarConfig config =
+    { toMsg = SidebarMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     }
 
 

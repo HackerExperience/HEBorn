@@ -1,4 +1,4 @@
-module UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
+module UI.Elements.HorizontalBtnPanel exposing (horizontalBtnPanel)
 
 import Html exposing (Html, Attribute, node, span, text)
 import Html.Events exposing (onClick)

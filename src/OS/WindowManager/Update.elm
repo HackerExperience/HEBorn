@@ -26,7 +26,7 @@ import Apps.LogViewer.Update as LogViewer
 import Apps.ServersGears.Update as ServersGears
 import Apps.TaskManager.Update as TaskManager
 import Apps.VirusPanel.Update as VirusPanel
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId(..))
@@ -36,6 +36,8 @@ import OS.WindowManager.Launch exposing (..)
 import OS.WindowManager.Messages exposing (..)
 import OS.WindowManager.Models exposing (..)
 import OS.WindowManager.Shared exposing (..)
+import OS.WindowManager.Sidebar.Messages as Sidebar
+import OS.WindowManager.Sidebar.Update as Sidebar
 
 
 type alias UpdateResponse msg =
@@ -56,6 +58,9 @@ update config msg model =
 
         SetAppSize size_ ->
             onSetAppSize size_ model
+
+        SidebarMsg msg ->
+            onSidebarMsg config msg model
 
         -- window handling
         Close wId ->
@@ -114,6 +119,28 @@ onSetAppSize : Window.Size -> Model -> UpdateResponse msg
 onSetAppSize size_ model =
     { model | appSize = Just size_ }
         |> flip (,) React.none
+
+
+onSidebarMsg :
+    Config msg
+    -> Sidebar.Msg
+    -> Model
+    -> UpdateResponse msg
+onSidebarMsg config msg model =
+    let
+        config_ =
+            sidebarConfig config
+
+        ( sidebar, react ) =
+            Sidebar.update
+                (sidebarConfig config)
+                msg
+                (getSidebar model)
+
+        model_ =
+            setSidebar sidebar model
+    in
+        ( model_, react )
 
 
 onOpenApp : Config msg -> AppParams -> CId -> Model -> UpdateResponse msg

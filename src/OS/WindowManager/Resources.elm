@@ -18,6 +18,7 @@ type Classes
     | HeaderContextSw
     | Canvas
     | Super
+    | Sidebar
 
 
 workspaceNode : String

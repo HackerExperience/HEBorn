@@ -8,7 +8,7 @@ import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Requests.Browse as BrowseRequest exposing (browseRequest)
-import Game.Meta.Types.Apps.Desktop exposing (Reference, Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network
 import Apps.Browser.Pages.Webserver.Update as Webserver

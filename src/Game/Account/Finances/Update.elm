@@ -1,7 +1,7 @@
 module Game.Account.Finances.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Account.Finances.Config exposing (..)
 import Game.Account.Finances.Models exposing (..)
 import Game.Account.Finances.Messages exposing (..)
