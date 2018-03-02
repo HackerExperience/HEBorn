@@ -111,7 +111,7 @@ headerConfig ({ game } as config) =
 
 consoleConfig : Config msg -> Console.Config
 consoleConfig config =
-    { logs = .logs <| Game.getBackFlix config.game }
+    { logs = Game.getBackFlix config.game }
 
 
 toastsConfig : Config msg -> Toasts.Config msg

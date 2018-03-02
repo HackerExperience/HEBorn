@@ -105,15 +105,10 @@ dockConfig config =
 
 backFlixConfig : AppId -> Config msg -> BackFlix.Config msg
 backFlixConfig appId config =
-    let
-        -- FIXME: not using a getter because backflix api is bad, fix it
-        logs =
-            .logs <| Game.getBackFlix config.game
-    in
-        { toMsg = BackFlixMsg >> AppMsg appId >> config.toMsg
-        , batchMsg = config.batchMsg
-        , logs = logs
-        }
+    { toMsg = BackFlixMsg >> AppMsg appId >> config.toMsg
+    , batchMsg = config.batchMsg
+    , logs = Game.getBackFlix config.game
+    }
 
 
 bounceManagerConfig : AppId -> Config msg -> BounceManager.Config msg

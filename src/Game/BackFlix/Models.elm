@@ -7,10 +7,6 @@ import Core.Error as Error
 
 
 type alias Model =
-    { logs : Logs }
-
-
-type alias Logs =
     Dict Id Log
 
 
@@ -44,29 +40,23 @@ type alias Log =
 
 initialModel : Model
 initialModel =
-    { logs = Dict.empty }
+    Dict.empty
 
 
-insertLog : Log -> Model -> Model
-insertLog log model =
+insert : Log -> Model -> Model
+insert log model =
     let
         log_id =
-            (findId ( log.timestamp, 0 ) model.logs)
-
-        logs_ =
-            Dict.insert log_id log model.logs
-
-        model_ =
-            { model | logs = logs_ }
+            (findId ( log.timestamp, 0 ) model)
     in
-        model_
+        Dict.insert log_id log model
 
 
 
--- FIXME: these functions should affect model, not the Logs Type
+-- FIXME: these functions should affect model, not the Model Type
 
 
-findId : ( Time, Int ) -> Logs -> Id
+findId : ( Time, Int ) -> Model -> Id
 findId (( birth, from ) as pig) backflix =
     backflix
         |> Dict.get pig
@@ -74,22 +64,22 @@ findId (( birth, from ) as pig) backflix =
         |> Maybe.withDefault pig
 
 
-remove : Id -> Logs -> Logs
+remove : Id -> Model -> Model
 remove =
     Dict.remove
 
 
-member : Id -> Logs -> Bool
+member : Id -> Model -> Bool
 member =
     Dict.member
 
 
-get : Id -> Logs -> Maybe Log
+get : Id -> Model -> Maybe Log
 get =
     Dict.get
 
 
-filter : (Id -> Log -> Bool) -> Logs -> Logs
+filter : (Id -> Log -> Bool) -> Model -> Model
 filter =
     Dict.filter
 

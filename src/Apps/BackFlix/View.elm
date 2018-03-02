@@ -72,13 +72,13 @@ viewTabLabel _ tab =
         |> (,) []
 
 
-viewTabAll : BackFlix.Logs -> Html Msg
-viewTabAll logs =
-    renderEntries logs True
+viewTabAll : BackFlix.Model -> Html Msg
+viewTabAll backflix =
+    renderEntries backflix True
 
 
-viewTabSimple : BackFlix.Logs -> Html Msg
-viewTabSimple logs =
+viewTabSimple : BackFlix.Model -> Html Msg
+viewTabSimple backflix =
     let
         filter id log =
             case log.type_ of
@@ -88,7 +88,7 @@ viewTabSimple logs =
                 _ ->
                     True
     in
-        renderEntries (Dict.filter filter logs) False
+        renderEntries (Dict.filter filter backflix) False
 
 
 

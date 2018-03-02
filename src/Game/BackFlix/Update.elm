@@ -17,9 +17,11 @@ update _ msg model =
             onHandleCreate log model
 
         _ ->
-            ( model, React.none )
+            React.update model
 
 
 onHandleCreate : Log -> Model -> UpdateResponse msg
 onHandleCreate log model =
-    ( insertLog log model, React.none )
+    model
+        |> insert log
+        |> React.update

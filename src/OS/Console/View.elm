@@ -23,7 +23,7 @@ view config =
             view_
 
 
-viewLogs : BackFlix.Logs -> List (Html msg)
+viewLogs : BackFlix.Model -> List (Html msg)
 viewLogs logs =
     logs
         |> Dict.foldl (\k v acc -> viewLog k v :: acc) []
