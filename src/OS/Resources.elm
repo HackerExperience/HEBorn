@@ -8,19 +8,6 @@ type Class
     | AutoHide
     | Toasts
     | Fading
-    | LogConsole
-    | LogConsoleBox
-    | LogConsoleHeader
-    | LogConsoleDataDiv
-    | BFRequest
-    | BFReceive
-    | BFJoin
-    | BFJoinAccount
-    | BFJoinServer
-    | BFNone
-    | BFOther
-    | BFEvent
-    | BFError
 
 
 type Id
