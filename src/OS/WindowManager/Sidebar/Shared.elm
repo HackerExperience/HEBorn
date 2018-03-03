@@ -1,5 +1,5 @@
 module OS.WindowManager.Sidebar.Shared exposing (..)
 
 
-type alias WidgetID =
+type alias WidgetId =
     String

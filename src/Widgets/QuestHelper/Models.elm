@@ -4,13 +4,15 @@ import Game.Storyline.Shared exposing (Step)
 
 
 type alias Model =
-    { step : Maybe Step }
+    { step : Step
+    , owner : String
+    }
 
 
 type Params
     = OpenForStep Step
 
 
-initialModel : Model
-initialModel =
-    { step = Nothing }
+getTitle : Model -> String
+getTitle { owner } =
+    "Quest: " ++ owner
