@@ -39,20 +39,10 @@ onHeaderMsg :
     -> Model
     -> UpdateResponse msg
 onHeaderMsg config msg model =
-    let
-        config_ =
-            headerConfig config
-
-        ( header, react ) =
-            Header.update
-                (headerConfig config)
-                msg
-                (getHeader model)
-
-        model_ =
-            setHeader header model
-    in
-        ( model_, react )
+    model
+        |> getHeader
+        |> Header.update (headerConfig config) msg
+        |> Tuple.mapFirst (flip setHeader model)
 
 
 onWindowManagerMsg :
@@ -69,14 +59,7 @@ onWindowManagerMsg config msg model =
 
 onToastsMsg : Config msg -> Toasts.Msg -> Model -> UpdateResponse msg
 onToastsMsg config msg model =
-    let
-        config_ =
-            toastsConfig config
-
-        ( toasts, react ) =
-            Toasts.update config_ msg model.toasts
-
-        model_ =
-            { model | toasts = toasts }
-    in
-        ( model_, react )
+    model
+        |> getToasts
+        |> Toasts.update (toastsConfig config) msg
+        |> Tuple.mapFirst (flip setToasts model)

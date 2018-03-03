@@ -2,15 +2,15 @@ module Apps.LogViewer.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz)
-import Css.Icons as Icon
+import UI.Common exposing (flexContainerHorz)
+import UI.Icons as Icons
 import Apps.LogViewer.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 
@@ -24,49 +24,49 @@ css =
             [ flexContainerHorz ]
         , class BtnUser
             [ ico
-            , before [ Icon.user ]
+            , before [ Icons.user ]
             ]
         , class BtnEdit
             [ ico
-            , before [ Icon.edit ]
+            , before [ Icons.edit ]
             ]
         , class BtnHide
             [ ico
-            , before [ Icon.view ]
+            , before [ Icons.view ]
             ]
         , class BtnFilter
             [ ico
-            , before [ Icon.filter ]
+            , before [ Icons.filter ]
             ]
         , class BtnCrypt
             [ ico
-            , before [ Icon.lock ]
+            , before [ Icons.lock ]
             ]
         , class BtnDelete
             [ ico
-            , before [ Icon.trash ]
+            , before [ Icons.trash ]
             ]
         , class BtnDecrypt
             [ ico
-            , before [ Icon.unlock ]
+            , before [ Icons.unlock ]
             ]
         , class BtnApply
             [ ico
-            , before [ Icon.apply ]
+            , before [ Icons.apply ]
             ]
         , class BtnCancel
             [ ico
-            , before [ Icon.cancel ]
+            , before [ Icons.cancel ]
             ]
         , class BottomButton
             [ cursor pointer ]
         , class IcoCrosshair
             [ ico
-            , before [ Icon.locationTarget ]
+            , before [ Icons.locationTarget ]
             ]
         , class IcoDangerous
             [ ico
-            , before [ Icon.dangerous ]
+            , before [ Icons.dangerous ]
             ]
         , class BoxifyMe
             [ border3 (px 1) solid (hex "444")

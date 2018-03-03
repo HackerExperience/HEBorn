@@ -113,11 +113,18 @@ backFlixConfig appId config =
     }
 
 
-sidebarConfig : Config msg -> Sidebar.Config msg
-sidebarConfig config =
-    { toMsg = SidebarMsg >> config.toMsg
-    , batchMsg = config.batchMsg
-    }
+sidebarConfig : Bool -> Config msg -> Sidebar.Config msg
+sidebarConfig isFreeplay config =
+    let
+        toMsg =
+            if isFreeplay then
+                MultiplayerSidebarMsg
+            else
+                CampaingSidebarMsg
+    in
+        { toMsg = toMsg >> config.toMsg
+        , batchMsg = config.batchMsg
+        }
 
 
 bounceManagerConfig : AppId -> Config msg -> BounceManager.Config msg

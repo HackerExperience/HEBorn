@@ -32,7 +32,8 @@ type Msg
     | OpenApp AppParams CId
     | LazyLaunchEndpoint WindowId DesktopApp
     | SetAppSize Window.Size
-    | SidebarMsg Sidebar.Msg
+    | CampaingSidebarMsg Sidebar.Msg
+    | MultiplayerSidebarMsg Sidebar.Msg
       -- window handling
     | Close WindowId
     | Minimize WindowId

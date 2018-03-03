@@ -1,4 +1,4 @@
-module Css.FontAwesome.Helper exposing (..)
+module UI.FontAwesome.Helper exposing (..)
 
 import Css exposing (Style, Snippet, fontFamilies, before, property)
 

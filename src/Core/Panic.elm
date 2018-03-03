@@ -29,7 +29,7 @@ import Css
         , pointer
         )
 import Css.Colors exposing (white)
-import Css.Utils exposing (selectableText)
+import Utils.Css exposing (selectableText)
 import Core.Messages exposing (Msg(HandleShutdown))
 
 

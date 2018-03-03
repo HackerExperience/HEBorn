@@ -1,4 +1,4 @@
-module Css.Gradients exposing (..)
+module UI.Gradients exposing (..)
 
 import Css exposing (Style, AngleOrDirection, backgroundImage, linearGradient2, stop, stop2, hex, pct)
 

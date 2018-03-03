@@ -1,13 +1,14 @@
 module OS.WindowManager.Style exposing (..)
 
 import Css exposing (..)
-import Css.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
+import Css.Colors as Colors
 import Css.Elements exposing (div)
-import Css.Icons as Icon
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (pseudoContent, withAttribute, nest, child)
-import UI.Colors as Colors
+import Utils.Css as Css exposing (pseudoContent, withAttribute, nest, child)
 import OS.WindowManager.Resources exposing (..)
+import UI.Colors as Colors
+import UI.Common exposing (globalShadow, flexContainerHorz, flexContainerVert, internalPadding)
+import UI.Icons as Icons
 
 
 wmBorderRadius : Px
@@ -34,7 +35,6 @@ css =
             [ flex (int 1)
             , displayFlex
             , flexDirection rowReverse
-            , alignItems center
             , children [ sidebar ]
             ]
         , window
@@ -113,7 +113,7 @@ maximizedWindow =
         , child (class HeaderButtons)
         , child (class HeaderBtnMaximize)
         ]
-        [ before [ Icon.windowUnmaximize ] ]
+        [ before [ Icons.windowUnmaximize ] ]
     ]
 
 
@@ -144,26 +144,26 @@ headerTitle =
         [ flex (int 1)
         , textAlign center
         , before
-            [ Icon.fontFamily
+            [ Icons.fontFamily
             , minWidth (px 14)
             , textAlign center
             , float left
             ]
-        , addIco "explorer" Icon.explorer
-        , addIco "logvw" Icon.logvw
-        , addIco "browser" Icon.browser
-        , addIco "taskmngr" Icon.taskMngr
-        , addIco "udb" Icon.dbAdmin
-        , addIco "connmngr" Icon.connMngr
-        , addIco "bouncemngr" Icon.bounceMngr
-        , addIco "moneymngr" Icon.finance
-        , addIco "hebamp" Icon.hebamp
-        , addIco "cpanel" Icon.cpanel
-        , addIco "srvgr" Icon.srvgr
-        , addIco "locpk" Icon.locpk
-        , addIco "lanvw" Icon.lanvw
-        , addIco "email" Icon.email
-        , addIco "bug" Icon.bug
+        , addIco "explorer" Icons.explorer
+        , addIco "logvw" Icons.logvw
+        , addIco "browser" Icons.browser
+        , addIco "taskmngr" Icons.taskMngr
+        , addIco "udb" Icons.dbAdmin
+        , addIco "connmngr" Icons.connMngr
+        , addIco "bouncemngr" Icons.bounceMngr
+        , addIco "moneymngr" Icons.finance
+        , addIco "hebamp" Icons.hebamp
+        , addIco "cpanel" Icons.cpanel
+        , addIco "srvgr" Icons.srvgr
+        , addIco "locpk" Icons.locpk
+        , addIco "lanvw" Icons.lanvw
+        , addIco "email" Icons.email
+        , addIco "bug" Icons.bug
         ]
 
 
@@ -184,24 +184,24 @@ headerBtns =
                 , marginBottom (px -2)
                 , color Colors.white
                 , before
-                    [ Icon.fontFamily
+                    [ Icons.fontFamily
                     , textAlign center
                     ]
                 ]
             , class HeaderBtnPin
-                [ before [ Icon.windowPin ]
+                [ before [ Icons.windowPin ]
                 , color (hex "c1c1c1")
                 ]
             , class HeaderBtnClose
-                [ before [ Icon.windowClose ]
+                [ before [ Icons.windowClose ]
                 , color (hex "f25156")
                 ]
             , class HeaderBtnMaximize
-                [ before [ Icon.windowMaximize ]
+                [ before [ Icons.windowMaximize ]
                 , color (hex "0ed439")
                 ]
             , class HeaderBtnMinimize
-                [ before [ Icon.windowMinimize ]
+                [ before [ Icons.windowMinimize ]
                 , color (hex "ffc109")
                 ]
             ]
@@ -212,4 +212,7 @@ sidebar : Snippet
 sidebar =
     class Sidebar
         [ flex (int 0)
+        , flexContainerHorz
+        , alignItems center
+        , height (pct 100)
         ]

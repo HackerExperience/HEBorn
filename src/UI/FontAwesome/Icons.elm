@@ -1,6 +1,6 @@
-module Css.FontAwesome.Icons exposing (..)
+module UI.FontAwesome.Icons exposing (..)
 
-import Css.FontAwesome.Helper exposing (UnicodeTag)
+import UI.FontAwesome.Helper exposing (UnicodeTag)
 
 
 -- Auto generated from https://github.com/FortAwesome/Font-Awesome/blob/master/src/icons.yml

@@ -100,7 +100,7 @@ viewSession config model isFreeplay { visible, focusing } =
     visible
         |> List.filterMap
             (filterMapWindows config model isFreeplay)
-        |> (::) (viewSidebar config model)
+        |> (::) (viewSidebar config model isFreeplay)
         |> Html.Keyed.node
             R.workspaceNode
             [ class [ R.Super ] ]
@@ -535,11 +535,11 @@ appIconAttr =
 -- Sidebar
 
 
-viewSidebar : Config msg -> Model -> ( String, Html msg )
-viewSidebar config model =
+viewSidebar : Config msg -> Model -> Bool -> ( String, Html msg )
+viewSidebar config model isFreeplay =
     model
-        |> getSidebar
+        |> getSidebar isFreeplay
         |> lazy2
             (Sidebar.view >>> div [ class [ R.Sidebar ] ])
-            (sidebarConfig config)
+            (sidebarConfig isFreeplay config)
         |> (,) "#sidebar"

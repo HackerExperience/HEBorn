@@ -1,11 +1,11 @@
 module OS.Console.Style exposing (..)
 
 import Css exposing (..)
-import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
+import UI.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
 import Css.Elements exposing (typeSelector, ul, li, div, h6)
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (..)
-import Css.Icons as Icons
+import Utils.Css as Css exposing (..)
+import UI.Icons as Icons
 import UI.Style exposing (clickableBox)
 import UI.Colors as Colors
 import Css.Colors
@@ -25,6 +25,7 @@ css =
             , color (hex "00FF00")
             , fontFamily monospace
             , fontFamilies [ "Monospace" ]
+            , fontSize (px 8)
             , children
                 [ div
                     [ children
