@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 import OS.WindowManager.Sidebar.Shared exposing (..)
 import Widgets.QuestHelper.Models as Quest
+import Widgets.TaskList.Models as Tasks
 
 
 type alias Model =
@@ -14,22 +15,34 @@ type alias Model =
 
 
 type alias Widgets =
-    Dict WidgetID Widget
+    Dict WidgetId Widget
 
 
 type alias Prioritized =
-    Set WidgetID
+    Set WidgetId
 
 
-type alias Widget =
+type Widget
+    = Local LocalWidget
+    | External ExternalWidget
+
+
+type alias LocalWidget =
     { isExpanded : Bool
     , order : Int
     , model : WidgetModel
     }
 
 
+type alias ExternalWidget =
+    { isExpanded : Bool
+    , order : Int
+    }
+
+
 type WidgetModel
     = QuestHelperModel Quest.Model
+    | TaskListModel Tasks.Model
 
 
 
@@ -46,15 +59,14 @@ initialModel =
 
 dummyModel : Model
 dummyModel =
-    { isVisible = True
+    { isVisible = False
     , widgets =
-        Quest.initialModel
-            |> QuestHelperModel
-            |> Widget True 0
-            |> flip (Dict.insert "test") Dict.empty
-    , prioritized =
-        Set.empty
-            |> Set.insert "test"
+        Tasks.initialModel
+            |> TaskListModel
+            |> LocalWidget True 0
+            |> Local
+            |> flip (Dict.insert "dummy") Dict.empty
+    , prioritized = Set.empty
     }
 
 
@@ -72,9 +84,12 @@ setVisibility isVisible model =
 -- about widgets
 
 
-hasWidgets : Model -> Bool
-hasWidgets { widgets } =
-    not (Dict.isEmpty widgets)
+hasLocalWidgets : Model -> Bool
+hasLocalWidgets { widgets } =
+    widgets
+        |> Dict.filter (\_ -> isLocal)
+        |> Dict.isEmpty
+        |> not
 
 
 getPrioritized : Model -> Prioritized
@@ -97,13 +112,20 @@ setWidgets widgets model =
     { model | widgets = widgets }
 
 
-get : WidgetID -> Model -> Maybe Widget
+get : WidgetId -> Model -> Maybe Widget
 get id { widgets } =
     Dict.get id widgets
 
 
-set : WidgetID -> Widget -> Model -> Model
-set id widget model =
+getOrPretend : WidgetId -> Model -> Widget
+getOrPretend id { widgets } =
+    widgets
+        |> Dict.get id
+        |> Maybe.withDefault untouchedExternal
+
+
+insert : WidgetId -> Widget -> Model -> Model
+insert id widget model =
     let
         widgets_ =
             Dict.insert id widget model.widgets
@@ -111,7 +133,7 @@ set id widget model =
         { model | widgets = widgets_ }
 
 
-remove : WidgetID -> Model -> Model
+remove : WidgetId -> Model -> Model
 remove id model =
     let
         widgets_ =
@@ -120,7 +142,7 @@ remove id model =
         { model | widgets = widgets_ }
 
 
-prioritize : WidgetID -> Model -> Model
+prioritize : WidgetId -> Model -> Model
 prioritize id model =
     let
         prioritized_ =
@@ -129,7 +151,7 @@ prioritize id model =
         { model | prioritized = prioritized_ }
 
 
-deprioritize : WidgetID -> Model -> Model
+deprioritize : WidgetId -> Model -> Model
 deprioritize id model =
     let
         prioritized_ =
@@ -138,37 +160,111 @@ deprioritize id model =
         { model | prioritized = prioritized_ }
 
 
+merge :
+    Dict WidgetId WidgetModel
+    -> Widgets
+    -> Dict WidgetId LocalWidget
+merge external local =
+    let
+        onlyExternal id model acu =
+            Dict.insert id
+                (LocalWidget True 0 model)
+                acu
+
+        onlyLocal id data acu =
+            case data of
+                Local data ->
+                    Dict.insert id data acu
+
+                External _ ->
+                    acu
+
+        both id model data acu =
+            case data of
+                Local local ->
+                    Dict.insert id
+                        { local | model = model }
+                        acu
+
+                External { isExpanded, order } ->
+                    Dict.insert id
+                        (LocalWidget isExpanded order model)
+                        acu
+    in
+        Dict.merge
+            onlyExternal
+            both
+            onlyLocal
+            external
+            local
+            Dict.empty
+
+
 
 -- about widget
 
 
-getOrder : Widget -> Int
-getOrder =
-    .order
+untouchedExternal : Widget
+untouchedExternal =
+    External { isExpanded = False, order = 0 }
 
 
-setOrder : Int -> Widget -> Widget
-setOrder order widget =
-    { widget | order = order }
+isLocal : Widget -> Bool
+isLocal x =
+    case x of
+        Local _ ->
+            True
+
+        External _ ->
+            False
 
 
-isExpanded : Widget -> Bool
+map :
+    (LocalWidget -> LocalWidget)
+    -> (ExternalWidget -> ExternalWidget)
+    -> Widget
+    -> Widget
+map local external widget =
+    case widget of
+        Local widget ->
+            widget |> local |> Local
+
+        External widget ->
+            widget |> external |> External
+
+
+isExpanded : { a | isExpanded : Bool } -> Bool
 isExpanded =
     .isExpanded
 
 
-setExpanded : Bool -> Widget -> Widget
+setExpanded : Bool -> { a | isExpanded : Bool } -> { a | isExpanded : Bool }
 setExpanded isExpanded widget =
     { widget | isExpanded = isExpanded }
 
 
-increaseOrder : Widget -> Widget
+toggleExpanded : { a | isExpanded : Bool } -> { a | isExpanded : Bool }
+toggleExpanded widget =
+    { widget | isExpanded = not widget.isExpanded }
+
+
+getOrder : { a | order : Int } -> Int
+getOrder =
+    .order
+
+
+setOrder : Int -> { a | order : Int } -> { a | order : Int }
+setOrder order widget =
+    { widget | order = order }
+
+
+increaseOrder : { a | order : Int } -> { a | order : Int }
 increaseOrder ({ order } as widget) =
     -- MOVE DOWN
     { widget | order = order + 1 }
 
 
-decreaseOrder : Widget -> Widget
+decreaseOrder : { a | order : Int } -> { a | order : Int }
 decreaseOrder ({ order } as widget) =
     -- MOVE UP
     { widget | order = order - 1 }
@@ -181,5 +277,8 @@ decreaseOrder ({ order } as widget) =
 getTitle : WidgetModel -> String
 getTitle model =
     case model of
-        QuestHelperModel _ ->
-            "Quest: TODO"
+        QuestHelperModel model ->
+            Quest.getTitle model
+
+        TaskListModel model ->
+            Tasks.getTitle model

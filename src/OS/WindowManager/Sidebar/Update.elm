@@ -41,15 +41,55 @@ update config msg model =
                 |> React.update
 
         WidgetMsg widgetID msg ->
-            onWidgetMsg widgetID msg model
+            onWidgetMsg config widgetID msg model
 
 
-onWidgetMsg : WidgetID -> WidgetMsg -> Model -> UpdateResponse msg
-onWidgetMsg widgetID msg model =
-    case get widgetID model of
-        Just widget ->
-            -- TODO
-            React.update model
+onWidgetMsg :
+    Config msg
+    -> WidgetId
+    -> WidgetMsg
+    -> Model
+    -> UpdateResponse msg
+onWidgetMsg config widgetID msg model =
+    model
+        |> getOrPretend widgetID
+        |> updateWidget config widgetID msg
+        |> Tuple.mapFirst
+            (flip (insert widgetID) model)
 
-        Nothing ->
-            React.update model
+
+type alias WidgetResponse msg =
+    ( Widget, React msg )
+
+
+updateWidget :
+    Config msg
+    -> WidgetId
+    -> WidgetMsg
+    -> Widget
+    -> WidgetResponse msg
+updateWidget config id msg widget =
+    case msg of
+        ToggleExpanded ->
+            widget
+                |> map toggleExpanded toggleExpanded
+                |> React.update
+
+        IncreaseOrder ->
+            widget
+                |> map increaseOrder increaseOrder
+                |> React.update
+
+        DecreaseOrder ->
+            widget
+                |> map decreaseOrder decreaseOrder
+                |> React.update
+
+        _ ->
+            case widget of
+                Local widget ->
+                    -- TODO
+                    React.update <| Local <| widget
+
+                External _ ->
+                    React.update widget
