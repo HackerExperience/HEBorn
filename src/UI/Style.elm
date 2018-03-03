@@ -1,12 +1,13 @@
 module UI.Style exposing (css, clickableBox)
 
 import Css exposing (..)
+import Css.Colors as Colors
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (typeSelector, input, span, button)
-import Css.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
-import Css.Utils as Css exposing (withAttribute, child)
-import Css.Icons as Icon exposing (locationTarget)
-import UI.Colors as Colors exposing (hyperlink, localhost)
+import Utils.Css as Css exposing (withAttribute, child)
+import UI.Colors as Colors
+import UI.Common exposing (internalPadding, flexContainerHorz, flexContainerVert)
+import UI.Icons as Icons exposing (locationTarget)
 
 
 -- Utils
@@ -15,7 +16,7 @@ import UI.Colors as Colors exposing (hyperlink, localhost)
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 
@@ -70,10 +71,10 @@ toogable =
                 , display block
                 , textAlign center
                 , minHeight (px 16)
-                , before [ Icon.divExpand ]
+                , before [ Icons.divExpand ]
                 , cursor pointer
                 , withAttribute (Css.BOOL "expanded")
-                    [ before [ Icon.divContract ] ]
+                    [ before [ Icons.divContract ] ]
                 ]
             ]
         ]
@@ -95,7 +96,7 @@ linkAddr =
         , children
             [ typeSelector "ico"
                 [ ico
-                , before [ Icon.locationTarget ]
+                , before [ Icons.locationTarget ]
                 ]
             , typeSelector "addr"
                 [ textDecoration underline ]
@@ -106,7 +107,7 @@ linkAddr =
             , children
                 [ typeSelector "ico"
                     [ ico
-                    , before [ Icon.home ]
+                    , before [ Icons.home ]
                     ]
                 , typeSelector "addr"
                     [ textDecoration none ]
@@ -118,7 +119,7 @@ linkAddr =
         , children
             [ typeSelector "ico"
                 [ ico
-                , before [ Icon.person ]
+                , before [ Icons.person ]
                 ]
             , typeSelector "addr"
                 [ textDecoration underline ]

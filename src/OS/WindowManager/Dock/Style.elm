@@ -3,10 +3,10 @@ module OS.WindowManager.Dock.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (ul, li)
-import Css.Utils as Css exposing (Easing(..), pseudoContent, withAttribute, transition)
-import Css.Common exposing (flexContainerHorz, globalShadow, emptyContent)
-import Css.Gradients as Gradients
-import Css.Icons as Icon
+import Utils.Css as Css exposing (Easing(..), pseudoContent, withAttribute, transition)
+import UI.Common exposing (flexContainerHorz, globalShadow, emptyContent)
+import UI.Gradients as Gradients
+import UI.Icons as Icons
 import Utils.Html.Attributes exposing (appAttrTag)
 import OS.Resources as OS
 import OS.WindowManager.Dock.Resources exposing (..)
@@ -148,7 +148,7 @@ itemIco =
                 ]
         , globalShadow
         , before
-            [ Icon.fontFamily
+            [ Icons.fontFamily
             , fontSize (px 24)
             , minWidth (px 30)
             , minHeight (px 30)
@@ -156,24 +156,24 @@ itemIco =
             , display inlineBlock
             ]
         , transition 0.25 "all" EaseOut
-        , addIco "explorer" Icon.explorer
-        , addIco "logvw" Icon.logvw
-        , addIco "browser" Icon.browser
-        , addIco "taskmngr" Icon.taskMngr
-        , addIco "udb" Icon.dbAdmin
-        , addIco "connmngr" Icon.connMngr
-        , addIco "bouncemngr" Icon.bounceMngr
-        , addIco "moneymngr" Icon.finance
-        , addIco "hebamp" Icon.hebamp
-        , addIco "cpanel" Icon.cpanel
-        , addIco "srvgr" Icon.srvgr
-        , addIco "locpk" Icon.locpk
-        , addIco "lanvw" Icon.lanvw
-        , addIco "email" Icon.email
-        , addIco "bug" Icon.bug
-        , addIco "calculator" Icon.calculator
-        , addIco "logfl" Icon.logfl
-        , addIco "bug" Icon.bug
+        , addIco "explorer" Icons.explorer
+        , addIco "logvw" Icons.logvw
+        , addIco "browser" Icons.browser
+        , addIco "taskmngr" Icons.taskMngr
+        , addIco "udb" Icons.dbAdmin
+        , addIco "connmngr" Icons.connMngr
+        , addIco "bouncemngr" Icons.bounceMngr
+        , addIco "moneymngr" Icons.finance
+        , addIco "hebamp" Icons.hebamp
+        , addIco "cpanel" Icons.cpanel
+        , addIco "srvgr" Icons.srvgr
+        , addIco "locpk" Icons.locpk
+        , addIco "lanvw" Icons.lanvw
+        , addIco "email" Icons.email
+        , addIco "bug" Icons.bug
+        , addIco "calculator" Icons.calculator
+        , addIco "logfl" Icons.logfl
+        , addIco "bug" Icons.bug
         , addGrad "explorer" Gradients.mangoPulp
         , addGrad "logvw" Gradients.stellar
         , addGrad "browser" Gradients.pinotNoir

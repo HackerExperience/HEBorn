@@ -1,8 +1,8 @@
-module Css.Icons exposing (..)
+module UI.Icons exposing (..)
 
 import Css exposing (Style)
-import Css.FontAwesome.Icons as FA
-import Css.FontAwesome.Helper exposing (faIcon, fontAwesome)
+import UI.FontAwesome.Icons as FA
+import UI.FontAwesome.Helper exposing (faIcon, fontAwesome)
 
 
 type alias Icon =

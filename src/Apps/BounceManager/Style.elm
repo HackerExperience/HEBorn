@@ -1,23 +1,24 @@
 module Apps.BounceManager.Style exposing (..)
 
 import Css exposing (..)
-import Css.Common
+import Css.Colors as Colors
+import Css.Namespace exposing (namespace)
+import Utils.Css exposing (transition, Easing(..))
+import UI.Common
     exposing
         ( internalPadding
         , flexContainerVert
         , flexContainerHorz
         )
-import Css.Namespace exposing (namespace)
-import Css.Icons as Icon
-import Css.Utils exposing (transition, Easing(..))
 import UI.Colors as Colors
+import UI.Icons as Icons
 import Apps.BounceManager.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 
@@ -34,11 +35,11 @@ css =
             ]
         , class BtnEdit
             [ ico
-            , before [ Icon.edit ]
+            , before [ Icons.edit ]
             ]
         , class BtnDelete
             [ ico
-            , before [ Icon.trash ]
+            , before [ Icons.trash ]
             ]
         , class BottomButton
             [ cursor pointer ]

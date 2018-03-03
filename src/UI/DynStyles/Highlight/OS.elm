@@ -2,7 +2,7 @@ module UI.DynStyles.Highlight.OS exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (withAttribute, nest)
+import Utils.Css as Css exposing (withAttribute, nest)
 import Utils.Html.Attributes exposing (activeContextValue, appAttrTag)
 import Apps.Shared as Apps
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)

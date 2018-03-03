@@ -1,9 +1,10 @@
 module Apps.Browser.Style exposing (..)
 
 import Css exposing (..)
-import Css.Namespace exposing (namespace)
+import Css.Colors as Colors
 import Css.Elements exposing (input, button, form, typeSelector)
-import Css.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
+import Css.Namespace exposing (namespace)
+import UI.Common exposing (flexContainerHorz, flexContainerVert, internalPadding, internalPaddingSz)
 import UI.Colors as Colors
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 

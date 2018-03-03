@@ -2,9 +2,9 @@ module Apps.Explorer.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (transition, easingToString, Easing(..), pseudoContent, selectableText)
-import Css.Common exposing (flexContainerVert, flexContainerHorz, internalPadding, internalPaddingSz)
-import Css.Icons as Icon
+import Utils.Css exposing (transition, easingToString, Easing(..), pseudoContent, selectableText)
+import UI.Common exposing (flexContainerVert, flexContainerHorz, internalPadding, internalPaddingSz)
+import UI.Icons as Icons
 import Apps.Explorer.Resources exposing (..)
 
 
@@ -57,7 +57,7 @@ css =
                 [ everything
                     [ textAlign center
                     , color (hex "000")
-                    , Icon.fontFamily
+                    , Icons.fontFamily
                     , fontSize (px 22)
                     , cursor pointer
                     , paddingLeft internalPaddingSz
@@ -67,7 +67,7 @@ css =
         , class NewBtn
             [ position relative
             , after
-                [ Icon.add
+                [ Icons.add
                 , fontSize (px 14)
                 , position absolute
                 , lineHeight (int 1)
@@ -78,15 +78,15 @@ css =
             ]
         , class DirBtn
             [ before
-                [ Icon.directory ]
+                [ Icons.directory ]
             ]
         , class DocBtn
             [ before
-                [ Icon.fileGeneric ]
+                [ Icons.fileGeneric ]
             ]
         , class GoUpBtn
             [ before
-                [ Icon.dirUp ]
+                [ Icons.dirUp ]
             ]
         , class CntListEntry
             [ flexContainerHorz
@@ -98,7 +98,7 @@ css =
                         , display inlineBlock
                         , flex (int 0)
                         , textAlign center
-                        , Icon.fontFamily
+                        , Icons.fontFamily
                         ]
                     , nthChild "0n+2"
                         [ flex (int 1)
@@ -120,7 +120,7 @@ css =
                                 , display inlineBlock
                                 , flex (int 0)
                                 , textAlign center
-                                , Icon.fontFamily
+                                , Icons.fontFamily
                                 ]
                             , lastChild
                                 [ width (px 92) ]
@@ -140,31 +140,31 @@ css =
             ]
         , class DirIcon
             [ before
-                [ Icon.directoryUntouched
+                [ Icons.directoryUntouched
                 , color (hex "000")
                 ]
             ]
         , class VirusIcon
             [ before
-                [ Icon.virus
+                [ Icons.virus
                 , color (hex "D00")
                 ]
             ]
         , class FirewallIcon
             [ before
-                [ Icon.firewall
+                [ Icons.firewall
                 , color (hex "D00")
                 ]
             ]
         , class ActiveIcon
             [ before
-                [ Icon.modeActive
+                [ Icons.modeActive
                 , color (hex "D00")
                 ]
             ]
         , class PassiveIcon
             [ before
-                [ Icon.modePassive
+                [ Icons.modePassive
                 , color (hex "000")
                 ]
             ]
@@ -210,20 +210,20 @@ css =
             ]
         , class NavIcon
             [ marginRight (px 8)
-            , Icon.fontFamily
+            , Icons.fontFamily
             ]
         , class EntryChilds
             [ paddingLeft (px 12)
             , display none
             ]
         , class CasedDirIcon
-            [ before [ Icon.directoryUntouched ] ]
+            [ before [ Icons.directoryUntouched ] ]
         , class CasedOpIcon
-            [ before [ Icon.branchUntouched ] ]
+            [ before [ Icons.branchUntouched ] ]
         , class GenericArchiveIcon
-            [ before [ Icon.fileGeneric ] ]
+            [ before [ Icons.fileGeneric ] ]
         , class StorageIcon
-            [ before [ Icon.storage ] ]
+            [ before [ Icons.storage ] ]
         , class EntryExpanded
             [ children
                 [ class EntryChilds
@@ -231,9 +231,9 @@ css =
                 , class EntryView
                     [ children
                         [ class CasedDirIcon
-                            [ before [ Icon.directoryExpanded ] ]
+                            [ before [ Icons.directoryExpanded ] ]
                         , class CasedOpIcon
-                            [ before [ Icon.branchExpanded ] ]
+                            [ before [ Icons.branchExpanded ] ]
                         ]
                     ]
                 ]

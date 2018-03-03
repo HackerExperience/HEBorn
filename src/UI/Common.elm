@@ -1,7 +1,7 @@
-module Css.Common exposing (..)
+module UI.Common exposing (..)
 
 import Css exposing (..)
-import Css.Utils exposing (pseudoContent)
+import Utils.Css exposing (pseudoContent)
 
 
 flexContainerVert : Style

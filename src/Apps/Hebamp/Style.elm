@@ -1,14 +1,13 @@
 module Apps.Hebamp.Style exposing (..)
 
 import Css exposing (..)
-import Css.Namespace exposing (namespace)
 import Css.Colors exposing (black, lime)
-import Css.FontAwesome.Helper exposing (fontAwesome, faIcon)
-import Css.FontAwesome.Icons as FA
-import Css.Icons as Icon
-import Css.Icons as Icon
+import Css.Namespace exposing (namespace)
 import Apps.Hebamp.Resources exposing (Classes(..), prefix)
-import UI.Colors as Color
+import UI.FontAwesome.Helper exposing (fontAwesome, faIcon)
+import UI.FontAwesome.Icons as FA
+import UI.Icons as Icons
+import UI.Icons as Icons
 
 
 -- Based on this: https://codepen.io/pedox/pen/ndpfD
@@ -76,10 +75,10 @@ css =
             , children
                 [ class IconClose
                     [ before
-                        [ Icon.windowClose ]
+                        [ Icons.windowClose ]
                     , color (hex "f25156")
-                    , Icon.fontFamily
-                    , textShadow4 (px 1) (px 0) (px 3) Color.black
+                    , Icons.fontFamily
+                    , textShadow4 (px 1) (px 0) (px 3) black
                     , zIndex (int 2)
                     , lineHeight (px 16)
                     , fontSize (px 14)

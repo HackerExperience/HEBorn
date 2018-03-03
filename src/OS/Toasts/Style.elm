@@ -1,15 +1,12 @@
 module OS.Toasts.Style exposing (..)
 
 import Css exposing (..)
-import Css.Common exposing (flexContainerVert, flexContainerHorz, globalShadow)
-import Css.Elements exposing (typeSelector, ul, li, div, h6)
+import Css.Colors as Colors
+import Css.Elements exposing (div, h6)
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (..)
-import Css.Icons as Icons
-import UI.Style exposing (clickableBox)
-import UI.Colors as Colors
-import Css.Colors
+import Utils.Css exposing (..)
 import OS.Toasts.Resources exposing (..)
+import UI.Colors as Colors
 
 
 css : Stylesheet

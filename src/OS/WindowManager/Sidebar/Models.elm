@@ -8,9 +8,17 @@ import Widgets.QuestHelper.Models as Quest
 
 type alias Model =
     { isVisible : Bool
-    , widgets : Dict WidgetID Widget
-    , priorities : Set WidgetID
+    , widgets : Widgets
+    , prioritized : Prioritized
     }
+
+
+type alias Widgets =
+    Dict WidgetID Widget
+
+
+type alias Prioritized =
+    Set WidgetID
 
 
 type alias Widget =
@@ -32,7 +40,21 @@ initialModel : Model
 initialModel =
     { isVisible = False
     , widgets = Dict.empty
-    , priorities = Set.empty
+    , prioritized = Set.empty
+    }
+
+
+dummyModel : Model
+dummyModel =
+    { isVisible = True
+    , widgets =
+        Quest.initialModel
+            |> QuestHelperModel
+            |> Widget True 0
+            |> flip (Dict.insert "test") Dict.empty
+    , prioritized =
+        Set.empty
+            |> Set.insert "test"
     }
 
 
@@ -53,6 +75,26 @@ setVisibility isVisible model =
 hasWidgets : Model -> Bool
 hasWidgets { widgets } =
     not (Dict.isEmpty widgets)
+
+
+getPrioritized : Model -> Prioritized
+getPrioritized =
+    .prioritized
+
+
+setPrioritized : Prioritized -> Model -> Model
+setPrioritized prioritized model =
+    { model | prioritized = prioritized }
+
+
+getWidgets : Model -> Widgets
+getWidgets =
+    .widgets
+
+
+setWidgets : Widgets -> Model -> Model
+setWidgets widgets model =
+    { model | widgets = widgets }
 
 
 get : WidgetID -> Model -> Maybe Widget
@@ -81,23 +123,33 @@ remove id model =
 prioritize : WidgetID -> Model -> Model
 prioritize id model =
     let
-        priorities_ =
-            Set.insert id model.priorities
+        prioritized_ =
+            Set.insert id model.prioritized
     in
-        { model | priorities = priorities_ }
+        { model | prioritized = prioritized_ }
 
 
 deprioritize : WidgetID -> Model -> Model
 deprioritize id model =
     let
-        priorities_ =
-            Set.remove id model.priorities
+        prioritized_ =
+            Set.remove id model.prioritized
     in
-        { model | priorities = priorities_ }
+        { model | prioritized = prioritized_ }
 
 
 
 -- about widget
+
+
+getOrder : Widget -> Int
+getOrder =
+    .order
+
+
+setOrder : Int -> Widget -> Widget
+setOrder order widget =
+    { widget | order = order }
 
 
 isExpanded : Widget -> Bool
@@ -120,3 +172,14 @@ decreaseOrder : Widget -> Widget
 decreaseOrder ({ order } as widget) =
     -- MOVE UP
     { widget | order = order - 1 }
+
+
+
+-- about widget model
+
+
+getTitle : WidgetModel -> String
+getTitle model =
+    case model of
+        QuestHelperModel _ ->
+            "Quest: TODO"
