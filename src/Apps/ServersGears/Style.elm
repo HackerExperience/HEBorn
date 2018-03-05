@@ -48,7 +48,7 @@ css =
                             ]
                         , class PanelInvt
                             [ flex (int 1)
-                            , overflowY scroll
+                            , overflowY auto
                             , borderLeft3 (px 1) solid black
                             , child (class Group)
                                 [ borderTop3 (px 1) solid black
