@@ -10,6 +10,7 @@ import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared exposing (CId)
 import Game.Servers.Notifications.Models as ServerNotifications
 import OS.Header.Messages exposing (Msg)
+import Apps.Params as AppParams exposing (AppParams)
 
 
 type alias Config msg =
@@ -26,6 +27,7 @@ type alias Config msg =
     , nips : List NIP
     , accountNotifications : AccountNotifications.Model
     , serversNotifications : ServerNotifications.Model
+    , onOpenApp : AppParams -> CId -> msg
     , onSignOut : msg
     , onSetGateway : CId -> msg
     , onSetEndpoint : Maybe CId -> msg

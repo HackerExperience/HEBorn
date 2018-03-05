@@ -8,7 +8,7 @@ import Game.Meta.Types.Apps.Desktop exposing (Reference)
 
 type MainTab
     = TabManage
-    | TabBuild ( Maybe Bounces.ID, Bounces.Bounce )
+    | TabBuild SelectedBounce
 
 
 type Selection
@@ -25,21 +25,21 @@ type ModalAction
     | ForSaveSucessful
 
 
-type Params
-    = WithBounce Bounces.ID
-
-
 type Error
     = CreateError Bounces.CreateError
     | UpdateError Bounces.UpdateError
     | RemoveError Bounces.RemoveError
 
 
+type alias SelectedBounce =
+    ( Maybe Bounces.ID, Bounces.Bounce )
+
+
 type alias Model =
     { selected : MainTab
     , selection : Maybe Selection
     , anyChange : Bool
-    , selectedBounce : Maybe ( Maybe Bounces.ID, Bounces.Bounce )
+    , selectedBounce : Maybe SelectedBounce
     , renaming : Bool
     , path : List NIP
     , bounceNameBuffer : Maybe String
@@ -87,6 +87,21 @@ tabToString tab =
 
         TabBuild _ ->
             "Build"
+
+
+setSelectedTab : MainTab -> Model -> Model
+setSelectedTab tab model =
+    { model | selected = tab }
+
+
+setPath : List NIP -> Model -> Model
+setPath path model =
+    { model | path = path }
+
+
+setSelectedBounce : Maybe SelectedBounce -> Model -> Model
+setSelectedBounce maybeSelectedBounce model =
+    { model | selectedBounce = maybeSelectedBounce }
 
 
 setAnyChanges : Bool -> Model -> Model
