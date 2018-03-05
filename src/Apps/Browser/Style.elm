@@ -49,7 +49,7 @@ css =
                 , class PageContent
                     [ flex (int 1)
                     , height (px 0)
-                    , overflowY scroll
+                    , overflowY auto
                     ]
                 ]
             ]

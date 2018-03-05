@@ -155,7 +155,7 @@ flexCols =
 verticalList : Snippet
 verticalList =
     typeSelector "verticallist"
-        [ overflowY scroll
+        [ overflowY auto
         , flex (int 1)
         ]
 

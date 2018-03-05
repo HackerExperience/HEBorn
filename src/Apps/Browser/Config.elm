@@ -72,14 +72,16 @@ downloadCenterConfig config =
 
 homeConfig : Config msg -> Home.Config msg
 homeConfig config =
-    { onNewTabIn = NewTabIn >> config.toMsg
-    , onGoAddress = GoAddress >> ActiveTabMsg >> config.toMsg
-    , onOpenApp =
-        config
-            |> endpointCId
-            |> Maybe.map (flip config.onOpenApp)
-            |> Maybe.withDefault (always <| config.batchMsg [])
-    }
+    let
+        ( cid, server ) =
+            config.activeGateway
+    in
+        { onNewTabIn = NewTabIn >> config.toMsg
+        , onGoAddress = GoAddress >> ActiveTabMsg >> config.toMsg
+        , onOpenApp =
+            -- Home only exists in Global Network (::)
+            flip config.onOpenApp cid
+        }
 
 
 webserverConfig : Config msg -> Webserver.Config msg
