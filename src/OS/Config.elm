@@ -2,6 +2,7 @@ module OS.Config exposing (..)
 
 import ContextMenu
 import Html exposing (Html, Attribute)
+import Utils.Core exposing (..)
 import Core.Flags exposing (Flags)
 import Game.Models as Game
 import Game.Messages as Game
@@ -20,6 +21,7 @@ import Game.Servers.Notifications.Messages as ServersNotifications
 import OS.Console.Config as Console
 import OS.Header.Config as Header
 import OS.WindowManager.Config as WindowManager
+import OS.WindowManager.Messages as WindowManager
 import OS.Toasts.Config as Toasts
 import OS.Toasts.Messages as Toasts
 import OS.Messages exposing (..)
@@ -96,6 +98,7 @@ headerConfig ({ game } as config) =
         , nips = Servers.getNIPs server_
         , accountNotifications = Account.getNotifications account_
         , serversNotifications = Servers.getNotifications server_
+        , onOpenApp = WindowManager.OpenApp >>> WindowManagerMsg >>> config.toMsg
         , onSignOut = onSignOut config
         , onSetGateway = Account.HandleSetGateway >> account config
         , onSetEndpoint = Account.HandleSetEndpoint >> account config

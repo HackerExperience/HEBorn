@@ -97,11 +97,10 @@ onGoTab tab model =
         TabBuild ( maybeId, bounce ) ->
             let
                 model_ =
-                    { model
-                        | selected = tab
-                        , selectedBounce = Just ( maybeId, bounce )
-                        , path = bounce.path
-                    }
+                    model
+                        |> setSelectedTab tab
+                        |> setPath bounce.path
+                        |> setSelectedBounce (Just ( maybeId, bounce ))
             in
                 ( model_, React.none )
 
@@ -253,12 +252,12 @@ onSave ({ toMsg, accountId, bounces, database } as config) ( id, bounce ) model 
                                 Nothing ->
                                     bounce.name
 
-                        bounce_ =
+                        newBounce =
                             { name = name
                             , path = model.path
                             }
                     in
-                        doCreateRequest config hackedServers bounce_
+                        doCreateRequest config hackedServers newBounce
     in
         ( model, react )
 

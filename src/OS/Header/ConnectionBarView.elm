@@ -18,6 +18,8 @@ import OS.Header.Messages exposing (..)
 import OS.Header.Resources exposing (..)
 import UI.Layouts.VerticalList exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
+import Apps.Params as AppParams exposing (AppParams)
+import Apps.BounceManager.Shared as BounceManager
 
 
 { id, class, classList } =
@@ -393,8 +395,12 @@ bounceOptions config readonly activeBounce model =
                     False
 
         editMsg bounceId =
-            onClick <|
-                config.batchMsg []
+            bounceId
+                |> BounceManager.WithBounce
+                |> AppParams.BounceManager
+                |> flip (config.onOpenApp) config.activeGatewayCId
+                |> onClick
+                |> List.singleton
 
         selectMsg bounceId =
             [ config.onSetBounce <| Just bounceId, config.toMsg DropMenu ]
@@ -410,7 +416,7 @@ bounceOptions config readonly activeBounce model =
                             if inUse then
                                 []
                             else
-                                [ button [ editMsg id ] [ text "Edit" ]
+                                [ button (editMsg id) [ text "Edit" ]
                                 , button (selectMsg id) [ text "Select" ]
                                 ]
 
