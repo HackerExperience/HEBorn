@@ -29,3 +29,4 @@ type Msg
     | CreateRequest (Maybe Bounces.CreateError)
     | UpdateRequest (Maybe Bounces.UpdateError)
     | RemoveRequest (Maybe Bounces.RemoveError)
+    | SetInitialSeed Int

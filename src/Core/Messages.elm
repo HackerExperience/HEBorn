@@ -25,7 +25,7 @@ type Msg
     | HandleCrash Error
     | HandlePlay
     | HandleEvent Ws.Channel (Result String ( String, String, Value ))
-    | HandleAwait AwaitEvent.RequestId Msg
+    | HandleAwait AwaitEvent.RequestId ( String, Msg )
     | LandingMsg Landing.Msg
     | SetupMsg Setup.Msg
     | GameMsg Game.Msg

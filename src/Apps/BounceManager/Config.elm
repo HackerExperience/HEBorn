@@ -11,6 +11,7 @@ type alias Config msg =
     { toMsg : Msg -> msg
     , flags : Flags
     , batchMsg : List msg -> msg
+    , awaitEvent : String -> ( String, msg ) -> msg
     , reference : Reference
     , bounces : Bounces.Model
     , database : Database.Model

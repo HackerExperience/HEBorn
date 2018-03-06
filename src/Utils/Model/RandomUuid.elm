@@ -1,23 +1,27 @@
-module Utils.Model.RandomUuid exposing (Model, Uuid, getSeed, newUuid)
+module Utils.Model.RandomUuid exposing (Uuid, getSeed, newUuid, setSeed, generator)
 
 import Random.Pcg as Random
 import Uuid
 
 
-type alias Model ext =
-    { ext | randomUuidSeed : Random.Seed }
+type alias Model r =
+    { r | randomUuidSeed : Random.Seed }
 
 
 type alias Uuid =
     String
 
 
-getSeed : Model a -> Random.Seed
+getSeed :
+    Model r
+    -> Random.Seed
 getSeed { randomUuidSeed } =
     randomUuidSeed
 
 
-newUuid : Model a -> ( Model a, Uuid )
+newUuid :
+    Model r
+    -> ( Model r, Uuid )
 newUuid ({ randomUuidSeed } as model) =
     let
         ( uuid, randomUuidSeed_ ) =
@@ -30,3 +34,13 @@ newUuid ({ randomUuidSeed } as model) =
             { model | randomUuidSeed = randomUuidSeed_ }
     in
         ( model_, uuid_ )
+
+
+setSeed : Int -> Model r -> Model r
+setSeed int model =
+    { model | randomUuidSeed = Random.initialSeed int }
+
+
+generator : Random.Generator Int
+generator =
+    Random.int 0 Random.maxInt
