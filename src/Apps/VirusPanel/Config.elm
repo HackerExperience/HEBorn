@@ -13,6 +13,7 @@ import Apps.VirusPanel.Messages exposing (..)
 type alias Config msg =
     { toMsg : Msg -> msg
     , batchMsg : List msg -> msg
+    , awaitEvent : String -> ( String, msg ) -> msg
     , flags : Flags
     , accountId : String
     , database : Database.Model

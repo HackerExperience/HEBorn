@@ -1,5 +1,6 @@
 module Apps.BounceManager.Models exposing (..)
 
+import Random.Pcg as Random
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network exposing (NIP)
@@ -23,6 +24,7 @@ type ModalAction
     | ForSave ( Maybe Bounces.ID, Bounces.Bounce )
     | ForError Error
     | ForSaveSucessful
+    | ForSpinner
 
 
 type Error
@@ -38,6 +40,7 @@ type alias SelectedBounce =
 type alias Model =
     { selected : MainTab
     , selection : Maybe Selection
+    , randomUuidSeed : Random.Seed
     , anyChange : Bool
     , selectedBounce : Maybe SelectedBounce
     , renaming : Bool
@@ -68,6 +71,7 @@ initialModel : Reference -> Model
 initialModel me =
     { selected = TabManage
     , selection = Nothing
+    , randomUuidSeed = Random.initialSeed 16777215
     , anyChange = False
     , selectedBounce = Nothing
     , renaming = False

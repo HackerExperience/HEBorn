@@ -7,11 +7,13 @@ type alias ID =
 
 type CreateError
     = CreateBadRequest
+    | CreateFailed
     | CreateUnknown
 
 
 type UpdateError
     = UpdateBadRequest
+    | UpdateFailed
     | UpdateUnknown
 
 

@@ -195,11 +195,7 @@ modalHandler ({ toMsg, batchMsg } as config) model =
             Just (ForSave ( id, bounce )) ->
                 modalOkCancel (Just "Bounce Manager")
                     ("Do you really want to save " ++ name)
-                    (batchMsg
-                        [ toMsg <| Save ( id, bounce )
-                        , toMsg <| SetModal Nothing
-                        ]
-                    )
+                    (toMsg <| Save ( id, bounce ))
                     (toMsg <| SetModal Nothing)
 
             Just (ForEditWithoutSave id) ->
@@ -219,6 +215,11 @@ modalHandler ({ toMsg, batchMsg } as config) model =
                 modalOk (Just "Bounce Manager")
                     ("Save Sucessfully!")
                     (toMsg <| SetModal Nothing)
+
+            Just ForSpinner ->
+                modalOk (Just "Think that i'm a Spinner")
+                    "Spinning...."
+                    (batchMsg [])
 
             Nothing ->
                 text ""
@@ -245,6 +246,9 @@ renderCreateErrorModal { toMsg, batchMsg } error =
                 Bounces.CreateBadRequest ->
                     "Bad Request"
 
+                Bounces.CreateFailed ->
+                    "Bounce create failed"
+
                 Bounces.CreateUnknown ->
                     "Unknown Error"
     in
@@ -260,6 +264,9 @@ renderUpdateErrorModal { toMsg, batchMsg } error =
             case error of
                 Bounces.UpdateBadRequest ->
                     "Bad Request"
+
+                Bounces.UpdateFailed ->
+                    "Bounce create failed"
 
                 Bounces.UpdateUnknown ->
                     "Unknown Error"

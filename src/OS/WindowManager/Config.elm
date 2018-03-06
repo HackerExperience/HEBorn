@@ -56,7 +56,7 @@ type alias Config msg =
     { flags : Flags
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
-    , awaitEvent : String -> msg -> msg
+    , awaitEvent : String -> ( String, msg ) -> msg
     , gameMsg : Game.Msg -> msg
     , game : Game.Model
     , activeContext : Context
@@ -121,6 +121,7 @@ bounceManagerConfig appId config =
         { flags = config.flags
         , toMsg = BounceManagerMsg >> AppMsg appId >> config.toMsg
         , batchMsg = config.batchMsg
+        , awaitEvent = config.awaitEvent
         , reference = appId
         , bounces = Account.getBounces account
         , database = Account.getDatabase account
@@ -340,6 +341,7 @@ virusPanelConfig appId activeGateway config =
     in
         { toMsg = VirusPanelMsg >> AppMsg appId >> config.toMsg
         , batchMsg = config.batchMsg
+        , awaitEvent = config.awaitEvent
         , flags = config.flags
         , database = Account.getDatabase account
         , processes = Servers.getProcesses server

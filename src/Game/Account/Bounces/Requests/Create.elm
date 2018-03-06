@@ -21,11 +21,12 @@ createRequest :
     Database.HackedServers
     -> Bounces.Bounce
     -> ID
+    -> String
     -> FlagsSource a
     -> Cmd Data
-createRequest hackedServers bounce id flagsSrc =
+createRequest hackedServers bounce id requestId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bounceCreate id) (encoder hackedServers bounce)
+        |> Requests.request_ (Topics.bounceCreate id) (encoder hackedServers bounce requestId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -33,8 +34,8 @@ createRequest hackedServers bounce id flagsSrc =
 -- internals
 
 
-encoder : Database.HackedServers -> Bounces.Bounce -> Value
-encoder hackedServers bounce =
+encoder : Database.HackedServers -> Bounces.Bounce -> String -> Value
+encoder hackedServers bounce requestId =
     let
         valueList =
             List.map (encodeNIP hackedServers) bounce.path
@@ -42,6 +43,7 @@ encoder hackedServers bounce =
         Encode.object
             [ ( "name", Encode.string bounce.name )
             , ( "links", Encode.list valueList )
+            , ( "request_id", Encode.string requestId )
             ]
 
 
@@ -69,6 +71,9 @@ errorToString error =
     case error of
         CreateBadRequest ->
             "Bad Request"
+
+        CreateFailed ->
+            "Bounce creating failed"
 
         CreateUnknown ->
             "Unknown"
