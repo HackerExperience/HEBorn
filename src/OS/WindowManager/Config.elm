@@ -56,6 +56,7 @@ type alias Config msg =
     { flags : Flags
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
+    , awaitEvent : String -> msg -> msg
     , gameMsg : Game.Msg -> msg
     , game : Game.Model
     , activeContext : Context

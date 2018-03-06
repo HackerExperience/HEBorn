@@ -31,6 +31,7 @@ type alias Config msg =
     { flags : Flags
     , toMsg : Msg -> msg
     , batchMsg : List msg -> msg
+    , awaitEvent : String -> msg -> msg
     , gameMsg : Game.Msg -> msg
     , game : Game.Model
     , activeContext : Context
@@ -47,6 +48,7 @@ windowManagerConfig config =
     { flags = config.flags
     , toMsg = WindowManagerMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , awaitEvent = config.awaitEvent
     , gameMsg = config.gameMsg
     , game = config.game
     , activeContext = config.activeContext

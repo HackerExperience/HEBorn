@@ -11,6 +11,7 @@ import Driver.Websocket.Messages as Ws
 import Driver.Websocket.Update as Ws
 import Game.Messages as Game
 import Game.Models as Game
+import Game.Meta.Types.AwaitEvent as AwaitEvent
 import Game.Meta.Models as Meta
 import Game.Meta.Messages as Meta
 import Game.Update as Game
@@ -78,14 +79,43 @@ update msg model =
             in
                 ( { model | state = state }, cmd )
 
-        HandleEvent channel value ->
-            case Events.handler eventsConfig channel value of
-                Ok msg ->
-                    update msg model
+        HandleEvent channel result ->
+            let
+                ( maybeMsg, awaitEvent ) =
+                    case result of
+                        Ok ( _, rId, _ ) ->
+                            AwaitEvent.receive rId model.awaitEvent
 
-                Err error ->
-                    always ( model, Cmd.none ) <|
-                        Debug.log (Events.report error) ""
+                        Err _ ->
+                            ( Nothing, model.awaitEvent )
+
+                awaitMsgs =
+                    case maybeMsg of
+                        Just msg ->
+                            [ msg ]
+
+                        Nothing ->
+                            []
+
+                msgs =
+                    case Events.handler eventsConfig channel result of
+                        Ok msg ->
+                            msg :: awaitMsgs
+
+                        Err error ->
+                            always awaitMsgs <|
+                                Debug.log (Events.report error) ""
+            in
+                update (BatchMsg msgs) { model | awaitEvent = awaitEvent }
+
+        HandleAwait requestId msg ->
+            let
+                awaitEvent =
+                    AwaitEvent.subscribe requestId msg model.awaitEvent
+            in
+                ( { model | awaitEvent = awaitEvent }
+                , Cmd.none
+                )
 
         LoadingEnd z ->
             ( { model | windowLoaded = True }, Cmd.none )
