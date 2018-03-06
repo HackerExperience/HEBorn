@@ -83,8 +83,8 @@ update msg model =
             let
                 ( maybeMsg, awaitEvent ) =
                     case result of
-                        Ok ( _, rId, _ ) ->
-                            AwaitEvent.receive rId model.awaitEvent
+                        Ok ( eventName, rId, _ ) ->
+                            AwaitEvent.receive eventName rId model.awaitEvent
 
                         Err _ ->
                             ( Nothing, model.awaitEvent )
@@ -108,10 +108,10 @@ update msg model =
             in
                 update (BatchMsg msgs) { model | awaitEvent = awaitEvent }
 
-        HandleAwait requestId msg ->
+        HandleAwait requestId event ->
             let
                 awaitEvent =
-                    AwaitEvent.subscribe requestId msg model.awaitEvent
+                    AwaitEvent.subscribe requestId event model.awaitEvent
             in
                 ( { model | awaitEvent = awaitEvent }
                 , Cmd.none

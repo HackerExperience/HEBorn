@@ -11,10 +11,10 @@ import Random.Pcg as Random
 
 
 type alias Model =
-    RandomUuid.Model
-        { processes : Processes
-        , lastModified : Time
-        }
+    { processes : Processes
+    , lastModified : Time
+    , randomUuidSeed : Random.Seed
+    }
 
 
 type alias Processes =

@@ -11,7 +11,7 @@ import Dict exposing (Dict)
 
 
 type alias AwaitEvent msg =
-    Dict RequestId msg
+    Dict RequestId (Dict String msg)
 
 
 type alias RequestId =
@@ -23,13 +23,26 @@ empty =
     Dict.empty
 
 
-subscribe : RequestId -> msg -> AwaitEvent msg -> AwaitEvent msg
-subscribe =
-    Dict.insert
+subscribe :
+    RequestId
+    -> ( String, msg )
+    -> AwaitEvent msg
+    -> AwaitEvent msg
+subscribe requestId event awaitEvent =
+    let
+        msgs =
+            Maybe.withDefault Dict.empty <| Dict.get requestId awaitEvent
+
+        insertEffect ( eventName, effectMsg ) dict =
+            dict
+                |> Dict.insert eventName effectMsg
+                |> flip (Dict.insert requestId) awaitEvent
+    in
+        insertEffect event msgs
 
 
-receive : RequestId -> AwaitEvent msg -> ( Maybe msg, AwaitEvent msg )
-receive requestId awaitEvent =
-    ( Dict.get requestId awaitEvent
+receive : String -> RequestId -> AwaitEvent msg -> ( Maybe msg, AwaitEvent msg )
+receive eventName requestId awaitEvent =
+    ( Maybe.andThen (Dict.get eventName) (Dict.get requestId awaitEvent)
     , Dict.remove requestId awaitEvent
     )

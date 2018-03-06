@@ -220,6 +220,9 @@ windowInitSize app =
         DesktopApp.Browser ->
             Browser.windowInitSize
 
+        DesktopApp.BounceManager ->
+            BounceManager.windowInitSize
+
         DesktopApp.Calculator ->
             Calculator.windowInitSize
 
