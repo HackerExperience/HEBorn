@@ -1,12 +1,14 @@
 module OS.WindowManager.Sidebar.View exposing (view)
 
+import ContextMenu
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick)
 import Set
+import Game.Meta.Types.Desktop.Widgets as DesktopWidget
 import OS.WindowManager.Sidebar.Config exposing (..)
-import OS.WindowManager.Sidebar.Messages exposing (Msg(..))
+import OS.WindowManager.Sidebar.Messages exposing (..)
 import OS.WindowManager.Sidebar.Models exposing (..)
 import OS.WindowManager.Sidebar.Shared exposing (..)
 import OS.WindowManager.Sidebar.Resources as R
@@ -43,7 +45,16 @@ super config model =
     model
         |> getWidgets
         |> widgets config (getPrioritized model)
-        |> div [ class (superClasses model) ]
+        |> div
+            [ class (superClasses model)
+            , DesktopWidget.TaskList
+                |> NewWidget
+                |> config.toMsg
+                |> (,) (ContextMenu.item "New task list")
+                |> List.singleton
+                |> List.singleton
+                |> config.menuAttr
+            ]
 
 
 superClasses : Model -> List R.Classes
@@ -78,8 +89,24 @@ widget config ( id, { isExpanded, model } ) =
 
 header : Config msg -> WidgetId -> WidgetModel -> Html msg
 header config id model =
-    div [ class [ R.WidgetHeader ] ]
+    div
+        [ class [ R.WidgetHeader ]
+        , onClick <| config.toMsg <| WidgetMsg id ToggleExpanded
+        , menu config id model
+        ]
         [ text (getTitle model) ]
+
+
+menu : Config msg -> WidgetId -> WidgetModel -> Attribute msg
+menu { menuAttr, toMsg } id model =
+    menuAttr
+        [ [ ( ContextMenu.item "Move up", toMsg <| WidgetMsg id DecreaseOrder )
+          , ( ContextMenu.item "Move down", toMsg <| WidgetMsg id IncreaseOrder )
+          , ( ContextMenu.item "Expand/Contract", toMsg <| WidgetMsg id ToggleExpanded )
+          ]
+        , [ ( ContextMenu.item "Delete", toMsg <| Remove id )
+          ]
+        ]
 
 
 content : Config msg -> WidgetId -> WidgetModel -> Html msg

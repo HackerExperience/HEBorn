@@ -1,10 +1,14 @@
 module OS.WindowManager.Sidebar.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import OS.WindowManager.Sidebar.Config exposing (Config)
+import Game.Meta.Types.Desktop.Widgets exposing (..)
+import OS.WindowManager.Sidebar.Config exposing (..)
 import OS.WindowManager.Sidebar.Messages exposing (Msg(..), WidgetMsg(..))
 import OS.WindowManager.Sidebar.Models exposing (..)
 import OS.WindowManager.Sidebar.Shared exposing (..)
+import Widgets.QuestHelper.Models as Quest
+import Widgets.TaskList.Models as Tasks
+import Widgets.TaskList.Update as Tasks
 
 
 type alias UpdateResponse msg =
@@ -21,9 +25,8 @@ update config msg model =
                 |> flip setVisibility model
                 |> React.update
 
-        NewWidget _ _ ->
-            -- TODO
-            React.update model
+        NewWidget widget ->
+            onNewWidget config widget model
 
         Remove id ->
             model
@@ -58,6 +61,34 @@ onWidgetMsg config widgetID msg model =
             (flip (insert widgetID) model)
 
 
+onNewWidget : Config msg -> DesktopWidget -> Model -> UpdateResponse msg
+onNewWidget _ widget model =
+    let
+        widgetModel =
+            case widget of
+                QuestHelper ->
+                    Native.Panic.crash "Bad boy"
+                        "QuestHelper must be generated from story"
+
+                TaskList ->
+                    TaskListModel Tasks.initialModel
+
+        widget_ =
+            Local (LocalWidget True 0 widgetModel)
+
+        ( id, model0 ) =
+            getNewWidgetId model
+
+        model_ =
+            insert id widget_ model0
+    in
+        React.update model_
+
+
+
+-- internals
+
+
 type alias WidgetResponse msg =
     ( Widget, React msg )
 
@@ -88,8 +119,31 @@ updateWidget config id msg widget =
         _ ->
             case widget of
                 Local widget ->
-                    -- TODO
-                    React.update <| Local <| widget
+                    updateLocalWidget config id msg widget
 
                 External _ ->
                     React.update widget
+
+
+updateLocalWidget :
+    Config msg
+    -> WidgetId
+    -> WidgetMsg
+    -> LocalWidget
+    -> WidgetResponse msg
+updateLocalWidget config id msg widget =
+    case widget.model of
+        QuestHelperModel _ ->
+            -- ALWAYS EXTERNAL
+            React.update <| Local widget
+
+        TaskListModel model ->
+            case msg of
+                TaskListMsg msg ->
+                    model
+                        |> Tasks.update (taskListConfig id config) msg
+                        |> Tuple.mapFirst
+                            (TaskListModel >> flip setModel widget >> Local)
+
+                _ ->
+                    React.update <| Local widget

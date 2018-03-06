@@ -1,7 +1,9 @@
 module OS.WindowManager.Sidebar.Models exposing (..)
 
 import Dict exposing (Dict)
+import Random.Pcg as Random
 import Set exposing (Set)
+import Uuid
 import OS.WindowManager.Sidebar.Shared exposing (..)
 import Widgets.QuestHelper.Models as Quest
 import Widgets.TaskList.Models as Tasks
@@ -11,6 +13,7 @@ type alias Model =
     { isVisible : Bool
     , widgets : Widgets
     , prioritized : Prioritized
+    , seed : Random.Seed
     }
 
 
@@ -54,19 +57,7 @@ initialModel =
     { isVisible = False
     , widgets = Dict.empty
     , prioritized = Set.empty
-    }
-
-
-dummyModel : Model
-dummyModel =
-    { isVisible = False
-    , widgets =
-        Tasks.initialModel
-            |> TaskListModel
-            |> LocalWidget True 0
-            |> Local
-            |> flip (Dict.insert "dummy") Dict.empty
-    , prioritized = Set.empty
+    , seed = Random.initialSeed 10827990
     }
 
 
@@ -82,6 +73,11 @@ setVisibility isVisible model =
 
 
 -- about widgets
+
+
+getNewWidgetId : Model -> ( WidgetId, Model )
+getNewWidgetId =
+    getUuid
 
 
 hasLocalWidgets : Model -> Bool
@@ -282,3 +278,31 @@ getTitle model =
 
         TaskListModel model ->
             Tasks.getTitle model
+
+
+setModel : WidgetModel -> LocalWidget -> LocalWidget
+setModel model_ widget =
+    { widget | model = model_ }
+
+
+isExternalOnly : WidgetModel -> Bool
+isExternalOnly model =
+    case model of
+        QuestHelperModel _ ->
+            True
+
+        TaskListModel _ ->
+            False
+
+
+
+-- internals
+
+
+getUuid : Model -> ( String, Model )
+getUuid model =
+    let
+        ( uuid, seed ) =
+            Random.step Uuid.uuidGenerator model.seed
+    in
+        ( Uuid.toString uuid, { model | seed = seed } )

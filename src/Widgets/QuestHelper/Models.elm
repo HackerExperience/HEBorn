@@ -9,10 +9,6 @@ type alias Model =
     }
 
 
-type Params
-    = OpenForStep Step
-
-
 getTitle : Model -> String
 getTitle { owner } =
     "Quest: " ++ owner

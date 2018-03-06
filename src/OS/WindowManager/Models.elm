@@ -41,8 +41,7 @@ type alias Model =
     , seed : Random.Seed
     , drag : Draggable.State WindowId
     , appSize : Maybe Size
-    , campaingSidebar : Sidebar.Model
-    , multiplayerSidebar : Sidebar.Model
+    , sidebar : Sidebar.Model
     }
 
 
@@ -178,8 +177,7 @@ initialModel =
     , seed = Random.initialSeed 844121764423
     , drag = Draggable.init
     , appSize = Nothing
-    , campaingSidebar = Sidebar.dummyModel
-    , multiplayerSidebar = Sidebar.initialModel
+    , sidebar = Sidebar.initialModel
     }
 
 
@@ -997,32 +995,14 @@ removeFromSession windowId =
 -- sidebar
 
 
-getSidebar : Bool -> Model -> Sidebar.Model
-getSidebar isFreePlay =
-    if isFreePlay then
-        getMultiplayerSidebar
-    else
-        getCampaingSidebar
+getSidebar : Model -> Sidebar.Model
+getSidebar =
+    .sidebar
 
 
-getCampaingSidebar : Model -> Sidebar.Model
-getCampaingSidebar =
-    .campaingSidebar
-
-
-getMultiplayerSidebar : Model -> Sidebar.Model
-getMultiplayerSidebar =
-    .multiplayerSidebar
-
-
-setCampaingSidebar : Sidebar.Model -> Model -> Model
-setCampaingSidebar sidebar model =
-    { model | campaingSidebar = sidebar }
-
-
-setMultiplayerSidebar : Sidebar.Model -> Model -> Model
-setMultiplayerSidebar sidebar model =
-    { model | multiplayerSidebar = sidebar }
+setSidebar : Sidebar.Model -> Model -> Model
+setSidebar sidebar model =
+    { model | sidebar = sidebar }
 
 
 

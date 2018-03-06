@@ -59,11 +59,8 @@ update config msg model =
         SetAppSize size_ ->
             onSetAppSize size_ model
 
-        CampaingSidebarMsg msg ->
-            onCampaingSidebarMsg config msg model
-
-        MultiplayerSidebarMsg msg ->
-            onMultiplayerSidebarMsg config msg model
+        SidebarMsg msg ->
+            onSidebarMsg config msg model
 
         -- window handling
         Close wId ->
@@ -124,28 +121,22 @@ onSetAppSize size_ model =
         |> flip (,) React.none
 
 
-onCampaingSidebarMsg :
+onSidebarMsg :
     Config msg
     -> Sidebar.Msg
     -> Model
     -> UpdateResponse msg
-onCampaingSidebarMsg config msg model =
-    model
-        |> getCampaingSidebar
-        |> Sidebar.update (sidebarConfig False config) msg
-        |> Tuple.mapFirst (flip setCampaingSidebar model)
-
-
-onMultiplayerSidebarMsg :
-    Config msg
-    -> Sidebar.Msg
-    -> Model
-    -> UpdateResponse msg
-onMultiplayerSidebarMsg config msg model =
-    model
-        |> getMultiplayerSidebar
-        |> Sidebar.update (sidebarConfig True config) msg
-        |> Tuple.mapFirst (flip setMultiplayerSidebar model)
+onSidebarMsg config msg model =
+    let
+        isFreeplay =
+            config.activeServer
+                |> Tuple.second
+                |> Servers.isFreeplay
+    in
+        model
+            |> getSidebar
+            |> Sidebar.update (sidebarConfig isFreeplay config) msg
+            |> Tuple.mapFirst (flip setSidebar model)
 
 
 onOpenApp : Config msg -> AppParams -> CId -> Model -> UpdateResponse msg

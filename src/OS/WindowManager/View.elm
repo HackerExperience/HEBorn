@@ -538,7 +538,7 @@ appIconAttr =
 viewSidebar : Config msg -> Model -> Bool -> ( String, Html msg )
 viewSidebar config model isFreeplay =
     model
-        |> getSidebar isFreeplay
+        |> getSidebar
         |> lazy2
             (Sidebar.view >>> div [ class [ R.Sidebar ] ])
             (sidebarConfig isFreeplay config)

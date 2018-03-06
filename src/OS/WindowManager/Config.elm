@@ -116,18 +116,15 @@ backFlixConfig appId config =
 sidebarConfig : Bool -> Config msg -> Sidebar.Config msg
 sidebarConfig isFreeplay config =
     let
-        ( toMsg, story_ ) =
+        story_ =
             if isFreeplay then
-                ( MultiplayerSidebarMsg
-                , Nothing
-                )
+                Nothing
             else
-                ( CampaingSidebarMsg
-                , Just <| Game.getStory config.game
-                )
+                Just <| Game.getStory config.game
     in
-        { toMsg = toMsg >> config.toMsg
+        { toMsg = SidebarMsg >> config.toMsg
         , batchMsg = config.batchMsg
+        , menuAttr = config.menuAttr
         , story = story_
         }
 

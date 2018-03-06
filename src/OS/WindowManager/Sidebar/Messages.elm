@@ -2,13 +2,12 @@ module OS.WindowManager.Sidebar.Messages exposing (Msg(..), WidgetMsg(..))
 
 import Game.Meta.Types.Desktop.Widgets as DesktopWidget exposing (DesktopWidget)
 import OS.WindowManager.Sidebar.Shared exposing (WidgetId)
-import Widgets.Params exposing (..)
 import Widgets.TaskList.Messages as Tasks
 
 
 type Msg
     = ToggleVisibility
-    | NewWidget DesktopWidget (Maybe WidgetParams)
+    | NewWidget DesktopWidget
     | Remove WidgetId
     | Prioritize WidgetId
     | Deprioritize WidgetId

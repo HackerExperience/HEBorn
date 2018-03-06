@@ -13,7 +13,7 @@ view config { entries } =
     entries
         |> List.foldr
             (entry config)
-            ( 0, [] )
+            ( List.length entries - 1, [] )
         |> Tuple.second
         |> ul []
 
@@ -38,4 +38,4 @@ entry { toMsg } ( active, value_ ) ( count, acu ) =
             []
         ]
         |> flip (::) acu
-        |> (,) (count + 1)
+        |> (,) (count - 1)
