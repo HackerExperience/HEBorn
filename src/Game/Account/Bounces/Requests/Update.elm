@@ -22,11 +22,12 @@ updateRequest :
     -> Bounces.ID
     -> Bounces.Bounce
     -> ID
+    -> String
     -> FlagsSource a
     -> Cmd Data
-updateRequest hackedServers bounceId bounce id flagsSrc =
+updateRequest hackedServers bounceId bounce id requestId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bounceUpdate id) (encoder hackedServers bounceId bounce)
+        |> Requests.request_ (Topics.bounceUpdate id) (encoder hackedServers bounceId bounce requestId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -34,8 +35,8 @@ updateRequest hackedServers bounceId bounce id flagsSrc =
 -- internals
 
 
-encoder : Database.HackedServers -> Bounces.ID -> Bounces.Bounce -> Value
-encoder hackedServers bounceId bounce =
+encoder : Database.HackedServers -> Bounces.ID -> Bounces.Bounce -> String -> Value
+encoder hackedServers bounceId bounce requestId =
     let
         valueList =
             List.map (encodeNIP hackedServers) bounce.path
@@ -44,6 +45,7 @@ encoder hackedServers bounceId bounce =
             [ ( "bounce_id", Encode.string bounceId )
             , ( "name", Encode.string bounce.name )
             , ( "links", Encode.list valueList )
+            , ( "request_id", Encode.string requestId )
             ]
 
 
@@ -71,6 +73,9 @@ errorToString error =
     case error of
         UpdateBadRequest ->
             "Bad Request"
+
+        UpdateFailed ->
+            "Bounce update failed"
 
         UpdateUnknown ->
             "Unknown"
