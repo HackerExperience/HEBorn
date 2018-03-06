@@ -87,7 +87,7 @@ receiver flagsSrc url code value =
 
 site : Site.Url -> Decoder Site
 site url =
-    andThen (siteByType url) (field "content" type_)
+    andThen (siteByType url) type_
 
 
 type_ : Decoder Site.Type
@@ -143,8 +143,7 @@ type_ =
 
 siteByType : Site.Url -> Site.Type -> Decoder Site
 siteByType url type_ =
-    decode (Site url type_)
-        |> required "meta" meta
+    map (Site url type_) <| field "meta" meta
 
 
 meta : Decoder Site.Meta
@@ -155,11 +154,17 @@ meta =
         |> optional "public" (list Decoders.Filesystem.fileEntry) []
 
 
+content : Decoder a -> Decoder a
+content =
+    field "content"
+
+
 web : Decoder Site.Type
 web =
     decode Site.WebserverContent
         |> hardcoded "TODO"
         |> map Site.Webserver
+        |> content
 
 
 bank : Decoder Site.Type
@@ -168,6 +173,7 @@ bank =
         |> required "title" string
         |> required "nip" Decoders.Network.nipTuple
         |> map Site.Bank
+        |> content
 
 
 downloadCenter : Decoder Site.Type
@@ -175,6 +181,7 @@ downloadCenter =
     decode Site.DownloadCenterContent
         |> required "title" string
         |> map Site.DownloadCenter
+        |> content
 
 
 errorMessage : Site.Url -> Decoder Error
