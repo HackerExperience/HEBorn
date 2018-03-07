@@ -4,10 +4,12 @@ import Dict as Dict
 import Json.Decode as Decode exposing (Decoder, map, field, string, succeed, oneOf)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded, optional)
 import Decoders.Bounces exposing (bounces)
+import Decoders.Database exposing (database)
+import Decoders.Finances exposing (finances)
 import Game.Account.Models exposing (..)
 import Game.Account.Bounces.Dummy as Bounces
-import Game.Account.Database.Dummy as Database
-import Game.Account.Finances.Dummy as Finances
+import Game.Account.Database.Models as Database
+import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared as Servers
 
 
@@ -19,14 +21,14 @@ account model =
         |> hardcoded model.auth
         |> hardcoded model.inTutorial
         |> hardcoded model.email
-        |> hardcoded Database.dummy
+        |> required "database" database
         |> hardcoded model.dock
         |> hardcoded model.gateways
         |> hardcoded model.activeGateway
         |> hardcoded model.context
-        --optional "bounces" bounces Dict.empty
-        |> hardcoded Bounces.dummy
-        |> hardcoded Finances.dummy
+        |> required "bounces" bounces
+        --required "finances" finances
+        |> hardcoded model.finances
         |> hardcoded model.notifications
         |> hardcoded model.signOut
         |> mainframe

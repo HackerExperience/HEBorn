@@ -33,8 +33,10 @@ database =
     decode Model
         |> required "servers" servers
         |> required "bank_accounts" hackedBankAccounts
+        --required "btc_wallets"
         |> hardcoded Dict.empty
-        |> required "viruses" viruses
+        --required "viruses" viruses
+        |> hardcoded Dict.empty
 
 
 virus : Decoder Virus
@@ -89,7 +91,8 @@ hackedServer =
         |> required "password" string
         |> optionalMaybe "label" string
         |> optionalMaybe "notes" string
-        |> required "viruses" (list string)
+        --required "viruses" (list string)
+        |> hardcoded []
         |> optionalMaybe "active" string
         |> optionalMaybe "running_time" float
 
@@ -97,7 +100,7 @@ hackedServer =
 nip : Decoder NIP
 nip =
     decode (,)
-        |> required "netid" string
+        |> required "network_id" string
         |> required "ip" string
 
 
