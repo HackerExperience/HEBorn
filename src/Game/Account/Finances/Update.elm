@@ -2,11 +2,11 @@ module Game.Account.Finances.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Account.Finances.Requests.Login as LoginRequest exposing (loginRequest)
+import Game.Account.Finances.Requests.Transfer as TransferRequest exposing (transferRequest)
 import Game.Account.Finances.Config exposing (..)
 import Game.Account.Finances.Models exposing (..)
 import Game.Account.Finances.Messages exposing (..)
-import Game.Account.Finances.Requests.Login as Login
-import Game.Account.Finances.Requests.Transfer as Transfer
 
 
 type alias UpdateResponse msg =
@@ -16,20 +16,23 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
-        Request data ->
-            onRequest config data model
-
         HandleBankAccountClosed accountId ->
             handleBankAccountClosed accountId model
 
         HandleBankAccountUpdated accountId account ->
             handleBankAccountUpdated accountId account model
 
-        HandleBankAccountLogin request requester ->
-            handleBankAccountLogin config request requester model
+        HandleBankAccountLogin payload requester ->
+            handleBankAccountLogin config payload requester model
 
-        HandleBankAccountTransfer request requester ->
-            handleBankAccountTransfer config request requester model
+        HandleBankAccountTransfer payload requester ->
+            handleBankAccountTransfer config payload requester model
+
+        LoginRequest requester data ->
+            onLoginRequest config requester data model
+
+        TransferRequest requester data ->
+            onTransferRequest config requester data model
 
 
 handleBankAccountClosed : AccountId -> Model -> UpdateResponse msg
@@ -44,16 +47,16 @@ handleBankAccountUpdated accountId bankAccount model =
 
 handleBankAccountLogin :
     Config msg
-    -> BankLoginRequest
+    -> LoginRequest.Payload
     -> Requester
     -> Model
     -> UpdateResponse msg
-handleBankAccountLogin config request requester model =
+handleBankAccountLogin config payload requester model =
     let
         request_ =
             config
-                |> Login.request request requester config.accountId
-                |> Cmd.map config.toMsg
+                |> loginRequest payload config.accountId
+                |> Cmd.map (LoginRequest requester >> config.toMsg)
                 |> React.cmd
     in
         ( model, request_ )
@@ -61,66 +64,36 @@ handleBankAccountLogin config request requester model =
 
 handleBankAccountTransfer :
     Config msg
-    -> BankTransferRequest
+    -> TransferRequest.Payload
     -> Requester
     -> Model
     -> UpdateResponse msg
-handleBankAccountTransfer config request requester model =
+handleBankAccountTransfer config payload requester model =
     let
         request_ =
-            Transfer.request request requester config.accountId config
-                |> Cmd.map config.toMsg
+            config
+                |> transferRequest payload config.accountId
+                |> Cmd.map (TransferRequest requester >> config.toMsg)
                 |> React.cmd
     in
         ( model, request_ )
 
 
-onRequest : Config msg -> RequestMsg -> Model -> UpdateResponse msg
-onRequest config data model =
-    case data of
-        BankLogin requester response ->
-            onBankLogin config requester (Login.receive response) model
-
-        BankTransfer requester response ->
-            onBankTransfer config requester (Transfer.receive response) model
-
-
-onBankLogin :
+onLoginRequest :
     Config msg
     -> Requester
-    -> LoginResponse
+    -> LoginRequest.Data
     -> Model
     -> UpdateResponse msg
-onBankLogin config requester response model =
-    case response of
-        Valid data ->
-            ( model
-            , React.msg <| config.onBankAccountLogin (Ok data) requester
-            )
-
-        DecodeFailed ->
-            ( model, React.none )
-
-        Invalid ->
-            ( model
-            , React.msg <| config.onBankAccountLogin (Err ()) requester
-            )
+onLoginRequest config requester data model =
+    ( model, React.msg <| config.onBankAccountLogin data requester )
 
 
-onBankTransfer :
+onTransferRequest :
     Config msg
     -> Requester
-    -> TransferResponse
+    -> TransferRequest.Data
     -> Model
     -> UpdateResponse msg
-onBankTransfer config requester response model =
-    case response of
-        Successful ->
-            ( model
-            , React.msg <| config.onBankAccountTransfer (Ok ()) requester
-            )
-
-        Error ->
-            ( model
-            , React.msg <| config.onBankAccountTransfer (Err ()) requester
-            )
+onTransferRequest config requester data model =
+    ( model, React.msg <| config.onBankAccountTransfer data requester )

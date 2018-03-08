@@ -1,18 +1,10 @@
-module Landing.Login.Messages
-    exposing
-        ( Msg(..)
-        , RequestMsg(..)
-        )
+module Landing.Login.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
+import Landing.Requests.Login as Login
 
 
 type Msg
     = SubmitLogin
     | SetUsername String
     | SetPassword String
-    | Request RequestMsg
-
-
-type RequestMsg
-    = LoginRequest ResponseType
+    | LoginRequest Login.Data

@@ -3,14 +3,13 @@ module Game.Storyline.Update exposing (update)
 import Dict
 import Time exposing (Time)
 import Utils.React as React exposing (React)
-import Game.Storyline.Config exposing (..)
-import Game.Storyline.Models exposing (..)
-import Game.Storyline.Messages exposing (..)
-import Game.Storyline.Shared exposing (Reply, PastEmail(..))
-import Game.Storyline.Requests exposing (Response(..), receive)
-import Game.Storyline.Requests.Reply as Reply
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
+import Game.Storyline.Requests.Reply as ReplyRequest exposing (replyRequest)
+import Game.Storyline.Config exposing (..)
+import Game.Storyline.Messages exposing (..)
+import Game.Storyline.Models exposing (..)
+import Game.Storyline.Shared exposing (Reply, PastEmail(..))
 
 
 type alias UpdateResponse msg =
@@ -40,17 +39,15 @@ update config msg model =
             -- TODO: Need help
             ( model, React.none )
 
-        Request data ->
-            onRequest config (receive data) model
+        ReplyRequest data ->
+            onReplyRequest config data model
 
 
 handleReply : Config msg -> String -> Reply -> Model -> UpdateResponse msg
 handleReply config contactId reply model =
-    Reply.request ( contactId, reply )
-        config.accountId
-        reply
-        config
-        |> Cmd.map config.toMsg
+    config
+        |> replyRequest contactId reply config.accountId reply
+        |> Cmd.map (ReplyRequest >> config.toMsg)
         |> React.cmd
         |> (,) model
 
@@ -171,10 +168,6 @@ handleReplySent _ when contactId reply model =
         ( model_, React.none )
 
 
-
--- requests
-
-
-onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
-onRequest config response model =
+onReplyRequest : Config msg -> ReplyRequest.Data -> Model -> UpdateResponse msg
+onReplyRequest config data model =
     ( model, React.none )

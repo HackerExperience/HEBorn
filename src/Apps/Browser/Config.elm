@@ -4,8 +4,9 @@ import ContextMenu
 import Html exposing (Attribute)
 import Core.Flags as Core
 import Utils.Core exposing (..)
-import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 import Apps.Params as AppParams exposing (AppParams)
+import Game.Account.Finances.Requests.Login as LoginRequest
+import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Meta.Types.Network as Network exposing (NIP)
@@ -41,8 +42,8 @@ type alias Config msg =
     , onLogout : CId -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onNewBruteforceProcess : Network.IP -> msg
-    , onBankAccountLogin : BankLoginRequest -> Requester -> msg
-    , onBankAccountTransfer : BankTransferRequest -> Requester -> msg
+    , onBankAccountLogin : LoginRequest.Payload -> Requester -> msg
+    , onBankAccountTransfer : TransferRequest.Payload -> Requester -> msg
     , menuAttr : ContextMenuAttribute msg
     }
 

@@ -7,6 +7,8 @@ import Core.Error as Error exposing (Error)
 import Game.Meta.Types.Context as Context
 import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Account.Finances.Shared exposing (..)
+import Game.Account.Finances.Requests.Login as BankLoginRequest
+import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Account.Config as Account
@@ -46,8 +48,8 @@ type alias Config msg =
     , onServerToast : CId -> ServersNotifications.Content -> msg
 
     -- account.finances
-    , onBankAccountLogin : Result () BankAccountData -> Requester -> msg
-    , onBankAccountTransfer : Result () () -> Requester -> msg
+    , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
+    , onBankAccountTransfer : BankTransferRequest.Data -> Requester -> msg
     }
 
 

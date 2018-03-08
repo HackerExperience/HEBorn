@@ -1,41 +1,40 @@
-module Setup.Requests.Setup exposing (Response(..), request, receive)
+module Setup.Requests.Setup exposing (Data, setupRequest)
 
 import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Json.Encode as Encode exposing (Value)
 import Requests.Types exposing (FlagsSource, Code(..))
-import Setup.Messages exposing (..)
 import Setup.Models exposing (..)
 import Game.Account.Models as Account
 
 
-type Response
-    = Okay
-    | Error
+type alias Data =
+    Result () ()
 
 
-request : List PageModel -> Account.ID -> FlagsSource a -> Cmd Msg
-request pages id =
+setupRequest : List PageModel -> Account.ID -> FlagsSource a -> Cmd Data
+setupRequest pages id flagsSrc =
     let
         payload =
             Encode.object
                 [ ( "pages", Encode.list <| encodeDone pages ) ]
     in
-        Requests.request (Topics.clientSetup id)
-            (SetupRequest >> Request)
-            payload
+        flagsSrc
+            |> Requests.request_ (Topics.clientSetup id) payload
+            |> Cmd.map (uncurry receiver)
 
 
-receive : Code -> Value -> Maybe Response
-receive code json =
+
+-- internals
+
+
+receiver : Code -> Value -> Data
+receiver code json =
     case code of
         OkCode ->
-            Just Okay
+            Ok ()
 
         _ ->
             -- TODO: add better error handling
-            let
-                _ =
-                    Debug.log "▶ Setup Error Code:" code
-            in
-                Just Error
+            always (Err ()) <|
+                Debug.log "▶ Setup Error Code:" code

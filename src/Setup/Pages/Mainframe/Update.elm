@@ -40,11 +40,9 @@ onValidate ({ toMsg, mainframe } as config) model =
         cmd =
             case Maybe.uncurry (getHostname model) mainframe of
                 Just ( name, mainframe ) ->
-                    Check.serverName
-                        (Checked mainframe >> toMsg)
-                        name
-                        mainframe
-                        config
+                    config
+                        |> Check.serverName name mainframe
+                        |> Cmd.map (Checked mainframe >> toMsg)
 
                 Nothing ->
                     Cmd.none

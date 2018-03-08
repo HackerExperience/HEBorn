@@ -8,6 +8,8 @@ import Game.Account.Messages exposing (..)
 import Game.Account.Bounces.Config as Bounces
 import Game.Account.Database.Config as Database
 import Game.Account.Database.Models as Database
+import Game.Account.Finances.Requests.Login as BankLoginRequest
+import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Finances.Shared exposing (..)
 import Game.Account.Finances.Config as Finances
 import Game.Account.Notifications.Config as Notifications
@@ -29,8 +31,8 @@ type alias Config msg =
     , onSetEndpoint : CId -> Maybe CId -> msg
 
     -- account.finances
-    , onBankAccountLogin : Result () BankAccountData -> Requester -> msg
-    , onBankAccountTransfer : Result () () -> Requester -> msg
+    , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
+    , onBankAccountTransfer : BankTransferRequest.Data -> Requester -> msg
 
     -- account.notifications
     , onToast : Notifications.Content -> msg

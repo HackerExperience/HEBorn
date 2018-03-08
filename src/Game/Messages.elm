@@ -1,4 +1,4 @@
-module Game.Messages exposing (Msg(..), RequestMsg(..))
+module Game.Messages exposing (..)
 
 import Json.Decode exposing (Value)
 import Game.Account.Messages as Account
@@ -20,9 +20,5 @@ type Msg
     | WebMsg Web.Msg
     | BackFlixMsg BackFlix.Msg
     | Resync
-    | Request RequestMsg
+    | ResyncRequest ResponseType
     | HandleJoinedAccount Value
-
-
-type RequestMsg
-    = ResyncRequest ResponseType

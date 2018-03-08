@@ -1,8 +1,7 @@
 module Landing.SignUp.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Landing.SignUp.Requests exposing (..)
-import Landing.SignUp.Requests.SignUp as SignUp
+import Landing.Requests.SignUp as SignUpRequest exposing (signUpRequest)
 import Landing.SignUp.Config exposing (..)
 import Landing.SignUp.Messages exposing (..)
 import Landing.SignUp.Models exposing (..)
@@ -18,8 +17,8 @@ update config msg model =
         SubmitForm ->
             ( model
             , config
-                |> SignUp.request model.email model.username model.password
-                |> Cmd.map config.toMsg
+                |> signUpRequest model.email model.username model.password
+                |> Cmd.map (SignUpRequest >> config.toMsg)
                 |> React.cmd
             )
 
@@ -83,33 +82,21 @@ update config msg model =
                 , React.none
                 )
 
-        Request data ->
-            onRequest config (receive data) model
+        SignUpRequest data ->
+            onSignUpRequest config data model
 
 
 
 -- internals
 
 
-onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
-onRequest config response model =
-    case response of
-        Just response ->
-            updateRequest config response model
-
-        Nothing ->
-            ( model, React.none )
-
-
-updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
-updateRequest config response model =
-    case response of
-        -- TODO: add more types to match response status
-        SignUpResponse (SignUp.Okay _ _ _) ->
-            ( model, React.none )
-
-        _ ->
-            ( model, React.none )
+onSignUpRequest :
+    Config msg
+    -> SignUpRequest.Data
+    -> Model
+    -> UpdateResponse msg
+onSignUpRequest config data model =
+    ( model, React.none )
 
 
 getErrorsUsername : Model -> String
