@@ -7,7 +7,7 @@ module Game.Requests.Resync
 
 import Decoders.Game exposing (ServersToJoin)
 import Json.Decode exposing (Value, decodeValue)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types
     exposing
@@ -27,7 +27,7 @@ type alias Data =
 
 resyncRequest : Account.ID -> FlagsSource a -> Cmd ResponseType
 resyncRequest id =
-    Requests.request_ (Topics.accountResync id) emptyPayload
+    Requests.request (Topics.accountResync id) emptyPayload
 
 
 resyncReceive : Model -> ResponseType -> Data
@@ -36,7 +36,7 @@ resyncReceive model ( code, json ) =
         OkCode ->
             json
                 |> decodeValue (Decoders.Game.bootstrap model)
-                |> report_ "Game.Resync" code model
+                |> report "Game.Resync" code model
                 |> Result.mapError (always ())
 
         _ ->

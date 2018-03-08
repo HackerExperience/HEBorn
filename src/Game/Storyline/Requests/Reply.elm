@@ -12,7 +12,7 @@ import Json.Decode as Decode
         )
 import Json.Encode as Encode
 import Utils.Json.Decode exposing (message, commonError)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Storyline.Shared exposing (ContactId, Reply(..))
@@ -41,7 +41,7 @@ replyRequest :
     -> Cmd Data
 replyRequest contactId reply1 accountId reply2 flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.emailReply accountId)
+        |> Requests.request (Topics.emailReply accountId)
             (encoder contactId reply1)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -101,7 +101,7 @@ receiver flagsSrc code json =
         ErrorCode ->
             json
                 |> decodeValue errorMessage
-                |> report_ "Storyline.Reply" code flagsSrc
+                |> report "Storyline.Reply" code flagsSrc
                 |> Result.mapError (always Unknown)
                 |> Result.andThen Err
 

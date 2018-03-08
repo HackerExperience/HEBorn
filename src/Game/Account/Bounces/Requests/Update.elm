@@ -3,7 +3,7 @@ module Game.Account.Bounces.Requests.Update exposing (updateRequest)
 import Utils.Json.Decode exposing (commonError, message)
 import Json.Decode as Decode exposing (Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode exposing (Value)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Account.Models exposing (..)
@@ -27,7 +27,8 @@ updateRequest :
     -> Cmd Data
 updateRequest hackedServers bounceId bounce id requestId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bounceUpdate id) (encoder hackedServers bounceId bounce requestId)
+        |> Requests.request (Topics.bounceUpdate id)
+            (encoder hackedServers bounceId bounce requestId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -102,6 +103,6 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Bounces.Update" code flagsSrc
+                |> report "Bounces.Update" code flagsSrc
                 |> Result.mapError (always UpdateUnknown)
                 |> Result.andThen Err

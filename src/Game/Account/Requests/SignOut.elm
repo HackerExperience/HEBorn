@@ -14,7 +14,7 @@ type alias Data =
 signOutRequest : String -> ID -> FlagsSource a -> Cmd Data
 signOutRequest token id flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.accountLogout id) (encoder token)
+        |> Requests.request (Topics.accountLogout id) (encoder token)
         |> Cmd.map (uncurry receiver)
 
 

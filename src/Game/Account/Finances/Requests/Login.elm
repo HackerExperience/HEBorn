@@ -8,7 +8,7 @@ module Game.Account.Finances.Requests.Login
 import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
 import Decoders.Bank exposing (accountData)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Account.Models as Account
@@ -36,7 +36,7 @@ type Error
 loginRequest : Payload -> Account.ID -> FlagsSource a -> Cmd Data
 loginRequest payload accountId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bankLogin accountId)
+        |> Requests.request (Topics.bankLogin accountId)
             (encoder payload)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -61,7 +61,7 @@ receiver flagsSrc code value =
         OkCode ->
             value
                 |> decodeValue accountData
-                |> report_ "Finances.Login" code flagsSrc
+                |> report "Finances.Login" code flagsSrc
                 |> Result.mapError (always Unknown)
 
         _ ->

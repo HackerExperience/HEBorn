@@ -3,7 +3,7 @@ module Game.Account.Bounces.Requests.Remove exposing (removeRequest)
 import Json.Decode as Decode exposing (Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode exposing (Value)
 import Utils.Json.Decode exposing (commonError, message)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Account.Models exposing (..)
@@ -17,7 +17,7 @@ type alias Data =
 removeRequest : Bounces.ID -> ID -> FlagsSource a -> Cmd Data
 removeRequest bounceId id flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bounceRemove id) (encoder bounceId)
+        |> Requests.request (Topics.bounceRemove id) (encoder bounceId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -62,6 +62,6 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Bounces.Remove" code flagsSrc
+                |> report "Bounces.Remove" code flagsSrc
                 |> Result.mapError (always RemoveUnknown)
                 |> Result.andThen Err

@@ -35,7 +35,7 @@ transferRequest :
     -> Cmd Data
 transferRequest payload accountId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bankTransfer accountId) (encoder payload)
+        |> Requests.request (Topics.bankTransfer accountId) (encoder payload)
         |> Cmd.map (uncurry receiver)
 
 

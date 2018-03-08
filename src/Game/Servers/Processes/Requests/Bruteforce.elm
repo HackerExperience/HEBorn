@@ -28,7 +28,7 @@ bruteforceRequest :
     -> Cmd Data
 bruteforceRequest network targetIp cid flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bruteforce cid)
+        |> Requests.request (Topics.bruteforce cid)
             (encoder network targetIp)
         |> Cmd.map (uncurry receiver)
 
