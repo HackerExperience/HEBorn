@@ -5,8 +5,9 @@ import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
 import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
 import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
-import Game.Storyline.Shared exposing (ContactId, Reply)
 import Game.Storyline.StepActions.Shared exposing (Action)
+import Game.Storyline.Requests.Reply as ReplyRequest
+import Game.Storyline.Shared exposing (ContactId, Reply)
 
 
 type Msg
@@ -16,8 +17,4 @@ type Msg
     | HandleReplySent StoryEmailReplySent.Data
     | HandleActionDone Action
     | HandleStepProceeded StoryStepProceeded.Data
-    | Request RequestMsg
-
-
-type RequestMsg
-    = ReplyRequest ( ContactId, Reply ) ResponseType
+    | ReplyRequest ReplyRequest.Data

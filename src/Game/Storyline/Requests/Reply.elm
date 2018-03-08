@@ -1,9 +1,4 @@
-module Game.Storyline.Requests.Reply
-    exposing
-        ( Response(..)
-        , request
-        , receive
-        )
+module Game.Storyline.Requests.Reply exposing (Data, Error, replyRequest)
 
 import Json.Decode as Decode
     exposing
@@ -16,50 +11,43 @@ import Json.Decode as Decode
         , string
         )
 import Json.Encode as Encode
-import Utils.Json.Decode exposing (commonError)
-import Requests.Requests as Requests
+import Utils.Json.Decode exposing (message, commonError)
+import Requests.Requests as Requests exposing (report_)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
-import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Shared exposing (ContactId, Reply(..))
 
 
-type Response
-    = Okay
-    | WrongStep
+type alias Data =
+    Result Error ()
+
+
+type Error
+    = WrongStep
     | ReplyNotFound
+    | Unknown
 
 
-request :
-    ( ContactId, Reply )
+
+-- TODO: check if passing two replies is needed
+
+
+replyRequest :
+    ContactId
+    -> Reply
     -> ContactId
     -> Reply
     -> FlagsSource a
-    -> Cmd Msg
-request (( contactId, _ ) as src) accountId reply =
-    Requests.request
-        (Topics.emailReply accountId)
-        (ReplyRequest src >> Request)
-        (encoder contactId reply)
-
-
-receive : Code -> Value -> Maybe Response
-receive code json =
-    case code of
-        OkCode ->
-            Just Okay
-
-        ErrorCode ->
-            Requests.decodeGenericError
-                json
-                decodeErrorMessage
-
-        _ ->
-            Nothing
+    -> Cmd Data
+replyRequest contactId reply1 accountId reply2 flagsSrc =
+    flagsSrc
+        |> Requests.request_ (Topics.emailReply accountId)
+            (encoder contactId reply1)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
 
--- INTERNALS
+-- internals
 
 
 encoder : ContactId -> Reply -> Value
@@ -68,19 +56,6 @@ encoder contactId reply =
         [ ( "reply_id", Encode.string <| getReplyId reply )
         , ( "contact_id", Encode.string contactId )
         ]
-
-
-decodeErrorMessage : String -> Decoder Response
-decodeErrorMessage str =
-    case str of
-        "not_in_step" ->
-            succeed WrongStep
-
-        "reply_not_found" ->
-            succeed ReplyNotFound
-
-        value ->
-            fail <| commonError "email reply error message" value
 
 
 getReplyId : Reply -> String
@@ -115,3 +90,35 @@ getReplyId reply =
 
         NastyVirus1 ->
             "nasty_virus1"
+
+
+receiver : FlagsSource a -> Code -> Value -> Data
+receiver flagsSrc code json =
+    case code of
+        OkCode ->
+            Ok ()
+
+        ErrorCode ->
+            json
+                |> decodeValue errorMessage
+                |> report_ "Storyline.Reply" code flagsSrc
+                |> Result.mapError (always Unknown)
+                |> Result.andThen Err
+
+        _ ->
+            Err Unknown
+
+
+errorMessage : Decoder Error
+errorMessage =
+    message <|
+        \str ->
+            case str of
+                "not_in_step" ->
+                    succeed WrongStep
+
+                "reply_not_found" ->
+                    succeed ReplyNotFound
+
+                value ->
+                    fail <| commonError "email reply error message" value

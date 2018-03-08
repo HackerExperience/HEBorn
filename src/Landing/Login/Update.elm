@@ -1,8 +1,7 @@
 module Landing.Login.Update exposing (..)
 
 import Utils.React as React exposing (React)
-import Landing.Login.Requests exposing (..)
-import Landing.Login.Requests.Login as Login
+import Landing.Requests.Login as LoginRequest exposing (loginRequest)
 import Landing.Login.Config exposing (..)
 import Landing.Login.Messages exposing (..)
 import Landing.Login.Models exposing (..)
@@ -24,16 +23,16 @@ update config msg model =
         SetPassword password ->
             onSetPassword config password model
 
-        Request data ->
-            onRequest config (receive data) model
+        LoginRequest data ->
+            onLoginRequest config data model
 
 
 onSubmitLogin : Config msg -> Model -> UpdateResponse msg
 onSubmitLogin config model =
     ( model
     , config
-        |> Login.request model.username model.password
-        |> Cmd.map config.toMsg
+        |> loginRequest model.username model.password
+        |> Cmd.map (LoginRequest >> config.toMsg)
         |> React.cmd
     )
 
@@ -52,33 +51,17 @@ onSetPassword config password model =
     )
 
 
-onRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
-onRequest config response model =
-    case response of
-        Just response ->
-            updateRequest config response model
+onLoginRequest :
+    Config msg
+    -> LoginRequest.Data
+    -> Model
+    -> UpdateResponse msg
+onLoginRequest config data model =
+    case data of
+        Ok ( token, id ) ->
+            ( { model | loginFailed = False }
+            , React.msg <| config.onLogin id model.username token
+            )
 
-        Nothing ->
-            ( model, React.none )
-
-
-updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
-updateRequest config response model =
-    case response of
-        LoginResponse (Login.Okay token id) ->
-            onLoginOkay config token id model
-
-        LoginResponse Login.Error ->
-            onLoginError config model
-
-
-onLoginOkay : Config msg -> String -> String -> Model -> UpdateResponse msg
-onLoginOkay config token id model =
-    ( { model | loginFailed = False }
-    , React.msg <| config.onLogin id model.username token
-    )
-
-
-onLoginError : Config msg -> Model -> UpdateResponse msg
-onLoginError config model =
-    ( { model | loginFailed = True }, React.none )
+        Err () ->
+            ( { model | loginFailed = True }, React.none )

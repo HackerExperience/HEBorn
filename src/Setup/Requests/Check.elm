@@ -1,4 +1,4 @@
-module Setup.Requests.Check exposing (..)
+module Setup.Requests.Check exposing (serverName, serverLocation)
 
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Encode as Encode
@@ -13,29 +13,36 @@ import Setup.Settings exposing (..)
 {- This is a meta/multi request module, use it to build custom requests -}
 
 
-serverName : (Bool -> msg) -> String -> CId -> FlagsSource a -> Cmd msg
-serverName func name cid =
-    name
-        |> Name
-        |> encodeSettings
-        |> encodeKV
-        |> Requests.request (Topics.serverConfigCheck cid)
-            (uncurry receiveServerName >> func)
+serverName : String -> CId -> FlagsSource a -> Cmd Bool
+serverName name cid flagsSrc =
+    let
+        payload =
+            name
+                |> Name
+                |> encodeSettings
+                |> encodeKV
+    in
+        flagsSrc
+            |> Requests.request_ (Topics.serverConfigCheck cid) payload
+            |> Cmd.map (uncurry receiveServerName)
 
 
 serverLocation :
-    (Maybe String -> msg)
-    -> Coordinates
+    Coordinates
     -> CId
     -> FlagsSource a
-    -> Cmd msg
-serverLocation func coords cid =
-    coords
-        |> Location
-        |> encodeSettings
-        |> encodeKV
-        |> Requests.request (Topics.serverConfigCheck cid)
-            (uncurry receiveServerLocation >> func)
+    -> Cmd (Maybe String)
+serverLocation coords cid flagsSrc =
+    let
+        payload =
+            coords
+                |> Location
+                |> encodeSettings
+                |> encodeKV
+    in
+        flagsSrc
+            |> Requests.request_ (Topics.serverConfigCheck cid) payload
+            |> Cmd.map (uncurry receiveServerLocation)
 
 
 

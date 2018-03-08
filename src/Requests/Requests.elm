@@ -4,7 +4,6 @@ module Requests.Requests
         , report_
         , request
         , report
-        , decodeGenericError
         )
 
 import Http
@@ -88,17 +87,6 @@ report result =
                     Debug.log ("Request Decode Error " ++ msg) "..."
             in
                 Nothing
-
-
-decodeGenericError :
-    Decode.Value
-    -> (String -> Decode.Decoder a)
-    -> Maybe a
-decodeGenericError value decodeMessage =
-    Decode.field "message" Decode.string
-        |> Decode.andThen decodeMessage
-        |> flip Decode.decodeValue value
-        |> report
 
 
 

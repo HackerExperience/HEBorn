@@ -11,13 +11,12 @@ import Setup.Pages.PickLocation.Update as PickLocation
 import Setup.Pages.PickLocation.Messages as PickLocation
 import Setup.Pages.Mainframe.Update as Mainframe
 import Setup.Pages.Mainframe.Messages as Mainframe
-import Setup.Requests.Setup as Setup
-import Setup.Requests.SetServer as SetServer
+import Setup.Requests.Setup as SetupRequest exposing (setupRequest)
+import Setup.Requests.SetServer as SetServerRequest exposing (setServerRequest)
 import Setup.Settings as Settings exposing (Settings)
 import Setup.Config exposing (..)
 import Setup.Models exposing (..)
 import Setup.Messages exposing (..)
-import Setup.Requests exposing (..)
 
 
 type alias UpdateResponse msg =
@@ -51,8 +50,11 @@ update config msg model =
             else
                 ( model, React.none )
 
-        Request data ->
-            updateRequest config (receive data) model
+        SetServerRequest problems ->
+            onGenericSet config problems model
+
+        SetupRequest status ->
+            onSetup config status model
 
 
 
@@ -131,20 +133,11 @@ onPickLocationMsg config msg model =
 -- request handlers
 
 
-updateRequest : Config msg -> Maybe Response -> Model -> UpdateResponse msg
-updateRequest config response model =
-    case response of
-        Just (SetServer problems) ->
-            onGenericSet config problems model
-
-        Just (Setup status) ->
-            onSetup config status model
-
-        Nothing ->
-            ( model, React.none )
-
-
-onGenericSet : Config msg -> List Settings -> Model -> UpdateResponse msg
+onGenericSet :
+    Config msg
+    -> SetServerRequest.Data
+    -> Model
+    -> UpdateResponse msg
 onGenericSet ({ accountId } as config) list model =
     let
         model_ =
@@ -153,8 +146,8 @@ onGenericSet ({ accountId } as config) list model =
         if List.isEmpty list && noTopicsRemaining model_ then
             ( model_
             , config
-                |> Setup.request (List.map Tuple.first model.done) accountId
-                |> Cmd.map config.toMsg
+                |> setupRequest (List.map Tuple.first model.done) accountId
+                |> Cmd.map (SetupRequest >> config.toMsg)
                 |> React.cmd
             )
         else
@@ -174,13 +167,13 @@ onGenericSet ({ accountId } as config) list model =
                     |> flip (,) React.none
 
 
-onSetup : Config msg -> Setup.Response -> Model -> UpdateResponse msg
+onSetup : Config msg -> SetupRequest.Data -> Model -> UpdateResponse msg
 onSetup config status model =
     case status of
-        Setup.Okay ->
+        Ok () ->
             ( model, React.msg config.onPlay )
 
-        Setup.Error ->
+        Err () ->
             -- TODO: decide what to do
             ( model, React.none )
 
@@ -263,8 +256,8 @@ setRequest config model =
                     case config.mainframe of
                         Just cid ->
                             config
-                                |> SetServer.request settings cid
-                                |> Cmd.map config.toMsg
+                                |> setServerRequest settings cid
+                                |> Cmd.map (SetServerRequest >> config.toMsg)
 
                         Nothing ->
                             Cmd.none

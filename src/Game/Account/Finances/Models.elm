@@ -49,23 +49,6 @@ type alias BitcoinWallet =
     }
 
 
-type alias BankLoginRequest =
-    { bank : NIP
-    , accountNum : AccountNumber
-    , password : String
-    }
-
-
-type alias BankTransferRequest =
-    { fromBank : NIP
-    , fromAcc : AccountNumber
-    , toBank : NIP
-    , toAcc : AccountNumber
-    , password : String
-    , value : Int
-    }
-
-
 type alias Shop =
     Id
 
