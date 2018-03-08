@@ -10,7 +10,7 @@ import Game.Servers.Filesystem.Shared exposing (..)
 
 renameRequest : String -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 renameRequest newBaseName id cid =
-    Requests.request_ (Topics.fsRename cid)
+    Requests.request (Topics.fsRename cid)
         (encoder newBaseName id)
 
 

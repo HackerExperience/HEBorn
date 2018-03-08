@@ -16,7 +16,7 @@ createRequest :
     -> FlagsSource a
     -> Cmd ResponseType
 createRequest what newBaseName newPath cid =
-    Requests.request_ (Topics.fsCreate cid)
+    Requests.request (Topics.fsCreate cid)
         (encoder what newBaseName newPath)
 
 

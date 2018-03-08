@@ -8,7 +8,7 @@ import Json.Decode as Decode exposing (Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode exposing (Value)
 import Requests.Types exposing (FlagsSource, Code(..))
 import Requests.Topics as Topics
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Game.Account.Models exposing (..)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
@@ -33,7 +33,7 @@ collectWithBankRequest :
     -> Cmd Data
 collectWithBankRequest gateway viruses bounce ( atmId, accNumber ) id flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.virusCollect id)
+        |> Requests.request (Topics.virusCollect id)
             (encoder gateway viruses bounce atmId accNumber)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -93,6 +93,6 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Virus.Collect" code flagsSrc
+                |> report "Virus.Collect" code flagsSrc
                 |> Result.mapError (always UnkownCollectError)
                 |> Result.andThen Err

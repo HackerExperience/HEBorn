@@ -3,7 +3,7 @@ module Landing.Requests.SignUp exposing (Data, signUpRequest)
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 
@@ -15,7 +15,7 @@ type alias Data =
 signUpRequest : String -> String -> String -> FlagsSource a -> Cmd Data
 signUpRequest email username password flagsSrc =
     flagsSrc
-        |> Requests.request_ Topics.register (encoder email username password)
+        |> Requests.request Topics.register (encoder email username password)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -38,7 +38,7 @@ receiver flagsSrc code value =
         OkCode ->
             value
                 |> decodeValue decoder
-                |> report_ "Landing.SignUp" code flagsSrc
+                |> report "Landing.SignUp" code flagsSrc
                 |> Result.mapError (always ())
 
         _ ->

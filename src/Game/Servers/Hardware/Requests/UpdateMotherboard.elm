@@ -14,7 +14,7 @@ import Json.Decode as Decode
         , fail
         )
 import Utils.Json.Decode exposing (commonError, message)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Decoders.Hardware
@@ -42,7 +42,7 @@ type Errors
 updateMotherboardRequest : Motherboard -> CId -> FlagsSource a -> Cmd Data
 updateMotherboardRequest motherboard cid flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.updateMotherboard cid)
+        |> Requests.request (Topics.updateMotherboard cid)
             (Motherboard.encode motherboard)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -57,13 +57,13 @@ receiver flagsSrc code value =
         OkCode ->
             value
                 |> decodeValue Decoders.Hardware.motherboard
-                |> report_ "Hardware.UpdateMotherboard" code flagsSrc
+                |> report "Hardware.UpdateMotherboard" code flagsSrc
                 |> Result.mapError (always Unknown)
 
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Hardware.UpdateMotherboard" code flagsSrc
+                |> report "Hardware.UpdateMotherboard" code flagsSrc
                 |> Result.mapError (always Unknown)
                 |> Result.andThen Err
 

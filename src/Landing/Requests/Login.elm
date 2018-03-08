@@ -3,7 +3,7 @@ module Landing.Requests.Login exposing (Data, loginRequest)
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 
@@ -15,7 +15,7 @@ type alias Data =
 loginRequest : String -> String -> FlagsSource a -> Cmd Data
 loginRequest username password flagsSrc =
     flagsSrc
-        |> Requests.request_ Topics.login (encoder username password)
+        |> Requests.request Topics.login (encoder username password)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -37,7 +37,7 @@ receiver flagsSrc code value =
         OkCode ->
             value
                 |> decodeValue decoder
-                |> report_ "Landing.Login" code flagsSrc
+                |> report "Landing.Login" code flagsSrc
                 |> Result.mapError (always ())
 
         NotFoundCode ->

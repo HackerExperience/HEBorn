@@ -10,7 +10,7 @@ import Game.Servers.Filesystem.Shared exposing (..)
 
 moveRequest : Path -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 moveRequest path id cid =
-    Requests.request_ (Topics.fsMove cid)
+    Requests.request (Topics.fsMove cid)
         (encoder path id)
 
 

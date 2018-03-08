@@ -20,7 +20,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError, message)
 import Game.Meta.Types.Network exposing (NIP)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (Code(..), FlagsSource)
 import Game.Servers.Shared exposing (CId)
@@ -56,7 +56,7 @@ privateDownloadRequest :
     -> Cmd Data
 privateDownloadRequest target fileId storageId cid flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.fsDownload cid)
+        |> Requests.request (Topics.fsDownload cid)
             (encoder target fileId storageId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -70,7 +70,7 @@ publicDownloadRequest :
     -> Cmd Data
 publicDownloadRequest target fileId storageId cid flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.pftpDownload cid)
+        |> Requests.request (Topics.pftpDownload cid)
             (encoder target fileId storageId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -120,7 +120,7 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Processes.Download" code flagsSrc
+                |> report "Processes.Download" code flagsSrc
                 |> Result.mapError (always Unknown)
                 |> Result.andThen Err
 

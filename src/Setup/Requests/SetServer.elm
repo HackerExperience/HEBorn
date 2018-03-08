@@ -22,7 +22,7 @@ setServerRequest settings cid flagsSrc =
                 |> Encode.object
     in
         flagsSrc
-            |> Requests.request_ (Topics.serverConfigSet cid) payload
+            |> Requests.request (Topics.serverConfigSet cid) payload
             |> Cmd.map (uncurry <| receiver settings)
 
 

@@ -2,7 +2,7 @@ module Game.Servers.Requests.Resync exposing (Data, resyncRequest)
 
 import Time exposing (Time)
 import Json.Decode as Decode exposing (Value, decodeValue)
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Decoders.Servers
@@ -17,7 +17,7 @@ type alias Data =
 resyncRequest : CId -> Time -> Maybe GatewayCache -> FlagsSource a -> Cmd Data
 resyncRequest id time gatewayCache flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.serverResync id)
+        |> Requests.request (Topics.serverResync id)
             emptyPayload
         |> Cmd.map (uncurry <| receiver flagsSrc id time gatewayCache)
 
@@ -39,7 +39,7 @@ receiver flagsSrc cid now gatewayCache code value =
         OkCode ->
             value
                 |> decodeValue (Decoders.Servers.server now gatewayCache)
-                |> report_ "Servers.Resync" code flagsSrc
+                |> report "Servers.Resync" code flagsSrc
                 |> Result.map ((,) cid)
                 |> Result.mapError (always ())
 

@@ -20,7 +20,7 @@ setupRequest pages id flagsSrc =
                 [ ( "pages", Encode.list <| encodeDone pages ) ]
     in
         flagsSrc
-            |> Requests.request_ (Topics.clientSetup id) payload
+            |> Requests.request (Topics.clientSetup id) payload
             |> Cmd.map (uncurry receiver)
 
 

@@ -23,7 +23,7 @@ serverName name cid flagsSrc =
                 |> encodeKV
     in
         flagsSrc
-            |> Requests.request_ (Topics.serverConfigCheck cid) payload
+            |> Requests.request (Topics.serverConfigCheck cid) payload
             |> Cmd.map (uncurry receiveServerName)
 
 
@@ -41,7 +41,7 @@ serverLocation coords cid flagsSrc =
                 |> encodeKV
     in
         flagsSrc
-            |> Requests.request_ (Topics.serverConfigCheck cid) payload
+            |> Requests.request (Topics.serverConfigCheck cid) payload
             |> Cmd.map (uncurry receiveServerLocation)
 
 
