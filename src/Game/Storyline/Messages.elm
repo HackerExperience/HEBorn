@@ -1,6 +1,5 @@
 module Game.Storyline.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
 import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent

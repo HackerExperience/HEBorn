@@ -1,7 +1,6 @@
 module Setup.Messages exposing (..)
 
 import Json.Encode exposing (Value)
-import Requests.Types exposing (ResponseType)
 import Game.Servers.Shared as Servers
 import Setup.Settings exposing (Settings, SettingTopic)
 import Setup.Requests.SetServer as SetServerRequest

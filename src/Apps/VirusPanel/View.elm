@@ -10,15 +10,11 @@ import Utils.Maybe as Maybe
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.ToString exposing (timestampToFullData)
-import UI.Widgets.CustomSelect exposing (customSelect)
 import UI.Widgets.HorizontalTabs exposing (hzTabs)
 import UI.Widgets.Modal exposing (modalOk)
 import UI.Widgets.Modal.Virus exposing (..)
 import Game.Account.Database.Models as Database exposing (VirusType(..))
 import Game.Account.Database.Shared exposing (..)
-import Game.Account.Bounces.Shared as Bounces
-import Game.Account.Finances.Models as Finances
-import Game.Account.Finances.Shared exposing (toMoney)
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Apps.VirusPanel.Config exposing (..)
 import Apps.VirusPanel.Messages exposing (Msg(..))

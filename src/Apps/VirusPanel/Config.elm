@@ -2,7 +2,6 @@ module Apps.VirusPanel.Config exposing (..)
 
 import Core.Flags exposing (Flags)
 import Game.Account.Bounces.Models as Bounces
-import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Database.Models as Database
 import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared as Servers

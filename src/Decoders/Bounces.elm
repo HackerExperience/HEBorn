@@ -14,7 +14,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, required, custom)
 import Game.Account.Bounces.Models exposing (..)
 import Game.Account.Bounces.Shared exposing (..)
-import Game.Account.Finances.Models exposing (AtmId, AccountNumber)
 import Game.Meta.Types.Network exposing (NIP)
 
 
