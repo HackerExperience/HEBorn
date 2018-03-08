@@ -4,17 +4,14 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Utils.Html.Attributes exposing (boolAttr)
 import UI.Widgets.Modal as Modal exposing (..)
 import Game.Account.Bounces.Models as Bounces
-import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Database.Models as Database exposing (HackedServer)
 import Game.Account.Finances.Models as Finances
     exposing
         ( AccountId
         , BitcoinAddress
         )
-import Game.Shared exposing (ID)
 import Apps.VirusPanel.Config as App
 import Apps.VirusPanel.Models as App
     exposing

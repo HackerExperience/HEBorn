@@ -6,7 +6,6 @@ import Game.Account.Models as Account
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Account.Finances.Messages exposing (..)
-import Game.Account.Finances.Shared exposing (..)
 
 
 type alias Config msg =

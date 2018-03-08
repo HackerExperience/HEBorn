@@ -4,7 +4,6 @@ import Game.Meta.Types.Apps.Desktop exposing (Requester)
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Account.Finances.Models exposing (..)
-import Game.Account.Finances.Shared exposing (..)
 
 
 type Msg

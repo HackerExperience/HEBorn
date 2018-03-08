@@ -1,7 +1,6 @@
 module Landing.SignUp.Messages exposing (..)
 
 import Landing.Requests.SignUp as SignUp
-import Requests.Types exposing (ResponseType)
 
 
 type Msg

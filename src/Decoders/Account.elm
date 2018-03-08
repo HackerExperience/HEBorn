@@ -1,9 +1,7 @@
 module Decoders.Account exposing (..)
 
-import Dict as Dict
 import Json.Decode as Decode exposing (Decoder, map, field, string, succeed, oneOf)
 import Json.Decode.Pipeline exposing (decode, required, hardcoded, optional)
-import Decoders.Bounces exposing (bounces)
 import Game.Account.Models exposing (..)
 import Game.Account.Bounces.Dummy as Bounces
 import Game.Account.Database.Dummy as Database

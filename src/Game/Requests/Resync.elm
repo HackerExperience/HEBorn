@@ -16,7 +16,6 @@ import Requests.Types
         , Code(..)
         , emptyPayload
         )
-import Game.Messages exposing (..)
 import Game.Models exposing (..)
 import Game.Account.Models as Account
 

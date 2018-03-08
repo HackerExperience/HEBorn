@@ -2,7 +2,6 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.React as React exposing (React)
-import Game.Account.Finances.Shared as Finances
 import Game.Account.Finances.Requests.Login as BankLoginRequest
 import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Servers.Models as Servers

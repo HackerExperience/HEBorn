@@ -2,7 +2,6 @@ module Game.Account.Finances.Models exposing (..)
 
 import Dict as Dict exposing (Dict)
 import Game.Servers.Shared exposing (Id)
-import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Components as Components
 
 

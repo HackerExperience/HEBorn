@@ -2,9 +2,7 @@ module Apps.VirusPanel.Update exposing (update)
 
 import Dict as Dict
 import Utils.React as React exposing (React)
-import Game.Servers.Logs.Models exposing (ID)
 import Game.Meta.Types.Network exposing (NIP)
-import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Database.Models as Database
 import Game.Account.Database.Shared exposing (..)
