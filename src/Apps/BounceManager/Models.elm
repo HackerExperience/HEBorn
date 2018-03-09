@@ -24,7 +24,6 @@ type ModalAction
     | ForSave ( Maybe Bounces.ID, Bounces.Bounce )
     | ForError Error
     | ForSaveSucessful
-    | ForSpinner
 
 
 type Error
@@ -41,6 +40,8 @@ type alias Model =
     { selected : MainTab
     , selection : Maybe Selection
     , randomUuidSeed : Random.Seed
+    , waitingSave : Bool
+    , waitingDelete : Bool
     , anyChange : Bool
     , selectedBounce : Maybe SelectedBounce
     , renaming : Bool
@@ -71,6 +72,8 @@ initialModel : Reference -> Model
 initialModel me =
     { selected = TabManage
     , selection = Nothing
+    , waitingSave = False
+    , waitingDelete = False
     , randomUuidSeed = Random.initialSeed 16777215
     , anyChange = False
     , selectedBounce = Nothing

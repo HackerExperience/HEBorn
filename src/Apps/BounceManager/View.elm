@@ -216,11 +216,6 @@ modalHandler ({ toMsg, batchMsg } as config) model =
                     ("Save Sucessfully!")
                     (toMsg <| SetModal Nothing)
 
-            Just ForSpinner ->
-                modalOk (Just "Think that i'm a Spinner")
-                    "Spinning...."
-                    (batchMsg [])
-
             Nothing ->
                 text ""
 
