@@ -72,6 +72,9 @@ type_ =
                 "file_download" ->
                     field "data" download
 
+                "file_upload" ->
+                    field "data" upload
+
                 "virus_collect" ->
                     succeed VirusCollect
 
@@ -191,6 +194,13 @@ download =
         |> required "connection_type" connType
         |> required "storage_id" string
         |> map Download
+
+
+upload : Decoder Type
+upload =
+    decode UploadContent
+        |> optionalMaybe "storage_id" string
+        |> map Upload
 
 
 connType : Decoder TransferType

@@ -8,6 +8,8 @@ type Content
     = Generic Title Message
     | DownloadStarted NIP StorageId Filesystem.FileEntry
     | DownloadConcluded NIP StorageId Filesystem.FileEntry
+    | UploadStarted NIP StorageId Filesystem.FileEntry
+    | UploadConcluded NIP StorageId Filesystem.FileEntry
 
 
 type alias Title =
@@ -42,6 +44,20 @@ render content =
               )
             )
 
+        UploadStarted origin storage fileEntry ->
+            ( "New upload started"
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " upload started!"
+              )
+            )
+
+        UploadConcluded origin storage fileEntry ->
+            ( "New upload concluded"
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " upload concluded!"
+              )
+            )
+
 
 
 -- it might make sense to return html instead
@@ -63,6 +79,20 @@ renderToast content =
         DownloadConcluded origin storage fileEntry ->
             ( "Download concluded"
             , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " download has  concluded!"
+                ++ " download has concluded!"
+              )
+            )
+
+        UploadStarted origin storage fileEntry ->
+            ( "Upload started"
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " upload has started!"
+              )
+            )
+
+        UploadConcluded origin storage fileEntry ->
+            ( "Upload concluded"
+            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
+                ++ " upload has concluded!"
               )
             )

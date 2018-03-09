@@ -219,16 +219,28 @@ emailConfig appId ( cid, _ ) config =
 
 explorerConfig : AppId -> ( CId, Server ) -> Config msg -> Explorer.Config msg
 explorerConfig appId ( cid, server ) config =
-    { toMsg = ExplorerMsg >> AppMsg appId >> config.toMsg
-    , batchMsg = config.batchMsg
-    , activeServer = server
-    , onNewTextFile = Filesystem.HandleNewTextFile >>> filesystem config cid
-    , onNewDir = Filesystem.HandleNewDir >>> filesystem config cid
-    , onMoveFile = Filesystem.HandleMove >>> filesystem config cid
-    , onRenameFile = Filesystem.HandleRename >>> filesystem config cid
-    , onDeleteFile = Filesystem.HandleDelete >> filesystem config cid
-    , menuAttr = config.menuAttr
-    }
+    let
+        onUploadFile =
+            Processes.HandleStartUpload >>>> processes config cid
+
+        getFilesystem =
+            flip Servers.getStorage server
+                >> Maybe.map Servers.getFilesystem
+    in
+        { toMsg = ExplorerMsg >> AppMsg appId >> config.toMsg
+        , batchMsg = config.batchMsg
+        , activeServer = server
+        , endpointCId = endpointCIdFromConfig config
+        , endpointMainStorage = endpointMainStorageId config
+        , getFilesystem = getFilesystem
+        , onNewTextFile = Filesystem.HandleNewTextFile >>> filesystem config cid
+        , onNewDir = Filesystem.HandleNewDir >>> filesystem config cid
+        , onMoveFile = Filesystem.HandleMove >>> filesystem config cid
+        , onRenameFile = Filesystem.HandleRename >>> filesystem config cid
+        , onDeleteFile = Filesystem.HandleDelete >> filesystem config cid
+        , onUploadFile = onUploadFile
+        , menuAttr = config.menuAttr
+        }
 
 
 financeConfig : AppId -> Config msg -> Finance.Config msg
@@ -438,6 +450,19 @@ endpointCIdFromConfig { activeGateway } =
     activeGateway
         |> Tuple.second
         |> Servers.getEndpointCId
+
+
+endpointMainStorageId : Config msg -> Maybe StorageId
+endpointMainStorageId { activeGateway, game } =
+    let
+        servers =
+            Game.getServers game
+    in
+        activeGateway
+            |> Tuple.second
+            |> Servers.getEndpointCId
+            |> Maybe.andThen (flip Servers.get servers)
+            |> Maybe.map (Servers.getMainStorageId)
 
 
 accountFromConfig : Config msg -> Account.Model

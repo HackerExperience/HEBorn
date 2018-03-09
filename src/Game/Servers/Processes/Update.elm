@@ -8,12 +8,14 @@ import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesChanged
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Requests.Bruteforce as Bruteforce exposing (bruteforceRequest)
 import Game.Servers.Processes.Requests.Download as Download
     exposing
         ( publicDownloadRequest
         , privateDownloadRequest
         )
+import Game.Servers.Processes.Requests.Upload as Upload exposing (uploadRequest)
 import Game.Servers.Processes.Config exposing (..)
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Processes.Models exposing (..)
@@ -38,6 +40,12 @@ update config msg model =
 
         HandleStartPublicDownload origin storage id ->
             handleStartDownload config PublicFTP origin storage id model
+
+        HandleStartUpload target storage fileEntry ->
+            handleStartUpload config target storage fileEntry model
+
+        UploadRequestFailed id ->
+            ( remove id model, React.none )
 
         BruteforceRequestFailed id ->
             ( remove id model, React.none )
@@ -106,7 +114,7 @@ handleStartDownload config transferType origin storageId file model =
                 Err error ->
                     config.batchMsg
                         [ config.toMsg <| DownloadRequestFailed id
-                        , config.onDownloadFailed
+                        , config.onGenericNotification
                             "Couldn't start download"
                             (Download.errorToString error)
                         ]
@@ -114,6 +122,46 @@ handleStartDownload config transferType origin storageId file model =
         cmd =
             config
                 |> perform origin (Filesystem.toId file) storageId config.cid
+                |> Cmd.map toMsg
+                |> React.cmd
+    in
+        ( model_, cmd )
+
+
+handleStartUpload :
+    Config msg
+    -> CId
+    -> Upload.StorageId
+    -> Filesystem.FileEntry
+    -> Model
+    -> UpdateResponse msg
+handleStartUpload config target storageId file model =
+    let
+        process =
+            newOptimistic (Upload (UploadContent (Just storageId)))
+                config.nip
+                (Network.getIp config.nip)
+                unknownProcessFile
+
+        ( id, model_ ) =
+            insertOptimistic process model
+
+        toMsg result =
+            case result of
+                Ok () ->
+                    config.onUploadStarted storageId file
+
+                Err error ->
+                    config.batchMsg
+                        [ config.toMsg <| UploadRequestFailed id
+                        , config.onGenericNotification
+                            "Couldn't start upload"
+                            (Upload.errorToString error)
+                        ]
+
+        cmd =
+            config
+                |> uploadRequest (Filesystem.toId file) storageId target
                 |> Cmd.map toMsg
                 |> React.cmd
     in
