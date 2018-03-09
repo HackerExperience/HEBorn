@@ -64,8 +64,6 @@ renderData ( nip, item ) =
             , text <| Maybe.withDefault "[Unlabeled]" alias
             , text " notes: "
             , item.notes |> Maybe.withDefault "S/N" |> text
-            , span [ onClick <| EnterSelectingVirus (Network.toString nip) ]
-                [ text " !!!!VIRUS!!!!" ]
             ]
 
 
@@ -83,31 +81,6 @@ renderMiniData ( nip, item ) =
             , text " nick: "
             , text <| Maybe.withDefault "[Unlabeled]" alias
             ]
-
-
-renderVirusOption : Config msg -> String -> String -> Html Msg
-renderVirusOption { database } activeId id =
-    let
-        version =
-            id
-                |> flip Database.getVirus database
-                |> Maybe.andThen
-                    (\virus ->
-                        Database.getVirusVersion virus
-                            |> toString
-                            |> Just
-                    )
-                |> Maybe.withDefault "Unknown"
-
-        label =
-            id
-                |> flip Database.getVirus database
-                |> Maybe.andThen (Database.getVirusName >> Just)
-                |> Maybe.withDefault "Unknown"
-    in
-        option
-            [ value id, selected (activeId == id) ]
-            [ text (label ++ " (" ++ (toString version) ++ ")") ]
 
 
 renderEditing :
@@ -135,17 +108,6 @@ renderEditing config (( nip, item ) as entry) src =
                     ]
                     []
                 ]
-
-        SelectingVirus activeId ->
-            select
-                [ class [ BoxifyMe ]
-                , onChange
-                    (UpdateServersSelectVirus (Network.toString nip))
-                ]
-                (List.map
-                    (renderVirusOption config <| Maybe.withDefault "" activeId)
-                    item.virusInstalled
-                )
 
 
 renderTopFlags : ( NIP, Database.HackedServer ) -> Html Msg

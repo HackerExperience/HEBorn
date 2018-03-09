@@ -34,20 +34,18 @@ modalSetActiveVirus :
     -> Html msg
 modalSetActiveVirus config server selectMsg okMsg cancelMsg model =
     let
-        virusName =
-            flip Database.getVirus config.database
-                >> Maybe.map Database.getVirusName
-                >> Maybe.withDefault "Unknown"
-
         installedVirus =
             Database.getVirusInstalled server
 
         virusList =
-            List.map virusName installedVirus
+            installedVirus
+                |> Dict.values
+                |> List.map Database.getVirusName
 
         activeVirus =
             model.selectedActiveVirus
-                |> Maybe.map virusName
+                |> Maybe.andThen (flip Database.getVirus server)
+                |> Maybe.map Database.getVirusName
 
         body =
             [ text "Select Active Virus: "

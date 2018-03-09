@@ -114,12 +114,32 @@ resetRunningVirusTime :
 resetRunningVirusTime config nip fileId hackedServers =
     case Dict.get nip hackedServers of
         Just server ->
-            if (Just fileId) == (getActiveVirus server) then
-                Dict.insert nip
-                    { server | runningTime = Just config.lastTick }
+            let
+                viruses =
+                    server
+                        |> getVirusInstalled
+            in
+                if Dict.member fileId viruses then
+                    viruses
+                        |> Dict.get fileId
+                        |> Maybe.map
+                            (resetVirusTime config
+                                >> flip (Dict.insert fileId) viruses
+                                >> (\iv -> { server | virusInstalled = iv })
+                                >> flip (Dict.insert nip) hackedServers
+                                >> Maybe.withDefault hackedServers
+                            )
+                else
                     hackedServers
-            else
-                hackedServers
 
         Nothing ->
             hackedServers
+
+
+
+-- Helpers
+
+
+resetVirusTime : Config msg -> Virus -> Virus
+resetVirusTime config virus =
+    { virus | runningTime = Just config.lastTick }

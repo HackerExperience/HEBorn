@@ -19,10 +19,39 @@ type Easing
     | CubicBezier Int Int Int Int
 
 
+type IterationCount
+    = Number Float
+    | Infinite
+
+
 type Condition
     = EQ String String
     | BOOL String
     | NOT Condition
+
+
+animation : String -> Float -> Easing -> IterationCount -> Style
+animation type_ time easing iteration =
+    property "animation"
+        (type_
+            |> toString
+            |> flip (++) " "
+            |> flip (++) (toString time)
+            |> flip (++) "s "
+            |> flip (++) (easingToString easing)
+            |> flip (++) " "
+            |> flip (++) (iterationCountToString iteration)
+        )
+
+
+iterationCountToString : IterationCount -> String
+iterationCountToString iterationCount =
+    case interationCount of
+        Number num ->
+            toString num
+
+        Infinite ->
+            "infinite"
 
 
 easingToString : Easing -> String
