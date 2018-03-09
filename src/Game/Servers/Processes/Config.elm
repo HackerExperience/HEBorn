@@ -16,5 +16,6 @@ type alias Config msg =
     , nip : NIP
     , lastTick : Time
     , onDownloadStarted : String -> Filesystem.FileEntry -> msg
-    , onDownloadFailed : String -> String -> msg
+    , onUploadStarted : String -> Filesystem.FileEntry -> msg
+    , onGenericNotification : String -> String -> msg
     }

@@ -48,7 +48,13 @@ processesConfig cid nip config =
                 >> NotificationsMsg
                 >> ServerMsg cid
                 >> config.toMsg
-    , onDownloadFailed =
+    , onUploadStarted =
+        \storage ->
+            Notifications.HandleUploadStarted nip storage
+                >> NotificationsMsg
+                >> ServerMsg cid
+                >> config.toMsg
+    , onGenericNotification =
         \title ->
             Notifications.HandleGeneric title
                 >> NotificationsMsg

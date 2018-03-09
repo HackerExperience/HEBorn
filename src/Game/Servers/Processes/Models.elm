@@ -41,6 +41,7 @@ type
     | FileTransference
     | PassiveFirewall
     | Download DownloadContent
+    | Upload UploadContent
     | VirusCollect
 
 
@@ -57,6 +58,11 @@ type TransferType
 type alias DownloadContent =
     { transferType : TransferType
     , storageId : String
+    }
+
+
+type alias UploadContent =
+    { storageId : Maybe String
     }
 
 
@@ -440,6 +446,9 @@ getName process =
 
         Download _ ->
             "Download"
+
+        Upload _ ->
+            "Upload"
 
         VirusCollect ->
             "Virus Collect"

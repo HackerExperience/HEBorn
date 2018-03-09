@@ -6,15 +6,19 @@ import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesRecalcado
 import Game.Meta.Types.Network as Network
 import Game.Servers.Filesystem.Shared as Filesystem
+import Game.Servers.Shared exposing (CId)
 import Game.Servers.Processes.Requests.Download as Download
+import Game.Servers.Processes.Requests.Upload as Upload
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Shared exposing (..)
 
 
 type Msg
     = DownloadRequestFailed ID
+    | UploadRequestFailed ID
     | HandleStartDownload Network.NIP Download.StorageId Filesystem.FileEntry
     | HandleStartPublicDownload Network.NIP Download.StorageId Filesystem.FileEntry
+    | HandleStartUpload CId Upload.StorageId Filesystem.FileEntry
     | BruteforceRequestFailed ID
     | HandleStartBruteforce Network.IP
     | HandleBruteforceFailed BruteforceFailed.Data

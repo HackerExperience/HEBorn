@@ -139,6 +139,11 @@ fsDownload cid =
     WebsocketTopic (ServerChannel cid) "file.download"
 
 
+fsUpload : Servers.CId -> Topic
+fsUpload cid =
+    WebsocketTopic (ServerChannel cid) "file.upload"
+
+
 
 -- Public FTP
 
