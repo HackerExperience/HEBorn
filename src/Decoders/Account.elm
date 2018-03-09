@@ -6,7 +6,6 @@ import Decoders.Bounces exposing (bounces)
 import Decoders.Database exposing (database)
 import Decoders.Finances exposing (finances)
 import Game.Account.Models exposing (..)
-import Game.Account.Bounces.Dummy as Bounces
 import Game.Account.Database.Models as Database
 import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared as Servers
