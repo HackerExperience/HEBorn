@@ -57,7 +57,7 @@ eventTests =
 
                 json =
                     """
-                        { "type" : "cracker"
+                        { "type" : "cracker_bruteforce"
                         , "access" :
                             { "origin_ip" : "id"
                             , "priority" : 3

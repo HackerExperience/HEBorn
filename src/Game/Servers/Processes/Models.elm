@@ -2,12 +2,12 @@ module Game.Servers.Processes.Models exposing (..)
 
 import Dict exposing (Dict)
 import Time exposing (Time)
-import Game.Shared
+import Random.Pcg as Random
+import Utils.Model.RandomUuid as RandomUuid
 import Game.Meta.Types.Network as Network
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Logs.Models as Logs
-import Utils.Model.RandomUuid as RandomUuid
-import Random.Pcg as Random
+import Game.Servers.Processes.Shared exposing (..)
 
 
 type alias Model =
@@ -19,10 +19,6 @@ type alias Model =
 
 type alias Processes =
     Dict ID Process
-
-
-type alias ID =
-    Game.Shared.ID
 
 
 type alias Process =
@@ -110,10 +106,6 @@ type alias ProcessFile =
     , version : Maybe Version
     , name : String
     }
-
-
-type alias FileID =
-    Game.Shared.ID
 
 
 type alias Version =
@@ -302,12 +294,12 @@ replace previousId id process model =
 
 
 pause : Process -> Process
-pause ({ access } as process) =
+pause process =
     { process | state = Paused }
 
 
 resume : Process -> Process
-resume ({ access } as process) =
+resume process =
     { process | state = Running }
 
 
@@ -355,7 +347,7 @@ getTarget process =
 
 getOrigin : Process -> Maybe Network.NIP
 getOrigin process =
-    case process.access of
+    case getAccess process of
         Full data ->
             Just <| Network.toNip process.network data.origin
 
@@ -364,23 +356,28 @@ getOrigin process =
 
 
 getVersion : Process -> Maybe Version
-getVersion { file } =
-    Maybe.andThen .version file
+getVersion =
+    getFile >> Maybe.andThen .version
+
+
+getFile : Process -> Maybe ProcessFile
+getFile =
+    .file
 
 
 getFileID : Process -> Maybe FileID
-getFileID { file } =
-    Maybe.andThen .id file
+getFileID =
+    getFile >> Maybe.andThen .id
 
 
 getFileName : Process -> Maybe FileName
-getFileName { file } =
-    Maybe.map .name file
+getFileName =
+    getFile >> Maybe.map .name
 
 
 getPriority : Process -> Maybe Priority
-getPriority { access } =
-    case access of
+getPriority process =
+    case getAccess process of
         Full data ->
             Just data.priority
 
@@ -389,8 +386,8 @@ getPriority { access } =
 
 
 getUsage : Process -> Maybe ResourcesUsage
-getUsage { access } =
-    case access of
+getUsage process =
+    case getAccess process of
         Full data ->
             Just data.usage
 
@@ -414,8 +411,8 @@ getCompletionDate =
 
 
 getConnectionId : Process -> Maybe ConnectionID
-getConnectionId { access } =
-    case access of
+getConnectionId process =
+    case getAccess process of
         Full data ->
             data.source_connection
 
@@ -424,8 +421,8 @@ getConnectionId { access } =
 
 
 getName : Process -> String
-getName { type_ } =
-    case type_ of
+getName process =
+    case getType process of
         Cracker ->
             "Cracker"
 

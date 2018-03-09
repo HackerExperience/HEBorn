@@ -2,7 +2,7 @@ module Events.Server.Handlers.ProcessCompleted exposing (..)
 
 import Json.Decode exposing (Decoder, decodeValue, field, string)
 import Events.Shared exposing (Handler)
-import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Processes.Shared exposing (..)
 
 
 type alias Data =

@@ -19,6 +19,7 @@ import Random.Pcg
 import Random.Pcg.Extra exposing (andMap)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Processes.Models as Processes exposing (..)
+import Game.Servers.Processes.Shared as Processes exposing (..)
 import Game.Servers.Shared as Servers
 import Game.Servers.Logs.Models as Logs
 import Gen.Network as GenNetwork
