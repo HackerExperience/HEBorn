@@ -5,7 +5,7 @@ import Json.Decode as Decode exposing (Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode exposing (Value)
 import Requests.Types exposing (FlagsSource, Code(..))
 import Requests.Topics as Topics
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Game.Account.Models exposing (..)
 import Game.Account.Bounces.Models as Bounces
 import Game.Account.Bounces.Shared as Bounces exposing (CreateError(..))
@@ -26,7 +26,8 @@ createRequest :
     -> Cmd Data
 createRequest hackedServers bounce id requestId flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.bounceCreate id) (encoder hackedServers bounce requestId)
+        |> Requests.request (Topics.bounceCreate id)
+            (encoder hackedServers bounce requestId)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
@@ -100,6 +101,6 @@ receiver flagsSrc code value =
         _ ->
             value
                 |> decodeValue errorMessage
-                |> report_ "Bounces.Create" code flagsSrc
+                |> report "Bounces.Create" code flagsSrc
                 |> Result.mapError (always CreateUnknown)
                 |> Result.andThen Err

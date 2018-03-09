@@ -16,7 +16,6 @@ module UI.Widgets.Modal
 import Dict exposing (Dict)
 import Html exposing (Html, Attribute, node, div, button, text, h3, span)
 import Html.Events exposing (onClick)
-import UI.Widgets.CustomSelect exposing (customSelect)
 import Game.Servers.Models exposing (Storages)
 
 

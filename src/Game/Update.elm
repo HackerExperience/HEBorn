@@ -26,8 +26,11 @@ import Game.Web.Update as Web
 import Game.BackFlix.Messages as BackFlix
 import Game.BackFlix.Update as BackFlix
 import Game.Meta.Types.Network as Network
-import Game.Requests as Request exposing (Response)
-import Game.Requests.Resync as Resync
+import Game.Requests.Resync as ResyncRequest
+    exposing
+        ( resyncRequest
+        , resyncReceive
+        )
 import Game.Config exposing (..)
 import Game.Messages exposing (..)
 import Game.Models exposing (..)
@@ -64,10 +67,8 @@ update config msg model =
         Resync ->
             onResync config model
 
-        Request data ->
-            Request.receive model data
-                |> Maybe.map (flip (updateRequest config) model)
-                |> Maybe.withDefault ( model, React.none )
+        ResyncRequest response ->
+            onResyncRequest config (resyncReceive model response) model
 
         HandleJoinedAccount value ->
             handleJoinedAccount config value model
@@ -87,8 +88,8 @@ onResync config model =
 
         react =
             model
-                |> Resync.request accountId
-                |> Cmd.map config.toMsg
+                |> resyncRequest accountId
+                |> Cmd.map (ResyncRequest >> config.toMsg)
                 |> React.cmd
     in
         ( model, react )
@@ -230,31 +231,23 @@ onBackFlix config msg model =
         ( model_, react )
 
 
-
--- requests
-
-
-updateRequest : Config msg -> Response -> Model -> UpdateResponse msg
-updateRequest config response model =
-    case response of
-        Request.Resync (Resync.Okay data) ->
-            uncurry (flip <| onResyncResponse config) data
-
-
-onResyncResponse :
+onResyncRequest :
     Config msg
-    -> Decoders.Game.ServersToJoin
+    -> ResyncRequest.Data
     -> Model
     -> UpdateResponse msg
-onResyncResponse config servers model =
-    let
-        react =
-            servers.player
+onResyncRequest config data model =
+    case data of
+        Ok ( model, servers ) ->
+            ( model
+            , servers.player
                 |> List.map (bootstrapJoin config servers.remote)
                 |> config.batchMsg
                 |> React.msg
-    in
-        ( model, React.none )
+            )
+
+        Err _ ->
+            ( model, React.none )
 
 
 

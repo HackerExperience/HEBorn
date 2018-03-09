@@ -1,12 +1,13 @@
 module Apps.Browser.Pages.Bank.Config exposing (Config)
 
+import Game.Account.Finances.Requests.Login as LoginRequest
+import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Account.Finances.Models exposing (BankLoginRequest, BankTransferRequest)
 
 
 type alias Config msg =
     { toMsg : Msg -> msg
-    , onLogin : BankLoginRequest -> msg
-    , onTransfer : BankTransferRequest -> msg
+    , onLogin : LoginRequest.Payload -> msg
+    , onTransfer : TransferRequest.Payload -> msg
     , onLogout : msg
     }

@@ -1,11 +1,4 @@
-module Requests.Requests
-    exposing
-        ( request_
-        , report_
-        , request
-        , report
-        , decodeGenericError
-        )
+module Requests.Requests exposing (request, report)
 
 import Http
 import Utils.Json.Decode as Decode
@@ -19,11 +12,8 @@ import Requests.Topics as Topics exposing (Topic(..))
 import Requests.Types exposing (..)
 
 
--- REVIEW: remove underlines after deprecating legacy functions
-
-
-request_ : Topic -> Encode.Value -> FlagsSource a -> Cmd ResponseType
-request_ topic payload flagSource =
+request : Topic -> Encode.Value -> FlagsSource a -> Cmd ResponseType
+request topic payload flagSource =
     case topic of
         WebsocketTopic channel path ->
             WebsocketDriver.send
@@ -41,64 +31,11 @@ request_ topic payload flagSource =
                 (Encode.encode 0 payload)
 
 
-report_ : String -> Code -> FlagsSource a -> Result String b -> Result String b
-report_ info code flagSrc result =
+report : String -> Code -> FlagsSource a -> Result String b -> Result String b
+report info code flagSrc result =
     Decode.report ("Request (" ++ toString code ++ ") " ++ info)
         flagSrc.flags
         result
-
-
-
--- REVIEW: legacy functions
-
-
-request :
-    Topic
-    -> (ResponseType -> msg)
-    -> Encode.Value
-    -> FlagsSource a
-    -> Cmd msg
-request topic msg data source =
-    case topic of
-        WebsocketTopic channel path ->
-            WebsocketDriver.send
-                (okWs msg)
-                (errorWs msg)
-                source.flags.apiWsUrl
-                (WebsocketDriver.getAddress channel)
-                path
-                data
-
-        HttpTopic path ->
-            HttpDriver.send (genericHttp msg)
-                source.flags.apiHttpUrl
-                path
-                (Encode.encode 0 data)
-
-
-report : Result String a -> Maybe a
-report result =
-    case result of
-        Ok response ->
-            Just response
-
-        Err msg ->
-            let
-                msg_ =
-                    Debug.log ("Request Decode Error " ++ msg) "..."
-            in
-                Nothing
-
-
-decodeGenericError :
-    Decode.Value
-    -> (String -> Decode.Decoder a)
-    -> Maybe a
-decodeGenericError value decodeMessage =
-    Decode.field "message" Decode.string
-        |> Decode.andThen decodeMessage
-        |> flip Decode.decodeValue value
-        |> report
 
 
 

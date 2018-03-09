@@ -1,36 +1,15 @@
-module Game.Account.Finances.Messages
-    exposing
-        ( Msg(..)
-        , RequestMsg(..)
-        , LoginResponse(..)
-        , TransferResponse(..)
-        )
+module Game.Account.Finances.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
 import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Account.Finances.Requests.Login as LoginRequest
+import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Account.Finances.Models exposing (..)
-import Game.Account.Finances.Shared exposing (..)
 
 
 type Msg
-    = Request RequestMsg
+    = LoginRequest Requester LoginRequest.Data
+    | TransferRequest Requester TransferRequest.Data
     | HandleBankAccountClosed AccountId
     | HandleBankAccountUpdated AccountId BankAccount
-    | HandleBankAccountLogin BankLoginRequest Requester
-    | HandleBankAccountTransfer BankTransferRequest Requester
-
-
-type RequestMsg
-    = BankLogin Requester ResponseType
-    | BankTransfer Requester ResponseType
-
-
-type LoginResponse
-    = Valid BankAccountData
-    | DecodeFailed
-    | Invalid
-
-
-type TransferResponse
-    = Successful
-    | Error
+    | HandleBankAccountLogin LoginRequest.Payload Requester
+    | HandleBankAccountTransfer TransferRequest.Payload Requester

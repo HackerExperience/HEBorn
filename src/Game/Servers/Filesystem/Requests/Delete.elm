@@ -10,7 +10,7 @@ import Game.Servers.Filesystem.Shared exposing (..)
 
 deleteRequest : Id -> CId -> FlagsSource a -> Cmd ResponseType
 deleteRequest id cid =
-    Requests.request_ (Topics.fsDelete cid)
+    Requests.request (Topics.fsDelete cid)
         (encoder id)
 
 

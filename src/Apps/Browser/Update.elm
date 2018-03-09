@@ -2,8 +2,8 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.React as React exposing (React)
-import Game.Account.Finances.Models as Finances
-import Game.Account.Finances.Shared as Finances
+import Game.Account.Finances.Requests.Login as BankLoginRequest
+import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
@@ -142,7 +142,7 @@ onReqDownload { onNewPublicDownload } source file storage model =
 
 onBankLogin :
     Config msg
-    -> Finances.BankLoginRequest
+    -> BankLoginRequest.Payload
     -> Reference
     -> Model
     -> UpdateResponse msg
@@ -156,7 +156,7 @@ onBankLogin { onBankAccountLogin } request reference model =
 
 onBankTransfer :
     Config msg
-    -> Finances.BankTransferRequest
+    -> BankTransferRequest.Payload
     -> Reference
     -> Model
     -> UpdateResponse msg
@@ -450,22 +450,22 @@ handleBankLogin :
     Config msg
     -> Int
     -> Tab
-    -> Result () Finances.BankAccountData
+    -> BankLoginRequest.Data
     -> Model
     -> TabUpdateResponse msg
-handleBankLogin config tabId tab result model =
+handleBankLogin config tabId tab data model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            case result of
+            case data of
                 Ok accountData ->
                     updatePage config
                         (BankMsg <| Bank.HandleLogin accountData)
                         page
 
-                Err () ->
+                Err _ ->
                     updatePage config (BankMsg Bank.HandleLoginError) page
     in
         ( { tab | page = pageModel }, React.none )
@@ -475,20 +475,20 @@ handleBankTransfer :
     Config msg
     -> Int
     -> Tab
-    -> Result () ()
+    -> BankTransferRequest.Data
     -> Model
     -> TabUpdateResponse msg
-handleBankTransfer config tabId tab result model =
+handleBankTransfer config tabId tab data model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            case result of
+            case data of
                 Ok () ->
                     updatePage config (BankMsg Bank.HandleTransfer) page
 
-                Err () ->
+                Err _ ->
                     updatePage config (BankMsg Bank.HandleTransferError) page
     in
         ( { tab | page = pageModel }, React.none )

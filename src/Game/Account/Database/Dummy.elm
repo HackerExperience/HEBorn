@@ -1,7 +1,6 @@
 module Game.Account.Database.Dummy exposing (dummy)
 
 import Dict as Dict
-import Random as Random
 import Game.Account.Database.Models exposing (..)
 
 

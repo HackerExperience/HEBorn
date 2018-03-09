@@ -7,8 +7,6 @@ import Game.Account.Database.Models
         ( HackedBankAccountID
         , HackedBankAccount
         )
-import Game.Account.Finances.Models exposing (AtmId, AccountNumber)
-import Game.Shared exposing (ID)
 
 
 type Msg

@@ -1,6 +1,6 @@
-module Landing.SignUp.Messages exposing (Msg(..), RequestMsg(..))
+module Landing.SignUp.Messages exposing (..)
 
-import Requests.Types exposing (ResponseType)
+import Landing.Requests.SignUp as SignUp
 
 
 type Msg
@@ -11,8 +11,4 @@ type Msg
     | ValidatePassword
     | SetEmail String
     | ValidateEmail
-    | Request RequestMsg
-
-
-type RequestMsg
-    = SignUpRequest ResponseType
+    | SignUpRequest SignUp.Data

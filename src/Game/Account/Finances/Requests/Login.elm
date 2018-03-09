@@ -1,60 +1,69 @@
 module Game.Account.Finances.Requests.Login
     exposing
-        ( request
-        , receive
+        ( Payload
+        , Data
+        , loginRequest
         )
 
 import Json.Encode as Encode
 import Json.Decode exposing (Value, decodeValue)
 import Decoders.Bank exposing (accountData)
-import Requests.Requests as Requests
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
-import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
+import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Account.Models as Account
-import Game.Account.Finances.Models as Finances exposing (BankLoginRequest)
-import Game.Account.Finances.Messages
-    exposing
-        ( Msg(..)
-        , RequestMsg(..)
-        , LoginResponse(..)
-        )
 import Game.Meta.Types.Network as Network
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Account.Finances.Shared exposing (BankAccountData)
+import Game.Account.Finances.Models as Finances exposing (AccountNumber)
 
 
-request :
-    BankLoginRequest
-    -> Requester
-    -> Account.ID
-    -> FlagsSource a
-    -> Cmd Msg
-request { bank, accountNum, password } requester accountId data =
-    let
-        payload =
-            Encode.object
-                [ ( "bank_net", Encode.string (Network.getId bank) )
-                , ( "bank_ip", Encode.string (Network.getIp bank) )
-                , ( "account", Encode.int accountNum )
-                , ( "password", Encode.string password )
-                ]
-    in
-        Requests.request (Topics.bankLogin accountId)
-            (BankLogin requester >> Request)
-            payload
-            data
+type alias Payload =
+    { bank : Network.NIP
+    , accountNum : AccountNumber
+    , password : String
+    }
 
 
-receive : ResponseType -> LoginResponse
-receive ( code, json ) =
+type alias Data =
+    Result Error BankAccountData
+
+
+type Error
+    = Invalid
+    | Unknown
+
+
+loginRequest : Payload -> Account.ID -> FlagsSource a -> Cmd Data
+loginRequest payload accountId flagsSrc =
+    flagsSrc
+        |> Requests.request (Topics.bankLogin accountId)
+            (encoder payload)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
+
+
+
+-- internals
+
+
+encoder : Payload -> Value
+encoder { bank, accountNum, password } =
+    Encode.object
+        [ ( "bank_net", Encode.string (Network.getId bank) )
+        , ( "bank_ip", Encode.string (Network.getIp bank) )
+        , ( "account", Encode.int accountNum )
+        , ( "password", Encode.string password )
+        ]
+
+
+receiver : FlagsSource a -> Code -> Value -> Data
+receiver flagsSrc code value =
     case code of
         OkCode ->
-            case (decodeValue accountData json) of
-                Ok accountData ->
-                    Valid accountData
-
-                Err msg ->
-                    DecodeFailed
+            value
+                |> decodeValue accountData
+                |> report "Finances.Login" code flagsSrc
+                |> Result.mapError (always Unknown)
 
         _ ->
             --TODO: Threat this error properly
-            Invalid
+            Err Invalid

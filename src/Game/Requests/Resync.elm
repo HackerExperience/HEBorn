@@ -1,39 +1,42 @@
 module Game.Requests.Resync
     exposing
-        ( Response(..)
-        , request
-        , receive
+        ( Data
+        , resyncRequest
+        , resyncReceive
         )
 
 import Decoders.Game exposing (ServersToJoin)
 import Json.Decode exposing (Value, decodeValue)
-import Requests.Requests as Requests
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
-import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
-import Game.Messages exposing (..)
+import Requests.Types
+    exposing
+        ( FlagsSource
+        , ResponseType
+        , Code(..)
+        , emptyPayload
+        )
 import Game.Models exposing (..)
 import Game.Account.Models as Account
 
 
-type Response
-    = Okay ( Model, ServersToJoin )
+type alias Data =
+    Result () ( Model, ServersToJoin )
 
 
-request : Account.ID -> FlagsSource a -> Cmd Msg
-request id =
-    Requests.request (Topics.accountResync id)
-        (ResyncRequest >> Request)
-        emptyPayload
+resyncRequest : Account.ID -> FlagsSource a -> Cmd ResponseType
+resyncRequest id =
+    Requests.request (Topics.accountResync id) emptyPayload
 
 
-receive : Model -> Code -> Value -> Maybe Response
-receive model code json =
+resyncReceive : Model -> ResponseType -> Data
+resyncReceive model ( code, json ) =
     case code of
         OkCode ->
             json
                 |> decodeValue (Decoders.Game.bootstrap model)
-                |> Result.map Okay
-                |> Requests.report
+                |> report "Game.Resync" code model
+                |> Result.mapError (always ())
 
         _ ->
-            Nothing
+            Err ()

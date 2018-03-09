@@ -2,7 +2,6 @@ module Game.Account.Finances.Models exposing (..)
 
 import Dict as Dict exposing (Dict)
 import Game.Servers.Shared exposing (Id)
-import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Meta.Types.Components as Components
 
 
@@ -46,23 +45,6 @@ type alias BitcoinAddress =
 type alias BitcoinWallet =
     { address : String
     , balance : Float
-    }
-
-
-type alias BankLoginRequest =
-    { bank : NIP
-    , accountNum : AccountNumber
-    , password : String
-    }
-
-
-type alias BankTransferRequest =
-    { fromBank : NIP
-    , fromAcc : AccountNumber
-    , toBank : NIP
-    , toAcc : AccountNumber
-    , password : String
-    , value : Int
     }
 
 

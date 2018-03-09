@@ -29,7 +29,7 @@ import Json.Decode.Pipeline as Encode
         , hardcoded
         )
 import Json.Encode as Encode
-import Requests.Requests as Requests exposing (report_)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Utils.Json.Decode exposing (message)
@@ -52,7 +52,7 @@ type Error
 browseRequest : Site.Url -> Network.ID -> CId -> FlagsSource a -> Cmd Data
 browseRequest url nid cid flagsSrc =
     flagsSrc
-        |> Requests.request_ (Topics.browse cid) (encoder nid url)
+        |> Requests.request (Topics.browse cid) (encoder nid url)
         |> Cmd.map (uncurry <| receiver flagsSrc url)
 
 
@@ -74,13 +74,13 @@ receiver flagsSrc url code value =
         OkCode ->
             value
                 |> decodeValue (site url)
-                |> report_ "Servers.Browse" code flagsSrc
+                |> report "Servers.Browse" code flagsSrc
                 |> Result.mapError (always <| ConnectionError url)
 
         _ ->
             value
                 |> decodeValue (errorMessage url)
-                |> report_ "Servers.Browse" code flagsSrc
+                |> report "Servers.Browse" code flagsSrc
                 |> Result.mapError (always <| ConnectionError url)
                 |> Result.andThen Err
 
