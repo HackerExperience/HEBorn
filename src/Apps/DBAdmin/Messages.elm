@@ -12,8 +12,5 @@ type Msg
     | ApplyEditing MainTab ID
     | LeaveEditing MainTab ID
     | StartDeleting MainTab ID
-    | EnterSelectingVirus ID
     | UpdateServersEditingNick ID String
     | UpdateServersEditingNotes ID String
-    | UpdateServersSelectVirus ID ID
-    | DummyNoOp

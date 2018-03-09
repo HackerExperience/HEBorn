@@ -189,6 +189,7 @@ widgets =
     , horizontalTabs
     , customSelect
     , modal
+    , spinner
     , map
     ]
 
@@ -266,14 +267,14 @@ progressBar =
 modal : Snippet
 modal =
     typeSelector "modal"
-        [ position absolute
-        , left (px 0)
+        [ left (px 0)
         , right (px 0)
         , top (px 0)
         , height (pct 100)
         , zIndex (int 0)
         , flexContainerVert
         , justifyContent center
+        , position absolute
         , children
             [ typeSelector "overlay"
                 [ backgroundColor (rgba 0 0 0 0.5)
@@ -316,6 +317,20 @@ modal =
                     ]
                 ]
             ]
+        ]
+
+
+spinner : Snippet
+spinner =
+    typeSelector "spinner"
+        [ position absolute
+        , borderRadius (pct 50)
+        , border3 (px 1) solid (hex "ccc")
+        , borderTopColor (hex "07d")
+        , property "animation" "spinner .6s linear infinite"
+        , width (px 32)
+        , height (px 32)
+        , zIndex (int -2)
         ]
 
 

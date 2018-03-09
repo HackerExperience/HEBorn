@@ -10,7 +10,6 @@ type alias Model =
     { servers : HackedServers
     , bankAccounts : HackedBankAccounts
     , btcWallets : HackedBitcoinWallets
-    , viruses : Viruses
     }
 
 
@@ -36,13 +35,20 @@ type alias Virus =
     { name : String
     , version : Float
     , type_ : VirusType
+    , extension : String
+    , runningTime : Maybe Time
+    , isActive : Bool
     }
 
 
 type alias HackedBankAccount =
     { name : String
-    , password : String
-    , balance : Int
+    , password : Maybe String
+    , knownBalance : Maybe Int
+    , token : Maybe String
+    , notes : Maybe String
+    , lastLoginDate : Maybe Time
+    , lastUpdate : Time
     }
 
 
@@ -80,9 +86,7 @@ type alias HackedServer =
     { password : String
     , alias : Maybe String
     , notes : Maybe String
-    , virusInstalled : List ID
-    , activeVirus : Maybe ID
-    , runningTime : Maybe Time
+    , virusInstalled : Viruses
     }
 
 
@@ -91,25 +95,26 @@ emptyServer =
     { password = ""
     , alias = Nothing
     , notes = Nothing
-    , virusInstalled = []
-    , activeVirus = Nothing
-    , runningTime = Nothing
+    , virusInstalled = Dict.empty
     }
 
 
 initialModel : Model
 initialModel =
-    Model Dict.empty Dict.empty Dict.empty Dict.empty
+    Model Dict.empty Dict.empty Dict.empty
 
 
-getVirusInstalled : HackedServer -> List ID
+getVirusInstalled : HackedServer -> Viruses
 getVirusInstalled =
     .virusInstalled
 
 
-getActiveVirus : HackedServer -> Maybe ID
-getActiveVirus =
-    .activeVirus
+getActiveVirus : HackedServer -> Maybe Virus
+getActiveVirus server =
+    server.virusInstalled
+        |> Dict.filter (\k v -> (==) True v.isActive)
+        |> Dict.values
+        |> List.head
 
 
 getVirusName : Virus -> String
@@ -123,13 +128,13 @@ getVirusVersion =
 
 
 getVirusTime : HackedServer -> Maybe Time
-getVirusTime =
-    .runningTime
+getVirusTime server =
+    Maybe.andThen .runningTime (getActiveVirus server)
 
 
-getVirus : ID -> Model -> Maybe Virus
-getVirus id model =
-    Dict.get id model.viruses
+getVirus : ID -> HackedServer -> Maybe Virus
+getVirus id server =
+    Dict.get id server.virusInstalled
 
 
 getHackedServers : Model -> HackedServers

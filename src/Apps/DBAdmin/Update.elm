@@ -32,12 +32,6 @@ update config msg model =
         UpdateTextFilter tab filter ->
             onUpdateTextFilter config tab filter model
 
-        EnterSelectingVirus serverIp ->
-            onEnterSelectingVirus config serverIp model
-
-        UpdateServersSelectVirus serverIp virusId ->
-            onUpdateServersSelectVirus serverIp virusId model
-
         GoTab tab ->
             onGoTab tab model
 
@@ -77,24 +71,6 @@ onUpdateTextFilter config tab filter model =
     let
         model_ =
             updateTextFilter filter tab config.database model
-    in
-        ( model_, React.none )
-
-
-onEnterSelectingVirus : Config msg -> ID -> Model -> UpdateResponse msg
-onEnterSelectingVirus config serverIp model =
-    let
-        model_ =
-            Servers.enterSelectingVirus serverIp config.database model
-    in
-        ( model_, React.none )
-
-
-onUpdateServersSelectVirus : ID -> ID -> Model -> UpdateResponse msg
-onUpdateServersSelectVirus serverIp virusId model =
-    let
-        model_ =
-            Servers.updateSelectingVirus virusId serverIp model
     in
         ( model_, React.none )
 

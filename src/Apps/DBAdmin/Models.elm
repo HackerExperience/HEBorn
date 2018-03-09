@@ -15,7 +15,6 @@ type Sorting
 
 type EditingServers
     = EditingTexts ( String, String )
-    | SelectingVirus (Maybe String)
 
 
 type alias Tab =
