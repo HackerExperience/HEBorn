@@ -8,6 +8,7 @@ import UI.Widgets.ProgressBar exposing (progressBar)
 import UI.Widgets.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Servers.Processes.Models as Processes
+import Game.Servers.Processes.Shared as Processes
 import Apps.TaskManager.Config exposing (..)
 import Apps.TaskManager.Models exposing (..)
 import Apps.TaskManager.Resources exposing (Classes(..), prefix)

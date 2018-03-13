@@ -17,6 +17,7 @@ import Game.Servers.Processes.Requests.Download as Download
 import Game.Servers.Processes.Config exposing (..)
 import Game.Servers.Processes.Messages exposing (..)
 import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Processes.Shared exposing (..)
 
 
 type alias UpdateResponse msg =

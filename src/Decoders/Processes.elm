@@ -3,6 +3,7 @@ module Decoders.Processes exposing (..)
 import Time exposing (Time)
 import Dict exposing (Dict)
 import Game.Servers.Processes.Models exposing (..)
+import Game.Servers.Processes.Shared exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required, optional, custom)
 import Utils.Json.Decode exposing (optionalMaybe)
@@ -66,7 +67,7 @@ type_ =
 
         decodeType value =
             case value of
-                "cracker" ->
+                "cracker_bruteforce" ->
                     succeed Cracker
 
                 "file_download" ->
@@ -90,15 +91,15 @@ access =
                 |> required "origin_ip" string
                 |> required "priority" priority
                 |> required "usage" resourcesUsage
-                |> optional "source_connection_id" (maybe string) Nothing
-                |> optional "target_connection_id" (maybe string) Nothing
-                |> optional "source_file" (maybe file) Nothing
+                |> optionalMaybe "source_connection_id" string
+                |> optionalMaybe "target_connection_id" string
+                |> optionalMaybe "source_file" file
                 |> map Full
 
         partial =
             decode PartialAccess
-                |> optional "source_connection_id" (maybe string) Nothing
-                |> optional "target_connection_id" (maybe string) Nothing
+                |> optionalMaybe "source_connection_id" string
+                |> optionalMaybe "target_connection_id" string
                 |> map Partial
     in
         oneOf [ full, partial ]
@@ -132,6 +133,7 @@ priority =
     let
         decode num =
             case num of
+                -- 0 => paused
                 1 ->
                     succeed Lowest
 
