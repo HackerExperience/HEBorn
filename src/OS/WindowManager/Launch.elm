@@ -40,10 +40,9 @@ launch :
     -> Maybe AppParams
     -> Maybe Context
     -> CId
-    -> CId
     -> Model
     -> ( Model, React msg )
-launch config desktopApp maybeParams maybeContext cid sessionId model =
+launch config desktopApp maybeParams maybeContext cid model =
     case Servers.get cid <| serversFromConfig config of
         Just server ->
             case Apps.context desktopApp of
@@ -53,7 +52,6 @@ launch config desktopApp maybeParams maybeContext cid sessionId model =
                         maybeParams
                         (Maybe.withDefault Gateway maybeContext)
                         ( cid, server )
-                        sessionId
                         model
 
                 Apps.StaticContext Gateway ->
@@ -62,7 +60,6 @@ launch config desktopApp maybeParams maybeContext cid sessionId model =
                         maybeParams
                         Gateway
                         ( cid, server )
-                        sessionId
                         model
 
                 Apps.StaticContext Endpoint ->
@@ -71,7 +68,6 @@ launch config desktopApp maybeParams maybeContext cid sessionId model =
                         maybeParams
                         Endpoint
                         ( cid, server )
-                        sessionId
                         model
 
         Nothing ->
@@ -120,10 +116,9 @@ launchDoubleHelper :
     -> Maybe AppParams
     -> Context
     -> ( CId, Server )
-    -> CId
     -> Model
     -> ( Model, React msg )
-launchDoubleHelper config desktopApp maybeParams context activeGateway sessionId model =
+launchDoubleHelper config desktopApp maybeParams context activeGateway model =
     let
         ( gatewayParams, endpointParams ) =
             case context of
@@ -165,17 +160,13 @@ launchDoubleHelper config desktopApp maybeParams context activeGateway sessionId
         instance =
             Double context appId Nothing
 
+        sessionId =
+            Tuple.first config.activeServer
+
         model3 =
             case maybeActiveCId of
                 Just cid ->
-                    let
-                        model_ =
-                            insert sessionId windowId size instance model2
-                    in
-                        if (Tuple.first config.activeServer) /= cid then
-                            pin windowId model_
-                        else
-                            model_
+                    insert sessionId windowId size instance model2
 
                 Nothing ->
                     model2
@@ -208,10 +199,9 @@ launchSingleHelper :
     -> Maybe AppParams
     -> Context
     -> ( CId, Server )
-    -> CId
     -> Model
     -> ( Model, React msg )
-launchSingleHelper config desktopApp maybeParams context activeGateway sessionId model =
+launchSingleHelper config desktopApp maybeParams context activeGateway model =
     case getActiveServer config context activeGateway of
         Just activeServer ->
             let
@@ -236,14 +226,11 @@ launchSingleHelper config desktopApp maybeParams context activeGateway sessionId
                 instance =
                     Single context appId
 
-                model3 =
-                    insert sessionId windowId size instance model2
+                sessionId =
+                    Tuple.first config.activeServer
 
                 model_ =
-                    if config.activeServer /= activeServer then
-                        pin windowId model3
-                    else
-                        model3
+                    insert sessionId windowId size instance model2
             in
                 ( model_, react )
 

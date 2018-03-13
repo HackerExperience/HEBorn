@@ -46,13 +46,7 @@ update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
     case msg of
         NewApp desktopApp maybeContext maybeParams cid ->
-            launch config
-                desktopApp
-                maybeParams
-                maybeContext
-                cid
-                (Tuple.first config.activeServer)
-                model
+            launch config desktopApp maybeParams maybeContext cid model
 
         OpenApp params cid ->
             onOpenApp config params cid model
@@ -150,13 +144,7 @@ onOpenApp config params cid model =
                 updateAppParams config appId params model
 
             Nothing ->
-                launch config
-                    desktopApp
-                    (Just params)
-                    maybeContext
-                    cid
-                    (Tuple.first config.activeServer)
-                    model
+                launch config desktopApp (Just params) maybeContext cid model
 
 
 withWindow :
@@ -213,7 +201,6 @@ onClickIcon config desktopApp model =
                 Nothing
                 (Just context)
                 (Tuple.first config.activeGateway)
-                sessionId
                 model_
         else
             React.update model_
