@@ -9,10 +9,12 @@ import Apps.Browser.Pages.Webserver.Messages exposing (..)
 
 type alias Config msg =
     { toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     , onLogin : NIP -> String -> msg
     , onLogout : NIP -> msg
     , onCrack : NIP -> msg
     , onAnyMap : NIP -> msg
+    , onSetEndpoint : Maybe CId -> msg
     , onPublicDownload : NIP -> Filesystem.FileEntry -> msg
     , onSelectEndpoint : msg
     , onNewApp : DesktopApp -> msg
