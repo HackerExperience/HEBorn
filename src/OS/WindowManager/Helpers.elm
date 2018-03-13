@@ -60,10 +60,41 @@ getEndpointOfWindow : Config msg -> Model -> Window -> Maybe ( CId, Server )
 getEndpointOfWindow config model window =
     -- this function is unsafe until someone adapt Game.Servers to allow
     -- proper reverse mapping functionality, but it should be enough for now
-    model
-        |> getCIdsOfWindow config window
-        |> List.filter (Tuple.second >> Servers.isGateway >> not)
-        |> List.head
+    let
+        cids =
+            getCIdsOfWindow config window model
+
+        gateway =
+            cids
+                |> List.filter (Tuple.second >> Servers.isGateway)
+                |> List.head
+
+        endpoint =
+            cids
+                |> List.filter (Tuple.second >> Servers.isGateway >> not)
+                |> List.head
+    in
+        case endpoint of
+            Just _ ->
+                endpoint
+
+            Nothing ->
+                case gateway of
+                    Just ( _, server ) ->
+                        let
+                            servers =
+                                serversFromConfig config
+
+                            cid =
+                                Servers.getEndpointCId server
+
+                            server_ =
+                                Maybe.andThen (flip Servers.get <| servers) cid
+                        in
+                            Maybe.uncurry cid server_
+
+                    Nothing ->
+                        Nothing
 
 
 

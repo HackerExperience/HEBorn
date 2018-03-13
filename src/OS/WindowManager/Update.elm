@@ -196,7 +196,12 @@ onClickIcon config desktopApp model =
             openOrRestoreApp desktopApp sessionId model
     in
         if shouldLaunch then
-            launch config desktopApp Nothing (Just context) sessionId model_
+            launch config
+                desktopApp
+                Nothing
+                (Just context)
+                (Tuple.first config.activeGateway)
+                model_
         else
             React.update model_
 

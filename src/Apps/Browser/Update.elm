@@ -261,10 +261,13 @@ processTabMsg config tabId msg tab model =
             -- TODO: implementation pending
             ( tab, React.none )
 
-        NewApp params ->
+        NewApp app ->
             ( tab
-            , React.none
-              --, React.msg <| config.onNewApp Nothing params
+            , React.msg <|
+                config.onNewApp app
+                    (Just Endpoint)
+                    Nothing
+                    (Tuple.first config.activeGateway)
             )
 
         SelectEndpoint ->
