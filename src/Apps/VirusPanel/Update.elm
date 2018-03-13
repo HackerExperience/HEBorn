@@ -213,20 +213,22 @@ doCollectWithBankRequest config bounceId bankAccountId virusList =
         gateway =
             config.activeGatewayCId
 
-        virusReducer nip acu =
-            let
-                activeVirus =
-                    config.database
-                        |> Database.getHackedServers
-                        |> Dict.get nip
-                        |> Maybe.andThen (Database.getActiveVirus)
-            in
-                case activeVirus of
-                    Just id ->
-                        id :: acu
+        folder k v ( acu, found ) =
+            if not found && v.isActive then
+                ( k :: acu, True )
+            else
+                ( acu, found )
 
-                    Nothing ->
-                        acu
+        virusReducer nip acu =
+            config.database
+                |> Database.getHackedServers
+                |> Dict.get nip
+                |> Maybe.map
+                    (Database.getVirusInstalled
+                        >> Dict.foldr folder ( [], False )
+                        >> Tuple.first
+                    )
+                |> Maybe.withDefault []
 
         virusesId =
             List.foldr virusReducer [] virusList

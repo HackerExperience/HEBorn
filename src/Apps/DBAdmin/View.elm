@@ -112,8 +112,14 @@ renderBankAccount id account acc =
         account_ =
             [ text account.name, text " ", text (toString accountNumber) ]
 
+        knownBalance =
+            account.knownBalance
+                |> Maybe.map toMoney
+                |> Maybe.withDefault "?"
+
         accountContent =
-            [ text <| "USD : " ++ (toMoney account.balance) ]
+            [ text <| "USD : " ++ knownBalance
+            ]
 
         content =
             div

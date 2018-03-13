@@ -222,7 +222,6 @@ getCollectType database selectedServers =
                 virusType =
                     Database.getHackedServer nip hackedServers
                         |> Maybe.andThen Database.getActiveVirus
-                        |> Maybe.andThen (flip Database.getVirus database)
                         |> Maybe.map Database.getVirusType
             in
                 case virusType of
@@ -265,7 +264,8 @@ checkAllSelected database ({ toCollectSelected } as model) =
                     False
 
         runningVirus =
-            Database.getHackedServers database
+            database
+                |> Database.getHackedServers
                 |> Dict.filter filterer
                 |> Dict.keys
     in

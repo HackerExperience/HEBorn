@@ -103,8 +103,8 @@ viewServer ({ toMsg } as config) model ( nip, server ) =
                     Network.render nip
 
         activeVirus =
-            Database.getActiveVirus server
-                |> Maybe.andThen (flip Database.getVirus config.database)
+            server
+                |> Database.getActiveVirus
                 |> Maybe.map (Database.getVirusName >> (++) "Running: " >> text)
                 |> Maybe.withDefault (text "")
     in
@@ -165,10 +165,14 @@ viewTabCollect ({ database, toMsg } as config) model =
 
 collectTopBar : Config msg -> Model -> Html msg
 collectTopBar ({ toMsg } as config) model =
-    div [ class [ CollectTopBar ] ]
-        [ checkbox (checkAllSelected config.database model) (toMsg CheckAll)
-        , span [] [ text " Select All" ]
-        ]
+    let
+        allSelected =
+            checkAllSelected config.database model
+    in
+        div [ class [ CollectTopBar ] ]
+            [ checkbox allSelected (toMsg CheckAll)
+            , span [] [ text " Select All" ]
+            ]
 
 
 viewCollectVirus :
@@ -187,33 +191,9 @@ viewCollectVirus ({ toMsg, database } as config) model ( nip, server ) acu =
                 |> Maybe.andThen Database.getActiveVirus
 
         thereIsActiveVirus =
-            activeVirus
-                |> Maybe.map (flip Database.getVirus database)
+            server
+                |> Database.getActiveVirus
                 |> Maybe.isJust
-
-        name =
-            activeVirus
-                |> Maybe.andThen (flip Database.getVirus database)
-                |> Maybe.map (Database.getVirusName)
-                |> Maybe.withDefault "Unknown"
-                |> flip (++) " on "
-                |> flip (++) (Network.render nip)
-
-        -- HORA DO SHOW P****
-        showTime str =
-            case time of
-                Just string ->
-                    (++) "Running Since: " string
-                        |> text
-
-                Nothing ->
-                    text ""
-
-        time =
-            Database.getHackedServer nip hackedServers
-                |> Maybe.andThen (Database.getVirusTime)
-                |> Maybe.map (timestampToFullData >> Just)
-                |> Maybe.withDefault Nothing
 
         check_ =
             List.member nip model.toCollectSelected
@@ -221,13 +201,44 @@ viewCollectVirus ({ toMsg, database } as config) model ( nip, server ) acu =
         if thereIsActiveVirus then
             div [ class [ CollectingVirus ] ]
                 [ checkbox check_ (toMsg <| Check nip)
-                , text name
+                , virusName database nip activeVirus
                 , br [] []
-                , showTime time
+                , virusTimestamp hackedServers nip
                 ]
                 :: acu
         else
             acu
+
+
+virusName : Database.Model -> NIP -> Maybe Database.Virus -> Html msg
+virusName database nip activeVirus =
+    activeVirus
+        |> Maybe.map (Database.getVirusName)
+        |> Maybe.withDefault "Unknown"
+        |> flip (++) " on "
+        |> flip (++) (Network.render nip)
+        |> text
+
+
+virusTimestamp : Database.HackedServers -> NIP -> Html msg
+virusTimestamp hackedServers nip =
+    let
+        -- HORA DO SHOW P****
+        showTime str =
+            case str of
+                Just string ->
+                    string
+                        |> (++) "Running Since: "
+                        |> text
+
+                Nothing ->
+                    text ""
+    in
+        Database.getHackedServer nip hackedServers
+            |> Maybe.andThen (Database.getVirusTime)
+            |> Maybe.map (timestampToFullData >> Just)
+            |> Maybe.withDefault Nothing
+            |> showTime
 
 
 

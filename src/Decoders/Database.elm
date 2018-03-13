@@ -7,6 +7,7 @@ import Json.Decode as Decode
         , andThen
         , map
         , list
+        , bool
         , string
         , float
         , int
@@ -33,16 +34,19 @@ database =
     decode Model
         |> required "servers" servers
         |> required "bank_accounts" hackedBankAccounts
+        --required "btc_wallets"
         |> hardcoded Dict.empty
-        |> required "viruses" viruses
 
 
 virus : Decoder Virus
 virus =
     decode Virus
-        |> required "filename" string
+        |> required "name" string
         |> required "version" float
         |> required "type" (string |> andThen virusType)
+        |> required "extension" string
+        |> optionalMaybe "running_time" float
+        |> required "is_active" bool
 
 
 viruses : Decoder Viruses
@@ -85,19 +89,16 @@ servers =
 hackedServer : Decoder HackedServer
 hackedServer =
     decode HackedServer
-        --|> custom nip
         |> required "password" string
-        |> optionalMaybe "label" string
+        |> optionalMaybe "alias" string
         |> optionalMaybe "notes" string
-        |> required "viruses" (list string)
-        |> optionalMaybe "active" string
-        |> optionalMaybe "running_time" float
+        |> required "viruses" viruses
 
 
 nip : Decoder NIP
 nip =
     decode (,)
-        |> required "netid" string
+        |> required "network_id" string
         |> required "ip" string
 
 
@@ -123,9 +124,13 @@ hackedBankAccountId =
 hackedBankAccount : Decoder HackedBankAccount
 hackedBankAccount =
     decode HackedBankAccount
-        |> required "name" string
-        |> required "password" string
-        |> required "balance" int
+        |> hardcoded "Bank bem louco"
+        |> optionalMaybe "password" string
+        |> optionalMaybe "known_balance" int
+        |> optionalMaybe "token" string
+        |> optionalMaybe "notes" string
+        |> optionalMaybe "last_login_date" float
+        |> required "last_update" float
 
 
 virusCollected : Decoder ( AtmId, AccountNumber, Int, ID, NIP )

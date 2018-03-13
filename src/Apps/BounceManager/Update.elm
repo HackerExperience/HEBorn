@@ -246,7 +246,7 @@ onSave ({ toMsg, accountId, bounces, database } as config) ( id, bounce ) model 
             Random.newUuid model
 
         setSpinner =
-            React.msg <| toMsg <| SetModal (Just ForSpinner)
+            React.msg <| toMsg <| SetModal Nothing
 
         successMsg =
             toMsg <| SetModal <| Just ForSaveSucessful

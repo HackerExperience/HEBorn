@@ -71,34 +71,6 @@ enterEditing itemId database model =
         Maybe.withDefault model model_
 
 
-enterSelectingVirus : String -> Database.Model -> Model -> Model
-enterSelectingVirus itemId database model =
-    let
-        items =
-            database
-                |> Database.getHackedServers
-
-        item =
-            items
-                |> Dict.filter (\nip _ -> Network.toString nip == itemId)
-                |> Dict.toList
-                |> List.head
-
-        model_ =
-            item
-                |> Maybe.map
-                    (\( nip, item ) ->
-                        let
-                            edit_ =
-                                item.activeVirus
-                                    |> SelectingVirus
-                        in
-                            updateEditing (Network.toString nip) edit_ model
-                    )
-    in
-        Maybe.withDefault model model_
-
-
 updateEditing : String -> EditingServers -> Model -> Model
 updateEditing itemId value model =
     let
@@ -106,15 +78,6 @@ updateEditing itemId value model =
             Dict.insert itemId value model.serversEditing
     in
         { model | serversEditing = editing_ }
-
-
-updateSelectingVirus : String -> String -> Model -> Model
-updateSelectingVirus virusId itemId model =
-    let
-        edit_ =
-            SelectingVirus (Just virusId)
-    in
-        updateEditing itemId edit_ model
 
 
 leaveEditing : String -> Model -> Model
