@@ -6,8 +6,10 @@ import Html.Attributes exposing (value, attribute)
 import Html.Events exposing (onClick, onInput)
 import Html.CssHelpers
 import ContextMenu
+import Utils.Maybe as Maybe
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers
+import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
@@ -331,7 +333,11 @@ detailedEntryList config server list model =
     List.map (flip (detailedEntry config server) model) list
 
 
-menuTreeArchive : Config msg -> Servers.StorageId -> Filesystem.Id -> Attribute msg
+menuTreeArchive :
+    Config msg
+    -> Servers.StorageId
+    -> Filesystem.Id
+    -> Attribute msg
 menuTreeArchive =
     menuMainArchive
 
@@ -349,17 +355,26 @@ menuMainDir { menuAttr, toMsg } fullPath =
         ]
 
 
-menuMainArchive : Config msg -> Servers.StorageId -> Filesystem.Id -> Attribute msg
-menuMainArchive { menuAttr, toMsg, onDeleteFile } storage id =
+menuMainArchive :
+    Config msg
+    -> Servers.StorageId
+    -> Filesystem.Id
+    -> Attribute msg
+menuMainArchive ({ menuAttr } as config) storage id =
     menuAttr
-        [ [ ( ContextMenu.item "Rename", toMsg <| EnterRename id )
-          , ( ContextMenu.item "Move", toMsg <| UpdateEditing (Moving id) )
-          , ( ContextMenu.item "Delete", onDeleteFile storage id )
+        [ [ ( ContextMenu.item "Rename", config.toMsg <| EnterRename id )
+          , ( ContextMenu.item "Move", config.toMsg <| UpdateEditing (Moving id) )
+          , ( ContextMenu.item "Delete", config.onDeleteFile storage id )
+          , ( ContextMenu.item "Upload", uploadAction config id storage )
           ]
         ]
 
 
-menuExecutable : Config msg -> Servers.StorageId -> Filesystem.Id -> Attribute msg
+menuExecutable :
+    Config msg
+    -> Servers.StorageId
+    -> Filesystem.Id
+    -> Attribute msg
 menuExecutable =
     menuMainArchive
 
@@ -564,3 +579,34 @@ explorerMain config editing path server model =
             |> flip (detailedEntryList config server) model
             |> div [ class [ ContentList ] ]
         ]
+
+
+uploadAction :
+    Config msg
+    -> Filesystem.Id
+    -> Servers.StorageId
+    -> msg
+uploadAction ({ onUploadFile, batchMsg } as config) id storage =
+    let
+        fs =
+            config.getFilesystem storage
+
+        fileEntry =
+            case fs of
+                Just fs ->
+                    Maybe.uncurry (Just id) (Filesystem.getFile id fs)
+
+                Nothing ->
+                    Nothing
+    in
+        case Maybe.uncurry fileEntry config.endpointMainStorage of
+            Just ( fileEntry, storageId ) ->
+                case config.endpointCId of
+                    Just target ->
+                        onUploadFile target storageId fileEntry
+
+                    Nothing ->
+                        batchMsg []
+
+            Nothing ->
+                batchMsg []

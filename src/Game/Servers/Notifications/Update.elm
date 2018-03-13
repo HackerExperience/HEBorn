@@ -27,6 +27,18 @@ update config msg model =
                 (DownloadConcluded nip storage entry)
                 model
 
+        HandleUploadStarted nip storage entry ->
+            handleNewNotification
+                config
+                (UploadStarted nip storage entry)
+                model
+
+        HandleUploadConcluded nip storage entry ->
+            handleNewNotification
+                config
+                (UploadConcluded nip storage entry)
+                model
+
         HandleGeneric title content ->
             handleNewNotification config (Generic title content) model
 
