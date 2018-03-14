@@ -18,6 +18,7 @@ import Apps.Browser.Pages.DownloadCenter.Update as DownloadCenter
 import Apps.Browser.Messages exposing (..)
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Shared exposing (..)
 
 
 type alias UpdateResponse msg =

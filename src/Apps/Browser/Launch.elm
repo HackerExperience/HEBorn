@@ -7,6 +7,7 @@ import Game.Meta.Types.Network as Network
 import Apps.Browser.Config exposing (..)
 import Apps.Browser.Models exposing (..)
 import Apps.Browser.Messages exposing (..)
+import Apps.Browser.Shared exposing (..)
 
 
 type alias LaunchResponse msg =

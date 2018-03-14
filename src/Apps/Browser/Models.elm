@@ -6,6 +6,7 @@ import Game.Meta.Types.Apps.Desktop exposing (Reference)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Meta.Types.Network.Site as Site exposing (Site)
+import Apps.Browser.Shared exposing (..)
 import Apps.Browser.Pages.NotFound.Models as PageNotFound
 import Apps.Browser.Pages.Webserver.Models as PageWebserver
 import Apps.Browser.Pages.DownloadCenter.Models as DownloadCenter
@@ -20,10 +21,6 @@ type alias Model =
     , rightTabs : List Int
     , lastTab : Int
     }
-
-
-type Params
-    = OpenAtUrl URL
 
 
 type alias Tabs =
@@ -58,10 +55,6 @@ type Page
       -- Virtual ones
     | LoadingModel String
     | BlankModel
-
-
-type alias URL =
-    String
 
 
 type alias BrowserHistory =
