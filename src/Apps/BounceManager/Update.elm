@@ -29,7 +29,7 @@ update :
 update config msg model =
     case msg of
         GoTab tab ->
-            onGoTab tab model
+            onGoTab config tab model
 
         UpdateEditing str ->
             onUpdateEditing str model
@@ -101,15 +101,15 @@ onSetInitialSeed seed model =
     ( Random.setSeed seed model, React.none )
 
 
-onGoTab : MainTab -> Model -> UpdateResponse msg
-onGoTab tab model =
+onGoTab : Config msg -> MainTab -> Model -> UpdateResponse msg
+onGoTab config tab model =
     case tab of
         TabBuild ( maybeId, bounce ) ->
             let
                 model_ =
                     model
                         |> setSelectedTab tab
-                        |> setPath bounce.path
+                        |> setNewPath config maybeId
                         |> setSelectedBounce (Just ( maybeId, bounce ))
             in
                 ( model_, React.none )
@@ -120,6 +120,19 @@ onGoTab tab model =
                     { model | selected = tab }
             in
                 ( model_, React.none )
+
+
+setNewPath : Config msg -> Maybe String -> Model -> Model
+setNewPath { bounces } maybeId model =
+    case Maybe.andThen (flip Bounces.getPath bounces) maybeId of
+        Just path ->
+            if path /= model.path then
+                setPath model.path model
+            else
+                setPath path model
+
+        Nothing ->
+            setPath model.path model
 
 
 onUpdateEditing : String -> Model -> UpdateResponse msg
@@ -194,11 +207,11 @@ onClearSelection model =
 onAddNode : Network.NIP -> Int -> Model -> UpdateResponse msg
 onAddNode nip where_ model =
     let
-        path_ =
+        path =
             insertAt where_ nip model.path
 
         model_ =
-            { model | path = path_, selection = Nothing, anyChange = True }
+            { model | path = path, selection = Nothing, anyChange = True }
     in
         ( model_, React.none )
 
@@ -206,13 +219,13 @@ onAddNode nip where_ model =
 onMoveNode : Network.NIP -> Int -> Model -> UpdateResponse msg
 onMoveNode nip where_ model =
     let
-        path_ =
+        path =
             nip
                 |> (\nip -> List.filter (((==) nip) >> not) model.path)
                 |> insertAt where_ nip
 
         model_ =
-            { model | path = path_, selection = Nothing, anyChange = True }
+            { model | path = path, selection = Nothing, anyChange = True }
     in
         ( model_, React.none )
 
