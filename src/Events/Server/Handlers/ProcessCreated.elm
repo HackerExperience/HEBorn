@@ -4,7 +4,7 @@ import Json.Decode exposing (decodeValue)
 import Events.Shared exposing (Handler)
 import Game.Servers.Processes.Models exposing (..)
 import Game.Servers.Processes.Shared exposing (..)
-import Decoders.Processes
+import Decoders.Processes exposing (process)
 
 
 type alias Data =
@@ -13,4 +13,4 @@ type alias Data =
 
 handler : Handler Data msg
 handler toMsg =
-    decodeValue Decoders.Processes.process >> Result.map toMsg
+    decodeValue process >> Result.map toMsg

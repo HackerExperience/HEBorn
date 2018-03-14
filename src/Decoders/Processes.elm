@@ -44,7 +44,7 @@ process =
     decode Process
         |> custom type_
         |> required "access" access
-        |> required "state" state
+        |> optional "state" state Starting
         |> optionalMaybe "target_file" file
         |> optionalMaybe "progress" progress
         |> required "network_id" string
