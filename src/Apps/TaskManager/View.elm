@@ -84,10 +84,15 @@ viewState now lastRecalc proc =
                         (flip (-) now >> max 0)
                         maybeCompletitionDate
 
+                timeLeftOnSync =
+                    Maybe.map
+                        (flip (-) lastRecalc >> max 0)
+                        maybeCompletitionDate
+
                 progress =
                     Maybe.map2
                         (syncProgress now lastRecalc)
-                        timeLeft
+                        timeLeftOnSync
                         lastProgress
             in
                 progress
