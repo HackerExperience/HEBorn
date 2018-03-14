@@ -19,16 +19,18 @@ bankConfig =
 
 
 downloadCenterConfig : Browser.Config msg -> DownloadCenter.Config Msg
-downloadCenterConfig { endpoints } =
+downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg
+    , batchMsg = config.batchMsg
     , onLogin = \a b -> ActiveTabMsg <| Login a b
     , onLogout = ActiveTabMsg Logout
     , onCrack = Crack >> ActiveTabMsg
     , onAnyMap = AnyMap >> ActiveTabMsg
     , onPublicDownload = PublicDownload
+    , onSetEndpoint = config.onSetEndpoint
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
     , onNewApp = NewApp >> ActiveTabMsg
-    , endpoints = endpoints
+    , endpoints = config.endpoints
     }
 
 
@@ -40,14 +42,16 @@ homeConfig =
 
 
 webserverConfig : Browser.Config msg -> Webserver.Config Msg
-webserverConfig { endpoints } =
+webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg
+    , batchMsg = config.batchMsg
     , onLogin = \a b -> ActiveTabMsg <| Login a b
     , onLogout = ActiveTabMsg Logout
     , onCrack = Crack >> ActiveTabMsg
     , onAnyMap = AnyMap >> ActiveTabMsg
     , onPublicDownload = PublicDownload
+    , onSetEndpoint = config.onSetEndpoint
     , onSelectEndpoint = ActiveTabMsg SelectEndpoint
     , onNewApp = NewApp >> ActiveTabMsg
-    , endpoints = endpoints
+    , endpoints = config.endpoints
     }

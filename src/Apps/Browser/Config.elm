@@ -40,6 +40,7 @@ type alias Config msg =
     , onSetContext : Context -> msg
     , onLogin : NIP -> Network.IP -> String -> Requester -> msg
     , onLogout : CId -> msg
+    , onSetEndpoint : Maybe CId -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onNewBruteforceProcess : Network.IP -> msg
     , onBankAccountLogin : LoginRequest.Payload -> Requester -> msg
@@ -60,12 +61,14 @@ bankConfig config =
 downloadCenterConfig : Config msg -> DownloadCenter.Config msg
 downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
     , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
+    , onSetEndpoint = config.onSetEndpoint
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
     , endpoints = endpoints config
     }
@@ -88,12 +91,14 @@ homeConfig config =
 webserverConfig : Config msg -> Webserver.Config msg
 webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg >> config.toMsg
+    , batchMsg = config.batchMsg
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
     , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
     , onAnyMap = AnyMap >> ActiveTabMsg >> config.toMsg
     , onPublicDownload = PublicDownload >>> config.toMsg
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
+    , onSetEndpoint = config.onSetEndpoint
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
     , endpoints = endpoints config
     }

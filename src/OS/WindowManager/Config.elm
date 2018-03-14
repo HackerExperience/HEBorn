@@ -163,6 +163,7 @@ browserConfig appId activeServer ( gCId, gServer ) config =
         , onSetContext = Account.HandleSetContext >> account config
         , onLogin = Web.Login gCId >>>>> web config
         , onLogout = flip (server config) Servers.HandleLogout
+        , onSetEndpoint = Account.HandleSetEndpoint >> account config
         , onNewPublicDownload = onNewPublicDownload
         , onNewBruteforceProcess = onNewBruteforceProcess
         , onBankAccountLogin = onBankAccountLogin

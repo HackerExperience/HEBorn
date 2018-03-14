@@ -36,12 +36,14 @@ publicFilesConfig { onPublicDownload } source =
 
 
 hackingPanelConfig : Config msg -> HackingPanel.Config msg
-hackingPanelConfig { toMsg, onLogout, onSelectEndpoint, onAnyMap, onNewApp } =
-    { onLogout = onLogout
-    , onSelectEndpoint = onSelectEndpoint
-    , onAnyMap = onAnyMap
-    , onNewApp = onNewApp
-    , onSetShowingPanel = SetShowingPanel >> toMsg
+hackingPanelConfig config =
+    { batchMsg = config.batchMsg
+    , onLogout = config.onLogout
+    , onSetEndpoint = config.onSetEndpoint
+    , onSelectEndpoint = config.onSelectEndpoint
+    , onAnyMap = config.onAnyMap
+    , onNewApp = config.onNewApp
+    , onSetShowingPanel = SetShowingPanel >> config.toMsg
     , apps =
         [ DesktopApp.TaskManager
         , DesktopApp.ConnManager
