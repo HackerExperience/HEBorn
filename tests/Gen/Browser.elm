@@ -16,6 +16,7 @@ import Random.Pcg
         )
 import Random.Pcg.Extra exposing (andMap)
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Shared exposing (..)
 import Game.Meta.Types.Network.Site as Site
 
 

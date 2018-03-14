@@ -20,6 +20,7 @@ import UI.Layouts.VerticalList exposing (..)
 import UI.Widgets.CustomSelect exposing (customSelect)
 import Apps.Params as AppParams exposing (AppParams)
 import Apps.BounceManager.Shared as BounceManager
+import Apps.Browser.Shared as Browser
 
 
 { id, class, classList } =
@@ -370,11 +371,16 @@ bounceMember :
     -> ( List (Html msg), Int )
 bounceMember config nip ( acc, counter ) =
     let
-        batchMsg =
-            onClick <| config.batchMsg []
+        msg =
+            nip
+                |> Network.render
+                |> Browser.OpenAtUrl
+                |> AppParams.Browser
+                |> flip (config.onOpenApp) config.activeGatewayCId
+                |> onClick
     in
         div [ class [ BounceMember ] ]
-            [ button [ batchMsg ] [ text <| toString (counter) ]
+            [ button [ msg ] [ text <| toString (counter) ]
             , text "═>"
             , br [] []
             , text <| Network.toString nip

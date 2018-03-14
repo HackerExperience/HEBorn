@@ -12,6 +12,7 @@ import Apps.Browser.Pages.Webserver.Messages as Webserver
 import Apps.Browser.Pages.DownloadCenter.Messages as DownloadCenter
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Models exposing (..)
+import Apps.Browser.Shared exposing (..)
 
 
 type Msg

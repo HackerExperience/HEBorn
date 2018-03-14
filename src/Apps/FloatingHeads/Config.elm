@@ -7,7 +7,7 @@ import Game.Storyline.Models as Storyline
 import Game.Storyline.Shared exposing (ContactId, Reply)
 import Game.Storyline.Emails.Config as Emails
 import Apps.FloatingHeads.Messages exposing (..)
-import Apps.Browser.Models as Browser
+import Apps.Browser.Shared as Browser
 
 
 type alias Config msg =
