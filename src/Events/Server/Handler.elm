@@ -4,7 +4,6 @@ import Events.Shared exposing (Router)
 import Game.Servers.Shared as Servers exposing (CId)
 import Events.Server.Handlers.FileAdded as FileAdded
 import Events.Server.Handlers.FileDownloaded as FileDownloaded
-import Events.Server.Handlers.ProcessCreated as ProcessCreated
 import Events.Server.Handlers.ProcessCompleted as ProcessCompleted
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesRecalcado
 import Events.Server.Handlers.ProcessBruteforceFailed as ProcessBruteforceFailed
@@ -21,9 +20,6 @@ events config cid name value =
 
         "file_downloaded" ->
             FileDownloaded.handler (config.onFileDownloaded cid) value
-
-        "process_created" ->
-            ProcessCreated.handler (config.onProcessCreated cid) value
 
         "process_completed" ->
             ProcessCompleted.handler (config.onProcessCompleted cid) value
