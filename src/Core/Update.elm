@@ -8,6 +8,7 @@ import Events.Handler as Events
 import Landing.Messages as Landing
 import Landing.Update as Landing
 import Driver.Websocket.Messages as Ws
+import Driver.Websocket.Channels as Ws
 import Driver.Websocket.Update as Ws
 import Game.Messages as Game
 import Game.Models as Game
@@ -385,6 +386,12 @@ received msg =
 
         -- ignored messages
         BatchMsg _ ->
+            msg
+
+        GameMsg (Game.BackFlixMsg _) ->
+            msg
+
+        HandleEvent Ws.BackFlixChannel _ ->
             msg
 
         GameMsg (Game.MetaMsg (Meta.Tick _)) ->
