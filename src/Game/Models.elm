@@ -261,6 +261,7 @@ getBounces game =
     game
         |> getAccount
         |> (.bounces)
+        |> (.bounces)
         |> Dict.keys
 
 

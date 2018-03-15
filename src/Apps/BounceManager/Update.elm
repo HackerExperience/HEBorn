@@ -1,5 +1,6 @@
 module Apps.BounceManager.Update exposing (update)
 
+import Dict
 import Utils.React as React exposing (React)
 import Utils.List exposing (..)
 import Utils.Maybe as Maybe
@@ -15,6 +16,7 @@ import Game.Meta.Types.Network as Network
 import Apps.BounceManager.Config exposing (..)
 import Apps.BounceManager.Models exposing (..)
 import Apps.BounceManager.Messages as BounceManager exposing (Msg(..))
+import Game.Meta.Types.Desktop.Apps exposing (Reference)
 
 
 type alias UpdateResponse msg =
@@ -94,6 +96,15 @@ update config msg model =
 
         SetInitialSeed seed ->
             onSetInitialSeed seed model
+
+        ResetModel ->
+            onResetModel model
+
+        ReloadBounce id ->
+            onReloadBounce config id model
+
+        HandleReload id ->
+            onReloadBounce config id model
 
 
 onSetInitialSeed : Int -> Model -> UpdateResponse msg
@@ -258,69 +269,149 @@ onSave ({ toMsg, accountId, bounces, database } as config) ( id, bounce ) model 
         ( model0, rId ) =
             Random.newUuid model
 
-        setSpinner =
-            React.msg <| toMsg <| SetModal Nothing
-
-        successMsg =
-            toMsg <| SetModal <| Just ForSaveSucessful
-
-        failMsg isCreate =
-            if isCreate then
-                Bounces.CreateFailed
-                    |> CreateError
-                    |> ForError
-                    |> Just
-                    |> SetModal
-                    |> toMsg
-            else
-                Bounces.UpdateFailed
-                    |> UpdateError
-                    |> ForError
-                    |> Just
-                    |> SetModal
-                    |> toMsg
-
-        name =
-            model.bounceNameBuffer
-                |> Maybe.withDefault bounce.name
-
         newBounce =
-            { name = name, path = model.path }
+            { name = generatingBounceName bounce model
+            , path = model.path
+            }
+
+        createBounce id rId =
+            doCreateRequest config hackedServers newBounce rId
+
+        updateBounce id rId =
+            doUpdateRequest config hackedServers id newBounce rId
 
         react =
             case Maybe.uncurry id (getBounce id) of
                 Just ( id, bounce_ ) ->
-                    if (bounce_ /= newBounce) then
-                        React.batch config.batchMsg
-                            [ rId
-                                |> doUpdateRequest config hackedServers id bounce
-                            , setSpinner
-                            , ( "bounce_updated", successMsg )
-                                |> config.awaitEvent rId
-                                |> React.msg
-                            , ( "bounce_update_failed", (failMsg False) )
-                                |> config.awaitEvent rId
-                                |> React.msg
-                            ]
-                    else
-                        React.none
+                    getReactBounceUpdate
+                        config
+                        updateBounce
+                        id
+                        bounce_
+                        newBounce
+                        rId
+                        model0
 
                 Nothing ->
-                    React.batch config.batchMsg
-                        [ rId
-                            |> doCreateRequest config hackedServers newBounce
-                        , setSpinner
-                        , ( "bounce_created", successMsg )
-                            |> config.awaitEvent rId
-                            |> React.msg
-                        , ( "bounce_create_failed"
-                          , (failMsg True)
-                          )
-                            |> config.awaitEvent rId
-                            |> React.msg
-                        ]
+                    getReactBounceCreate config createBounce id rId model0
     in
         ( model0, react )
+
+
+getReactBounceCreate :
+    Config msg
+    -> (Maybe Bounces.ID -> String -> React msg)
+    -> Maybe Bounces.ID
+    -> String
+    -> Model
+    -> React msg
+getReactBounceCreate ({ batchMsg } as config) request maybeId rId model =
+    let
+        onSuccess =
+            genSuccessMsg config
+
+        waitForBounce =
+            config.reference
+                |> config.onWaitForBounce rId
+                |> React.msg
+    in
+        React.batch batchMsg
+            [ request maybeId rId
+            , genSetSpinnerMsg config
+            , waitForBounce
+            , subBounceCreationSucceed config rId onSuccess
+            , subBounceCreationFailed config rId
+            ]
+
+
+getReactBounceUpdate :
+    Config msg
+    -> (String -> String -> React msg)
+    -> Bounces.ID
+    -> Bounces.Bounce
+    -> Bounces.Bounce
+    -> String
+    -> Model
+    -> React msg
+getReactBounceUpdate config request id bounce newBounce rId model =
+    let
+        onSuccess =
+            config.onRequestBounceReload id config.reference
+    in
+        if (bounce /= newBounce) then
+            React.batch config.batchMsg
+                [ request id rId
+                , genSetSpinnerMsg config
+                , subBounceUpdateSucceed config rId onSuccess
+                , subBounceUpdateFailed config rId
+                ]
+        else
+            React.none
+
+
+generatingBounceName : Bounces.Bounce -> Model -> String
+generatingBounceName bounce model =
+    Maybe.withDefault bounce.name model.bounceNameBuffer
+
+
+genSetSpinnerMsg : Config msg -> React msg
+genSetSpinnerMsg { toMsg } =
+    ForSpinner
+        |> Just
+        |> SetModal
+        |> toMsg
+        |> React.msg
+
+
+subBounceCreationSucceed : Config msg -> String -> msg -> React msg
+subBounceCreationSucceed config requestId msg =
+    ( "bounce_created", msg )
+        |> config.awaitEvent requestId
+        |> React.msg
+
+
+subBounceCreationFailed : Config msg -> String -> React msg
+subBounceCreationFailed config requestId =
+    ( "bounce_create_failed", genFailMsg config True )
+        |> config.awaitEvent requestId
+        |> React.msg
+
+
+subBounceUpdateSucceed : Config msg -> String -> msg -> React msg
+subBounceUpdateSucceed config requestId msg =
+    ( "bounce_updated", msg )
+        |> config.awaitEvent requestId
+        |> React.msg
+
+
+subBounceUpdateFailed : Config msg -> String -> React msg
+subBounceUpdateFailed config requestId =
+    ( "bounce_update_failed", (genFailMsg config False) )
+        |> config.awaitEvent requestId
+        |> React.msg
+
+
+genSuccessMsg : Config msg -> msg
+genSuccessMsg { batchMsg } =
+    batchMsg []
+
+
+genFailMsg : Config msg -> Bool -> msg
+genFailMsg { toMsg } isCreate =
+    if isCreate then
+        Bounces.CreateFailed
+            |> CreateError
+            |> ForError
+            |> Just
+            |> SetModal
+            |> toMsg
+    else
+        Bounces.UpdateFailed
+            |> UpdateError
+            |> ForError
+            |> Just
+            |> SetModal
+            |> toMsg
 
 
 onReset :
@@ -506,14 +597,10 @@ doCreateRequest :
     -> String
     -> React msg
 doCreateRequest ({ toMsg, accountId } as config) hackedServers bounce rId =
-    let
-        _ =
-            Debug.log "Create Request ID" rId
-    in
-        config
-            |> createRequest hackedServers bounce accountId rId
-            |> Cmd.map (errorToMaybe >> CreateRequest >> toMsg)
-            |> React.cmd
+    config
+        |> createRequest hackedServers bounce accountId rId
+        |> Cmd.map (errorToMaybe >> CreateRequest >> toMsg)
+        |> React.cmd
 
 
 
@@ -528,14 +615,10 @@ doUpdateRequest :
     -> String
     -> React msg
 doUpdateRequest ({ toMsg, accountId } as config) hackedServers id bounce rId =
-    let
-        _ =
-            Debug.log "Update Request ID" rId
-    in
-        config
-            |> updateRequest hackedServers id bounce accountId rId
-            |> Cmd.map (errorToMaybe >> UpdateRequest >> toMsg)
-            |> React.cmd
+    config
+        |> updateRequest hackedServers id bounce accountId rId
+        |> Cmd.map (errorToMaybe >> UpdateRequest >> toMsg)
+        |> React.cmd
 
 
 
@@ -551,3 +634,26 @@ doRemoveRequest ({ toMsg, accountId } as config) id =
         |> removeRequest id accountId
         |> Cmd.map (errorToMaybe >> RemoveRequest >> toMsg)
         |> React.cmd
+
+
+onResetModel : Model -> UpdateResponse msg
+onResetModel model =
+    ( initialModel model.me, React.none )
+
+
+onReloadBounce : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
+onReloadBounce { bounces } id model =
+    let
+        newModel =
+            case ( Dict.get id (Bounces.getBounces bounces), model.selected ) of
+                ( Just bounce, TabBuild ( _, _ ) ) ->
+                    { model
+                        | selected = TabBuild ( Just id, bounce )
+                        , selectedBounce = Just ( Just id, bounce )
+                        , modal = Just ForSaveSucessful
+                    }
+
+                _ ->
+                    model
+    in
+        ( newModel, React.none )

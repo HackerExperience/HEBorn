@@ -16,4 +16,6 @@ type alias Config msg =
     , bounces : Bounces.Model
     , database : Database.Model
     , accountId : String
+    , onRequestBounceReload : String -> Reference -> msg
+    , onWaitForBounce : String -> Reference -> msg
     }

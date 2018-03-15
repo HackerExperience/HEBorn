@@ -126,6 +126,7 @@ bounceSelect ({ bounces } as config) selectMsg model =
                 |> flip (::) acu
     in
         bounces
+            |> Bounces.getBounces
             |> Dict.foldr reducer []
             |> (::) noneOption
             |> Html.select []

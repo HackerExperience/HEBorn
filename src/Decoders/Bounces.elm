@@ -1,6 +1,6 @@
 module Decoders.Bounces exposing (..)
 
-import Dict as Dict
+import Dict as Dict exposing (Dict)
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -11,7 +11,7 @@ import Json.Decode as Decode
         , field
         , map
         )
-import Json.Decode.Pipeline exposing (decode, required, custom)
+import Json.Decode.Pipeline exposing (decode, required, custom, hardcoded)
 import Game.Account.Bounces.Models exposing (..)
 import Game.Account.Bounces.Shared exposing (..)
 import Game.Meta.Types.Network exposing (NIP)
@@ -19,6 +19,13 @@ import Game.Meta.Types.Network exposing (NIP)
 
 bounces : Decoder Model
 bounces =
+    decode Model
+        |> custom bounceDict
+        |> hardcoded Dict.empty
+
+
+bounceDict : Decoder (Dict ID Bounce)
+bounceDict =
     map Dict.fromList (list bounceWithId)
 
 

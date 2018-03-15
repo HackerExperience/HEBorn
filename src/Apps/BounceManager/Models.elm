@@ -24,6 +24,7 @@ type ModalAction
     | ForSave ( Maybe Bounces.ID, Bounces.Bounce )
     | ForError Error
     | ForSaveSucessful
+    | ForSpinner
 
 
 type Error

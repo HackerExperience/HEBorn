@@ -27,7 +27,7 @@ type alias Config msg =
     , onDbAccountUpdated : DbAccountUpdated.Data -> msg
     , onDbAccountRemoved : DbAccountRemoved.Data -> msg
     , onTutorialFinished : TutorialFinished.Data -> msg
-    , onBounceCreated : BounceCreated.Data -> msg
+    , onBounceCreated : String -> BounceCreated.Data -> msg
     , onBounceUpdated : BounceUpdated.Data -> msg
     , onBounceRemoved : BounceRemoved.Data -> msg
     , onVirusCollected : VirusCollected.Data -> msg

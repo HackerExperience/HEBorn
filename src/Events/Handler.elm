@@ -23,7 +23,7 @@ handler :
 handler config channel result =
     case result of
         Ok ( event, requestId, value ) ->
-            case router config channel event value of
+            case router config channel requestId event value of
                 Ok event ->
                     Ok event
 
@@ -51,14 +51,20 @@ report { event, channel, message } =
 -- inte
 
 
-router : Config msg -> Ws.Channel -> String -> Value -> Result String msg
-router config channel event json =
+router :
+    Config msg
+    -> Ws.Channel
+    -> String
+    -> String
+    -> Value
+    -> Result String msg
+router config channel requestId event json =
     case channel of
         Ws.AccountChannel _ ->
-            Account.events config.forAccount event json
+            Account.events config.forAccount requestId event json
 
         Ws.ServerChannel id ->
-            Server.events config.forServer id event json
+            Server.events config.forServer requestId id event json
 
         Ws.BackFlixChannel ->
-            BackFlix.events config.forBackFlix event json
+            BackFlix.events config.forBackFlix requestId event json

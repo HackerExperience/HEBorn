@@ -6,6 +6,7 @@ module UI.Elements.Modal
         , modalOkCancel
         , modalNode
         , modalFrame
+        , modalFrameOnly
         , overlayNode
         , select
         , buttons
@@ -120,6 +121,34 @@ modalFrame title body buttons =
                 []
                 [ node msgNode [] main
                 , node btnsNode [] buttons
+                ]
+                |> List.singleton
+                |> node containerNode []
+
+        root =
+            node modalNode [] [ overlay Nothing, content_ ]
+    in
+        root
+
+
+modalFrameOnly :
+    Maybe String
+    -> String
+    -> Html msg
+modalFrameOnly title message =
+    let
+        main =
+            case title of
+                Just title ->
+                    h3 [] [ text title ] :: [ text message ]
+
+                Nothing ->
+                    [ text message ]
+
+        content_ =
+            node contentNode
+                []
+                [ node msgNode [] main
                 ]
                 |> List.singleton
                 |> node containerNode []

@@ -19,6 +19,7 @@ type Classes
     | HackedServer
     | BounceMap
     | MiddleButton
+    | ManageCreate
     | Slot
     | FilterBox
     | MoveMenu

@@ -12,8 +12,8 @@ import Events.Server.Handlers.MotherboardUpdated as MotherboardUpdated
 import Events.Server.Config exposing (..)
 
 
-events : Config msg -> CId -> Router msg
-events config cid name value =
+events : Config msg -> String -> CId -> Router msg
+events config requestId cid name value =
     case name of
         "file_added" ->
             FileAdded.handler (config.onFileAdded cid) value
