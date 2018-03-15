@@ -3,16 +3,6 @@ module UI.Colors exposing (..)
 import Css exposing (Color, hex, rgb)
 
 
-black : Color
-black =
-    hex "000"
-
-
-white : Color
-white =
-    hex "FFF"
-
-
 localhost : Color
 localhost =
     hex "56822E"

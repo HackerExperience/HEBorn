@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes as Attributes exposing (style, attribute, tabindex)
 import Html.Events exposing (onMouseDown)
 import Html.Keyed
+import Html.Lazy exposing (lazy2)
 import Html.CssHelpers
 import Css exposing (left, top, asPairs, px, int, zIndex)
 import ContextMenu
@@ -11,6 +12,7 @@ import Draggable
 import Utils.Html.Attributes exposing (appAttr, boolAttr, activeContextAttr)
 import Utils.Html.Events exposing (onClickMe, onKeyDown)
 import Utils.Maybe as Maybe
+import Utils.Core exposing (..)
 import Apps.Shared as Apps
 import Apps.BackFlix.View as BackFlix
 import Apps.BounceManager.View as BounceManager
@@ -33,17 +35,18 @@ import Apps.ServersGears.View as ServersGears
 import Apps.TaskManager.View as TaskManager
 import Apps.VirusPanel.View as VirusPanel
 import Game.Meta.Types.Context as Context exposing (Context(..))
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId(..))
-import OS.Resources as OsRes
-import OS.WindowManager.Dock.View as Dock
+import OS.Resources as OS
 import OS.WindowManager.Config exposing (..)
 import OS.WindowManager.Helpers exposing (..)
-import OS.WindowManager.Resources as Res
-import OS.WindowManager.Shared exposing (..)
 import OS.WindowManager.Messages exposing (..)
 import OS.WindowManager.Models exposing (..)
+import OS.WindowManager.Resources as R
+import OS.WindowManager.Shared exposing (..)
+import OS.WindowManager.Dock.View as Dock
+import OS.WindowManager.Sidebar.View as Sidebar
 
 
 view : Config msg -> Model -> Html msg
@@ -57,7 +60,7 @@ view config model =
         session =
             getSession (getSessionId config) model
     in
-        div [ osClass [ OsRes.Session ] ]
+        div [ osClass [ OS.Session ] ]
             [ viewSession config model isFreeplay session
 
             -- sadly, using lazy here will cause problems with window titles
@@ -70,17 +73,17 @@ view config model =
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Res.prefix
+    Html.CssHelpers.withNamespace R.prefix
 
 
 osClass : List class -> Attribute msg
 osClass =
-    .class <| Html.CssHelpers.withNamespace OsRes.prefix
+    .class <| Html.CssHelpers.withNamespace OS.prefix
 
 
 windowManagerClass : List class -> Attribute msg
 windowManagerClass =
-    .class <| Html.CssHelpers.withNamespace Res.prefix
+    .class <| Html.CssHelpers.withNamespace R.prefix
 
 
 styles : List Css.Style -> Attribute msg
@@ -94,8 +97,13 @@ styles =
 
 viewSession : Config msg -> Model -> Bool -> Session -> Html msg
 viewSession config model isFreeplay { visible, focusing } =
-    Html.Keyed.node Res.workspaceNode [ class [ Res.Super ] ] <|
-        List.filterMap (filterMapWindows config model isFreeplay) visible
+    visible
+        |> List.filterMap
+            (filterMapWindows config model isFreeplay)
+        |> (::) (viewSidebar config model isFreeplay)
+        |> Html.Keyed.node
+            R.workspaceNode
+            [ class [ R.Super ] ]
 
 
 filterMapWindows :
@@ -206,7 +214,7 @@ windowWrapper config model app windowId window html =
             Apps.icon desktopApp
 
         content =
-            div [ class [ Res.WindowBody ], config.menuAttr [] ] [ html ]
+            div [ class [ R.WindowBody ], config.menuAttr [] ] [ html ]
     in
         if hasDecorations then
             div attrs
@@ -236,11 +244,11 @@ header :
 header config title icon resizable desktopApp windowId window =
     div
         [ Draggable.mouseTrigger windowId (DragMsg >> config.toMsg)
-        , class [ Res.HeaderSuper ]
+        , class [ R.HeaderSuper ]
         , headerMenu config windowId window resizable
         ]
         [ div
-            [ class [ Res.WindowHeader ]
+            [ class [ R.WindowHeader ]
             , onMouseDown (config.toMsg <| UpdateFocus (Just windowId))
             ]
             [ headerTitle title icon
@@ -253,7 +261,7 @@ header config title icon resizable desktopApp windowId window =
 headerTitle : String -> String -> Html msg
 headerTitle title icon =
     div
-        [ class [ Res.HeaderTitle ]
+        [ class [ R.HeaderTitle ]
         , appIconAttr icon
         ]
         [ text title ]
@@ -270,7 +278,7 @@ headerContext config desktopApp windowId window =
                 Double _ _ Nothing ->
                     div []
                         [ span
-                            [ class [ Res.HeaderContextSw ]
+                            [ class [ R.HeaderContextSw ]
                             , LazyLaunchEndpoint windowId desktopApp
                                 |> config.toMsg
                                 |> onClickMe
@@ -281,7 +289,7 @@ headerContext config desktopApp windowId window =
                 Double _ _ _ ->
                     div []
                         [ span
-                            [ class [ Res.HeaderContextSw ]
+                            [ class [ R.HeaderContextSw ]
                             , onClickMe <|
                                 config.toMsg (ToggleContext windowId)
                             ]
@@ -297,14 +305,14 @@ headerButtons config resizable windowId =
     let
         pin =
             span
-                [ class [ Res.HeaderButton, Res.HeaderBtnPin ]
+                [ class [ R.HeaderButton, R.HeaderBtnPin ]
                 , onClickMe <| config.toMsg (TogglePin windowId)
                 ]
                 []
 
         minimize =
             span
-                [ class [ Res.HeaderButton, Res.HeaderBtnMinimize ]
+                [ class [ R.HeaderButton, R.HeaderBtnMinimize ]
                 , onClickMe <| config.toMsg (Minimize windowId)
                 ]
                 []
@@ -312,7 +320,7 @@ headerButtons config resizable windowId =
         maximize =
             if resizable then
                 span
-                    [ class [ Res.HeaderButton, Res.HeaderBtnMaximize ]
+                    [ class [ R.HeaderButton, R.HeaderBtnMaximize ]
                     , onClickMe <| config.toMsg (ToggleMaximize windowId)
                     ]
                     []
@@ -321,12 +329,12 @@ headerButtons config resizable windowId =
 
         close =
             span
-                [ class [ Res.HeaderButton, Res.HeaderBtnClose ]
+                [ class [ R.HeaderButton, R.HeaderBtnClose ]
                 , onClickMe <| config.toMsg (Close windowId)
                 ]
                 []
     in
-        div [ class [ Res.HeaderButtons ] ]
+        div [ class [ R.HeaderButtons ] ]
             [ pin
             , minimize
             , maximize
@@ -358,11 +366,11 @@ windowClasses : Window -> Attribute msg
 windowClasses window =
     if isMaximized window then
         class
-            [ Res.Window
-            , Res.Maximizeme
+            [ R.Window
+            , R.Maximizeme
             ]
     else
-        class [ Res.Window ]
+        class [ R.Window ]
 
 
 windowPositionAndSize : Maybe Size -> Bool -> Window -> Html.Attribute msg
@@ -398,7 +406,7 @@ windowPositionAndSize appSize hasDecorations window =
 
 decoratedAttr : Bool -> Html.Attribute msg
 decoratedAttr =
-    boolAttr Res.decoratedAttrTag
+    boolAttr R.decoratedAttrTag
 
 
 
@@ -520,4 +528,18 @@ appAttr_ =
 
 appIconAttr : String -> Attribute msg
 appIconAttr =
-    attribute Res.appIconAttrTag
+    attribute R.appIconAttrTag
+
+
+
+-- Sidebar
+
+
+viewSidebar : Config msg -> Model -> Bool -> ( String, Html msg )
+viewSidebar config model isFreeplay =
+    model
+        |> getSidebar
+        |> lazy2
+            (Sidebar.view >>> div [ class [ R.Sidebar ] ])
+            (sidebarConfig isFreeplay config)
+        |> (,) "#sidebar"

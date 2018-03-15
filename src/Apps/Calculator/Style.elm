@@ -3,9 +3,9 @@ module Apps.Calculator.Style exposing (..)
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
 import Css.Elements exposing (ul, li, div, span, button)
-import Css.Utils exposing (..)
-import Css.Common exposing (..)
-import UI.Colors as Color
+import Utils.Css exposing (..)
+import UI.Common exposing (..)
+import UI.Colors as Colors
 import Apps.Calculator.Resources exposing (..)
 
 

@@ -2,7 +2,7 @@ module UI.DynStyles.Highlight.Explorer exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Utils as Css exposing (withAttribute)
+import Utils.Css as Css exposing (withAttribute)
 import Apps.Explorer.Resources as Explorer
 
 

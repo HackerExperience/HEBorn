@@ -8,7 +8,7 @@ import Game.Servers.Tunnels.Models as Tunnels
 import Game.Meta.Types.Network exposing (NIP)
 import UI.Layouts.VerticalList exposing (verticalList)
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
-import UI.Entries.FilterHeader exposing (filterHeader)
+import UI.Elements.FilterHeader exposing (filterHeader)
 import Apps.ConnManager.Config exposing (..)
 import Apps.ConnManager.Messages exposing (Msg(..))
 import Apps.ConnManager.Models exposing (..)

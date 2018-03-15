@@ -4,8 +4,8 @@ import ContextMenu
 import Time exposing (Time)
 import Html exposing (..)
 import Html.CssHelpers
-import UI.Widgets.ProgressBar exposing (progressBar)
-import UI.Widgets.LineGraph exposing (lineGraph)
+import UI.Elements.ProgressBar exposing (progressBar)
+import UI.Elements.LineGraph exposing (lineGraph)
 import UI.ToString exposing (bibytesToString, bitsPerSecondToString, frequencyToString, secondsToTimeNotation)
 import Game.Servers.Processes.Models as Processes
 import Game.Servers.Processes.Shared as Processes

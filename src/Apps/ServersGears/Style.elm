@@ -1,10 +1,11 @@
 module Apps.ServersGears.Style exposing (..)
 
 import Css exposing (..)
+import Css.Colors exposing (black)
 import Css.Elements exposing (div, svg)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (child)
-import Css.Common exposing (flexContainerHorz, flexContainerVert)
+import Utils.Css exposing (child)
+import UI.Common exposing (flexContainerHorz, flexContainerVert)
 import UI.Colors exposing (..)
 import Apps.ServersGears.Resources exposing (Classes(..), prefix)
 

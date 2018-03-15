@@ -1,4 +1,4 @@
-module UI.Entries.Toogable exposing (toogableEntry)
+module UI.Elements.Toogable exposing (toogableEntry)
 
 import Html exposing (Html, Attribute, node, div)
 import Html.Attributes exposing (attribute)

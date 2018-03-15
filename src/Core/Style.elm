@@ -3,7 +3,7 @@ module Core.Style exposing (..)
 import Css exposing (..)
 import Css.Elements exposing (typeSelector, body, li, main_, header, footer, nav)
 import Css.Namespace exposing (namespace)
-import Css.Utils exposing (unselectable)
+import Utils.Css exposing (unselectable)
 import Core.Resources exposing (prefix, appId)
 
 

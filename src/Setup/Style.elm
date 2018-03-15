@@ -1,13 +1,14 @@
 module Setup.Style exposing (..)
 
-import Css.Utils exposing (nest, child)
 import Css exposing (..)
+import Css.Colors as Colors
 import Css.Elements exposing (typeSelector, div, h1, span)
 import Css.Namespace exposing (namespace)
-import Css.Gradients as Gradients
-import Css.Icons as Icon
-import UI.Colors as Color
+import Utils.Css exposing (nest, child)
 import Setup.Resources exposing (..)
+import UI.Gradients as Gradients
+import UI.Icons as Icons
+import UI.Colors as Colors
 
 
 css : Stylesheet
@@ -22,7 +23,7 @@ css =
         , selector leftBarNode
             [ minWidth (px 220)
             , flex (int 0)
-            , backgroundColor Color.separator
+            , backgroundColor Colors.separator
             ]
         , selector contentNode
             [ flex (int 1)
@@ -70,7 +71,7 @@ locationPicker =
             ]
         , nthChild "2"
             [ padding2 (px 0) (px 16) ]
-        , backgroundColor Color.bgWindow
+        , backgroundColor Colors.bgWindow
         , padding (px 16)
         ]
     ]
@@ -80,10 +81,10 @@ headerBanner : List Style
 headerBanner =
     [ minHeight (px 80)
     , Gradients.pinotNoir toTopLeft
-    , color Color.white
+    , color Colors.white
     , padding2 (px 2) (px 16)
     , nest [ child h1, before ]
-        [ Icon.fontFamily
-        , Icon.osLogo
+        [ Icons.fontFamily
+        , Icons.osLogo
         ]
     ]

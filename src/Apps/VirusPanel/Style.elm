@@ -1,17 +1,18 @@
 module Apps.VirusPanel.Style exposing (..)
 
 import Css exposing (..)
+import Css.Colors as Colors
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz)
-import Css.Icons as Icon
 import UI.Colors as Colors
+import UI.Common exposing (flexContainerHorz)
+import UI.Icons as Icons
 import Apps.VirusPanel.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 

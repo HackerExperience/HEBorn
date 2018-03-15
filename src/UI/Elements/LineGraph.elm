@@ -1,4 +1,4 @@
-module UI.Widgets.LineGraph exposing (lineGraph)
+module UI.Elements.LineGraph exposing (lineGraph)
 
 import Html exposing (Html)
 import Svg exposing (svg, polyline, polygon)

@@ -1,14 +1,15 @@
 module Apps.FloatingHeads.Style exposing (..)
 
 import Css exposing (..)
-import Css.Namespace exposing (namespace)
+import Css.Colors as Colors
 import Css.Elements exposing (ul, li, div, span)
-import Css.Icons as Icon
-import Css.Utils exposing (..)
-import Css.Common exposing (..)
-import UI.Colors as Color
+import Css.Namespace exposing (namespace)
+import Utils.Css exposing (..)
 import OS.WindowManager.Resources as WM
 import Apps.FloatingHeads.Resources exposing (Classes(..), prefix)
+import UI.Icons as Icons
+import UI.Common exposing (..)
+import UI.Colors as Colors
 
 
 css : Stylesheet
@@ -45,19 +46,19 @@ pseudoHeader =
         , children
             [ class HeaderBtnClose
                 [ before
-                    [ Icon.windowClose ]
+                    [ Icons.windowClose ]
                 , color (hex "f25156")
-                , Icon.fontFamily
-                , textShadow4 (px 1) (px 0) (px 3) Color.black
+                , Icons.fontFamily
+                , textShadow4 (px 1) (px 0) (px 3) Colors.black
                 , position relative
                 , zIndex (int 2)
                 ]
             , class HeaderBtnDrag
                 [ before
-                    [ Icon.moveable ]
-                , color Color.bgWindow
-                , Icon.fontFamily
-                , textShadow4 (px 1) (px 0) (px 3) Color.black
+                    [ Icons.moveable ]
+                , color Colors.bgWindow
+                , Icons.fontFamily
+                , textShadow4 (px 1) (px 0) (px 3) Colors.black
                 ]
             ]
         , hover
@@ -98,7 +99,7 @@ chat =
         , padding (px 0)
         , marginTop (px -16)
         , zIndex (int 2)
-        , backgroundColor Color.bgSelected
+        , backgroundColor Colors.bgSelected
         , children
             [ ul
                 [ flex (int 1)

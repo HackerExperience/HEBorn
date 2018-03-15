@@ -2,15 +2,15 @@ module Apps.DBAdmin.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
-import Css.Common exposing (flexContainerHorz)
-import Css.Icons as Icon
+import UI.Common exposing (flexContainerHorz)
+import UI.Icons as Icons
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
 
 
 ico : Style
 ico =
     before
-        [ Icon.fontFamily
+        [ Icons.fontFamily
         , textAlign center
         ]
 
@@ -24,23 +24,23 @@ css =
             [ flexContainerHorz ]
         , class BtnEdit
             [ ico
-            , before [ Icon.edit ]
+            , before [ Icons.edit ]
             ]
         , class BtnFilter
             [ ico
-            , before [ Icon.filter ]
+            , before [ Icons.filter ]
             ]
         , class BtnDelete
             [ ico
-            , before [ Icon.trash ]
+            , before [ Icons.trash ]
             ]
         , class BtnApply
             [ ico
-            , before [ Icon.apply ]
+            , before [ Icons.apply ]
             ]
         , class BtnCancel
             [ ico
-            , before [ Icon.cancel ]
+            , before [ Icons.cancel ]
             ]
         , class BottomButton
             [ cursor pointer ]

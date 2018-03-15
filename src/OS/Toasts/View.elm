@@ -3,7 +3,7 @@ module OS.Toasts.View exposing (view)
 import Dict exposing (foldl)
 import Html exposing (Html, div, text, h6, p)
 import Html.CssHelpers
-import OS.Toasts.Resources as Res
+import OS.Toasts.Resources as R
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
 import OS.Toasts.Messages exposing (..)
@@ -11,7 +11,7 @@ import OS.Toasts.Models exposing (..)
 
 
 { id, class, classList } =
-    Html.CssHelpers.withNamespace Res.prefix
+    Html.CssHelpers.withNamespace R.prefix
 
 
 view : Model -> Html Msg
@@ -25,7 +25,7 @@ view model =
                     (toast k v) :: acu
             )
             []
-        |> div [ class [ Res.Toasts ] ]
+        |> div [ class [ R.Toasts ] ]
 
 
 toast : Int -> Toast -> Html Msg
@@ -33,7 +33,7 @@ toast id { notification, state } =
     let
         classAttr =
             if state == Fading then
-                Just <| class [ Res.Fading ]
+                Just <| class [ R.Fading ]
             else
                 Nothing
 

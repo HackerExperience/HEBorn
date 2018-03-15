@@ -5,7 +5,7 @@ import Json.Decode exposing (Value)
 import Core.Flags as Core
 import Core.Error as Error exposing (Error)
 import Game.Meta.Types.Context as Context
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Account.Finances.Requests.Login as BankLoginRequest
 import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Notifications.Shared as AccountNotifications

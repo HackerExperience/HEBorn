@@ -6,9 +6,9 @@ import Html.Attributes exposing (value, selected)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import UI.Layouts.VerticalList exposing (verticalList)
-import UI.Entries.FilterHeader exposing (filterHeader)
-import UI.Entries.Toogable exposing (toogableEntry)
-import UI.Widgets.HorizontalBtnPanel exposing (horizontalBtnPanel)
+import UI.Elements.FilterHeader exposing (filterHeader)
+import UI.Elements.Toogable exposing (toogableEntry)
+import UI.Elements.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Utils.Html exposing (spacer)
 import Utils.Html.Events exposing (onChange)
 import Game.Account.Database.Models as Database

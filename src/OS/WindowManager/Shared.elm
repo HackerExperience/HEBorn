@@ -1,6 +1,6 @@
 module OS.WindowManager.Shared exposing (..)
 
-import Game.Meta.Types.Apps.Desktop as Desktop
+import Game.Meta.Types.Desktop.Apps as Desktop
 
 
 type alias AppId =

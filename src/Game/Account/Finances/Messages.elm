@@ -1,6 +1,6 @@
 module Game.Account.Finances.Messages exposing (..)
 
-import Game.Meta.Types.Apps.Desktop exposing (Requester)
+import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Account.Finances.Models exposing (..)

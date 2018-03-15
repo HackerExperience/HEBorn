@@ -11,7 +11,7 @@ import Json.Decode as Decode
         )
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
 import Game.Account.Dock.Models exposing (..)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 
 
 dock : Decoder Model

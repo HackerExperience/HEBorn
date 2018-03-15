@@ -2,6 +2,7 @@ module Game.Storyline.Models exposing (..)
 
 import Dict exposing (Dict)
 import Utils.List as List
+import Utils.Maybe as Maybe
 import Game.Storyline.Shared exposing (..)
 import Game.Storyline.StepActions.Shared exposing (Action)
 
@@ -60,6 +61,33 @@ getActions model =
     model
         |> Dict.foldl acuAction []
         |> List.uniqueBy toString
+
+
+noQuests : Model -> Bool
+noQuests model =
+    model
+        |> Dict.filter
+            (\_ -> .step >> Maybe.isJust)
+        |> Dict.isEmpty
+
+
+
+-- about contact
+
+
+getNick : Contact -> String
+getNick =
+    .about >> .nick
+
+
+getAvatar : Contact -> String
+getAvatar =
+    .about >> .picture
+
+
+getStep : Contact -> Maybe Step
+getStep { step } =
+    Maybe.map Tuple.first step
 
 
 

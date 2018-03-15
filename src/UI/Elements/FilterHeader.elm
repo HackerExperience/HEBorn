@@ -1,4 +1,4 @@
-module UI.Entries.FilterHeader exposing (filterHeader)
+module UI.Elements.FilterHeader exposing (filterHeader)
 
 import Html exposing (Html, Attribute, text, node, input)
 import Html.Attributes exposing (attribute, placeholder, value)

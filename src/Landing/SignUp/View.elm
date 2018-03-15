@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Html.CssHelpers
-import Landing.Resources as Res
+import Landing.Resources as R
 import Landing.SignUp.Messages exposing (..)
 import Landing.SignUp.Models exposing (..)
 
 
 landClass : List class -> Attribute msg
 landClass =
-    (.class) <| Html.CssHelpers.withNamespace Res.prefix
+    (.class) <| Html.CssHelpers.withNamespace R.prefix
 
 
 view : (Msg -> msg) -> Model -> Html msg
@@ -21,9 +21,9 @@ view toMsg model =
             [ id "signup-form"
             , action "javascript:void(0);"
             ]
-            [ div [ landClass [ Res.Title ] ] [ text "Sign up" ]
+            [ div [ landClass [ R.Title ] ] [ text "Sign up" ]
             , br [] []
-            , div [ landClass [ Res.Input ] ]
+            , div [ landClass [ R.Input ] ]
                 [ label [ for "email-field" ] [ text "email: " ]
                 , input
                     [ type_ "text"
@@ -34,7 +34,7 @@ view toMsg model =
                     []
                 ]
             , div [ class "validation-error" ] [ text (viewErrorsEmail model) ]
-            , div [ landClass [ Res.Input ] ]
+            , div [ landClass [ R.Input ] ]
                 [ label [ for "username-field" ] [ text "username: " ]
                 , input
                     [ type_ "text"
@@ -45,7 +45,7 @@ view toMsg model =
                     []
                 ]
             , div [ class "validation-error" ] [ text (viewErrorsUsername model) ]
-            , div [ landClass [ Res.Input ] ]
+            , div [ landClass [ R.Input ] ]
                 [ label [ for "password-field" ] [ text "password: " ]
                 , input
                     [ type_ "password"

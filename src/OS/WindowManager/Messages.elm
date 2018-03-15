@@ -3,7 +3,7 @@ module OS.WindowManager.Messages exposing (..)
 import Draggable
 import Window
 import Game.Meta.Types.Context exposing (..)
-import Game.Meta.Types.Apps.Desktop as DesktopApp exposing (DesktopApp)
+import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Servers.Shared exposing (CId)
 import Apps.Params as AppParams exposing (AppParams)
 import Apps.LogViewer.Messages as LogViewer
@@ -24,6 +24,7 @@ import Apps.BackFlix.Messages as BackFlix
 import Apps.FloatingHeads.Messages as FloatingHeads
 import Apps.VirusPanel.Messages as VirusPanel
 import OS.WindowManager.Shared exposing (..)
+import OS.WindowManager.Sidebar.Messages as Sidebar
 
 
 type Msg
@@ -31,6 +32,7 @@ type Msg
     | OpenApp AppParams CId
     | LazyLaunchEndpoint WindowId DesktopApp
     | SetAppSize Window.Size
+    | SidebarMsg Sidebar.Msg
       -- window handling
     | Close WindowId
     | Minimize WindowId
