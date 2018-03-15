@@ -7,7 +7,7 @@ import Events.Account.Handlers.VirusCollected as VirusCollected
 import Game.Account.Database.Config exposing (..)
 import Game.Account.Database.Models exposing (..)
 import Game.Account.Database.Messages exposing (..)
-import Game.Meta.Types.Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Shared exposing (ID)
 
 

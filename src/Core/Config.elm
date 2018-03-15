@@ -164,9 +164,6 @@ eventsConfig =
                 onFileDownloaded cid ( id, data ) =
                     BatchMsg []
 
-                onProcessCreated cid data =
-                    processes cid <| Processes.HandleProcessStarted data
-
                 onProcessCompleted cid data =
                     processes cid <| Processes.HandleProcessConclusion data
 
@@ -184,7 +181,6 @@ eventsConfig =
             in
                 { onFileAdded = onFileAdded
                 , onFileDownloaded = onFileDownloaded
-                , onProcessCreated = onProcessCreated
                 , onProcessCompleted = onProcessCompleted
                 , onProcessesRecalcado = onProcessesRecalcado
                 , onBruteforceFailed = onBruteforceFailed

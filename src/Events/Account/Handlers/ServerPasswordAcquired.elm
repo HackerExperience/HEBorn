@@ -16,8 +16,6 @@ import Game.Meta.Types.Network exposing (NIP)
 type alias Data =
     { nip : NIP
     , password : String
-    , processId : String
-    , gatewayIp : String
     }
 
 
@@ -35,8 +33,6 @@ passwordAcquired =
     decode Data
         |> custom nip
         |> required "password" string
-        |> required "process_id" string
-        |> required "gateway_ip" string
 
 
 nip : Decoder NIP

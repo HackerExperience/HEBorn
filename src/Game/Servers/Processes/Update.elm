@@ -2,7 +2,6 @@ module Game.Servers.Processes.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Random.Pcg as Random
-import Events.Server.Handlers.ProcessCreated as ProcessStarted
 import Events.Server.Handlers.ProcessCompleted as ProcessConclusion
 import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesChanged
@@ -56,9 +55,6 @@ update config msg model =
 
         HandleBruteforceFailed data ->
             handleBruteforceFailed data model
-
-        HandleProcessStarted data ->
-            handleProcessStarted data model
 
         HandleProcessConclusion data ->
             handleProcessConclusion data model
@@ -219,13 +215,6 @@ handleBruteforceFailed data model =
                 |> flip (,) React.none
     in
         updateOrSync update data.processId model
-
-
-handleProcessStarted : ProcessStarted.Data -> Model -> UpdateResponse msg
-handleProcessStarted ( id, process ) model =
-    model
-        |> insert id process
-        |> flip (,) React.none
 
 
 handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse msg
