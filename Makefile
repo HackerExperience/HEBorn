@@ -1,4 +1,4 @@
-.PHONY: default setup prepare build build-css release
+.PHONY: default setup prepare build build-css release app
 default: dev
 
 # Default settings
@@ -82,6 +82,17 @@ release: build
 	TARGET_ENV='build' webpack
 	tar -zcf release.tar.gz build/ && \
 	mv release.tar.gz build/
+
+# Creates a Electron release
+app: build
+	TARGET_ENV='build' webpack
+	cat static/main.js > build/main.js
+	cat static/package.json > build/package.json
+	electron-packager build "Hacker Experience 2" \
+		--platform=all \
+		--arch=all \
+		--overwrite=true \
+		--out=dist
 
 ################################################################################
 # Dev
