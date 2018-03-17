@@ -15,7 +15,7 @@ module UI.Elements.Modal
         )
 
 import Dict exposing (Dict)
-import Html exposing (Html, Attribute, node, div, button, text, h3, span)
+import Html exposing (Html, Attribute, node, div, button, text, h3, span, br)
 import Html.Events exposing (onClick)
 import UI.Elements.CustomSelect exposing (customSelect)
 import Game.Servers.Models exposing (Storages)
@@ -121,6 +121,7 @@ modalFrame title body buttons =
                 []
                 [ node msgNode [] main
                 , node btnsNode [] buttons
+                , br [] []
                 ]
                 |> List.singleton
                 |> node containerNode []

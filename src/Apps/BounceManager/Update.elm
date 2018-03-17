@@ -106,10 +106,28 @@ update config msg model =
         HandleReload id ->
             onReloadBounce config id model
 
+        CreateNewBounce ->
+            onCreateNewBounce config model
+
 
 onSetInitialSeed : Int -> Model -> UpdateResponse msg
 onSetInitialSeed seed model =
     ( Random.setSeed seed model, React.none )
+
+
+onCreateNewBounce : Config msg -> Model -> UpdateResponse msg
+onCreateNewBounce config model =
+    let
+        tab =
+            TabBuild ( Nothing, Bounces.emptyBounce )
+
+        model_ =
+            model
+                |> onGoTab config tab
+                |> Tuple.first
+                |> setPath []
+    in
+        React.update model_
 
 
 onGoTab : Config msg -> MainTab -> Model -> UpdateResponse msg
@@ -120,21 +138,21 @@ onGoTab config tab model =
                 model_ =
                     model
                         |> setSelectedTab tab
-                        |> setNewPath config maybeId
                         |> setSelectedBounce (Just ( maybeId, bounce ))
+                        |> setNewPath config maybeId bounce
             in
-                ( model_, React.none )
+                React.update model_
 
         _ ->
             let
                 model_ =
                     { model | selected = tab }
             in
-                ( model_, React.none )
+                React.update model_
 
 
-setNewPath : Config msg -> Maybe String -> Model -> Model
-setNewPath { bounces } maybeId model =
+setNewPath : Config msg -> Maybe String -> Bounces.Bounce -> Model -> Model
+setNewPath { bounces } maybeId bounce model =
     case Maybe.andThen (flip Bounces.getPath bounces) maybeId of
         Just path ->
             if path /= model.path then
@@ -152,7 +170,7 @@ onUpdateEditing str model =
         model_ =
             { model | bounceNameBuffer = Just str }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onToggleNameEdit : Model -> UpdateResponse msg
@@ -164,7 +182,7 @@ onToggleNameEdit model =
                 , bounceNameBuffer = Nothing
             }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onApplyNameChangings : Model -> UpdateResponse msg
@@ -176,7 +194,7 @@ onApplyNameChangings model =
                 , anyChange = True
             }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectServer : Network.NIP -> Model -> UpdateResponse msg
@@ -185,7 +203,7 @@ onSelectServer nip model =
         model_ =
             { model | selection = Just (SelectingServer nip) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectSlot : Int -> Model -> UpdateResponse msg
@@ -194,7 +212,7 @@ onSelectSlot num model =
         model_ =
             { model | selection = Just (SelectingSlot num) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectEntry : Network.NIP -> Model -> UpdateResponse msg
@@ -203,7 +221,7 @@ onSelectEntry nip model =
         model_ =
             { model | selection = Just (SelectingEntry nip) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onClearSelection : Model -> UpdateResponse msg
@@ -212,7 +230,7 @@ onClearSelection model =
         model_ =
             { model | selection = Nothing }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onAddNode : Network.NIP -> Int -> Model -> UpdateResponse msg
@@ -224,7 +242,7 @@ onAddNode nip where_ model =
         model_ =
             { model | path = path, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onMoveNode : Network.NIP -> Int -> Model -> UpdateResponse msg
@@ -238,7 +256,7 @@ onMoveNode nip where_ model =
         model_ =
             { model | path = path, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onRemoveNode : Network.NIP -> Model -> UpdateResponse msg
@@ -250,7 +268,7 @@ onRemoveNode nip model =
         model_ =
             { model | path = path_, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSave :
@@ -427,7 +445,7 @@ onReset ({ bounces } as config) ( id, bounce ) model =
         model_ =
             reset selected model
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onDelete :
@@ -461,7 +479,7 @@ onDelete config bounceId model =
                         , anyChange = False
                     }
             in
-                ( model_, React.none )
+                React.update model_
 
 
 bounceExist : Config msg -> Maybe Bounces.ID -> Maybe MainTab
@@ -494,7 +512,7 @@ onEdit config bounceId model =
                 Nothing ->
                     model
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onToggleExpand : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
@@ -509,7 +527,7 @@ onToggleExpand config bounceId model =
         model_ =
             { model | expanded = newExpanded }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSetModal : Config msg -> Maybe ModalAction -> Model -> UpdateResponse msg
@@ -523,7 +541,7 @@ onSetModal config modal model =
                 _ ->
                     { model | modal = modal }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onCreateRequest :
@@ -541,7 +559,7 @@ onCreateRequest config response model =
                 Just error ->
                     { model | modal = Just <| ForError (CreateError error) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onUpdateRequest :
@@ -559,7 +577,7 @@ onUpdateRequest config response model =
                 Just error ->
                     { model | modal = Just <| ForError (UpdateError error) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onRemoveRequest :
@@ -583,7 +601,7 @@ onRemoveRequest config response model =
                 Just error ->
                     { model | modal = Just <| ForError (RemoveError error) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 
@@ -644,7 +662,7 @@ onResetModel model =
 onReloadBounce : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
 onReloadBounce { bounces } id model =
     let
-        newModel =
+        model_ =
             case ( Dict.get id (Bounces.getBounces bounces), model.selected ) of
                 ( Just bounce, TabBuild ( _, _ ) ) ->
                     { model
@@ -656,4 +674,4 @@ onReloadBounce { bounces } id model =
                 _ ->
                     model
     in
-        ( newModel, React.none )
+        React.update model_

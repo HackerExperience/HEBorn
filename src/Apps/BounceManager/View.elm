@@ -77,9 +77,7 @@ viewTabManage ({ toMsg, bounces } as config) model =
         div [ class [ Super, Manage, Empty ] ]
             [ button
                 [ class [ MiddleButton ]
-                , ( Nothing, Bounces.emptyBounce )
-                    |> TabBuild
-                    |> GoTab
+                , CreateNewBounce
                     |> toMsg
                     |> onClickWithStopProp
                 ]
@@ -95,9 +93,7 @@ viewTabManage ({ toMsg, bounces } as config) model =
             |> flip (++)
                 [ button
                     [ class [ ManageCreate ]
-                    , ( Nothing, Bounces.emptyBounce )
-                        |> TabBuild
-                        |> GoTab
+                    , CreateNewBounce
                         |> toMsg
                         |> onClickWithStopProp
                     ]

@@ -33,3 +33,4 @@ type Msg
     | ResetModel
     | ReloadBounce Bounces.ID
     | HandleReload Bounces.ID
+    | CreateNewBounce
