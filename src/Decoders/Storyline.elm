@@ -114,6 +114,23 @@ replyFromId id =
         "nasty_virus1" ->
             succeed NastyVirus1
 
+        "nasty_virus2" ->
+            succeed NastyVirus2
+
+        "punks1" ->
+            succeed Punks1
+
+        "punks2" ->
+            succeed Punks2
+
+        "punks3" ->
+            succeed Punks3
+                |> required "ip" string
+                |> field "meta"
+
+        "dlayd_much1" ->
+            succeed DlaydMuch1
+
         error ->
             fail <| commonError "email type" error
 

@@ -44,7 +44,9 @@ view { onOpenBrowser, username } content =
             ]
 
         NastyVirus1 ->
-            []
+            [ text "But as long as you are idle... "
+            , text "You know the #RCN? I heard they developed a nasty virus."
+            ]
 
         NothingNow ->
             [ text "Hmm nothing now, but I'll refer to you if someone shows up looking for a job." ]
@@ -54,3 +56,28 @@ view { onOpenBrowser, username } content =
 
         YeahRight ->
             [ text "Yeah, right..." ]
+
+        NastyVirus2 ->
+            [ text "Wanna try to \"borrow\" it? "
+            , text "Might work like an, er, angel investment if you find a good PC to install it."
+            ]
+
+        Punks1 ->
+            [ text "Those punks still around? "
+            , text "I'm pretty sure they are the ones who framed me... "
+            , text "Anyway, sure I'm in. Where do I get it?"
+            ]
+
+        Punks2 ->
+            [ text "Well, the folks there may have a good reputation, "
+            , text "but they have a backup server that's quite easy to get in. "
+            ]
+
+        Punks3 ip ->
+            [ text "Try this: "
+            , addr onOpenBrowser ip
+            , text " - I'll join you"
+            ]
+
+        DlaydMuch1 ->
+            []

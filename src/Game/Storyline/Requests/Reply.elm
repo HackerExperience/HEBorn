@@ -91,6 +91,21 @@ getReplyId reply =
         NastyVirus1 ->
             "nasty_virus1"
 
+        NastyVirus2 ->
+            "nasty_virus2"
+
+        Punks1 ->
+            "punks1"
+
+        Punks2 ->
+            "punks2"
+
+        Punks3 _ ->
+            "punks3"
+
+        DlaydMuch1 ->
+            "dlayd_much1"
+
 
 receiver : FlagsSource a -> Code -> Value -> Data
 receiver flagsSrc code json =
