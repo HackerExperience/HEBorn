@@ -18,8 +18,8 @@ import Events.Account.Handlers.VirusCollected as VirusCollected
 import Events.Account.Config exposing (..)
 
 
-events : Config msg -> Router msg
-events config name value =
+events : Config msg -> String -> Router msg
+events config requestId name value =
     case name of
         "server_password_acquired" ->
             ServerPasswordAcquired.handler config.onServerPasswordAcquired value
@@ -52,7 +52,7 @@ events config name value =
             TutorialFinished.handler config.onTutorialFinished value
 
         "bounce_created" ->
-            BounceCreated.handler config.onBounceCreated value
+            BounceCreated.handler (config.onBounceCreated requestId) value
 
         "bounce_updated" ->
             BounceUpdated.handler config.onBounceUpdated value

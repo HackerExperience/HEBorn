@@ -6,16 +6,3 @@ import Game.BackFlix.Models exposing (..)
 
 type Msg
     = HandleCreate Log
-    | DummyOp
-
-
-type LogMsg
-    = LogRequest LogRequestMsg
-
-
-type RequestMsg
-    = Retry ResponseType
-
-
-type LogRequestMsg
-    = NoOp ResponseType

@@ -51,7 +51,7 @@ view ({ toMsg } as config) ({ openMenu } as model) =
             case activeEndpointCId of
                 Nothing ->
                     bounces
-                        |> Dict.keys
+                        |> Bounces.getIds
                         |> List.map Just
                         |> (::) Nothing
 
@@ -290,6 +290,7 @@ bouncePicker ({ toMsg, batchMsg, onSetBounce } as config) readonly =
 bounceList : Config msg -> Html msg
 bounceList ({ bounces } as config) =
     bounces
+        |> Bounces.getBounces
         |> Dict.foldl (bounceListEntry config) []
         |> verticalList [ class [ BounceList ] ]
 

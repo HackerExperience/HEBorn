@@ -14,7 +14,7 @@ import Game.Meta.Types.Network as Network
 import UI.Layouts.VerticalSticked exposing (verticalSticked)
 import UI.Layouts.VerticalList exposing (..)
 import UI.Elements.HorizontalTabs exposing (hzTabs)
-import UI.Elements.Modal exposing (modalOk, modalOkCancel)
+import UI.Elements.Modal exposing (modalOk, modalOkCancel, modalFrameOnly)
 import UI.Elements.Toogable exposing (toogableEntry)
 import UI.Elements.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Apps.BounceManager.Config exposing (..)
@@ -73,13 +73,11 @@ viewTabLabel _ tab =
 
 viewTabManage : Config msg -> Model -> Html msg
 viewTabManage ({ toMsg, bounces } as config) model =
-    if Dict.isEmpty bounces then
+    if Bounces.isEmpty bounces then
         div [ class [ Super, Manage, Empty ] ]
             [ button
                 [ class [ MiddleButton ]
-                , ( Nothing, Bounces.emptyBounce )
-                    |> TabBuild
-                    |> GoTab
+                , CreateNewBounce
                     |> toMsg
                     |> onClickWithStopProp
                 ]
@@ -87,10 +85,20 @@ viewTabManage ({ toMsg, bounces } as config) model =
             ]
     else
         bounces
+            |> Bounces.getBounces
             |> Dict.toList
             |> List.map (viewBounce config model)
             |> verticalList [ class [ BounceList ] ]
             |> List.singleton
+            |> flip (++)
+                [ button
+                    [ class [ ManageCreate ]
+                    , CreateNewBounce
+                        |> toMsg
+                        |> onClickWithStopProp
+                    ]
+                    [ text "Create new Bounce" ]
+                ]
             |> (++) [ modalHandler config model ]
             |> div [ class [ Super, Manage ] ]
 
@@ -215,6 +223,9 @@ modalHandler ({ toMsg, batchMsg } as config) model =
                 modalOk (Just "Bounce Manager")
                     ("Save Sucessfully!")
                     (toMsg <| SetModal Nothing)
+
+            Just ForSpinner ->
+                modalFrameOnly (Just "Bounce Manager") "Now Saving..."
 
             Nothing ->
                 text ""

@@ -16,9 +16,6 @@ update _ msg model =
         HandleCreate log ->
             onHandleCreate log model
 
-        _ ->
-            React.update model
-
 
 onHandleCreate : Log -> Model -> UpdateResponse msg
 onHandleCreate log model =

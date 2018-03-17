@@ -80,6 +80,13 @@ bounceManage =
                         ]
                     ]
                 ]
+            , class ManageCreate
+                [ width (px 150)
+                , height (px 32)
+                , alignSelf (flexEnd)
+                , marginBottom (px 8)
+                , marginRight (px 8)
+                ]
             ]
         ]
 

@@ -6,6 +6,7 @@ module UI.Elements.Modal
         , modalOkCancel
         , modalNode
         , modalFrame
+        , modalFrameOnly
         , overlayNode
         , select
         , buttons
@@ -14,7 +15,7 @@ module UI.Elements.Modal
         )
 
 import Dict exposing (Dict)
-import Html exposing (Html, Attribute, node, div, button, text, h3, span)
+import Html exposing (Html, Attribute, node, div, button, text, h3, span, br)
 import Html.Events exposing (onClick)
 import UI.Elements.CustomSelect exposing (customSelect)
 import Game.Servers.Models exposing (Storages)
@@ -120,6 +121,35 @@ modalFrame title body buttons =
                 []
                 [ node msgNode [] main
                 , node btnsNode [] buttons
+                , br [] []
+                ]
+                |> List.singleton
+                |> node containerNode []
+
+        root =
+            node modalNode [] [ overlay Nothing, content_ ]
+    in
+        root
+
+
+modalFrameOnly :
+    Maybe String
+    -> String
+    -> Html msg
+modalFrameOnly title message =
+    let
+        main =
+            case title of
+                Just title ->
+                    h3 [] [ text title ] :: [ text message ]
+
+                Nothing ->
+                    [ text message ]
+
+        content_ =
+            node contentNode
+                []
+                [ node msgNode [] main
                 ]
                 |> List.singleton
                 |> node containerNode []

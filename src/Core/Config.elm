@@ -47,6 +47,7 @@ import OS.WindowManager.Shared as WindowManager
 import OS.WindowManager.Messages as WindowManager
 import OS.Toasts.Messages as Toast
 import Apps.Browser.Messages as Browser
+import Apps.BounceManager.Messages as BounceMan
 
 
 landingConfig : Bool -> Flags -> Landing.Config Msg
@@ -136,6 +137,9 @@ eventsConfig =
 
                 onTutorialFinished =
                     .completed >> Account.HandleTutorialCompleted >> account
+
+                onBounceCreated rId ( id, bounce ) =
+                    bounces <| Bounces.HandleCreated rId id bounce
             in
                 { onServerPasswordAcquired = onServerPasswordAcquired
                 , onStoryStepProceeded = onStoryStepProceeded
@@ -147,7 +151,7 @@ eventsConfig =
                 , onDbAccountUpdated = onDbAccountUpdated
                 , onDbAccountRemoved = onDbAccountRemoved
                 , onTutorialFinished = onTutorialFinished
-                , onBounceCreated = uncurry Bounces.HandleCreated >> bounces
+                , onBounceCreated = onBounceCreated
                 , onBounceUpdated = uncurry Bounces.HandleUpdated >> bounces
                 , onBounceRemoved = Bounces.HandleRemoved >> bounces
                 , onVirusCollected = onVirusCollected
@@ -207,6 +211,12 @@ gameConfig =
                     [ ws <| Ws.HandleJoin (AccountChannel accountId) Nothing
                     , ws <| Ws.HandleJoin BackFlixChannel Nothing
                     ]
+
+        onReloadBounce id appId =
+            bounceMan appId <| BounceMan.HandleReload id
+
+        onReloadIfBounceLoaded id =
+            bounceMans <| BounceMan.HandleReloadIfLoaded id
     in
         { toMsg = GameMsg
         , batchMsg = BatchMsg
@@ -220,6 +230,8 @@ gameConfig =
         , onServerToast = Toast.HandleServers >>> toast
         , onBankAccountLogin = Browser.HandleBankLogin >> browserTab
         , onBankAccountTransfer = Browser.HandleBankTransfer >> browserTab
+        , onReloadBounce = onReloadBounce
+        , onReloadIfBounceLoaded = onReloadIfBounceLoaded
         }
 
 
@@ -419,3 +431,13 @@ browserTab msg { reference, browserTab } =
 browsers : Browser.Msg -> Msg
 browsers =
     WindowManager.BrowserMsg >> apps
+
+
+bounceMan : WindowManager.AppId -> BounceMan.Msg -> Msg
+bounceMan appId =
+    WindowManager.BounceManagerMsg >> app appId
+
+
+bounceMans : BounceMan.Msg -> Msg
+bounceMans =
+    WindowManager.BounceManagerMsg >> apps

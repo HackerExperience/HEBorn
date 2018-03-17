@@ -15,6 +15,7 @@ import Game.Account.Notifications.Config as Notifications
 import Game.Account.Notifications.Shared as Notifications
 import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Servers.Shared exposing (CId)
+import Game.Account.Bounces.Shared as Bounces
 
 
 type alias Config msg =
@@ -32,6 +33,10 @@ type alias Config msg =
     -- account.finances
     , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
     , onBankAccountTransfer : BankTransferRequest.Data -> Requester -> msg
+
+    -- account.bounces
+    , onReloadBounce : Bounces.ID -> String -> msg
+    , onReloadIfBounceLoaded : Bounces.ID -> msg
 
     -- account.notifications
     , onToast : Notifications.Content -> msg
@@ -63,6 +68,8 @@ bouncesConfig database accountId config =
     , toMsg = BouncesMsg >> config.toMsg
     , database = database
     , accountId = accountId
+    , onReloadBounce = config.onReloadBounce
+    , onReloadIfBounceLoaded = config.onReloadIfBounceLoaded
     }
 
 

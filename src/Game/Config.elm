@@ -6,6 +6,7 @@ import Core.Flags as Core
 import Core.Error as Error exposing (Error)
 import Game.Meta.Types.Context as Context
 import Game.Meta.Types.Desktop.Apps exposing (Requester)
+import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Finances.Requests.Login as BankLoginRequest
 import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Notifications.Shared as AccountNotifications
@@ -45,6 +46,10 @@ type alias Config msg =
     -- account.notifications
     , onAccountToast : AccountNotifications.Content -> msg
     , onServerToast : CId -> ServersNotifications.Content -> msg
+
+    -- account.bounces
+    , onReloadBounce : Bounces.ID -> String -> msg
+    , onReloadIfBounceLoaded : Bounces.ID -> msg
 
     -- account.finances
     , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
@@ -108,6 +113,8 @@ accountConfig lastTick flags config =
     -- account.finances
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
+    , onReloadBounce = config.onReloadBounce
+    , onReloadIfBounceLoaded = config.onReloadIfBounceLoaded
     , onToast = config.onAccountToast
     }
 

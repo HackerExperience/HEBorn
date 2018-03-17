@@ -31,6 +31,7 @@ import Dict
 import Native.Panic
 import Core.Error as Error
 import Game.Account.Models as Account
+import Game.Account.Bounces.Models as Bounces
 import Game.Servers.Models as Servers
 import Game.Inventory.Models as Inventory
 import Game.Servers.Shared as Servers
@@ -260,7 +261,8 @@ getBounces : Model -> List String
 getBounces game =
     game
         |> getAccount
-        |> (.bounces)
+        |> .bounces
+        |> Bounces.getBounces
         |> Dict.keys
 
 

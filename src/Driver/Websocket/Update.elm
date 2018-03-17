@@ -1,7 +1,7 @@
 module Driver.Websocket.Update exposing (update)
 
 import Dict exposing (Dict)
-import Json.Decode exposing (Value, decodeValue, value, string, field)
+import Json.Decode exposing (Value, decodeValue, value, string, field, maybe, map)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Phoenix.Channel as Channel
 import Utils.React as React exposing (React)
@@ -101,7 +101,12 @@ handleJoin config channel payload model =
             getAddress channel
 
         eventHandler =
-            decodeEvent >> config.onEvent channel
+            case channel of
+                BackFlixChannel ->
+                    decodeBackFlixEvent >> config.onEvent channel
+
+                _ ->
+                    decodeEvent >> config.onEvent channel
 
         driverChannel =
             channelAddress
@@ -161,6 +166,19 @@ decodeJoinFailed =
 
 decodeEvent : Value -> Result String ( String, String, Value )
 decodeEvent =
+    let
+        meta =
+            map (Maybe.withDefault "") <| maybe (field "request_id" string)
+    in
+        decode (,,)
+            |> required "event" string
+            |> required "meta" meta
+            |> required "data" value
+            |> decodeValue
+
+
+decodeBackFlixEvent : Value -> Result String ( String, String, Value )
+decodeBackFlixEvent =
     decode (,,)
         |> required "event" string
         |> optional "request_id" string ""

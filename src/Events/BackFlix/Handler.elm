@@ -5,8 +5,8 @@ import Events.BackFlix.Handlers.NewLog as NewLog
 import Events.BackFlix.Config exposing (..)
 
 
-events : Config msg -> Router msg
-events config name json =
+events : Config msg -> String -> Router msg
+events config requestId name json =
     case name of
         "new_log" ->
             NewLog.handler config.onNewLog json
