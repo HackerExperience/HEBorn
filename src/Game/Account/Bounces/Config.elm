@@ -13,4 +13,5 @@ type alias Config msg =
     , accountId : String
     , database : Database.Model
     , onReloadBounce : ID -> String -> msg
+    , onReloadIfBounceLoaded : ID -> msg
     }

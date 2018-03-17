@@ -97,19 +97,50 @@ update config msg model =
         SetInitialSeed seed ->
             onSetInitialSeed seed model
 
-        ResetModel ->
-            onResetModel model
-
         ReloadBounce id ->
             onReloadBounce config id model
 
         HandleReload id ->
             onReloadBounce config id model
 
+        HandleReloadIfLoaded id ->
+            handleReloadIfLoaded config id model
+
+        CreateNewBounce ->
+            onCreateNewBounce config model
+
+
+handleReloadIfLoaded : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
+handleReloadIfLoaded config id model =
+    case Maybe.andThen Tuple.first model.selectedBounce of
+        Just id_ ->
+            if id == id_ then
+                onReloadBounce config id model
+            else
+                React.update model
+
+        Nothing ->
+            React.update model
+
 
 onSetInitialSeed : Int -> Model -> UpdateResponse msg
 onSetInitialSeed seed model =
     ( Random.setSeed seed model, React.none )
+
+
+onCreateNewBounce : Config msg -> Model -> UpdateResponse msg
+onCreateNewBounce config model =
+    let
+        tab =
+            TabBuild ( Nothing, Bounces.emptyBounce )
+
+        model_ =
+            model
+                |> onGoTab config tab
+                |> Tuple.first
+                |> setPath []
+    in
+        React.update model_
 
 
 onGoTab : Config msg -> MainTab -> Model -> UpdateResponse msg
@@ -120,21 +151,21 @@ onGoTab config tab model =
                 model_ =
                     model
                         |> setSelectedTab tab
-                        |> setNewPath config maybeId
                         |> setSelectedBounce (Just ( maybeId, bounce ))
+                        |> setNewPath config maybeId bounce
             in
-                ( model_, React.none )
+                React.update model_
 
         _ ->
             let
                 model_ =
                     { model | selected = tab }
             in
-                ( model_, React.none )
+                React.update model_
 
 
-setNewPath : Config msg -> Maybe String -> Model -> Model
-setNewPath { bounces } maybeId model =
+setNewPath : Config msg -> Maybe String -> Bounces.Bounce -> Model -> Model
+setNewPath { bounces } maybeId bounce model =
     case Maybe.andThen (flip Bounces.getPath bounces) maybeId of
         Just path ->
             if path /= model.path then
@@ -152,7 +183,7 @@ onUpdateEditing str model =
         model_ =
             { model | bounceNameBuffer = Just str }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onToggleNameEdit : Model -> UpdateResponse msg
@@ -164,7 +195,7 @@ onToggleNameEdit model =
                 , bounceNameBuffer = Nothing
             }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onApplyNameChangings : Model -> UpdateResponse msg
@@ -176,7 +207,7 @@ onApplyNameChangings model =
                 , anyChange = True
             }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectServer : Network.NIP -> Model -> UpdateResponse msg
@@ -185,7 +216,7 @@ onSelectServer nip model =
         model_ =
             { model | selection = Just (SelectingServer nip) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectSlot : Int -> Model -> UpdateResponse msg
@@ -194,7 +225,7 @@ onSelectSlot num model =
         model_ =
             { model | selection = Just (SelectingSlot num) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSelectEntry : Network.NIP -> Model -> UpdateResponse msg
@@ -203,7 +234,7 @@ onSelectEntry nip model =
         model_ =
             { model | selection = Just (SelectingEntry nip) }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onClearSelection : Model -> UpdateResponse msg
@@ -212,7 +243,7 @@ onClearSelection model =
         model_ =
             { model | selection = Nothing }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onAddNode : Network.NIP -> Int -> Model -> UpdateResponse msg
@@ -224,7 +255,7 @@ onAddNode nip where_ model =
         model_ =
             { model | path = path, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onMoveNode : Network.NIP -> Int -> Model -> UpdateResponse msg
@@ -238,7 +269,7 @@ onMoveNode nip where_ model =
         model_ =
             { model | path = path, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onRemoveNode : Network.NIP -> Model -> UpdateResponse msg
@@ -250,7 +281,7 @@ onRemoveNode nip model =
         model_ =
             { model | path = path_, selection = Nothing, anyChange = True }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 onSave :
@@ -296,6 +327,254 @@ onSave ({ toMsg, accountId, bounces, database } as config) ( id, bounce ) model 
                     getReactBounceCreate config createBounce id rId model0
     in
         ( model0, react )
+
+
+onReset :
+    Config msg
+    -> ( Maybe Bounces.ID, Bounces.Bounce )
+    -> Model
+    -> UpdateResponse msg
+onReset ({ bounces } as config) ( id, bounce ) model =
+    let
+        selected =
+            Maybe.withDefault emptyBounceBuildTab <| bounceExist config id
+
+        model_ =
+            reset selected model
+    in
+        React.update model_
+
+
+onDelete :
+    Config msg
+    -> Maybe Bounces.ID
+    -> Model
+    -> UpdateResponse msg
+onDelete config bounceId model =
+    case bounceId of
+        Just id ->
+            let
+                model_ =
+                    { model
+                        | selected = TabManage
+                        , selectedBounce = Nothing
+                    }
+
+                react =
+                    doRemoveRequest config id
+            in
+                ( model_, react )
+
+        Nothing ->
+            let
+                model_ =
+                    { model
+                        | selected = TabManage
+                        , selectedBounce = Nothing
+                        , path = []
+                        , bounceNameBuffer = Nothing
+                        , anyChange = False
+                    }
+            in
+                React.update model_
+
+
+bounceExist : Config msg -> Maybe Bounces.ID -> Maybe MainTab
+bounceExist { bounces } id =
+    case id of
+        Just id ->
+            case Bounces.get id bounces of
+                Just bounce ->
+                    Just <| TabBuild ( Just id, bounce )
+
+                Nothing ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
+onEdit : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
+onEdit config bounceId model =
+    let
+        model_ =
+            case Bounces.get bounceId config.bounces of
+                Just bounce ->
+                    { model
+                        | selected = TabBuild ( Just bounceId, bounce )
+                        , selectedBounce = Just ( Just bounceId, bounce )
+                        , path = bounce.path
+                    }
+
+                Nothing ->
+                    model
+    in
+        React.update model_
+
+
+onToggleExpand : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
+onToggleExpand config bounceId model =
+    let
+        newExpanded =
+            if (List.member bounceId model.expanded) then
+                List.filter ((==) bounceId >> not) model.expanded
+            else
+                (::) bounceId model.expanded
+
+        model_ =
+            { model | expanded = newExpanded }
+    in
+        React.update model_
+
+
+onSetModal : Config msg -> Maybe ModalAction -> Model -> UpdateResponse msg
+onSetModal config modal model =
+    let
+        model_ =
+            case modal of
+                Just ForSaveSucessful ->
+                    { model | modal = modal, anyChange = False }
+
+                _ ->
+                    { model | modal = modal }
+    in
+        React.update model_
+
+
+onCreateRequest :
+    Config msg
+    -> Maybe Bounces.CreateError
+    -> Model
+    -> UpdateResponse msg
+onCreateRequest config response model =
+    let
+        model_ =
+            case response of
+                Nothing ->
+                    model
+
+                Just error ->
+                    { model | modal = Just <| ForError (CreateError error) }
+    in
+        React.update model_
+
+
+onUpdateRequest :
+    Config msg
+    -> Maybe Bounces.UpdateError
+    -> Model
+    -> UpdateResponse msg
+onUpdateRequest config response model =
+    let
+        model_ =
+            case response of
+                Nothing ->
+                    model
+
+                Just error ->
+                    { model | modal = Just <| ForError (UpdateError error) }
+    in
+        React.update model_
+
+
+onRemoveRequest :
+    Config msg
+    -> Maybe Bounces.RemoveError
+    -> Model
+    -> UpdateResponse msg
+onRemoveRequest config response model =
+    let
+        model_ =
+            case response of
+                Nothing ->
+                    { model
+                        | selected = TabManage
+                        , selectedBounce = Nothing
+                        , path = []
+                        , bounceNameBuffer = Nothing
+                        , anyChange = False
+                    }
+
+                Just error ->
+                    { model | modal = Just <| ForError (RemoveError error) }
+    in
+        React.update model_
+
+
+
+-- CreateRequest
+
+
+doCreateRequest :
+    Config msg
+    -> Database.HackedServers
+    -> Bounces.Bounce
+    -> String
+    -> React msg
+doCreateRequest ({ toMsg, accountId } as config) hackedServers bounce rId =
+    config
+        |> createRequest hackedServers bounce accountId rId
+        |> Cmd.map (errorToMaybe >> CreateRequest >> toMsg)
+        |> React.cmd
+
+
+
+-- UpdateRequest
+
+
+doUpdateRequest :
+    Config msg
+    -> Database.HackedServers
+    -> Bounces.ID
+    -> Bounces.Bounce
+    -> String
+    -> React msg
+doUpdateRequest ({ toMsg, accountId } as config) hackedServers id bounce rId =
+    config
+        |> updateRequest hackedServers id bounce accountId rId
+        |> Cmd.map (errorToMaybe >> UpdateRequest >> toMsg)
+        |> React.cmd
+
+
+
+-- RemoveRequest
+
+
+doRemoveRequest :
+    Config msg
+    -> Bounces.ID
+    -> React msg
+doRemoveRequest ({ toMsg, accountId } as config) id =
+    config
+        |> removeRequest id accountId
+        |> Cmd.map (errorToMaybe >> RemoveRequest >> toMsg)
+        |> React.cmd
+
+
+onReloadBounce : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
+onReloadBounce { bounces, reference } id model =
+    let
+        model_ =
+            case ( Dict.get id (Bounces.getBounces bounces), model.selected ) of
+                ( Just bounce, TabBuild _ ) ->
+                    { model
+                        | selected = TabBuild ( Just id, bounce )
+                        , selectedBounce = Just ( Just id, bounce )
+                        , path = bounce.path
+                        , anyChange = False
+                        , selection = Nothing
+                        , renaming = False
+                        , modal = Just ForSaveSucessful
+                    }
+
+                _ ->
+                    model
+    in
+        React.update model_
+
+
+
+-- Helpers
 
 
 getReactBounceCreate :
@@ -412,248 +691,3 @@ genFailMsg { toMsg } isCreate =
             |> Just
             |> SetModal
             |> toMsg
-
-
-onReset :
-    Config msg
-    -> ( Maybe Bounces.ID, Bounces.Bounce )
-    -> Model
-    -> UpdateResponse msg
-onReset ({ bounces } as config) ( id, bounce ) model =
-    let
-        selected =
-            Maybe.withDefault emptyBounceBuildTab <| bounceExist config id
-
-        model_ =
-            reset selected model
-    in
-        ( model_, React.none )
-
-
-onDelete :
-    Config msg
-    -> Maybe Bounces.ID
-    -> Model
-    -> UpdateResponse msg
-onDelete config bounceId model =
-    case bounceId of
-        Just id ->
-            let
-                model_ =
-                    { model
-                        | selected = TabManage
-                        , selectedBounce = Nothing
-                    }
-
-                react =
-                    doRemoveRequest config id
-            in
-                ( model_, react )
-
-        Nothing ->
-            let
-                model_ =
-                    { model
-                        | selected = TabManage
-                        , selectedBounce = Nothing
-                        , path = []
-                        , bounceNameBuffer = Nothing
-                        , anyChange = False
-                    }
-            in
-                ( model_, React.none )
-
-
-bounceExist : Config msg -> Maybe Bounces.ID -> Maybe MainTab
-bounceExist { bounces } id =
-    case id of
-        Just id ->
-            case Bounces.get id bounces of
-                Just bounce ->
-                    Just <| TabBuild ( Just id, bounce )
-
-                Nothing ->
-                    Nothing
-
-        Nothing ->
-            Nothing
-
-
-onEdit : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
-onEdit config bounceId model =
-    let
-        model_ =
-            case Bounces.get bounceId config.bounces of
-                Just bounce ->
-                    { model
-                        | selected = TabBuild ( Just bounceId, bounce )
-                        , selectedBounce = Just ( Just bounceId, bounce )
-                        , path = bounce.path
-                    }
-
-                Nothing ->
-                    model
-    in
-        ( model_, React.none )
-
-
-onToggleExpand : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
-onToggleExpand config bounceId model =
-    let
-        newExpanded =
-            if (List.member bounceId model.expanded) then
-                List.filter ((==) bounceId >> not) model.expanded
-            else
-                (::) bounceId model.expanded
-
-        model_ =
-            { model | expanded = newExpanded }
-    in
-        ( model_, React.none )
-
-
-onSetModal : Config msg -> Maybe ModalAction -> Model -> UpdateResponse msg
-onSetModal config modal model =
-    let
-        model_ =
-            case modal of
-                Just ForSaveSucessful ->
-                    { model | modal = modal, anyChange = False }
-
-                _ ->
-                    { model | modal = modal }
-    in
-        ( model_, React.none )
-
-
-onCreateRequest :
-    Config msg
-    -> Maybe Bounces.CreateError
-    -> Model
-    -> UpdateResponse msg
-onCreateRequest config response model =
-    let
-        model_ =
-            case response of
-                Nothing ->
-                    model
-
-                Just error ->
-                    { model | modal = Just <| ForError (CreateError error) }
-    in
-        ( model_, React.none )
-
-
-onUpdateRequest :
-    Config msg
-    -> Maybe Bounces.UpdateError
-    -> Model
-    -> UpdateResponse msg
-onUpdateRequest config response model =
-    let
-        model_ =
-            case response of
-                Nothing ->
-                    model
-
-                Just error ->
-                    { model | modal = Just <| ForError (UpdateError error) }
-    in
-        ( model_, React.none )
-
-
-onRemoveRequest :
-    Config msg
-    -> Maybe Bounces.RemoveError
-    -> Model
-    -> UpdateResponse msg
-onRemoveRequest config response model =
-    let
-        model_ =
-            case response of
-                Nothing ->
-                    { model
-                        | selected = TabManage
-                        , selectedBounce = Nothing
-                        , path = []
-                        , bounceNameBuffer = Nothing
-                        , anyChange = False
-                    }
-
-                Just error ->
-                    { model | modal = Just <| ForError (RemoveError error) }
-    in
-        ( model_, React.none )
-
-
-
--- CreateRequest
-
-
-doCreateRequest :
-    Config msg
-    -> Database.HackedServers
-    -> Bounces.Bounce
-    -> String
-    -> React msg
-doCreateRequest ({ toMsg, accountId } as config) hackedServers bounce rId =
-    config
-        |> createRequest hackedServers bounce accountId rId
-        |> Cmd.map (errorToMaybe >> CreateRequest >> toMsg)
-        |> React.cmd
-
-
-
--- UpdateRequest
-
-
-doUpdateRequest :
-    Config msg
-    -> Database.HackedServers
-    -> Bounces.ID
-    -> Bounces.Bounce
-    -> String
-    -> React msg
-doUpdateRequest ({ toMsg, accountId } as config) hackedServers id bounce rId =
-    config
-        |> updateRequest hackedServers id bounce accountId rId
-        |> Cmd.map (errorToMaybe >> UpdateRequest >> toMsg)
-        |> React.cmd
-
-
-
--- RemoveRequest
-
-
-doRemoveRequest :
-    Config msg
-    -> Bounces.ID
-    -> React msg
-doRemoveRequest ({ toMsg, accountId } as config) id =
-    config
-        |> removeRequest id accountId
-        |> Cmd.map (errorToMaybe >> RemoveRequest >> toMsg)
-        |> React.cmd
-
-
-onResetModel : Model -> UpdateResponse msg
-onResetModel model =
-    ( initialModel model.me, React.none )
-
-
-onReloadBounce : Config msg -> Bounces.ID -> Model -> UpdateResponse msg
-onReloadBounce { bounces } id model =
-    let
-        newModel =
-            case ( Dict.get id (Bounces.getBounces bounces), model.selected ) of
-                ( Just bounce, TabBuild ( _, _ ) ) ->
-                    { model
-                        | selected = TabBuild ( Just id, bounce )
-                        , selectedBounce = Just ( Just id, bounce )
-                        , modal = Just ForSaveSucessful
-                    }
-
-                _ ->
-                    model
-    in
-        ( newModel, React.none )

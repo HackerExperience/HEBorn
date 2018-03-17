@@ -30,6 +30,7 @@ type Msg
     | UpdateRequest (Maybe Bounces.UpdateError)
     | RemoveRequest (Maybe Bounces.RemoveError)
     | SetInitialSeed Int
-    | ResetModel
     | ReloadBounce Bounces.ID
     | HandleReload Bounces.ID
+    | HandleReloadIfLoaded Bounces.ID
+    | CreateNewBounce

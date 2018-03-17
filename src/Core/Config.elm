@@ -214,6 +214,9 @@ gameConfig =
 
         onReloadBounce id appId =
             bounceMan appId <| BounceMan.HandleReload id
+
+        onReloadIfBounceLoaded id =
+            bounceMans <| BounceMan.HandleReloadIfLoaded id
     in
         { toMsg = GameMsg
         , batchMsg = BatchMsg
@@ -228,6 +231,7 @@ gameConfig =
         , onBankAccountLogin = Browser.HandleBankLogin >> browserTab
         , onBankAccountTransfer = Browser.HandleBankTransfer >> browserTab
         , onReloadBounce = onReloadBounce
+        , onReloadIfBounceLoaded = onReloadIfBounceLoaded
         }
 
 
@@ -432,3 +436,8 @@ browsers =
 bounceMan : WindowManager.AppId -> BounceMan.Msg -> Msg
 bounceMan appId =
     WindowManager.BounceManagerMsg >> app appId
+
+
+bounceMans : BounceMan.Msg -> Msg
+bounceMans =
+    WindowManager.BounceManagerMsg >> apps

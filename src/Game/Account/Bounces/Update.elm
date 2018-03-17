@@ -71,8 +71,12 @@ handleUpdated :
     -> Bounce
     -> Model
     -> UpdateResponse msg
-handleUpdated config id bounce model =
-    ( insert id bounce model, React.none )
+handleUpdated { onReloadIfBounceLoaded } id bounce model =
+    let
+        react =
+            React.msg (onReloadIfBounceLoaded id)
+    in
+        ( insert id bounce model, react )
 
 
 handleDeleted : Config msg -> ID -> Model -> UpdateResponse msg

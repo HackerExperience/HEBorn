@@ -36,6 +36,7 @@ type alias Config msg =
 
     -- account.bounces
     , onReloadBounce : Bounces.ID -> String -> msg
+    , onReloadIfBounceLoaded : Bounces.ID -> msg
 
     -- account.notifications
     , onToast : Notifications.Content -> msg
@@ -68,6 +69,7 @@ bouncesConfig database accountId config =
     , database = database
     , accountId = accountId
     , onReloadBounce = config.onReloadBounce
+    , onReloadIfBounceLoaded = config.onReloadIfBounceLoaded
     }
 
 

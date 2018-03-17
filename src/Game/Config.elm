@@ -49,6 +49,7 @@ type alias Config msg =
 
     -- account.bounces
     , onReloadBounce : Bounces.ID -> String -> msg
+    , onReloadIfBounceLoaded : Bounces.ID -> msg
 
     -- account.finances
     , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
@@ -113,6 +114,7 @@ accountConfig lastTick flags config =
     , onBankAccountLogin = config.onBankAccountLogin
     , onBankAccountTransfer = config.onBankAccountTransfer
     , onReloadBounce = config.onReloadBounce
+    , onReloadIfBounceLoaded = config.onReloadIfBounceLoaded
     , onToast = config.onAccountToast
     }
 
