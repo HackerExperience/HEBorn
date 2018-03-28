@@ -18,6 +18,7 @@ import Game.Servers.Shared exposing (..)
 type alias Model =
     { gateways : Gateways
     , servers : Servers
+    , gatewayOfEndpoints : GatewayOfEndpoints
     }
 
 
@@ -94,10 +95,15 @@ type alias AnalyzedEndpoint =
     {}
 
 
+type alias GatewayOfEndpoints =
+    Dict EndpointAddress Id
+
+
 initialModel : Model
 initialModel =
     { gateways = Dict.empty
     , servers = Dict.empty
+    , gatewayOfEndpoints = Dict.empty
     }
 
 
@@ -113,8 +119,16 @@ insertGateway id activeNIP nips endpoints model =
 
         gateways =
             Dict.insert id cache model.gateways
+
+        gatewayOfEndpoints =
+            Set.foldl (\nip -> Dict.insert nip id)
+                model.gatewayOfEndpoints
+                endpoints
     in
-        { model | gateways = gateways }
+        { model
+            | gateways = gateways
+            , gatewayOfEndpoints = gatewayOfEndpoints
+        }
 
 
 removeGateway : CId -> Model -> Model
@@ -211,10 +225,19 @@ remove cid model0 =
         servers =
             Dict.remove (toSessionId cid) model1.servers
 
-        model_ =
-            { model1 | servers = servers }
+        model2 =
+            case cid of
+                EndpointCId nip ->
+                    let
+                        gatewayOfEndpoints =
+                            Dict.remove nip model1.gatewayOfEndpoints
+                    in
+                        { model1 | gatewayOfEndpoints = gatewayOfEndpoints }
+
+                GatewayCId _ ->
+                    model1
     in
-        model_
+        { model2 | servers = servers }
 
 
 keys : Model -> List CId
@@ -535,3 +558,15 @@ getLabel cid model =
 
         Nothing ->
             Nothing
+
+
+getGatewayOfEndpoint : CId -> Model -> Maybe CId
+getGatewayOfEndpoint cid model =
+    case cid of
+        GatewayCId _ ->
+            Nothing
+
+        EndpointCId nip ->
+            model.gatewayOfEndpoints
+                |> Dict.get nip
+                |> Maybe.map GatewayCId
