@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Game.Account.Notifications.Shared as Notifications
+import Game.Account.Notifications.OnClick as Notifications
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
@@ -15,28 +16,31 @@ import OS.Header.NotificationsView exposing (notifications)
     Html.CssHelpers.withNamespace prefix
 
 
-view : Config msg -> OpenMenu -> Html Msg
+view : Config msg -> OpenMenu -> Html msg
 view config openMenu =
     if openMenu == AccountOpen then
         visibleAccountGear config
     else
-        invisibleAccountGear
+        Html.map config.toMsg invisibleAccountGear
 
 
-visibleAccountGear : Config msg -> Html Msg
-visibleAccountGear config =
-    [ notifications Notifications.render
+visibleAccountGear : Config msg -> Html msg
+visibleAccountGear ({ toMsg } as config) =
+    [ notifications
+        config
+        Notifications.render
+        (Notifications.grabOnClick (accountActionConfig config))
         "Account"
-        AccountReadAll
+        (toMsg AccountReadAll)
         config.accountNotifications
-    , ul [] [ logoutBtn ]
+    , ul [] [ logoutBtn config ]
     ]
         |> div []
         |> List.singleton
         |> indicator
             [ class [ AccountIco ]
-            , onMouseEnter MouseEnterDropdown
-            , onMouseLeave MouseLeavesDropdown
+            , onMouseEnter <| toMsg MouseEnterDropdown
+            , onMouseLeave <| toMsg MouseLeavesDropdown
             ]
 
 
@@ -51,10 +55,10 @@ invisibleAccountGear =
         []
 
 
-logoutBtn : Html Msg
-logoutBtn =
+logoutBtn : Config msg -> Html msg
+logoutBtn { toMsg } =
     button
-        [ onClick SignOut ]
+        [ onClick <| toMsg SignOut ]
         [ text "Sign out" ]
         |> List.singleton
         |> li []

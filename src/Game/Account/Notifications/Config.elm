@@ -12,3 +12,9 @@ type alias Config msg =
     , lastTick : Time
     , onToast : Content -> msg
     }
+
+
+type alias ActionConfig msg =
+    { batchMsg : List msg -> msg
+    , openThunderbird : msg
+    }
