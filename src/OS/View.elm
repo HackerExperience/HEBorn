@@ -85,8 +85,7 @@ displayVersion version =
 toasts : Config msg -> Model -> Html msg
 toasts config model =
     model.toasts
-        |> Toasts.view
-        |> Html.map (ToastsMsg >> config.toMsg)
+        |> Toasts.view (toastsConfig config)
 
 
 console : Config msg -> Html msg
