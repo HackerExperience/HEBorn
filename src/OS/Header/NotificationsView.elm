@@ -78,6 +78,11 @@ visibleNotifications config render actioner title readAllMsg itens uniqueClass =
         |> List.singleton
         |> indicator
             [ class [ uniqueClass ]
+            , onClick <|
+                if Notifications.isEmpty itens then
+                    config.batchMsg []
+                else
+                    readAllMsg
             , onMouseEnter <| config.toMsg MouseEnterDropdown
             , onMouseLeave <| config.toMsg MouseLeavesDropdown
             ]
@@ -102,7 +107,7 @@ notifications config render actioner title readAllMsg itens =
                 []
                 itens
             )
-        |> (::) (header title readAllMsg)
+        |> (::) (header title)
         |> ul []
         |> List.singleton
         |> div [ class [ Notification ] ]
@@ -113,12 +118,11 @@ indicator =
     node indicatorNode
 
 
-header : String -> msg -> Html msg
-header title readAllMsg =
+header : String -> Html msg
+header title =
     li []
         [ div [] [ text (title ++ " notifications") ]
         , spacer
-        , div [ onClick readAllMsg ] [ text "Mark All as Read" ]
         ]
 
 
