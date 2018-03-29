@@ -122,7 +122,12 @@ consoleConfig config =
 
 toastsConfig : Config msg -> Toasts.Config msg
 toastsConfig config =
-    { toMsg = ToastsMsg >> config.toMsg }
+    { toMsg = ToastsMsg >> config.toMsg
+    , batchMsg = config.batchMsg
+    , activeGatewayCId = Tuple.first config.activeGateway
+    , onNewApp = WindowManager.NewApp >>>>> WindowManagerMsg >>>>> config.toMsg
+    , onOpenApp = WindowManager.OpenApp >>> WindowManagerMsg >>> config.toMsg
+    }
 
 
 
