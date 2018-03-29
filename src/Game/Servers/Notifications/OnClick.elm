@@ -21,3 +21,9 @@ grabOnClick config content =
 
         UploadConcluded _ _ _ ->
             config.openTaskManager
+
+        BruteforceStarted _ ->
+            config.openTaskManager
+
+        BruteforceConcluded _ ->
+            config.openHackedDatabase

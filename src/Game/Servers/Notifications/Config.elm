@@ -18,5 +18,6 @@ type alias Config msg =
 type alias ActionConfig msg =
     { batchMsg : List msg -> msg
     , openTaskManager : msg
+    , openHackedDatabase : msg
     , openExplorerInFile : Filesystem.FileEntry -> msg
     }

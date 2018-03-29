@@ -1,12 +1,15 @@
 module Game.Servers.Processes.Requests.Bruteforce
     exposing
         ( Data
+        , Errors(..)
         , bruteforceRequest
+        , errorToString
         )
 
-import Json.Decode exposing (Value, decodeValue)
+import Json.Decode exposing (Value, Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode
-import Requests.Requests as Requests
+import Utils.Json.Decode exposing (commonError, message)
+import Requests.Requests as Requests exposing (report)
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..))
 import Game.Meta.Types.Network as Network
@@ -17,7 +20,12 @@ import Game.Servers.Shared exposing (CId)
 
 
 type alias Data =
-    Result () ()
+    Result Errors ()
+
+
+type Errors
+    = BadRequest
+    | Unknown
 
 
 bruteforceRequest :
@@ -30,7 +38,17 @@ bruteforceRequest network targetIp cid flagsSrc =
     flagsSrc
         |> Requests.request (Topics.bruteforce cid)
             (encoder network targetIp)
-        |> Cmd.map (uncurry receiver)
+        |> Cmd.map (uncurry <| receiver flagsSrc)
+
+
+errorToString : Errors -> String
+errorToString error =
+    case error of
+        BadRequest ->
+            "Shit happened!"
+
+        Unknown ->
+            "Shit happened!1!!1!"
 
 
 
@@ -46,11 +64,27 @@ encoder network targetIp =
         ]
 
 
-receiver : Code -> Value -> Data
-receiver code json =
+receiver : FlagsSource a -> Code -> Value -> Data
+receiver flagsSrc code value =
     case code of
         OkCode ->
             Ok ()
 
         _ ->
-            Err ()
+            value
+                |> decodeValue errorMessage
+                |> report "Processes.Bruteforce" code flagsSrc
+                |> Result.mapError (always Unknown)
+                |> Result.andThen Err
+
+
+errorMessage : Decoder Errors
+errorMessage =
+    message <|
+        \str ->
+            case str of
+                "bad_request" ->
+                    succeed BadRequest
+
+                value ->
+                    fail <| commonError "download error message" value

@@ -11,4 +11,6 @@ type Msg
     | HandleDownloadConcluded NIP StorageId Filesystem.FileEntry
     | HandleUploadStarted NIP StorageId Filesystem.FileEntry
     | HandleUploadConcluded NIP StorageId Filesystem.FileEntry
+    | HandleBruteforceStarted NIP
+    | HandleBruteforceConcluded NIP
     | HandleReadAll
