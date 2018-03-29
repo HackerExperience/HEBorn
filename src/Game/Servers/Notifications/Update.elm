@@ -39,6 +39,18 @@ update config msg model =
                 (UploadConcluded nip storage entry)
                 model
 
+        HandleBruteforceStarted nip ->
+            handleNewNotification
+                config
+                (BruteforceStarted nip)
+                model
+
+        HandleBruteforceConcluded nip ->
+            handleNewNotification
+                config
+                (BruteforceConcluded nip)
+                model
+
         HandleGeneric title content ->
             handleNewNotification config (Generic title content) model
 

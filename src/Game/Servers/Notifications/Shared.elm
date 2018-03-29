@@ -1,6 +1,6 @@
 module Game.Servers.Notifications.Shared exposing (..)
 
-import Game.Meta.Types.Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 
 
@@ -10,6 +10,8 @@ type Content
     | DownloadConcluded NIP StorageId Filesystem.FileEntry
     | UploadStarted NIP StorageId Filesystem.FileEntry
     | UploadConcluded NIP StorageId Filesystem.FileEntry
+    | BruteforceStarted NIP
+    | BruteforceConcluded NIP
 
 
 type alias Title =
@@ -58,41 +60,17 @@ render content =
               )
             )
 
+        BruteforceStarted target ->
+            ( "Bruteforce started"
+            , "Trying to crack " ++ (Network.render target)
+            )
 
-
--- it might make sense to return html instead
+        BruteforceConcluded target ->
+            ( "Bruteforce concluded"
+            , "Finished cracking " ++ (Network.render target)
+            )
 
 
 renderToast : Content -> ( String, String )
-renderToast content =
-    case content of
-        Generic title body ->
-            ( title, body )
-
-        DownloadStarted origin storage fileEntry ->
-            ( "Download started"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " download has started!"
-              )
-            )
-
-        DownloadConcluded origin storage fileEntry ->
-            ( "Download concluded"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " download has concluded!"
-              )
-            )
-
-        UploadStarted origin storage fileEntry ->
-            ( "Upload started"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " upload has started!"
-              )
-            )
-
-        UploadConcluded origin storage fileEntry ->
-            ( "Upload concluded"
-            , ((Filesystem.getName <| Filesystem.toFile fileEntry)
-                ++ " upload has concluded!"
-              )
-            )
+renderToast =
+    render

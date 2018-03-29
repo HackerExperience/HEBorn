@@ -54,6 +54,11 @@ processesConfig cid nip config =
                 >> NotificationsMsg
                 >> ServerMsg cid
                 >> config.toMsg
+    , onBruteforceStarted =
+        Notifications.HandleBruteforceStarted nip
+            |> NotificationsMsg
+            |> ServerMsg cid
+            |> config.toMsg
     , onGenericNotification =
         \title ->
             Notifications.HandleGeneric title

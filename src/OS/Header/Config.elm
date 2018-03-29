@@ -58,6 +58,8 @@ serverActionConfig config =
     { batchMsg = config.batchMsg
     , openTaskManager =
         config.onNewApp TaskManager Nothing Nothing config.activeGatewayCId
+    , openHackedDatabase =
+        config.onNewApp DBAdmin Nothing Nothing config.activeGatewayCId
     , openExplorerInFile =
         -- TODO: Explorer params
         \_ -> config.onNewApp Explorer Nothing Nothing config.activeGatewayCId
