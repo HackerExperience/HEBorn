@@ -4,6 +4,7 @@ import Dict
 import Html exposing (..)
 import Html.CssHelpers
 import Game.Servers.Notifications.Shared as ServersNotifications
+import Game.Servers.Notifications.OnClick as ServersNotifications
 import Game.Meta.Types.Notifications as Notifications
 import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
@@ -21,7 +22,7 @@ view : Config msg -> Model -> Html msg
 view config { openMenu } =
     let
         ( chatView, chatBubble ) =
-            chat openMenu
+            chat config openMenu
 
         ( serverView, serverBubble ) =
             servers config openMenu
@@ -29,34 +30,35 @@ view config { openMenu } =
         ( accountView, accountBubble ) =
             account config openMenu
     in
-        Html.map config.toMsg <|
-            div [ class [ Taskbar ] ]
-                [ chatView
-                , chatBubble
-                , serverView
-                , serverBubble
-                , accountView
-                , accountBubble
-                ]
+        div [ class [ Taskbar ] ]
+            [ chatView
+            , chatBubble
+            , serverView
+            , serverBubble
+            , accountView
+            , accountBubble
+            ]
 
 
 
 -- INTERNALS
 
 
-chat : OpenMenu -> ( Html Msg, Html Msg )
-chat openMenu =
+chat : Config msg -> OpenMenu -> ( Html msg, Html msg )
+chat config openMenu =
     let
         notifications =
             Dict.empty
 
         view =
-            Notifications.view (always ( "", "" ))
+            Notifications.view config
+                (always ( "", "" ))
+                (always (config.batchMsg []))
                 openMenu
                 ChatOpen
                 ChatIco
                 "Chat"
-                ChatReadAll
+                (config.toMsg ChatReadAll)
                 notifications
 
         bubble_ =
@@ -67,19 +69,21 @@ chat openMenu =
         ( view, bubble_ )
 
 
-servers : Config msg -> OpenMenu -> ( Html Msg, Html Msg )
+servers : Config msg -> OpenMenu -> ( Html msg, Html msg )
 servers config openMenu =
     let
         notifications =
             config.serversNotifications
 
         view =
-            Notifications.view ServersNotifications.render
+            Notifications.view config
+                ServersNotifications.render
+                (ServersNotifications.grabOnClick (serverActionConfig config))
                 openMenu
                 ServersOpen
                 ServersIco
                 "This server"
-                ServerReadAll
+                (config.toMsg ServerReadAll)
                 notifications
 
         bubble_ =
@@ -90,7 +94,7 @@ servers config openMenu =
         ( view, bubble_ )
 
 
-account : Config msg -> OpenMenu -> ( Html Msg, Html Msg )
+account : Config msg -> OpenMenu -> ( Html msg, Html msg )
 account config openMenu =
     let
         view =
@@ -104,7 +108,7 @@ account config openMenu =
         ( view, bubble_ )
 
 
-bubble : Int -> Html Msg
+bubble : Int -> Html msg
 bubble num =
     flip
         (node bubbleNode)
