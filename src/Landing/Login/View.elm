@@ -63,10 +63,18 @@ viewErrorsPassword model =
 
 viewErrorsLogin : Model -> String
 viewErrorsLogin model =
-    if model.loginFailed then
-        "Login failed"
-    else
-        ""
+    case model.loginFailed of
+        Just WrongCreds ->
+            "Login failed"
+
+        Just NetworkError ->
+            "Impossible to establish communication"
+
+        Just HangTheDJ ->
+            "Unknown unexpected error"
+
+        Nothing ->
+            ""
 
 
 buttonClass : Model -> String
