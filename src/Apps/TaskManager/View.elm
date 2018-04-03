@@ -226,15 +226,18 @@ viewGraphUsage title color history =
         sz =
             toFloat ((List.length history) - 1)
 
+        nanToZero num =
+            if isNaN num then
+                0
+            else
+                num
+
         points =
-            (List.indexedMap
-                (\i x ->
-                    ( (1 - toFloat (i) / sz)
+            (flip List.indexedMap history) <|
+                \i x ->
+                    ( nanToZero (1 - toFloat (i) / sz)
                     , (1 - x)
                     )
-                )
-                history
-            )
     in
         lineGraph points color 50 True ( 3, 1 )
 
