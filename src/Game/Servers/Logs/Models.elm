@@ -3,6 +3,7 @@ module Game.Servers.Logs.Models exposing (..)
 import Dict exposing (Dict)
 import Time exposing (Time)
 import Regex exposing (HowMany(All), regex)
+import Utils.Maybe as Maybe
 import Game.Meta.Types.Network exposing (IP, NIP)
 
 
@@ -106,9 +107,12 @@ insert id log model =
             Dict.insert id log model.logs
 
         drawOrder =
-            Dict.insert
-                (findId ( log.timestamp, 0 ) model.drawOrder)
-                id
+            if Maybe.isNothing <| Dict.get id model.logs then
+                Dict.insert
+                    (findId ( log.timestamp, 0 ) model.drawOrder)
+                    id
+                    model.drawOrder
+            else
                 model.drawOrder
     in
         { model | logs = logs, drawOrder = drawOrder }
