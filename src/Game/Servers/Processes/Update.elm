@@ -191,10 +191,15 @@ handleStartBruteforce config target model =
         toMsg result =
             case result of
                 Ok () ->
-                    config.batchMsg []
+                    config.onBruteforceStarted
 
-                Err () ->
-                    config.toMsg <| BruteforceRequestFailed id
+                Err error ->
+                    config.batchMsg
+                        [ config.toMsg <| BruteforceRequestFailed id
+                        , config.onGenericNotification
+                            "Couldn't start bruteforce"
+                            (Bruteforce.errorToString error)
+                        ]
 
         cmd =
             config

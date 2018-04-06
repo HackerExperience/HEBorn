@@ -59,9 +59,17 @@ onLoginRequest :
 onLoginRequest config data model =
     case data of
         Ok ( token, id ) ->
-            ( { model | loginFailed = False }
+            ( { model | loginFailed = Nothing }
             , React.msg <| config.onLogin id model.username token
             )
 
-        Err () ->
-            ( { model | loginFailed = True }, React.none )
+        Err error ->
+            case error of
+                LoginRequest.WrongCreds ->
+                    ( { model | loginFailed = Just WrongCreds }, React.none )
+
+                LoginRequest.NetworkError ->
+                    ( { model | loginFailed = Just NetworkError }, React.none )
+
+                LoginRequest.UnknownError ->
+                    ( { model | loginFailed = Just HangTheDJ }, React.none )

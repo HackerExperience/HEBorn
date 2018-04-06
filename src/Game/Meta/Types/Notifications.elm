@@ -23,6 +23,11 @@ empty =
     Dict.empty
 
 
+isEmpty : Notifications a -> Bool
+isEmpty =
+    Dict.isEmpty
+
+
 get : Id -> Notifications a -> Maybe (Notification a)
 get id =
     Dict.get id

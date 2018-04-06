@@ -11,8 +11,14 @@ type alias Model =
     { formErrors : FormError
     , username : String
     , password : String
-    , loginFailed : Bool
+    , loginFailed : Maybe Errors
     }
+
+
+type Errors
+    = WrongCreds
+    | NetworkError
+    | HangTheDJ
 
 
 initialErrors : FormError
@@ -27,5 +33,5 @@ initialModel =
     { formErrors = initialErrors
     , username = ""
     , password = ""
-    , loginFailed = False
+    , loginFailed = Nothing
     }

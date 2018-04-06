@@ -100,6 +100,7 @@ headerConfig ({ game } as config) =
         , nips = Servers.getNIPs server_
         , accountNotifications = Account.getNotifications account_
         , serversNotifications = Servers.getNotifications server_
+        , onNewApp = WindowManager.NewApp >>>>> WindowManagerMsg >>>>> config.toMsg
         , onOpenApp = WindowManager.OpenApp >>> WindowManagerMsg >>> config.toMsg
         , onSignOut = onSignOut config
         , onSetGateway = Account.HandleSetGateway >> account config
@@ -121,7 +122,12 @@ consoleConfig config =
 
 toastsConfig : Config msg -> Toasts.Config msg
 toastsConfig config =
-    { toMsg = ToastsMsg >> config.toMsg }
+    { toMsg = ToastsMsg >> config.toMsg
+    , batchMsg = config.batchMsg
+    , activeGatewayCId = Tuple.first config.activeGateway
+    , onNewApp = WindowManager.NewApp >>>>> WindowManagerMsg >>>>> config.toMsg
+    , onOpenApp = WindowManager.OpenApp >>> WindowManagerMsg >>> config.toMsg
+    }
 
 
 
