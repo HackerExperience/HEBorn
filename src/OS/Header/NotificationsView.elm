@@ -16,7 +16,7 @@ type alias Renderer a =
     a -> ( String, String )
 
 
-type alias Actioner a msg =
+type alias ToMsg a msg =
     a -> msg
 
 
@@ -27,7 +27,7 @@ type alias Actioner a msg =
 view :
     Config msg
     -> Renderer a
-    -> Actioner a msg
+    -> ToMsg a msg
     -> OpenMenu
     -> OpenMenu
     -> Class
@@ -66,7 +66,7 @@ emptyNotifications { toMsg } uniqueClass activator =
 visibleNotifications :
     Config msg
     -> Renderer a
-    -> Actioner a msg
+    -> ToMsg a msg
     -> String
     -> msg
     -> Notifications.Notifications a
@@ -93,7 +93,7 @@ visibleNotifications config render actioner title readAllMsg itens uniqueClass =
 notifications :
     Config msg
     -> Renderer a
-    -> Actioner a msg
+    -> ToMsg a msg
     -> String
     -> msg
     -> Notifications.Notifications a
@@ -134,7 +134,7 @@ footer =
 notificationReduce :
     Config msg
     -> Renderer a
-    -> Actioner a msg
+    -> ToMsg a msg
     -> Notifications.Id
     -> Notifications.Notification a
     -> List (Html msg)
