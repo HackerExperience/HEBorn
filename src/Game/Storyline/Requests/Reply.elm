@@ -106,6 +106,45 @@ getReplyId reply =
         DlaydMuch1 ->
             "dlayd_much1"
 
+        DlaydMuch2 ->
+            "dlayd_much2"
+
+        DlaydMuch3 ->
+            "dlayd_much3"
+
+        DlaydMuch4 ->
+            "dlayd_much4"
+
+        Noice ->
+            "noice"
+
+        NastyVirus3 ->
+            "nasty_virus3"
+
+        VirusSpotted1 ->
+            "virus_spotted1"
+
+        VirusSpotted2 ->
+            "virus_spotted2"
+
+        PointlessConvo1 ->
+            "pointless_convo1"
+
+        PointlessConvo2 ->
+            "pointless_convo2"
+
+        PointlessConvo3 ->
+            "pointless_convo3"
+
+        PointlessConvo4 ->
+            "pointless_convo4"
+
+        PointlessConvo5 ->
+            "pointless_convo5"
+
+        CleanYourLogs ->
+            "clean_your_logs"
+
 
 receiver : FlagsSource a -> Code -> Value -> Data
 receiver flagsSrc code json =

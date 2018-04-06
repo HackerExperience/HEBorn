@@ -131,6 +131,45 @@ replyFromId id =
         "dlayd_much1" ->
             succeed DlaydMuch1
 
+        "dlayd_much2" ->
+            succeed DlaydMuch2
+
+        "dlayd_much3" ->
+            succeed DlaydMuch3
+
+        "dlayd_much4" ->
+            succeed DlaydMuch4
+
+        "noice" ->
+            succeed Noice
+
+        "nasty_virus3" ->
+            succeed NastyVirus3
+
+        "virus_spotted1" ->
+            succeed VirusSpotted1
+
+        "virus_spotted2" ->
+            succeed VirusSpotted2
+
+        "pointless_convo1" ->
+            succeed PointlessConvo1
+
+        "pointless_convo2" ->
+            succeed PointlessConvo2
+
+        "pointless_convo3" ->
+            succeed PointlessConvo3
+
+        "pointless_convo4" ->
+            succeed PointlessConvo4
+
+        "pointless_convo5" ->
+            succeed PointlessConvo5
+
+        "clean_your_logs" ->
+            succeed CleanYourLogs
+
         error ->
             fail <| commonError "email type" error
 
