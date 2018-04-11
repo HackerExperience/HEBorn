@@ -6,6 +6,7 @@ import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Messages as Notifications
+import Game.Account.Requests.ActionPerformed as ActionPerformed
 
 
 type Msg
@@ -22,3 +23,4 @@ type Msg
     | HandleTutorialCompleted Bool
     | HandleConnected
     | HandleDisconnected
+    | HandleActionPerformed ActionPerformed.Data

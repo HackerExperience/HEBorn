@@ -1,4 +1,4 @@
-module Game.Account.Requests.ActionPerformed exposing (actionPerformedRequest)
+module Game.Account.Requests.ActionPerformed exposing (Data, request)
 
 import Json.Decode as Decode
     exposing
@@ -25,11 +25,11 @@ type Error
     | BadAction
 
 
-signOutRequest : ClientAction -> ID -> FlagsSource a -> Cmd Data
-signOutRequest action accId flagsSrc =
+request : ClientActions -> ID -> FlagsSource a -> Cmd Data
+request action accId flagsSrc =
     flagsSrc
         |> Requests.request
-            (Topics.clientActionPerformed id)
+            (Topics.clientActionPerformed accId)
             (encoder action)
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
@@ -55,7 +55,7 @@ receiver flagsSrc code json =
             Err Unknown
 
 
-encoder : ClientAction -> Value
+encoder : ClientActions -> Value
 encoder performedAction =
     Encode.object
         [ ( "action", Encode.string <| ClientActions.toString performedAction ) ]

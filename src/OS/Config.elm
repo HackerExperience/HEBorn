@@ -11,6 +11,7 @@ import Game.Account.Models as Account
 import Game.Account.Bounces.Shared as Bounces
 import Game.Account.Notifications.Messages as AccountNotifications
 import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Account.Requests.ActionPerformed as ActionPerformed
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (..)
 import Game.Meta.Types.Desktop.Apps exposing (Requester)
@@ -38,6 +39,7 @@ type alias Config msg =
     , activeServer : ( CId, Server )
     , activeGateway : ( CId, Server )
     , onActionDone : DesktopApp -> Context -> msg
+    , handleActionPerformed : ActionPerformed.Data -> msg
     , menuAttr : ContextMenuAttribute msg
     , menuView : Html msg
     }
@@ -57,6 +59,7 @@ windowManagerConfig config =
     , onSetContext = onSetContext config
     , onActionDone = config.onActionDone
     , onAccountToast = onAccountToast config
+    , handleActionPerformed = config.handleActionPerformed
     , menuAttr = config.menuAttr
     }
 

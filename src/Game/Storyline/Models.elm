@@ -71,6 +71,15 @@ noQuests model =
         |> Dict.isEmpty
 
 
+isAnyoneInStep : Step -> Model -> Bool
+isAnyoneInStep step model =
+    let
+        check _ contact acu =
+            acu || (getStep contact == Just step)
+    in
+        Dict.foldr check False model
+
+
 
 -- about contact
 

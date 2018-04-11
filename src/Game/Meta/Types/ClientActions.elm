@@ -6,7 +6,7 @@ type ClientActions
     | SpottedNastyVirus
 
 
-toString : ClientAction -> String
+toString : ClientActions -> String
 toString context =
     case context of
         AccessedTaskManager ->

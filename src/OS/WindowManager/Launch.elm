@@ -23,10 +23,15 @@ import Apps.LogViewer.Models as LogViewer
 import Apps.ServersGears.Models as ServersGears
 import Apps.TaskManager.Models as TaskManager
 import Apps.VirusPanel.Models as VirusPanel
+import Game.Account.Models as Account
+import Game.Account.Requests.ActionPerformed as ActionPerformed
+import Game.Meta.Types.ClientActions as ClientActions
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId)
+import Game.Storyline.Models as Story
+import Game.Storyline.Shared as Story
 import OS.WindowManager.Config exposing (..)
 import OS.WindowManager.Helpers exposing (..)
 import OS.WindowManager.Messages exposing (..)
@@ -399,9 +404,7 @@ launchDelegate config activeServer activeGateway windowId appId desktopApp maybe
                 |> flip (,) React.none
 
         DesktopApp.TaskManager ->
-            ( TaskManagerModel TaskManager.initialModel
-            , React.none
-            )
+            launchTaskManager config windowId appId
 
         DesktopApp.VirusPanel ->
             ( VirusPanelModel VirusPanel.initialModel
@@ -422,3 +425,28 @@ launchLocationPicker config windowId appId =
                 |> React.cmd
     in
         ( LocationPickerModel model, react )
+
+
+launchTaskManager : Config msg -> WindowId -> AppId -> ( AppModel, React msg )
+launchTaskManager config windowId appId =
+    let
+        isRightStep =
+            (isCampaignFromConfig config)
+                && Story.isAnyoneInStep
+                    Story.Tutorial_NastyVirus
+                    (storyFromConfig config)
+
+        storyReact =
+            if (isRightStep) then
+                config
+                    |> ActionPerformed.request
+                        ClientActions.AccessedTaskManager
+                        (Account.getId <| accountFromConfig <| config)
+                    |> Cmd.map config.handleActionPerformed
+                    |> React.cmd
+            else
+                React.none
+    in
+        ( TaskManagerModel TaskManager.initialModel
+        , storyReact
+        )
