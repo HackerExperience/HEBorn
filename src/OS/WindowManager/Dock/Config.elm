@@ -4,6 +4,7 @@ import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Account.Dock.Models as Dock
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
+import Game.Storyline.Models as Story
 import OS.WindowManager.Shared exposing (WindowId)
 
 
@@ -18,4 +19,5 @@ type alias Config msg =
     , accountDock : Dock.Model
     , endpointCId : Maybe CId
     , servers : Servers.Model
+    , story : Story.Model
     }

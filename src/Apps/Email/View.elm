@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.CssHelpers
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Game.Storyline.Models exposing (Contact)
+import Game.Storyline.Models exposing (Contact, getContacts)
 import Game.Storyline.Shared exposing (ContactId)
 import Apps.Email.Config exposing (..)
 import Apps.Email.Messages exposing (Msg(..))
@@ -20,6 +20,7 @@ import Apps.Email.Resources exposing (Classes(..), prefix)
 view : Config msg -> Model -> Html msg
 view ({ story } as config) model =
     story
+        |> getContacts
         |> Dict.foldr (contact config) []
         |> ul [ class [ Contacts ] ]
         |> List.singleton

@@ -8,6 +8,12 @@ import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type alias Model =
+    { contacts : Contacts
+    , highestCheckpoint : Checkpoint
+    }
+
+
+type alias Contacts =
     Dict ContactId Contact
 
 
@@ -23,7 +29,100 @@ type alias Contact =
 
 initialModel : Model
 initialModel =
-    Dict.empty
+    { contacts = Dict.empty
+    , highestCheckpoint = checkpoint Nothing Nothing Nothing
+    }
+
+
+fromContacts : Contacts -> Model
+fromContacts contacts =
+    let
+        check _ contact acu =
+            let
+                thisCp =
+                    checkpoint
+                        (getQuest contact)
+                        (getStep contact)
+                        (getLastReply contact)
+            in
+                if (thisCp >= acu) then
+                    thisCp
+                else
+                    acu
+    in
+        { contacts = contacts
+        , highestCheckpoint =
+            Dict.foldl check
+                (checkpoint Nothing Nothing Nothing)
+                contacts
+        }
+
+
+getCheckpoint : Model -> Checkpoint
+getCheckpoint { highestCheckpoint } =
+    highestCheckpoint
+
+
+setCheckpoint : Checkpoint -> Model -> Model
+setCheckpoint checkpoint model =
+    { model | highestCheckpoint = checkpoint }
+
+
+getContacts : Model -> Contacts
+getContacts { contacts } =
+    contacts
+
+
+setContacts : Contacts -> Model -> Model
+setContacts contacts model =
+    { model | contacts = contacts }
+
+
+getActions : Model -> List Action
+getActions model =
+    model
+        |> getContacts
+        |> Dict.foldl acuAction []
+        |> List.uniqueBy toString
+
+
+noQuests : Model -> Bool
+noQuests model =
+    model
+        |> getContacts
+        |> Dict.filter
+            (\_ -> .step >> Maybe.isJust)
+        |> Dict.isEmpty
+
+
+isAnyoneInStep : Step -> Model -> Bool
+isAnyoneInStep step model =
+    let
+        check _ contact acu =
+            acu || (getStep contact == Just step)
+    in
+        model
+            |> getContacts
+            |> Dict.foldr check False
+
+
+getContact : ContactId -> Model -> Maybe Contact
+getContact cId model =
+    model
+        |> getContacts
+        |> Dict.get cId
+
+
+setContact : ContactId -> Contact -> Model -> Model
+setContact cId val model =
+    model
+        |> getContacts
+        |> Dict.insert cId val
+        |> flip setContacts model
+
+
+
+-- about contact
 
 
 initialAbout : ContactId -> About
@@ -41,47 +140,9 @@ getPastEmails =
     (.pastEmails)
 
 
-getContact : ContactId -> Model -> Maybe Contact
-getContact =
-    Dict.get
-
-
-setContact : ContactId -> Contact -> Model -> Model
-setContact =
-    Dict.insert
-
-
 getAvailableReplies : Contact -> List Reply
 getAvailableReplies =
     (.availableReplies)
-
-
-getActions : Model -> List Action
-getActions model =
-    model
-        |> Dict.foldl acuAction []
-        |> List.uniqueBy toString
-
-
-noQuests : Model -> Bool
-noQuests model =
-    model
-        |> Dict.filter
-            (\_ -> .step >> Maybe.isJust)
-        |> Dict.isEmpty
-
-
-isAnyoneInStep : Step -> Model -> Bool
-isAnyoneInStep step model =
-    let
-        check _ contact acu =
-            acu || (getStep contact == Just step)
-    in
-        Dict.foldr check False model
-
-
-
--- about contact
 
 
 getNick : Contact -> String
@@ -97,6 +158,19 @@ getAvatar =
 getStep : Contact -> Maybe Step
 getStep { step } =
     Maybe.map Tuple.first step
+
+
+getQuest : Contact -> Maybe Quest
+getQuest { quest } =
+    quest
+
+
+getLastReply : Contact -> Maybe Reply
+getLastReply { pastEmails } =
+    pastEmails
+        |> Dict.values
+        |> List.foldl (Just >> always) Nothing
+        |> Maybe.map emailToReply
 
 
 

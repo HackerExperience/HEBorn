@@ -105,6 +105,7 @@ dockConfig config =
         , accountDock = Account.getDock <| accountFromConfig config
         , endpointCId = endpointCIdFromConfig config
         , servers = Game.getServers config.game
+        , story = storyFromConfig config
         }
 
 

@@ -8,8 +8,9 @@ import Html.CssHelpers
 import Utils.Html.Attributes exposing (..)
 import Apps.Shared as Apps
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
-import OS.Resources as OS
 import Game.Servers.Models as Servers
+import Game.Storyline.Dock as Story
+import OS.Resources as OS
 import OS.WindowManager.Models exposing (..)
 import OS.WindowManager.Shared exposing (..)
 import OS.WindowManager.Dock.Config exposing (..)
@@ -42,8 +43,14 @@ view config model isFreeplay session =
         groups =
             group config model isFreeplay session
 
+        src =
+            if isFreeplay then
+                config.accountDock
+            else
+                Story.dockApps config.story
+
         icons =
-            config.accountDock
+            src
                 |> List.foldl (viewIcons config model isFreeplay groups) []
                 |> List.reverse
                 |> div [ class [ R.Main ] ]

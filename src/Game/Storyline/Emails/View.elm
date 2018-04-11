@@ -21,6 +21,15 @@ view { onOpenBrowser, username } content =
             , text " Care to share one with me?"
             ]
 
+        WatchIADoing ->
+            [ text "Oh wow, that's great, welcome back then! Do you plan to lay low or what?" ]
+
+        HellYeah ->
+            [ text "This is my work, and I need money "
+            , text "¯\\_(ツ)_/¯"
+            , text ". Got any software you can hand me?"
+            ]
+
         DownloadCracker1 downloadCenterIP ->
             [ text "Sure. I've set up a public FTP server at "
             , addr onOpenBrowser downloadCenterIP
@@ -32,30 +41,21 @@ view { onOpenBrowser, username } content =
             , text "I'll wire you the money someday :roll:"
             ]
 
+        YeahRight ->
+            [ text "Yeah, right..." ]
+
         Downloaded ->
             [ text "Got it, thanks."
             , text "I lost touch with all my contacts... got any gig for me?"
             ]
 
-        HellYeah ->
-            [ text "This is my work, and I need money "
-            , text "¯\\_(ツ)_/¯"
-            , text ". Got any software you can hand me?"
-            ]
+        NothingNow ->
+            [ text "Hmm nothing now, but I'll refer to you if someone shows up looking for a job." ]
 
         NastyVirus1 ->
             [ text "But as long as you are idle... "
             , text "You know the #RCN? I heard they developed a nasty virus."
             ]
-
-        NothingNow ->
-            [ text "Hmm nothing now, but I'll refer to you if someone shows up looking for a job." ]
-
-        WatchIADoing ->
-            [ text "Oh wow, that's great, welcome back then! Do you plan to lay low or what?" ]
-
-        YeahRight ->
-            [ text "Yeah, right..." ]
 
         NastyVirus2 ->
             [ text "Wanna try to \"borrow\" it? "

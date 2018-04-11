@@ -9,6 +9,7 @@ import Game.Storyline.Shared as Story
 view : Story.Model -> Html msg
 view story =
     story
+        |> Story.getContacts
         |> Dict.foldl contact []
         |> div []
 
