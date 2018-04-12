@@ -55,12 +55,18 @@ about =
 
 contact : Decoder (About -> Contact)
 contact =
-    decode Contact
+    decode
+        (\r e s ->
+            case s of
+                Just ( q, s, a ) ->
+                    Contact r e (Just ( s, a )) Nothing (Just q)
+
+                Nothing ->
+                    Contact r e Nothing Nothing Nothing
+        )
         |> required "replies" replies
         |> required "emails" pastEmails
         |> optionalMaybe "name" stepWithActions
-        |> hardcoded Nothing
-        |> hardcoded Nothing
 
 
 replies : Decoder (List Reply)
@@ -208,27 +214,30 @@ emailFromSender sender =
                 |> fail
 
 
-stepWithActions : Decoder ( Step, List Action )
+stepWithActions : Decoder ( Quest, Step, List Action )
 stepWithActions =
-    map (\k -> ( k, initialActions k )) step
+    map (\( q, k ) -> ( q, k, initialActions k )) step
 
 
-step : Decoder Step
+step : Decoder ( Quest, Step )
 step =
-    andThen stepFromId string
+    flip andThen string <|
+        \id ->
+            case String.split "@" id of
+                [ "tutorial", step ] ->
+                    map ((,) Tutorial) <|
+                        case step of
+                            "setup_pc" ->
+                                succeed Tutorial_SetupPC
 
+                            "download_cracker" ->
+                                succeed Tutorial_DownloadCracker
 
-stepFromId : String -> Decoder Step
-stepFromId id =
-    case id of
-        "tutorial@setup_pc" ->
-            succeed Tutorial_SetupPC
+                            "nasty_virus" ->
+                                succeed Tutorial_NastyVirus
 
-        "tutorial@download_cracker" ->
-            succeed Tutorial_DownloadCracker
+                            error ->
+                                fail <| commonError "storyline tutorial step id" error
 
-        "tutorial@nasty_virus" ->
-            succeed Tutorial_NastyVirus
-
-        error ->
-            fail <| commonError "storyline step id" error
+                error ->
+                    fail <| commonError "storyline quest id" error

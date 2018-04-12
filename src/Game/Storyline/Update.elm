@@ -5,11 +5,13 @@ import Time exposing (Time)
 import Utils.React as React exposing (React)
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
+import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
 import Game.Storyline.Requests.Reply as ReplyRequest exposing (replyRequest)
 import Game.Storyline.Config exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Models exposing (..)
-import Game.Storyline.Shared exposing (Reply, PastEmail(..))
+import Game.Storyline.Shared exposing (Reply, Quest, Step, PastEmail(..))
+import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type alias UpdateResponse msg =
@@ -28,15 +30,15 @@ update config msg model =
         HandleReplyUnlocked data ->
             handleReplyUnlocked config data model
 
-        HandleReplySent { timestamp, reply, contactId } ->
-            handleReplySent config timestamp contactId reply model
+        HandleReplySent data ->
+            handleReplySent config data model
 
         HandleActionDone _ ->
             -- TODO: Need help
             ( model, React.none )
 
-        HandleStepProceeded _ ->
-            -- TODO: Need help
+        HandleStepProceeded data ->
+            -- TODO: Missing contact id
             ( model, React.none )
 
         ReplyRequest data ->
@@ -130,25 +132,26 @@ handleReplyUnlocked config { contactId, replies } model =
 
 handleReplySent :
     Config msg
-    -> Time
-    -> String
-    -> Reply
+    -> StoryEmailReplySent.Data
     -> Model
     -> UpdateResponse msg
-handleReplySent _ when contactId reply model =
+handleReplySent _ { timestamp, contactId, step, reply, availableReplies } model =
     let
+        ( quest, realStep, actions ) =
+            step
+
         person_ =
             case getContact contactId model of
                 Nothing ->
                     { pastEmails =
-                        ( when, FromPlayer reply )
+                        ( timestamp, FromPlayer reply )
                             |> List.singleton
                             |> Dict.fromList
                     , availableReplies =
-                        []
-                    , step = Nothing
+                        availableReplies
+                    , step = Just ( realStep, actions )
                     , objective = Nothing
-                    , quest = Nothing
+                    , quest = Just quest
                     , about = initialAbout contactId
                     }
 
@@ -158,8 +161,11 @@ handleReplySent _ when contactId reply model =
                             contact
                                 |> getPastEmails
                                 |> Dict.insert
-                                    when
+                                    timestamp
                                     (FromPlayer reply)
+                        , availableReplies = availableReplies
+                        , step = Just ( realStep, actions )
+                        , quest = Just quest
                     }
 
         model_ =

@@ -1,11 +1,17 @@
 module Events.Account.Handlers.StoryStepProceeded exposing (Data, handler)
 
-import Json.Decode exposing (Decoder, decodeValue, string, field)
+import Json.Decode exposing (Decoder, decodeValue, map, field)
 import Events.Shared exposing (Handler)
+import Decoders.Storyline exposing (stepWithActions)
+import Game.Storyline.Shared exposing (Reply, Quest, Step, ContactId)
+import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type alias Data =
-    String
+    { quest : Quest
+    , step : Step
+    , actions : List Action
+    }
 
 
 handler : Handler Data msg
@@ -17,6 +23,8 @@ handler toMsg =
 -- internals
 
 
-stepProceed : Decoder String
+stepProceed : Decoder Data
 stepProceed =
-    field "next_step" string
+    stepWithActions
+        |> field "next_step"
+        |> map (\( q, s, a ) -> Data q s a)
