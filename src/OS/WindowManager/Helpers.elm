@@ -58,43 +58,10 @@ getGatewayOfWindow config model window =
 
 getEndpointOfWindow : Config msg -> Model -> Window -> Maybe ( CId, Server )
 getEndpointOfWindow config model window =
-    -- this function is unsafe until someone adapt Game.Servers to allow
-    -- proper reverse mapping functionality, but it should be enough for now
-    let
-        cids =
-            getCIdsOfWindow config window model
-
-        gateway =
-            cids
-                |> List.filter (Tuple.second >> Servers.isGateway)
-                |> List.head
-
-        endpoint =
-            cids
-                |> List.filter (Tuple.second >> Servers.isGateway >> not)
-                |> List.head
-    in
-        case endpoint of
-            Just _ ->
-                endpoint
-
-            Nothing ->
-                case gateway of
-                    Just ( _, server ) ->
-                        let
-                            servers =
-                                serversFromConfig config
-
-                            cid =
-                                Servers.getEndpointCId server
-
-                            server_ =
-                                Maybe.andThen (flip Servers.get <| servers) cid
-                        in
-                            Maybe.uncurry cid server_
-
-                    Nothing ->
-                        Nothing
+    model
+        |> getCIdsOfWindow config window
+        |> List.filter (Tuple.second >> Servers.isGateway >> not)
+        |> List.head
 
 
 
@@ -104,25 +71,62 @@ getEndpointOfWindow config model window =
 getCIdsOfWindow : Config msg -> Window -> Model -> List ( CId, Server )
 getCIdsOfWindow config window model =
     let
+        servers =
+            serversFromConfig config
+
         appIds =
             listAppIds window
 
-        appCIds =
+        cids =
             List.filterMap (flip getApp model >> Maybe.map getAppCId) appIds
 
-        getAppendServer cid =
-            case Servers.get cid <| serversFromConfig config of
+        appendServers cid =
+            case Servers.get cid servers of
                 Just server ->
                     Just ( cid, server )
 
                 Nothing ->
                     Nothing
     in
-        appIds
-            |> List.head
-            |> Maybe.andThen (flip getWindowOfApp model)
-            |> Maybe.andThen (flip getSessionOfWindow model)
-            |> Maybe.map List.singleton
-            |> Maybe.withDefault []
-            |> (++) appCIds
-            |> List.filterMap getAppendServer
+        case cids of
+            _ :: _ :: _ ->
+                -- window has two contexts, use them both
+                List.filterMap appendServers cids
+
+            cid :: _ ->
+                -- window has a single  context, fetch it's counterpart
+                cid
+                    |> getBoundServers config
+                    |> List.filterMap appendServers
+
+            _ ->
+                -- window has no context, fetch session contexts
+                appIds
+                    |> List.head
+                    |> Maybe.andThen (flip getWindowOfApp model)
+                    |> Maybe.andThen (flip getSessionOfWindow model)
+                    |> Maybe.andThen appendServers
+                    |> Maybe.map List.singleton
+                    |> Maybe.withDefault []
+
+
+getBoundServers : Config msg -> CId -> List CId
+getBoundServers config cid =
+    let
+        servers =
+            serversFromConfig config
+
+        maybeServer =
+            Servers.get cid servers
+    in
+        case Servers.getGatewayOfEndpoint cid servers of
+            Just gcid ->
+                -- it was an endpoint cid, so join it with a gateway
+                [ gcid, cid ]
+
+            Nothing ->
+                -- it was an gateway cid, so try to find its endpoint
+                maybeServer
+                    |> Maybe.andThen Servers.getEndpointCId
+                    |> Maybe.map (flip (::) [ cid ])
+                    |> Maybe.withDefault [ cid ]
