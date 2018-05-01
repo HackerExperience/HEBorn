@@ -68,6 +68,14 @@ setCheckpoint checkpoint model =
     { model | highestCheckpoint = checkpoint }
 
 
+passCheckpoint : Checkpoint -> Model -> Model
+passCheckpoint checkpoint model =
+    if (checkpoint > getCheckpoint model) then
+        { model | highestCheckpoint = checkpoint }
+    else
+        model
+
+
 getContacts : Model -> Contacts
 getContacts { contacts } =
     contacts
@@ -171,6 +179,14 @@ getLastReply { pastEmails } =
         |> Dict.values
         |> List.foldl (Just >> always) Nothing
         |> Maybe.map emailToReply
+
+
+checkpointFromContact : Contact -> Checkpoint
+checkpointFromContact contact =
+    checkpoint
+        (getQuest contact)
+        (getStep contact)
+        (getLastReply contact)
 
 
 

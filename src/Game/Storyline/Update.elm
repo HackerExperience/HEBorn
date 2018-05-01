@@ -6,11 +6,12 @@ import Utils.React as React exposing (React)
 import Events.Account.Handlers.StoryEmailSent as StoryEmailSent
 import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocked
 import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
+import Events.Account.Handlers.StoryStepProceeded as StoryStepProceeded
 import Game.Storyline.Requests.Reply as ReplyRequest exposing (replyRequest)
 import Game.Storyline.Config exposing (..)
 import Game.Storyline.Messages exposing (..)
 import Game.Storyline.Models exposing (..)
-import Game.Storyline.Shared exposing (Reply, Quest, Step, PastEmail(..))
+import Game.Storyline.Shared exposing (Reply, Quest, Step, PastEmail(..), checkpoint)
 import Game.Storyline.StepActions.Shared exposing (Action)
 
 
@@ -38,8 +39,7 @@ update config msg model =
             ( model, React.none )
 
         HandleStepProceeded data ->
-            -- TODO: Missing contact id
-            ( model, React.none )
+            handleStepProceeded config data model
 
         ReplyRequest data ->
             onReplyRequest config data model
@@ -88,7 +88,9 @@ handleNewEmail config data model =
                         }
 
         model_ =
-            setContact contactId person_ model
+            model
+                |> setContact contactId person_
+                |> passCheckpoint (checkpointFromContact person_)
     in
         ( model_, React.none )
 
@@ -169,7 +171,43 @@ handleReplySent _ { timestamp, contactId, step, reply, availableReplies } model 
                     }
 
         model_ =
-            setContact contactId person_ model
+            model
+                |> setContact contactId person_
+                |> passCheckpoint (checkpointFromContact person_)
+    in
+        ( model_, React.none )
+
+
+handleStepProceeded :
+    Config msg
+    -> StoryStepProceeded.Data
+    -> Model
+    -> UpdateResponse msg
+handleStepProceeded config { contactId, quest, step, actions } model =
+    let
+        person_ =
+            case getContact contactId model of
+                Nothing ->
+                    { pastEmails =
+                        Dict.empty
+                    , availableReplies =
+                        []
+                    , step = Just ( step, actions )
+                    , objective = Nothing
+                    , quest = Just quest
+                    , about = initialAbout contactId
+                    }
+
+                Just person ->
+                    { person
+                        | step = Just ( step, actions )
+                        , quest = Just quest
+                    }
+
+        model_ =
+            model
+                |> setContact contactId person_
+                |> passCheckpoint (checkpointFromContact person_)
     in
         ( model_, React.none )
 
