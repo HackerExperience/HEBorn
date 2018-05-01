@@ -11,6 +11,7 @@ dockApps model =
         |> addIf model Browser browserCheckpoint
         |> addIf model TaskManager taskManagerCheckpoint
         |> addIf model DBAdmin hackedDatabaseCheckpoint
+        |> addIf model Explorer explorerCheckpoint
 
 
 
@@ -41,6 +42,13 @@ taskManagerCheckpoint =
 
 hackedDatabaseCheckpoint : Checkpoint
 hackedDatabaseCheckpoint =
+    checkpoint (Just Tutorial)
+        (Just Tutorial_NastyVirus)
+        (Just DlaydMuch4)
+
+
+explorerCheckpoint : Checkpoint
+explorerCheckpoint =
     checkpoint (Just Tutorial)
         (Just Tutorial_NastyVirus)
         (Just NastyVirus3)

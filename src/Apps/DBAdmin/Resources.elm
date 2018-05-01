@@ -16,6 +16,7 @@ type Classes
     | RealMoney
     | RightSide
     | LeftSide
+    | Password
 
 
 prefix : String
