@@ -48,6 +48,9 @@ update config msg model =
 handleDelete : Config msg -> Id -> Model -> UpdateResponse msg
 handleDelete config id model =
     let
+        z =
+            Debug.log "Asking to delete file " id
+
         ( model_, cmd ) =
             case getFile id model of
                 Just file ->

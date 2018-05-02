@@ -74,7 +74,7 @@ visibleNotifications :
     -> Html msg
 visibleNotifications config render actioner title readAllMsg itens uniqueClass =
     itens
-        |> notifications config render actioner title readAllMsg
+        |> notifications config render actioner title
         |> List.singleton
         |> indicator
             [ class [ uniqueClass ]
@@ -95,10 +95,9 @@ notifications :
     -> Renderer a
     -> ToMsg a msg
     -> String
-    -> msg
     -> Notifications.Notifications a
     -> Html msg
-notifications config render actioner title readAllMsg itens =
+notifications config render actioner title itens =
     footer
         |> List.singleton
         |> (++)

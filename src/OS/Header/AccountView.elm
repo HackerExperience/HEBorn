@@ -31,7 +31,6 @@ visibleAccountGear ({ toMsg } as config) =
         Notifications.render
         (Notifications.grabOnClick (accountActionConfig config))
         "Account"
-        (toMsg AccountReadAll)
         config.accountNotifications
     , ul [] [ logoutBtn config ]
     ]
@@ -39,6 +38,7 @@ visibleAccountGear ({ toMsg } as config) =
         |> List.singleton
         |> indicator
             [ class [ AccountIco ]
+            , onClick <| toMsg AccountReadAll
             , onMouseEnter <| toMsg MouseEnterDropdown
             , onMouseLeave <| toMsg MouseLeavesDropdown
             ]
