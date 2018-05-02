@@ -1,5 +1,6 @@
 module Apps.Explorer.Models exposing (..)
 
+import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Shared as Servers
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Filesystem.Models as Filesystem
@@ -19,7 +20,12 @@ type alias Model =
     { storageId : Maybe Servers.StorageId
     , path : Filesystem.Path
     , editing : EditingStatus
+    , modal : Maybe ModalAction
     }
+
+
+type ModalAction
+    = ForDownload NIP Filesystem.FileEntry
 
 
 name : String
@@ -55,6 +61,7 @@ initialModel =
     { storageId = Nothing
     , path = [ "" ]
     , editing = NotEditing
+    , modal = Nothing
     }
 
 
@@ -122,3 +129,8 @@ resolvePath path server model =
         |> getFilesystem server
         |> Maybe.map (Filesystem.list path)
         |> Maybe.withDefault []
+
+
+leaveModal : Model -> Model
+leaveModal tab =
+    { tab | modal = Nothing }

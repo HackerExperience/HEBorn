@@ -247,13 +247,17 @@ explorerConfig appId ( cid, server ) config =
         onUploadFile =
             Processes.HandleStartUpload >>>> processes config cid
 
+        onDownloadFile =
+            Processes.HandleStartDownload >>>> processes config cid
+
         getFilesystem =
             flip Servers.getStorage server
                 >> Maybe.map Servers.getFilesystem
     in
         { toMsg = ExplorerMsg >> AppMsg appId >> config.toMsg
         , batchMsg = config.batchMsg
-        , activeServer = server
+        , activeServer = ( cid, server )
+        , activeGateway = config.activeGateway
         , endpointCId = endpointCIdFromConfig config
         , endpointMainStorage = endpointMainStorageId config
         , getFilesystem = getFilesystem
@@ -263,6 +267,7 @@ explorerConfig appId ( cid, server ) config =
         , onRenameFile = Filesystem.HandleRename >>> filesystem config cid
         , onDeleteFile = Filesystem.HandleDelete >> filesystem config cid
         , onUploadFile = onUploadFile
+        , onDownloadFile = onDownloadFile
         , menuAttr = config.menuAttr
         }
 

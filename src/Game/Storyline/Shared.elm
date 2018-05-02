@@ -92,11 +92,7 @@ emailToReply email =
 
 checkpointIsGTE : Checkpoint -> Checkpoint -> Bool
 checkpointIsGTE l r =
-    let
-        z =
-            Debug.log ("What is higher" ++ (toString l) ++ " or " ++ (toString r) ++ " :") (l >= r)
-    in
-        (l >= r)
+    (l >= r)
 
 
 checkpoint : Maybe Quest -> Maybe Step -> Maybe Reply -> Checkpoint

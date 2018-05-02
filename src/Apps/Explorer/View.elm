@@ -8,13 +8,14 @@ import Html.CssHelpers
 import ContextMenu
 import Utils.Maybe as Maybe
 import Game.Servers.Models as Servers exposing (Server)
-import Game.Servers.Shared as Servers
+import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
 import Apps.Explorer.Models exposing (..)
 import Apps.Explorer.Resources exposing (Classes(..), prefix, idAttrKey)
+import UI.Elements.Modal exposing (modalPickStorage)
 import UI.Elements.ProgressBar exposing (progressBar)
 import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 
@@ -24,11 +25,25 @@ import UI.ToString exposing (bytesToString, secondsToTimeNotation)
 
 
 view : Config msg -> Model -> Html msg
-view ({ activeServer } as config) ({ editing, path } as model) =
+view ({ activeServer } as config) ({ editing, path, modal } as model) =
     div [ class [ Window ] ]
         [ explorerColumn config activeServer model
         , explorerMain config editing path activeServer model
+        , modals config modal
         ]
+
+
+modals : Config msg -> Maybe ModalAction -> Html msg
+modals config modal =
+    case modal of
+        Nothing ->
+            text ""
+
+        Just (ForDownload target file) ->
+            modalPickStorage ((Tuple.second config.activeGateway).storages)
+                (Maybe.map (flip (config.onDownloadFile target) file)
+                    >> Maybe.withDefault (config.toMsg (EnterModal Nothing))
+                )
 
 
 idAttr : String -> Attribute msg
@@ -176,7 +191,7 @@ treeEntry ({ toMsg } as config) server file model =
             Filesystem.FileEntry id file ->
                 div
                     [ class [ NavEntry, EntryArchive ]
-                    , menuTreeArchive config storage id
+                    , menuTreeArchive config storage ( id, file )
                     ]
                     [ icon, label ]
 
@@ -228,10 +243,10 @@ detailedEntry config server entry model =
             in
                 case Filesystem.getType file of
                     Filesystem.Text ->
-                        detailedTextFile config storage entry id file
+                        detailedTextFile config storage entry ( id, file )
 
                     _ ->
-                        detailedGenericArchive config storage entry id file
+                        detailedGenericArchive config storage entry ( id, file )
 
 
 detailedFolder : Config msg -> Filesystem.Path -> Filesystem.Name -> Server -> Model -> Html msg
@@ -263,13 +278,12 @@ detailedTextFile :
     Config msg
     -> Servers.StorageId
     -> Filesystem.Entry
-    -> Filesystem.Id
-    -> Filesystem.File
+    -> ( Filesystem.Id, Filesystem.File )
     -> Html msg
-detailedTextFile config storage entry id file =
+detailedTextFile config storage entry (( id, file ) as fileEntry) =
     div
         [ class [ CntListEntry, EntryArchive ]
-        , menuMainArchive config storage id
+        , menuMainArchive config storage fileEntry
         , idAttr id
         ]
         [ span [ class [ entryIcon entry ] ] []
@@ -289,15 +303,14 @@ detailedGenericArchive :
     Config msg
     -> Servers.StorageId
     -> Filesystem.Entry
-    -> Filesystem.Id
-    -> Filesystem.File
+    -> ( Filesystem.Id, Filesystem.File )
     -> Html msg
-detailedGenericArchive config storage entry id file =
+detailedGenericArchive config storage entry (( id, file ) as fileEntry) =
     let
         baseEntry =
             div
                 [ class [ CntListEntry, EntryArchive ]
-                , menuExecutable config storage id
+                , menuExecutable config storage fileEntry
                 , idAttr id
                 ]
                 [ span [ class [ entryIcon entry ] ] []
@@ -336,7 +349,7 @@ detailedEntryList config server list model =
 menuTreeArchive :
     Config msg
     -> Servers.StorageId
-    -> Filesystem.Id
+    -> ( Filesystem.Id, Filesystem.File )
     -> Attribute msg
 menuTreeArchive =
     menuMainArchive
@@ -358,22 +371,32 @@ menuMainDir { menuAttr, toMsg } fullPath =
 menuMainArchive :
     Config msg
     -> Servers.StorageId
-    -> Filesystem.Id
+    -> ( Filesystem.Id, Filesystem.File )
     -> Attribute msg
-menuMainArchive ({ menuAttr } as config) storage id =
-    menuAttr
-        [ [ ( ContextMenu.item "Rename", config.toMsg <| EnterRename id )
-          , ( ContextMenu.item "Move", config.toMsg <| UpdateEditing (Moving id) )
-          , ( ContextMenu.item "Delete", config.onDeleteFile storage id )
-          , ( ContextMenu.item "Upload", uploadAction config id storage )
-          ]
-        ]
+menuMainArchive ({ menuAttr } as config) storage (( id, _ ) as fileEntry) =
+    let
+        activeCId =
+            Just <| Tuple.first config.activeServer
+
+        contextUnique =
+            if (config.endpointCId == activeCId) then
+                [ ( ContextMenu.item "Download", downloadAction config fileEntry ) ]
+            else
+                [ ( ContextMenu.item "Upload", uploadAction config fileEntry storage ) ]
+
+        common =
+            [ ( ContextMenu.item "Rename", config.toMsg <| EnterRename id )
+            , ( ContextMenu.item "Move", config.toMsg <| UpdateEditing (Moving id) )
+            , ( ContextMenu.item "Delete", config.onDeleteFile storage id )
+            ]
+    in
+        menuAttr [ common, contextUnique ]
 
 
 menuExecutable :
     Config msg
     -> Servers.StorageId
-    -> Filesystem.Id
+    -> ( Filesystem.Id, Filesystem.File )
     -> Attribute msg
 menuExecutable =
     menuMainArchive
@@ -407,8 +430,8 @@ usage min max =
             ]
 
 
-explorerColumn : Config msg -> Server -> Model -> Html msg
-explorerColumn config { storages, mainStorage } model =
+explorerColumn : Config msg -> ( CId, Server ) -> Model -> Html msg
+explorerColumn config ( _, { storages, mainStorage } ) model =
     div
         [ class [ Nav ]
         ]
@@ -564,10 +587,10 @@ explorerMain :
     Config msg
     -> EditingStatus
     -> Filesystem.Path
-    -> Server
+    -> ( CId, Server )
     -> Model
     -> Html msg
-explorerMain config editing path server model =
+explorerMain config editing path ( _, server ) model =
     div
         [ class
             [ Content ]
@@ -583,30 +606,29 @@ explorerMain config editing path server model =
 
 uploadAction :
     Config msg
-    -> Filesystem.Id
+    -> ( Filesystem.Id, Filesystem.File )
     -> Servers.StorageId
     -> msg
-uploadAction ({ onUploadFile, batchMsg } as config) id storage =
+uploadAction ({ onUploadFile, batchMsg } as config) fileEntry storage =
     let
         fs =
             config.getFilesystem storage
-
-        fileEntry =
-            case fs of
-                Just fs ->
-                    Maybe.uncurry (Just id) (Filesystem.getFile id fs)
-
-                Nothing ->
-                    Nothing
     in
-        case Maybe.uncurry fileEntry config.endpointMainStorage of
-            Just ( fileEntry, storageId ) ->
-                case config.endpointCId of
-                    Just target ->
-                        onUploadFile target storageId fileEntry
-
-                    Nothing ->
-                        batchMsg []
+        case Maybe.uncurry config.endpointCId config.endpointMainStorage of
+            Just ( target, storageId ) ->
+                onUploadFile target storageId fileEntry
 
             Nothing ->
                 batchMsg []
+
+
+downloadAction :
+    Config msg
+    -> ( Filesystem.Id, Filesystem.File )
+    -> msg
+downloadAction { activeServer, toMsg } fileEntry =
+    let
+        target =
+            Servers.getActiveNIP (Tuple.second activeServer)
+    in
+        toMsg <| EnterModal <| Just <| ForDownload target fileEntry

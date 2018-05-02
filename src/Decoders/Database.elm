@@ -57,7 +57,7 @@ viruses =
 virusType : String -> Decoder VirusType
 virusType str =
     case str of
-        "spyware" ->
+        "virus_spyware" ->
             succeed Spyware
 
         "adware" ->
