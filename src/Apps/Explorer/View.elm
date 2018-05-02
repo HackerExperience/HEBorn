@@ -62,6 +62,9 @@ entryIcon entry =
                     Filesystem.Cracker _ ->
                         VirusIcon
 
+                    Filesystem.Spyware _ ->
+                        VirusIcon
+
                     Filesystem.Firewall _ ->
                         FirewallIcon
 
@@ -171,7 +174,14 @@ modulesOfType type_ =
                 , ( "Net", net, ActiveIcon )
                 ]
 
-            _ ->
+            Filesystem.Spyware { spy } ->
+                [ ( "Spy", spy, ActiveIcon )
+                ]
+
+            Filesystem.Text ->
+                []
+
+            Filesystem.CryptoKey ->
                 []
 
 
