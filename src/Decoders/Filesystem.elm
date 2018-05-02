@@ -239,6 +239,9 @@ fileType =
                 "crypto_key" ->
                     succeed Filesystem.CryptoKey
 
+                "virus_spyware" ->
+                    map Filesystem.Spyware <| modulesFor spyware
+
                 error ->
                     fail <| commonError "type" error
     in
@@ -336,3 +339,9 @@ anyMap =
     decode Filesystem.AnyMapModules
         |> required "map_geo" simpleModule
         |> required "map_net" simpleModule
+
+
+spyware : Decoder Filesystem.SpywareModules
+spyware =
+    decode Filesystem.SpywareModules
+        |> required "vir_spyware" simpleModule

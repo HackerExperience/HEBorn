@@ -17,5 +17,6 @@ type alias Config msg =
     , lastTick : Time
     , onDownloadStarted : String -> Filesystem.FileEntry -> msg
     , onUploadStarted : String -> Filesystem.FileEntry -> msg
+    , onBruteforceStarted : msg
     , onGenericNotification : String -> String -> msg
     }

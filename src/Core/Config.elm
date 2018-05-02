@@ -275,6 +275,7 @@ osConfig game menu ctx (( sCId, _ ) as srv) (( gCId, gSrv ) as gtw) =
         , activeServer = srv
         , activeGateway = gtw
         , onActionDone = onActionDone
+        , handleActionPerformed = Account.HandleActionPerformed >> account
         , menuView = ContextMenu.view menuConfig MenuMsg identity menu
         , menuAttr = ContextMenu.open MenuMsg
         }

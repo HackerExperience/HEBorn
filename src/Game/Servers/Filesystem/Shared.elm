@@ -19,6 +19,7 @@ module Game.Servers.Filesystem.Shared
         , EncryptorModules
         , DecryptorModules
         , AnyMapModules
+        , SpywareModules
         , toPath
         , joinPath
         , pathBase
@@ -107,6 +108,7 @@ type Type
     | Encryptor EncryptorModules
     | Decryptor DecryptorModules
     | AnyMap AnyMapModules
+    | Spyware SpywareModules
 
 
 {-| The base for a module is a version, additional data may be included.
@@ -174,6 +176,11 @@ type alias DecryptorModules =
 type alias AnyMapModules =
     { geo : SimpleModule
     , net : SimpleModule
+    }
+
+
+type alias SpywareModules =
+    { spy : SimpleModule
     }
 
 
@@ -412,3 +419,6 @@ getModuleVersions file =
 
         AnyMap { geo, net } ->
             Just [ geo.version, net.version ]
+
+        Spyware { spy } ->
+            Just [ spy.version ]

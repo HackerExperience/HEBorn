@@ -1,4 +1,4 @@
-module Landing.Requests.Login exposing (Data, loginRequest)
+module Landing.Requests.Login exposing (Data, Errors(..), loginRequest)
 
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -9,7 +9,13 @@ import Requests.Types exposing (FlagsSource, Code(..))
 
 
 type alias Data =
-    Result () ( String, String )
+    Result Errors ( String, String )
+
+
+type Errors
+    = WrongCreds
+    | NetworkError
+    | UnknownError
 
 
 loginRequest : String -> String -> FlagsSource a -> Cmd Data
@@ -38,13 +44,13 @@ receiver flagsSrc code value =
             value
                 |> decodeValue decoder
                 |> report "Landing.Login" code flagsSrc
-                |> Result.mapError (always ())
+                |> Result.mapError (always UnknownError)
 
         NotFoundCode ->
-            Err ()
+            Err WrongCreds
 
         _ ->
-            Err ()
+            Err NetworkError
 
 
 decoder : Decoder ( String, String )

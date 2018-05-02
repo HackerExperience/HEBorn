@@ -2,6 +2,7 @@ module Apps.DBAdmin.Style exposing (..)
 
 import Css exposing (..)
 import Css.Namespace exposing (namespace)
+import Utils.Css exposing (selectableText)
 import UI.Common exposing (flexContainerHorz)
 import UI.Icons as Icons
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
@@ -64,4 +65,6 @@ css =
             , display block
             , width (pct 100)
             ]
+        , class Password
+            [ selectableText ]
         ]

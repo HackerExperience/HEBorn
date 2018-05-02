@@ -34,6 +34,7 @@ import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
+import Game.Account.Requests.ActionPerformed as ActionPerformed
 import Game.Meta.Models as Meta
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
@@ -45,6 +46,7 @@ import Game.Servers.Hardware.Messages as Hardware
 import Game.Servers.Hardware.Models as Hardware
 import Game.Servers.Logs.Messages as Logs
 import Game.Servers.Processes.Messages as Processes
+import Game.Storyline.Models as Storyline
 import Game.Storyline.Messages as Storyline
 import Game.Web.Messages as Web
 import OS.WindowManager.Messages exposing (..)
@@ -66,6 +68,7 @@ type alias Config msg =
     , onSetContext : Context -> msg
     , onActionDone : DesktopApp -> Context -> msg
     , onAccountToast : AccountNotifications.Content -> msg
+    , handleActionPerformed : ActionPerformed.Data -> msg
     , menuAttr : List (List ( ContextMenu.Item, msg )) -> Attribute msg
     }
 
@@ -102,6 +105,7 @@ dockConfig config =
         , accountDock = Account.getDock <| accountFromConfig config
         , endpointCId = endpointCIdFromConfig config
         , servers = Game.getServers config.game
+        , story = storyFromConfig config
         }
 
 
@@ -120,7 +124,7 @@ sidebarConfig isFreeplay config =
             if isFreeplay then
                 Nothing
             else
-                Just <| Game.getStory config.game
+                Just <| storyFromConfig config
     in
         { toMsg = SidebarMsg >> config.toMsg
         , batchMsg = config.batchMsg
@@ -232,7 +236,7 @@ emailConfig : AppId -> ( CId, Server ) -> Config msg -> Email.Config msg
 emailConfig appId ( cid, _ ) config =
     { toMsg = EmailMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
-    , story = Game.getStory config.game
+    , story = storyFromConfig config
     , onOpenApp = flip OpenApp cid >> config.toMsg
     }
 
@@ -281,7 +285,7 @@ floatingHeadsConfig windowId appId ( gCid, _ ) config =
     { toMsg = FloatingHeadsMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , reference = appId
-    , story = Game.getStory config.game
+    , story = storyFromConfig config
     , username = Account.getUsername <| accountFromConfig config
     , onReply = Storyline.HandleReply >>> storyline config
     , onCloseApp = config.toMsg <| Close windowId
@@ -488,6 +492,11 @@ endpointMainStorageId { activeGateway, game } =
 accountFromConfig : Config msg -> Account.Model
 accountFromConfig { game } =
     Game.getAccount game
+
+
+storyFromConfig : Config msg -> Storyline.Model
+storyFromConfig { game } =
+    Game.getStory game
 
 
 lastTickFromConfig : Config msg -> Time

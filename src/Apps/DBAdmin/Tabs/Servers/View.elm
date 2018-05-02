@@ -58,10 +58,13 @@ renderData ( nip, item ) =
         div []
             [ text "ip: "
             , text <| Network.render nip
+            , br [] []
             , text " psw: "
-            , text item.password
+            , span [ class [ Password ] ] [ text item.password ]
+            , br [] []
             , text " nick: "
             , text <| Maybe.withDefault "[Unlabeled]" alias
+            , br [] []
             , text " notes: "
             , item.notes |> Maybe.withDefault "S/N" |> text
             ]
@@ -76,9 +79,9 @@ renderMiniData ( nip, item ) =
         div []
             [ text "ip: "
             , text <| Tuple.second nip
-            , text " psw: "
-            , text item.password
-            , text " nick: "
+            , text " // psw: "
+            , span [ class [ Password ] ] [ text item.password ]
+            , text " // nick: "
             , text <| Maybe.withDefault "[Unlabeled]" alias
             ]
 

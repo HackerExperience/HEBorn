@@ -16,7 +16,7 @@ import Json.Decode as Decode
         )
 import Json.Decode.Pipeline exposing (decode, required, hardcoded, custom)
 import Utils.Json.Decode exposing (optionalMaybe, commonError)
-import Game.Storyline.Models exposing (Contact, Model, initialAbout)
+import Game.Storyline.Models exposing (Contact, Model, initialAbout, fromContacts)
 import Game.Storyline.Shared exposing (..)
 import Game.Storyline.StepActions.Shared exposing (Action)
 import Game.Storyline.StepActions.Helper exposing (initialActions)
@@ -25,6 +25,7 @@ import Game.Storyline.StepActions.Helper exposing (initialActions)
 story : Decoder Model
 story =
     contacts
+        |> map (\contacts -> fromContacts contacts)
 
 
 contacts : Decoder (Dict ContactId Contact)
@@ -54,12 +55,18 @@ about =
 
 contact : Decoder (About -> Contact)
 contact =
-    decode Contact
+    decode
+        (\r e s ->
+            case s of
+                Just ( q, s, a ) ->
+                    Contact r e (Just ( s, a )) Nothing (Just q)
+
+                Nothing ->
+                    Contact r e Nothing Nothing Nothing
+        )
         |> required "replies" replies
         |> required "emails" pastEmails
         |> optionalMaybe "name" stepWithActions
-        |> hardcoded Nothing
-        |> hardcoded Nothing
 
 
 replies : Decoder (List Reply)
@@ -131,6 +138,45 @@ replyFromId id =
         "dlayd_much1" ->
             succeed DlaydMuch1
 
+        "dlayd_much2" ->
+            succeed DlaydMuch2
+
+        "dlayd_much3" ->
+            succeed DlaydMuch3
+
+        "dlayd_much4" ->
+            succeed DlaydMuch4
+
+        "noice" ->
+            succeed Noice
+
+        "nasty_virus3" ->
+            succeed NastyVirus3
+
+        "virus_spotted1" ->
+            succeed VirusSpotted1
+
+        "virus_spotted2" ->
+            succeed VirusSpotted2
+
+        "pointless_convo1" ->
+            succeed PointlessConvo1
+
+        "pointless_convo2" ->
+            succeed PointlessConvo2
+
+        "pointless_convo3" ->
+            succeed PointlessConvo3
+
+        "pointless_convo4" ->
+            succeed PointlessConvo4
+
+        "pointless_convo5" ->
+            succeed PointlessConvo5
+
+        "clean_your_logs" ->
+            succeed CleanYourLogs
+
         error ->
             fail <| commonError "email type" error
 
@@ -168,27 +214,30 @@ emailFromSender sender =
                 |> fail
 
 
-stepWithActions : Decoder ( Step, List Action )
+stepWithActions : Decoder ( Quest, Step, List Action )
 stepWithActions =
-    map (\k -> ( k, initialActions k )) step
+    map (\( q, k ) -> ( q, k, initialActions k )) step
 
 
-step : Decoder Step
+step : Decoder ( Quest, Step )
 step =
-    andThen stepFromId string
+    flip andThen string <|
+        \id ->
+            case String.split "@" id of
+                [ "tutorial", step ] ->
+                    map ((,) Tutorial) <|
+                        case step of
+                            "setup_pc" ->
+                                succeed Tutorial_SetupPC
 
+                            "download_cracker" ->
+                                succeed Tutorial_DownloadCracker
 
-stepFromId : String -> Decoder Step
-stepFromId id =
-    case id of
-        "tutorial@setup_pc" ->
-            succeed Tutorial_SetupPC
+                            "nasty_virus" ->
+                                succeed Tutorial_NastyVirus
 
-        "tutorial@download_cracker" ->
-            succeed Tutorial_DownloadCracker
+                            error ->
+                                fail <| commonError "storyline tutorial step id" error
 
-        "tutorial@nasty_virus" ->
-            succeed Tutorial_NastyVirus
-
-        error ->
-            fail <| commonError "storyline step id" error
+                error ->
+                    fail <| commonError "storyline quest id" error

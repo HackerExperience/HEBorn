@@ -179,30 +179,34 @@ viewPg config { page, modal } =
     div
         [ class [ PageContent ] ]
         [ viewPage config page
-        , Html.map config.toMsg <|
-            case modal of
-                Just (ForDownload source file) ->
-                    let
-                        storages =
-                            config.activeServer
-                                |> Tuple.second
-                                |> .storages
+        , case modal of
+            Just (ForDownload source file) ->
+                let
+                    storages =
+                        config.activeServer
+                            |> Tuple.second
+                            |> .storages
 
-                        onPick chosen =
-                            chosen
-                                |> Maybe.map (ReqDownload source file)
-                                |> Maybe.withDefault
-                                    (ActiveTabMsg <| EnterModal Nothing)
-                    in
-                        modalPickStorage storages onPick
+                    onPick chosen =
+                        chosen
+                            |> Maybe.map
+                                (ReqDownload source file
+                                    >> List.singleton
+                                )
+                            |> Maybe.withDefault []
+                            |> (::) (ActiveTabMsg <| EnterModal Nothing)
+                            |> List.map config.toMsg
+                            |> config.batchMsg
+                in
+                    modalPickStorage storages onPick
 
-                Just ImpossibleToLogin ->
-                    modalOk (Just "Impossible to login!")
-                        "Maybe password was invalid or try again later."
-                        (ActiveTabMsg <| EnterModal Nothing)
+            Just ImpossibleToLogin ->
+                modalOk (Just "Impossible to login!")
+                    "Maybe password was invalid or try again later."
+                    (config.toMsg <| ActiveTabMsg <| EnterModal Nothing)
 
-                Nothing ->
-                    text ""
+            Nothing ->
+                text ""
         ]
 
 

@@ -11,14 +11,15 @@ import Json.Decode
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Time exposing (Time)
 import Events.Shared exposing (Handler)
-import Decoders.Storyline exposing (replies, reply, step)
-import Game.Storyline.Shared exposing (Reply, Step, ContactId)
+import Decoders.Storyline exposing (replies, reply, stepWithActions)
+import Game.Storyline.Shared exposing (Reply, Quest, Step, ContactId)
+import Game.Storyline.StepActions.Shared exposing (Action)
 
 
 type alias Data =
     { timestamp : Time
     , contactId : ContactId
-    , step : Step
+    , step : ( Quest, Step, List Action )
     , reply : Reply
     , availableReplies : List Reply
     }
@@ -38,7 +39,7 @@ replySent =
     decode Data
         |> required "timestamp" float
         |> required "contact_id" string
-        |> required "step" step
+        |> required "step" stepWithActions
         |> required "reply_id" reply
         --|> required "reply_to" reply
         |> required "replies" replies

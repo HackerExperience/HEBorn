@@ -64,6 +64,9 @@ update config msg model =
         HandleDisconnected ->
             handleDisconnected config model
 
+        HandleActionPerformed _ ->
+            ( model, React.none )
+
 
 
 -- internals

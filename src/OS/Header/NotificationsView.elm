@@ -6,6 +6,7 @@ import Html.CssHelpers
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Utils.Html exposing (spacer)
 import Game.Meta.Types.Notifications as Notifications
+import OS.Header.Config exposing (..)
 import OS.Header.Models exposing (..)
 import OS.Header.Messages exposing (..)
 import OS.Header.Resources exposing (..)
@@ -15,76 +16,98 @@ type alias Renderer a =
     a -> ( String, String )
 
 
+type alias ToMsg a msg =
+    a -> msg
+
+
 { id, class, classList } =
     Html.CssHelpers.withNamespace prefix
 
 
 view :
-    Renderer a
+    Config msg
+    -> Renderer a
+    -> ToMsg a msg
     -> OpenMenu
     -> OpenMenu
     -> Class
     -> String
-    -> Msg
+    -> msg
     -> Notifications.Notifications a
-    -> Html Msg
-view render current activator uniqueClass title readAllMsg itens =
+    -> Html msg
+view config render actioner current activator uniqueClass title readAllMsg itens =
     if (current == activator) then
-        visibleNotifications
+        visibleNotifications config
             render
+            actioner
             title
             readAllMsg
             itens
             uniqueClass
     else
-        emptyNotifications uniqueClass activator
+        emptyNotifications config uniqueClass activator
 
 
 
 -- internals
 
 
-emptyNotifications : Class -> OpenMenu -> Html Msg
-emptyNotifications uniqueClass activator =
+emptyNotifications : Config msg -> Class -> OpenMenu -> Html msg
+emptyNotifications { toMsg } uniqueClass activator =
     indicator
         [ class [ uniqueClass ]
-        , onClick <| ToggleMenus activator
-        , onMouseEnter MouseEnterDropdown
-        , onMouseLeave MouseLeavesDropdown
+        , onClick <| toMsg <| ToggleMenus activator
+        , onMouseEnter <| toMsg <| MouseEnterDropdown
+        , onMouseLeave <| toMsg MouseLeavesDropdown
         ]
         []
 
 
 visibleNotifications :
-    Renderer a
+    Config msg
+    -> Renderer a
+    -> ToMsg a msg
     -> String
-    -> Msg
+    -> msg
     -> Notifications.Notifications a
     -> Class
-    -> Html Msg
-visibleNotifications render title readAllMsg itens uniqueClass =
-    notifications render title readAllMsg itens
+    -> Html msg
+visibleNotifications config render actioner title readAllMsg itens uniqueClass =
+    itens
+        |> notifications config render actioner title readAllMsg
         |> List.singleton
         |> indicator
             [ class [ uniqueClass ]
-            , onMouseEnter MouseEnterDropdown
-            , onMouseLeave MouseLeavesDropdown
+            , onClick <|
+                if Notifications.isEmpty itens then
+                    config.batchMsg []
+                else
+                    readAllMsg
+            , onMouseEnter <| config.toMsg MouseEnterDropdown
+            , onMouseLeave <| config.toMsg MouseLeavesDropdown
             ]
 
 
 {-| Gen a div with an ul with an header, all notifications and a footer
 -}
 notifications :
-    Renderer a
+    Config msg
+    -> Renderer a
+    -> ToMsg a msg
     -> String
-    -> Msg
+    -> msg
     -> Notifications.Notifications a
-    -> Html Msg
-notifications render title readAllMsg itens =
+    -> Html msg
+notifications config render actioner title readAllMsg itens =
     footer
         |> List.singleton
-        |> (++) (Dict.foldl (notificationReduce render) [] itens)
-        |> (::) (header title readAllMsg)
+        |> (++)
+            (Dict.foldl
+                (notificationReduce config render actioner)
+                []
+                itens
+            )
+        |> (::) (header title)
         |> ul []
         |> List.singleton
         |> div [ class [ Notification ] ]
@@ -95,35 +118,36 @@ indicator =
     node indicatorNode
 
 
-header : String -> Msg -> Html Msg
-header title readAllMsg =
+header : String -> Html msg
+header title =
     li []
         [ div [] [ text (title ++ " notifications") ]
         , spacer
-        , div [ onClick readAllMsg ] [ text "Mark All as Read" ]
         ]
 
 
-footer : Html Msg
+footer : Html msg
 footer =
     li [] [ text "..." ]
 
 
 notificationReduce :
-    Renderer a
+    Config msg
+    -> Renderer a
+    -> ToMsg a msg
     -> Notifications.Id
     -> Notifications.Notification a
-    -> List (Html Msg)
-    -> List (Html Msg)
-notificationReduce renderer id { content } acu =
+    -> List (Html msg)
+    -> List (Html msg)
+notificationReduce config renderer actioner id { content } acu =
     renderer content
-        |> notification id
+        |> notification (actioner content) id
         |> flip (::) acu
 
 
-notification : Notifications.Id -> ( String, String ) -> Html Msg
-notification id ( title, body ) =
-    li []
+notification : msg -> Notifications.Id -> ( String, String ) -> Html msg
+notification clickMsg id ( title, body ) =
+    li [ onClick clickMsg ]
         [ text title
         , br [] []
         , text body

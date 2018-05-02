@@ -34,6 +34,11 @@ accountResync id =
     WebsocketTopic (AccountChannel id) "bootstrap"
 
 
+clientActionPerformed : Account.ID -> Topic
+clientActionPerformed id =
+    WebsocketTopic (AccountChannel id) "client.action"
+
+
 clientSetup : Account.ID -> Topic
 clientSetup id =
     WebsocketTopic (AccountChannel id) "client.setup"
