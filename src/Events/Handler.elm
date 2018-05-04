@@ -39,7 +39,7 @@ handler config channel result =
 
 report : Error -> String
 report { event, channel, message } =
-    "Event '"
+    "⚠ Event '"
         ++ event
         ++ " from channel '"
         ++ toString channel

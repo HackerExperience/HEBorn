@@ -50,7 +50,7 @@ report info flags result =
             if Flags.isDev flags then
                 let
                     _ =
-                        Debug.log ("▶ " ++ info ++ ": \n" ++ msg)
+                        Debug.log ("⚠ " ++ info ++ ": \n" ++ msg)
                 in
                     result
             else
