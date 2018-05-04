@@ -9,7 +9,6 @@ import ContextMenu
 import Utils.Maybe as Maybe
 import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Shared as Servers exposing (CId)
-import Game.Servers.Filesystem.Models as Filesystem
 import Game.Servers.Filesystem.Shared as Filesystem
 import Apps.Explorer.Config exposing (..)
 import Apps.Explorer.Messages exposing (Msg(..))
