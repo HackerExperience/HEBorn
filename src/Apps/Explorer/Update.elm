@@ -16,10 +16,13 @@ type alias UpdateResponse msg =
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update ({ activeServer } as config) msg model =
     let
+        activeServerData =
+            Tuple.second activeServer
+
         maybeFs =
             model
-                |> getStorage activeServer
-                |> flip Servers.getStorage activeServer
+                |> getStorage activeServerData
+                |> flip Servers.getStorage activeServerData
                 |> Maybe.map Servers.getFilesystem
     in
         case maybeFs of
@@ -47,6 +50,9 @@ realUpdate config fs msg model =
 
         ApplyEdit ->
             onApplyEdit config fs model
+
+        EnterModal modal ->
+            ( { model | modal = modal }, React.none )
 
         _ ->
             -- TODO: implement folder operation requests
@@ -115,7 +121,7 @@ onApplyEdit config fs model =
             config
 
         storageId =
-            getStorage config.activeServer model
+            getStorage (Tuple.second config.activeServer) model
 
         react =
             case model.editing of

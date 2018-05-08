@@ -1,6 +1,6 @@
 module Events.Server.Handlers.FileDownloaded exposing (..)
 
-import Json.Decode exposing (decodeValue)
+import Json.Decode exposing (decodeValue, field)
 import Events.Shared exposing (Handler)
 import Game.Servers.Shared as Servers
 import Game.Servers.Filesystem.Shared as Filesystem
@@ -14,5 +14,9 @@ type alias Data =
 
 handler : Handler Data msg
 handler toMsg =
-    decodeValue (Decoders.Servers.withStorageId Decoders.Filesystem.fileEntry)
+    (Decoders.Filesystem.fileEntry
+        |> Decoders.Servers.withStorageId
+        |> field "file"
+        |> decodeValue
+    )
         >> Result.map toMsg

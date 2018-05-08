@@ -47,21 +47,17 @@ update config msg model =
 
 handleDelete : Config msg -> Id -> Model -> UpdateResponse msg
 handleDelete config id model =
-    let
-        ( model_, cmd ) =
-            case getFile id model of
-                Just file ->
-                    ( deleteFile id model
-                    , config
-                        |> deleteRequest id config.cid
-                        |> Cmd.map (always <| config.batchMsg [])
-                        |> React.cmd
-                    )
+    case getFile id model of
+        Just file ->
+            ( deleteFile id model
+            , config
+                |> deleteRequest id config.cid
+                |> Cmd.map (always <| config.batchMsg [])
+                |> React.cmd
+            )
 
-                Nothing ->
-                    ( model, React.none )
-    in
-        ( model_, cmd )
+        Nothing ->
+            ( model, React.none )
 
 
 handleMove :

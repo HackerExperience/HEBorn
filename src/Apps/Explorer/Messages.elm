@@ -11,4 +11,5 @@ type Msg
     | UpdateEditing EditingStatus
     | EnterRename Filesystem.Id
     | EnterRenameDir Filesystem.Path
+    | EnterModal (Maybe ModalAction)
     | ApplyEdit

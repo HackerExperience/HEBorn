@@ -33,7 +33,7 @@ request topic payload flagSource =
 
 report : String -> Code -> FlagsSource a -> Result String b -> Result String b
 report info code flagSrc result =
-    Decode.report ("Request (" ++ toString code ++ ") " ++ info)
+    Decode.report ("⚠ Request (" ++ toString code ++ ") " ++ info)
         flagSrc.flags
         result
 
@@ -76,7 +76,7 @@ errorWs msg value =
     let
         result =
             value
-                |> Debug.log "▶ Websocket (:error)"
+                |> Debug.log "⚠ Websocket (:error)"
                 |> Decode.decodeValue response
     in
         case result of
