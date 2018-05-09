@@ -2,7 +2,7 @@ module Apps.DBAdmin.Tabs.Servers.View exposing (view)
 
 import Dict
 import Html exposing (..)
-import Html.Attributes exposing (value, selected)
+import Html.Attributes exposing (value, selected, placeholder)
 import Html.Events exposing (..)
 import Html.CssHelpers
 import UI.Layouts.VerticalList exposing (verticalList)
@@ -10,7 +10,6 @@ import UI.Elements.FilterHeader exposing (filterHeader)
 import UI.Elements.Toogable exposing (toogableEntry)
 import UI.Elements.HorizontalBtnPanel exposing (horizontalBtnPanel)
 import Utils.Html exposing (spacer)
-import Utils.Html.Events exposing (onChange)
 import Game.Account.Database.Models as Database
 import Game.Meta.Types.Network as Network exposing (NIP)
 import Apps.DBAdmin.Config exposing (..)
@@ -34,14 +33,14 @@ isEntryEditing app ( nip, _ ) =
     Dict.member (Network.toString nip) app.serversEditing
 
 
-renderFlag : Classes -> List (Html Msg)
+renderFlag : Classes -> List (Html msg)
 renderFlag flag =
     [ text " "
     , span [ class [ flag ] ] []
     ]
 
 
-renderFlags : List Classes -> List (Html Msg)
+renderFlags : List Classes -> List (Html msg)
 renderFlags =
     List.map renderFlag
         >> List.concat
@@ -49,7 +48,7 @@ renderFlags =
         >> Maybe.withDefault []
 
 
-renderData : ( NIP, Database.HackedServer ) -> Html Msg
+renderData : ( NIP, Database.HackedServer ) -> Html msg
 renderData ( nip, item ) =
     let
         alias =
@@ -70,19 +69,14 @@ renderData ( nip, item ) =
             ]
 
 
-renderMiniData : ( NIP, Database.HackedServer ) -> Html Msg
+renderMiniData : ( NIP, Database.HackedServer ) -> Html msg
 renderMiniData ( nip, item ) =
     let
         alias =
             Database.getHackedServerAlias item
     in
         div []
-            [ text "ip: "
-            , text <| Tuple.second nip
-            , text " // psw: "
-            , span [ class [ Password ] ] [ text item.password ]
-            , text " // nick: "
-            , text <| Maybe.withDefault "[Unlabeled]" alias
+            [ text <| Maybe.withDefault (Tuple.second nip) alias
             ]
 
 
@@ -90,58 +84,64 @@ renderEditing :
     Config msg
     -> ( NIP, Database.HackedServer )
     -> EditingServers
-    -> Html Msg
-renderEditing config (( nip, item ) as entry) src =
+    -> Html msg
+renderEditing { toMsg } (( nip, item ) as entry) src =
     case src of
         EditingTexts ( nick, notes ) ->
             div []
-                [ renderMiniData entry
+                [ renderData entry
+                , text "New label:"
+                , br [] []
                 , input
-                    [ class []
+                    [ class [ BoxifyMe ]
                     , value nick
+                    , placeholder "Alias"
                     , onInput
-                        (UpdateServersEditingNick (Network.toString nip))
+                        (UpdateServersEditingNick (Network.toString nip) >> toMsg)
                     ]
                     []
+                , text "New notes:"
+                , br [] []
                 , input
                     [ class [ BoxifyMe ]
                     , value notes
+                    , placeholder "Notes"
                     , onInput
-                        (UpdateServersEditingNotes (Network.toString nip))
+                        (UpdateServersEditingNotes (Network.toString nip) >> toMsg)
                     ]
                     []
                 ]
 
 
-renderTopFlags : ( NIP, Database.HackedServer ) -> Html Msg
-renderTopFlags _ =
+renderTopFlags : Config msg -> ( NIP, Database.HackedServer ) -> Html msg
+renderTopFlags _ _ =
     div []
         -- TODO: Catch the flags for real
         (renderFlags [ BtnEdit ])
 
 
-btnsEditing : String -> List ( Attribute Msg, Msg )
-btnsEditing itemId =
-    [ ( class [ BtnApply, BottomButton ], ApplyEditing TabServers itemId )
-    , ( class [ BtnCancel, BottomButton ], LeaveEditing TabServers itemId )
+btnsEditing : Config msg -> NIP -> List ( Attribute msg, msg )
+btnsEditing { toMsg } itemId =
+    [ ( class [ BtnApply, BottomButton ], toMsg <| ApplyEditing TabServers <| Network.toString itemId )
+    , ( class [ BtnCancel, BottomButton ], toMsg <| LeaveEditing TabServers <| Network.toString itemId )
     ]
 
 
-btnsNormal : String -> List ( Attribute Msg, Msg )
-btnsNormal itemId =
-    [ ( class [ BtnEdit, BottomButton ], EnterEditing TabServers itemId )
-    , ( class [ BtnDelete, BottomButton ], StartDeleting TabServers itemId )
+btnsNormal : Config msg -> NIP -> List ( Attribute msg, msg )
+btnsNormal { toMsg } itemId =
+    [ ( class [ BtnEdit, BottomButton ], toMsg <| EnterEditing TabServers <| Network.toString itemId )
+    , ( class [ BtnDelete, BottomButton ], toMsg <| StartDeleting TabServers <| Network.toString itemId )
     ]
 
 
-renderBottomActions : Model -> ( NIP, Database.HackedServer ) -> Html Msg
-renderBottomActions app (( nip, _ ) as entry) =
+renderBottomActions : Config msg -> Model -> ( NIP, Database.HackedServer ) -> Html msg
+renderBottomActions config app (( nip, _ ) as entry) =
     let
         btns =
             if (isEntryEditing app entry) then
-                btnsEditing <| Network.toString nip
+                btnsEditing config nip
             else if (isEntryExpanded app entry) then
-                btnsNormal <| Network.toString nip
+                btnsNormal config nip
             else
                 []
     in
@@ -152,7 +152,7 @@ renderAnyData :
     Config msg
     -> Model
     -> ( NIP, Database.HackedServer )
-    -> Html Msg
+    -> Html msg
 renderAnyData config app (( nip, _ ) as entry) =
     case (Dict.get (Network.toString nip) app.serversEditing) of
         Just x ->
@@ -165,12 +165,12 @@ renderAnyData config app (( nip, _ ) as entry) =
                 renderMiniData entry
 
 
-renderBottom : Model -> ( NIP, Database.HackedServer ) -> Html Msg
-renderBottom app entry =
+renderBottom : Config msg -> Model -> ( NIP, Database.HackedServer ) -> Html msg
+renderBottom config app entry =
     let
         data =
             if (isEntryEditing app entry || isEntryExpanded app entry) then
-                [ renderBottomActions app entry ]
+                [ renderBottomActions config app entry ]
             else
                 []
     in
@@ -183,7 +183,7 @@ renderEntry :
     Config msg
     -> Model
     -> ( NIP, Database.HackedServer )
-    -> Html Msg
+    -> Html msg
 renderEntry config app (( nip, _ ) as entry) =
     let
         expandedState =
@@ -195,19 +195,19 @@ renderEntry config app (( nip, _ ) as entry) =
         etop =
             [ div [] []
             , spacer
-            , renderTopFlags entry
+            , renderTopFlags config entry
             ]
 
         data =
             [ div [ class [ ETop ] ] etop
             , renderAnyData config app entry
-            , renderBottom app entry
+            , renderBottom config app entry
             ]
     in
         toogableEntry
             (not editingState)
             []
-            (ToogleExpand TabServers <| Network.toString nip)
+            (config.toMsg <| ToogleExpand TabServers <| Network.toString nip)
             expandedState
             data
 
@@ -216,22 +216,22 @@ renderEntryList :
     Config msg
     -> Model
     -> Database.HackedServers
-    -> List (Html Msg)
+    -> List (Html msg)
 renderEntryList config app entries =
     entries
         |> Dict.toList
         |> List.map (renderEntry config app)
 
 
-view : Config msg -> Model -> Html Msg
-view ({ database } as config) model =
+view : Config msg -> Model -> Html msg
+view ({ database, toMsg } as config) model =
     let
         header =
             filterHeader []
                 []
                 model.servers.filterText
                 "Search..."
-                (UpdateTextFilter TabServers)
+                (UpdateTextFilter TabServers >> toMsg)
     in
         database.servers
             |> applyFilter model
