@@ -43,6 +43,10 @@ css =
             [ ico
             , before [ Icons.cancel ]
             ]
+        , class BtnBrowse
+            [ ico
+            , before [ Icons.browser ]
+            ]
         , class BottomButton
             [ cursor pointer ]
         , class FinanceEntry

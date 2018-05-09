@@ -1,5 +1,6 @@
 module Apps.DBAdmin.Tabs.Servers.View exposing (view)
 
+import ContextMenu
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (value, selected, placeholder)
@@ -128,9 +129,9 @@ btnsEditing { toMsg } itemId =
 
 
 btnsNormal : Config msg -> NIP -> List ( Attribute msg, msg )
-btnsNormal { toMsg } itemId =
-    [ ( class [ BtnEdit, BottomButton ], toMsg <| EnterEditing TabServers <| Network.toString itemId )
-    , ( class [ BtnDelete, BottomButton ], toMsg <| StartDeleting TabServers <| Network.toString itemId )
+btnsNormal { toMsg, openBrowser } nip =
+    [ ( class [ BtnEdit, BottomButton ], toMsg <| EnterEditing TabServers <| Network.toString nip )
+    , ( class [ BtnBrowse, BottomButton ], openBrowser <| Network.getIp nip )
     ]
 
 
@@ -203,10 +204,13 @@ renderEntry config app (( nip, _ ) as entry) =
             , renderAnyData config app entry
             , renderBottom config app entry
             ]
+
+        attrs =
+            [ config.menuAttr [ [ ( ContextMenu.item "Open in Browser", config.openBrowser <| Network.getIp nip ) ] ] ]
     in
         toogableEntry
             (not editingState)
-            []
+            attrs
             (config.toMsg <| ToogleExpand TabServers <| Network.toString nip)
             expandedState
             data
