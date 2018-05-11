@@ -20,6 +20,7 @@ type alias Config msg =
     , onAnyMap : NIP -> msg
     , onEnterPanel : msg
     , showPassword : Bool
+    , fallbackPassword : Maybe String
     }
 
 
@@ -52,10 +53,18 @@ goPanelView config model =
 
 
 loginForm : Config msg -> Model -> Html msg
-loginForm config model =
+loginForm config { target, password } =
     let
         inputText =
-            Maybe.withDefault "" model.password
+            case ( password, config.fallbackPassword ) of
+                ( Just psw, _ ) ->
+                    psw
+
+                ( Nothing, Just fallback ) ->
+                    fallback
+
+                _ ->
+                    ""
     in
         node "portal"
             []
@@ -68,7 +77,7 @@ loginForm config model =
                     []
                 , button
                     [ inputText
-                        |> config.onLogin model.target
+                        |> config.onLogin target
                         |> onClick
                     ]
                     [ text "Go" ]
