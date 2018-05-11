@@ -31,19 +31,24 @@ view config ({ selected } as model) =
                     (Servers.view config model)
 
                 TabBankAccs ->
-                    renderBankAccounts database model
+                    Html.map config.toMsg <|
+                        renderBankAccounts database model
 
                 TabWallets ->
-                    renderBitcoinAccounts database model
+                    Html.map config.toMsg <|
+                        renderBitcoinAccounts database model
 
         viewTabs =
-            hzTabs (compareTabs selected) viewTabLabel GoTab tabs
+            hzTabs
+                (compareTabs selected)
+                viewTabLabel
+                (GoTab >> config.toMsg)
+                tabs
     in
-        Html.map config.toMsg <|
-            verticalSticked
-                (Just [ viewTabs ])
-                [ viewData ]
-                Maybe.Nothing
+        verticalSticked
+            (Just [ viewTabs ])
+            [ viewData ]
+            Maybe.Nothing
 
 
 tabs : List MainTab
@@ -59,7 +64,7 @@ compareTabs =
     (==)
 
 
-viewTabLabel : Bool -> MainTab -> ( List (Attribute Msg), List (Html Msg) )
+viewTabLabel : Bool -> MainTab -> ( List (Attribute msg), List (Html msg) )
 viewTabLabel _ tab =
     tab
         |> tabToString
@@ -71,8 +76,8 @@ viewTabLabel _ tab =
 renderBitcoinAccount :
     Database.HackedBitcoinAddress
     -> Database.HackedBitcoinWallet
-    -> List (Html Msg)
-    -> List (Html Msg)
+    -> List (Html msg)
+    -> List (Html msg)
 renderBitcoinAccount address account acc =
     let
         account_ =
@@ -91,7 +96,7 @@ renderBitcoinAccount address account acc =
         content :: acc
 
 
-renderBitcoinAccounts : Database.Model -> Model -> Html Msg
+renderBitcoinAccounts : Database.Model -> Model -> Html msg
 renderBitcoinAccounts database model =
     database
         |> Database.getBitcoinWallets
@@ -102,8 +107,8 @@ renderBitcoinAccounts database model =
 renderBankAccount :
     Database.HackedBankAccountID
     -> Database.HackedBankAccount
-    -> List (Html Msg)
-    -> List (Html Msg)
+    -> List (Html msg)
+    -> List (Html msg)
 renderBankAccount id account acc =
     let
         accountNumber =
@@ -131,7 +136,7 @@ renderBankAccount id account acc =
         content :: acc
 
 
-renderBankAccounts : Database.Model -> Model -> Html Msg
+renderBankAccounts : Database.Model -> Model -> Html msg
 renderBankAccounts database model =
     database
         |> Database.getBankAccounts

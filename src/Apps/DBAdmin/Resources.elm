@@ -9,6 +9,7 @@ type Classes
     | BtnDelete
     | BtnApply
     | BtnCancel
+    | BtnBrowse
     | BottomButton
     | BoxifyMe
     | FinanceEntry

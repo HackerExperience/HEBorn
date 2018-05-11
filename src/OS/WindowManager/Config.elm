@@ -10,6 +10,7 @@ import Core.Flags exposing (Flags)
 import Apps.BackFlix.Config as BackFlix
 import Apps.BounceManager.Config as BounceManager
 import Apps.Browser.Config as Browser
+import Apps.Browser.Shared as Browser
 import Apps.Bug.Config as Bug
 import Apps.Calculator.Config as Calculator
 import Apps.ConnManager.Config as ConnManager
@@ -26,6 +27,7 @@ import Apps.LogViewer.Config as LogViewer
 import Apps.ServersGears.Config as ServersGears
 import Apps.TaskManager.Config as TaskManager
 import Apps.VirusPanel.Config as VirusPanel
+import Apps.Params as AppParams
 import Game.Models as Game
 import Game.Messages as Game
 import Game.Account.Messages as Account
@@ -229,6 +231,13 @@ dbAdminConfig appId config =
     { toMsg = DBAdminMsg >> AppMsg appId >> config.toMsg
     , batchMsg = config.batchMsg
     , database = Account.getDatabase <| accountFromConfig config
+    , openBrowser =
+        \url ->
+            OpenApp
+                (AppParams.Browser <| Browser.OpenAtUrl url)
+                (Tuple.first config.activeServer)
+                |> config.toMsg
+    , menuAttr = config.menuAttr
     }
 
 
