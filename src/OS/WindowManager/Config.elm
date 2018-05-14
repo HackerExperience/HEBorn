@@ -183,6 +183,11 @@ browserConfig appId activeServer ( gCId, gServer ) config =
         , reference = appId
         , activeServer = activeServer
         , activeGateway = config.activeGateway
+        , hackedServers =
+            config
+                |> accountFromConfig
+                |> Account.getDatabase
+                |> Database.getHackedServers
         , onNewApp = NewApp >>>>> config.toMsg
         , onOpenApp = OpenApp >>> config.toMsg
         , onSetContext = Account.HandleSetContext >> account config

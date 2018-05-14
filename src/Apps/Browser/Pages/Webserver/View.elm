@@ -2,9 +2,10 @@ module Apps.Browser.Pages.Webserver.View exposing (view)
 
 import Html exposing (..)
 import Html.CssHelpers
-import Game.Servers.Shared as Servers
+import Game.Account.Database.Models as Database
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
+import Game.Servers.Shared as Servers
 import Apps.Browser.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Webserver.Config exposing (Config)
 import Apps.Browser.Pages.Webserver.Messages exposing (Msg(..))
@@ -18,14 +19,19 @@ import Apps.Browser.Widgets.PublicFiles.View as PublicFiles exposing (publicFile
     Html.CssHelpers.withNamespace prefix
 
 
-hackingToolkitConfig : Config msg -> Bool -> HackingToolkit.Config msg
-hackingToolkitConfig { toMsg, onLogin, onCrack, onAnyMap } showPassword =
-    { onInput = UpdatePasswordField >> toMsg
-    , onLogin = onLogin
-    , onCrack = onCrack
-    , onAnyMap = onAnyMap
-    , onEnterPanel = toMsg <| SetShowingPanel True
+hackingToolkitConfig :
+    Config msg
+    -> Bool
+    -> Maybe String
+    -> HackingToolkit.Config msg
+hackingToolkitConfig config showPassword fallbackPassword =
+    { onInput = UpdatePasswordField >> config.toMsg
+    , onLogin = config.onLogin
+    , onCrack = config.onCrack
+    , onAnyMap = config.onAnyMap
+    , onEnterPanel = config.toMsg <| SetShowingPanel True
     , showPassword = showPassword
+    , fallbackPassword = fallbackPassword
     }
 
 
@@ -58,20 +64,24 @@ hackingPanelConfig config =
 view : Config msg -> Model -> Html msg
 view config model =
     let
-        cid =
-            Servers.EndpointCId model.toolkit.target
+        target =
+            model.toolkit.target
 
         endpointMember =
-            List.member cid config.endpoints
+            List.member (Servers.EndpointCId target) config.endpoints
+
+        fallbackPassword =
+            Database.getHackedServer target config.hackedServers
+                |> Maybe.map (Database.getPassword)
     in
         if (model.showingPanel && endpointMember) then
-            hackingPanel (hackingPanelConfig config) model.toolkit.target
+            hackingPanel (hackingPanelConfig config) target
         else
-            viewPre config (not endpointMember) model
+            viewPre config (not endpointMember) fallbackPassword model
 
 
-viewPre : Config msg -> Bool -> Model -> Html msg
-viewPre config showPassword model =
+viewPre : Config msg -> Bool -> Maybe String -> Model -> Html msg
+viewPre config showPassword fallbackPsw model =
     div [ class [ AutoHeight ] ]
         [ (if model.custom == "" then
             "No Webserver running"
@@ -85,6 +95,6 @@ viewPre config showPassword model =
             (publicFilesConfig config model.toolkit.target)
             model.publicFiles
         , hackingToolkit
-            (hackingToolkitConfig config showPassword)
+            (hackingToolkitConfig config showPassword fallbackPsw)
             model.toolkit
         ]

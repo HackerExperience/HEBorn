@@ -5,6 +5,7 @@ import Html exposing (Attribute)
 import Core.Flags as Core
 import Utils.Core exposing (..)
 import Apps.Params as AppParams exposing (AppParams)
+import Game.Account.Database.Models exposing (HackedServers)
 import Game.Account.Finances.Requests.Login as LoginRequest
 import Game.Account.Finances.Requests.Transfer as TransferRequest
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
@@ -35,6 +36,7 @@ type alias Config msg =
     , reference : Reference
     , activeServer : ( CId, Servers.Server )
     , activeGateway : ( CId, Servers.Server )
+    , hackedServers : HackedServers
     , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> CId -> msg
     , onOpenApp : AppParams -> CId -> msg
     , onSetContext : Context -> msg
@@ -62,6 +64,8 @@ downloadCenterConfig : Config msg -> DownloadCenter.Config msg
 downloadCenterConfig config =
     { toMsg = DownloadCenterMsg >> ActiveTabMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , hackedServers = config.hackedServers
+    , endpoints = endpoints config
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
     , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
@@ -70,7 +74,6 @@ downloadCenterConfig config =
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onSetEndpoint = config.onSetEndpoint
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = endpoints config
     }
 
 
@@ -92,6 +95,8 @@ webserverConfig : Config msg -> Webserver.Config msg
 webserverConfig config =
     { toMsg = WebserverMsg >> ActiveTabMsg >> config.toMsg
     , batchMsg = config.batchMsg
+    , endpoints = endpoints config
+    , hackedServers = config.hackedServers
     , onLogin = Login >>> ActiveTabMsg >>> config.toMsg
     , onLogout = Servers.EndpointCId >> config.onLogout
     , onCrack = Crack >> ActiveTabMsg >> config.toMsg
@@ -100,7 +105,6 @@ webserverConfig config =
     , onSelectEndpoint = SelectEndpoint |> ActiveTabMsg |> config.toMsg
     , onSetEndpoint = config.onSetEndpoint
     , onNewApp = NewApp >> ActiveTabMsg >> config.toMsg
-    , endpoints = endpoints config
     }
 
 
