@@ -39,10 +39,21 @@ modals config modal =
             text ""
 
         Just (ForDownload target file) ->
-            modalPickStorage ((Tuple.second config.activeGateway).storages)
-                (Maybe.map (flip (config.onDownloadFile target) file)
-                    >> Maybe.withDefault (config.toMsg (EnterModal Nothing))
-                )
+            let
+                storages =
+                    (Tuple.second config.activeGateway).storages
+
+                action =
+                    (Maybe.map
+                        (flip (config.onDownloadFile target) file
+                            >> List.singleton
+                        )
+                        >> Maybe.withDefault []
+                        >> (::) (config.toMsg <| EnterModal Nothing)
+                        >> config.batchMsg
+                    )
+            in
+                modalPickStorage storages action
 
 
 idAttr : String -> Attribute msg
