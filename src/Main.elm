@@ -17,12 +17,13 @@ type alias Flags =
     , apiHttpUrl : String
     , apiWsUrl : String
     , version : String
+    , mode : String
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
-init { seed, apiHttpUrl, apiWsUrl, version } =
-    Core.init seed <| Core.initFlags apiHttpUrl apiWsUrl version
+init { seed, apiHttpUrl, apiWsUrl, version, mode } =
+    Core.init seed <| Core.initFlags apiHttpUrl apiWsUrl version mode
 
 
 main : Program Flags Model Msg
