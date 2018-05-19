@@ -1,7 +1,7 @@
 module Apps.LocationPicker.Models exposing (..)
 
 import Utils.Ports.Map exposing (Coordinates, mapInit)
-import Utils.Ports.Geolocation exposing (geoLocReq)
+import Utils.Ports.Geolocation exposing (getCoordinates)
 
 
 type alias Model =
@@ -38,7 +38,7 @@ startCmd : Model -> Cmd msg
 startCmd model =
     Cmd.batch
         [ mapInit model.mapEId
-        , geoLocReq model.self
+        , getCoordinates model.self
         ]
 
 

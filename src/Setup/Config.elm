@@ -36,10 +36,11 @@ finishConfig { toMsg } =
 
 
 pickLocationConfig : Config msg -> PickLocation.Config msg
-pickLocationConfig { toMsg } =
+pickLocationConfig { toMsg, batchMsg } =
     { onNext = NextPage >> toMsg
     , onPrevious = PreviousPage |> toMsg
     , toMsg = PickLocationMsg >> toMsg
+    , batchMsg = batchMsg
     }
 
 

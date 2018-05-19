@@ -8,4 +8,5 @@ type alias Config msg =
     { onNext : List Settings -> msg
     , onPrevious : msg
     , toMsg : Msg -> msg
+    , batchMsg : List msg -> msg
     }

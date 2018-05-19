@@ -3,7 +3,7 @@ module Setup.Update exposing (update)
 import Json.Decode as Decode exposing (Value)
 import Utils.React as React exposing (React)
 import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
+import Utils.Ports.Geolocation as Geolocation
 import Decoders.Client
 import Core.Error as Error
 import Game.Servers.Shared as Servers
@@ -226,7 +226,7 @@ locationPickerCmd model =
         Just (PickLocationModel _) ->
             Cmd.batch
                 [ Map.mapInit mapId
-                , geoLocReq geoInstance
+                , Geolocation.getCoordinates geoInstance
                 ]
 
         _ ->

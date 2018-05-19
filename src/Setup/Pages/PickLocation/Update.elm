@@ -3,7 +3,7 @@ module Setup.Pages.PickLocation.Update exposing (update)
 import Json.Decode as Decode exposing (Value)
 import Utils.React as React exposing (React)
 import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation exposing (geoLocReq, geoRevReq, decodeLabel)
+import Utils.Ports.Geolocation as Geolocation
 import Setup.Pages.PickLocation.Config exposing (..)
 import Setup.Pages.PickLocation.Models exposing (..)
 import Setup.Pages.PickLocation.Messages exposing (..)
@@ -19,11 +19,11 @@ update config msg model =
         MapClick value ->
             onMapClick config value model
 
-        GeoLocResp value ->
-            onGeoLocResp config value model
-
-        GeoRevResp value ->
-            onGeoRevResp config value model
+        GeolocationMsg id msg ->
+            if id == mapId then
+                onGeolocationMsg config msg model
+            else
+                ( model, React.none )
 
         ResetLoc ->
             onResetLocation model
@@ -44,8 +44,7 @@ onMapClick config value model =
         cmd =
             case model_.coordinates of
                 Just coords ->
-                    geoRevReq
-                        ( geoInstance, coords.lat, coords.lng )
+                    Geolocation.getLabel mapId coords.lat coords.lng
 
                 _ ->
                     Cmd.none
@@ -53,41 +52,22 @@ onMapClick config value model =
         ( model_, React.cmd cmd )
 
 
-onGeoLocResp : Config msg -> Value -> Model -> UpdateResponse msg
-onGeoLocResp config value model =
-    -- TODO: add check location here
-    let
-        newPos =
-            value
-                |> Map.decodeCoordinates
-                |> Result.toMaybe
+onGeolocationMsg : Config msg -> Geolocation.Msg -> Model -> UpdateResponse msg
+onGeolocationMsg config msg model =
+    case msg of
+        Geolocation.Coordinates lat lng ->
+            [ Map.mapCenter ( mapId, lat, lng, 18 )
+            , Geolocation.getLabel mapId lat lng
+            ]
+                |> List.map React.cmd
+                |> React.batch config.batchMsg
+                |> (,) (setCoords (Just { lat = lat, lng = lng }) model)
 
-        model_ =
-            setCoords newPos model
+        Geolocation.Label name ->
+            React.update <| setAreaLabel (Just name) model
 
-        cmd =
-            case newPos of
-                Just { lat, lng } ->
-                    Cmd.batch
-                        [ Map.mapCenter
-                            ( mapId, lat, lng, 18 )
-                        , geoRevReq
-                            ( geoInstance, lat, lng )
-                        ]
-
-                Nothing ->
-                    Cmd.none
-    in
-        ( model_, React.cmd cmd )
-
-
-onGeoRevResp : Config msg -> Value -> Model -> UpdateResponse msg
-onGeoRevResp config value model =
-    value
-        |> decodeLabel
-        |> Result.toMaybe
-        |> flip setAreaLabel model
-        |> flip (,) React.none
+        _ ->
+            ( model, React.none )
 
 
 onResetLocation : Model -> UpdateResponse msg
