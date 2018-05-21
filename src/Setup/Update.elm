@@ -2,7 +2,7 @@ module Setup.Update exposing (update)
 
 import Json.Decode as Decode exposing (Value)
 import Utils.React as React exposing (React)
-import Utils.Ports.Map as Map
+import Utils.Ports.Leaflet as Leaflet
 import Utils.Ports.Geolocation as Geolocation
 import Decoders.Client
 import Core.Error as Error
@@ -66,15 +66,21 @@ onNextPage config settings model0 =
     let
         model =
             nextPage settings model0
+
+        cmd =
+            case model.page of
+                Just (PickLocationModel _) ->
+                    Cmd.map config.toMsg <| locationPickerCmd model
+
+                _ ->
+                    Cmd.none
     in
         if doneSetup model then
-            let
-                ( model_, react ) =
-                    setRequest config model
-            in
-                ( model_, react )
+            model
+                |> setRequest config
+                |> Tuple.mapSecond (React.addCmd cmd)
         else
-            ( model, React.none )
+            ( model, React.cmd cmd )
 
 
 onPreviousPage : Config msg -> Model -> UpdateResponse msg
@@ -84,9 +90,14 @@ onPreviousPage { toMsg } model =
             previousPage model
 
         react =
-            locationPickerCmd model_
-                |> Cmd.map toMsg
-                |> React.cmd
+            case model.page of
+                Just (PickLocationModel _) ->
+                    locationPickerCmd model_
+                        |> Cmd.map toMsg
+                        |> React.cmd
+
+                _ ->
+                    React.none
     in
         ( model_, react )
 
@@ -225,7 +236,7 @@ locationPickerCmd model =
     case model.page of
         Just (PickLocationModel _) ->
             Cmd.batch
-                [ Map.mapInit mapId
+                [ Leaflet.init mapId
                 , Geolocation.getCoordinates geoInstance
                 ]
 

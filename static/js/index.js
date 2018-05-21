@@ -8,5 +8,5 @@ require("leaflet_js");
 
 require('./onload.js');
 require('./audio.js');
-require('./map.js');
+require('./leaflet.js');
 require('./geolocation.js');

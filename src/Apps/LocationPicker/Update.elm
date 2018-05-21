@@ -2,7 +2,7 @@ module Apps.LocationPicker.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Json.Decode exposing (Value)
-import Utils.Ports.Map as Map
+import Utils.Ports.Leaflet as Leaflet
 import Utils.Ports.Geolocation as Geolocation
 import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Models exposing (..)
@@ -20,9 +20,11 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        -- -- Context
-        MapClick value ->
-            onMapClick value model
+        LeafletMsg id msg ->
+            if id == model.mapEId then
+                onLeafletMsg config msg model
+            else
+                ( model, React.none )
 
         GeolocationMsg id msg ->
             if id == model.self then
@@ -31,24 +33,21 @@ update config msg model =
                 ( model, React.none )
 
 
-onMapClick : Value -> Model -> UpdateResponse msg
-onMapClick value model =
-    let
-        model_ =
-            value
-                |> Map.decodeCoordinates
-                |> Result.toMaybe
-                |> flip setPos model
-    in
-        ( model_, React.none )
+onLeafletMsg : Config msg -> Leaflet.Msg -> Model -> UpdateResponse msg
+onLeafletMsg config msg model =
+    case msg of
+        Leaflet.Clicked coords ->
+            ( setPos (Just coords) model, React.none )
+
+        _ ->
+            ( model, React.none )
 
 
 onGeoMsg : Config msg -> Geolocation.Msg -> Model -> UpdateResponse msg
 onGeoMsg config msg model =
     case msg of
         Geolocation.Coordinates lat lng ->
-            ( model.mapEId, lat, lng, 18 )
-                |> Map.mapCenter
+            Leaflet.center model.mapEId { lat = lat, lng = lng } 18
                 |> React.cmd
                 |> (,) model
 

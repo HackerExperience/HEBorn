@@ -6,7 +6,7 @@ import Requests.Requests as Requests
 import Requests.Topics as Topics
 import Requests.Types exposing (FlagsSource, Code(..), ResponseType)
 import Game.Servers.Shared exposing (CId)
-import Utils.Ports.Map exposing (Coordinates)
+import Utils.Ports.Leaflet exposing (Coordinates)
 import Setup.Settings exposing (..)
 
 
