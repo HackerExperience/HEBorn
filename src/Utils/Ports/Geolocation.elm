@@ -3,6 +3,7 @@ port module Utils.Ports.Geolocation
         ( Id
         , Latitude
         , Longitude
+        , Coords
         , Msg(..)
         , getCoordinates
         , getLabel
@@ -33,17 +34,25 @@ type alias Longitude =
     Float
 
 
+{-| Latitude and longitude coordinates.
+-}
+type alias Coords =
+    { lat : Latitude
+    , lng : Longitude
+    }
+
+
 {-| Messages received from Geolocation.
 -}
 type Msg
-    = Coordinates Latitude Longitude
+    = Coordinates Coords
     | Label String
     | Unknown
 
 
 type GeolocationCmd
     = GetCoordinates
-    | GetLabel Latitude Longitude
+    | GetLabel Coords
 
 
 {-| Asks for current Geolocation.
@@ -57,10 +66,10 @@ getCoordinates id =
 
 {-| Asks label for given Geolocation.
 -}
-getLabel : Id -> Latitude -> Longitude -> Cmd msg
-getLabel id lat lng =
-    lng
-        |> GetLabel lat
+getLabel : Id -> Coords -> Cmd msg
+getLabel id coords =
+    coords
+        |> GetLabel
         |> cmd id
         |> geolocationCmd
 
@@ -102,10 +111,12 @@ cmd id geoCmd =
                 , ( "id", Encode.string id )
                 ]
 
-        GetLabel lat lng ->
+        GetLabel { lat, lng } ->
             Encode.object
                 [ ( "msg", Encode.string "label" )
                 , ( "id", Encode.string id )
+                , ( "lat", Encode.float lat )
+                , ( "lng", Encode.float lng )
                 ]
 
 
@@ -117,10 +128,10 @@ sub =
             (\t ->
                 case t of
                     "coordinates" ->
-                        decode Coordinates
+                        decode Coords
                             |> required "lat" Decode.float
                             |> required "lng" Decode.float
-                            |> Decode.map (flip (,))
+                            |> Decode.map (Coordinates >> flip (,))
                             |> required "id" Decode.string
 
                     "label" ->

@@ -38,9 +38,9 @@ update config msg model =
 onLeafletMsg : Config msg -> Leaflet.Msg -> Model -> UpdateResponse msg
 onLeafletMsg config msg model =
     case msg of
-        Leaflet.Clicked ({ lat, lng } as coords) ->
+        Leaflet.Clicked coords ->
             ( setCoords (Just coords) model
-            , React.cmd <| Geolocation.getLabel geoInstance lat lng
+            , React.cmd <| Geolocation.getLabel geoInstance coords
             )
 
         _ ->
@@ -50,13 +50,13 @@ onLeafletMsg config msg model =
 onGeolocationMsg : Config msg -> Geolocation.Msg -> Model -> UpdateResponse msg
 onGeolocationMsg config msg model =
     case msg of
-        Geolocation.Coordinates lat lng ->
-            [ Leaflet.center mapId { lat = lat, lng = lng } 18
-            , Geolocation.getLabel geoInstance lat lng
+        Geolocation.Coordinates coords ->
+            [ Leaflet.center mapId coords 18
+            , Geolocation.getLabel geoInstance coords
             ]
                 |> List.map React.cmd
                 |> React.batch config.batchMsg
-                |> (,) (setCoords (Just { lat = lat, lng = lng }) model)
+                |> (,) (setCoords (Just coords) model)
 
         Geolocation.Label name ->
             React.update <| setAreaLabel (Just name) model

@@ -46,8 +46,8 @@ onLeafletMsg config msg model =
 onGeoMsg : Config msg -> Geolocation.Msg -> Model -> UpdateResponse msg
 onGeoMsg config msg model =
     case msg of
-        Geolocation.Coordinates lat lng ->
-            Leaflet.center model.mapEId { lat = lat, lng = lng } 18
+        Geolocation.Coordinates coords ->
+            Leaflet.center model.mapEId coords 18
                 |> React.cmd
                 |> (,) model
 
