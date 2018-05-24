@@ -8,6 +8,7 @@ import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
 import Core.Flags as Flags
+import OS.Map.View as Map
 import OS.Header.View as Header
 import OS.Header.Messages as Header
 import OS.Header.Models as Header
@@ -58,6 +59,10 @@ view config model =
 viewOS : Config msg -> Model -> List (Html msg)
 viewOS config model =
     [ viewHeader config model.header
+    , if Flags.isHE2 config.flags then
+        Map.view (mapConfig config) (getMap model)
+      else
+        text ""
     , console config
     , viewMain config model
     , toasts config model

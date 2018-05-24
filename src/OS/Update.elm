@@ -1,8 +1,11 @@
 module OS.Update exposing (update)
 
 import Utils.React as React exposing (React)
+import Core.Flags as Flags
 import OS.Header.Messages as Header
 import OS.Header.Update as Header
+import OS.Map.Messages as Map
+import OS.Map.Update as Map
 import OS.WindowManager.Messages as WindowManager
 import OS.WindowManager.Update as WindowManager
 import OS.Toasts.Messages as Toasts
@@ -21,6 +24,12 @@ update config msg model =
     case msg of
         HeaderMsg msg ->
             onHeaderMsg config msg model
+
+        MapMsg msg ->
+            if Flags.isHE2 config.flags then
+                onMapMsg config msg model
+            else
+                ( model, React.none )
 
         WindowManagerMsg msg ->
             onWindowManagerMsg config msg model
@@ -43,6 +52,18 @@ onHeaderMsg config msg model =
         |> getHeader
         |> Header.update (headerConfig config) msg
         |> Tuple.mapFirst (flip setHeader model)
+
+
+onMapMsg :
+    Config msg
+    -> Map.Msg
+    -> Model
+    -> UpdateResponse msg
+onMapMsg config msg model =
+    model
+        |> getMap
+        |> Map.update (mapConfig config) msg
+        |> Tuple.mapFirst (flip setMap model)
 
 
 onWindowManagerMsg :

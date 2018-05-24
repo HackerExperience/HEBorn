@@ -230,7 +230,7 @@ initialPlay ws game =
             , os = OS.initialModel
             }
     in
-        ( play_, Cmd.none )
+        ( play_, OS.startCmd (Game.getFlags game) )
 
 
 initialGame : Connecting -> Flags -> Game.Model

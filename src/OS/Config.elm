@@ -21,6 +21,8 @@ import Game.Servers.Models as Servers exposing (Server)
 import Game.Servers.Notifications.Messages as ServersNotifications
 import OS.Console.Config as Console
 import OS.Header.Config as Header
+import OS.Map.Config as Map
+import OS.Map.Messages as Map
 import OS.WindowManager.Config as WindowManager
 import OS.WindowManager.Messages as WindowManager
 import OS.Toasts.Config as Toasts
@@ -43,6 +45,11 @@ type alias Config msg =
     , menuAttr : ContextMenuAttribute msg
     , menuView : Html msg
     }
+
+
+mapConfig : Config msg -> Map.Config msg
+mapConfig config =
+    { toMsg = MapMsg >> config.toMsg }
 
 
 windowManagerConfig : Config msg -> WindowManager.Config msg
