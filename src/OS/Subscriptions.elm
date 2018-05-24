@@ -10,10 +10,18 @@ import OS.Models exposing (..)
 
 subscriptions : Config msg -> Model -> Sub msg
 subscriptions config model =
-    Sub.batch
-        [ WindowManager.subscriptions (windowManagerConfig config) model.windowManager
-        , if Flags.isHE2 config.flags then
-            Map.subscriptions (mapConfig config) (getMap model)
-          else
-            Sub.none
-        ]
+    let
+        windowSub =
+            WindowManager.subscriptions (windowManagerConfig config)
+                model.windowManager
+
+        mapSub =
+            if Flags.isHE2 config.flags then
+                Map.subscriptions (mapConfig config) (getMap model)
+            else
+                Sub.none
+    in
+        Sub.batch
+            [ windowSub
+            , mapSub
+            ]
