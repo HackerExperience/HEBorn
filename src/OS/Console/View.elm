@@ -3,6 +3,7 @@ module OS.Console.View exposing (view)
 import Dict exposing (Dict)
 import Game.BackFlix.Models as BackFlix
 import Html exposing (Html, div, span, text)
+import Html.Attributes exposing (style)
 import Html.CssHelpers
 import UI.ToString exposing (timestampToFullData)
 import OS.Console.Config exposing (..)
@@ -19,7 +20,10 @@ view config =
         view_ =
             viewLogs config.logs ++ [ text "elliot@localhost_>" ]
     in
-        div [ class [ LogConsole ] ]
+        div
+            [ class [ LogConsole ]
+            , style [ ( "pointerEvents", "none" ) ]
+            ]
             view_
 
 

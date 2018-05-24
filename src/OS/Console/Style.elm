@@ -20,7 +20,7 @@ css =
             , marginTop (px 41)
             , flexContainerVert
             , position absolute
-            , zIndex (int -1)
+            , zIndex (int 0)
             , backgroundColor (rgba 0 0 0 0.5)
             , color (hex "00FF00")
             , fontFamily monospace
