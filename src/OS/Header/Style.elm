@@ -26,7 +26,7 @@ css =
                 , taskbar
                 , networkTongue
                 ]
-            , zIndex (int 1)
+            , zIndex (int 0)
             ]
         ]
 
