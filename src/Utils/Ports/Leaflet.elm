@@ -1,12 +1,13 @@
-port module Utils.Ports.Geolocation
+port module Utils.Ports.Leaflet
     exposing
         ( Id
         , Latitude
         , Longitude
-        , Coords
+        , Coordinates
+        , Zoom
         , Msg(..)
-        , getCoordinates
-        , getLabel
+        , init
+        , center
         , subscribe
         )
 
@@ -16,7 +17,7 @@ import Json.Decode.Pipeline exposing (decode, required)
 import Utils.Json.Decode exposing (commonError)
 
 
-{-| Geolocation requester Id.
+{-| Map Id.
 -}
 type alias Id =
     String
@@ -34,51 +35,56 @@ type alias Longitude =
     Float
 
 
-{-| Latitude and longitude coordinates.
+{-| Map coordinates.
 -}
-type alias Coords =
+type alias Coordinates =
     { lat : Latitude
     , lng : Longitude
     }
 
 
-{-| Messages received from Geolocation.
+{-| Map zoom level.
+-}
+type alias Zoom =
+    Float
+
+
+{-| Messages received from Leaflet.
 -}
 type Msg
-    = Coordinates Coords
-    | Label String
+    = Clicked Coordinates
     | Unknown
 
 
-type GeolocationCmd
-    = GetCoordinates
-    | GetLabel Coords
+type LeafletCmd
+    = Init
+    | Center Coordinates Zoom
 
 
-{-| Asks for current Geolocation.
+{-| Initializes Leaflet map.
 -}
-getCoordinates : Id -> Cmd msg
-getCoordinates id =
-    GetCoordinates
+init : Id -> Cmd msg
+init id =
+    Init
         |> cmd id
-        |> geolocationCmd
+        |> leafletCmd
 
 
-{-| Asks label for given Geolocation.
+{-| Centers given Leaflet map.
 -}
-getLabel : Id -> Coords -> Cmd msg
-getLabel id coords =
-    coords
-        |> GetLabel
+center : Id -> Coordinates -> Zoom -> Cmd msg
+center id coordinates zoom =
+    zoom
+        |> Center coordinates
         |> cmd id
-        |> geolocationCmd
+        |> leafletCmd
 
 
-{-| Subscribes to Geolocation.
+{-| Subscribes to Leaflet.
 -}
 subscribe : (Id -> Msg -> msg) -> Sub msg
 subscribe toMsg =
-    geolocationSub <|
+    leafletSub <|
         \value ->
             case Decode.decodeValue sub value of
                 Ok ( id, sub ) ->
@@ -87,7 +93,7 @@ subscribe toMsg =
                 Err msg ->
                     let
                         _ =
-                            Debug.log "Geolocation communication error" msg
+                            Debug.log "Leaflet communication error" msg
                     in
                         toMsg "" Unknown
 
@@ -96,27 +102,28 @@ subscribe toMsg =
 -- internals
 
 
-port geolocationSub : (Decode.Value -> msg) -> Sub msg
+port leafletSub : (Decode.Value -> msg) -> Sub msg
 
 
-port geolocationCmd : Encode.Value -> Cmd msg
+port leafletCmd : Encode.Value -> Cmd msg
 
 
-cmd : Id -> GeolocationCmd -> Encode.Value
-cmd id geoCmd =
-    case geoCmd of
-        GetCoordinates ->
+cmd : Id -> LeafletCmd -> Encode.Value
+cmd id leafCmd =
+    case leafCmd of
+        Init ->
             Encode.object
-                [ ( "msg", Encode.string "coordinates" )
-                , ( "id", Encode.string id )
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "init" )
                 ]
 
-        GetLabel { lat, lng } ->
+        Center { lat, lng } zoom ->
             Encode.object
-                [ ( "msg", Encode.string "label" )
-                , ( "id", Encode.string id )
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "center" )
                 , ( "lat", Encode.float lat )
                 , ( "lng", Encode.float lng )
+                , ( "zoom", Encode.float zoom )
                 ]
 
 
@@ -127,16 +134,11 @@ sub =
         |> Decode.andThen
             (\t ->
                 case t of
-                    "coordinates" ->
-                        decode Coords
+                    "clicked" ->
+                        decode Coordinates
                             |> required "lat" Decode.float
                             |> required "lng" Decode.float
-                            |> Decode.map (Coordinates >> flip (,))
-                            |> required "id" Decode.string
-
-                    "label" ->
-                        decode Label
-                            |> required "label" Decode.string
+                            |> Decode.map Clicked
                             |> Decode.map (flip (,))
                             |> required "id" Decode.string
 

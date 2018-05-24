@@ -2,8 +2,8 @@ module Apps.LocationPicker.Update exposing (update)
 
 import Utils.React as React exposing (React)
 import Json.Decode exposing (Value)
-import Utils.Ports.Map as Map
-import Utils.Ports.Geolocation as Gloc
+import Utils.Ports.Leaflet as Leaflet
+import Utils.Ports.Geolocation as Geolocation
 import Apps.LocationPicker.Config exposing (..)
 import Apps.LocationPicker.Models exposing (..)
 import Apps.LocationPicker.Messages as LocationPicker exposing (Msg(..))
@@ -20,53 +20,36 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        -- -- Context
-        MapClick value ->
-            onMapClick value model
+        LeafletMsg id msg ->
+            if id == model.mapEId then
+                onLeafletMsg config msg model
+            else
+                ( model, React.none )
 
-        GeoResp value ->
-            onGeoResp config value model
-
-
-onMapClick : Value -> Model -> UpdateResponse msg
-onMapClick value model =
-    let
-        model_ =
-            value
-                |> Map.decodeCoordinates
-                |> Result.toMaybe
-                |> flip setPos model
-    in
-        ( model_, React.none )
+        GeolocationMsg id msg ->
+            if id == model.self then
+                onGeoMsg config msg model
+            else
+                ( model, React.none )
 
 
-onGeoResp : Config msg -> Value -> Model -> UpdateResponse msg
-onGeoResp config value model =
-    if Gloc.checkInstance value model.self then
-        geoResp config value model
-    else
-        ( model, React.none )
+onLeafletMsg : Config msg -> Leaflet.Msg -> Model -> UpdateResponse msg
+onLeafletMsg config msg model =
+    case msg of
+        Leaflet.Clicked coords ->
+            ( setPos (Just coords) model, React.none )
+
+        _ ->
+            ( model, React.none )
 
 
-geoResp : Config msg -> Value -> Model -> UpdateResponse msg
-geoResp config value model =
-    let
-        newPos =
-            value
-                |> Map.decodeCoordinates
-                |> Result.toMaybe
+onGeoMsg : Config msg -> Geolocation.Msg -> Model -> UpdateResponse msg
+onGeoMsg config msg model =
+    case msg of
+        Geolocation.Coordinates coords ->
+            Leaflet.center model.mapEId coords 18
+                |> React.cmd
+                |> (,) model
 
-        model_ =
-            setPos newPos model
-
-        react =
-            case newPos of
-                Just { lat, lng } ->
-                    [ Map.mapCenter ( model.mapEId, lat, lng, 18 ) ]
-                        |> List.map React.cmd
-                        |> React.batch config.batchMsg
-
-                Nothing ->
-                    React.none
-    in
-        ( model_, react )
+        _ ->
+            ( model, React.none )

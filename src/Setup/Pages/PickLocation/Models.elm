@@ -1,6 +1,6 @@
 module Setup.Pages.PickLocation.Models exposing (..)
 
-import Utils.Ports.Map exposing (Coordinates)
+import Utils.Ports.Leaflet exposing (Coordinates)
 import Setup.Settings as Settings exposing (Settings)
 
 

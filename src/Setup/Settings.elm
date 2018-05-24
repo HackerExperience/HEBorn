@@ -10,7 +10,7 @@ module Setup.Settings
 import Dict as Dict
 import Json.Encode as Encode exposing (Value)
 import Json.Decode as Decode exposing (Decoder)
-import Utils.Ports.Map exposing (Coordinates)
+import Utils.Ports.Leaflet exposing (Coordinates)
 
 
 type Settings

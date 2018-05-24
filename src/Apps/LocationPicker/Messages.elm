@@ -1,8 +1,9 @@
 module Apps.LocationPicker.Messages exposing (Msg(..))
 
-import Json.Encode exposing (Value)
+import Utils.Ports.Leaflet as Leaflet
+import Utils.Ports.Geolocation as Geolocation
 
 
 type Msg
-    = MapClick Value
-    | GeoResp Value
+    = LeafletMsg Leaflet.Id Leaflet.Msg
+    | GeolocationMsg Geolocation.Id Geolocation.Msg

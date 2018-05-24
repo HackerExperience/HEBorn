@@ -2,6 +2,7 @@ module Gen.Game exposing (..)
 
 import Fuzz exposing (Fuzzer)
 import Random.Pcg exposing (Generator, andThen, map, map2, list, int)
+import Core.Flags
 import Game.Account.Models as Account
 import Game.Meta.Models as Meta
 import Game.Storyline.Models as Story
@@ -53,6 +54,7 @@ genModel =
                 { apiHttpUrl = ""
                 , apiWsUrl = ""
                 , version = "test"
+                , mode = Core.Flags.HE1
                 }
             }
 
