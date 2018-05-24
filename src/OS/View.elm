@@ -58,12 +58,12 @@ view config model =
 
 viewOS : Config msg -> Model -> List (Html msg)
 viewOS config model =
-    [ viewHeader config model.header
-    , if Flags.isHE2 config.flags then
+    [ if Flags.isHE2 config.flags then
         Map.view (mapConfig config) (getMap model)
       else
         text ""
     , console config
+    , viewHeader config model.header
     , viewMain config model
     , toasts config model
     , lazy (Flags.getVersion >> displayVersion) config.flags
