@@ -215,4 +215,5 @@ sidebar =
         , flexContainerHorz
         , alignItems center
         , height (pct 100)
+        , zIndex (int 0)
         ]
