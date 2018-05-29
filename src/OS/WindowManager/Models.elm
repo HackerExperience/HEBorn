@@ -770,6 +770,11 @@ getPosition =
     .position
 
 
+setPosition : Float -> Float -> Window -> Window
+setPosition x y window =
+    { window | position = Position x y }
+
+
 move : Float -> Float -> Window -> Window
 move deltaX deltaY ({ position } as window) =
     let
