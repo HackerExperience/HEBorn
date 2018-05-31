@@ -5,5 +5,5 @@ import Utils.Ports.Geolocation as Geolocation
 
 
 type Msg
-    = LeafletMsg Leaflet.Msg
+    = LeafletMsg Leaflet.Id Leaflet.Msg
     | GeolocationMsg Geolocation.Msg
