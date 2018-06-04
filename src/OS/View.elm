@@ -8,6 +8,7 @@ import Html.Lazy exposing (lazy)
 import Html.CssHelpers
 import Utils.Html.Attributes exposing (activeContextAttr)
 import Core.Flags as Flags
+import OS.Map.View as Map
 import OS.Header.View as Header
 import OS.Header.Messages as Header
 import OS.Header.Models as Header
@@ -57,10 +58,11 @@ view config model =
 
 viewOS : Config msg -> Model -> List (Html msg)
 viewOS config model =
-    [ viewHeader config model.header
-    , console config
+    [ viewMap config model
+    , viewConsole config
+    , viewHeader config model.header
     , viewMain config model
-    , toasts config model
+    , viewToasts config model
     , lazy (Flags.getVersion >> displayVersion) config.flags
     ]
 
@@ -82,12 +84,20 @@ displayVersion version =
         [ text version ]
 
 
-toasts : Config msg -> Model -> Html msg
-toasts config model =
+viewToasts : Config msg -> Model -> Html msg
+viewToasts config model =
     model.toasts
         |> Toasts.view (toastsConfig config)
 
 
-console : Config msg -> Html msg
-console config =
+viewConsole : Config msg -> Html msg
+viewConsole config =
     Console.view (consoleConfig config)
+
+
+viewMap : Config msg -> Model -> Html msg
+viewMap config model =
+    if Flags.isHE2 config.flags then
+        Map.view (mapConfig config) (getMap model)
+    else
+        text ""

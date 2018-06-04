@@ -1,4 +1,4 @@
-module Core.Flags exposing (Flags, Mode(..), initFlags, getVersion, getMode, isDev)
+module Core.Flags exposing (Flags, Mode(..), initFlags, getVersion, getMode, isDev, isHE2)
 
 
 type Mode
@@ -36,6 +36,11 @@ getMode =
 isDev : Flags -> Bool
 isDev { version } =
     version == "dev"
+
+
+isHE2 : Flags -> Bool
+isHE2 { mode } =
+    mode == HE2
 
 
 

@@ -192,6 +192,7 @@ widgets =
     , modal
     , spinner
     , map
+    , mapWallpaper
     ]
 
 
@@ -341,6 +342,17 @@ map =
         [ height (pct 100)
         , display block
         , zIndex (int 0)
+        ]
+
+
+mapWallpaper : Snippet
+mapWallpaper =
+    typeSelector "hemapWallpaper"
+        [ height (pct 100)
+        , width (pct 100)
+        , display block
+        , zIndex inherit
+        , position absolute
         ]
 
 
