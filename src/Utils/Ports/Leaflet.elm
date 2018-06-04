@@ -8,6 +8,8 @@ port module Utils.Ports.Leaflet
         , Msg(..)
         , init
         , center
+        , insertProjection
+        , removeProjection
         , subscribe
         )
 
@@ -20,6 +22,12 @@ import Utils.Json.Decode exposing (commonError)
 {-| Map Id.
 -}
 type alias Id =
+    String
+
+
+{-| Projection point name.
+-}
+type alias Name =
     String
 
 
@@ -43,6 +51,14 @@ type alias Coordinates =
     }
 
 
+{-| 2D Point in the map.
+-}
+type alias Point =
+    { x : Float
+    , y : Float
+    }
+
+
 {-| Map zoom level.
 -}
 type alias Zoom =
@@ -53,11 +69,15 @@ type alias Zoom =
 -}
 type Msg
     = Clicked Coordinates
+    | Moved Point
+    | Projected Name Point
     | Unknown
 
 
 type LeafletCmd
     = Init
+    | InsertProjection Name Coordinates
+    | RemoveProjection Name
     | Center Coordinates Zoom
 
 
@@ -79,6 +99,23 @@ center id coordinates zoom =
         |> cmd id
         |> leafletCmd
 
+{-| Adds a new coordinate projection to watch.
+-}
+insertProjection : Id -> Name -> Coordinates -> Cmd msg
+insertProjection id name coordinates =
+    coordinates
+        |> InsertProjection name
+        |> cmd id
+        |> leafletCmd
+
+{-| Stops watching a coordinate projection.
+-}
+removeProjection : Id -> Name -> Cmd msg
+removeProjection id name =
+    name
+        |> RemoveProjection 
+        |> cmd id
+        |> leafletCmd
 
 {-| Subscribes to Leaflet.
 -}
@@ -126,6 +163,22 @@ cmd id leafCmd =
                 , ( "zoom", Encode.float zoom )
                 ]
 
+        InsertProjection name {lat, lng} ->
+            Encode.object
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "insertProjection" )
+                , ( "name", Encode.string name )
+                , ( "lat", Encode.float lat )
+                , ( "lng", Encode.float lng )
+                ]
+
+        RemoveProjection name ->
+            Encode.object
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "removeProjection" )
+                , ( "name", Encode.string name )
+                ]
+
 
 sub : Decoder ( Id, Msg )
 sub =
@@ -139,6 +192,23 @@ sub =
                             |> required "lat" Decode.float
                             |> required "lng" Decode.float
                             |> Decode.map Clicked
+                            |> Decode.map (flip (,))
+                            |> required "id" Decode.string
+
+                    "moved" ->
+                        decode Point
+                            |> required "x" Decode.float
+                            |> required "y" Decode.float
+                            |> Decode.map Moved
+                            |> Decode.map (flip (,))
+                            |> required "id" Decode.string
+
+                    "projected" ->
+                        decode Point
+                            |> required "x" Decode.float
+                            |> required "y" Decode.float
+                            |> Decode.map (flip Projected)
+                            |> required "name" Decode.string
                             |> Decode.map (flip (,))
                             |> required "id" Decode.string
 
