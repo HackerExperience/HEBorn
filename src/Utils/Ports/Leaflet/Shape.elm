@@ -9,6 +9,7 @@ module Utils.Ports.Leaflet.Shape
         , Longitude
         , Coordinates
         , polyline
+        , antPolyline
         , circle
         , stroke
         , color
@@ -32,6 +33,7 @@ import Json.Encode as Encode exposing (Value)
 -}
 type Shape
     = PolylineShape Path Polyline
+    | AntPolylineShape Path AntPolyline
     | CircleShape Path Circle
 
 
@@ -39,6 +41,16 @@ type Shape
 -}
 type alias Polyline =
     { lines : Lines }
+
+
+{-| Specific properties of AntPolyline.
+-}
+type alias AntPolyline =
+    { lines : Lines
+    , pulseColor : Maybe Color
+    , delay : Maybe Int
+    , dashArray : Maybe DashArray
+    }
 
 
 {-| Specific properties of Circle.
@@ -104,11 +116,24 @@ type alias Coordinates =
     }
 
 
-{-| Creates a polyline `Shape`, requires position, size and color
+{-| Latitude and Longitude coordinates.
+-}
+type alias DashArray =
+    ( Int, Int )
+
+
+{-| Creates a polyline `Shape`, requires position and color
 -}
 polyline : Lines -> Color -> Shape
 polyline lines color =
     PolylineShape (defaultPath color) (defaultPolyline lines)
+
+
+{-| Creates an antPolyline `Shape`, requires position and color.
+-}
+antPolyline : Lines -> Color -> Shape
+antPolyline lines color =
+    AntPolylineShape (defaultPath color) (defaultAntPolyline lines)
 
 
 {-| Creates a circle `Shape`, requires position, size and color
@@ -242,6 +267,17 @@ defaultPolyline lines =
     { lines = lines }
 
 
+{-| Create a minimally configured `Polyline`.
+-}
+defaultAntPolyline : Lines -> AntPolyline
+defaultAntPolyline lines =
+    { lines = lines
+    , pulseColor = Nothing
+    , delay = Nothing
+    , dashArray = Nothing
+    }
+
+
 {-| Create a minimally configured `Circle`.
 -}
 defaultCircle : Coordinates -> Size -> Circle
@@ -257,6 +293,9 @@ mapPath shape apply =
         PolylineShape path polyline ->
             PolylineShape (apply path) polyline
 
+        AntPolylineShape path antPolyline ->
+            AntPolylineShape (apply path) antPolyline
+
         CircleShape path circle ->
             CircleShape (apply path) circle
 
@@ -268,6 +307,24 @@ mapPolyline shape apply =
     case shape of
         PolylineShape path polyline ->
             PolylineShape path (apply polyline)
+
+        AntPolylineShape path antPolyline ->
+            AntPolylineShape path antPolyline
+
+        CircleShape path circle ->
+            CircleShape path circle
+
+
+{-| Maps `AntPolyline` of `Shape`.
+-}
+mapAntPolyline : Shape -> (AntPolyline -> AntPolyline) -> Shape
+mapAntPolyline shape apply =
+    case shape of
+        PolylineShape path polyline ->
+            PolylineShape path polyline
+
+        AntPolylineShape path antPolyline ->
+            AntPolylineShape path (apply antPolyline)
 
         CircleShape path circle ->
             CircleShape path circle
@@ -281,6 +338,9 @@ mapCircle shape apply =
         PolylineShape path polyline ->
             PolylineShape path polyline
 
+        AntPolylineShape path antPolyline ->
+            AntPolylineShape path antPolyline
+
         CircleShape path circle ->
             CircleShape path (apply circle)
 
@@ -293,6 +353,9 @@ encodeShape shape =
     case shape of
         PolylineShape path polyline ->
             (encodePath path) ++ (encodePolyline polyline)
+
+        AntPolylineShape path antPolyline ->
+            (encodePath path) ++ (encodeAntPolyline antPolyline)
 
         CircleShape path circle ->
             (encodePath path) ++ (encodeCircle circle)
@@ -314,7 +377,7 @@ encodePath path =
         ]
 
 
-{-| Encode a `Color` into a `Value`.
+{-| Encodes a `Color` into a `Value`.
 -}
 encodeColor : Color -> Value
 encodeColor ( r, g, b ) =
@@ -328,7 +391,7 @@ encodeColor ( r, g, b ) =
             ++ ")"
 
 
-{-| Encode a `Polyline` into a `List (String, Value)`, useful for
+{-| Encodes a `Polyline` into a `List (String, Value)`, useful for
 `Encode.object`.
 -}
 encodePolyline : Polyline -> List ( String, Value )
@@ -344,6 +407,22 @@ encodePolyline polyline =
         ]
 
 
+{-| Encodes an `AntPolyline` into a `List (String, Value)`, useful for
+`Encode.object`.
+-}
+encodeAntPolyline : AntPolyline -> List ( String, Value )
+encodeAntPolyline antPolyline =
+    List.filterMap identity
+        [ Just
+            ( "lines"
+            , antPolyline.lines
+                |> List.map encodeCoordinates
+                |> Encode.list
+            )
+        , Just ( "type", Encode.string "antPolyline" )
+        ]
+
+
 {-| Encode `Coordinates` into `Value`.
 -}
 encodeCoordinates : Coordinates -> Value
@@ -353,7 +432,7 @@ encodeCoordinates { lat, lng } =
         |> Encode.list
 
 
-{-| Encode a `Circle` into a `List (String, Value)`, useful for
+{-| Encodes a `Circle` into a `List (String, Value)`, useful for
 `Encode.object`.
 -}
 encodeCircle : Circle -> List ( String, Value )
