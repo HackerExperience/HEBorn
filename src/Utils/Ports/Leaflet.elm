@@ -10,6 +10,8 @@ port module Utils.Ports.Leaflet
         , center
         , insertProjection
         , removeProjection
+        , setShape
+        , removeShape
         , subscribe
         )
 
@@ -17,6 +19,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Json.Decode.Pipeline exposing (decode, required)
 import Utils.Json.Decode exposing (commonError)
+import Utils.Ports.Leaflet.Shape as Shape exposing (Shape)
 
 
 {-| Map Id.
@@ -34,21 +37,19 @@ type alias Name =
 {-| Latitude coordinate.
 -}
 type alias Latitude =
-    Float
+    Shape.Latitude
 
 
 {-| Longitude coordinate.
 -}
 type alias Longitude =
-    Float
+    Shape.Longitude
 
 
 {-| Map coordinates.
 -}
 type alias Coordinates =
-    { lat : Latitude
-    , lng : Longitude
-    }
+    Shape.Coordinates
 
 
 {-| 2D Point in the map.
@@ -78,6 +79,8 @@ type LeafletCmd
     = Init
     | InsertProjection Name Coordinates
     | RemoveProjection Name
+    | SetShape Name Shape
+    | RemoveShape Name
     | Center Coordinates Zoom
 
 
@@ -99,6 +102,7 @@ center id coordinates zoom =
         |> cmd id
         |> leafletCmd
 
+
 {-| Adds a new coordinate projection to watch.
 -}
 insertProjection : Id -> Name -> Coordinates -> Cmd msg
@@ -108,14 +112,36 @@ insertProjection id name coordinates =
         |> cmd id
         |> leafletCmd
 
+
 {-| Stops watching a coordinate projection.
 -}
 removeProjection : Id -> Name -> Cmd msg
 removeProjection id name =
     name
-        |> RemoveProjection 
+        |> RemoveProjection
         |> cmd id
         |> leafletCmd
+
+
+{-| Creates or updates a `Shape`.
+-}
+setShape : Id -> Name -> Shape -> Cmd msg
+setShape id name shape =
+    shape
+        |> SetShape name
+        |> cmd id
+        |> leafletCmd
+
+
+{-| Removes updates a `Shape`.
+-}
+removeShape : Id -> Name -> Cmd msg
+removeShape id name =
+    name
+        |> RemoveShape
+        |> cmd id
+        |> leafletCmd
+
 
 {-| Subscribes to Leaflet.
 -}
@@ -163,7 +189,7 @@ cmd id leafCmd =
                 , ( "zoom", Encode.float zoom )
                 ]
 
-        InsertProjection name {lat, lng} ->
+        InsertProjection name { lat, lng } ->
             Encode.object
                 [ ( "id", Encode.string id )
                 , ( "msg", Encode.string "insertProjection" )
@@ -179,6 +205,21 @@ cmd id leafCmd =
                 , ( "name", Encode.string name )
                 ]
 
+        SetShape name shape ->
+            Encode.object
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "setShape" )
+                , ( "name", Encode.string name )
+                , ( "shape", Shape.encode shape )
+                ]
+
+        RemoveShape name ->
+            Encode.object
+                [ ( "id", Encode.string id )
+                , ( "msg", Encode.string "removeShape" )
+                , ( "name", Encode.string name )
+                ]
+
 
 sub : Decoder ( Id, Msg )
 sub =
@@ -188,7 +229,7 @@ sub =
             (\t ->
                 case t of
                     "clicked" ->
-                        decode Coordinates
+                        decode Shape.Coordinates
                             |> required "lat" Decode.float
                             |> required "lng" Decode.float
                             |> Decode.map Clicked

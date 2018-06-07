@@ -12,6 +12,4 @@ type alias UpdateResponse msg =
 
 update : Config msg -> Msg -> Model -> UpdateResponse msg
 update config msg model =
-    case msg of
-        _ ->
-            ( model, React.none )
+    ( model, React.none )
