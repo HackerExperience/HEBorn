@@ -31,7 +31,8 @@ var commonConfig = {
     extensions: ['.js', '.elm', '.css', '.png', '.jpg', '.svg', '.ico'],
     alias: {
         leaflet_css: __dirname + "/node_modules/leaflet/dist/leaflet.css",
-        leaflet_js: __dirname + "/node_modules/leaflet/dist/leaflet.js"
+        leaflet_js: __dirname + "/node_modules/leaflet/dist/leaflet.js",
+        leaflet_ant_js: __dirname + "/node_modules/leaflet-ant-path/dist/leaflet-ant-path.js"
     }
   },
   module: {

@@ -100,7 +100,7 @@ function removeProjection(cmd) {
   delete projections[name];
 }
 
-// creates an with shape style
+// creates a shape style object from shape object
 function shapeStyle(shape) {
   var opts = {};
 
@@ -112,6 +112,14 @@ function shapeStyle(shape) {
   if (shape.stroke !== undefined) opts.stroke = shape.stroke;
   if (shape.weight !== undefined) opts.weight = shape.weight;
 
+  return opts;
+}
+
+// inserts antPolyline style properties from shape object
+function antPolylineStyle(opts, shape) {
+  if (shape.pulseColor) opts.pulseColor = shape.pulseColor;
+  if (shape.delay) opts.delay = shape.delay;
+  if (shape.dashArray) opts.dashArray = shape.dashArray;
   return opts;
 }
 
@@ -128,6 +136,13 @@ function insertShape(cmd) {
   if (cmd.shape.type === "polyline") {
     var shape = L.polyline(cmd.shape.lines, opts);
     shapes[cmd.name] = { type: "polyline", shape: shape };
+    shape.addTo(map);
+  } else if (cmd.shape.type === "antPolyline") {
+    var shape = L.polyline.antPath(
+      cmd.shape.lines,
+      antPolylineStyle(opts, cmd.shape)
+    );
+    shapes[cmd.name] = { type: "antPolyline", shape: shape };
     shape.addTo(map);
   } else if (cmd.shape.type === "circle") {
     opts.radius = cmd.shape.radius;
@@ -151,6 +166,9 @@ function updateShape(cmd) {
     if (cmd.shape.type === "polyline") {
       if (cmd.shape.lines) shape.setLatLngs(cmd.shape.lines);
       shape.setStyle(opts);
+    } else if (cmd.shape.type === "antPolyline") {
+      if (cmd.shape.lines) shape.setLatLngs(cmd.shape.lines);
+      shape.setStyle(antPolylineStyle(opts));
     } else if (cmd.shape.type === "circle") {
       if (cmd.shape.position) shape.setLatLng(cmd.shape.position);
       if (cmd.shape.radius) shape.setRadius(cmd.shape.radius);
@@ -165,7 +183,7 @@ function setShape(cmd) {
 
   if (!shapes) return;
 
-  if (!shapes[cmd.name]) {
+  if (shapes[cmd.name] !== undefined) {
     if (shapes[cmd.name].type !== cmd.shape.type) {
       removeShape(cmd);
       insertShape(cmd);
