@@ -70,6 +70,8 @@ type alias Zoom =
 -}
 type Msg
     = Clicked Coordinates
+    | ClickedShape Name
+    | HoveredShape Name Bool
     | Moved Point
     | Projected Name Point
     | Unknown
@@ -233,6 +235,19 @@ sub =
                             |> required "lat" Decode.float
                             |> required "lng" Decode.float
                             |> Decode.map Clicked
+                            |> Decode.map (flip (,))
+                            |> required "id" Decode.string
+
+                    "clickedShape" ->
+                        decode ClickedShape
+                            |> required "name" Decode.string
+                            |> Decode.map (flip (,))
+                            |> required "id" Decode.string
+
+                    "hoveredShape" ->
+                        decode HoveredShape
+                            |> required "name" Decode.string
+                            |> required "over" Decode.bool
                             |> Decode.map (flip (,))
                             |> required "id" Decode.string
 
