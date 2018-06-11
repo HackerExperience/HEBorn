@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "main": "main.js",
+  "devDependencies": {
+    "electron": "~1.8.4"
+  }
+}
