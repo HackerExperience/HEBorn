@@ -123,6 +123,36 @@ function antPolylineStyle(opts, shape) {
   return opts;
 }
 
+// adds shape events
+function shapeEvents(cmd, shape) {
+  shape.on('click', function () {
+    send({
+      id: cmd.id,
+      msg: "clickedShape",
+      name: cmd.name
+    });
+  })
+
+
+  shape.on('mouseover', function () {
+    send({
+      id: cmd.id,
+      msg: "hoveredShape",
+      name: cmd.name,
+      over: true
+    });
+  })
+
+  shape.on('mouseout', function () {
+    send({
+      id: cmd.id,
+      msg: "hoveredShape",
+      name: cmd.name,
+      over: false
+    });
+  })
+}
+
 // creates a new shape
 function insertShape(cmd) {
   var map = maps[cmd.id] && maps[cmd.id][0];
@@ -136,6 +166,7 @@ function insertShape(cmd) {
   if (cmd.shape.type === "polyline") {
     var shape = L.polyline(cmd.shape.lines, opts);
     shapes[cmd.name] = { type: "polyline", shape: shape };
+    shapeEvents(cmd, shape);
     shape.addTo(map);
   } else if (cmd.shape.type === "antPolyline") {
     var shape = L.polyline.antPath(
@@ -143,12 +174,14 @@ function insertShape(cmd) {
       antPolylineStyle(opts, cmd.shape)
     );
     shapes[cmd.name] = { type: "antPolyline", shape: shape };
+    shapeEvents(cmd, shape);
     shape.addTo(map);
   } else if (cmd.shape.type === "circle") {
     opts.radius = cmd.shape.radius;
 
     var shape = L.circle(cmd.shape.position, opts);
     shapes[cmd.name] = { type: "circle", shape: shape };
+    shapeEvents(cmd, shape);
     shape.addTo(map);
   }
 }
