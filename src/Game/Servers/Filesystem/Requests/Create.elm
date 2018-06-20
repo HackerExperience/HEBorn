@@ -8,6 +8,8 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
+{-| Cria um Cmd de request para criar um arquivo. WIP
+-}
 createRequest :
     String
     -> String

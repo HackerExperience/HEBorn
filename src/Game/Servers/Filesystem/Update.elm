@@ -45,6 +45,8 @@ update config msg model =
 -- internals
 
 
+{-| Deleta um arquivo quando recebe a mensagem `HandleDelete`.
+-}
 handleDelete : Config msg -> Id -> Model -> UpdateResponse msg
 handleDelete config id model =
     case getFile id model of
@@ -60,6 +62,8 @@ handleDelete config id model =
             ( model, React.none )
 
 
+{-| Move um arquivo quando recebe a mensagem `HandleMove`.
+-}
 handleMove :
     Config msg
     -> Id
@@ -84,6 +88,8 @@ handleMove config id newPath model =
         ( model_, cmd )
 
 
+{-| Renomeia um arquivo quando recebe a mensagem `HandleRename`.
+-}
 handleRename :
     Config msg
     -> Id
@@ -108,6 +114,8 @@ handleRename config id name model =
         ( model_, cmd )
 
 
+{-| Cria um arquivo de texto novo quando recebe a mensagem `HandleNewTextFile`.
+-}
 handleNewTextFile :
     Config msg
     -> Path
@@ -136,6 +144,8 @@ handleNewTextFile config path name model =
             ( model, React.none )
 
 
+{-| Cria um diretório novo quando recebe a mensagem `HandleNewDir`.
+-}
 handleNewDir :
     Config msg
     -> Path
@@ -158,6 +168,9 @@ handleNewDir config path name model =
             ( model, React.none )
 
 
+{-| Cria um arquivo de texto novo quando recebe a mensagem `HandleAdded`, que
+é criada por um evento.
+-}
 onHandleAdded : Id -> File -> Model -> UpdateResponse msg
 onHandleAdded id file model =
     ( insertFile id file model, React.none )

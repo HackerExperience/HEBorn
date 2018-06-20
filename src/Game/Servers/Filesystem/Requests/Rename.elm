@@ -8,6 +8,8 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
+{-| Cria um Cmd de request para renomear um arquivo.
+-}
 renameRequest : String -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 renameRequest newBaseName id cid =
     Requests.request (Topics.fsRename cid)

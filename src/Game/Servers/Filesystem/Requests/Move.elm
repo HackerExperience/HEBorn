@@ -8,6 +8,8 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
+{-| Cria um Cmd de request para mover um arquivo.
+-}
 moveRequest : Path -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 moveRequest path id cid =
     Requests.request (Topics.fsMove cid)
