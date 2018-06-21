@@ -229,7 +229,7 @@ member id model =
     Dict.member id model.logs
 
 
-{-| Tenta encontrar Log.
+{-| Tenta pegar Log.
 -}
 get : ID -> Model -> Maybe Log
 get id model =
@@ -264,7 +264,7 @@ setTimestamp timestamp log =
     { log | timestamp = timestamp }
 
 
-{-| Atualiza o conteúdo do Log, essa função está proposta para exclusão.
+{-| Atualiza o conteúdo do Log, esta função está proposta para exclusão.
 -}
 setContent : Maybe String -> Log -> Log
 setContent newContent log =

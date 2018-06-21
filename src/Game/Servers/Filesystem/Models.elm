@@ -310,14 +310,14 @@ scan path model =
 -- getters/setters
 
 
-{-| Tenta coletar os dados do arquivo a partir do Id.
+{-| Tenta pegar arquivo.
 -}
 getFile : Id -> Model -> Maybe File
 getFile id =
     .files >> Dict.get id
 
 
-{-| Tenta coletar a lista de Id de arquivos da pasta de tal Path.
+{-| Tenta pegar pasta.
 -}
 getFolder : Path -> Model -> Maybe (List Id)
 getFolder path =

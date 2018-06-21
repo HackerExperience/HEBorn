@@ -18,14 +18,14 @@ initialModel =
     Model Nothing
 
 
-{-| Getter para motherboard.
+{-| Tenta pegar motherboard.
 -}
 getMotherboard : Model -> Maybe Motherboard
 getMotherboard =
     .motherboard
 
 
-{-| Setter para motherboard.
+{-| Atualiza motherboard.
 -}
 setMotherboard : Maybe Motherboard -> Model -> Model
 setMotherboard motherboard model =
