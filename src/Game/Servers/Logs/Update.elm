@@ -32,6 +32,8 @@ update config msg model =
             ( model, React.none )
 
 
+{-| Atualiza log caso ele exista.
+-}
 updateLog : (Log -> Log) -> ID -> Model -> UpdateResponse msg
 updateLog func id model =
     case get id model of
