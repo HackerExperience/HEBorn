@@ -76,6 +76,8 @@ update config msg model =
 -- internals
 
 
+{-| Realiza um request para iniciar um processo de download.
+-}
 handleStartDownload :
     Config msg
     -> TransferType
@@ -86,16 +88,19 @@ handleStartDownload :
     -> UpdateResponse msg
 handleStartDownload config transferType origin storageId file model =
     let
+        -- cria um processo otimisticamente
         process =
             newOptimistic (Download (DownloadContent transferType storageId))
                 config.nip
                 (Network.getIp config.nip)
                 unknownProcessFile
 
+        -- insere processo otimista na model
         ( id, model_ ) =
             insertOptimistic process model
 
         perform =
+            -- request muda de acordo com o tipo de transferencia
             case transferType of
                 PublicFTP ->
                     publicDownloadRequest
@@ -103,6 +108,7 @@ handleStartDownload config transferType origin storageId file model =
                 PrivateFTP ->
                     privateDownloadRequest
 
+        -- handler para resposta do request
         toMsg result =
             case result of
                 Ok () ->
@@ -125,6 +131,8 @@ handleStartDownload config transferType origin storageId file model =
         ( model_, cmd )
 
 
+{-| Realiza um request para iniciar um processo de upload.
+-}
 handleStartUpload :
     Config msg
     -> CId
@@ -134,15 +142,18 @@ handleStartUpload :
     -> UpdateResponse msg
 handleStartUpload config target storageId file model =
     let
+        -- cria um processo otimisticamente
         process =
             newOptimistic (Upload (UploadContent (Just storageId)))
                 config.nip
                 (Network.getIp config.nip)
                 unknownProcessFile
 
+        -- insere processo otimista na model
         ( id, model_ ) =
             insertOptimistic process model
 
+        -- handler para resposta do request
         toMsg result =
             case result of
                 Ok () ->
@@ -165,6 +176,8 @@ handleStartUpload config target storageId file model =
         ( model_, cmd )
 
 
+{-| Realiza um request para iniciar um processo de bruteforce.
+-}
 handleStartBruteforce :
     Config msg
     -> Network.IP
@@ -172,9 +185,11 @@ handleStartBruteforce :
     -> UpdateResponse msg
 handleStartBruteforce config target model =
     let
+        -- cria um processo otimisticamente
         process =
             newOptimistic Cracker config.nip target unknownProcessFile
 
+        -- insere processo otimista na model
         ( id, model_ ) =
             insertOptimistic process model
 
@@ -188,6 +203,7 @@ handleStartBruteforce config target model =
                 |> getTarget
                 |> Network.getIp
 
+        -- handler para resposta do request
         toMsg result =
             case result of
                 Ok () ->
@@ -210,6 +226,8 @@ handleStartBruteforce config target model =
         ( model_, cmd )
 
 
+{-| Realiza um request para iniciar um processo de bruteforce.
+-}
 handleBruteforceFailed : BruteforceFailed.Data -> Model -> UpdateResponse msg
 handleBruteforceFailed data model =
     let
@@ -222,6 +240,8 @@ handleBruteforceFailed data model =
         updateOrSync update data.processId model
 
 
+{-| Conclui processo na model.
+-}
 handleProcessConclusion : ProcessConclusion.Data -> Model -> UpdateResponse msg
 handleProcessConclusion id model =
     let
@@ -233,6 +253,8 @@ handleProcessConclusion id model =
         updateOrSync update id model
 
 
+{-| Atualiza processos da model.
+-}
 handleProcessesChanged :
     Config msg
     -> ProcessesChanged.Data
@@ -244,6 +266,8 @@ handleProcessesChanged config processes model =
     )
 
 
+{-| Pausa processo na model.
+-}
 handlePause : Config msg -> ID -> Model -> UpdateResponse msg
 handlePause config id model =
     let
@@ -255,6 +279,8 @@ handlePause config id model =
         updateOrSync update id model
 
 
+{-| Despausa processo na model.
+-}
 handleResume : Config msg -> ID -> Model -> UpdateResponse msg
 handleResume config id model =
     let
@@ -266,6 +292,8 @@ handleResume config id model =
         updateOrSync update id model
 
 
+{-| Remove processo da model.
+-}
 handleRemove : Config msg -> ID -> Model -> UpdateResponse msg
 handleRemove config id model =
     ( remove id model, React.none )
@@ -275,8 +303,8 @@ handleRemove config id model =
 -- helpers
 
 
-{-| Applies the function to the process when it's found, (should) requests
-a bootstrap otherwise.
+{-| Aplica função no processo quando for encontrado, pede (deveria pedir)
+bootstrap caso contrário.
 -}
 updateOrSync :
     (Process -> UpdateResponse msg)

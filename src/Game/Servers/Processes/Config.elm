@@ -8,6 +8,14 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Messages exposing (..)
 
 
+{-| Parâmetros especiais:
+
+  - onDownloadStarted: lançado quando um processo de download é iniciado
+  - onUploadStarted: lançado quando um processo de upload é iniciado
+  - onBruteforceStarted: lançado quando um processo de bruteforce é iniciado
+  - onGenericNotification: utilizado para lançar notificações
+
+-}
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
