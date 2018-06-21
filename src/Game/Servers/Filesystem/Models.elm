@@ -70,8 +70,8 @@ initialModel =
     }
 
 
-{-| Insere um arquivo de tal Id no filesystem, a localização do arquivo é
-definida pela propriedade Path do mesmo.
+{-| Insere um arquivo no filesystem, a localização do arquivo é definida pela
+propriedade Path do mesmo.
 -}
 insertFile : Id -> File -> Model -> Model
 insertFile id file ({ files, folders } as model) =
@@ -103,7 +103,7 @@ insertFile id file ({ files, folders } as model) =
             model
 
 
-{-| Insere uma pasta de tal Name dentro do Path.
+{-| Insere uma pasta dentro do Path.
 -}
 insertFolder : Path -> Name -> Model -> Model
 insertFolder path name ({ folders } as model) =
@@ -125,7 +125,7 @@ insertFolder path name ({ folders } as model) =
         model
 
 
-{-| Deleta o arquivo de tal Id.
+{-| Deleta arquivo pelo Id.
 -}
 deleteFile : Id -> Model -> Model
 deleteFile id ({ files, folders } as model) =
@@ -150,7 +150,7 @@ deleteFolder path ({ folders } as model) =
         model
 
 
-{-| Move o arquivo de tal Id para o Path.
+{-| Move o arquivo para o Path.
 -}
 moveFile : Id -> Path -> Model -> Model
 moveFile id path ({ files, folders } as model) =
@@ -174,7 +174,7 @@ moveFile id path ({ files, folders } as model) =
             model
 
 
-{-| Renomeia o arquivo de tal Id.
+{-| Renomeia o arquivo.
 -}
 renameFile : Id -> Name -> Model -> Model
 renameFile id name model =
@@ -310,7 +310,7 @@ scan path model =
 -- getters/setters
 
 
-{-| Tenta coletar os dados do arquivo de tal Id.
+{-| Tenta coletar os dados do arquivo a partir do Id.
 -}
 getFile : Id -> Model -> Maybe File
 getFile id =
@@ -375,7 +375,7 @@ isFolder path model =
 -- internals
 
 
-{-| Tenta remover arquivo de tal Id de tais Folders.
+{-| Tenta remover arquivo de tais Folders.
 -}
 removeFromFolder : Id -> Path -> Folders -> Folders
 removeFromFolder id path folders =
@@ -394,7 +394,7 @@ removeFromFolder id path folders =
                 folders
 
 
-{-| Tenta inserir arquivo de tal Id em tais Folders.
+{-| WIP
 -}
 insertInFolder : Id -> Path -> Folders -> Folders
 insertInFolder id path folders =
