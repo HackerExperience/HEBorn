@@ -1,5 +1,9 @@
 module Game.Servers.Tunnels.Models exposing (..)
 
+{-| Documentação pendente pois este domínio está incompleto e provavelmente
+errado.
+-}
+
 import Dict exposing (Dict)
 import Game.Account.Bounces.Shared as Bounces
 import Game.Meta.Types.Network as Network
