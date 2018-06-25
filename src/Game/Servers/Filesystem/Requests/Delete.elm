@@ -17,7 +17,7 @@ deleteRequest id cid =
 
 
 
--- internals
+-- funções internas
 
 
 encoder : Id -> Value

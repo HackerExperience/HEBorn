@@ -443,7 +443,7 @@ handleLogout config cid server =
 
 
 
---internals
+--funções internas
 
 
 incEndpoint : Config msg -> CId -> Server -> Model -> Model

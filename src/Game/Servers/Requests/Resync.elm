@@ -31,7 +31,7 @@ resyncRequest id time gatewayCache flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Decodifica resposta do request.

@@ -62,7 +62,7 @@ errorToString error =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Encodifica payload do request.

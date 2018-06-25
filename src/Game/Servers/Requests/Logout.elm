@@ -26,7 +26,7 @@ logoutRequest id flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Decodifica resposta do request.

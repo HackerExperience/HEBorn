@@ -70,7 +70,7 @@ updateMotherboardRequest motherboard cid flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Converte dados raw da resposta do request em um formato validado.

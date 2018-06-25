@@ -1,7 +1,6 @@
 module Game.Servers.Processes.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Random.Pcg as Random
 import Events.Server.Handlers.ProcessCompleted as ProcessConclusion
 import Events.Server.Handlers.ProcessBruteforceFailed as BruteforceFailed
 import Events.Server.Handlers.ProcessesRecalcado as ProcessesChanged
@@ -73,7 +72,7 @@ update config msg model =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Realiza um request para iniciar um processo de download.

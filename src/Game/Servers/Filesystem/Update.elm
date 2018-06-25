@@ -42,7 +42,7 @@ update config msg model =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Deleta um arquivo quando recebe a mensagem `HandleDelete`.

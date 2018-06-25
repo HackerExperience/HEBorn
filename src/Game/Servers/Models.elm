@@ -139,10 +139,6 @@ initialModel =
     }
 
 
-
--- gateway mapping information
-
-
 {-| Insere um server gateway na model.
 -}
 insertGateway : Id -> NIP -> List NIP -> Set EndpointAddress -> Model -> Model
@@ -204,10 +200,6 @@ getServerId cid model =
             Nothing
 
 
-
--- session cid data
-
-
 {-| Converte CId em SessionId.
 -}
 toSessionId : CId -> SessionId
@@ -218,10 +210,6 @@ toSessionId cid =
 
         EndpointCId ( id, ip ) ->
             id ++ "@" ++ ip
-
-
-
--- elm structure-like functions
 
 
 {-| Tenta pegar um servidor da model.
@@ -307,10 +295,6 @@ fromKey key =
 
         _ ->
             GatewayCId key
-
-
-
--- server getters/setters
 
 
 {-| Retorna nome do servidor.

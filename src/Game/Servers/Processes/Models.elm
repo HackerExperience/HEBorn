@@ -107,10 +107,6 @@ type alias UploadContent =
     }
 
 
-
--- owner dependant data
-
-
 {-| Nível de acesso que o jogador tem ao processo.
 -}
 type Access

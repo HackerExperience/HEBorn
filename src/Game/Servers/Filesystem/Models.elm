@@ -57,10 +57,6 @@ type alias StringPath =
     String
 
 
-
--- crud
-
-
 {-| Model inicial, só contem a pasta raiz.
 -}
 initialModel : Model
@@ -186,10 +182,6 @@ renameFile id name model =
             model
 
 
-
--- listing path contents
-
-
 {-| List direct entries of given folder.
 -}
 list : Path -> Model -> List Entry
@@ -306,10 +298,6 @@ scan path model =
         Dict.foldl reducer [] model.folders
 
 
-
--- getters/setters
-
-
 {-| Tenta pegar arquivo.
 -}
 getFile : Id -> Model -> Maybe File
@@ -322,10 +310,6 @@ getFile id =
 getFolder : Path -> Model -> Maybe (List Id)
 getFolder path =
     .folders >> Dict.get (joinPath path)
-
-
-
--- checking operations
 
 
 {-| Checa se um Path pertence a um arquivo.
@@ -372,7 +356,7 @@ isFolder path model =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Tenta remover arquivo de tais Folders.

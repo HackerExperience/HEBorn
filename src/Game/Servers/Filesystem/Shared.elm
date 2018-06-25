@@ -240,10 +240,6 @@ type alias SpywareModules =
     }
 
 
-
--- path operations
-
-
 {-| Converte uma String em um Path.
 -}
 toPath : String -> Path
@@ -300,10 +296,6 @@ appendPath name path =
 concatPath : List Path -> Path
 concatPath =
     List.concat
-
-
-
--- getters/setters
 
 
 {-| Pega o `Name` de um arquivo.
@@ -399,10 +391,6 @@ getEntryName entry =
             getName file
 
 
-
--- checking operations
-
-
 {-| Checa se uma `String` é valida como nome de arquivo.
 -}
 isValidFilename : String -> Bool
@@ -443,10 +431,6 @@ hasModules file =
             True
 
 
-
--- entry convertion
-
-
 {-| Coleta o Id de um `FileEntry`.
 -}
 toId : FileEntry -> Id
@@ -474,7 +458,7 @@ toFileEntry entry =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Tenta coletar a versão de todos os módulos, utilizado para calcular a

@@ -17,13 +17,13 @@ moveRequest path id cid =
 
 
 
--- internals
+-- funções internas
 
 
 encoder : Path -> Id -> Value
 encoder path id =
     let
-        -- TODO: sending a flat string may be better
+        -- TODO: enviar uma string simples pode ser melhor
         destination =
             path
                 |> List.map Encode.string

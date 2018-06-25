@@ -17,7 +17,7 @@ renameRequest newBaseName id cid =
 
 
 
--- internals
+-- funções internas
 
 
 encoder : String -> Id -> Value

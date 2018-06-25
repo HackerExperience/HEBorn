@@ -72,7 +72,7 @@ browseRequest url nid cid flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
 {-| Encodifica payload do request.
