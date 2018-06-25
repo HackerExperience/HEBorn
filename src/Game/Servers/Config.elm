@@ -17,6 +17,17 @@ import Game.Servers.Shared exposing (..)
 import Game.Servers.Models exposing (Server)
 
 
+{-| Parâmetros especiais:
+
+    activeCId: id do servidor ativo
+    activeGateway: id do servidor gateway ativo
+    onSetGatewayContext: usado quando precisar mudar o contexto do gateway
+    onInventoryFreed: usado quando precisar liberar um item do inventário
+    onInventoryUsed: usado quando precisar utilizar um item do inventário
+    onNewGateway: usado quando adicionar um novo gateway
+    onToast: usado quando exibir uma toast
+
+-}
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
@@ -34,6 +45,8 @@ type alias Config msg =
     }
 
 
+{-| Config de processos.
+-}
 processesConfig : CId -> NIP -> Config msg -> Processes.Config msg
 processesConfig cid nip config =
     { flags = config.flags
@@ -68,6 +81,8 @@ processesConfig cid nip config =
     }
 
 
+{-| Config de logs.
+-}
 logsConfig : CId -> Config msg -> Logs.Config msg
 logsConfig cid config =
     { flags = config.flags
@@ -77,6 +92,8 @@ logsConfig cid config =
     }
 
 
+{-| Config de filesystem.
+-}
 filesystemConfig : CId -> StorageId -> Config msg -> Filesystem.Config msg
 filesystemConfig cid storageId config =
     { flags = config.flags
@@ -86,6 +103,8 @@ filesystemConfig cid storageId config =
     }
 
 
+{-| Config de tunnels.
+-}
 tunnelsConfig : CId -> Config msg -> Tunnels.Config msg
 tunnelsConfig cid config =
     { flags = config.flags
@@ -94,6 +113,8 @@ tunnelsConfig cid config =
     }
 
 
+{-| Config de hardware.
+-}
 hardwareConfig : CId -> NIP -> Config msg -> Hardware.Config msg
 hardwareConfig cid nip config =
     { flags = config.flags
@@ -105,6 +126,8 @@ hardwareConfig cid nip config =
     }
 
 
+{-| Config de notifications.
+-}
 notificationsConfig : CId -> Config msg -> Notifications.Config msg
 notificationsConfig cid config =
     { flags = config.flags

@@ -8,6 +8,9 @@ module Game.Servers.Processes.Requests.Upload
         , errorToString
         )
 
+{-| Contém requests de upload de arquivo.
+-}
+
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -16,10 +19,6 @@ import Json.Decode as Decode
         , succeed
         , fail
         )
-
-
-{-| Contém requests de upload de arquivo.
--}
 import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError, message)
 import Requests.Requests as Requests exposing (report)

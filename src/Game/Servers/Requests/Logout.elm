@@ -7,10 +7,16 @@ import Requests.Types exposing (FlagsSource, Code(..), emptyPayload)
 import Game.Servers.Shared exposing (CId)
 
 
+{-| Resultado do request, pode ser um erro ou um CId. A pesar do erro não
+ser tratado, é melhor utilizar result desde já pois é certo que um dia o erro
+será tratado.
+-}
 type alias Data =
     Result () CId
 
 
+{-| Cria um Cmd de request para deslogar do servidor.
+-}
 logoutRequest : CId -> FlagsSource a -> Cmd Data
 logoutRequest id flagsSrc =
     flagsSrc
@@ -23,6 +29,8 @@ logoutRequest id flagsSrc =
 -- internals
 
 
+{-| Decodifica resposta do request.
+-}
 receiver :
     FlagsSource a
     -> CId

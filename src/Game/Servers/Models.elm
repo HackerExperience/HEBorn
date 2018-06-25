@@ -15,6 +15,9 @@ import Game.Meta.Types.Context exposing (Context(..))
 import Game.Servers.Shared exposing (..)
 
 
+{-| Model de servers, contém dados específicos do server e mais alguns dados
+que são mantidos em cache.
+-}
 type alias Model =
     { gateways : Gateways
     , servers : Servers
@@ -22,10 +25,14 @@ type alias Model =
     }
 
 
+{-| Dict com cache de cada gateway.
+-}
 type alias Gateways =
     Dict Id GatewayCache
 
 
+{-| Dados em cache de um gateway.
+-}
 type alias GatewayCache =
     { activeNIP : NIP
     , nips : List NIP
@@ -33,10 +40,14 @@ type alias GatewayCache =
     }
 
 
+{-| Dict com servidores.
+-}
 type alias Servers =
     Dict SessionId Server
 
 
+{-| Dados de um servidor.
+-}
 type alias Server =
     { name : String
     , type_ : ServerType
@@ -55,50 +66,71 @@ type alias Server =
     }
 
 
+{-| Coordenadas de um servidor.
+-}
 type alias Coordinates =
     Float
 
 
+{-| Storages de um servidor.
+-}
 type alias Storages =
     Dict StorageId Storage
 
 
+{-| Dados de uma storage, o nome ela e seu filesystem.
+-}
 type alias Storage =
     { name : String
     , filesystem : Filesystem.Model
     }
 
 
+{-| Tipos de servidor.
+-}
 type ServerType
     = Desktop
     | DesktopCampaign
     | Mobile
 
 
+{-| Dados do servidor que variam se o servidor é um gateway ou endpoint.
+-}
 type Ownership
     = GatewayOwnership GatewayData
     | EndpointOwnership EndpointData
 
 
+{-| Dados específicos para gateways.
+-}
 type alias GatewayData =
     { endpoints : Set EndpointAddress
     , endpoint : Maybe CId
     }
 
 
+{-| Dados específicos para endpoints.
+-}
 type alias EndpointData =
     { analyzed : Maybe AnalyzedEndpoint
     }
 
 
+{-| Dados de um endpoint analisado.
+-}
 type alias AnalyzedEndpoint =
     {}
 
 
+{-| Dict pra mapear endpoints para seus gateways, o window manager utiliza
+muito isso pra alguns casos específicos de aplicativos.
+-}
 type alias GatewayOfEndpoints =
     Dict EndpointAddress Id
 
 
+{-| Model inicial.
+-}
 initialModel : Model
 initialModel =
     { gateways = Dict.empty
@@ -111,6 +143,8 @@ initialModel =
 -- gateway mapping information
 
 
+{-| Insere um server gateway na model.
+-}
 insertGateway : Id -> NIP -> List NIP -> Set EndpointAddress -> Model -> Model
 insertGateway id activeNIP nips endpoints model =
     let
@@ -131,6 +165,8 @@ insertGateway id activeNIP nips endpoints model =
         }
 
 
+{-| Remove um server gateway na model.
+-}
 removeGateway : CId -> Model -> Model
 removeGateway cid model =
     let
@@ -149,11 +185,15 @@ removeGateway cid model =
                 model
 
 
+{-| Retorna o cache do server gateway.
+-}
 getGatewayCache : CId -> Model -> Maybe GatewayCache
 getGatewayCache cid model =
     Dict.get (toSessionId cid) model.gateways
 
 
+{-| Retorna o id do servidor, sempre retorna Nothing pra endpoints.
+-}
 getServerId : CId -> Model -> Maybe Id
 getServerId cid model =
     case cid of
@@ -168,6 +208,8 @@ getServerId cid model =
 -- session cid data
 
 
+{-| Converte CId em SessionId.
+-}
 toSessionId : CId -> SessionId
 toSessionId cid =
     case cid of
@@ -182,11 +224,15 @@ toSessionId cid =
 -- elm structure-like functions
 
 
+{-| Tenta pegar um servidor da model.
+-}
 get : CId -> Model -> Maybe Server
 get cid model =
     Dict.get (toSessionId cid) model.servers
 
 
+{-| Insere um servidor na model.
+-}
 insert : CId -> Server -> Model -> Model
 insert cid server model0 =
     let
@@ -216,6 +262,8 @@ insert cid server model0 =
         model_
 
 
+{-| Remove server do servidor.
+-}
 remove : CId -> Model -> Model
 remove cid model0 =
     let
@@ -240,6 +288,8 @@ remove cid model0 =
         { model2 | servers = servers }
 
 
+{-| Retorna lista de CIds do jogo.
+-}
 keys : Model -> List CId
 keys model =
     model.servers
@@ -247,6 +297,8 @@ keys model =
         |> List.map fromKey
 
 
+{-| Converte SessionId em CId.
+-}
 fromKey : SessionId -> CId
 fromKey key =
     case String.split "@" key of
@@ -261,96 +313,134 @@ fromKey key =
 -- server getters/setters
 
 
+{-| Retorna nome do servidor.
+-}
 getName : Server -> String
 getName =
     .name
 
 
+{-| Atualiza nome do servidor.
+-}
 setName : String -> Server -> Server
 setName name server =
     { server | name = name }
 
 
+{-| Retorna nip ativo do servidor.
+-}
 getActiveNIP : Server -> NIP
 getActiveNIP { activeNIP } =
     activeNIP
 
 
+{-| Retorna os nips do servidor.
+-}
 getNIPs : Server -> List NIP
 getNIPs server =
     server.nips
 
 
+{-| Atualiza os nips do servidor.
+-}
 setNIPs : List NIP -> Server -> Server
 setNIPs nips server =
     { server | nips = nips }
 
 
+{-| Retorna lista de storages do servidor.
+-}
 listStorages : Server -> List ( StorageId, Storage )
 listStorages server =
     Dict.toList server.storages
 
 
+{-| Retorna main storage do servidor.
+-}
 getMainStorageId : Server -> StorageId
 getMainStorageId =
     .mainStorage
 
 
+{-| Retorna main storage do servidor.
+-}
 getMainStorage : Server -> Maybe Storage
 getMainStorage server =
     getStorage (getMainStorageId server) server
 
 
+{-| Tenta pegar storage do servidor.
+-}
 getStorage : StorageId -> Server -> Maybe Storage
 getStorage id server =
     Dict.get id server.storages
 
 
+{-| Atualiza storage do servidor.
+-}
 setStorage : StorageId -> Storage -> Server -> Server
 setStorage id storages server =
     { server | storages = Dict.insert id storages server.storages }
 
 
+{-| Retorna nome da storage.
+-}
 getStorageName : Storage -> String
 getStorageName =
     .name
 
 
+{-| Atualiza nome da storage.
+-}
 setStorageName : String -> Storage -> Storage
 setStorageName name storage =
     { storage | name = name }
 
 
+{-| Retorna filesystem da storage.
+-}
 getFilesystem : Storage -> Filesystem.Model
 getFilesystem =
     .filesystem
 
 
+{-| Atualiza filesystem da storage.
+-}
 setFilesystem : Filesystem.Model -> Storage -> Storage
 setFilesystem fs storage =
     { storage | filesystem = fs }
 
 
+{-| Retorna logs do servidor.
+-}
 getLogs : Server -> Logs.Model
 getLogs =
     .logs
 
 
+{-| Atualiza logs do servidor.
+-}
 setLogs : Logs.Model -> Server -> Server
 setLogs logs model =
     { model | logs = logs }
 
 
+{-| Retorna processos do servidor.
+-}
 getProcesses : Server -> Processes.Model
 getProcesses =
     .processes
 
 
+{-| Atualiza processos do servidor.
+-}
 setProcesses : Processes.Model -> Server -> Server
 setProcesses processes model =
     { model | processes = processes }
 
 
+{-| Tenta pegar cid do endpoint do gateway.
+-}
 getEndpointCId : Server -> Maybe CId
 getEndpointCId server =
     case server.ownership of
@@ -361,6 +451,8 @@ getEndpointCId server =
             Nothing
 
 
+{-| Atualiza cid do endpoint do gateway.
+-}
 setEndpointCId : Maybe CId -> Server -> Server
 setEndpointCId cid ({ ownership } as server) =
     let
@@ -376,6 +468,8 @@ setEndpointCId cid ({ ownership } as server) =
         { server | ownership = ownership_ }
 
 
+{-| Adiciona endpoint ao gateway.
+-}
 addEndpointCId : CId -> Server -> Server
 addEndpointCId cid ({ ownership } as server) =
     let
@@ -394,6 +488,8 @@ addEndpointCId cid ({ ownership } as server) =
         { server | ownership = ownership_ }
 
 
+{-| Reomve endpoint do gateway.
+-}
 removeEndpointCId : CId -> Server -> Server
 removeEndpointCId cid ({ ownership } as server) =
     let
@@ -417,11 +513,15 @@ removeEndpointCId cid ({ ownership } as server) =
         { server | ownership = ownership_ }
 
 
+{-| Atualiza nip ativo do servidor.
+-}
 setActiveNIP : NIP -> Server -> Server
 setActiveNIP nip server =
     { server | activeNIP = nip }
 
 
+{-| Tenta pegar os endpoints de um servidor.
+-}
 getEndpoints : Server -> Maybe (List CId)
 getEndpoints server =
     case server.ownership of
@@ -435,11 +535,15 @@ getEndpoints server =
             Nothing
 
 
+{-| Tenta pegar os bounces de um servidor.
+-}
 getBounce : Server -> Maybe Bounces.ID
 getBounce server =
     server.bounce
 
 
+{-| Tenta pegar o bounce ativo de um servidor.
+-}
 getActiveBounce : Server -> Model -> Maybe Bounces.ID
 getActiveBounce server model =
     case (getEndpointCId server) of
@@ -452,6 +556,8 @@ getActiveBounce server model =
                 |> Maybe.andThen (getBounce)
 
 
+{-| Atualiza o bounce ativo.
+-}
 setActiveBounce : Server -> Maybe Bounces.ID -> Server
 setActiveBounce server bounceId =
     case (getEndpointCId server) of
@@ -463,11 +569,15 @@ setActiveBounce server bounceId =
             server
 
 
+{-| Atualiza os bounces de um servidor.
+-}
 setBounce : Maybe Bounces.ID -> Server -> Server
 setBounce bounce server =
     { server | bounce = bounce }
 
 
+{-| Retorna se o server é um gateway.
+-}
 isGateway : Server -> Bool
 isGateway { ownership } =
     case ownership of
@@ -478,6 +588,8 @@ isGateway { ownership } =
             False
 
 
+{-| Retornar se o server é freeplay.
+-}
 isFreeplay : Server -> Bool
 isFreeplay server =
     case server.type_ of
@@ -491,36 +603,51 @@ isFreeplay server =
             False
 
 
+{-| Tenta pegar hardware de um servidor.
+-}
 getHardware : Server -> Hardware.Model
 getHardware server =
     server.hardware
 
 
+{-| Atualiza hardware de um servidor.
+-}
 setHardware : Hardware.Model -> Server -> Server
 setHardware hardware server =
     { server | hardware = hardware }
 
 
+{-| Tenta pegar notifications de um servidor.
+-}
 getNotifications : Server -> Notifications.Model
 getNotifications =
     .notifications
 
 
+{-| Atualiza notifications de um servidor.
+-}
 setNotifications : Notifications.Model -> Server -> Server
 setNotifications notifications server =
     { server | notifications = notifications }
 
 
+{-| Tenta pegar tunnels de um servidor.
+-}
 getTunnels : Server -> Tunnels.Model
 getTunnels =
     .tunnels
 
 
+{-| Atualiza tunnels de um servidor.
+-}
 setTunnels : Tunnels.Model -> Server -> Server
 setTunnels tunnels server =
     { server | tunnels = tunnels }
 
 
+{-| Retorna um ( CId, Server ) relacionado ao ( CId, Server ) e contexto
+passado.
+-}
 getContextServer : Context -> Model -> ( CId, Server ) -> Maybe ( CId, Server )
 getContextServer context servers ( gatewayCId, gateway ) =
     let
@@ -538,11 +665,15 @@ getContextServer context servers ( gatewayCId, gateway ) =
                 Maybe.uncurry endpointCId maybeEndpoint
 
 
+{-| Retorna tipo do servidor.
+-}
 getType : Server -> ServerType
 getType =
     .type_
 
 
+{-| Tenta coletar nome (Label) do servidor.
+-}
 getLabel : CId -> Model -> Maybe String
 getLabel cid model =
     case get cid model of
@@ -560,6 +691,8 @@ getLabel cid model =
             Nothing
 
 
+{-| Tenta coletar o Gateway de um Endpoint.
+-}
 getGatewayOfEndpoint : CId -> Model -> Maybe CId
 getGatewayOfEndpoint cid model =
     case cid of

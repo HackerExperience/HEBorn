@@ -54,6 +54,8 @@ update config msg model =
             handleDisconnect config cid model
 
 
+{-| Atualiza a model com um server atualizado pela função `updateServer`.
+-}
 onServerMsg :
     Config msg
     -> CId
@@ -71,6 +73,8 @@ onServerMsg config cid msg model =
             ( model, React.none )
 
 
+{-| Realiza um request para resincronizar o servidor.
+-}
 onResync : Config msg -> CId -> Model -> UpdateResponse msg
 onResync config cid model =
     let
@@ -93,6 +97,8 @@ onResync config cid model =
         ( model, cmd )
 
 
+{-| Atualiza um server de acordo com a mensagem enviada a ele.
+-}
 updateServer :
     Config msg
     -> CId
@@ -136,6 +142,8 @@ updateServer config cid model msg server =
             handleLogout config cid server
 
 
+{-| Altera bounce utilizado para se conectar ao servidor.
+-}
 handleSetBounce :
     Config msg
     -> CId
@@ -146,6 +154,8 @@ handleSetBounce _ cid maybeBounceId server =
     ( setActiveBounce server maybeBounceId, React.none )
 
 
+{-| Altera endpoint do servidor.
+-}
 handleSetEndpoint :
     Config msg
     -> Maybe CId
@@ -155,6 +165,8 @@ handleSetEndpoint _ cid server =
     ( setEndpointCId cid server, React.none )
 
 
+{-| Altera NIP ativo do servidor.
+-}
 handleSetActiveNIP :
     Config msg
     -> Network.NIP
@@ -164,6 +176,8 @@ handleSetActiveNIP _ nip server =
     ( setActiveNIP nip server, React.none )
 
 
+{-| Altera nome do servidor.
+-}
 handleSetName :
     String
     -> Server
@@ -172,6 +186,8 @@ handleSetName name server =
     ( setName name server, React.none )
 
 
+{-| Delega mensagens para o domínio de Filesystem.
+-}
 onFilesystemMsg :
     Config msg
     -> CId
@@ -201,6 +217,8 @@ onFilesystemMsg config cid id msg server =
             ( server, React.none )
 
 
+{-| Delega mensagens para o domínio de Logs.
+-}
 onLogsMsg :
     Config msg
     -> CId
@@ -221,6 +239,8 @@ onLogsMsg config cid msg server =
         ( server_, cmd )
 
 
+{-| Delega mensagens para o domínio de Processos.
+-}
 onProcessesMsg :
     Config msg
     -> CId
@@ -244,6 +264,8 @@ onProcessesMsg config cid msg server =
         ( server_, cmd )
 
 
+{-| Delega mensagens para o domínio de Hardware.
+-}
 onHardwareMsg :
     Config msg
     -> CId
@@ -267,6 +289,8 @@ onHardwareMsg config cid msg server =
         ( server_, cmd )
 
 
+{-| Delega mensagens para o domínio de Tunnels.
+-}
 onTunnelsMsg :
     Config msg
     -> CId
@@ -287,6 +311,8 @@ onTunnelsMsg config cid msg server =
         ( server_, cmd )
 
 
+{-| Delega mensagens para o domínio de Notifications.
+-}
 onNotificationsMsg :
     Config msg
     -> CId
@@ -307,6 +333,9 @@ onNotificationsMsg config cid msg server =
         ( model_, cmd )
 
 
+{-| Insere um servidor novo na model ao se conectar em um novo channel de
+servidor.
+-}
 handleJoinedServer :
     Config msg
     -> CId
@@ -315,6 +344,7 @@ handleJoinedServer :
     -> UpdateResponse msg
 handleJoinedServer config cid value model =
     let
+        -- monta um decoder de bootstrap utilizando decoders genéricos
         decodeBootstrap =
             model
                 |> getGatewayCache cid
@@ -322,13 +352,17 @@ handleJoinedServer config cid value model =
     in
         case Decode.decodeValue decodeBootstrap value of
             Ok server ->
+                -- dados do bootstrap estão bem formatados
                 let
+                    -- emite evento para account avisando da adição de um novo
+                    -- gateway
                     cmd =
                         if isGateway server then
                             React.msg <| config.onNewGateway cid
                         else
                             React.none
 
+                    -- insere o servidor na model
                     model_ =
                         model
                             |> insert cid server
@@ -337,6 +371,7 @@ handleJoinedServer config cid value model =
                     ( model_, cmd )
 
             Err reason ->
+                -- erro ao decodificar o bootstrap
                 let
                     log =
                         Debug.log ("▶ Server Bootstrap Error:\n" ++ reason) ""
@@ -344,6 +379,8 @@ handleJoinedServer config cid value model =
                     ( model, React.none )
 
 
+{-| Desconecta o servidor.
+-}
 handleDisconnect :
     Config msg
     -> CId
@@ -354,6 +391,8 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
         ( servers_, gateways_ ) =
             case cid of
                 EndpointCId addr ->
+                    -- remove dados específicos de endpoint da model
+                    -- caso seja um endpoint
                     ( Dict.map (\_ -> removeEndpointCId cid) model.servers
                     , Dict.map
                         (\_ cache ->
@@ -363,8 +402,10 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
                     )
 
                 _ ->
+                    -- não faz nada (por enquanto) caso seja um gateway
                     ( model.servers, model.gateways )
 
+        -- atualiza
         model_ =
             { model
                 | servers = servers_
@@ -372,6 +413,8 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
             }
                 |> remove cid
 
+        -- emite evento de troca de contexto caso o gateway ativo tenha perdido
+        -- seu endpoint
         react =
             if (activeCId == Just cid) then
                 React.msg onSetGatewayContext
@@ -381,6 +424,8 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
         ( model_, react )
 
 
+{-| Efetua request de logout.
+-}
 handleLogout :
     Config msg
     -> CId
@@ -389,7 +434,7 @@ handleLogout :
 handleLogout config cid server =
     config
         |> logoutRequest cid
-        -- this request doesn't have reponse
+        -- este request não possui resposta
         |> Cmd.map (\_ -> config.batchMsg [])
         |> React.cmd
         |> React.addMsg config.batchMsg
