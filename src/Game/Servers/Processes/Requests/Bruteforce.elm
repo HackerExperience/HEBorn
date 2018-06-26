@@ -6,7 +6,8 @@ module Game.Servers.Processes.Requests.Bruteforce
         , errorToString
         )
 
-{-| Contém request bruteforce.
+{-| Contém request bruteforce, que serve para roubar a senha de um servidor
+remoto.
 -}
 
 import Json.Decode exposing (Value, Decoder, decodeValue, succeed, fail)

@@ -54,7 +54,7 @@ update config msg model =
             handleDisconnect config cid model
 
 
-{-| Atualiza a model com um server atualizado pela função `updateServer`.
+{-| Atualiza a model com um server atualizado pela função updateServer.
 -}
 onServerMsg :
     Config msg
@@ -405,13 +405,13 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
                     -- não faz nada (por enquanto) caso seja um gateway
                     ( model.servers, model.gateways )
 
-        -- atualiza
+        -- atualiza a model e remove o cid
         model_ =
-            { model
-                | servers = servers_
-                , gateways = gateways_
-            }
-                |> remove cid
+            remove cid <|
+                { model
+                    | servers = servers_
+                    , gateways = gateways_
+                }
 
         -- emite evento de troca de contexto caso o gateway ativo tenha perdido
         -- seu endpoint

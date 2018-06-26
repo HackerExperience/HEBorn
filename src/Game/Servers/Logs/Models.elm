@@ -10,7 +10,8 @@ import Utils.Maybe as Maybe
 import Game.Meta.Types.Network exposing (IP, NIP)
 
 
-{-| A model contém Logs de um servidor e a ordem de desenho dos mesmos.
+{-| A model contém Logs de um servidor e a ordem de desenho dos mesmos e a
+ordem de desenho dos mesmos organizados por data.
 -}
 type alias Model =
     { logs : Dict ID Log
@@ -33,10 +34,17 @@ type alias Date =
 
 {-| Log é composto por um conjunto de dados:
 
-  - timestamp: data de criação do log
-  - status: estado do log perante o jogador (recém descoberto, recém criado ou
-    conhecido)
-  - content: conteúdo do log, indisponível quando o mesmo está criptografado
+  - timestamp
+
+Data de criação do log.
+
+  - status
+
+Estado do log perante o jogador (recém descoberto, recém criado ou conhecido).
+
+  - content
+
+Conteúdo do log, indisponível quando o mesmo está criptografado.
 
 -}
 type alias Log =
@@ -53,7 +61,7 @@ type Content
     | Encrypted
 
 
-{-| Conteúdo de um Log quando o mesmo está descriptografado,
+{-| Conteúdo de um Log quando o mesmo está descriptografado.
 -}
 type alias Data =
     { raw : String
@@ -71,11 +79,25 @@ type Status
 
 {-| Formatos de logs conhecidos:
 
-  - LocalLoginFormat: login no servidor local
-  - RemoteLoginFormat: login em servidor remoto
-  - ConnectionFormat: conexão aberta entre dois servidores
-  - DownloadByFormat: arquivo foi baixado por outro servidor
-  - DownloadFromFormat: arquivo foi baixado de outro servidor
+  - LocalLoginFormat
+
+Login no servidor local.
+
+  - RemoteLoginFormat
+
+Login em servidor remoto.
+
+  - ConnectionFormat
+
+Conexão aberta entre dois servidores.
+
+  - DownloadByFormat
+
+Arquivo foi baixado por outro servidor.
+
+  - DownloadFromFormat
+
+Arquivo foi baixado de outro servidor.
 
 -}
 type Format
@@ -86,7 +108,7 @@ type Format
     | DownloadFromFormat Download
 
 
-{-| Dados de um Log de login local,
+{-| Dados de um Log de login local.
 -}
 type alias LocalLogin =
     { from : IP
@@ -94,7 +116,7 @@ type alias LocalLogin =
     }
 
 
-{-| Dados de um Log de login remoto,
+{-| Dados de um Log de login remoto.
 -}
 type alias RemoteLogin =
     { into : IP
@@ -169,8 +191,8 @@ insert id log model =
         { model | logs = logs, drawOrder = drawOrder }
 
 
-{-| Cria um Id para log novo. O nome dessa função está misleading, é uma boa
-ideia mudar.
+{-| Cria um Id para log novo.
+O nome dessa função está misleading, é uma boa ideia mudar.
 -}
 findId : ( Time, Int ) -> Dict Date ID -> Date
 findId (( birth, from ) as pig) model =

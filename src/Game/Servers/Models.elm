@@ -31,7 +31,8 @@ type alias Gateways =
     Dict Id GatewayCache
 
 
-{-| Dados em cache de um gateway.
+{-| Dados em cache de um gateway, são recebidos no momento do bootstrap de
+Account e são necessários para se conectar ao servidor.
 -}
 type alias GatewayCache =
     { activeNIP : NIP
@@ -78,7 +79,8 @@ type alias Storages =
     Dict StorageId Storage
 
 
-{-| Dados de uma storage, o nome ela e seu filesystem.
+{-| Dados de uma storage, o nome dela e seu filesystem, veja mais informações
+sobre o filesystem na model do mesmo.o
 -}
 type alias Storage =
     { name : String
@@ -86,7 +88,21 @@ type alias Storage =
     }
 
 
-{-| Tipos de servidor.
+{-| Tipos de servidor, que podem ser:
+
+  - Desktop
+
+Servidor comum utilizado no modo freeplay.
+
+  - DesktopCampaign
+
+Servidor comum utilizado no modo campanha, tem limitações dependendo da missão.
+
+  - Mobile
+
+Utilizado no modo freeplay, a coordenada muda de acordo com a posição real do
+jogador.
+
 -}
 type ServerType
     = Desktop
@@ -94,14 +110,26 @@ type ServerType
     | Mobile
 
 
-{-| Dados do servidor que variam se o servidor é um gateway ou endpoint.
+{-| Dados de servidores que variam dependendo de quem é o dono do servidor,
+olhe a seguir para mais detalhes.
 -}
 type Ownership
     = GatewayOwnership GatewayData
     | EndpointOwnership EndpointData
 
 
-{-| Dados específicos para gateways.
+{-| Dados que só servidores gateway possuem:
+
+  - endpoints
+
+O set de endpoints que o servidor está conectado.
+
+  - endpoint
+
+O endpoint ativo do servidor.
+
+Olhe a seguir para mais detalhes.
+
 -}
 type alias GatewayData =
     { endpoints : Set EndpointAddress
@@ -109,20 +137,22 @@ type alias GatewayData =
     }
 
 
-{-| Dados específicos para endpoints.
+{-| Dados que só servidores endpoint possuem, por enquanto só contém dados
+dados analisados, olhe a seguir para mais detalhes.
 -}
 type alias EndpointData =
     { analyzed : Maybe AnalyzedEndpoint
     }
 
 
-{-| Dados de um endpoint analisado.
+{-| Dados de um endpoint que só são acessíveis após rodar um software de
+análise no servidor, por enquanto está vazio.
 -}
 type alias AnalyzedEndpoint =
     {}
 
 
-{-| Dict pra mapear endpoints para seus gateways, o window manager utiliza
+{-| Dict que mapeia endpoints para seus gateways, o window manager utiliza
 muito isso pra alguns casos específicos de aplicativos.
 -}
 type alias GatewayOfEndpoints =

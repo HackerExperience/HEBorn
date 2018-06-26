@@ -19,13 +19,36 @@ import Game.Servers.Models exposing (Server)
 
 {-| Parâmetros especiais:
 
-    activeCId: id do servidor ativo
-    activeGateway: id do servidor gateway ativo
-    onSetGatewayContext: usado quando precisar mudar o contexto do gateway
-    onInventoryFreed: usado quando precisar liberar um item do inventário
-    onInventoryUsed: usado quando precisar utilizar um item do inventário
-    onNewGateway: usado quando adicionar um novo gateway
-    onToast: usado quando exibir uma toast
+  - activeCId
+
+Id do servidor ativo.
+
+  - activeGateway
+
+Id do servidor gateway ativo.
+
+  - onSetGatewayContext
+
+Usado para mudar o contexto do gateway.
+
+  - onInventoryFreed
+
+Usado para liberar um item do inventário. Passa o item do inventório a ser
+liberado.
+
+  - onInventoryUsed
+
+Usado para utilizar um item do inventário. Passa o item do inventório a ser
+utilizado.
+
+  - onNewGateway
+
+Usado quando adicionar um novo gateway. Passa o CId do gateway novo.
+
+  - onToast
+
+Usado para exibir uma toast. Passa o CId do servidor afetado e o conteúdo da
+notificação.
 
 -}
 type alias Config msg =

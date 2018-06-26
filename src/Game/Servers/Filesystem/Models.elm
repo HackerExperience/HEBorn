@@ -84,7 +84,7 @@ insertFile id file ({ files, folders } as model) =
         -- só inserir o arquivo caso o fullpath esteja livre
         if noFileExists then
             let
-                -- deletear este arquivo da model caso ele já exista em outro
+                -- deletar este arquivo da model caso ele já exista em outro
                 -- diretório
                 model_ =
                     deleteFile id model
@@ -182,13 +182,13 @@ renameFile id name model =
             model
 
 
-{-| List direct entries of given folder.
+{-| Lista membros diretos de uma pasta.
 -}
 list : Path -> Model -> List Entry
 list path model =
-    -- TODO: add nested folder support
+    -- TODO: adicionar suporte a pastas dentro de pastas
     let
-        -- remove uma área do p
+        -- remove uma parte do path
         drop =
             String.dropLeft (String.length (joinPath path))
 
@@ -196,7 +196,7 @@ list path model =
         split =
             String.split "/"
 
-        --
+        -- usado pra filtrar o resultado do scan
         filterer item =
             case item of
                 FileEntry _ file ->
@@ -378,7 +378,7 @@ removeFromFolder id path folders =
                 folders
 
 
-{-| WIP
+{-| Helper para inserir arquivo em um path no tipo Folders.
 -}
 insertInFolder : Id -> Path -> Folders -> Folders
 insertInFolder id path folders =

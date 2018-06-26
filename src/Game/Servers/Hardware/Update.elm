@@ -27,7 +27,7 @@ update config msg model =
 
 
 {-| Realiza request para atualizar a motherboard quando recebe a mensagem
-`HandleMotherboardUpdate`.
+HandleMotherboardUpdate.
 -}
 handleMotherboardUpdate :
     Config msg
@@ -55,7 +55,7 @@ handleMotherboardUpdate config motherboard model =
         ( model, cmd )
 
 
-{-| Atualiza model quando recebe evento `HandleMotherboardUpdated`.
+{-| Atualiza model quando recebe evento HandleMotherboardUpdated.
 -}
 handleMotherboardUpdated :
     Config msg

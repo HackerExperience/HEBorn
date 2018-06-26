@@ -9,7 +9,8 @@ module Game.Servers.Processes.Requests.Download
         , errorToString
         )
 
-{-| Contém requests de download de arquivo de servidores invadidos e ftp público.
+{-| Contém requests de download de arquivo de servidores invadidos e ftp
+público.
 -}
 
 import Json.Decode as Decode
@@ -39,12 +40,29 @@ type alias Data =
 
 {-| Tipos de erros que podem ocorrer ao realizar o request:
 
-    - SelfLoop: download forma loop
-    - FileNotFound: arquivo não encontrado
-    - StorageFull: storage alvo está cheia
-    - StorageNotFound: storage alvo não existe
-    - BadRequest: request mal formado
-    - Unknown: erro desconhecido pelo client
+    - SelfLoop
+
+Download forma loop.
+
+    - FileNotFound
+
+Arquivo não encontrado.
+
+    - StorageFull
+
+Storage alvo está cheia.
+
+    - StorageNotFound
+
+Storage alvo não existe.
+
+    - BadRequest
+
+Request mal formado.
+
+    - Unknown
+
+Erro desconhecido pelo client.
 
 -}
 type Errors

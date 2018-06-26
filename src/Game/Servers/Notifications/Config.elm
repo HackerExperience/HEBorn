@@ -9,7 +9,9 @@ import Game.Servers.Filesystem.Shared as Filesystem
 
 {-| Config de Server.Notifications, contém uma mensagens configuraveis:
 
-  - onToast: utilizado para criar uma toast
+  - onToast
+
+Utilizado para criar uma toast. Passa conteúdo da toast.
 
 -}
 type alias Config msg =

@@ -6,11 +6,18 @@ import Game.Servers.Hardware.Models exposing (..)
 
 {-| Mensagens:
 
-  - HandleMotherBoardUpdate: recebida por dispatch, efetua request para atualizar
-    a motherboard
-  - HandleMotherboardUpdated: recebida por evento, atualiza a motherboard da
-    model
-  - SetMotherboard: recebida com a respota do request updateMotherboardRequest
+  - HandleMotherBoardUpdate
+
+Recebida por dispatch, efetua request para atualizar a motherboard. Requer
+a motherboard no estado desejado.
+
+  - HandleMotherboardUpdated
+
+Recebida por evento, atualiza a motherboard da model.
+
+  - SetMotherboard
+
+Recebida com a respota do request updateMotherboardRequest.
 
 -}
 type Msg

@@ -7,13 +7,27 @@ import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Processes.Messages exposing (..)
 
+    , onGenericNotification : String -> String -> msg
 
 {-| Parâmetros especiais:
 
-  - onDownloadStarted: lançado quando um processo de download é iniciado
-  - onUploadStarted: lançado quando um processo de upload é iniciado
-  - onBruteforceStarted: lançado quando um processo de bruteforce é iniciado
-  - onGenericNotification: utilizado para lançar notificações
+  - onDownloadStarted
+
+Lançado quando um processo de download é iniciado. Passa StorageId alvo do
+download e FileEntry de origem.
+
+  - onUploadStarted
+
+Lançado quando um processo de upload é iniciado. Passa StorageId alvo do
+download e FileEntry de origem.
+
+  - onBruteforceStarted
+
+Lançado quando um processo de bruteforce é iniciado.
+
+  - onGenericNotification
+
+Utilizado para lançar notificações. Passa título e conteúdo da notificação.
 
 -}
 type alias Config msg =

@@ -15,12 +15,25 @@ import Game.Servers.Models exposing (..)
 
 {-| Mensagens:
 
-    - ServerMsg: mensagem para um server em específico
-    - Synced: recebido como resposta de um request de sincronização
-    - HandleResync: recebida por dispatch, efetua um request de resync
-    - HandleJoinedServer: recebida por evento quando conectar com o canal de
-        um servidor
-    - HandleDisconnect: recebido como resposta do request de logout
+  - ServerMsg
+
+Mensagem para um server em específico.
+
+  - Synced
+
+Recebido como resposta de um request de sincronização.
+
+  - HandleResync
+
+Recebida por dispatch, efetua um request de resync. Requer o CId do servidor.
+
+  - HandleJoinedServer
+
+Recebida por evento quando conectar com o canal de um servidor.
+
+  - HandleDisconnect
+
+Recebido como resposta do request de logout.
 
 -}
 type Msg
@@ -33,20 +46,52 @@ type Msg
 
 {-| Mensagens direcionadas a um servidor:
 
-    - HandleLogout: recebida por dispatch, efetua request de logout do servidor
-    - HandleSetBounce: recebida por dispatch, muda bounce do servidor
-    - HandleSetEndpoint: recebida por dispatch, muda endpoint do servidor, só
-        funciona com servidores gateway
-    - HandleSetActiveNIP: recebida por dispatch, muda nip do servidor
-    - HandleSetName: recebida por dispatch, muda nome do servidor, só funciona
-    com servidores do jogador
-    - FilesystemMsg: mensagens direcionadas ao domínio de Filesystem do servidor
-    - LogsMsg: mensagens direcionadas ao domínio de Logs do servidor
-    - ProcessesMsg: mensagens direcionadas ao domínio de Processes do servidor
-    - HardwareMsg: mensagens direcionadas ao domínio de Hardware do servidor
-    - TunnelsMsg: mensagens direcionadas ao domínio de Tunnels do servidor
-    - NotificationsMsg: mensagens direcionadas ao domínio de Notifications do
-    servidor
+  - HandleLogout
+
+Recebida por dispatch, efetua request de logout do servidor.
+
+  - HandleSetBounce
+
+Recebida por dispatch, muda bounce do servidor.
+
+  - HandleSetEndpoint
+
+Recebida por dispatch, muda endpoint do servidor, só funciona co
+servidores gateway.
+
+  - HandleSetActiveNIP
+
+Recebida por dispatch, muda nip do servidor.
+
+  - HandleSetName
+
+Recebida por dispatch, muda nome do servidor, só funciona.
+
+com servidores do jogador
+
+  - FilesystemMsg
+
+Mensagens direcionadas ao domínio de Filesystem do servidor.
+
+  - LogsMsg
+
+Mensagens direcionadas ao domínio de Logs do servidor.
+
+  - ProcessesMsg
+
+Mensagens direcionadas ao domínio de Processes do servidor.
+
+  - HardwareMsg
+
+Mensagens direcionadas ao domínio de Hardware do servidor.
+
+  - TunnelsMsg
+
+Mensagens direcionadas ao domínio de Tunnels do servidor.
+
+  - NotificationsMsg
+
+Mensagens direcionadas ao domínio de Notifications do servidor
 
 -}
 type ServerMsg

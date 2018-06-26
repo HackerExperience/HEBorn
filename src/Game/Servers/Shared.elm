@@ -17,6 +17,10 @@ type alias EndpointAddress =
 
 {-| Id conhecido de um servidor, pode ser um Id para gateways ou um NIP para
 endpoints.
+
+Essa diferenciação existe pois não temos acesso ao ServerId de servidores
+remotos.
+
 -}
 type CId
     = GatewayCId Id

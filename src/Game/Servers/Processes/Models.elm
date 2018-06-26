@@ -33,12 +33,12 @@ type alias Processes =
 {-| Estrutura de dados que armazena um processo, processos possuem os
 seguintes dados:
 
-  - Tipo de processo
-  - Nível de acesso do jogador
-  - Estado do processo
-  - Arquivo do processo (caso ele seja um software)
-  - Network que o processo está utilizando
-  - IP que o processo está utilizando
+  - type_: Tipo de processo.
+  - access: Nível de acesso do jogador.
+  - state: Estado do processo.
+  - file: Arquivo do processo (caso ele seja um software).
+  - progress: Network que o processo está utilizando.
+  - network: IP que o processo está utilizando.
 
 -}
 type alias Process =
@@ -54,14 +54,37 @@ type alias Process =
 
 {-| Tipo do processo, a maioria dos tipos são tipos de software:
 
-Cracker: rouba senha de um servidor
-Decryptor: descriptografa arquivos
-Encryptor: criptografa arquivos
-FileTransference: transfere arquivo de um servidor para outro
-PassiveFirewall: firewall que executa passivamente
-Download: download de arquivo
-Upload: upload de arquivo
-VirusCollect: coleta dinheiro gerado por virus
+  - Cracker
+
+Rouba senha de um servidor.
+
+  - Decryptor
+
+Descriptografa arquivos.
+
+  - Encryptor
+
+Criptografa arquivos.
+
+  - FileTransference
+
+Transfere arquivo de um servidor para outro.
+
+  - PassiveFirewall
+
+Firewall que executa passivamente.
+
+  - Download
+
+Download de arquivo.
+
+  - Upload
+
+Upload de arquivo.
+
+  - VirusCollect
+
+Coleta dinheiro gerado por virus.
 
 -}
 type
@@ -137,13 +160,29 @@ type alias PartialAccess =
 
 {-| Estado do processo:
 
-  - Starting: otimista, ainda não foi criado no server side
-  - Running: em execução
-  - Paused: pausado
-  - Concluded: concluído de forma otimista, não se sabe se foi com sucesso
-    ou não
-  - Succeeded: concluído com sucesso
-  - Failed: concluído ou terminado com falha
+  - Starting
+
+Processo otimista, ainda não foi criado no server side.
+
+  - Running
+
+Processo em execução.
+
+  - Paused
+
+Processo pausado.
+
+  - Concluded
+
+Concluído de forma otimista, não se sabe se foi com sucesso ou não.
+
+  - Succeeded
+
+Processo concluído com sucesso.
+
+  - Failed
+
+Processo concluído ou terminado com falha.
 
 -}
 type State
@@ -235,14 +274,16 @@ type alias Percentage =
 
 
 {-| Data em que o processo será concluído.
+
 Não tente mudar isso para "tempo faltando para concluir o processo", isso
 causaria updates de model desnecessários.
+
 -}
 type alias CompletionDate =
     Time
 
 
-{-| Aplica função caso o processo esteja sendo inicializado
+{-| Aplica função caso o processo esteja sendo inicializado.
 -}
 whenStarted : (Process -> Process) -> Process -> Process
 whenStarted func process =
@@ -252,7 +293,7 @@ whenStarted func process =
         func process
 
 
-{-| Aplica função caso o processo esteja em execução
+{-| Aplica função caso o processo esteja em execução.
 -}
 whenIncomplete : (Process -> Process) -> Process -> Process
 whenIncomplete func process =
@@ -262,7 +303,7 @@ whenIncomplete func process =
         func process
 
 
-{-| Aplica função caso o jogador tenha acesso total ao processo
+{-| Aplica função caso o jogador tenha acesso total ao processo.
 -}
 whenFullAccess : (Process -> Process) -> Process -> Process
 whenFullAccess func process =
@@ -410,7 +451,7 @@ resume process =
     { process | state = Running }
 
 
-{-| Conclui um processo, aceita um `Maybe Bool` para definir um estado de
+{-| Conclui um processo, aceita um Maybe Bool para definir um estado de
 conclusão mais preciso.
 -}
 conclude : Maybe Bool -> Process -> Process

@@ -32,18 +32,45 @@ type alias Data =
 {-| Tipos de erros que podem rolar ao efetuar o request, seria uma boa ideia
 tirar as piadas:
 
-  - PorraKress: deu um erro e a culpa é do client side
-  - NaughtySlot: problema nos dados do slot
-  - UnhealthyFriends: problema na network connection
-  - CoitusInterruptus: motherboard não contém componentes iniciais (?)
-  - TryinToUseGod: tentando conectar um componente que não existe
-  - WrongHole: tentando conectar um componente no slot errado
-  - RobinHood: tentando usar um componente ou network que não pertence ao
-    jogador (?)
-  - ConnectionRequired: motherboard não tem um IP público
-  - WrongToolForTheJob: tentando usar um componente que não é uma
-    motherboard como uma motherboard
-  - Unknown: erro desconhecido pelo client
+  - PorraKress
+
+Deu um erro e a culpa é do client side.
+
+  - NaughtySlot
+
+Problema nos dados do slot.
+
+  - UnhealthyFriends
+
+Problema na network connection.
+
+  - CoitusInterruptus
+
+Motherboard não contém componentes iniciais.
+
+  - TryinToUseGod
+
+Tentando conectar um componente que não existe.
+
+  - WrongHole
+
+Tentando conectar um componente no slot errado.
+
+  - RobinHood
+
+Tentando usar um componente ou network que não pertence ao jogador.
+
+  - ConnectionRequired
+
+Motherboard não tem um IP público.
+
+  - WrongToolForTheJob
+
+Tentando usar um componente que não é uma motherboard como uma motherboard.
+
+  - Unknown
+
+Erro desconhecido pelo client.
 
 -}
 type Errors

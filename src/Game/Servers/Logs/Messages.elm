@@ -5,12 +5,32 @@ import Game.Servers.Logs.Models exposing (..)
 
 {-| Mensagens:
 
-  - HandleCreated: recebida por evento quando um log é criado
-  - HandleUpdateContent: recebida por dispatch para atualizar o conteúdo do log
-  - HandleHide: recebida por dispatch, efetua request para esconder o log
-  - HandleEncrypt: recebida por dispatch, efetua request para encriptar o log
-  - HandleDecrypt: recebida por dispatch, efetua request para desencriptar o log
-  - HandleDelete: recebida por dispatch, efetua request para deletar o log
+  - HandleCreated
+
+Recebida por evento quando um log é criado.
+
+  - HandleUpdateContent
+
+Recebida por dispatch para atualizar o conteúdo do log. Requer Id do log e
+String com conteúdo novo.
+
+  - HandleHide
+
+Recebida por dispatch, efetua request para esconder o log. Requer Id do log.
+
+  - HandleEncrypt
+
+Recebida por dispatch, efetua request para encriptar o log. Requer Id do log e
+conteúdo descriptografado do log.
+
+  - HandleDecrypt
+
+Recebida por dispatch, efetua request para desencriptar o log. Requer Id do
+log.
+
+  - HandleDelete
+
+Recebida por dispatch, efetua request para deletar o log. Requer Id do log.
 
 -}
 type Msg

@@ -8,8 +8,13 @@ import Game.Servers.Hardware.Messages exposing (..)
 
 {-| Config do Hardware, contém duas mensagens configuraveis:
 
-  - onInventoryFreed: é lançada quando um item do inventório for liberado
-  - onInventoryUsed: é lançada quando um item do inventório for utilizado
+  - onInventoryFreed
+
+É lançada quando um item do inventório for liberado. Passa FileEntry afetada.
+
+  - onInventoryUsed
+
+É lançada quando um item do inventório for utilizado. Passa FileEntry afetada.
 
 -}
 type alias Config msg =

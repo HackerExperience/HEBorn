@@ -5,16 +5,43 @@ import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Notifications.Shared exposing (..)
 
 
-{-| Mensagens:
+{-| Mensagens, todas são recebidas por dispatch:
 
-  - HandleGeneric: adiciona notificação genérica
-  - HandleDownloadStarted: adiciona notificação de download iniciado
-  - HandleDownloadConcluded: adiciona notificação de download concluído
-  - HandleUploadStarted: adiciona notificação de upload iniciado
-  - HandleUploadConcluded: adiciona notificação de upload concluído
-  - HandleBruteforceStarted: aiciona notificação de bruteforce iniciado
-  - HandleBruteforceConcluded: adiciona notificação de bruteforce concluído
-  - HandleReadAll: marca todas as notificações como lidas
+  - HandleGeneric
+
+Adiciona notificação genérica. Requer Title e Content da notificação.
+
+  - HandleDownloadStarted
+
+Adiciona notificação de download iniciado. Requer NIP do servidor afetado,
+StorageId de destino e FileEntry de origem.
+
+  - HandleDownloadConcluded
+
+Adiciona notificação de download concluído. Requer NIP do servidor afetado,
+StorageId de destino e FileEntry de origem.
+
+  - HandleUploadStarted
+
+Adiciona notificação de upload iniciado. Requer NIP do servidor afetado,
+StorageId de destino e FileEntry de origem.
+
+  - HandleUploadConcluded
+
+Adiciona notificação de upload concluído. Requer NIP do servidor afetado,
+StorageId de destino e FileEntry de origem.
+
+  - HandleBruteforceStarted
+
+Aiciona notificação de bruteforce iniciado. Requer NIP do servidor afetado.
+
+  - HandleBruteforceConcluded
+
+Adiciona notificação de bruteforce concluído. Requer NIP do servidor afetado.
+
+  - HandleReadAll
+
+Marca todas as notificações como lidas.
 
 -}
 type Msg

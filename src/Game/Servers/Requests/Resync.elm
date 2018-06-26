@@ -1,5 +1,9 @@
 module Game.Servers.Requests.Resync exposing (Data, resyncRequest)
 
+{-| Contém request de resync, é utilizado para normalizar os dados da model
+consistentes caso alguma inconsistẽncia aconteça.
+-}
+
 import Time exposing (Time)
 import Json.Decode as Decode exposing (Value, decodeValue)
 import Requests.Requests as Requests exposing (report)
