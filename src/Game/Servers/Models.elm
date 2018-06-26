@@ -31,8 +31,12 @@ type alias Gateways =
     Dict Id GatewayCache
 
 
-{-| Dados em cache de um gateway, são recebidos no momento do bootstrap de
-Account e são necessários para se conectar ao servidor.
+{-| Dados em cache de um gateway, contém o NIP ativo do servidor, a lista
+de NIPs disponíveis para o servidor utilizar e os endpoints conectados.
+
+Estes dados são recebidos no momento do bootstrap de Account e são necessários
+para se conectar ao channel do servidor.
+
 -}
 type alias GatewayCache =
     { activeNIP : NIP

@@ -23,13 +23,15 @@ Mensagem para um server em específico.
 
 Recebido como resposta de um request de sincronização.
 
-  - HandleResync
+  - HandleResync (dispatch)
 
-Recebida por dispatch, efetua um request de resync. Requer o CId do servidor.
+Efetua um request de resync. Requer o CId do servidor.
+Deve ser recebeida após a model de um servidor tornar-se inconsistente.
 
-  - HandleJoinedServer
+  - HandleJoinedServer (evento)
 
-Recebida por evento quando conectar com o canal de um servidor.
+Insere dados do bootstrap na model.
+Recebida quando se conectar ao canal de um servidor.
 
   - HandleDisconnect
 
@@ -46,28 +48,28 @@ type Msg
 
 {-| Mensagens direcionadas a um servidor:
 
-  - HandleLogout
+  - HandleLogout (dispatch)
 
-Recebida por dispatch, efetua request de logout do servidor.
+Efetua request de logout do servidor.
 
-  - HandleSetBounce
+  - HandleSetBounce (dispatch)
 
-Recebida por dispatch, muda bounce do servidor.
+Muda o bounce ativo do servidor, só funciona com endpoints. Requer um
+Maybe Bounces.ID que será o novo bounce do servidor.
 
-  - HandleSetEndpoint
+  - HandleSetEndpoint (dispatch)
 
-Recebida por dispatch, muda endpoint do servidor, só funciona co
-servidores gateway.
+Muda endpoint ativo do servidor, só funciona com servidores gateway. Requer um
+Maybe CId que será o o novo endpoint ativo do servidor.
 
-  - HandleSetActiveNIP
+  - HandleSetActiveNIP (dispatch)
 
-Recebida por dispatch, muda nip do servidor.
+Muda o NIP ativo do servidor. Requer um NIP que será o novo NIP ativo.
 
-  - HandleSetName
+  - HandleSetName (dispatch)
 
-Recebida por dispatch, muda nome do servidor, só funciona.
-
-com servidores do jogador
+Muda nome do servidor, só funciona com servidores do jogador. Requer uma String
+que será o novo nome do servidor.
 
   - FilesystemMsg
 
