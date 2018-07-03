@@ -9,6 +9,10 @@ module Game.Servers.Processes.Requests.Download
         , errorToString
         )
 
+{-| Contém requests de `Download` de arquivo de servidores invadidos e FTP
+público.
+-}
+
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -26,10 +30,41 @@ import Requests.Types exposing (Code(..), FlagsSource)
 import Game.Servers.Shared exposing (CId)
 
 
+{-| Resultado do request, não é um Maybe pois o tratamento de sucesso pode
+ser interessante um dia e a falta de typeclasses do elm nos forçaria a
+reescrever tudo se deixarmos pra mudar o tipo depois.
+-}
 type alias Data =
     Result Errors ()
 
 
+{-| Tipos de erros que podem ocorrer ao realizar o request:
+
+    - `SelfLoop`
+
+Download forma loop.
+
+    - `FileNotFound`
+
+Arquivo não encontrado.
+
+    - `StorageFull`
+
+Storage alvo está cheia.
+
+    - `StorageNotFound`
+
+Storage alvo não existe.
+
+    - `BadRequest`
+
+Request mal formado.
+
+    - `Unknown`
+
+Erro desconhecido pelo client.
+
+-}
 type Errors
     = SelfLoop
     | FileNotFound
@@ -39,14 +74,20 @@ type Errors
     | Unknown
 
 
+{-| `Id` do arquivo a ser baixado.
+-}
 type alias FileId =
     String
 
 
+{-| `Id` da storage que vai armazenar arquivo.
+-}
 type alias StorageId =
     String
 
 
+{-| Cria um `Cmd` de request para baixar um arquivo privado.
+-}
 privateDownloadRequest :
     NIP
     -> FileId
@@ -61,6 +102,8 @@ privateDownloadRequest target fileId storageId cid flagsSrc =
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
+{-| Cria um `Cmd` de request para baixar um arquivo de um ftp público.
+-}
 publicDownloadRequest :
     NIP
     -> FileId
@@ -75,6 +118,8 @@ publicDownloadRequest target fileId storageId cid flagsSrc =
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
+{-| Converte tipo do erro em string de erro (útil para views).
+-}
 errorToString : Errors -> String
 errorToString error =
     case error of
@@ -98,9 +143,11 @@ errorToString error =
 
 
 
--- internals
+-- funções internas
 
 
+{-| Encodifica payload do request.
+-}
 encoder : NIP -> FileId -> String -> Value
 encoder ( netId, ip ) fileId storageId =
     Encode.object
@@ -111,6 +158,8 @@ encoder ( netId, ip ) fileId storageId =
         ]
 
 
+{-| Decodifica resposta do request.
+-}
 receiver : FlagsSource a -> Code -> Value -> Data
 receiver flagsSrc code value =
     case code of
@@ -125,6 +174,8 @@ receiver flagsSrc code value =
                 |> Result.andThen Err
 
 
+{-| Converte a string de erro no tipo do erro.
+-}
 errorMessage : Decoder Errors
 errorMessage =
     message <|

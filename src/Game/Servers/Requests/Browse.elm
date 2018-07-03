@@ -5,6 +5,10 @@ module Game.Servers.Requests.Browse
         , browseRequest
         )
 
+{-| Contém requests de Browse, utilizado para navegar para páginas de redes
+do jogo como a internet pública.
+-}
+
 import Json.Decode as Decode
     exposing
         ( Decoder
@@ -40,15 +44,31 @@ import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
 
 
+{-| Resultado do request, pode ser um erro ou um site.
+-}
 type alias Data =
     Result Error Site
 
 
+{-| Tipos de erros que podem ocorrer ao realizar o request:
+
+    - `PageNotFound`
+
+Página não encontrada.
+
+    - `ConnectionError`
+
+Falha de conexão.
+
+-}
 type Error
     = PageNotFound Site.Url
     | ConnectionError Site.Url
 
 
+{-| Cria um `Cmd` de request para navegar para a seguinte página usando um
+servidor e uma network específica.
+-}
 browseRequest : Site.Url -> Network.ID -> CId -> FlagsSource a -> Cmd Data
 browseRequest url nid cid flagsSrc =
     flagsSrc
@@ -57,9 +77,11 @@ browseRequest url nid cid flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
+{-| Encodifica payload do request.
+-}
 encoder : Network.ID -> Site.Url -> Value
 encoder nid url =
     Encode.object
@@ -68,16 +90,20 @@ encoder nid url =
         ]
 
 
+{-| Decodifica resposta do request.
+-}
 receiver : FlagsSource a -> Site.Url -> Code -> Value -> Data
 receiver flagsSrc url code value =
     case code of
         OkCode ->
+            -- caso código de erro seja `Ok`
             value
                 |> decodeValue (site url)
                 |> report "Servers.Browse" code flagsSrc
                 |> Result.mapError (always <| ConnectionError url)
 
         _ ->
+            -- caso código de erro não seja `Ok`
             value
                 |> decodeValue (errorMessage url)
                 |> report "Servers.Browse" code flagsSrc
@@ -85,11 +111,15 @@ receiver flagsSrc url code value =
                 |> Result.andThen Err
 
 
+{-| Aceita o `Url` do `Site` e retorna um decodificador de Site.
+-}
 site : Site.Url -> Decoder Site
 site url =
     andThen (siteByType url) type_
 
 
+{-| Decodificador de tipos de `Site`.
+-}
 type_ : Decoder Site.Type
 type_ =
     flip andThen (field "type" string) <|
@@ -141,11 +171,16 @@ type_ =
                     fail "Unknown web page type"
 
 
+{-| Recebe endereço e tipo por parâmetro, então retorna um decodificador de
+`Site`.
+-}
 siteByType : Site.Url -> Site.Type -> Decoder Site
 siteByType url type_ =
     map (Site url type_) <| field "meta" meta
 
 
+{-| Decodificador de metadados que existem para todos os sites.
+-}
 meta : Decoder Site.Meta
 meta =
     decode Site.Meta
@@ -154,11 +189,15 @@ meta =
         |> optional "public" (list Decoders.Filesystem.fileEntry) []
 
 
+{-| Campo content, helper utilizado por decoders de cada tipo de site.
+-}
 content : Decoder a -> Decoder a
 content =
     field "content"
 
 
+{-| Decodificador de sites do tipo `Webserver`.
+-}
 web : Decoder Site.Type
 web =
     decode Site.WebserverContent
@@ -167,6 +206,8 @@ web =
         |> content
 
 
+{-| Decodificador de sites do tipo `Bank`.
+-}
 bank : Decoder Site.Type
 bank =
     decode Site.BankContent
@@ -176,6 +217,8 @@ bank =
         |> content
 
 
+{-| Decodificador de sites do tipo `DownloadCenter`.
+-}
 downloadCenter : Decoder Site.Type
 downloadCenter =
     decode Site.DownloadCenterContent
@@ -184,6 +227,8 @@ downloadCenter =
         |> content
 
 
+{-| Recebe o url do site e retorna um decodificador de `Error`.
+-}
 errorMessage : Site.Url -> Decoder Error
 errorMessage url =
     message <|

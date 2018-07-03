@@ -18,13 +18,19 @@ module Game.Servers.Filesystem.Models
         , isFolder
         )
 
+{-| Armazena pastas e arquivos de uma `Storage`.
+-}
+
 import Dict exposing (Dict)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-{-| Two dicts, one mapping ids to files, another mapping paths to ids.
-This is not the fastest or simplest way for doing it, but this method
-helps keeping types simpler.
+{-| Model do `Filesystem`.
+
+Arquivos são armazenados no campo files, pastas no campo folders.
+
+Não é o método mais rápido ou simples, mas é o método mais fácil de explicar.
+
 -}
 type alias Model =
     { files : Files
@@ -32,18 +38,27 @@ type alias Model =
     }
 
 
+{-| `Dict` de arquivos, todos os dados dos arquivos são armazenados utilizando
+este tipo.
+-}
 type alias Files =
     Dict Id File
 
 
+{-| `Dict` de pastas e arquivos dentro dessas pastas.
+-}
 type alias Folders =
-    Dict String (List Id)
+    Dict StringPath (List Id)
 
 
+{-| Obtida ao transformar um `Path` em `String`.
+-}
+type alias StringPath =
+    String
 
--- crud
 
-
+{-| `Model` inicial, só contem a pasta raiz.
+-}
 initialModel : Model
 initialModel =
     { files = Dict.empty
@@ -51,8 +66,8 @@ initialModel =
     }
 
 
-{-| Inserting a file requires its `Id`, the insertion
-will occur in the file's path.
+{-| Insere um arquivo no `Filesystem`, a localização do arquivo é definida pela
+propriedade `Path` do mesmo.
 -}
 insertFile : Id -> File -> Model -> Model
 insertFile id file ({ files, folders } as model) =
@@ -66,20 +81,25 @@ insertFile id file ({ files, folders } as model) =
                 |> flip isFile model
                 |> not
     in
+        -- só inserir o arquivo caso o fullpath esteja livre
         if noFileExists then
             let
+                -- deletar este arquivo da model caso ele já exista em outro
+                -- diretório
                 model_ =
                     deleteFile id model
             in
+                -- inserir este arquivo no dict de arquivos e no dict de pastas
                 { model_
                     | files = Dict.insert id file files
                     , folders = insertInFolder id path folders
                 }
         else
+            -- não fazer nada caso o fullpath esteja ocupado
             model
 
 
-{-| Inserting a folder requires its `Path`.
+{-| Insere uma pasta dentro do `Path`.
 -}
 insertFolder : Path -> Name -> Model -> Model
 insertFolder path name ({ folders } as model) =
@@ -90,6 +110,7 @@ insertFolder path name ({ folders } as model) =
                     |> appendPath name
                     |> joinPath
         in
+            -- não fazer nada caso já exista uma pasta no local
             case Dict.get fullpath folders of
                 Just _ ->
                     model
@@ -100,7 +121,7 @@ insertFolder path name ({ folders } as model) =
         model
 
 
-{-| Deleting a File is O(n) of the folder size.
+{-| Deleta arquivo pelo `Id`.
 -}
 deleteFile : Id -> Model -> Model
 deleteFile id ({ files, folders } as model) =
@@ -115,8 +136,7 @@ deleteFile id ({ files, folders } as model) =
             model
 
 
-{-| Deletes a folder by path, also removes its childs.
-Time is O(n*2) of filesystem and O(n) of deleted entries.
+{-| Deleta uma pasta e seu conteúdo a partir de um `Path`.
 -}
 deleteFolder : Path -> Model -> Model
 deleteFolder path ({ folders } as model) =
@@ -126,8 +146,7 @@ deleteFolder path ({ folders } as model) =
         model
 
 
-{-| Moves a File using its Id and Path.
-Time is O(n*2) of filesystem and O(n) of path entries.
+{-| Move o arquivo para o `Path`.
 -}
 moveFile : Id -> Path -> Model -> Model
 moveFile id path ({ files, folders } as model) =
@@ -151,6 +170,8 @@ moveFile id path ({ files, folders } as model) =
             model
 
 
+{-| Renomeia o arquivo.
+-}
 renameFile : Id -> Name -> Model -> Model
 renameFile id name model =
     case getFile id model of
@@ -161,30 +182,30 @@ renameFile id name model =
             model
 
 
-
--- listing path contents
-
-
-{-| List direct entries of given folder.
-Time is O(n*2) of filesystem and O(n) of folder childs.
+{-| Lista membros diretos de uma pasta.
 -}
 list : Path -> Model -> List Entry
 list path model =
-    -- TODO: add nested folder support
+    -- TODO: adicionar suporte a pastas dentro de pastas
     let
+        -- remove uma parte do path
         drop =
             String.dropLeft (String.length (joinPath path))
 
+        -- não, não dá pra usar o toPath no lugar dessa função
         split =
             String.split "/"
 
-        filter item =
+        -- usado pra filtrar o resultado do scan
+        filterer item =
             case item of
                 FileEntry _ file ->
+                    -- verificar
                     file.path == path
 
                 FolderEntry path _ ->
                     let
+                        -- checa se a pasta está vazia
                         isEmpty =
                             model
                                 |> getFolder path
@@ -194,6 +215,8 @@ list path model =
                         if isEmpty then
                             True
                         else
+                            -- caso a pasta não esteja vazia, verificar se
+                            -- ela é um membro direto de path
                             path
                                 |> joinPath
                                 |> drop
@@ -201,13 +224,10 @@ list path model =
                                 |> List.length
                                 |> ((==) 1)
     in
-        model
-            |> scan path
-            |> List.filter filter
+        List.filter filterer <| scan path model
 
 
-{-| List direct entries of given folder.
-Time is O(n*2) of filesystem.
+{-| Lista conteúdo do do `Path`.
 -}
 scan : Path -> Model -> List Entry
 scan path model =
@@ -215,9 +235,11 @@ scan path model =
         location =
             joinPath path
 
+        -- uma função que checa se a string contém location
         contains =
             String.contains location
 
+        -- é exatamente como o `getFile`, mas retorna com o id junto da file
         get id =
             case getFile id model of
                 Just file ->
@@ -226,7 +248,9 @@ scan path model =
                 Nothing ->
                     Nothing
 
-        filter id file =
+        -- uma função que filtra e mapeia arquivos que contenham location em
+        -- seu path
+        filterer id file =
             if (contains (joinPath file.path)) then
                 Just <| FileEntry id file
             else
@@ -236,27 +260,31 @@ scan path model =
             parentPath path
 
         name =
-            path
-                |> List.reverse
-                |> List.head
-                |> Maybe.withDefault ""
+            pathBase path
 
-        reducer current files entries =
-            if (contains current) then
+        -- reducer que passa por todas as pastas do jogo
+        reducer currentPath files entries =
+            -- caso a pasta atual contenha location
+            if (contains currentPath) then
                 let
+                    --filtra arquivos desta pasta
                     entries1 =
                         List.filterMap
-                            (get >> Maybe.andThen (uncurry filter))
+                            (get >> Maybe.andThen (uncurry filterer))
                             files
 
                     entries2 =
                         let
                             myPath =
-                                toPath current
+                                toPath currentPath
                         in
-                            if current == location then
+                            if currentPath == location then
+                                -- incluir este path nos entries caso ele seja
+                                -- a location
                                 entries1
                             else
+                                -- incluir este path nos entries caso ele não
+                                -- seja a location
                                 myPath
                                     |> pathBase
                                     |> FolderEntry (parentPath myPath)
@@ -264,29 +292,28 @@ scan path model =
                 in
                     List.append entries2 entries
             else
+                -- caso a pasta atual não contenha location
                 entries
     in
         Dict.foldl reducer [] model.folders
 
 
-
--- getters/setters
-
-
+{-| Tenta pegar arquivo.
+-}
 getFile : Id -> Model -> Maybe File
 getFile id =
     .files >> Dict.get id
 
 
+{-| Tenta pegar pasta.
+-}
 getFolder : Path -> Model -> Maybe (List Id)
 getFolder path =
     .folders >> Dict.get (joinPath path)
 
 
-
--- checking operations
-
-
+{-| Checa se um `Path` pertence a um arquivo.
+-}
 isFile : Path -> Model -> Bool
 isFile fullpath { files, folders } =
     let
@@ -299,16 +326,25 @@ isFile fullpath { files, folders } =
         folders
             |> Dict.get (joinPath path)
             |> Maybe.withDefault []
+            -- filtrar da lista de id de arquivos no path...
             |> List.filter
+                -- ...pegando os dados para dos arquivos de cada id
                 (flip Dict.get files
                     >> Maybe.map getName
+                    -- resulta em `True` caso o nome do arquivo seja igual ao do
+                    -- fullpath
                     >> Maybe.map ((==) name)
+                    -- converte o Nothing em False
                     >> Maybe.withDefault False
                 )
+            -- o fullpath não pertence a um arquivo caso a lista filtrada
+            -- esteja vazia
             |> List.isEmpty
             |> not
 
 
+{-| Checa se um `Path` pertence a uma pasta.
+-}
 isFolder : Path -> Model -> Bool
 isFolder path model =
     case getFolder path model of
@@ -320,15 +356,18 @@ isFolder path model =
 
 
 
--- internals
+-- funções internas
 
 
+{-| Tenta remover arquivo de tais `Folders`.
+-}
 removeFromFolder : Id -> Path -> Folders -> Folders
 removeFromFolder id path folders =
     let
         location =
             joinPath path
     in
+        -- não fazer nada caso a pasta não exista
         case Dict.get location folders of
             Just ids ->
                 ids
@@ -339,6 +378,8 @@ removeFromFolder id path folders =
                 folders
 
 
+{-| Helper para inserir arquivo em um path no tipo `Folders`.
+-}
 insertInFolder : Id -> Path -> Folders -> Folders
 insertInFolder id path folders =
     let

@@ -1,5 +1,9 @@
 module Game.Servers.Tunnels.Update exposing (update)
 
+{-| Documentação pendente pois este domínio está incompleto e provavelmente
+errado.
+-}
+
 import Utils.React as React exposing (React)
 import Game.Servers.Tunnels.Config exposing (..)
 import Game.Servers.Tunnels.Messages exposing (..)

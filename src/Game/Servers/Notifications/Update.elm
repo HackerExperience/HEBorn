@@ -58,6 +58,8 @@ update config msg model =
             ( readAll model, React.none )
 
 
+{-| Cria uma nova notificação.
+-}
 handleNewNotification :
     Config msg
     -> Content

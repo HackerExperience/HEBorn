@@ -6,6 +6,10 @@ module Game.Servers.Processes.Requests.Bruteforce
         , errorToString
         )
 
+{-| Contém request `Bruteforce`, que serve para roubar a senha de um servidor
+remoto.
+-}
+
 import Json.Decode exposing (Value, Decoder, decodeValue, succeed, fail)
 import Json.Encode as Encode
 import Utils.Json.Decode exposing (commonError, message)
@@ -16,18 +20,23 @@ import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
 
 
--- not a bool because we'll threat errors
-
-
+{-| Resultado do request, não é um `Maybe` pois o tratamento de sucesso pode
+ser interessante um dia e a falta de typeclasses do elm nos forçaria a
+reescrever tudo se deixarmos pra mudar o tipo depois.
+-}
 type alias Data =
     Result Errors ()
 
 
+{-| Tipos de erros que podem ocorrer ao realizar o request.
+-}
 type Errors
     = BadRequest
     | Unknown
 
 
+{-| Cria um `Cmd` de request para atualizar a motherboard.
+-}
 bruteforceRequest :
     Network.ID
     -> Network.IP
@@ -41,6 +50,8 @@ bruteforceRequest network targetIp cid flagsSrc =
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
+{-| Converte tipo do erro em string de erro (útil para views).
+-}
 errorToString : Errors -> String
 errorToString error =
     case error of
@@ -52,9 +63,11 @@ errorToString error =
 
 
 
--- internals
+-- funções internas
 
 
+{-| Encodifica payload do request.
+-}
 encoder : Network.ID -> Network.IP -> Value
 encoder network targetIp =
     Encode.object
@@ -64,6 +77,8 @@ encoder network targetIp =
         ]
 
 
+{-| Decodifica resposta do request.
+-}
 receiver : FlagsSource a -> Code -> Value -> Data
 receiver flagsSrc code value =
     case code of
@@ -78,6 +93,8 @@ receiver flagsSrc code value =
                 |> Result.andThen Err
 
 
+{-| Converte a string de erro no tipo do erro.
+-}
 errorMessage : Decoder Errors
 errorMessage =
     message <|

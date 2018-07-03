@@ -4,6 +4,37 @@ import Game.Meta.Types.Network as Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 
 
+{-| Conteúdo de uma notificação:
+
+    - `Generic`
+
+Notifiação genérica.
+
+    - `DownloadStarted`
+
+Notificação de download iniciado.
+
+    - `DownloadConcluded`
+
+Notificação de download concluído.
+
+    - `UploadStarted`
+
+Notificação de upload iniciado.
+
+    - `UploadConcluded`
+
+Notificação de upload concluído.
+
+    - `BruteforceStarted`
+
+Notificação de bruteforce iniciado.
+
+    - `BruteforceConcluded`
+
+notificação de bruteforce concluído.
+
+-}
 type Content
     = Generic Title Message
     | DownloadStarted NIP StorageId Filesystem.FileEntry
@@ -14,18 +45,27 @@ type Content
     | BruteforceConcluded NIP
 
 
+{-| Título de uma notificação.
+-}
 type alias Title =
     String
 
 
+{-| Mensagem de uma notificação.
+-}
 type alias Message =
     String
 
 
+{-| Storage de uma notificação.
+-}
 type alias StorageId =
     String
 
 
+{-| Formata conteúdo da notificação em duas strings, uma com um resumo da
+notificação e outra com a notificação completa.
+-}
 render : Content -> ( String, String )
 render content =
     case content of
@@ -71,6 +111,8 @@ render content =
             )
 
 
+{-| O mesmo que render, mas com outro nome. (?)
+-}
 renderToast : Content -> ( String, String )
 renderToast =
     render

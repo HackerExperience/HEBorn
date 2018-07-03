@@ -22,10 +22,57 @@ import Game.Servers.Shared exposing (CId)
 import Game.Meta.Types.Components.Motherboard as Motherboard exposing (Motherboard)
 
 
+{-| Resultados possíveis para o request, ele pode dar erro ou retornar a
+motherboard atualizada.
+-}
 type alias Data =
     Result Errors Motherboard
 
 
+{-| Tipos de erros que podem rolar ao efetuar o request, seria uma boa ideia
+tirar as piadas:
+
+  - `PorraKress`
+
+Deu um erro e a culpa é do client side.
+
+  - `NaughtySlot`
+
+Problema nos dados do slot.
+
+  - `UnhealthyFriends`
+
+Problema na network connection.
+
+  - `CoitusInterruptus`
+
+Motherboard não contém componentes iniciais.
+
+  - `TryinToUseGod`
+
+Tentando conectar um componente que não existe.
+
+  - `WrongHole`
+
+Tentando conectar um componente no slot errado.
+
+  - `RobinHood`
+
+Tentando usar um componente ou network que não pertence ao jogador.
+
+  - `ConnectionRequired`
+
+Motherboard não tem um IP público.
+
+  - `WrongToolForTheJob`
+
+Tentando usar um componente que não é uma motherboard como uma motherboard.
+
+  - `Unknown`
+
+Erro desconhecido pelo client.
+
+-}
 type Errors
     = PorraKress
     | NaughtySlot
@@ -39,6 +86,8 @@ type Errors
     | Unknown
 
 
+{-| Cria um `Cmd` de request para atualizar a `Motherboard`.
+-}
 updateMotherboardRequest : Motherboard -> CId -> FlagsSource a -> Cmd Data
 updateMotherboardRequest motherboard cid flagsSrc =
     flagsSrc
@@ -48,9 +97,11 @@ updateMotherboardRequest motherboard cid flagsSrc =
 
 
 
--- internals
+-- funções internas
 
 
+{-| Converte dados raw da resposta do request em um formato validado.
+-}
 receiver : FlagsSource a -> Code -> Value -> Data
 receiver flagsSrc code value =
     case code of
@@ -68,6 +119,8 @@ receiver flagsSrc code value =
                 |> Result.andThen Err
 
 
+{-| Decoder para mensagem de erro.
+-}
 errorMessage : Decoder Errors
 errorMessage =
     message <|

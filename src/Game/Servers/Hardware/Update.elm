@@ -26,6 +26,9 @@ update config msg model =
             ( setMotherboard (Just motherboard) model, React.none )
 
 
+{-| Realiza request para atualizar a `Motherboard` quando recebe a mensagem
+`HandleMotherboardUpdate`.
+-}
 handleMotherboardUpdate :
     Config msg
     -> Motherboard
@@ -33,6 +36,7 @@ handleMotherboardUpdate :
     -> UpdateResponse msg
 handleMotherboardUpdate config motherboard model =
     let
+        -- handler para o request de atuualizar motherboard
         handler result =
             case result of
                 Ok motherboard ->
@@ -41,6 +45,7 @@ handleMotherboardUpdate config motherboard model =
                 Err error ->
                     config.batchMsg []
 
+        -- cria um `Cmd` de request para atualizar a placa mãe
         cmd =
             config
                 |> updateMotherboardRequest motherboard config.cid
@@ -50,6 +55,8 @@ handleMotherboardUpdate config motherboard model =
         ( model, cmd )
 
 
+{-| Atualiza model quando recebe evento `HandleMotherboardUpdated`.
+-}
 handleMotherboardUpdated :
     Config msg
     -> Model
@@ -62,6 +69,8 @@ handleMotherboardUpdated config model_ model =
                 |> getMotherboard
                 |> Maybe.withDefault Motherboard.empty
 
+        -- cria dois dispatches, um para liberar itens do inventário, outro
+        -- para utilizar
         ( used, freed ) =
             model
                 |> getMotherboard
@@ -72,7 +81,7 @@ handleMotherboardUpdated config model_ model =
                 |> Tuple.mapSecond
                     (List.map config.onInventoryFreed >> config.batchMsg)
 
-        cmd =
+        react =
             React.msg <| config.batchMsg [ used, freed ]
     in
-        ( model_, cmd )
+        ( model_, react )

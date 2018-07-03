@@ -8,6 +8,8 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
+{-| Cria um `Cmd` de request para mover um arquivo.
+-}
 moveRequest : Path -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 moveRequest path id cid =
     Requests.request (Topics.fsMove cid)
@@ -15,13 +17,13 @@ moveRequest path id cid =
 
 
 
--- internals
+-- funções internas
 
 
 encoder : Path -> Id -> Value
 encoder path id =
     let
-        -- TODO: sending a flat string may be better
+        -- TODO: enviar uma `String` simples pode ser melhor
         destination =
             path
                 |> List.map Encode.string

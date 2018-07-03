@@ -7,6 +7,13 @@ import Game.Servers.Notifications.Messages exposing (..)
 import Game.Servers.Filesystem.Shared as Filesystem
 
 
+{-| Configuração de `Server.Notifications`, contém uma mensagens configuravel:
+
+  - `onToast`
+
+Utilizado para criar uma toast. Passa conteúdo da toast.
+
+-}
 type alias Config msg =
     { flags : Core.Flags
     , toMsg : Msg -> msg
@@ -15,6 +22,8 @@ type alias Config msg =
     }
 
 
+{-| Configuração utilizada nas funções do arquivo `OnClick`.
+-}
 type alias ActionConfig msg =
     { batchMsg : List msg -> msg
     , openTaskManager : msg
