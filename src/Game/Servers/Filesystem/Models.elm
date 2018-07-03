@@ -18,14 +18,14 @@ module Game.Servers.Filesystem.Models
         , isFolder
         )
 
-{-| Armazena pastas e arquivos de uma Storage.
+{-| Armazena pastas e arquivos de uma `Storage`.
 -}
 
 import Dict exposing (Dict)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-{-| Model do Filesystem.
+{-| Model do `Filesystem`.
 
 Arquivos são armazenados no campo files, pastas no campo folders.
 
@@ -38,26 +38,26 @@ type alias Model =
     }
 
 
-{-| Dict de arquivos, todos os dados dos arquivos são armazenados utilizando
+{-| `Dict` de arquivos, todos os dados dos arquivos são armazenados utilizando
 este tipo.
 -}
 type alias Files =
     Dict Id File
 
 
-{-| Dict de pastas e arquivos dentro dessas pastas.
+{-| `Dict` de pastas e arquivos dentro dessas pastas.
 -}
 type alias Folders =
     Dict StringPath (List Id)
 
 
-{-| Obtida ao transformar um Path em String.
+{-| Obtida ao transformar um `Path` em `String`.
 -}
 type alias StringPath =
     String
 
 
-{-| Model inicial, só contem a pasta raiz.
+{-| `Model` inicial, só contem a pasta raiz.
 -}
 initialModel : Model
 initialModel =
@@ -66,8 +66,8 @@ initialModel =
     }
 
 
-{-| Insere um arquivo no filesystem, a localização do arquivo é definida pela
-propriedade Path do mesmo.
+{-| Insere um arquivo no `Filesystem`, a localização do arquivo é definida pela
+propriedade `Path` do mesmo.
 -}
 insertFile : Id -> File -> Model -> Model
 insertFile id file ({ files, folders } as model) =
@@ -99,7 +99,7 @@ insertFile id file ({ files, folders } as model) =
             model
 
 
-{-| Insere uma pasta dentro do Path.
+{-| Insere uma pasta dentro do `Path`.
 -}
 insertFolder : Path -> Name -> Model -> Model
 insertFolder path name ({ folders } as model) =
@@ -121,7 +121,7 @@ insertFolder path name ({ folders } as model) =
         model
 
 
-{-| Deleta arquivo pelo Id.
+{-| Deleta arquivo pelo `Id`.
 -}
 deleteFile : Id -> Model -> Model
 deleteFile id ({ files, folders } as model) =
@@ -136,7 +136,7 @@ deleteFile id ({ files, folders } as model) =
             model
 
 
-{-| Deleta uma pasta e seu conteúdo a partir de um Path.
+{-| Deleta uma pasta e seu conteúdo a partir de um `Path`.
 -}
 deleteFolder : Path -> Model -> Model
 deleteFolder path ({ folders } as model) =
@@ -146,7 +146,7 @@ deleteFolder path ({ folders } as model) =
         model
 
 
-{-| Move o arquivo para o Path.
+{-| Move o arquivo para o `Path`.
 -}
 moveFile : Id -> Path -> Model -> Model
 moveFile id path ({ files, folders } as model) =
@@ -227,7 +227,7 @@ list path model =
         List.filter filterer <| scan path model
 
 
-{-| Lista conteúdo do do path.
+{-| Lista conteúdo do do `Path`.
 -}
 scan : Path -> Model -> List Entry
 scan path model =
@@ -239,7 +239,7 @@ scan path model =
         contains =
             String.contains location
 
-        -- é exatamente como o getFile, mas retorna com o id junto da file
+        -- é exatamente como o `getFile`, mas retorna com o id junto da file
         get id =
             case getFile id model of
                 Just file ->
@@ -312,7 +312,7 @@ getFolder path =
     .folders >> Dict.get (joinPath path)
 
 
-{-| Checa se um Path pertence a um arquivo.
+{-| Checa se um `Path` pertence a um arquivo.
 -}
 isFile : Path -> Model -> Bool
 isFile fullpath { files, folders } =
@@ -331,7 +331,7 @@ isFile fullpath { files, folders } =
                 -- ...pegando os dados para dos arquivos de cada id
                 (flip Dict.get files
                     >> Maybe.map getName
-                    -- resulta em True caso o nome do arquivo seja igual ao do
+                    -- resulta em `True` caso o nome do arquivo seja igual ao do
                     -- fullpath
                     >> Maybe.map ((==) name)
                     -- converte o Nothing em False
@@ -343,7 +343,7 @@ isFile fullpath { files, folders } =
             |> not
 
 
-{-| Checa se um Path pertence a uma pasta.
+{-| Checa se um `Path` pertence a uma pasta.
 -}
 isFolder : Path -> Model -> Bool
 isFolder path model =
@@ -359,7 +359,7 @@ isFolder path model =
 -- funções internas
 
 
-{-| Tenta remover arquivo de tais Folders.
+{-| Tenta remover arquivo de tais `Folders`.
 -}
 removeFromFolder : Id -> Path -> Folders -> Folders
 removeFromFolder id path folders =
@@ -378,7 +378,7 @@ removeFromFolder id path folders =
                 folders
 
 
-{-| Helper para inserir arquivo em um path no tipo Folders.
+{-| Helper para inserir arquivo em um path no tipo `Folders`.
 -}
 insertInFolder : Id -> Path -> Folders -> Folders
 insertInFolder id path folders =

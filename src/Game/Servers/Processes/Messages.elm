@@ -13,58 +13,58 @@ import Game.Servers.Processes.Shared exposing (..)
 
 {-| Mensagens:
 
-  - DownloadRequestFailed
+  - `DownloadRequestFailed`
 
 Recebida com a resposta do privateDownloadRequest e publicDownloadRequest.
 
-  - UploadRequestFailed
+  - `UploadRequestFailed`
 
 Recebida com a resposta do uploadRequest.
 
-  - HandleStartDownload (dispatch)
+  - `HandleStartDownload` (dispatch)
 
-Inicia processo de download. Requer NIP da network, StorageId que armazenará o
-arquivo e o FileEntry do mesmo no servidor remoto.
+Inicia processo de download. Requer `NIP` da network, `StorageId` que
+armazenará o arquivo e o `FileEntry` do mesmo no servidor remoto.
 
-  - HandleStartPublicDownload (dispatch)
+  - `HandleStartPublicDownload` (dispatch)
 
-Inicia processo de download público. Requer NIP da network, StorageId que
-armazenará o arquivo e o FileEntry do mesmo no servidor remoto.
+Inicia processo de download público. Requer `NIP` da network, `StorageId` que
+armazenará o arquivo e o `FileEntry` do mesmo no servidor remoto.
 
-  - HandleStartUpload (dispatch)
+  - `HandleStartUpload` (dispatch)
 
-Inicia processo de upload. Requer CId do servidor de origem, StorageId do
-servidor remoto e FileEntry do servidor de origem.
+Inicia processo de upload. Requer `CId` do servidor de origem, `StorageId` do
+servidor remoto e `FileEntry` do servidor de origem.
 
-  - BruteforceRequestFailed
+  - `BruteforceRequestFailed`
 
-Recebida com a resposta do bruteforceRequest quando este request falhar.
+Recebida com a resposta do `bruteforceRequest` quando este request falhar.
 
-  - HandleStartBruteforce (dispatch)
+  - `HandleStartBruteforce` (dispatch)
 
 Inicia processo de bruteforce. Requer IP do servidor que será invadido.
 
-  - HandleBruteforceFailed (evento)
+  - `HandleBruteforceFailed` (evento)
 
 Recebida quando um processo de bruteforce falhar.
 
-  - HandleProcessConclusion (evento)
+  - `HandleProcessConclusion` (evento)
 
 Recebida quando um processo for concluído.
 
-  - HandleProcessesChanged (evento)
+  - `HandleProcessesChanged` (evento)
 
 Recebida quando a tabela de processos mudar.
 
-  - HandlePause (dispatch)
+  - `HandlePause` (dispatch)
 
 Pausa processo. Requer Id do processo a ser pausado.
 
-  - HandleResume (evento)
+  - `HandleResume` (evento)
 
 Recebida quando um processo for despausado.
 
-  - HandleRemove (evento)
+  - `HandleRemove` (evento)
 
 Recebida quando um processo for removido.
 

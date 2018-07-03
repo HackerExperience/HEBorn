@@ -54,35 +54,35 @@ type alias Process =
 
 {-| Tipo do processo, a maioria dos tipos são tipos de software:
 
-  - Cracker
+  - `Cracker`
 
 Rouba senha de um servidor.
 
-  - Decryptor
+  - `Decryptor`
 
 Descriptografa arquivos.
 
-  - Encryptor
+  - `Encryptor`
 
 Criptografa arquivos.
 
-  - FileTransference
+  - `FileTransference`
 
 Transfere arquivo de um servidor para outro.
 
-  - PassiveFirewall
+  - `PassiveFirewall`
 
 Firewall que executa passivamente.
 
-  - Download
+  - `Download`
 
 Download de arquivo.
 
-  - Upload
+  - `Upload`
 
 Upload de arquivo.
 
-  - VirusCollect
+  - `VirusCollect`
 
 Coleta dinheiro gerado por virus.
 
@@ -101,21 +101,21 @@ type
     | VirusCollect
 
 
-{-| Dados específicos de processos de Encryptor.
+{-| Dados específicos de processos de `Encryptor`.
 -}
 type alias EncryptorContent =
     { targetLogId : Logs.ID
     }
 
 
-{-| Dados específicos de processos de Transfer.
+{-| Dados específicos de processos de `Transfer`.
 -}
 type TransferType
     = PublicFTP
     | PrivateFTP
 
 
-{-| Dados específicos de processos de Download.
+{-| Dados específicos de processos de `Download`.
 -}
 type alias DownloadContent =
     { transferType : TransferType
@@ -123,7 +123,7 @@ type alias DownloadContent =
     }
 
 
-{-| Dados específicos de processos de Updload.
+{-| Dados específicos de processos de `Upload`.
 -}
 type alias UploadContent =
     { storageId : Maybe String
@@ -160,27 +160,27 @@ type alias PartialAccess =
 
 {-| Estado do processo:
 
-  - Starting
+  - `Starting`
 
 Processo otimista, ainda não foi criado no server side.
 
-  - Running
+  - `Running`
 
 Processo em execução.
 
-  - Paused
+  - `Paused`
 
 Processo pausado.
 
-  - Concluded
+  - `Concluded`
 
 Concluído de forma otimista, não se sabe se foi com sucesso ou não.
 
-  - Succeeded
+  - `Succeeded`
 
 Processo concluído com sucesso.
 
-  - Failed
+  - `Failed`
 
 Processo concluído ou terminado com falha.
 
@@ -222,7 +222,7 @@ type alias FileName =
     String
 
 
-{-| Prioridade do Processo.
+{-| Prioridade do processo.
 -}
 type Priority
     = Lowest
@@ -232,7 +232,7 @@ type Priority
     | Highest
 
 
-{-| Recursos sendo usados pelo Processo.
+{-| Recursos sendo usados pelo processo.
 -}
 type alias ResourcesUsage =
     { cpu : Usage
@@ -355,7 +355,7 @@ insertOptimistic process model0 =
         ( id, model2 )
 
 
-{-| Tenta pegar o Processo.
+{-| Tenta pegar o processo.
 -}
 get : ID -> Model -> Maybe Process
 get id model =
@@ -451,7 +451,7 @@ resume process =
     { process | state = Running }
 
 
-{-| Conclui um processo, aceita um Maybe Bool para definir um estado de
+{-| Conclui um processo, aceita um `Maybe Bool` para definir um estado de
 conclusão mais preciso.
 -}
 conclude : Maybe Bool -> Process -> Process
@@ -499,14 +499,14 @@ getAccess =
     .access
 
 
-{-| Retorna o NIP que o processo afeta.
+{-| Retorna o `NIP` que o processo afeta.
 -}
 getTarget : Process -> Network.NIP
 getTarget process =
     Network.toNip process.network process.target
 
 
-{-| Retorna o NIP de origem do processo.
+{-| Retorna o `NIP` de origem do processo.
 -}
 getOrigin : Process -> Maybe Network.NIP
 getOrigin process =
@@ -591,7 +591,7 @@ getCompletionDate =
     getProgress >> Maybe.andThen .completionDate
 
 
-{-| Retorna a ConnectionId do processo.
+{-| Retorna a `ConnectionId` do processo.
 -}
 getConnectionId : Process -> Maybe ConnectionID
 getConnectionId process =

@@ -19,7 +19,7 @@ type alias Model =
     }
 
 
-{-| Id do log é uma simples string recebida do servidor
+{-| Id do `Log` é uma simples string recebida do servidor
 -}
 type alias ID =
     String
@@ -32,19 +32,20 @@ type alias Date =
     ( Time, Int )
 
 
-{-| Log é composto por um conjunto de dados:
+{-| `Log` é composto por um conjunto de dados:
 
-  - timestamp
+  - `timestamp`
 
-Data de criação do log.
+Data de criação do `Log`.
 
-  - status
+  - `status`
 
-Estado do log perante o jogador (recém descoberto, recém criado ou conhecido).
+Estado do `Log` perante o jogador (recém descoberto, recém criado ou
+conhecido).
 
-  - content
+  - `content`
 
-Conteúdo do log, indisponível quando o mesmo está criptografado.
+Conteúdo do `Log`, indisponível quando o mesmo está criptografado.
 
 -}
 type alias Log =
@@ -61,7 +62,7 @@ type Content
     | Encrypted
 
 
-{-| Conteúdo de um Log quando o mesmo está descriptografado.
+{-| Conteúdo de um `Log` quando o mesmo está descriptografado.
 -}
 type alias Data =
     { raw : String
@@ -79,23 +80,23 @@ type Status
 
 {-| Formatos de logs conhecidos:
 
-  - LocalLoginFormat
+  - `LocalLoginFormat`
 
 Login no servidor local.
 
-  - RemoteLoginFormat
+  - `RemoteLoginFormat`
 
 Login em servidor remoto.
 
-  - ConnectionFormat
+  - `ConnectionFormat`
 
 Conexão aberta entre dois servidores.
 
-  - DownloadByFormat
+  - `DownloadByFormat`
 
 Arquivo foi baixado por outro servidor.
 
-  - DownloadFromFormat
+  - `DownloadFromFormat`
 
 Arquivo foi baixado de outro servidor.
 
@@ -108,7 +109,7 @@ type Format
     | DownloadFromFormat Download
 
 
-{-| Dados de um Log de login local.
+{-| Dados de um `Log` de login local.
 -}
 type alias LocalLogin =
     { from : IP
@@ -116,14 +117,14 @@ type alias LocalLogin =
     }
 
 
-{-| Dados de um Log de login remoto.
+{-| Dados de um `Log` de login remoto.
 -}
 type alias RemoteLogin =
     { into : IP
     }
 
 
-{-| Dados de um Log de conexão entre dois pontos.
+{-| Dados de um `Log` de conexão entre dois pontos.
 -}
 type alias Connection =
     { nip : IP
@@ -132,7 +133,7 @@ type alias Connection =
     }
 
 
-{-| Dados de um Log de arquivo baixado.
+{-| Dados de um `Log` de arquivo baixado.
 -}
 type alias Download =
     { filename : FileName
@@ -161,7 +162,7 @@ initialModel =
     }
 
 
-{-| Cria um Log novo.
+{-| Cria um `Log` novo.
 -}
 new : Time -> Status -> Maybe String -> Log
 new timestamp status content =
@@ -171,7 +172,7 @@ new timestamp status content =
         |> Log timestamp status
 
 
-{-| Insere um Log, substitui log existente caso já exista algum.
+{-| Insere um `Log`, substitui log existente caso já exista algum.
 -}
 insert : ID -> Log -> Model -> Model
 insert id log model =
@@ -191,7 +192,7 @@ insert id log model =
         { model | logs = logs, drawOrder = drawOrder }
 
 
-{-| Cria um Id para log novo.
+{-| Cria um `Id` para log novo.
 O nome dessa função está misleading, é uma boa ideia mudar.
 -}
 findId : ( Time, Int ) -> Dict Date ID -> Date
@@ -202,7 +203,7 @@ findId (( birth, from ) as pig) model =
         |> Maybe.withDefault pig
 
 
-{-| Remove Log por Id.
+{-| Remove `Log` por `Id`.
 -}
 remove : ID -> Model -> Model
 remove id model =
@@ -216,10 +217,10 @@ remove id model =
         { model | logs = logs, drawOrder = drawOrder }
 
 
-{-| Remove um log da drawOrder usando o Id e um Int, que pode ser 0 caso
-ele seja desconhecido.
+{-| Remove um log da `drawOrder` usando o `Id` e um `Int`, que pode ser `0`
+caso ele seja desconhecido.
 
-Seria uma boa ideia inverter a ordem do Id e do Int e renomear esta função,
+Seria uma boa ideia inverter a ordem do `Id` e do `Int` e renomear esta função,
 o nome está confuso.
 
 -}
@@ -244,49 +245,49 @@ searchAndDestroy n id model =
         model.drawOrder
 
 
-{-| Checa se Log é membro da Model.
+{-| Checa se `Log` é membro da `Model`.
 -}
 member : ID -> Model -> Bool
 member id model =
     Dict.member id model.logs
 
 
-{-| Tenta pegar Log.
+{-| Tenta pegar `Log`.
 -}
 get : ID -> Model -> Maybe Log
 get id model =
     Dict.get id model.logs
 
 
-{-| Filtra logs da Model, retorna um dict com os logs filtrados.
+{-| Filtra logs da `Model`, retorna um `Dict` com os logs filtrados.
 -}
 filter : (ID -> Log -> Bool) -> Model -> Dict ID Log
 filter filterer model =
     Dict.filter filterer model.logs
 
 
-{-| Pega a timestamp do Log.
+{-| Pega a timestamp do `Log`.
 -}
 getTimestamp : Log -> Time
 getTimestamp =
     .timestamp
 
 
-{-| Pega o conteúdo do Log.
+{-| Pega o conteúdo do `Log`.
 -}
 getContent : Log -> Content
 getContent =
     .content
 
 
-{-| Atualiza a timestamp do Log, essa função está proposta para exclusão.
+{-| Atualiza a timestamp do `Log`, essa função está proposta para exclusão.
 -}
 setTimestamp : Time -> Log -> Log
 setTimestamp timestamp log =
     { log | timestamp = timestamp }
 
 
-{-| Atualiza o conteúdo do Log, esta função está proposta para exclusão.
+{-| Atualiza o conteúdo do `Log`, esta função está proposta para exclusão.
 -}
 setContent : Maybe String -> Log -> Log
 setContent newContent log =

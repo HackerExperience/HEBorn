@@ -7,51 +7,55 @@ import Game.Servers.Notifications.Shared exposing (..)
 
 {-| Mensagens:
 
-  - HandleGeneric (dispatch)
+  - `HandleGeneric` (dispatch)
 
-Adiciona notificação genérica. Requer Title e Content da notificação.
+Adiciona notificação genérica. Requer `Title` e `Content` da notificação.
 
-  - HandleDownloadStarted (dispatch)
+  - `HandleDownloadStarted` (dispatch)
 
-Adiciona notificação de download iniciado. Requer NIP do servidor afetado,
-StorageId de destino e FileEntry de origem.
-Deve ser recebeida após iniciar um processo de Download utilizando este
+Adiciona notificação de download iniciado. Requer `NIP` do servidor afetado,
+`StorageId` de destino e `FileEntry` de origem.
+Deve ser recebeida após iniciar um processo de `Download` utilizando este
 servidor.
 
-  - HandleDownloadConcluded (dispatch)
+  - `HandleDownloadConcluded` (dispatch)
 
-Adiciona notificação de download concluído. Requer NIP do servidor afetado,
-StorageId de destino e FileEntry de origem.
-Deve ser recebeida após concluir um processo de Download que utilizava este
+Adiciona notificação de download concluído. Requer `NIP` do servidor afetado,
+`StorageId` de destino e `FileEntry` de origem.
+Deve ser recebeida após concluir um processo de `Download` que utilizava este
 servidor.
 
-  - HandleUploadStarted (dispatch)
+  - `HandleUploadStarted` (dispatch)
 
-Adiciona notificação de upload iniciado. Requer NIP do servidor afetado,
-StorageId de destino e FileEntry de origem.
-Deve ser recebeida após iniciar um processo de Upload utilizando este
+Adiciona notificação de upload iniciado. Requer `NIP` do servidor afetado,
+`StorageId` de destino e `FileEntry` de origem.
+
+Deve ser recebeida após iniciar um processo de `Upload` utilizando este
 servidor.
 
-  - HandleUploadConcluded (dispatch)
+  - `HandleUploadConcluded` (dispatch)
 
-Adiciona notificação de upload concluído. Requer NIP do servidor afetado,
-StorageId de destino e FileEntry de origem.
-Deve ser recebeida após concluir um processo de Upload que utilizava este
+Adiciona notificação de upload concluído. Requer `NIP` do servidor afetado,
+`StorageId` de destino e `FileEntry` de origem.
+
+Deve ser recebeida após concluir um processo de `Upload` que utilizava este
 servidor.
 
-  - HandleBruteforceStarted (dispatch)
+  - `HandleBruteforceStarted` (dispatch)
 
-Aiciona notificação de bruteforce iniciado. Requer NIP do servidor afetado.
-Deve ser recebeida após iniciar um processo de Bruteforce utilizando este
+Aiciona notificação de bruteforce iniciado. Requer `NIP` do servidor afetado.
+
+Deve ser recebeida após iniciar um processo de `Bruteforce` utilizando este
 servidor.
 
-  - HandleBruteforceConcluded (dispatch)
+  - `HandleBruteforceConcluded` (dispatch)
 
-Adiciona notificação de bruteforce concluído. Requer NIP do servidor afetado.
-Deve ser recebeida após concluir um processo de Bruteforce que utilizava este
+Adiciona notificação de bruteforce concluído. Requer `NIP` do servidor afetado.
+
+Deve ser recebeida após concluir um processo de `Bruteforce` que utilizava este
 servidor.
 
-  - HandleReadAll (dispatch)
+  - `HandleReadAll` (dispatch)
 
 Marca todas as notificações como lidas.
 

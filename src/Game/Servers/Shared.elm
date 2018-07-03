@@ -15,7 +15,7 @@ type alias EndpointAddress =
     NIP
 
 
-{-| Id conhecido de um servidor, pode ser um Id para gateways ou um NIP para
+{-| Id conhecido de um servidor, pode ser um Id para gateways ou um `NIP` para
 endpoints.
 
 Essa diferenciação existe pois não temos acesso ao ServerId de servidores
@@ -33,8 +33,8 @@ type alias StorageId =
     String
 
 
-{-| CId do servidor convertido em string, para ser usada como identificador de
-uma sessão no sistema operacional.
+{-| `CId` do servidor convertido em `String`, para ser usada como identificador
+de uma sessão no sistema operacional.
 -}
 type alias SessionId =
     String

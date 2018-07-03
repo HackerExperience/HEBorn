@@ -6,7 +6,7 @@ module Game.Servers.Processes.Requests.Bruteforce
         , errorToString
         )
 
-{-| Contém request bruteforce, que serve para roubar a senha de um servidor
+{-| Contém request `Bruteforce`, que serve para roubar a senha de um servidor
 remoto.
 -}
 
@@ -20,7 +20,7 @@ import Game.Meta.Types.Network as Network
 import Game.Servers.Shared exposing (CId)
 
 
-{-| Resultado do request, não é um Maybe pois o tratamento de sucesso pode
+{-| Resultado do request, não é um `Maybe` pois o tratamento de sucesso pode
 ser interessante um dia e a falta de typeclasses do elm nos forçaria a
 reescrever tudo se deixarmos pra mudar o tipo depois.
 -}
@@ -35,7 +35,7 @@ type Errors
     | Unknown
 
 
-{-| Cria um Cmd de request para atualizar a motherboard.
+{-| Cria um `Cmd` de request para atualizar a motherboard.
 -}
 bruteforceRequest :
     Network.ID

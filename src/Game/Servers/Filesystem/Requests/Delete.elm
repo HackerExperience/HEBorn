@@ -8,7 +8,7 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-{-| Cria um Cmd de request para deletar um arquivo.
+{-| Cria um `Cmd` de request para deletar um arquivo.
 -}
 deleteRequest : Id -> CId -> FlagsSource a -> Cmd ResponseType
 deleteRequest id cid =

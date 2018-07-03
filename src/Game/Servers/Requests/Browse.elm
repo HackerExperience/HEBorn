@@ -52,11 +52,11 @@ type alias Data =
 
 {-| Tipos de erros que podem ocorrer ao realizar o request:
 
-    - PageNotFound
+    - `PageNotFound`
 
 Página não encontrada.
 
-    - ConnectionError
+    - `ConnectionError`
 
 Falha de conexão.
 
@@ -66,7 +66,7 @@ type Error
     | ConnectionError Site.Url
 
 
-{-| Cria um Cmd de request para navegar para a seguinte página usando um
+{-| Cria um `Cmd` de request para navegar para a seguinte página usando um
 servidor e uma network específica.
 -}
 browseRequest : Site.Url -> Network.ID -> CId -> FlagsSource a -> Cmd Data
@@ -96,14 +96,14 @@ receiver : FlagsSource a -> Site.Url -> Code -> Value -> Data
 receiver flagsSrc url code value =
     case code of
         OkCode ->
-            -- caso código de erro seja Ok
+            -- caso código de erro seja `Ok`
             value
                 |> decodeValue (site url)
                 |> report "Servers.Browse" code flagsSrc
                 |> Result.mapError (always <| ConnectionError url)
 
         _ ->
-            -- caso código de erro não seja Ok
+            -- caso código de erro não seja `Ok`
             value
                 |> decodeValue (errorMessage url)
                 |> report "Servers.Browse" code flagsSrc
@@ -111,14 +111,14 @@ receiver flagsSrc url code value =
                 |> Result.andThen Err
 
 
-{-| Aceita o Url do Site e retorna um decodificador de Site.
+{-| Aceita o `Url` do `Site` e retorna um decodificador de Site.
 -}
 site : Site.Url -> Decoder Site
 site url =
     andThen (siteByType url) type_
 
 
-{-| Decodificador de tipos de Site.
+{-| Decodificador de tipos de `Site`.
 -}
 type_ : Decoder Site.Type
 type_ =
@@ -172,7 +172,7 @@ type_ =
 
 
 {-| Recebe endereço e tipo por parâmetro, então retorna um decodificador de
-Site.
+`Site`.
 -}
 siteByType : Site.Url -> Site.Type -> Decoder Site
 siteByType url type_ =
@@ -196,7 +196,7 @@ content =
     field "content"
 
 
-{-| Decodificador do de sites do tipo Webserver.
+{-| Decodificador de sites do tipo `Webserver`.
 -}
 web : Decoder Site.Type
 web =
@@ -206,7 +206,7 @@ web =
         |> content
 
 
-{-| Decodificador do de sites do tipo Bank.
+{-| Decodificador de sites do tipo `Bank`.
 -}
 bank : Decoder Site.Type
 bank =
@@ -217,7 +217,7 @@ bank =
         |> content
 
 
-{-| Decodificador do de sites do tipo DownloadCenter.
+{-| Decodificador de sites do tipo `DownloadCenter`.
 -}
 downloadCenter : Decoder Site.Type
 downloadCenter =
@@ -227,7 +227,7 @@ downloadCenter =
         |> content
 
 
-{-| Recebe o url dosite e retorna um decodificador de Error.
+{-| Recebe o url do site e retorna um decodificador de `Error`.
 -}
 errorMessage : Site.Url -> Decoder Error
 errorMessage url =

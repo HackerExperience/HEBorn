@@ -19,35 +19,35 @@ import Game.Servers.Models exposing (Server)
 
 {-| Parâmetros especiais:
 
-  - activeCId
+  - `activeCId`
 
 Id do servidor ativo.
 
-  - activeGateway
+  - `activeGateway`
 
 Id do servidor gateway ativo.
 
-  - onSetGatewayContext
+  - `onSetGatewayContext`
 
 Usado para mudar o contexto do gateway.
 
-  - onInventoryFreed
+  - `onInventoryFreed`
 
 Usado para liberar um item do inventário. Passa o item do inventório a ser
 liberado.
 
-  - onInventoryUsed
+  - `onInventoryUsed`
 
 Usado para utilizar um item do inventário. Passa o item do inventório a ser
 utilizado.
 
-  - onNewGateway
+  - `onNewGateway`
 
-Usado quando adicionar um novo gateway. Passa o CId do gateway novo.
+Usado quando adicionar um novo gateway. Passa o `CId` do gateway novo.
 
-  - onToast
+  - `onToast`
 
-Usado para exibir uma toast. Passa o CId do servidor afetado e o conteúdo da
+Usado para exibir uma toast. Passa o `CId` do servidor afetado e o conteúdo da
 notificação.
 
 -}

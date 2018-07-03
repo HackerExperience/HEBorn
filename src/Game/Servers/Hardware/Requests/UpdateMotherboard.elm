@@ -32,43 +32,43 @@ type alias Data =
 {-| Tipos de erros que podem rolar ao efetuar o request, seria uma boa ideia
 tirar as piadas:
 
-  - PorraKress
+  - `PorraKress`
 
 Deu um erro e a culpa é do client side.
 
-  - NaughtySlot
+  - `NaughtySlot`
 
 Problema nos dados do slot.
 
-  - UnhealthyFriends
+  - `UnhealthyFriends`
 
 Problema na network connection.
 
-  - CoitusInterruptus
+  - `CoitusInterruptus`
 
 Motherboard não contém componentes iniciais.
 
-  - TryinToUseGod
+  - `TryinToUseGod`
 
 Tentando conectar um componente que não existe.
 
-  - WrongHole
+  - `WrongHole`
 
 Tentando conectar um componente no slot errado.
 
-  - RobinHood
+  - `RobinHood`
 
 Tentando usar um componente ou network que não pertence ao jogador.
 
-  - ConnectionRequired
+  - `ConnectionRequired`
 
 Motherboard não tem um IP público.
 
-  - WrongToolForTheJob
+  - `WrongToolForTheJob`
 
 Tentando usar um componente que não é uma motherboard como uma motherboard.
 
-  - Unknown
+  - `Unknown`
 
 Erro desconhecido pelo client.
 
@@ -86,7 +86,7 @@ type Errors
     | Unknown
 
 
-{-| Cria um Cmd de request para atualizar a motherboard.
+{-| Cria um `Cmd` de request para atualizar a `Motherboard`.
 -}
 updateMotherboardRequest : Motherboard -> CId -> FlagsSource a -> Cmd Data
 updateMotherboardRequest motherboard cid flagsSrc =

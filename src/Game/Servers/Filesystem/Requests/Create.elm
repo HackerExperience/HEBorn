@@ -8,7 +8,7 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-{-| Cria um Cmd de request para criar um arquivo.
+{-| Cria um `Cmd` de request para criar um arquivo.
 -}
 createRequest :
     String
@@ -29,7 +29,7 @@ createRequest what newBaseName newPath cid =
 encoder : String -> String -> Path -> Value
 encoder what newBaseName newPath =
     let
-        -- TODO: enviar uma string simples pode ser melhor
+        -- TODO: enviar uma `String` simples pode ser melhor
         destination =
             newPath
                 |> List.map Encode.string
