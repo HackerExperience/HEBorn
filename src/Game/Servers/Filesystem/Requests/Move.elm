@@ -8,7 +8,7 @@ import Game.Servers.Shared exposing (CId)
 import Game.Servers.Filesystem.Shared exposing (..)
 
 
-{-| Cria um Cmd de request para mover um arquivo.
+{-| Cria um `Cmd` de request para mover um arquivo.
 -}
 moveRequest : Path -> Id -> CId -> FlagsSource a -> Cmd ResponseType
 moveRequest path id cid =
@@ -23,7 +23,7 @@ moveRequest path id cid =
 encoder : Path -> Id -> Value
 encoder path id =
     let
-        -- TODO: enviar uma string simples pode ser melhor
+        -- TODO: enviar uma `String` simples pode ser melhor
         destination =
             path
                 |> List.map Encode.string

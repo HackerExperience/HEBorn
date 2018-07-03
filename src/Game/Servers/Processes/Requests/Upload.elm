@@ -27,7 +27,7 @@ import Requests.Types exposing (Code(..), FlagsSource)
 import Game.Servers.Shared exposing (CId)
 
 
-{-| Resultado do request, não é um Maybe pois o tratamento de sucesso pode
+{-| Resultado do request, não é um `Maybe` pois o tratamento de sucesso pode
 ser interessante um dia e a falta de typeclasses do elm nos forçaria a
 reescrever tudo se deixarmos pra mudar o tipo depois.
 -}
@@ -37,27 +37,27 @@ type alias Data =
 
 {-| Tipos de erros que podem ocorrer ao realizar o request:
 
-  - SelfLoop
+  - `SelfLoop`
 
 Download forma loop.
 
-  - FileNotFound
+  - `FileNotFound`
 
 Arquivo não encontrado.
 
-  - StorageFull
+  - `StorageFull`
 
 Storage alvo está cheia.
 
-  - StorageNotFound
+  - `StorageNotFound`
 
 Storage alvo não existe.
 
-  - BadRequest
+  - `BadRequest`
 
 Request mal formado.
 
-  - Unknown
+  - `Unknown`
 
 Erro desconhecido pelo client.
 
@@ -71,19 +71,19 @@ type Errors
     | Unknown
 
 
-{-| Id do arquivo a ser baixado.
+{-| `Id` do arquivo a ser baixado.
 -}
 type alias FileId =
     String
 
 
-{-| Id da storage que vai armazenar arquivo.
+{-| `Id` da storage que vai armazenar arquivo.
 -}
 type alias StorageId =
     String
 
 
-{-| Cria um Cmd de request para enviar um arquivo para outro servidor.
+{-| Cria um `Cmd` de request para enviar um arquivo para outro servidor.
 -}
 uploadRequest :
     FileId
@@ -98,7 +98,7 @@ uploadRequest fileId storageId cid flagsSrc =
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
-{-| Converte tipo do erro em string de erro (útil para views).
+{-| Converte tipo do erro em `String` de erro (útil para views).
 -}
 errorToString : Errors -> String
 errorToString error =

@@ -25,16 +25,16 @@ type alias Model =
     }
 
 
-{-| Dict com cache de cada gateway.
+{-| `Dict` com cache de cada gateway.
 -}
 type alias Gateways =
     Dict Id GatewayCache
 
 
-{-| Dados em cache de um gateway, contém o NIP ativo do servidor, a lista
+{-| Dados em cache de um gateway, contém o `NIP` ativo do servidor, a lista
 de NIPs disponíveis para o servidor utilizar e os endpoints conectados.
 
-Estes dados são recebidos no momento do bootstrap de Account e são necessários
+Estes dados são recebidos no momento do bootstrap de `Account` e são necessários
 para se conectar ao channel do servidor.
 
 -}
@@ -45,7 +45,7 @@ type alias GatewayCache =
     }
 
 
-{-| Dict com servidores.
+{-| `Dict` com servidores.
 -}
 type alias Servers =
     Dict SessionId Server
@@ -84,7 +84,7 @@ type alias Storages =
 
 
 {-| Dados de uma storage, o nome dela e seu filesystem, veja mais informações
-sobre o filesystem na model do mesmo.o
+sobre o filesystem na model do mesmo.
 -}
 type alias Storage =
     { name : String
@@ -94,15 +94,15 @@ type alias Storage =
 
 {-| Tipos de servidor, que podem ser:
 
-  - Desktop
+  - `Desktop`
 
 Servidor comum utilizado no modo freeplay.
 
-  - DesktopCampaign
+  - `DesktopCampaign`
 
 Servidor comum utilizado no modo campanha, tem limitações dependendo da missão.
 
-  - Mobile
+  - `Mobile`
 
 Utilizado no modo freeplay, a coordenada muda de acordo com a posição real do
 jogador.
@@ -124,11 +124,11 @@ type Ownership
 
 {-| Dados que só servidores gateway possuem:
 
-  - endpoints
+  - `endpoints`
 
-O set de endpoints que o servidor está conectado.
+O `Set` de endpoints que o servidor está conectado.
 
-  - endpoint
+  - `endpoint`
 
 O endpoint ativo do servidor.
 
@@ -222,7 +222,7 @@ getGatewayCache cid model =
     Dict.get (toSessionId cid) model.gateways
 
 
-{-| Retorna o id do servidor, sempre retorna Nothing pra endpoints.
+{-| Retorna o id do servidor, sempre retorna `Nothing` pra endpoints.
 -}
 getServerId : CId -> Model -> Maybe Id
 getServerId cid model =
@@ -234,7 +234,7 @@ getServerId cid model =
             Nothing
 
 
-{-| Converte CId em SessionId.
+{-| Converte `CId` em `SessionId`.
 -}
 toSessionId : CId -> SessionId
 toSessionId cid =
@@ -310,7 +310,7 @@ remove cid model0 =
         { model2 | servers = servers }
 
 
-{-| Retorna lista de CIds do jogo.
+{-| Retorna lista de cids do jogo.
 -}
 keys : Model -> List CId
 keys model =
@@ -319,7 +319,7 @@ keys model =
         |> List.map fromKey
 
 
-{-| Converte SessionId em CId.
+{-| Converte `SessionId` em `CId`.
 -}
 fromKey : SessionId -> CId
 fromKey key =
@@ -663,7 +663,7 @@ setTunnels tunnels server =
     { server | tunnels = tunnels }
 
 
-{-| Retorna um ( CId, Server ) relacionado ao ( CId, Server ) e contexto
+{-| Retorna um `( CId, Server )` relacionado ao `( CId, Server )` e contexto
 passado.
 -}
 getContextServer : Context -> Model -> ( CId, Server ) -> Maybe ( CId, Server )

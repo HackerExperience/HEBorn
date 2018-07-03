@@ -54,7 +54,7 @@ update config msg model =
             handleDisconnect config cid model
 
 
-{-| Atualiza a model com um server atualizado pela função updateServer.
+{-| Atualiza a model com um server atualizado pela função `updateServer`.
 -}
 onServerMsg :
     Config msg
@@ -165,7 +165,7 @@ handleSetEndpoint _ cid server =
     ( setEndpointCId cid server, React.none )
 
 
-{-| Altera NIP ativo do servidor.
+{-| Altera `NIP` ativo do servidor.
 -}
 handleSetActiveNIP :
     Config msg
@@ -186,7 +186,7 @@ handleSetName name server =
     ( setName name server, React.none )
 
 
-{-| Delega mensagens para o domínio de Filesystem.
+{-| Delega mensagens para o domínio de `Filesystem`.
 -}
 onFilesystemMsg :
     Config msg
@@ -217,7 +217,7 @@ onFilesystemMsg config cid id msg server =
             ( server, React.none )
 
 
-{-| Delega mensagens para o domínio de Logs.
+{-| Delega mensagens para o domínio de `Logs`.
 -}
 onLogsMsg :
     Config msg
@@ -239,7 +239,7 @@ onLogsMsg config cid msg server =
         ( server_, cmd )
 
 
-{-| Delega mensagens para o domínio de Processos.
+{-| Delega mensagens para o domínio de `Processes`.
 -}
 onProcessesMsg :
     Config msg
@@ -264,7 +264,7 @@ onProcessesMsg config cid msg server =
         ( server_, cmd )
 
 
-{-| Delega mensagens para o domínio de Hardware.
+{-| Delega mensagens para o domínio de `Hardware`.
 -}
 onHardwareMsg :
     Config msg
@@ -289,7 +289,7 @@ onHardwareMsg config cid msg server =
         ( server_, cmd )
 
 
-{-| Delega mensagens para o domínio de Tunnels.
+{-| Delega mensagens para o domínio de `Tunnels`.
 -}
 onTunnelsMsg :
     Config msg
@@ -311,7 +311,7 @@ onTunnelsMsg config cid msg server =
         ( server_, cmd )
 
 
-{-| Delega mensagens para o domínio de Notifications.
+{-| Delega mensagens para o domínio de `Notifications`.
 -}
 onNotificationsMsg :
     Config msg
@@ -405,7 +405,7 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
                     -- não faz nada (por enquanto) caso seja um gateway
                     ( model.servers, model.gateways )
 
-        -- atualiza a model e remove o cid
+        -- atualiza a model e remove o `CId`
         model_ =
             remove cid <|
                 { model
@@ -424,7 +424,7 @@ handleDisconnect { activeCId, onSetGatewayContext } cid model =
         ( model_, react )
 
 
-{-| Efetua request de logout.
+{-| Efetua request de `Logout`.
 -}
 handleLogout :
     Config msg

@@ -15,25 +15,25 @@ import Game.Servers.Models exposing (..)
 
 {-| Mensagens:
 
-  - ServerMsg
+  - `ServerMsg`
 
 Mensagem para um server em específico.
 
-  - Synced
+  - `Synced`
 
 Recebido como resposta de um request de sincronização.
 
-  - HandleResync (dispatch)
+  - `HandleResync` (dispatch)
 
-Efetua um request de resync. Requer o CId do servidor.
+Efetua um request de resync. Requer o `CId` do servidor.
 Deve ser recebeida após a model de um servidor tornar-se inconsistente.
 
-  - HandleJoinedServer (evento)
+  - `HandleJoinedServer` (evento)
 
 Insere dados do bootstrap na model.
 Recebida quando se conectar ao canal de um servidor.
 
-  - HandleDisconnect
+  - `HandleDisconnect`
 
 Recebido como resposta do request de logout.
 
@@ -48,50 +48,50 @@ type Msg
 
 {-| Mensagens direcionadas a um servidor:
 
-  - HandleLogout (dispatch)
+  - `HandleLogout` (dispatch)
 
 Efetua request de logout do servidor.
 
-  - HandleSetBounce (dispatch)
+  - `HandleSetBounce` (dispatch)
 
 Muda o bounce ativo do servidor, só funciona com endpoints. Requer um
 Maybe Bounces.ID que será o novo bounce do servidor.
 
-  - HandleSetEndpoint (dispatch)
+  - `HandleSetEndpoint` (dispatch)
 
 Muda endpoint ativo do servidor, só funciona com servidores gateway. Requer um
 Maybe CId que será o o novo endpoint ativo do servidor.
 
-  - HandleSetActiveNIP (dispatch)
+  - `HandleSetActiveNIP` (dispatch)
 
 Muda o NIP ativo do servidor. Requer um NIP que será o novo NIP ativo.
 
-  - HandleSetName (dispatch)
+  - `HandleSetName` (dispatch)
 
 Muda nome do servidor, só funciona com servidores do jogador. Requer uma String
 que será o novo nome do servidor.
 
-  - FilesystemMsg
+  - `FilesystemMsg`
 
 Mensagens direcionadas ao domínio de Filesystem do servidor.
 
-  - LogsMsg
+  - `LogsMsg`
 
 Mensagens direcionadas ao domínio de Logs do servidor.
 
-  - ProcessesMsg
+  - `ProcessesMsg`
 
 Mensagens direcionadas ao domínio de Processes do servidor.
 
-  - HardwareMsg
+  - `HardwareMsg`
 
 Mensagens direcionadas ao domínio de Hardware do servidor.
 
-  - TunnelsMsg
+  - `TunnelsMsg`
 
 Mensagens direcionadas ao domínio de Tunnels do servidor.
 
-  - NotificationsMsg
+  - `NotificationsMsg`
 
 Mensagens direcionadas ao domínio de Notifications do servidor
 

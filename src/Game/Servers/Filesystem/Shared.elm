@@ -46,7 +46,7 @@ module Game.Servers.Filesystem.Shared
         )
 
 {-| Estruturas de dados utilizadas pelo Filesystem e por outros que utilizam
-o Filesystem.
+o `Filesystem`.
 -}
 
 import Utils.List as List
@@ -101,7 +101,7 @@ type alias Size =
     Int
 
 
-{-| Usado para passar o conteúdo de um arquivo junto de seu Id.
+{-| Usado para passar o conteúdo de um arquivo junto de seu `Id`.
 -}
 type alias FileEntry =
     ( Id, File )
@@ -116,52 +116,52 @@ type alias Version =
 
 {-| Tipos de arquivo, arquivos que forem software também incluem seus módulos.
 
-  - Text
+  - `Text`
 
-ARquivo de texto, não tem módulos.
+Arquivo de texto, não tem módulos.
 
-  - CryptoKey
+  - `CryptoKey`
 
 Chave de criptografia de um arquivo, dá acesso a arquivos criptografados,
 Não tem módulos.
 
-  - Cracker
+  - `Cracker`
 
 Rouba senha de um servidor.
 
-  - Firewall
+  - `Firewall`
 
 Protege o servidor de exploits.
 
-  - Exploit
+  - `Exploit`
 
-Invade servidor por meio de uma conexão existente, como FTP ou SSH.
+Invade servidor por meio de uma conexão existente, como `FTP` ou `SSH`.
 
-  - Hasher
+  - `Hasher`
 
 Protege o servidor e um cracker.
 
-  - LogForger
+  - `LogForger`
 
 Cria versões falsas de um log.
 
-  - LogRecover
+  - `LogRecover`
 
 Recupera busca logs desconhecidos e versões antigas logs conhecidos.
 
-  - Encryptor
+  - `Encryptor`
 
 Usado para criptografar logs.
 
-  - Decryptor
+  - `Decryptor`
 
 Usado para descriptografar logs.
 
-  - AnyMap
+  - `AnyMap`
 
 Usado para mapear a rede.
 
-  - Spyware
+  - `Spyware`
 
 Gera dinheiro vendendo dados do servidor.
 
@@ -193,7 +193,7 @@ type alias SimpleModule =
     { version : Float }
 
 
-{-| Módulos para o tipo de software Cracker.
+{-| Módulos para o tipo de software `Cracker`.
 -}
 type alias CrackerModules =
     { bruteForce : SimpleModule
@@ -201,7 +201,7 @@ type alias CrackerModules =
     }
 
 
-{-| Módulos para o tipo de software Firewall.
+{-| Módulos para o tipo de software `Firewall`.
 -}
 type alias FirewallModules =
     { active : SimpleModule
@@ -209,7 +209,7 @@ type alias FirewallModules =
     }
 
 
-{-| Módulos para o tipo de software Exploit.
+{-| Módulos para o tipo de software `Exploit`.
 -}
 type alias ExploitModules =
     { ftp : SimpleModule
@@ -217,14 +217,14 @@ type alias ExploitModules =
     }
 
 
-{-| Módulos para o tipo de software Hasher.
+{-| Módulos para o tipo de software `Hasher`.
 -}
 type alias HasherModules =
     { password : SimpleModule
     }
 
 
-{-| Módulos para o tipo de software LogForger.
+{-| Módulos para o tipo de software `LogForger`.
 -}
 type alias LogForgerModules =
     { create : SimpleModule
@@ -232,14 +232,14 @@ type alias LogForgerModules =
     }
 
 
-{-| Módulos para o tipo de software LogRecover.
+{-| Módulos para o tipo de software `LogRecover`.
 -}
 type alias LogRecoverModules =
     { recover : SimpleModule
     }
 
 
-{-| Módulos para o tipo de software Encryptor.
+{-| Módulos para o tipo de software `Encryptor`.
 -}
 type alias EncryptorModules =
     { file : SimpleModule
@@ -249,7 +249,7 @@ type alias EncryptorModules =
     }
 
 
-{-| Módulos para o tipo de software Decryptor.
+{-| Módulos para o tipo de software `Decryptor`.
 -}
 type alias DecryptorModules =
     { file : SimpleModule
@@ -259,7 +259,7 @@ type alias DecryptorModules =
     }
 
 
-{-| Módulos para o tipo de software AnyMap.
+{-| Módulos para o tipo de software `AnyMap`.
 -}
 type alias AnyMapModules =
     { geo : SimpleModule
@@ -267,14 +267,14 @@ type alias AnyMapModules =
     }
 
 
-{-| Módulos para o tipo de software Spyware.
+{-| Módulos para o tipo de software `Spyware`.
 -}
 type alias SpywareModules =
     { spy : SimpleModule
     }
 
 
-{-| Converte uma String em um Path.
+{-| Converte uma `String` em um `Path`.
 -}
 toPath : String -> Path
 toPath path =
@@ -286,7 +286,7 @@ toPath path =
             "" :: path
 
 
-{-| Converte uma Path em um String.
+{-| Converte uma Path em um `String`.
 -}
 joinPath : Path -> String
 joinPath path =
@@ -298,7 +298,7 @@ joinPath path =
             "/" ++ (String.join "/" path)
 
 
-{-| Pega o último elemento de um Path.
+{-| Pega o último elemento de um `Path`.
 -}
 pathBase : Path -> Name
 pathBase path =
@@ -310,14 +310,14 @@ pathBase path =
             ""
 
 
-{-| Remove o último elemento de um Path.
+{-| Remove o último elemento de um `Path`.
 -}
 parentPath : Path -> Path
 parentPath =
     List.dropRight 1
 
 
-{-| Insere um elemento no final de um um Path.
+{-| Insere um elemento no final de um um `Path`.
 -}
 appendPath : Name -> Path -> Path
 appendPath name path =
@@ -325,49 +325,49 @@ appendPath name path =
     path ++ [ name ]
 
 
-{-| Concatena vários paths.
+{-| Concatena `List Path` em um `Path` só.
 -}
 concatPath : List Path -> Path
 concatPath =
     List.concat
 
 
-{-| Pega o Name de um arquivo.
+{-| Pega o `Name` de um arquivo.
 -}
 getName : File -> Name
 getName =
     .name
 
 
-{-| Seta o Name de um arquivo.
+{-| Atualiza o `Name` de um arquivo.
 -}
 setName : String -> File -> File
 setName name file =
     { file | name = name }
 
 
-{-| Pega a Extension de um arquivo.
+{-| Pega a `Extension` de um arquivo.
 -}
 getExtension : File -> Extension
 getExtension =
     .extension
 
 
-{-| Pega o Path da pasta aonde o arquivo está.
+{-| Pega o `Path` da pasta aonde o arquivo está.
 -}
 getPath : File -> Path
 getPath =
     .path
 
 
-{-| Seta o Path de um arquivo.
+{-| Atualiza o `Path` de um arquivo.
 -}
 setPath : Path -> File -> File
 setPath path file =
     { file | path = path }
 
 
-{-| Pega o Path completo de um arquivo (inclui o nome do arquivo no path).
+{-| Pega o `Path` completo de um arquivo (inclui o nome do arquivo no path).
 -}
 getFullpath : File -> Path
 getFullpath file =
@@ -376,21 +376,21 @@ getFullpath file =
         |> appendPath (getName file)
 
 
-{-| Pega o Size de um arquivo.
+{-| Pega o `Size` de um arquivo.
 -}
 getSize : File -> Size
 getSize =
     .size
 
 
-{-| Pega o Type de um arquivo.
+{-| Pega o `Type` de um arquivo.
 -}
 getType : File -> Type
 getType =
     .type_
 
 
-{-| Pega a versão média de um arquivo, retorna Maybe pois o arquivo pode não
+{-| Pega a versão média de um arquivo, retorna `Maybe` pois o arquivo pode não
 ser um software.
 -}
 getMeanVersion : File -> Maybe Version
@@ -413,7 +413,7 @@ getModuleVersion =
     .version
 
 
-{-| Pega o nome de um Entry.
+{-| Pega o nome de um `Entry`.
 -}
 getEntryName : Entry -> Name
 getEntryName entry =
@@ -425,7 +425,7 @@ getEntryName entry =
             getName file
 
 
-{-| Checa se uma String é valida como nome de arquivo.
+{-| Checa se uma `String` é valida como nome de arquivo.
 -}
 isValidFilename : String -> Bool
 isValidFilename filename =
@@ -438,7 +438,7 @@ isValidFilename filename =
         True
 
 
-{-| Checa se uma Entry é uma pasta.
+{-| Checa se uma `Entry` é uma pasta.
 -}
 isFolderEntry : Entry -> Bool
 isFolderEntry entry =
@@ -450,7 +450,7 @@ isFolderEntry entry =
             False
 
 
-{-| Checa se um File é um software (tem módulos).
+{-| Checa se um `File` é um software (tem módulos).
 -}
 hasModules : File -> Bool
 hasModules file =
@@ -465,21 +465,21 @@ hasModules file =
             True
 
 
-{-| Coleta o Id de um FileEntry.
+{-| Coleta o `Id` de um `FileEntry`.
 -}
 toId : FileEntry -> Id
 toId =
     Tuple.first
 
 
-{-| Coleta o File de um FileEntry.
+{-| Coleta o `File` de um `FileEntry`.
 -}
 toFile : FileEntry -> File
 toFile =
     Tuple.second
 
 
-{-| Tenta converter um Entry em um FileEntry.
+{-| Tenta converter um `Entry` em um `FileEntry`.
 -}
 toFileEntry : Entry -> Maybe FileEntry
 toFileEntry entry =

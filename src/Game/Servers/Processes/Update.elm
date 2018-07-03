@@ -75,7 +75,7 @@ update config msg model =
 -- funções internas
 
 
-{-| Realiza um request para iniciar um processo de download.
+{-| Realiza um request para iniciar um processo de `Download`.
 -}
 handleStartDownload :
     Config msg
@@ -130,7 +130,7 @@ handleStartDownload config transferType origin storageId file model =
         ( model_, cmd )
 
 
-{-| Realiza um request para iniciar um processo de upload.
+{-| Realiza um request para iniciar um processo de `Upload`.
 -}
 handleStartUpload :
     Config msg
@@ -175,7 +175,7 @@ handleStartUpload config target storageId file model =
         ( model_, cmd )
 
 
-{-| Realiza um request para iniciar um processo de bruteforce.
+{-| Realiza um request para iniciar um processo de `Bruteforce`.
 -}
 handleStartBruteforce :
     Config msg
@@ -225,7 +225,7 @@ handleStartBruteforce config target model =
         ( model_, cmd )
 
 
-{-| Realiza um request para iniciar um processo de bruteforce.
+{-| Realiza um request para iniciar um processo de `Bruteforce`.
 -}
 handleBruteforceFailed : BruteforceFailed.Data -> Model -> UpdateResponse msg
 handleBruteforceFailed data model =

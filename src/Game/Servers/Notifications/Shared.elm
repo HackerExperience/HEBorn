@@ -6,31 +6,31 @@ import Game.Servers.Filesystem.Shared as Filesystem
 
 {-| Conteúdo de uma notificação:
 
-    - Generic
+    - `Generic`
 
 Notifiação genérica.
 
-    - DownloadStarted
+    - `DownloadStarted`
 
 Notificação de download iniciado.
 
-    - DownloadConcluded
+    - `DownloadConcluded`
 
 Notificação de download concluído.
 
-    - UploadStarted
+    - `UploadStarted`
 
 Notificação de upload iniciado.
 
-    - UploadConcluded
+    - `UploadConcluded`
 
 Notificação de upload concluído.
 
-    - BruteforceStarted
+    - `BruteforceStarted`
 
 Notificação de bruteforce iniciado.
 
-    - BruteforceConcluded
+    - `BruteforceConcluded`
 
 notificação de bruteforce concluído.
 

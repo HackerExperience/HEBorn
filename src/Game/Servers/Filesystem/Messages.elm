@@ -5,28 +5,29 @@ import Game.Servers.Filesystem.Shared exposing (..)
 
 {-| Mensagens:
 
-  - HandleDelete (dispatch)
+  - `HandleDelete` (dispatch)
 
-Deleta um arquivo. Requer Id do arquivo.
+Deleta um arquivo. Requer `Id` do arquivo.
 
-  - HandleRename (dispatch)
+  - `HandleRename` (dispatch)
 
-Renomeia um arquivo. Requer Path até o arquivo e Name do novo do arquivo.
+Renomeia um arquivo. Requer `Path` até o arquivo e `Name` do novo do arquivo.
 
-  - HandleNewTextFile (dispatch)
+  - `HandleNewTextFile` (dispatch)
 
-Cria um arquivo de texto. Requer Path até o diretório e Name do arquivo de
+Cria um arquivo de texto. Requer `Path` até o diretório e `Name` do arquivo de
 texto novo.
 
-  - HandleNewDir (dispatch)
+  - `HandleNewDir` (dispatch)
 
-Cria um novo diretório. Requer Path até o diretório e Name do diretório novo.
+Cria um novo diretório. Requer `Path` até o diretório e `Name` do diretório
+novo.
 
-  - HandleMove (dispatch)
+  - `HandleMove` (dispatch)
 
-Move um arquivo. Requer Id do arquivo e Path novo.
+Move um arquivo. Requer `Id` do arquivo e `Path` novo.
 
-  - HandleAdded (evento)
+  - `HandleAdded` (evento)
 
 Insere um arquivo novo na model.
 Recebida quando um arquivo é criado.

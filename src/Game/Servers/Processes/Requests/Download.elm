@@ -9,7 +9,7 @@ module Game.Servers.Processes.Requests.Download
         , errorToString
         )
 
-{-| Contém requests de download de arquivo de servidores invadidos e ftp
+{-| Contém requests de `Download` de arquivo de servidores invadidos e FTP
 público.
 -}
 
@@ -40,27 +40,27 @@ type alias Data =
 
 {-| Tipos de erros que podem ocorrer ao realizar o request:
 
-    - SelfLoop
+    - `SelfLoop`
 
 Download forma loop.
 
-    - FileNotFound
+    - `FileNotFound`
 
 Arquivo não encontrado.
 
-    - StorageFull
+    - `StorageFull`
 
 Storage alvo está cheia.
 
-    - StorageNotFound
+    - `StorageNotFound`
 
 Storage alvo não existe.
 
-    - BadRequest
+    - `BadRequest`
 
 Request mal formado.
 
-    - Unknown
+    - `Unknown`
 
 Erro desconhecido pelo client.
 
@@ -74,19 +74,19 @@ type Errors
     | Unknown
 
 
-{-| Id do arquivo a ser baixado.
+{-| `Id` do arquivo a ser baixado.
 -}
 type alias FileId =
     String
 
 
-{-| Id da storage que vai armazenar arquivo.
+{-| `Id` da storage que vai armazenar arquivo.
 -}
 type alias StorageId =
     String
 
 
-{-| Cria um Cmd de request para baixar um arquivo privado.
+{-| Cria um `Cmd` de request para baixar um arquivo privado.
 -}
 privateDownloadRequest :
     NIP
@@ -102,7 +102,7 @@ privateDownloadRequest target fileId storageId cid flagsSrc =
         |> Cmd.map (uncurry <| receiver flagsSrc)
 
 
-{-| Cria um Cmd de request para baixar um arquivo de um ftp público.
+{-| Cria um `Cmd` de request para baixar um arquivo de um ftp público.
 -}
 publicDownloadRequest :
     NIP

@@ -6,15 +6,15 @@ import Game.Servers.Shared as Servers exposing (CId)
 import Game.Servers.Hardware.Messages exposing (..)
 
 
-{-| Config do Hardware, contém duas mensagens configuraveis:
+{-| Configuração do `Hardware`, contém duas mensagens configuraveis:
 
-  - onInventoryFreed
+  - `onInventoryFreed`
 
-É lançada quando um item do inventório for liberado. Passa FileEntry afetada.
+É lançada quando um item do inventório for liberado. Passa `FileEntry` afetada.
 
-  - onInventoryUsed
+  - `onInventoryUsed`
 
-É lançada quando um item do inventório for utilizado. Passa FileEntry afetada.
+É lançada quando um item do inventório for utilizado. Passa `FileEntry` afetada.
 
 -}
 type alias Config msg =

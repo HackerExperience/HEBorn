@@ -26,8 +26,8 @@ update config msg model =
             ( setMotherboard (Just motherboard) model, React.none )
 
 
-{-| Realiza request para atualizar a motherboard quando recebe a mensagem
-HandleMotherboardUpdate.
+{-| Realiza request para atualizar a `Motherboard` quando recebe a mensagem
+`HandleMotherboardUpdate`.
 -}
 handleMotherboardUpdate :
     Config msg
@@ -45,7 +45,7 @@ handleMotherboardUpdate config motherboard model =
                 Err error ->
                     config.batchMsg []
 
-        -- cria um cmd de request para atualizar a placa mãe
+        -- cria um `Cmd` de request para atualizar a placa mãe
         cmd =
             config
                 |> updateMotherboardRequest motherboard config.cid
@@ -55,7 +55,7 @@ handleMotherboardUpdate config motherboard model =
         ( model, cmd )
 
 
-{-| Atualiza model quando recebe evento HandleMotherboardUpdated.
+{-| Atualiza model quando recebe evento `HandleMotherboardUpdated`.
 -}
 handleMotherboardUpdated :
     Config msg
