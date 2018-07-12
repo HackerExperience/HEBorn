@@ -11,7 +11,7 @@ import Apps.DBAdmin.Messages exposing (Msg(..))
 import Apps.DBAdmin.Models exposing (..)
 import Apps.DBAdmin.Resources exposing (Classes(..), prefix)
 import Apps.DBAdmin.Tabs.Servers.View as Servers exposing (view)
-import Game.Account.Finances.Shared exposing (toMoney)
+import Game.Bank.Shared exposing (toMoney)
 import Game.Account.Database.Models as Database
 
 

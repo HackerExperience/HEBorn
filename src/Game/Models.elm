@@ -4,6 +4,8 @@ module Game.Models
         , initialModel
         , getAccount
         , setAccount
+        , getBank
+        , setBank
         , getInventory
         , setInventory
         , getServers
@@ -32,6 +34,7 @@ import Native.Panic
 import Core.Error as Error
 import Game.Account.Models as Account
 import Game.Account.Bounces.Models as Bounces
+import Game.Bank.Models as Bank
 import Game.Servers.Models as Servers
 import Game.Inventory.Models as Inventory
 import Game.Servers.Shared as Servers
@@ -45,6 +48,7 @@ import Core.Flags exposing (Flags)
 
 type alias Model =
     { account : Account.Model
+    , bank : Bank.Model
     , inventory : Inventory.Model
     , servers : Servers.Model
     , meta : Meta.Model
@@ -67,6 +71,7 @@ initialModel :
     -> Model
 initialModel id username token flags =
     { account = Account.initialModel id username token
+    , bank = Bank.initialModel
     , inventory = Inventory.initialModel
     , servers = Servers.initialModel
     , meta = Meta.initialModel
@@ -89,6 +94,16 @@ getAccount =
 setAccount : Account.Model -> Model -> Model
 setAccount account model =
     { model | account = account }
+
+
+getBank : Model -> Bank.Model
+getBank =
+    .bank
+
+
+setBank : Bank.Model -> Model -> Model
+setBank bank model =
+    { model | bank = bank }
 
 
 getInventory : Model -> Inventory.Model

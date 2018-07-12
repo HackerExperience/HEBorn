@@ -7,14 +7,14 @@ import Core.Error as Error exposing (Error)
 import Game.Meta.Types.Context as Context
 import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Account.Bounces.Shared as Bounces
-import Game.Account.Finances.Requests.Login as BankLoginRequest
-import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Servers.Notifications.Shared as ServersNotifications
 import Game.Account.Config as Account
 import Game.Account.Models as Account
 import Game.Account.Messages as Account
+import Game.Account.Finances.Models as Finances
 import Game.BackFlix.Config as BackFlix
+import Game.Bank.Config as Bank
 import Game.Servers.Config as Servers
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (CId)
@@ -32,6 +32,12 @@ type alias Config msg =
     , batchMsg : List msg -> msg
     , onJoinServer : CId -> Maybe Value -> msg
     , onError : Error -> msg
+    , awaitEvent : String -> ( String, msg ) -> msg
+
+    -- bank
+    , onSendBankSessionId : String -> Requester -> msg
+    , onJoinBank : Finances.AccountId -> String -> Value -> msg
+    , onLeaveBank : Finances.AccountId -> String -> msg
 
     -- web
     , onJoinFailed : Requester -> msg
@@ -50,10 +56,6 @@ type alias Config msg =
     -- account.bounces
     , onReloadBounce : Bounces.ID -> String -> msg
     , onReloadIfBounceLoaded : Bounces.ID -> msg
-
-    -- account.finances
-    , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
-    , onBankAccountTransfer : BankTransferRequest.Data -> Requester -> msg
     }
 
 
@@ -111,8 +113,6 @@ accountConfig lastTick flags config =
                 |> config.toMsg
 
     -- account.finances
-    , onBankAccountLogin = config.onBankAccountLogin
-    , onBankAccountTransfer = config.onBankAccountTransfer
     , onReloadBounce = config.onReloadBounce
     , onReloadIfBounceLoaded = config.onReloadIfBounceLoaded
     , onToast = config.onAccountToast
@@ -134,6 +134,33 @@ webConfig flags servers config =
                 |> config.toMsg
     , onJoinFailed =
         config.onJoinFailed
+    }
+
+
+bankConfig :
+    Account.Model
+    -> Servers.Model
+    -> Core.Flags
+    -> Config msg
+    -> Bank.Config msg
+bankConfig account servers flags config =
+    { flags = flags
+    , toMsg = BankMsg >> config.toMsg
+    , batchMsg = config.batchMsg
+    , accountId = Account.getId account
+    , finances = Account.getFinances account
+    , activeGatewayCId = Account.getGateway account
+    , awaitEvent = config.awaitEvent
+    , activeBounce =
+        account
+            |> Account.getGateway
+            |> Maybe.andThen (flip Servers.get servers)
+            |> Maybe.andThen (flip Servers.getActiveBounce servers)
+    , onLogin = config.onJoinBank
+    , onLogout = config.onLeaveBank
+    , onSendSessionId = config.onSendBankSessionId
+    , onBankAccountUpdated = (\a b -> config.batchMsg []) -- Account.Msg <| DatabaseMsg Database.
+    , onHackedBankAccountUpdated = (\a b -> config.batchMsg [])
     }
 
 

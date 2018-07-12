@@ -4,12 +4,12 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.CssHelpers
 import Html.Events exposing (..)
-import Apps.Browser.Resources exposing (Classes(..), prefix)
+import Game.Bank.Models as Bank
+import Apps.Browser.Pages.Bank.Resources exposing (Classes(..), prefix)
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Account.Finances.Shared exposing (toMoney)
-import Game.Meta.Types.Network as Network
+import Game.Bank.Shared exposing (toMoney)
 
 
 { id, class, classList } =
@@ -18,29 +18,45 @@ import Game.Meta.Types.Network as Network
 
 view : Config msg -> Model -> Html msg
 view config model =
-    case model.bankState of
-        Login ->
+    case model.state of
+        Login _ ->
             viewLogin config model
 
         Main ->
             viewMain config model
 
-        Transfer ->
+        Loading ->
+            viewLoading config model
+
+        Transfer _ ->
             viewTransfer config model
+
+        TransferSuccess ->
+            viewTransferSuccess config model
 
 
 viewLogin : Config msg -> Model -> Html msg
 viewLogin config model =
-    div []
+    div [ class [ MainContainer ] ]
         [ viewHeader model
         , viewLoginForm config model
         , viewFooter model
         ]
 
 
+viewLoading : Config msg -> Model -> Html msg
+viewLoading config model =
+    div [ class [ MainContainer ] ] [ text "Loading..." ]
+
+
+viewTransferSuccess : Config msg -> Model -> Html msg
+viewTransferSuccess config model =
+    div [ class [ MainContainer ] ] [ text "Transfer started." ]
+
+
 viewMain : Config msg -> Model -> Html msg
 viewMain config model =
-    div []
+    div [ class [ MainContainer ] ]
         [ viewHeader model
         , viewMainCointainer config model
         , viewFooter model
@@ -49,7 +65,7 @@ viewMain config model =
 
 viewTransfer : Config msg -> Model -> Html msg
 viewTransfer config model =
-    div []
+    div [ class [ MainContainer ] ]
         [ viewHeader model
         , viewTransferForm config model
         , viewFooter model
@@ -58,12 +74,12 @@ viewTransfer config model =
 
 viewHeader : Model -> Html msg
 viewHeader model =
-    div [] [ text model.title ]
+    div [ class [ Header ] ] [ text model.title ]
 
 
 viewFooter : Model -> Html msg
 viewFooter model =
-    div [] [ text model.title ]
+    div [ class [ Footer ] ] [ text model.title ]
 
 
 viewLoginForm : Config msg -> Model -> Html msg
@@ -73,12 +89,14 @@ viewLoginForm ({ toMsg, onLogin } as config) model =
             [ placeholder "Password"
             , type_ "password"
             , onInput (UpdatePasswordField >> toMsg)
+            , class [ Input ]
             ]
                 |> (++) (renderPasswordValue model)
 
         loginAttr =
             [ placeholder "Account Number"
             , onInput (UpdateLoginField >> toMsg)
+            , class [ Input ]
             ]
                 |> (++) (renderLoginValue model)
 
@@ -88,35 +106,41 @@ viewLoginForm ({ toMsg, onLogin } as config) model =
         password =
             input passwordAttr []
     in
-        Html.form [ action "javascript:void(0);" ]
-            [ login
-            , br [] []
-            , password
-            , div [] [ error model ]
-            , br [] []
-            , input
-                (submitLoginAttr config model)
-                []
+        div [ class [ MiddleContainer ] ]
+            [ Html.form [ class [ LoginForm ], action "javascript:void(0);" ]
+                [ login
+                , br [] []
+                , password
+                , div [] [ error model ]
+                , br [] []
+                , input
+                    (submitLoginAttr config model)
+                    []
+                ]
             ]
 
+
+renderBalance : Config msg -> Model -> Html msg
+renderBalance config model =
+    model
+        |> (.sessionId)
+        |> Maybe.andThen ((flip Bank.getSession) config.bank)
+        |> Maybe.map (.accountCache)
+        |> Maybe.map (.balance)
+        |> Maybe.map (\a -> "Available USD: " ++ (toMoney a))
+        |> Maybe.withDefault "Balance is not Availiable"
+        |> text
 
 viewMainCointainer : Config msg -> Model -> Html msg
-viewMainCointainer { toMsg } model =
-    let
-        renderBalance model =
-            case model.accountData of
-                Just data ->
-                    text <| toMoney data.balance
-
-                Nothing ->
-                    text ""
-    in
-        div []
-            [ div []
-                [ renderBalance model ]
-            , div []
-                []
+viewMainCointainer ({ toMsg } as config) model =
+    div [ class [ MiddleContainer ] ]
+        [ div [ class [ BalanceContainer ] ]
+            [ renderBalance config model ]
+        , div [ class [ ActionsContainer ] ]
+            [ button (buttonCPAttr config model) [ text "Change Password" ]
+            , button (buttonTransferAttr config model) [ text "Transfer" ]
             ]
+        ]
 
 
 viewTransferForm : Config msg -> Model -> Html msg
@@ -127,125 +151,182 @@ viewTransferForm ({ toMsg, onTransfer } as config) model =
             , onInput (toMsg << UpdateTransferBankField)
             ]
                 |> (++) (renderToTransferBank model)
-    in
-        Html.form [ action "javascript:void(0);" ]
-            [ input
-                bankIPAttr
-                []
-            , br [] []
-            , input
-                [ placeholder "Account Number"
-                , type_ "number"
-                , value (toString model.toAccountTransfer)
-                , onInput (toMsg << UpdateTransferAccountField)
-                ]
-                []
-            , br [] []
-            , input
-                [ placeholder "Value"
-                , type_ "number"
-                , value (toString model.transferValue)
-                , onInput (toMsg << UpdateTransferValueField)
-                ]
-                []
-            , div [] [ error model ]
-            , input
-                (submitTransferAttr config model)
-                []
+
+        accountAttr info =
+            [ placeholder "Account Number"
+            , info.destinyAccount
+                |> Maybe.map toString
+                |> Maybe.withDefault ""
+                |> value
+            , onInput (toMsg << UpdateTransferAccountField)
             ]
+
+        valueAttr info =
+            [ placeholder "Value"
+            , info.value
+                |> Maybe.map toString
+                |> Maybe.withDefault ""
+                |> value
+            , onInput (toMsg << UpdateTransferValueField)
+            ]
+    in
+        case model.state of
+            Transfer info ->
+                div [ class [ MiddleContainer ] ]
+                    [ Html.form 
+                        [ class [ TransferForm ]
+                        , action "javascript:void(0);" 
+                        ]
+                        [ input bankIPAttr []
+                        , br [] []
+                        , input (accountAttr info) []
+                        , br [] []
+                        , input (valueAttr info) []
+                        , div [] [ error model ]
+                        , br [] []
+                        , input (submitTransferAttr config model) []
+                        ]
+                    ]
+
+            _ ->
+                text ""
+
+
+buttonCPAttr : Config msg -> Model -> List (Attribute msg)
+buttonCPAttr config model =
+    case model.sessionId of
+        Just sessionId ->
+            [ name "Change Password"
+            , onClick <| config.onChangePassword sessionId
+            ]
+
+        Nothing ->
+            [ disabled True ]
+
+buttonTransferAttr : Config msg -> Model -> List (Attribute msg)
+buttonTransferAttr {toMsg} model =
+    case model.sessionId of
+        Just sessionId ->
+            [ name "Transfer"
+            , SetTransfer
+                |> toMsg
+                |> onClick 
+            ]
+
+        Nothing ->
+            [ disabled True ]
+
+
+submitButtonBaseAttr : List (Attribute msg)
+submitButtonBaseAttr =
+    [ type_ "submit"
+    , value "Submit"
+    ]
 
 
 submitLoginAttr : Config msg -> Model -> List (Attribute msg)
-submitLoginAttr { onLogin } model =
+submitLoginAttr { onLogin, toMsg, batchMsg } model =
     let
-        baseAttr =
-            [ type_ "submit"
-            , value "Submit"
+        applier login password =
+            [ onLogin ( model.atmId, login ) password
+            , toMsg SetLoading
             ]
-    in
-        case ( model.accountNum, model.password ) of
-            ( Just login, Just password ) ->
-                let
-                    request =
-                        { bank = model.nip
-                        , accountNum = login
-                        , password = password
-                        }
-                in
-                    (onClick <| onLogin request) :: baseAttr
+                |> batchMsg
+                |> onClick
+                |> flip (::) submitButtonBaseAttr
 
-            _ ->
-                (disabled True) :: baseAttr
+        ( login, password ) =
+            case model.state of
+                Login info ->
+                    (,) info.login info.password
+
+                _ ->
+                    (,) Nothing Nothing
+    in
+        case Maybe.map2 applier login password of
+            Just attr ->
+                attr
+
+            Nothing ->
+                (disabled True) :: submitButtonBaseAttr
 
 
 submitTransferAttr : Config msg -> Model -> List (Attribute msg)
 submitTransferAttr { onTransfer } model =
     let
-        baseAttr =
-            [ type_ "submit"
-            , value "Submit"
-            ]
-    in
-        case
-            ( model.accountNum
-            , model.toBankTransfer
-            , model.toAccountTransfer
-            , model.password
-            , model.transferValue
-            )
-        of
-            ( Just fromAccount, Just toBank, Just toAccount, Just password, Just value ) ->
-                let
-                    request =
-                        { toBank = model.nip
-                        , toAcc = fromAccount
-                        , fromBank = toBank
-                        , fromAcc = toAccount
-                        , password = password
-                        , value = value
-                        }
-                in
-                    (onClick <| onTransfer request) :: baseAttr
+        applier sessionId accNum bankIp value =
+            onTransfer sessionId bankIp accNum value
+                |> onClick
+                |> flip (::) submitButtonBaseAttr
 
-            _ ->
-                (disabled True) :: baseAttr
+        ( sessionId, accNum, bankIp, value ) =
+            case model.state of
+                Transfer info ->
+                    ( model.sessionId
+                    , info.destinyAccount
+                    , info.destinyBank
+                    , info.value
+                    )
+
+                _ ->
+                    ( model.sessionId, Nothing, Nothing, Nothing )
+    in
+        case Maybe.map4 applier sessionId accNum bankIp value of
+            Just attr ->
+                attr
+
+            Nothing ->
+                (disabled True) :: submitButtonBaseAttr
 
 
 error : Model -> Html msg
 error model =
-    case model.error of
-        Just error ->
-            text error
+    case model.state of
+        Login info ->
+            text (Maybe.withDefault "" info.error)
 
-        Nothing ->
+        Transfer info ->
+            text (Maybe.withDefault "" info.error)
+
+        _ ->
             text ""
 
 
 renderToTransferBank : Model -> List (Attribute msg)
 renderToTransferBank model =
-    case model.toBankTransfer of
-        Just toBankTransfer ->
-            [ value (Network.toString toBankTransfer) ]
+    case model.state of
+        Transfer info ->
+            case info.destinyBank of
+                Just destinyBank ->
+                    [ value destinyBank ]
 
-        Nothing ->
+                Nothing ->
+                    []
+
+        _ ->
             []
 
 
 renderPasswordValue : Model -> List (Attribute msg)
 renderPasswordValue model =
-    case model.password of
-        Just password ->
-            [ value password ]
+    case model.state of
+        Login info ->
+            case info.password of
+                Just password ->
+                    [ value password ]
 
-        Nothing ->
+                Nothing ->
+                    []
+
+        _ ->
             []
 
 
 renderLoginValue : Model -> List (Attribute msg)
 renderLoginValue model =
-    case model.accountNum of
-        Just login ->
-            [ value <| toString login ]
+    case model.state of
+        Login info ->
+            [ value <| Maybe.withDefault "" (Maybe.map toString info.login) ]
 
-        Nothing ->
+        _ ->
             []

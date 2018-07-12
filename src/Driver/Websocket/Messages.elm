@@ -1,6 +1,7 @@
 module Driver.Websocket.Messages exposing (..)
 
 import Driver.Websocket.Channels exposing (..)
+import Game.Account.Finances.Models exposing (AccountId)
 import Json.Decode exposing (Value)
 
 

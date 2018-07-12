@@ -38,6 +38,8 @@ import Game.Account.Database.Models as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Shared as AccountNotifications
 import Game.Account.Requests.ActionPerformed as ActionPerformed
+import Game.Bank.Models as Bank
+import Game.Bank.Messages as Bank
 import Game.Meta.Models as Meta
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
@@ -173,10 +175,31 @@ browserConfig appId activeServer ( gCId, gServer ) config =
             Processes.HandleStartBruteforce >> processes config gCId
 
         onBankAccountLogin =
-            Finances.HandleBankAccountLogin >>> finances config
+            Bank.HandleLogin >>>> bank config
+
+        onBankAccountLoginToken =
+            Bank.HandleLoginToken >>>> bank config
 
         onBankAccountTransfer =
-            Finances.HandleBankAccountTransfer >>> finances config
+            Bank.HandleTransfer >>>>>> bank config
+
+        onBankAccountCreate =
+            Bank.HandleCreateAccount >>> bank config
+
+        onBankAccountClose =
+            Bank.HandleCloseAccount >>> bank config
+
+        onBankAccountChangePass =
+            Bank.HandleChangePassword >>> bank config
+
+        onBankRevealPassword =
+            Bank.HandleRevealPassword >>>> bank config
+
+        onBankResync =
+            Bank.HandleResync >>> bank config
+
+        onBankAccountLogout =
+            Bank.HandleLogout >>> bank config
     in
         { flags = config.flags
         , toMsg = BrowserMsg >> AppMsg appId >> config.toMsg
@@ -189,6 +212,9 @@ browserConfig appId activeServer ( gCId, gServer ) config =
                 |> accountFromConfig
                 |> Account.getDatabase
                 |> Database.getHackedServers
+        , bank =
+            config
+                |> bankFromConfig
         , onNewApp = NewApp >>>>> config.toMsg
         , onOpenApp = OpenApp >>> config.toMsg
         , onSetContext = Account.HandleSetContext >> account config
@@ -198,6 +224,12 @@ browserConfig appId activeServer ( gCId, gServer ) config =
         , onNewPublicDownload = onNewPublicDownload
         , onNewBruteforceProcess = onNewBruteforceProcess
         , onBankAccountLogin = onBankAccountLogin
+        , onBankAccountLoginToken = onBankAccountLoginToken
+        , onBankAccountChangePass = onBankAccountChangePass
+        , onBankAccountCreate = onBankAccountCreate
+        , onBankAccountClose = onBankAccountClose
+        , onBankAccountLogout = onBankAccountLogout
+        , onBankResync = onBankResync
         , onBankAccountTransfer = onBankAccountTransfer
         , menuAttr = config.menuAttr
         }
@@ -417,6 +449,11 @@ account config =
     Game.AccountMsg >> config.gameMsg
 
 
+bank : Config msg -> Bank.Msg -> msg
+bank config =
+    Game.BankMsg >> config.gameMsg
+
+
 bounces : Config msg -> Bounces.Msg -> msg
 bounces config =
     Account.BouncesMsg >> account config
@@ -512,6 +549,11 @@ endpointMainStorageId { activeGateway, game } =
 accountFromConfig : Config msg -> Account.Model
 accountFromConfig { game } =
     Game.getAccount game
+
+
+bankFromConfig : Config msg -> Bank.Model
+bankFromConfig { game } =
+    Game.getBank game
 
 
 storyFromConfig : Config msg -> Storyline.Model

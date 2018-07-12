@@ -1,11 +1,11 @@
 module Apps.Browser.Pages.Bank.Update exposing (update)
 
 import Utils.React as React exposing (React)
-import Game.Meta.Types.Network as Network exposing (NIP)
+import Utils.Maybe as Maybe
+import Game.Bank.Models as Bank
 import Apps.Browser.Pages.Bank.Config exposing (..)
 import Apps.Browser.Pages.Bank.Models exposing (..)
 import Apps.Browser.Pages.Bank.Messages exposing (..)
-import Game.Account.Finances.Shared exposing (BankAccountData)
 
 
 type alias UpdateResponse msg =
@@ -19,17 +19,23 @@ update :
     -> UpdateResponse msg
 update config msg model =
     case msg of
-        HandleLogin accData ->
-            handleLogin config accData model
+        HandleLogin sessionId ->
+            handleLogin config sessionId model
 
         HandleLoginError ->
             handleLoginError config model
 
-        HandleTransfer ->
-            handleTransfer config model
+        SetTransfer ->
+            setTransfer config model
 
         HandleTransferError ->
             handleTransferError config model
+
+        Logout ->
+            onLogout config model
+
+        SetLoading ->
+            onSetLoading model
 
         UpdateLoginField str ->
             onUpdateLoginField config str model
@@ -53,15 +59,7 @@ onUpdateLoginField :
     -> Model
     -> UpdateResponse msg
 onUpdateLoginField config str model =
-    if (String.contains "-" str) then
-        ( model, React.none )
-    else
-        case (String.toInt str) of
-            Result.Ok num ->
-                ( { model | accountNum = Just num }, React.none )
-
-            Result.Err _ ->
-                ( model, React.none )
+    React.update <| setUsername str model
 
 
 onUpdatePasswordField :
@@ -70,7 +68,7 @@ onUpdatePasswordField :
     -> Model
     -> UpdateResponse msg
 onUpdatePasswordField config str model =
-    ( { model | password = Just str }, React.none )
+    React.update <| setPassword str model
 
 
 onUpdateTransferBankField :
@@ -79,10 +77,7 @@ onUpdateTransferBankField :
     -> Model
     -> UpdateResponse msg
 onUpdateTransferBankField config str model =
-    if (String.contains "-" str) then
-        ( model, React.none )
-    else
-        ( { model | toBankTransfer = Just (Network.fromString str) }, React.none )
+    React.update <| setTransferDestinyBankIp str model
 
 
 onUpdateTransferAccountField :
@@ -91,15 +86,7 @@ onUpdateTransferAccountField :
     -> Model
     -> UpdateResponse msg
 onUpdateTransferAccountField config str model =
-    if (String.contains "-" str) then
-        ( model, React.none )
-    else
-        case (String.toInt str) of
-            Result.Ok num ->
-                ( { model | toAccountTransfer = Just num }, React.none )
-
-            Result.Err _ ->
-                ( model, React.none )
+    React.update <| setTransferDestinyAcc str model
 
 
 onUpdateTransferValueField :
@@ -108,30 +95,25 @@ onUpdateTransferValueField :
     -> Model
     -> UpdateResponse msg
 onUpdateTransferValueField config str model =
-    if (String.contains "-" str) then
-        ( model, React.none )
-    else
-        case (String.toInt str) of
-            Result.Ok num ->
-                ( { model | transferValue = Just num }, React.none )
+    React.update <| setTransferValue str model
 
-            Result.Err _ ->
-                ( model, React.none )
+
+onSetLoading : Model -> UpdateResponse msg
+onSetLoading model =
+    ( { model | state = Loading }, React.none )
 
 
 handleLogin :
     Config msg
-    -> BankAccountData
+    -> String
     -> Model
     -> UpdateResponse msg
-handleLogin config accData model =
+handleLogin config sessionId model =
     let
         model_ =
             { model
-                | loggedIn = True
-                , bankState = Main
-                , accountData = Just accData
-                , error = Nothing
+                | state = Main
+                , sessionId = Just sessionId
             }
     in
         ( model_, React.none )
@@ -142,23 +124,50 @@ handleLoginError :
     -> Model
     -> UpdateResponse msg
 handleLoginError config model =
+    React.update <| setLoginError "Invalid Login Information" model
+
+
+onLogout : Config msg -> Model -> UpdateResponse msg
+onLogout config model =
     let
         model_ =
-            { model | error = Just "Invalid Login Information" }
+            { model
+                | sessionId = Nothing
+                , state = Login (LoginInformation Nothing Nothing Nothing)
+            }
+
+        mapper =
+            flip Bank.getAccountId config.bank
+
+        accountId =
+            Maybe.map mapper model.sessionId
+
+
+        react =
+            case Maybe.uncurry accountId model.sessionId of
+                Just (accountId, sessionId) ->
+                    React.msg <| config.onLogout sessionId
+
+                Nothing ->
+                    React.none
     in
-        ( model_, React.none )
+        ( model_, react )
 
 
-handleTransfer :
+setTransfer :
     Config msg
     -> Model
     -> UpdateResponse msg
-handleTransfer config model =
+setTransfer config model =
     let
         model_ =
-            { model | bankState = Transfer }
+            { model
+                | state =
+                    TransferInformation Nothing Nothing Nothing Nothing
+                        |> Transfer
+            }
     in
-        ( model_, React.none )
+        React.update model_
 
 
 handleTransferError :
@@ -166,8 +175,4 @@ handleTransferError :
     -> Model
     -> UpdateResponse msg
 handleTransferError config model =
-    let
-        model_ =
-            { model | error = Just "Transfer Error" }
-    in
-        ( model_, React.none )
+    React.update <| setTransferError "Transfer Error" model

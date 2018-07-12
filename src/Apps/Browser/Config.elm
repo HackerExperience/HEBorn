@@ -6,11 +6,11 @@ import Core.Flags as Core
 import Utils.Core exposing (..)
 import Apps.Params as AppParams exposing (AppParams)
 import Game.Account.Database.Models exposing (HackedServers)
-import Game.Account.Finances.Requests.Login as LoginRequest
-import Game.Account.Finances.Requests.Transfer as TransferRequest
+import Game.Account.Finances.Models as Finances exposing (AccountNumber)
+import Game.Bank.Models as Bank
 import Game.Meta.Types.Desktop.Apps as DesktopApp exposing (DesktopApp)
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Meta.Types.Network as Network exposing (NIP)
+import Game.Meta.Types.Network as Network exposing (NIP, IP)
 import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared as Servers exposing (CId)
@@ -37,6 +37,7 @@ type alias Config msg =
     , activeServer : ( CId, Servers.Server )
     , activeGateway : ( CId, Servers.Server )
     , hackedServers : HackedServers
+    , bank : Bank.Model
     , onNewApp : DesktopApp -> Maybe Context -> Maybe AppParams -> CId -> msg
     , onOpenApp : AppParams -> CId -> msg
     , onSetContext : Context -> msg
@@ -45,8 +46,14 @@ type alias Config msg =
     , onSetEndpoint : Maybe CId -> msg
     , onNewPublicDownload : NIP -> Download.StorageId -> Filesystem.FileEntry -> msg
     , onNewBruteforceProcess : Network.IP -> msg
-    , onBankAccountLogin : LoginRequest.Payload -> Requester -> msg
-    , onBankAccountTransfer : TransferRequest.Payload -> Requester -> msg
+    , onBankAccountLogin : Finances.AccountId -> String -> Requester -> msg
+    , onBankAccountLoginToken : Finances.AccountId -> String -> Requester -> msg
+    , onBankAccountChangePass : String -> Requester -> msg
+    , onBankAccountCreate : Finances.AtmId -> Requester -> msg
+    , onBankAccountClose : String -> Requester -> msg
+    , onBankAccountLogout : String -> Requester -> msg
+    , onBankResync : String -> Requester -> msg
+    , onBankAccountTransfer : String -> IP -> AccountNumber -> Int -> Requester -> msg
     , menuAttr : ContextMenuAttribute msg
     }
 
@@ -54,9 +61,13 @@ type alias Config msg =
 bankConfig : Config msg -> Bank.Config msg
 bankConfig config =
     { toMsg = BankMsg >> ActiveTabMsg >> config.toMsg
-    , onLogin = BankLogin >> config.toMsg
-    , onTransfer = BankTransfer >> config.toMsg
-    , onLogout = BankLogout |> config.toMsg
+    , batchMsg = config.batchMsg
+    , bank = config.bank
+    , onLogin = BankLogin >>> config.toMsg
+    , onLoginToken = BankLoginToken >>> config.toMsg
+    , onTransfer = BankTransfer >>>>> config.toMsg
+    , onChangePassword = BankChangePass >> config.toMsg
+    , onLogout = BankLogout >> config.toMsg
     }
 
 

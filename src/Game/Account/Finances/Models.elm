@@ -38,6 +38,13 @@ type alias BankAccount =
     }
 
 
+type alias BankTransfer =
+    { from : AccountId
+    , to : AccountId
+    , value : Int
+    }
+
+
 type alias BitcoinAddress =
     String
 

@@ -17,6 +17,10 @@ type alias AtmId =
     ID
 
 
+type alias Token =
+    String
+
+
 
 --Sigma Viruses xD
 
@@ -29,6 +33,10 @@ type VirusType
     = Spyware
     | Adware
     | BTCMiner
+
+
+type alias Password =
+    String
 
 
 type alias Virus =

@@ -10,6 +10,9 @@ import Decoders.Game
 import Game.Account.Messages as Account
 import Game.Account.Models as Account
 import Game.Account.Update as Account
+import Game.Bank.Messages as Bank
+import Game.Bank.Models as Bank
+import Game.Bank.Update as Bank
 import Game.Meta.Messages as Meta
 import Game.Meta.Update as Meta
 import Game.Meta.Models as Meta
@@ -45,6 +48,9 @@ update config msg model =
     case msg of
         AccountMsg msg ->
             onAccount config msg model
+
+        BankMsg msg ->
+            onBank config msg model
 
         ServersMsg msg ->
             onServers config msg model
@@ -113,6 +119,21 @@ onAccount config msg model =
 
         model_ =
             { model | account = account }
+    in
+        ( model_, react )
+
+
+onBank : Config msg -> Bank.Msg -> Model -> UpdateResponse msg
+onBank config msg model =
+    let
+        config_ =
+            bankConfig (getAccount model) (getServers model) (getFlags model) config
+
+        ( bank, react ) =
+            Bank.update config_ msg <| getBank model
+
+        model_ =
+            { model | bank = bank }
     in
         ( model_, react )
 

@@ -1,13 +1,13 @@
 module Apps.Browser.Pages.Bank.Messages exposing (Msg(..))
 
-import Game.Account.Finances.Shared exposing (BankAccountData)
-
 
 type Msg
-    = HandleLogin BankAccountData
+    = HandleLogin String
     | HandleLoginError
-    | HandleTransfer
+    | SetTransfer
     | HandleTransferError
+    | SetLoading
+    | Logout
     | UpdateLoginField String
     | UpdatePasswordField String
     | UpdateTransferBankField String

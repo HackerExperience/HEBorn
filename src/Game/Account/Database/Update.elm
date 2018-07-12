@@ -27,6 +27,12 @@ update config msg model =
         HandleDatabaseAccountUpdated id account ->
             onHandleDatabaseAccountUpdated id account model
 
+        HandleDatabaseAccountLoggedIn _ _ ->
+            React.update model
+
+        HandleDatabaseAccountPasswordAcquired _ _ ->
+            React.update model
+
         HandleCollectedVirus data ->
             onHandleCollectedVirus config data model
 

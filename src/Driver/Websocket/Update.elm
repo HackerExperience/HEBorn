@@ -5,6 +5,8 @@ import Json.Decode exposing (Value, decodeValue, value, string, field, maybe, ma
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Phoenix.Channel as Channel
 import Utils.React as React exposing (React)
+import Decoders.Bank as Bank
+import Game.Account.Finances.Models exposing (AccountId)
 import Driver.Websocket.Config exposing (..)
 import Driver.Websocket.Channels exposing (..)
 import Driver.Websocket.Messages exposing (..)
@@ -60,6 +62,9 @@ onJoined config channel payload model =
                 ServerChannel cid ->
                     React.msg <| config.onJoinedServer cid payload_
 
+                BankChannel _ requestId ->
+                    React.msg <| config.onJoinedBank requestId payload_
+
                 BackFlixChannel ->
                     React.none
     in
@@ -75,6 +80,9 @@ onJoinFailed config channel payload model =
                     case channel of
                         ServerChannel cid ->
                             React.msg <| config.onJoinFailedServer cid
+
+                        BankChannel _ requestId ->
+                            React.msg <| config.onJoinBankFailed requestId
 
                         _ ->
                             React.none
@@ -129,7 +137,6 @@ handleJoin config channel payload model =
             Dict.insert channelAddress driverChannel_ model.channels
     in
         ( { model | channels = channels }, React.none )
-
 
 handleLeave :
     Config msg

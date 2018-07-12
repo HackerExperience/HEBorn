@@ -8,8 +8,6 @@ import Events.Account.Handlers.StoryEmailReplyUnlocked as StoryEmailReplyUnlocke
 import Events.Account.Handlers.StoryEmailReplySent as StoryEmailReplySent
 import Events.Account.Handlers.BankAccountUpdated as BankAccountUpdated
 import Events.Account.Handlers.BankAccountClosed as BankAccountClosed
-import Events.Account.Handlers.DbAccountUpdated as DbAccountUpdated
-import Events.Account.Handlers.DbAccountRemoved as DbAccountRemoved
 import Events.Account.Handlers.TutorialFinished as TutorialFinished
 import Events.Account.Handlers.BounceCreated as BounceCreated
 import Events.Account.Handlers.BounceUpdated as BounceUpdated
@@ -42,11 +40,8 @@ events config requestId name value =
         "bank_account_closed" ->
             BankAccountClosed.handler config.onBankAccountClosed value
 
-        "db_account_updated" ->
-            DbAccountUpdated.handler config.onDbAccountUpdated value
-
-        "db_account_removed" ->
-            DbAccountRemoved.handler config.onDbAccountRemoved value
+        "bank_account_password_changed" ->
+            Err ""
 
         "tutorial_finished" ->
             TutorialFinished.handler config.onTutorialFinished value

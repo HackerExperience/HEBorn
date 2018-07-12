@@ -44,6 +44,7 @@ css =
         , class Client
             [ flexContainerVert
             , height (pct 100)
+            , width (pct 100)
             , children
                 [ everything
                     [ flex (int 0) ]

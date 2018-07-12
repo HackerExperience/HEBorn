@@ -2,6 +2,7 @@ module Game.Messages exposing (..)
 
 import Json.Decode exposing (Value)
 import Game.Account.Messages as Account
+import Game.Bank.Messages as Bank
 import Game.Servers.Messages as Servers
 import Game.Meta.Messages as Meta
 import Game.Storyline.Messages as Story
@@ -14,6 +15,7 @@ import Requests.Types exposing (ResponseType)
 type Msg
     = AccountMsg Account.Msg
     | ServersMsg Servers.Msg
+    | BankMsg Bank.Msg
     | MetaMsg Meta.Msg
     | StoryMsg Story.Msg
     | InventoryMsg Inventory.Msg
