@@ -1,5 +1,6 @@
 module Game.Meta.Types.Network.Site exposing (..)
 
+import Game.Account.Finances.Models exposing (AtmId)
 import Game.Meta.Types.Network exposing (NIP)
 import Game.Servers.Filesystem.Shared as Filesystem
 
@@ -45,7 +46,7 @@ type alias WebserverContent =
 
 type alias BankContent =
     { title : String
-    , nip : NIP
+    , atmId : AtmId
     }
 
 

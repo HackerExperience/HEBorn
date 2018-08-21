@@ -93,7 +93,7 @@ update msg model =
                 awaitMsgs =
                     case maybeMsg of
                         Just msg ->
-                            [ msg ]
+                            Debug.log "" [ msg ]
 
                         Nothing ->
                             []

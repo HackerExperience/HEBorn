@@ -70,6 +70,7 @@ bootstrap : Model -> Decoder ( Model, ServersToJoin )
 bootstrap game =
     decode Model
         |> account game
+        |> hardcoded game.bank
         |> inventory game
         |> hardcoded game.servers
         |> hardcoded game.meta

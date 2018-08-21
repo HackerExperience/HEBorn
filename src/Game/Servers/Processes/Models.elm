@@ -5,6 +5,7 @@ import Time exposing (Time)
 import Random.Pcg as Random
 import Utils.Model.RandomUuid as RandomUuid
 import Game.Meta.Types.Network as Network
+import Game.Account.Finances.Models exposing (AtmId, AccountId)
 import Game.Servers.Tunnels.Models exposing (ConnectionID)
 import Game.Servers.Logs.Models as Logs
 import Game.Servers.Processes.Shared exposing (..)
@@ -43,10 +44,43 @@ type
     | Download DownloadContent
     | Upload UploadContent
     | VirusCollect
+    | BankAccountOpen BankAccountOpenContent
+    | BankAccountClose BankAccountCloseContent
+    | BankPasswordReveal BankPasswordRevealContent
+    | BankPasswordChange BankPasswordChangeContent
+    | BankTransfer BankTransferContent
 
 
 type alias EncryptorContent =
     { targetLogId : Logs.ID
+    }
+
+
+type alias BankAccountOpenContent =
+    { atmId : AtmId
+    }
+
+
+type alias BankAccountCloseContent =
+    { accountId : AccountId
+    }
+
+
+type alias BankPasswordChangeContent =
+    { accountId : AccountId
+    }
+
+
+type alias BankTransferContent =
+    { fromAccount : AccountId
+    , toAccount : AccountId
+    , value : Int
+    }
+
+
+type alias BankPasswordRevealContent =
+    { token : String
+    , accountId : AccountId
     }
 
 
@@ -452,6 +486,21 @@ getName process =
 
         VirusCollect ->
             "Virus Collect"
+
+        BankAccountOpen _ ->
+            "Bank Account Oppening"
+
+        BankAccountClose _ ->
+            "Bank Account Closing"
+
+        BankTransfer _ ->
+            "Bank Transference"
+
+        BankPasswordReveal _ ->
+            "Bank Account Password Revealing"
+
+        BankPasswordChange _ ->
+            "Bank Account Password Change"
 
 
 getPercentUsage : Usage -> Float

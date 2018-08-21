@@ -8,12 +8,14 @@ module Utils.React
         , addCmd
         , batch
         , map
+        , maybeUpdate
         , update
         , toCmd
         , split
         )
 
 import Task
+import Utils.Core exposing (..)
 
 
 type React msg
@@ -153,3 +155,8 @@ merge func react1 react2 =
 toCmd_ : msg -> Cmd msg
 toCmd_ msg =
     Task.perform (always msg) (Task.succeed ())
+
+
+maybeUpdate : (a -> React b) -> Maybe a -> model -> ( model, React b )
+maybeUpdate =
+    Maybe.map >>> Maybe.withDefault none >>> flip (,)

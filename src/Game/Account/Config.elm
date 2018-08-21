@@ -8,11 +8,10 @@ import Game.Account.Messages exposing (..)
 import Game.Account.Bounces.Config as Bounces
 import Game.Account.Database.Config as Database
 import Game.Account.Database.Models as Database
-import Game.Account.Finances.Requests.Login as BankLoginRequest
-import Game.Account.Finances.Requests.Transfer as BankTransferRequest
 import Game.Account.Finances.Config as Finances
 import Game.Account.Notifications.Config as Notifications
 import Game.Account.Notifications.Shared as Notifications
+import Game.Bank.Config as Bank
 import Game.Meta.Types.Desktop.Apps exposing (Requester)
 import Game.Servers.Shared exposing (CId)
 import Game.Account.Bounces.Shared as Bounces
@@ -30,10 +29,6 @@ type alias Config msg =
     , onError : Error -> msg
     , onSetEndpoint : CId -> Maybe CId -> msg
 
-    -- account.finances
-    , onBankAccountLogin : BankLoginRequest.Data -> Requester -> msg
-    , onBankAccountTransfer : BankTransferRequest.Data -> Requester -> msg
-
     -- account.bounces
     , onReloadBounce : Bounces.ID -> String -> msg
     , onReloadIfBounceLoaded : Bounces.ID -> msg
@@ -48,8 +43,6 @@ financesConfig accountId config =
     { flags = config.flags
     , toMsg = FinancesMsg >> config.toMsg
     , accountId = accountId
-    , onBankAccountLogin = config.onBankAccountLogin
-    , onBankAccountTransfer = config.onBankAccountTransfer
     }
 
 

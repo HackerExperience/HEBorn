@@ -2,6 +2,7 @@ module Requests.Topics exposing (..)
 
 import Driver.Websocket.Channels exposing (..)
 import Game.Account.Models as Account
+import Game.Account.Finances.Models as Finances
 import Game.Servers.Shared as Servers
 
 
@@ -52,6 +53,45 @@ accountConfigCheck id =
 accountConfigSet : Account.ID -> Topic
 accountConfigSet id =
     WebsocketTopic (AccountChannel id) "config.set"
+
+
+accountBankCreateAcc : Account.ID -> Topic
+accountBankCreateAcc id =
+    WebsocketTopic (AccountChannel id) "bank.createacc"
+
+
+
+-- bank
+
+
+bankResync : Finances.AccountId -> String -> Topic
+bankResync bankAccId requestId =
+    WebsocketTopic (BankChannel bankAccId requestId) "bootstrap"
+
+
+bankTransfer : Finances.AccountId -> String -> Topic
+bankTransfer bankAccId requestId =
+    WebsocketTopic (BankChannel bankAccId requestId) "bank.transfer"
+
+
+bankChangePass : Finances.AccountId -> String -> Topic
+bankChangePass bankAccId requestId =
+    WebsocketTopic (BankChannel bankAccId requestId) "bank.changepass"
+
+
+bankCloseAcc : Finances.AccountId -> String -> Topic
+bankCloseAcc bankAccId requestId =
+    WebsocketTopic (BankChannel bankAccId requestId) "bank.closeacc"
+
+
+bankLogout : Finances.AccountId -> String -> Topic
+bankLogout bankAccId requestId =
+    WebsocketTopic (BankChannel bankAccId requestId) "bank.logout"
+
+
+bankRevealPass : Servers.CId -> Topic
+bankRevealPass cid =
+    WebsocketTopic (ServerChannel cid) "bank.reveal"
 
 
 
@@ -192,16 +232,6 @@ browse cid =
 emailReply : Account.ID -> Topic
 emailReply id =
     WebsocketTopic (AccountChannel id) "email.reply"
-
-
-bankLogin : Account.ID -> Topic
-bankLogin id =
-    WebsocketTopic (AccountChannel id) "bank.login"
-
-
-bankTransfer : Account.ID -> Topic
-bankTransfer id =
-    WebsocketTopic (AccountChannel id) "bank.transfer"
 
 
 bounceCreate : Account.ID -> Topic

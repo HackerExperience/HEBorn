@@ -28,6 +28,7 @@ import Game.Account.Bounces.Messages as Bounces
 import Game.Account.Database.Messages as Database
 import Game.Account.Finances.Messages as Finances
 import Game.Account.Notifications.Messages as AccountNotifications
+import Game.Bank.Messages as Bank
 import Game.BackFlix.Messages as BackFlix
 import Game.Meta.Types.Context exposing (Context)
 import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
@@ -77,6 +78,13 @@ websocketConfig flags =
         onJoinedServer cid value =
             servers <| Servers.HandleJoinedServer cid value
 
+        onJoinedBank =
+            Bank.HandleJoinedBank >>> bank
+
+        onJoinBankFailed a =
+            BatchMsg []
+
+        --bank << Bank.HandleJoinFailed
         onLeft _ _ =
             BatchMsg []
     in
@@ -86,6 +94,8 @@ websocketConfig flags =
         , onDisconnected = account <| Account.HandleDisconnected
         , onJoinedAccount = onJoinedAccount
         , onJoinedServer = onJoinedServer
+        , onJoinedBank = onJoinedBank
+        , onJoinBankFailed = onJoinBankFailed
         , onJoinFailedServer = Web.HandleJoinServerFailed >> web
         , onLeft = onLeft
         , onEvent = HandleEvent
@@ -141,7 +151,8 @@ eventsConfig =
                 onBounceCreated rId ( id, bounce ) =
                     bounces <| Bounces.HandleCreated rId id bounce
             in
-                { onServerPasswordAcquired = onServerPasswordAcquired
+                { batchMsg = BatchMsg
+                , onServerPasswordAcquired = onServerPasswordAcquired
                 , onStoryStepProceeded = onStoryStepProceeded
                 , onStoryEmailSent = onStoryEmailSent
                 , onStoryEmailReplyUnlocked = onStoryEmailReplyUnlocked
@@ -159,6 +170,30 @@ eventsConfig =
 
         forBackFlix =
             { onNewLog = BackFlix.HandleCreate >> backflix }
+
+        forBank =
+            let
+                onBankLogin (accId, balance, pass) =
+                    bank <| Bank.HandleLoggedIn accId balance pass
+
+                onBankLogout =
+                    BatchMsg []
+
+                onBankAccountUpdated =
+                    BatchMsg []
+
+                onBankAccountRemoved =
+                    BatchMsg []
+
+                onBankAccountPasswordRevealed =
+                    BatchMsg []
+            in
+                { onBankLogin = onBankLogin
+                , onBankLogout = onBankLogout
+                , onBankAccountUpdated = onBankAccountUpdated
+                , onBankAccountRemoved = onBankAccountRemoved
+                , onBankAccountPasswordRevealed = onBankAccountPasswordRevealed
+                }
 
         forServer =
             let
@@ -194,6 +229,7 @@ eventsConfig =
     in
         { forAccount = forAccount
         , forBackFlix = forBackFlix
+        , forBank = forBank
         , forServer = forServer
         }
 
@@ -204,6 +240,13 @@ gameConfig =
         onJoinServer =
             \cid payload ->
                 ws <| Ws.HandleJoin (ServerChannel cid) payload
+
+        onJoinBank id requestId payload =
+            ws <| Ws.HandleJoin (BankChannel id requestId) (Just payload)
+
+        onLeaveBank =
+            \bankAccountId requestId ->
+                ws <| Ws.HandleLeave (BankChannel bankAccountId requestId)
 
         onConnected =
             \accountId ->
@@ -220,16 +263,18 @@ gameConfig =
     in
         { toMsg = GameMsg
         , batchMsg = BatchMsg
+        , awaitEvent = HandleAwait
         , onJoinServer = onJoinServer
+        , onJoinBank = onJoinBank
+        , onLeaveBank = onLeaveBank
         , onError = HandleCrash
+        , onSendBankSessionId = Browser.HandleBankLogin >> browserTab
         , onJoinFailed = browserTab Browser.HandleLoginFailed
         , onNewGateway = Setup.HandleJoinedServer >> setup
         , onConnected = onConnected
         , onDisconnected = HandleShutdown
         , onAccountToast = Toast.HandleAccount >> toast
         , onServerToast = Toast.HandleServers >>> toast
-        , onBankAccountLogin = Browser.HandleBankLogin >> browserTab
-        , onBankAccountTransfer = Browser.HandleBankTransfer >> browserTab
         , onReloadBounce = onReloadBounce
         , onReloadIfBounceLoaded = onReloadIfBounceLoaded
         }
@@ -310,6 +355,11 @@ type alias ContextMenuMagic =
 ws : Ws.Msg -> Msg
 ws =
     WebsocketMsg
+
+
+bank : Bank.Msg -> Msg
+bank =
+    Game.BankMsg >> game
 
 
 setup : Setup.Msg -> Msg

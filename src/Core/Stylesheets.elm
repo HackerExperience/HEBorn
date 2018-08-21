@@ -13,6 +13,7 @@ import OS.WindowManager.Style as WindowManager
 import OS.WindowManager.Dock.Style as Dock
 import OS.WindowManager.Sidebar.Style as Sidebar
 import Apps.Style as Apps
+import Apps.Browser.Pages.Style as BrowserPages
 
 
 port files : CssFileStructure -> Cmd msg
@@ -36,6 +37,7 @@ fileStructure =
                  , Sidebar.css
                  ]
                     ++ Apps.cssList
+                    ++ BrowserPages.cssList
                 )
           )
         ]

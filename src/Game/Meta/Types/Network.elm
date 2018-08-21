@@ -52,6 +52,11 @@ isFromInternet ( id, _ ) =
     id == "::"
 
 
+onInternet : IP -> NIP
+onInternet ip =
+    ( "::", ip )
+
+
 filterInternet : List NIP -> List NIP
 filterInternet list =
     List.filter isFromInternet list

@@ -17,7 +17,8 @@ import Events.Account.Handlers.VirusCollected as VirusCollected
 
 
 type alias Config msg =
-    { onServerPasswordAcquired : ServerPasswordAcquired.Data -> msg
+    { batchMsg : List msg -> msg
+    , onServerPasswordAcquired : ServerPasswordAcquired.Data -> msg
     , onStoryStepProceeded : StoryStepProceeded.Data -> msg
     , onStoryEmailSent : StoryEmailSent.Data -> msg
     , onStoryEmailReplyUnlocked : StoryEmailReplyUnlocked.Data -> msg

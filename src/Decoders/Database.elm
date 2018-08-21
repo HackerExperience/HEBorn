@@ -118,7 +118,7 @@ hackedBankAccountId : Decoder HackedBankAccountID
 hackedBankAccountId =
     decode (,)
         |> required "atm_id" string
-        |> required "account_num" int
+        |> required "account_number" int
 
 
 hackedBankAccount : Decoder HackedBankAccount

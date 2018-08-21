@@ -171,7 +171,7 @@ bank : Decoder Site.Type
 bank =
     decode Site.BankContent
         |> required "title" string
-        |> required "nip" Decoders.Network.nipTuple
+        |> required "atm_id" string
         |> map Site.Bank
         |> content
 

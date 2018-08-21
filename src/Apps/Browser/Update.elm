@@ -2,15 +2,16 @@ module Apps.Browser.Update exposing (update)
 
 import Dict
 import Utils.React as React exposing (React)
-import Game.Account.Finances.Requests.Login as BankLoginRequest
-import Game.Account.Finances.Requests.Transfer as BankTransferRequest
+import Game.Account.Finances.Models as Finances
+import Game.Bank.Requests.Transfer as BankTransferRequest
+import Game.Bank.Shared exposing (..)
 import Game.Servers.Models as Servers
 import Game.Servers.Shared exposing (StorageId)
 import Game.Servers.Filesystem.Shared as Filesystem
 import Game.Servers.Requests.Browse as BrowseRequest exposing (browseRequest)
 import Game.Meta.Types.Desktop.Apps exposing (Reference, Requester)
 import Game.Meta.Types.Context exposing (Context(..))
-import Game.Meta.Types.Network as Network
+import Game.Meta.Types.Network as Network exposing (IP)
 import Apps.Browser.Pages.Webserver.Update as Webserver
 import Apps.Browser.Pages.Bank.Messages as Bank
 import Apps.Browser.Pages.Bank.Update as Bank
@@ -67,14 +68,20 @@ update config msg model =
         EveryTabMsg msg ->
             onEveryTabMsg config msg model
 
-        BankLogin request ->
-            onBankLogin config request model.me model
+        BankLogin bankAccId password ->
+            onBankLogin config bankAccId password model
 
-        BankTransfer request ->
-            onBankTransfer config request model.me model
+        BankLoginToken bankAccId token ->
+            onBankLoginToken config bankAccId token model
 
-        BankLogout ->
-            onBankLogout config model
+        BankTransfer sessionId bankIp accNum value ->
+            onBankTransfer config sessionId bankIp accNum value model
+
+        BankLogout sessionId ->
+            onBankLogout config sessionId model
+
+        BankChangePass _ ->
+            React.update model
 
 
 
@@ -143,36 +150,64 @@ onReqDownload { onNewPublicDownload } source file storage model =
 
 onBankLogin :
     Config msg
-    -> BankLoginRequest.Payload
-    -> Reference
+    -> Finances.AccountId
+    -> String
     -> Model
     -> UpdateResponse msg
-onBankLogin { onBankAccountLogin } request reference model =
+onBankLogin { onBankAccountLogin } bankAccId password model =
     model.nowTab
-        |> Requester reference
-        |> onBankAccountLogin request
+        |> Requester model.me
+        |> onBankAccountLogin bankAccId password
+        |> React.msg
+        |> (,) model
+
+
+onBankLoginToken :
+    Config msg
+    -> Finances.AccountId
+    -> String
+    -> Model
+    -> UpdateResponse msg
+onBankLoginToken { onBankAccountLoginToken } bankAccId token model =
+    model.nowTab
+        |> Requester model.me
+        |> onBankAccountLoginToken bankAccId token
         |> React.msg
         |> (,) model
 
 
 onBankTransfer :
     Config msg
-    -> BankTransferRequest.Payload
-    -> Reference
+    -> String
+    -> IP
+    -> Finances.AccountNumber
+    -> Int
     -> Model
     -> UpdateResponse msg
-onBankTransfer { onBankAccountTransfer } request reference model =
+onBankTransfer { onBankAccountTransfer } sessionId bankIp accNum value model =
     model.nowTab
-        |> Requester reference
-        |> onBankAccountTransfer request
+        |> Requester model.me
+        |> onBankAccountTransfer sessionId bankIp accNum value
         |> React.msg
         |> (,) model
 
 
-onBankLogout : Config msg -> Model -> UpdateResponse msg
-onBankLogout config model =
-    -- TODO: Bank Logout Request
-    ( model, React.none )
+onBankChangePass : Config msg -> String -> Model -> UpdateResponse msg
+onBankChangePass { onBankAccountChangePass } sessionId model =
+    model.nowTab
+        |> Requester model.me
+        |> onBankAccountChangePass sessionId
+        |> React.msg
+        |> (,) model
+
+
+onBankLogout : Config msg -> String -> Model -> UpdateResponse msg
+onBankLogout { onBankAccountLogout } sessionId model =
+    model.nowTab
+        |> Requester model.me
+        |> onBankAccountLogout sessionId
+        |> React.msg
+        |> (,) model
 
 
 
@@ -454,23 +489,16 @@ handleBankLogin :
     Config msg
     -> Int
     -> Tab
-    -> BankLoginRequest.Data
+    -> String
     -> Model
     -> TabUpdateResponse msg
-handleBankLogin config tabId tab data model =
+handleBankLogin config tabId tab sessionId model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            case data of
-                Ok accountData ->
-                    updatePage config
-                        (BankMsg <| Bank.HandleLogin accountData)
-                        page
-
-                Err _ ->
-                    updatePage config (BankMsg Bank.HandleLoginError) page
+            updatePage config (BankMsg <| Bank.HandleLogin sessionId) page
     in
         ( { tab | page = pageModel }, React.none )
 
@@ -479,20 +507,15 @@ handleBankTransfer :
     Config msg
     -> Int
     -> Tab
-    -> BankTransferRequest.Data
+    -> String
     -> Model
     -> TabUpdateResponse msg
-handleBankTransfer config tabId tab data model =
+handleBankTransfer config tabId tab sessionId model =
     let
         page =
             (getTab tabId model.tabs).page
 
         ( pageModel, _ ) =
-            case data of
-                Ok () ->
-                    updatePage config (BankMsg Bank.HandleTransfer) page
-
-                Err _ ->
-                    updatePage config (BankMsg Bank.HandleTransferError) page
+            updatePage config (BankMsg <| Bank.SetTransfer) page
     in
         ( { tab | page = pageModel }, React.none )

@@ -4,6 +4,7 @@ import Json.Decode exposing (Value)
 import Driver.Websocket.Channels as Ws
 import Events.Account.Handler as Account
 import Events.Server.Handler as Server
+import Events.Bank.Handler as Bank
 import Events.BackFlix.Handler as BackFlix
 import Events.Config exposing (..)
 
@@ -65,6 +66,9 @@ router config channel requestId event json =
 
         Ws.ServerChannel id ->
             Server.events config.forServer requestId id event json
+
+        Ws.BankChannel bankAccId _ ->
+            Bank.events config.forBank requestId bankAccId event json
 
         Ws.BackFlixChannel ->
             BackFlix.events config.forBackFlix requestId event json
